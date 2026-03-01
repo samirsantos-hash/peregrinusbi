@@ -95,8 +95,8 @@ Deno.serve(async (req) => {
       const custId = cols[iCustId]?.trim();
       if (!custId) continue;
 
-      // Clean custId (remove .0 suffix)
-      const cleanCustId = custId.replace(/\.0$/, "");
+      // Clean custId (remove .0 or ,0 suffix from BR format)
+      const cleanCustId = custId.replace(/[.,]0$/, "");
 
       if (!sellerMap.has(cleanCustId)) {
         sellerMap.set(cleanCustId, {
