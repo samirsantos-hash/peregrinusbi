@@ -11,6 +11,7 @@ import QualityPanel from "@/components/dashboard/QualityPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
+import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { sellers, sellerKPIs } from "@/data/mockData";
 
 const Index = () => {
