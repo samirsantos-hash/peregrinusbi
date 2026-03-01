@@ -44,7 +44,9 @@ const Auth = () => {
         className="glass-card p-8 w-full max-w-sm space-y-6">
 
         <div className="text-center space-y-3">
-          <img src={logo} alt="Ecom Peregrinus" className="h-16 aspect-square object-contain mx-auto rounded-lg" />
+          <div className="w-24 h-24 mx-auto rounded-xl bg-background/80 border border-border/50 p-3 flex items-center justify-center shadow-lg shadow-primary/10">
+            <img src={logo} alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" />
+          </div>
           <h1 className="text-xl font-bold tracking-tight">Ecom Peregrinus</h1>
           <p className="text-xs text-muted-foreground">Entre com suas credenciais</p>
         </div>
