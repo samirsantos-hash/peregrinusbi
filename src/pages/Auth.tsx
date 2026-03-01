@@ -44,8 +44,7 @@ const Auth = () => {
 
         <div className="text-center space-y-2">
           <div className="w-2 h-8 rounded-full bg-neon-blue mx-auto" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
-          <h1 className="text-xl font-bold tracking-tight">
-          </h1>
+          <h1 className="text-xl font-bold tracking-tight">Ecom Peregrinus</h1>
           <p className="text-xs text-muted-foreground">Entre com suas credenciais</p>
         </div>
 
