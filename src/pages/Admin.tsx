@@ -1,0 +1,264 @@
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
+import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
+
+interface SellerOption {
+  id: string;
+  nickname: string;
+  custId: string;
+}
+
+interface ManagedUser {
+  id: string;
+  email: string;
+  cnpj: string | null;
+  allowed_cust_ids: string[];
+  must_change_password: boolean;
+  created_at: string;
+}
+
+const Admin = () => {
+  const { user, isAdmin, signOut } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const [sellers, setSellers] = useState<SellerOption[]>([]);
+  const [managedUsers, setManagedUsers] = useState<ManagedUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // New user form
+  const [newEmail, setNewEmail] = useState("");
+  const [newCnpj, setNewCnpj] = useState("");
+  const [selectedCustIds, setSelectedCustIds] = useState<string[]>([]);
+  const [creating, setCreating] = useState(false);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    const [sellersRes, usersRes] = await Promise.all([
+      supabase.from("sellers").select("id, nickname, cust_id").order("nickname"),
+      supabase.from("user_access_control").select("*").order("created_at", { ascending: false }),
+    ]);
+
+    if (sellersRes.data) {
+      setSellers(sellersRes.data.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.cust_id })));
+    }
+    if (usersRes.data) {
+      setManagedUsers(
+        usersRes.data.map((u: any) => ({
+          id: u.id,
+          email: u.user_email,
+          cnpj: u.cnpj,
+          allowed_cust_ids: u.allowed_cust_ids || [],
+          must_change_password: u.must_change_password,
+          created_at: u.created_at,
+        }))
+      );
+    }
+    setLoading(false);
+  };
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmail || selectedCustIds.length === 0) {
+      toast({ title: "Preencha o e-mail e selecione ao menos uma loja", variant: "destructive" });
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: {
+          action: "create_user",
+          email: newEmail,
+          cnpj: newCnpj || null,
+          allowedCustIds: selectedCustIds,
+        },
+      });
+
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      toast({ title: "Usuário criado!", description: `Senha temporária: ${data.tempPassword}` });
+      setNewEmail("");
+      setNewCnpj("");
+      setSelectedCustIds([]);
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    }
+    setCreating(false);
+  };
+
+  const handleDeleteUser = async (userId: string, email: string) => {
+    if (!confirm(`Remover acesso de ${email}?`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "delete_user", targetUserId: userId },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Usuário removido" });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const toggleCustId = (custId: string) => {
+    setSelectedCustIds((prev) =>
+      prev.includes(custId) ? prev.filter((c) => c !== custId) : [...prev, custId]
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-neon-blue" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="w-2 h-8 rounded-full bg-neon-blue" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">Painel Administrativo</h1>
+              <p className="text-xs text-muted-foreground">Gestão de Usuários e Dados</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={signOut}>Sair</Button>
+        </motion.div>
+
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto">
+            <TabsTrigger value="users" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+              <Users className="w-4 h-4" />
+              Gestão de Usuários
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+              <Upload className="w-4 h-4" />
+              Upload de Dados
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users" className="mt-5 space-y-6">
+            {/* Create User Form */}
+            <Card className="glass-card border-glass-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <UserPlus className="w-5 h-5 text-neon-blue" />
+                  Novo Usuário
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleCreateUser} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>E-mail do Cliente</Label>
+                      <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="cliente@email.com" required />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>CNPJ</Label>
+                      <Input value={newCnpj} onChange={(e) => setNewCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Lojas Autorizadas (CUST_ID)</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[240px] overflow-y-auto scrollbar-thin p-2 border border-border rounded-lg">
+                      {sellers.map((s) => (
+                        <label key={s.custId} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer text-sm">
+                          <Checkbox
+                            checked={selectedCustIds.includes(s.custId)}
+                            onCheckedChange={() => toggleCustId(s.custId)}
+                          />
+                          <span className="font-medium">{s.nickname}</span>
+                          <span className="text-muted-foreground text-xs font-mono">{s.custId}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button type="submit" disabled={creating}>
+                    {creating && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Criar Usuário
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+
+            {/* Users List */}
+            <Card className="glass-card border-glass-border">
+              <CardHeader>
+                <CardTitle className="text-lg">Usuários Cadastrados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {managedUsers.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {managedUsers.map((u) => (
+                      <div key={u.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                        <div>
+                          <p className="text-sm font-medium">{u.email}</p>
+                          <p className="text-xs text-muted-foreground">
+                            CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
+                            {u.must_change_password && <span className="ml-2 text-warning">● Senha temporária</span>}
+                          </p>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.id, u.email)}>
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="upload" className="mt-5">
+            <Card className="glass-card border-glass-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Upload className="w-5 h-5 text-neon-blue" />
+                  Importar Dados CSV
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Faça upload do arquivo CSV para atualizar os dados de KPI dos sellers.
+                </p>
+                <CsvUploadModal onSuccess={() => { toast({ title: "Dados importados!" }); loadData(); }} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+};
+
+export default Admin;
