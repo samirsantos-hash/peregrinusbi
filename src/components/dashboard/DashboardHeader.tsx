@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, TrendingUp, Sparkles, Store } from "lucide-react";
+import logo from "@/assets/logo.jpeg";
 import { format, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -58,8 +59,9 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
     >
       {/* Left - Store selector + Date */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        {/* Store selector */}
-        <div className="flex items-center gap-2">
+        {/* Logo + Store selector */}
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="Ecom Peregrinus" className="h-10 aspect-square object-contain rounded" />
           <Store className="w-4 h-4 text-neon-blue" />
           <Select value={selectedSeller} onValueChange={onSellerChange}>
             <SelectTrigger className="w-[220px] glass-card border-glass-border bg-card/60 focus:ring-neon-blue/30">

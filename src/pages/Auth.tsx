@@ -7,6 +7,7 @@ import { Loader2, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/logo.jpeg";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -42,8 +43,8 @@ const Auth = () => {
         animate={{ opacity: 1, y: 0 }}
         className="glass-card p-8 w-full max-w-sm space-y-6">
 
-        <div className="text-center space-y-2">
-          <div className="w-2 h-8 rounded-full bg-neon-blue mx-auto" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
+        <div className="text-center space-y-3">
+          <img src={logo} alt="Ecom Peregrinus" className="h-16 aspect-square object-contain mx-auto rounded-lg" />
           <h1 className="text-xl font-bold tracking-tight">Ecom Peregrinus</h1>
           <p className="text-xs text-muted-foreground">Entre com suas credenciais</p>
         </div>
