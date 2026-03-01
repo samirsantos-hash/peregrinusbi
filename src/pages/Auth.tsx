@@ -45,7 +45,7 @@ const Auth = () => {
 
         <div className="text-center space-y-3">
           <div className="w-24 h-24 mx-auto rounded-xl bg-background/80 border border-border/50 p-3 flex items-center justify-center shadow-lg shadow-primary/10">
-            <img alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2ea2c914-0a18-466e-8316-75cd37bbddd8.png" />
+            <img alt="Ecom Peregrinus" className="w-full h-full object-contain rounded-lg drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2ea2c914-0a18-466e-8316-75cd37bbddd8.png" />
           </div>
           <h1 className="font-bold tracking-tight font-mono bg-primary-foreground px-0 text-2xl">Ecom Peregrinus</h1>
           <p className="text-xs text-muted-foreground">Entre com suas credenciais</p>
