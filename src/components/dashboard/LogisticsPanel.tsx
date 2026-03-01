@@ -1,10 +1,17 @@
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { type SellerKPI } from "@/data/mockData";
 import { Package, Truck, Mail } from "lucide-react";
 
+interface KpiLike {
+  date: string;
+  pctFull: number;
+  pctFlex: number;
+  pctPostagem: number;
+  productId: string;
+}
+
 interface LogisticsPanelProps {
-  kpis: SellerKPI[];
+  kpis: KpiLike[];
 }
 
 const COLORS = ["hsl(199, 100%, 50%)", "hsl(160, 84%, 39%)", "hsl(280, 80%, 60%)"];
@@ -19,15 +26,15 @@ const CustomTooltip = ({ active, payload }: any) => {
 };
 
 const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
-  const latestByProduct = kpis.reduce<Record<string, SellerKPI>>((acc, k) => {
+  const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
     if (!acc[k.productId] || k.date > acc[k.productId].date) acc[k.productId] = k;
     return acc;
   }, {});
 
   const products = Object.values(latestByProduct);
-  const avgFull = products.reduce((s, p) => s + p.pctFull, 0) / products.length;
-  const avgFlex = products.reduce((s, p) => s + p.pctFlex, 0) / products.length;
-  const avgPostagem = products.reduce((s, p) => s + p.pctPostagem, 0) / products.length;
+  const avgFull = products.length > 0 ? products.reduce((s, p) => s + p.pctFull, 0) / products.length : 0;
+  const avgFlex = products.length > 0 ? products.reduce((s, p) => s + p.pctFlex, 0) / products.length : 0;
+  const avgPostagem = products.length > 0 ? products.reduce((s, p) => s + p.pctPostagem, 0) / products.length : 0;
 
   const donutData = [
     { name: "Full", value: Math.round(avgFull * 10) / 10 },

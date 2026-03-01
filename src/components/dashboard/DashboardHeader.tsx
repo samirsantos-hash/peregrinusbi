@@ -8,8 +8,18 @@ import { CalendarIcon, TrendingUp, Sparkles, Store } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { type Seller, type SellerKPI } from "@/data/mockData";
 import { type DateRange } from "react-day-picker";
+
+interface Seller {
+  id: string;
+  nickname: string;
+  custId: string;
+}
+
+interface KpiLike {
+  gmv: number;
+  upliftGmvM1: number;
+}
 
 interface DashboardHeaderProps {
   sellers: Seller[];
@@ -17,13 +27,11 @@ interface DashboardHeaderProps {
   onSellerChange: (id: string) => void;
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  kpis: SellerKPI[];
+  kpis: KpiLike[];
 }
 
 const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, onDateRangeChange, kpis }: DashboardHeaderProps) => {
   const [calOpen, setCalOpen] = useState(false);
-
-  const currentSeller = sellers.find((s) => s.id === selectedSeller);
 
   // AI Projection calc
   const avgUplift = kpis.length > 0 ? kpis.reduce((s, k) => s + k.upliftGmvM1, 0) / kpis.length : 0;

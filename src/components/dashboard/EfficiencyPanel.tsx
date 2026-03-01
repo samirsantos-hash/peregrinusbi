@@ -1,9 +1,18 @@
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
-import { type SellerKPI } from "@/data/mockData";
+
+interface KpiLike {
+  date: string;
+  revenue: number;
+  adsInvestment: number;
+  roas: number;
+  acos: number;
+  tacos: number;
+  cpa: number;
+}
 
 interface EfficiencyPanelProps {
-  kpis: SellerKPI[];
+  kpis: KpiLike[];
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -48,8 +57,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
-  const avgRoas = kpis.reduce((s, k) => s + k.roas, 0) / kpis.length;
-  const avgCpa = kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length;
+  const avgRoas = kpis.length > 0 ? kpis.reduce((s, k) => s + k.roas, 0) / kpis.length : 0;
+  const avgCpa = kpis.length > 0 ? kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length : 0;
 
   const metrics = [
     { label: "GMV Total", value: `R$ ${(totalGmv / 1000).toFixed(0)}K`, color: "neon-text" },
