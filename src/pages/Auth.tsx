@@ -25,10 +25,10 @@ const Auth = () => {
     if (error) {
       toast({
         title: "Erro ao entrar",
-        description: error.message === "Invalid login credentials"
-          ? "E-mail ou senha inválidos"
-          : error.message,
-        variant: "destructive",
+        description: error.message === "Invalid login credentials" ?
+        "E-mail ou senha inválidos" :
+        error.message,
+        variant: "destructive"
       });
     } else {
       navigate("/");
@@ -40,25 +40,25 @@ const Auth = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-8 w-full max-w-sm space-y-6"
-      >
+        className="glass-card p-8 w-full max-w-sm space-y-6">
+
         <div className="text-center space-y-2">
           <div className="w-2 h-8 rounded-full bg-neon-blue mx-auto" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
-          <h1 className="text-xl font-bold tracking-tight">Seller Dashboard</h1>
+          <h1 className="text-xl font-bold tracking-tight">
+          </h1>
           <p className="text-xs text-muted-foreground">Entre com suas credenciais</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              required
-            />
+            <Input id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="seu@email.com"
+            required />
+
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
@@ -68,8 +68,8 @@ const Auth = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              required
-            />
+              required />
+
           </div>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <LogIn className="w-4 h-4 mr-2" />}
@@ -77,8 +77,8 @@ const Auth = () => {
           </Button>
         </form>
       </motion.div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Auth;
