@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
 
     // Build KPI rows
     const kpiRows = rows.map((cols) => {
-      const cleanCustId = (cols[iCustId]?.trim() || "").replace(/\.0$/, "");
+      const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
       const sellerId = sellerIdMap.get(cleanCustId);
       if (!sellerId) return null;
 
