@@ -7,6 +7,7 @@ import { Loader2, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/logo.jpeg";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
