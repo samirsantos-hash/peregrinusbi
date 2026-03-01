@@ -1,15 +1,45 @@
 import { motion } from "framer-motion";
-import { type SellerKPI, getDiagnostic } from "@/data/mockData";
+import { getDiagnostic, type SellerKPI } from "@/hooks/useSellerData";
+
+// Also support mock data shape
+interface KpiLike {
+  date: string;
+  scorePhoto: number;
+  scoreTitle: number;
+  roas: number;
+  visits: number;
+  visitsExpensive: number;
+  minPriceRival: number;
+  productName: string;
+  productId: string;
+}
 
 interface DiagnosticAlertsProps {
-  kpis: SellerKPI[];
+  kpis: KpiLike[];
+}
+
+function getDiagnosticGeneric(kpi: KpiLike) {
+  const alerts: { icon: string; label: string; severity: "critical" | "warning" | "success" }[] = [];
+
+  if (kpi.scorePhoto > 0 && kpi.scorePhoto < 70) alerts.push({ icon: "📸", label: "Melhorar Fotos", severity: "critical" });
+  if (kpi.scoreTitle > 0 && kpi.scoreTitle < 70) alerts.push({ icon: "❌", label: "Ajustar SEO", severity: "critical" });
+  if (kpi.roas > 0 && kpi.roas < 2) alerts.push({ icon: "💸", label: "Revisar Verba Ads", severity: "warning" });
+
+  if (kpi.minPriceRival > 0 && kpi.visits > 0) {
+    const pctExpensive = kpi.visitsExpensive / kpi.visits;
+    if (pctExpensive > 0.3) alerts.push({ icon: "💰", label: "Preço não Competitivo", severity: "warning" });
+  }
+
+  if (alerts.length === 0) alerts.push({ icon: "🏆", label: "Anúncio Campeão", severity: "success" });
+
+  return alerts;
 }
 
 const DiagnosticAlerts = ({ kpis }: DiagnosticAlertsProps) => {
   // Get unique products with their latest diagnostics
-  const productDiags = kpis.reduce<Record<string, { kpi: SellerKPI; alerts: ReturnType<typeof getDiagnostic> }>>((acc, kpi) => {
+  const productDiags = kpis.reduce<Record<string, { kpi: KpiLike; alerts: ReturnType<typeof getDiagnosticGeneric> }>>((acc, kpi) => {
     if (!acc[kpi.productId]) {
-      acc[kpi.productId] = { kpi, alerts: getDiagnostic(kpi) };
+      acc[kpi.productId] = { kpi, alerts: getDiagnosticGeneric(kpi) };
     }
     return acc;
   }, {});
@@ -41,7 +71,7 @@ const DiagnosticAlerts = ({ kpis }: DiagnosticAlertsProps) => {
       <div className="space-y-2 max-h-[300px] overflow-y-auto scrollbar-thin pr-1">
         {items.map((item, idx) => (
           <motion.div
-            key={item.kpi.productId}
+            key={item.kpi.productId + idx}
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: idx * 0.05 }}
@@ -49,7 +79,6 @@ const DiagnosticAlerts = ({ kpis }: DiagnosticAlertsProps) => {
           >
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate">{item.kpi.productName}</p>
-              <p className="text-xs text-muted-foreground font-mono">{item.kpi.productId}</p>
             </div>
             <div className="flex gap-1.5 ml-3 flex-shrink-0">
               {item.alerts.map((alert, aIdx) => (
