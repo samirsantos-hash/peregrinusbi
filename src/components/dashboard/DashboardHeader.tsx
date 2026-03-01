@@ -61,7 +61,9 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         {/* Logo + Store selector */}
         <div className="flex items-center gap-3">
-          <img src={logo} alt="Ecom Peregrinus" className="h-10 aspect-square object-contain rounded" />
+          <div className="h-12 w-12 rounded-lg bg-background/80 border border-border/50 p-1.5 flex items-center justify-center">
+            <img src={logo} alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" />
+          </div>
           <Store className="w-4 h-4 text-neon-blue" />
           <Select value={selectedSeller} onValueChange={onSellerChange}>
             <SelectTrigger className="w-[220px] glass-card border-glass-border bg-card/60 focus:ring-neon-blue/30">
