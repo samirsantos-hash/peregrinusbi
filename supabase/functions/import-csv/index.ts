@@ -95,8 +95,8 @@ Deno.serve(async (req) => {
       const custId = cols[iCustId]?.trim();
       if (!custId) continue;
 
-      // Clean custId (remove .0 suffix)
-      const cleanCustId = custId.replace(/\.0$/, "");
+      // Clean custId (remove .0 or ,0 suffix from BR format)
+      const cleanCustId = custId.replace(/[.,]0$/, "");
 
       if (!sellerMap.has(cleanCustId)) {
         sellerMap.set(cleanCustId, {
@@ -140,7 +140,7 @@ Deno.serve(async (req) => {
 
     // Build KPI rows
     const kpiRows = rows.map((cols) => {
-      const cleanCustId = (cols[iCustId]?.trim() || "").replace(/\.0$/, "");
+      const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
       const sellerId = sellerIdMap.get(cleanCustId);
       if (!sellerId) return null;
 
