@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Shield, Swords, Truck, Loader2 } from "lucide-react";
@@ -24,24 +24,29 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("efficiency");
 
   // Fetch real data
-  const { data: dbSellers, isLoading: loadingSellers } = useSellers();
-  const { data: dbKpis, isLoading: loadingKpis } = useSellerKpis(selectedSeller || undefined);
+  const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
 
-  // Determine if we have real data
-  const hasRealData = dbSellers && dbSellers.length > 0;
+  // Determine if we have real data (only after fetch completes)
+  const hasRealData = sellersFetched && dbSellers && dbSellers.length > 0;
 
   // Use real sellers or fallback to mock
   const sellers = useMemo(() => {
+    if (!sellersFetched) return [];
     if (hasRealData) return dbSellers!.map(s => ({ id: s.id, nickname: s.nickname, custId: s.custId }));
     return mockSellers;
-  }, [hasRealData, dbSellers]);
+  }, [hasRealData, dbSellers, sellersFetched]);
 
   // Auto-select first seller
-  useMemo(() => {
+  useEffect(() => {
     if (sellers.length > 0 && (!selectedSeller || !sellers.find(s => s.id === selectedSeller))) {
       setSelectedSeller(sellers[0].id);
     }
-  }, [sellers, selectedSeller]);
+  }, [sellers]);
+
+  // Only query DB KPIs when using real data
+  const { data: dbKpis, isLoading: loadingKpis } = useSellerKpis(
+    hasRealData ? selectedSeller : undefined
+  );
 
   // Filter KPIs by date
   const filteredKpis = useMemo(() => {
@@ -49,10 +54,7 @@ const Index = () => {
     if (hasRealData) {
       kpis = dbKpis || [];
     } else {
-      kpis = (mockSellerKPIs[selectedSeller] || []).map(k => ({
-        ...k,
-        sellerId: k.sellerId,
-      }));
+      kpis = (mockSellerKPIs[selectedSeller] || []);
     }
 
     if (!dateRange?.from) return kpis;
@@ -72,7 +74,7 @@ const Index = () => {
     { id: "logistics", label: "Logística", icon: Truck },
   ];
 
-  const isLoading = loadingSellers || loadingKpis;
+  const isLoading = !sellersFetched || (hasRealData && loadingKpis);
 
   return (
     <div className="min-h-screen bg-background">
@@ -91,8 +93,8 @@ const Index = () => {
               <h1 className="text-xl font-bold tracking-tight">Seller Dashboard</h1>
               <p className="text-xs text-muted-foreground">
                 Gestão de Performance · Mercado Livre
-                {hasRealData && <span className="ml-2 text-emerald">● Dados reais</span>}
-                {!hasRealData && <span className="ml-2 text-warning">● Dados de demonstração</span>}
+                {sellersFetched && hasRealData && <span className="ml-2 text-emerald">● Dados reais</span>}
+                {sellersFetched && !hasRealData && <span className="ml-2 text-warning">● Dados de demonstração</span>}
               </p>
             </div>
           </div>
@@ -106,7 +108,7 @@ const Index = () => {
           </div>
         )}
 
-        {!isLoading && (
+        {!isLoading && sellers.length > 0 && (
           <>
             {/* Header */}
             <DashboardHeader
