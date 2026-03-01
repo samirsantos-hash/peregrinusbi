@@ -11,6 +11,7 @@ import Admin from "./pages/Admin";
 import ChangePassword from "./pages/ChangePassword";
 import NoAccess from "./pages/NoAccess";
 import NotFound from "./pages/NotFound";
+import Setup from "./pages/Setup";
 
 const queryClient = new QueryClient();
 
