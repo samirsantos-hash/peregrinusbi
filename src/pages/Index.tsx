@@ -11,6 +11,7 @@ import QualityPanel from "@/components/dashboard/QualityPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
+import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { sellers, sellerKPIs } from "@/data/mockData";
 
 const Index = () => {
@@ -50,12 +51,15 @@ const Index = () => {
 
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Title */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3">
-          <div className="w-2 h-8 rounded-full bg-neon-blue" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">Seller Dashboard</h1>
-            <p className="text-xs text-muted-foreground">Gestão de Performance · Mercado Livre</p>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-8 rounded-full bg-neon-blue" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">Seller Dashboard</h1>
+              <p className="text-xs text-muted-foreground">Gestão de Performance · Mercado Livre</p>
+            </div>
           </div>
+          <CsvUploadModal onSuccess={() => window.location.reload()} />
         </motion.div>
 
         {/* Header */}
