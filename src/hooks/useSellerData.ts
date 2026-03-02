@@ -6,6 +6,7 @@ export interface Seller {
   nickname: string;
   custId: string;
   cluster?: string;
+  subCluster?: string;
   state?: string;
 }
 
