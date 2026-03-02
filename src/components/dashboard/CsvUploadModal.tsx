@@ -55,7 +55,7 @@ const CsvUploadModal = ({ onSuccess }: CsvUploadModalProps) => {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="glass-card border-glass-border bg-card/60 gap-2">
           <Upload className="w-4 h-4" />
-          Importar CSV
+          Importar
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-card border-glass-border sm:max-w-md">
