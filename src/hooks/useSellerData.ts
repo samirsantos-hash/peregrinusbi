@@ -112,7 +112,13 @@ function transformKpi(row: any, sellerNickname: string): SellerKPI {
     pctPostagem: Math.round(pctPostagem * 10) / 10,
     tgmvFull,
     tgmvFlex,
-    upliftGmvM1: Number(row.uplift_gmv_lc_m1) || 0,
+    // uplift is stored as absolute value — convert to growth rate
+    upliftGmvM1: (() => {
+      const gmvM1 = Number(row.gmv_lc_m1) || 0;
+      const currentGmv = Number(row.gmv_lc) || 0;
+      if (gmvM1 > 0) return (currentGmv - gmvM1) / gmvM1;
+      return 0;
+    })(),
     gmvM1: Number(row.gmv_lc_m1) || 0,
     cdpTgmv: Number(row.cdp_tgmv_lc) || 0,
     repLevel: row.rep_current_level || "",
