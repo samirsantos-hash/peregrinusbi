@@ -40,29 +40,29 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
   const dailyGmv = totalGmv / 30;
 
   const projections = [
-    { days: 7, value: dailyGmv * 7 * (1 + avgUplift) },
-    { days: 15, value: dailyGmv * 15 * (1 + avgUplift) },
-    { days: 30, value: dailyGmv * 30 * (1 + avgUplift) },
-  ];
+  { days: 7, value: dailyGmv * 7 * (1 + avgUplift) },
+  { days: 15, value: dailyGmv * 15 * (1 + avgUplift) },
+  { days: 30, value: dailyGmv * 30 * (1 + avgUplift) }];
+
 
   const quickRanges = [
-    { label: "7 dias", days: 7 },
-    { label: "15 dias", days: 15 },
-    { label: "30 dias", days: 30 },
-  ];
+  { label: "7 dias", days: 7 },
+  { label: "15 dias", days: 15 },
+  { label: "30 dias", days: 30 }];
+
 
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4"
-    >
+      className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+
       {/* Left - Store selector + Date */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         {/* Logo + Store selector */}
         <div className="flex items-center gap-3">
           <div className="h-12 w-12 rounded-lg bg-background/80 border border-border/50 p-1.5 flex items-center justify-center">
-            <img src={logo} alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" />
+            <img alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2f12a5a6-9e0e-4367-a737-5d6a8137e4bd.png" />
           </div>
           <Store className="w-4 h-4 text-neon-blue" />
           <Select value={selectedSeller} onValueChange={onSellerChange}>
@@ -70,12 +70,12 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
               <SelectValue placeholder="Selecionar loja" />
             </SelectTrigger>
             <SelectContent className="bg-card border-glass-border">
-              {sellers.map((s) => (
-                <SelectItem key={s.id} value={s.id} className="focus:bg-muted">
+              {sellers.map((s) =>
+              <SelectItem key={s.id} value={s.id} className="focus:bg-muted">
                   <span className="font-medium">{s.nickname}</span>
                   <span className="text-muted-foreground ml-2 text-xs font-mono">{s.custId}</span>
                 </SelectItem>
-              ))}
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -86,31 +86,31 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
             <PopoverTrigger asChild>
               <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal glass-card border-glass-border bg-card/60", !dateRange && "text-muted-foreground")}>
                 <CalendarIcon className="mr-2 h-4 w-4 text-neon-blue" />
-                {dateRange?.from ? (
-                  dateRange.to ? (
-                    <>
+                {dateRange?.from ?
+                dateRange.to ?
+                <>
                       {format(dateRange.from, "dd MMM", { locale: ptBR })} - {format(dateRange.to, "dd MMM", { locale: ptBR })}
-                    </>
-                  ) : format(dateRange.from, "dd MMM yyyy", { locale: ptBR })
-                ) : "Selecionar período"}
+                    </> :
+                format(dateRange.from, "dd MMM yyyy", { locale: ptBR }) :
+                "Selecionar período"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0 bg-card border-glass-border" align="start">
               <div className="flex gap-1 p-2 border-b border-border">
-                {quickRanges.map((qr) => (
-                  <Button
-                    key={qr.days}
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs hover:bg-muted"
-                    onClick={() => {
-                      onDateRangeChange({ from: subDays(new Date(), qr.days), to: new Date() });
-                      setCalOpen(false);
-                    }}
-                  >
+                {quickRanges.map((qr) =>
+                <Button
+                  key={qr.days}
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs hover:bg-muted"
+                  onClick={() => {
+                    onDateRangeChange({ from: subDays(new Date(), qr.days), to: new Date() });
+                    setCalOpen(false);
+                  }}>
+
                     {qr.label}
                   </Button>
-                ))}
+                )}
               </div>
               <Calendar
                 initialFocus
@@ -119,8 +119,8 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
                 selected={dateRange}
                 onSelect={onDateRangeChange}
                 numberOfMonths={2}
-                className="p-3 pointer-events-auto"
-              />
+                className="p-3 pointer-events-auto" />
+
             </PopoverContent>
           </Popover>
         </div>
@@ -131,8 +131,8 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
-        className="glass-card-highlight p-4 neon-border w-full lg:w-auto"
-      >
+        className="glass-card-highlight p-4 neon-border w-full lg:w-auto">
+
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-4 h-4 text-neon-blue animate-pulse-neon" />
           <h3 className="text-xs font-semibold uppercase tracking-wider neon-text">
@@ -140,8 +140,8 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
           </h3>
         </div>
         <div className="flex gap-4">
-          {projections.map((p) => (
-            <div key={p.days} className="text-center">
+          {projections.map((p) =>
+          <div key={p.days} className="text-center">
               <p className="text-[10px] text-muted-foreground uppercase">{p.days}d</p>
               <p className="font-mono font-bold text-sm emerald-text">
                 R$ {(p.value / 1000).toFixed(0)}K
@@ -151,11 +151,11 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
                 <span className="text-[10px] text-emerald">+{(avgUplift * 100).toFixed(0)}%</span>
               </div>
             </div>
-          ))}
+          )}
         </div>
       </motion.div>
-    </motion.div>
-  );
+    </motion.div>);
+
 };
 
 export default DashboardHeader;
