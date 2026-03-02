@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.jpeg";
 
@@ -78,6 +78,11 @@ const Auth = () => {
             Entrar
           </Button>
         </form>
+        <div className="text-center">
+          <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+            Esqueci minha senha
+          </Link>
+        </div>
       </motion.div>
     </div>);
 

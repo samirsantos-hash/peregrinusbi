@@ -12,6 +12,8 @@ import ChangePassword from "./pages/ChangePassword";
 import NoAccess from "./pages/NoAccess";
 import NotFound from "./pages/NotFound";
 import Setup from "./pages/Setup";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +49,8 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/setup" element={<Setup />} />
       <Route path="/change-password" element={user ? <ChangePassword /> : <Navigate to="/auth" replace />} />
       <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
