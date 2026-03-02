@@ -10,47 +10,64 @@ export function useAuth() {
   const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    let mounted = true;
 
-        if (session?.user) {
-          // Check admin role
-          const { data: roles } = await supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", session.user.id);
-          setIsAdmin(roles?.some((r) => r.role === "admin") ?? false);
+    const syncAuthState = async (currentSession: Session | null) => {
+      if (!mounted) return;
 
-          // Check must_change_password
-          const { data: access } = await supabase
-            .from("user_access_control")
-            .select("must_change_password, temp_password_expires_at")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
 
-          if (access) {
-            const expired = access.temp_password_expires_at
-              ? new Date(access.temp_password_expires_at) < new Date()
-              : false;
-            setMustChangePassword(access.must_change_password && !expired);
-          } else {
-            setMustChangePassword(false);
-          }
-        } else {
-          setIsAdmin(false);
-          setMustChangePassword(false);
-        }
+      if (!currentSession?.user) {
+        setIsAdmin(false);
+        setMustChangePassword(false);
         setLoading(false);
+        return;
+      }
+
+      const [rolesResult, accessResult] = await Promise.all([
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", currentSession.user.id),
+        supabase
+          .from("user_access_control")
+          .select("must_change_password, temp_password_expires_at")
+          .eq("user_id", currentSession.user.id)
+          .maybeSingle(),
+      ]);
+
+      if (!mounted) return;
+
+      setIsAdmin(rolesResult.data?.some((r) => r.role === "admin") ?? false);
+
+      const access = accessResult.data;
+      if (access) {
+        const expired = access.temp_password_expires_at
+          ? new Date(access.temp_password_expires_at) < new Date()
+          : false;
+        setMustChangePassword(access.must_change_password && !expired);
+      } else {
+        setMustChangePassword(false);
+      }
+
+      setLoading(false);
+    };
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      void syncAuthState(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, currentSession) => {
+        void syncAuthState(currentSession);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
