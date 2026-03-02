@@ -66,14 +66,17 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
           </div>
           <Store className="w-4 h-4 text-neon-blue" />
           <Select value={selectedSeller} onValueChange={onSellerChange}>
-            <SelectTrigger className="w-[220px] glass-card border-glass-border bg-card/60 focus:ring-neon-blue/30">
+            <SelectTrigger className="w-[320px] glass-card border-glass-border bg-card/60 focus:ring-neon-blue/30">
               <SelectValue placeholder="Selecionar loja" />
             </SelectTrigger>
             <SelectContent className="bg-card border-glass-border">
               {sellers.map((s) =>
               <SelectItem key={s.id} value={s.id} className="focus:bg-muted">
+                  <span className="text-xs text-muted-foreground mr-1">Loja:</span>
                   <span className="font-medium">{s.nickname}</span>
-                  <span className="text-muted-foreground ml-2 text-xs font-mono">{s.custId}</span>
+                  <span className="mx-2 text-border">|</span>
+                  <span className="text-xs text-muted-foreground mr-1">Cust ID:</span>
+                  <span className="text-xs font-mono text-foreground">{s.custId}</span>
                 </SelectItem>
               )}
             </SelectContent>
