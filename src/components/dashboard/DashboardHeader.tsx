@@ -66,14 +66,17 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
           </div>
           <Store className="w-4 h-4 text-neon-blue" />
           <Select value={selectedSeller} onValueChange={onSellerChange}>
-            <SelectTrigger className="w-[220px] glass-card border-glass-border bg-card/60 focus:ring-neon-blue/30">
+            <SelectTrigger className="w-[320px] glass-card border-glass-border bg-card/60 focus:ring-neon-blue/30">
               <SelectValue placeholder="Selecionar loja" />
             </SelectTrigger>
             <SelectContent className="bg-card border-glass-border">
               {sellers.map((s) =>
               <SelectItem key={s.id} value={s.id} className="focus:bg-muted">
+                  <span className="text-xs text-muted-foreground mr-1">Loja:</span>
                   <span className="font-medium">{s.nickname}</span>
-                  <span className="text-muted-foreground ml-2 text-xs font-mono">{s.custId}</span>
+                  <span className="mx-2 text-border">|</span>
+                  <span className="text-xs text-muted-foreground mr-1">Cust ID:</span>
+                  <span className="text-xs font-mono text-foreground">{s.custId}</span>
                 </SelectItem>
               )}
             </SelectContent>
@@ -131,24 +134,24 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
-        className="glass-card-highlight p-4 neon-border w-full lg:w-auto">
+        className="glass-card-highlight p-6 neon-border w-full lg:w-auto">
 
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4 text-neon-blue animate-pulse-neon" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider neon-text">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-5 h-5 text-neon-blue animate-pulse-neon" />
+          <h3 className="text-sm font-semibold uppercase tracking-wider neon-text">
             Projeção de Crescimento (IA)
           </h3>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-6">
           {projections.map((p) =>
           <div key={p.days} className="text-center">
-              <p className="text-[10px] text-muted-foreground uppercase">{p.days}d</p>
-              <p className="font-mono font-bold text-sm emerald-text">
+              <p className="text-xs text-muted-foreground uppercase">{p.days}d</p>
+              <p className="font-mono font-bold text-xl emerald-text">
                 R$ {(p.value / 1000).toFixed(0)}K
               </p>
-              <div className="flex items-center justify-center gap-0.5 mt-0.5">
-                <TrendingUp className="w-3 h-3 text-emerald" />
-                <span className="text-[10px] text-emerald">+{(avgUplift * 100).toFixed(0)}%</span>
+              <div className="flex items-center justify-center gap-1 mt-1">
+                <TrendingUp className="w-4 h-4 text-emerald" />
+                <span className="text-xs text-emerald">+{(avgUplift * 100).toFixed(0)}%</span>
               </div>
             </div>
           )}
