@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
+import TooltipInfo from "./TooltipInfo";
 
 interface KpiLike {
   date: string;
@@ -30,7 +31,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
-  // Aggregate by date
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
     acc[k.date].gmv += k.revenue;
@@ -46,8 +46,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
   const chartData = Object.values(byDate)
     .map((d) => ({
       date: d.date.slice(5),
-      "Faturamento": Math.round(d.gmv),
-      "Investimento Ads": Math.round(d.adsInvestment),
+      "Faturamento Bruto": Math.round(d.gmv),
+      "Investimento em Marketing": Math.round(d.adsInvestment),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
       ACOS: Math.round((d.acos / d.count) * 100) / 100,
       TACOS: Math.round((d.tacos / d.count) * 100) / 100,
@@ -61,15 +61,14 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
   const avgCpa = kpis.length > 0 ? kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length : 0;
 
   const metrics = [
-    { label: "GMV Total", value: `R$ ${(totalGmv / 1000).toFixed(0)}K`, color: "neon-text" },
-    { label: "ROAS Médio", value: avgRoas.toFixed(2), color: avgRoas >= 2 ? "emerald-text" : "text-destructive" },
-    { label: "CPA Médio", value: `R$ ${avgCpa.toFixed(2)}`, color: "neon-text" },
-    { label: "Investimento", value: `R$ ${(totalAds / 1000).toFixed(0)}K`, color: "text-muted-foreground" },
+    { label: "Faturamento Bruto (GMV)", value: `R$ ${(totalGmv / 1000).toFixed(0)}K`, color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado." },
+    { label: "ROAS Médio", value: avgRoas.toFixed(2), color: avgRoas >= 2 ? "emerald-text" : "text-destructive", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é saudável." },
+    { label: "CPA Médio", value: `R$ ${avgCpa.toFixed(2)}`, color: "neon-text", tooltip: "Custo por aquisição. Quanto menor, mais eficiente a campanha." },
+    { label: "Investimento em Marketing", value: `R$ ${(totalAds / 1000).toFixed(0)}K`, color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
   ];
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      {/* Metric cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {metrics.map((m, i) => (
           <motion.div
@@ -79,17 +78,22 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             transition={{ delay: i * 0.08 }}
             className="glass-card p-4"
           >
-            <p className="metric-label">{m.label}</p>
+            <div className="flex items-center gap-1">
+              <p className="metric-label">{m.label}</p>
+              <TooltipInfo text={m.tooltip} />
+            </div>
             <p className={`metric-value mt-1 ${m.color}`}>{m.value}</p>
           </motion.div>
         ))}
       </div>
 
-      {/* Area chart - Revenue vs Ads */}
       <div className="glass-card p-5">
-        <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 text-foreground">
-          Faturamento vs Investimento em Ads
-        </h3>
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+            Faturamento Bruto vs Investimento em Marketing
+          </h3>
+          <TooltipInfo text="Comparativo entre o GMV gerado e o valor investido em Ads ao longo do tempo." />
+        </div>
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={chartData}>
             <defs>
@@ -106,18 +110,20 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="Faturamento" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlue)" strokeWidth={2} />
-            <Area type="monotone" dataKey="Investimento Ads" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmerald)" strokeWidth={2} />
+            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlue)" strokeWidth={2} />
+            <Area type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmerald)" strokeWidth={2} />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Bar chart - ROAS/ACOS/TACOS */}
       <div className="glass-card p-5">
-        <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 text-foreground">
-          ROAS · ACOS · TACOS
-        </h3>
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+            ROAS · ACOS · TACOS
+          </h3>
+          <TooltipInfo text="ROAS: retorno sobre Ads. ACOS: custo de Ads sobre vendas de Ads. TACOS: custo de Ads sobre vendas totais." />
+        </div>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={chartData.slice(-15)}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />

@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Package, Truck, Mail } from "lucide-react";
+import TooltipInfo from "./TooltipInfo";
 
 interface KpiLike {
   date: string;
@@ -43,9 +44,9 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
   ];
 
   const logIcons = [
-    { label: "Full", value: `${avgFull.toFixed(1)}%`, icon: Package, color: "neon-text", desc: "Mercado Envios Full" },
-    { label: "Flex", value: `${avgFlex.toFixed(1)}%`, icon: Truck, color: "emerald-text", desc: "Mercado Envios Flex" },
-    { label: "Postagem", value: `${avgPostagem.toFixed(1)}%`, icon: Mail, color: "text-purple-400", desc: "Correios / Postagem" },
+    { label: "Full", value: `${avgFull.toFixed(1)}%`, icon: Package, color: "neon-text", desc: "Mercado Envios Full", tooltip: "Percentual de vendas enviadas pelo Full (estoque no CD do Mercado Livre). Maior penetração melhora ranking." },
+    { label: "Flex", value: `${avgFlex.toFixed(1)}%`, icon: Truck, color: "emerald-text", desc: "Mercado Envios Flex", tooltip: "Percentual de vendas via Flex (coleta no vendedor). Boa alternativa para itens grandes." },
+    { label: "Postagem", value: `${avgPostagem.toFixed(1)}%`, icon: Mail, color: "text-purple-400", desc: "Correios / Postagem", tooltip: "Percentual de vendas via Correios. Menor priorização no algoritmo de busca." },
   ];
 
   return (
@@ -61,16 +62,22 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
           >
             <item.icon className={`w-6 h-6 mx-auto mb-2 ${item.color === "neon-text" ? "text-neon-blue" : item.color === "emerald-text" ? "text-emerald" : "text-purple-400"}`} />
             <p className={`metric-value ${item.color}`}>{item.value}</p>
-            <p className="metric-label mt-1">{item.label}</p>
+            <div className="flex items-center justify-center gap-1 mt-1">
+              <p className="metric-label">{item.label}</p>
+              <TooltipInfo text={item.tooltip} />
+            </div>
             <p className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</p>
           </motion.div>
         ))}
       </div>
 
       <div className="glass-card p-6">
-        <h3 className="text-sm font-semibold uppercase tracking-wider mb-4 text-foreground text-center">
-          Mix de Envio
-        </h3>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+            Mix de Envio
+          </h3>
+          <TooltipInfo text="Distribuição percentual dos métodos de envio. Maior proporção de Full e Flex melhora o desempenho no marketplace." />
+        </div>
         <ResponsiveContainer width="100%" height={320}>
           <PieChart>
             <Pie

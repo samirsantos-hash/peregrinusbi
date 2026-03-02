@@ -2,16 +2,17 @@ import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { BarChart3, Shield, Swords, Truck, Loader2, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, ClipboardCheck, Loader2, Settings, LogOut } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 import { subDays } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
 import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
-import QualityPanel from "@/components/dashboard/QualityPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
+import AuditPanel from "@/components/dashboard/AuditPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
@@ -26,22 +27,26 @@ const Index = () => {
     from: subDays(new Date(), 365),
     to: new Date()
   });
-  const [activeTab, setActiveTab] = useState("efficiency");
+  const [activeTab, setActiveTab] = useState("executive");
 
-  // Fetch real data (RLS will filter based on user's allowed_cust_ids)
   const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
 
   const hasRealData = sellersFetched && dbSellers && dbSellers.length > 0;
 
   const sellers = useMemo(() => {
     if (!sellersFetched) return [];
-    if (hasRealData) return dbSellers!.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.custId }));
-    // Only show mock data for admin (for demo purposes)
+    if (hasRealData) return dbSellers!.map((s) => ({
+      id: s.id,
+      nickname: s.nickname,
+      custId: s.custId,
+      cluster: s.cluster,
+      subCluster: s.subCluster,
+      state: s.state,
+    }));
     if (isAdmin) return mockSellers;
     return [];
   }, [hasRealData, dbSellers, sellersFetched, isAdmin]);
 
-  // If user has no sellers and is not admin, redirect to no-access
   useEffect(() => {
     if (sellersFetched && sellers.length === 0 && !isAdmin) {
       navigate("/no-access", { replace: true });
@@ -77,11 +82,12 @@ const Index = () => {
   }, [hasRealData, dbKpis, selectedSeller, dateRange]);
 
   const tabs = [
-  { id: "efficiency", label: "Eficiência", icon: BarChart3 },
-  { id: "quality", label: "Qualidade", icon: Shield },
-  { id: "competitiveness", label: "Competitividade", icon: Swords },
-  { id: "logistics", label: "Logística", icon: Truck }];
-
+    { id: "executive", label: "Dashboard Executivo", icon: LayoutDashboard },
+    { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
+    { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
+    { id: "audit", label: "Auditoria de Anúncios", icon: ClipboardCheck },
+    { id: "logistics", label: "Logística", icon: Truck },
+  ];
 
   const isLoading = !sellersFetched || hasRealData && loadingKpis;
 
@@ -135,47 +141,47 @@ const Index = () => {
         {!isLoading && sellers.length > 0 &&
         <>
             <DashboardHeader
-            sellers={sellers}
-            selectedSeller={selectedSeller}
-            onSellerChange={setSelectedSeller}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            kpis={filteredKpis} />
-
+              sellers={sellers}
+              selectedSeller={selectedSeller}
+              onSellerChange={setSelectedSeller}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              kpis={filteredKpis} />
 
             <DiagnosticAlerts kpis={filteredKpis} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto">
+              <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto flex-wrap">
                 {tabs.map((tab) =>
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
-
+                <TabsTrigger
+                  key={tab.id}
+                  value={tab.id}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
                     <tab.icon className="w-4 h-4" />
                     {tab.label}
                   </TabsTrigger>
-              )}
+                )}
               </TabsList>
 
               <AnimatePresence mode="wait">
                 <motion.div
-                key={`${activeTab}-${selectedSeller}`}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
-                className="mt-5">
-
+                  key={`${activeTab}-${selectedSeller}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                  className="mt-5">
+                  <TabsContent value="executive" className="mt-0">
+                    <ExecutivePanel kpis={filteredKpis} />
+                  </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
                     <EfficiencyPanel kpis={filteredKpis} />
                   </TabsContent>
-                  <TabsContent value="quality" className="mt-0">
-                    <QualityPanel kpis={filteredKpis} />
-                  </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0">
                     <CompetitivenessPanel kpis={filteredKpis} />
+                  </TabsContent>
+                  <TabsContent value="audit" className="mt-0">
+                    <AuditPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0">
                     <LogisticsPanel kpis={filteredKpis} />
@@ -186,8 +192,8 @@ const Index = () => {
           </>
         }
       </div>
-    </div>);
-
+    </div>
+  );
 };
 
 export default Index;

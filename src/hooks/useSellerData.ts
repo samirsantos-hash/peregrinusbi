@@ -6,6 +6,7 @@ export interface Seller {
   nickname: string;
   custId: string;
   cluster?: string;
+  subCluster?: string;
   state?: string;
 }
 
@@ -136,7 +137,7 @@ export function useSellers() {
     queryFn: async (): Promise<Seller[]> => {
       const { data, error } = await supabase
         .from("sellers")
-        .select("id, nickname, cust_id, cluster_seller, cus_state")
+        .select("id, nickname, cust_id, cluster_seller, sub_cluster_seller, cus_state")
         .order("nickname");
 
       if (error) throw error;
@@ -147,6 +148,7 @@ export function useSellers() {
         nickname: s.nickname,
         custId: s.cust_id,
         cluster: s.cluster_seller || undefined,
+        subCluster: s.sub_cluster_seller || undefined,
         state: s.cus_state || undefined,
       }));
     },
