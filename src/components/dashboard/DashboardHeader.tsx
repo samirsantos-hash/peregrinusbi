@@ -1,12 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, TrendingUp, Sparkles, Store } from "lucide-react";
-import logo from "@/assets/logo.jpeg";
-import { format, subDays } from "date-fns";
+import { CalendarIcon, TrendingUp, Sparkles, Store, Check, ChevronsUpDown } from "lucide-react";
+import { format, subDays, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
@@ -33,23 +32,34 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, onDateRangeChange, kpis }: DashboardHeaderProps) => {
   const [calOpen, setCalOpen] = useState(false);
+  const [storeOpen, setStoreOpen] = useState(false);
 
-  // AI Projection calc
+  const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
+
+  // Calculate the number of days in the selected range
+  const rangeDays = useMemo(() => {
+    if (dateRange?.from && dateRange?.to) {
+      return Math.max(differenceInDays(dateRange.to, dateRange.from), 1);
+    }
+    return 30;
+  }, [dateRange]);
+
+  // AI Projection calc — proportional to selected date range
   const avgUplift = kpis.length > 0 ? kpis.reduce((s, k) => s + k.upliftGmvM1, 0) / kpis.length : 0;
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
-  const dailyGmv = totalGmv / 30;
+  const dailyGmv = rangeDays > 0 ? totalGmv / rangeDays : 0;
 
   const projections = [
-  { days: 7, value: dailyGmv * 7 * (1 + avgUplift) },
-  { days: 15, value: dailyGmv * 15 * (1 + avgUplift) },
-  { days: 30, value: dailyGmv * 30 * (1 + avgUplift) }];
-
+    { days: 7, value: dailyGmv * 7 * (1 + avgUplift) },
+    { days: 15, value: dailyGmv * 15 * (1 + avgUplift) },
+    { days: 30, value: dailyGmv * 30 * (1 + avgUplift) },
+  ];
 
   const quickRanges = [
-  { label: "7 dias", days: 7 },
-  { label: "15 dias", days: 15 },
-  { label: "30 dias", days: 30 }];
-
+    { label: "7 dias", days: 7 },
+    { label: "15 dias", days: 15 },
+    { label: "30 dias", days: 30 },
+  ];
 
   return (
     <motion.div
@@ -59,28 +69,66 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
 
       {/* Left - Store selector + Date */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        {/* Logo + Store selector */}
+        {/* Logo + Store selector with search */}
         <div className="flex items-center gap-3">
           <div className="h-12 w-12 rounded-lg bg-background/80 border border-border/50 p-1.5 flex items-center justify-center">
             <img alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2f12a5a6-9e0e-4367-a737-5d6a8137e4bd.png" />
           </div>
           <Store className="w-4 h-4 text-neon-blue" />
-          <Select value={selectedSeller} onValueChange={onSellerChange}>
-            <SelectTrigger className="w-[320px] glass-card border-glass-border bg-card/60 focus:ring-neon-blue/30">
-              <SelectValue placeholder="Selecionar loja" />
-            </SelectTrigger>
-            <SelectContent className="bg-card border-glass-border">
-              {sellers.map((s) =>
-              <SelectItem key={s.id} value={s.id} className="focus:bg-muted">
-                  <span className="text-xs text-muted-foreground mr-1">Loja:</span>
-                  <span className="font-medium">{s.nickname}</span>
-                  <span className="mx-2 text-border">|</span>
-                  <span className="text-xs text-muted-foreground mr-1">Cust ID:</span>
-                  <span className="text-xs font-mono text-foreground">{s.custId}</span>
-                </SelectItem>
-              )}
-            </SelectContent>
-          </Select>
+
+          <Popover open={storeOpen} onOpenChange={setStoreOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={storeOpen}
+                className="w-[340px] justify-between glass-card border-glass-border bg-card/60 font-normal"
+              >
+                {selectedSellerObj ? (
+                  <span className="truncate">
+                    <span className="text-xs text-muted-foreground mr-1">Loja:</span>
+                    <span className="font-medium">{selectedSellerObj.nickname}</span>
+                    <span className="mx-2 text-border">|</span>
+                    <span className="text-xs text-muted-foreground mr-1">ID:</span>
+                    <span className="text-xs font-mono">{selectedSellerObj.custId}</span>
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground">Selecionar loja...</span>
+                )}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[340px] p-0 bg-card border-glass-border" align="start">
+              <Command className="bg-transparent">
+                <CommandInput placeholder="Pesquisar por nome ou Cust ID..." className="h-9" />
+                <CommandList>
+                  <CommandEmpty>Nenhuma loja encontrada.</CommandEmpty>
+                  <CommandGroup>
+                    {sellers.map((s) => (
+                      <CommandItem
+                        key={s.id}
+                        value={`${s.nickname} ${s.custId}`}
+                        onSelect={() => {
+                          onSellerChange(s.id);
+                          setStoreOpen(false);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", selectedSeller === s.id ? "opacity-100 text-neon-blue" : "opacity-0")} />
+                        <div className="flex items-center gap-1 truncate">
+                          <span className="text-xs text-muted-foreground">Loja:</span>
+                          <span className="font-medium">{s.nickname}</span>
+                          <span className="mx-1 text-border">|</span>
+                          <span className="text-xs text-muted-foreground">Cust ID:</span>
+                          <span className="text-xs font-mono">{s.custId}</span>
+                        </div>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Date Range Picker */}
@@ -110,7 +158,6 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
                     onDateRangeChange({ from: subDays(new Date(), qr.days), to: new Date() });
                     setCalOpen(false);
                   }}>
-
                     {qr.label}
                   </Button>
                 )}
@@ -123,42 +170,46 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
                 onSelect={onDateRangeChange}
                 numberOfMonths={2}
                 className="p-3 pointer-events-auto" />
-
             </PopoverContent>
           </Popover>
         </div>
       </div>
 
-      {/* Right - AI Projection */}
+      {/* Right - AI Projection — proportional to date range */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
-        className="glass-card-highlight p-6 neon-border w-full lg:w-auto">
+        className="glass-card-highlight p-6 neon-border w-full lg:w-auto lg:min-w-[420px]">
 
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-5 h-5 text-neon-blue animate-pulse-neon" />
-          <h3 className="text-sm font-semibold uppercase tracking-wider neon-text">
-            Projeção de Crescimento (IA)
-          </h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-neon-blue animate-pulse-neon" />
+            <h3 className="text-sm font-semibold uppercase tracking-wider neon-text">
+              Projeção de Crescimento (IA)
+            </h3>
+          </div>
+          <span className="text-[10px] text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
+            Base: {rangeDays}d analisados
+          </span>
         </div>
-        <div className="flex gap-6">
+        <div className="flex gap-8 justify-around">
           {projections.map((p) =>
-          <div key={p.days} className="text-center">
-              <p className="text-xs text-muted-foreground uppercase">{p.days}d</p>
-              <p className="font-mono font-bold text-xl emerald-text">
+          <div key={p.days} className="text-center min-w-[80px]">
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{p.days} dias</p>
+              <p className="font-mono font-bold text-2xl emerald-text">
                 R$ {(p.value / 1000).toFixed(0)}K
               </p>
-              <div className="flex items-center justify-center gap-1 mt-1">
+              <div className="flex items-center justify-center gap-1 mt-1.5">
                 <TrendingUp className="w-4 h-4 text-emerald" />
-                <span className="text-xs text-emerald">+{(avgUplift * 100).toFixed(0)}%</span>
+                <span className="text-sm font-medium text-emerald">+{(avgUplift * 100).toFixed(1)}%</span>
               </div>
             </div>
           )}
         </div>
       </motion.div>
-    </motion.div>);
-
+    </motion.div>
+  );
 };
 
 export default DashboardHeader;
