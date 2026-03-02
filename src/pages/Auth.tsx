@@ -78,6 +78,11 @@ const Auth = () => {
             Entrar
           </Button>
         </form>
+        <div className="text-center">
+          <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+            Esqueci minha senha
+          </Link>
+        </div>
       </motion.div>
     </div>);
 
