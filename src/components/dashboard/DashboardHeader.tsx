@@ -45,14 +45,20 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
   }, [dateRange]);
 
   // AI Projection calc — proportional to selected date range
-  const avgUplift = kpis.length > 0 ? kpis.reduce((s, k) => s + k.upliftGmvM1, 0) / kpis.length : 0;
+  // upliftGmvM1 is now a growth rate (e.g. 0.15 = +15%)
+  const validUplifts = kpis.filter((k) => k.upliftGmvM1 !== 0);
+  const avgUplift = validUplifts.length > 0
+    ? validUplifts.reduce((s, k) => s + k.upliftGmvM1, 0) / validUplifts.length
+    : 0;
+  // Clamp growth rate to reasonable range (-50% to +200%)
+  const clampedUplift = Math.max(-0.5, Math.min(2, avgUplift));
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
   const dailyGmv = rangeDays > 0 ? totalGmv / rangeDays : 0;
 
   const projections = [
-    { days: 7, value: dailyGmv * 7 * (1 + avgUplift) },
-    { days: 15, value: dailyGmv * 15 * (1 + avgUplift) },
-    { days: 30, value: dailyGmv * 30 * (1 + avgUplift) },
+    { days: 7, value: dailyGmv * 7 * (1 + clampedUplift) },
+    { days: 15, value: dailyGmv * 15 * (1 + clampedUplift) },
+    { days: 30, value: dailyGmv * 30 * (1 + clampedUplift) },
   ];
 
   const quickRanges = [
@@ -202,7 +208,7 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
               </p>
               <div className="flex items-center justify-center gap-1 mt-1.5">
                 <TrendingUp className="w-4 h-4 text-emerald" />
-                <span className="text-sm font-medium text-emerald">+{(avgUplift * 100).toFixed(1)}%</span>
+                <span className={cn("text-sm font-medium", clampedUplift >= 0 ? "text-emerald" : "text-destructive")}>{clampedUplift >= 0 ? "+" : ""}{(clampedUplift * 100).toFixed(1)}%</span>
               </div>
             </div>
           )}
