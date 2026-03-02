@@ -95,6 +95,9 @@ const Index = () => {
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-6">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-lg bg-background/80 border border-border/50 p-1 flex items-center justify-center">
+              <img alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2f12a5a6-9e0e-4367-a737-5d6a8137e4bd.png" />
+            </div>
             <div className="w-2 h-8 rounded-full bg-neon-blue" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
             <div>
               <h1 className="text-xl font-bold tracking-tight">Peregrinus Dashboard</h1>
