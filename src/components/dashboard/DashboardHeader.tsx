@@ -208,7 +208,7 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
               </p>
               <div className="flex items-center justify-center gap-1 mt-1.5">
                 <TrendingUp className="w-4 h-4 text-emerald" />
-                <span className="text-sm font-medium text-emerald">+{(avgUplift * 100).toFixed(1)}%</span>
+                <span className={cn("text-sm font-medium", clampedUplift >= 0 ? "text-emerald" : "text-destructive")}>{clampedUplift >= 0 ? "+" : ""}{(clampedUplift * 100).toFixed(1)}%</span>
               </div>
             </div>
           )}
