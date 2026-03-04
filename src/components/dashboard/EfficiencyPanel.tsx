@@ -1,6 +1,11 @@
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from "recharts";
+import {
+  AreaChart, Area, LineChart, Line,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+} from "recharts";
 import TooltipInfo from "./TooltipInfo";
+import PeriodSelector from "./PeriodSelector";
 
 interface KpiLike {
   date: string;
@@ -31,6 +36,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
+  const [periodAds, setPeriodAds] = useState("15");
+  const [periodRoas, setPeriodRoas] = useState("15");
+
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
     acc[k.date].gmv += k.revenue;
@@ -43,17 +51,31 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
     return acc;
   }, {});
 
-  const chartData = Object.values(byDate)
-    .map((d) => ({
-      date: d.date.slice(5),
+  const allDates = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+
+  const formatDate = (dateStr: string, days: number) => {
+    const [m, d] = dateStr.slice(5).split("-");
+    return `${d}/${m}`;
+  };
+
+  const adsData = useMemo(() => {
+    const days = parseInt(periodAds);
+    return allDates.slice(-days).map((d) => ({
+      date: formatDate(d.date, days),
       "Faturamento Bruto": Math.round(d.gmv),
       "Investimento em Marketing": Math.round(d.adsInvestment),
+    }));
+  }, [allDates, periodAds]);
+
+  const roasData = useMemo(() => {
+    const days = parseInt(periodRoas);
+    return allDates.slice(-days).map((d) => ({
+      date: formatDate(d.date, days),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
       ACOS: Math.round((d.acos / d.count) * 100) / 100,
       TACOS: Math.round((d.tacos / d.count) * 100) / 100,
-      CPA: Math.round((d.cpa / d.count) * 100) / 100,
-    }))
-    .sort((a, b) => a.date.localeCompare(b.date));
+    }));
+  }, [allDates, periodRoas]);
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
@@ -66,6 +88,9 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
     { label: "CPA Médio", value: `R$ ${avgCpa.toFixed(2)}`, color: "neon-text", tooltip: "Custo por aquisição. Quanto menor, mais eficiente a campanha." },
     { label: "Investimento em Marketing", value: `R$ ${(totalAds / 1000).toFixed(0)}K`, color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
   ];
+
+  const daysAds = parseInt(periodAds);
+  const daysRoas = parseInt(periodRoas);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -87,54 +112,78 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
         ))}
       </div>
 
+      {/* Area Chart — Faturamento vs Ads */}
       <div className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Faturamento Bruto vs Investimento em Marketing
-          </h3>
-          <TooltipInfo text="Comparativo entre o GMV gerado e o valor investido em Ads ao longo do tempo." />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Faturamento Bruto vs Investimento em Marketing
+            </h3>
+            <TooltipInfo text="Comparativo entre o GMV gerado e o valor investido em Ads ao longo do tempo." />
+          </div>
+          <PeriodSelector value={periodAds} onChange={setPeriodAds} />
         </div>
         <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={chartData}>
+          <AreaChart data={adsData}>
             <defs>
-              <linearGradient id="gradBlue" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="gradBlueEff" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
               </linearGradient>
-              <linearGradient id="gradEmerald" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="gradEmeraldEff" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-            <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v/1000).toFixed(0)}K`} />
+            <XAxis
+              dataKey="date"
+              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              axisLine={false}
+              interval="preserveStartEnd"
+              angle={daysAds >= 30 ? -45 : 0}
+              textAnchor={daysAds >= 30 ? "end" : "middle"}
+              height={daysAds >= 30 ? 50 : 30}
+            />
+            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlue)" strokeWidth={2} />
-            <Area type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmerald)" strokeWidth={2} />
+            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueEff)" strokeWidth={2} />
+            <Area type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldEff)" strokeWidth={2} />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
+      {/* Line Chart — ROAS / ACOS / TACOS */}
       <div className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            ROAS · ACOS · TACOS
-          </h3>
-          <TooltipInfo text="ROAS: retorno sobre Ads. ACOS: custo de Ads sobre vendas de Ads. TACOS: custo de Ads sobre vendas totais." />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              ROAS · ACOS · TACOS
+            </h3>
+            <TooltipInfo text="ROAS: retorno sobre Ads. ACOS: custo de Ads sobre vendas de Ads. TACOS: custo de Ads sobre vendas totais." />
+          </div>
+          <PeriodSelector value={periodRoas} onChange={setPeriodRoas} />
         </div>
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={chartData.slice(-15)}>
+        <ResponsiveContainer width="100%" height={260}>
+          <LineChart data={roasData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-            <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+            <XAxis
+              dataKey="date"
+              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              axisLine={false}
+              interval="preserveStartEnd"
+              angle={daysRoas >= 30 ? -45 : 0}
+              textAnchor={daysRoas >= 30 ? "end" : "middle"}
+              height={daysRoas >= 30 ? 50 : 30}
+            />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="ROAS" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="ACOS" fill="hsl(280, 80%, 60%)" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="TACOS" fill="hsl(40, 95%, 55%)" radius={[4, 4, 0, 0]} />
+            <Line type="monotone" dataKey="ROAS" stroke="hsl(199, 100%, 50%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+            <Line type="monotone" dataKey="ACOS" stroke="hsl(280, 80%, 60%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+            <Line type="monotone" dataKey="TACOS" stroke="hsl(40, 95%, 55%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
-          </BarChart>
+          </LineChart>
         </ResponsiveContainer>
       </div>
     </motion.div>
