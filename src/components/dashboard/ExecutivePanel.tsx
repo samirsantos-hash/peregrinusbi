@@ -157,8 +157,8 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} />
-            <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} />
+            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
