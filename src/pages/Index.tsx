@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
+import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
