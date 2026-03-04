@@ -6,12 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2 } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
+import { format } from "date-fns";
 
 interface SellerOption {
   id: string;
@@ -28,6 +30,13 @@ interface ManagedUser {
   created_at: string;
 }
 
+interface UploadLog {
+  id: string;
+  upload_type: string;
+  rows_imported: number;
+  uploaded_at: string;
+}
+
 const Admin = () => {
   const { user, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
@@ -35,6 +44,7 @@ const Admin = () => {
 
   const [sellers, setSellers] = useState<SellerOption[]>([]);
   const [managedUsers, setManagedUsers] = useState<ManagedUser[]>([]);
+  const [uploadLogs, setUploadLogs] = useState<UploadLog[]>([]);
   const [loading, setLoading] = useState(true);
 
   // New user form
@@ -49,9 +59,10 @@ const Admin = () => {
 
   const loadData = async () => {
     setLoading(true);
-    const [sellersRes, usersRes] = await Promise.all([
+    const [sellersRes, usersRes, logsRes] = await Promise.all([
       supabase.from("sellers").select("id, nickname, cust_id").order("nickname"),
       supabase.from("user_access_control").select("*").order("created_at", { ascending: false }),
+      supabase.from("upload_logs").select("*").order("uploaded_at", { ascending: false }).limit(50),
     ]);
 
     if (sellersRes.data) {
@@ -68,6 +79,9 @@ const Admin = () => {
           created_at: u.created_at,
         }))
       );
+    }
+    if (logsRes.data) {
+      setUploadLogs(logsRes.data as UploadLog[]);
     }
     setLoading(false);
   };
@@ -239,19 +253,93 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="upload" className="mt-5">
+          <TabsContent value="upload" className="mt-5 space-y-6">
+            {/* Dual Upload Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="glass-card border-glass-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Upload className="w-5 h-5 text-neon-blue" />
+                    CPP Mensal
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Planilha de performance e financeiro (GMV, Ads, Scores, Reputação).
+                  </p>
+                  <CsvUploadModal
+                    uploadType="cpp_mensal"
+                    label="Upload CPP Mensal"
+                    onSuccess={() => { toast({ title: "CPP Mensal importado!" }); loadData(); }}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className="glass-card border-glass-border">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Upload className="w-5 h-5 text-emerald" />
+                    Live Listings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Planilha de inventário e catálogo (Categoria, Itens, Vertical).
+                  </p>
+                  <CsvUploadModal
+                    uploadType="live_listings"
+                    label="Upload Live Listings"
+                    onSuccess={() => { toast({ title: "Live Listings importado!" }); loadData(); }}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Upload Logs */}
             <Card className="glass-card border-glass-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <Upload className="w-5 h-5 text-neon-blue" />
-                  Importar Dados CSV
+                  <FileText className="w-5 h-5 text-muted-foreground" />
+                  Histórico de Uploads
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Faça upload do arquivo CSV para atualizar os dados de KPI dos sellers.
-                </p>
-                <CsvUploadModal onSuccess={() => { toast({ title: "Dados importados!" }); loadData(); }} />
+                {uploadLogs.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum upload registrado.</p>
+                ) : (
+                  <div className="overflow-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Data do Upload</TableHead>
+                          <TableHead>Tipo</TableHead>
+                          <TableHead className="text-right">Linhas Importadas</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {uploadLogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell className="text-sm">
+                              {format(new Date(log.uploaded_at), "dd/MM/yyyy HH:mm")}
+                            </TableCell>
+                            <TableCell>
+                              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                                log.upload_type === "cpp_mensal"
+                                  ? "bg-neon-blue/10 text-neon-blue"
+                                  : "bg-emerald/10 text-emerald"
+                              }`}>
+                                {log.upload_type === "cpp_mensal" ? "CPP Mensal" : "Live Listings"}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-right font-mono text-sm">
+                              {log.rows_imported.toLocaleString("pt-BR")}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

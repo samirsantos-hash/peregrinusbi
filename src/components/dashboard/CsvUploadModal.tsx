@@ -5,15 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 
+type UploadType = "cpp_mensal" | "live_listings";
+
 interface CsvUploadModalProps {
   onSuccess?: () => void;
+  uploadType?: UploadType;
+  label?: string;
 }
 
-const CsvUploadModal = ({ onSuccess }: CsvUploadModalProps) => {
+const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUploadModalProps) => {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<"idle" | "reading" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-  const [stats, setStats] = useState<{ sellers: number; kpis: number } | null>(null);
+  const [stats, setStats] = useState<{ sellers?: number; kpis?: number; listings?: number } | null>(null);
+
+  const functionName = uploadType === "live_listings" ? "import-live-listings" : "import-csv";
+  const displayLabel = label || (uploadType === "live_listings" ? "Upload Live Listings" : "Upload CPP Mensal");
 
   const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,22 +34,26 @@ const CsvUploadModal = ({ onSuccess }: CsvUploadModalProps) => {
       setStatus("uploading");
       setMessage("Importando dados para o banco...");
 
-      const { data, error } = await supabase.functions.invoke("import-csv", {
+      const { data, error } = await supabase.functions.invoke(functionName, {
         body: { csv: text },
       });
 
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
 
-      setStats({ sellers: data.sellers, kpis: data.kpis });
+      setStats({
+        sellers: data.sellers,
+        kpis: data.kpis,
+        listings: data.listings,
+      });
       setStatus("success");
-      setMessage(`Importação concluída!`);
+      setMessage("Importação concluída!");
       onSuccess?.();
     } catch (err) {
       setStatus("error");
       setMessage(err instanceof Error ? err.message : "Erro desconhecido");
     }
-  }, [onSuccess]);
+  }, [onSuccess, functionName]);
 
   const reset = () => {
     setStatus("idle");
@@ -55,12 +66,12 @@ const CsvUploadModal = ({ onSuccess }: CsvUploadModalProps) => {
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="glass-card border-glass-border bg-card/60 gap-2">
           <Upload className="w-4 h-4" />
-          Importar
+          {displayLabel}
         </Button>
       </DialogTrigger>
       <DialogContent className="bg-card border-glass-border sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Importar Dados (CSV)</DialogTitle>
+          <DialogTitle>Importar {uploadType === "live_listings" ? "Live Listings" : "CPP Mensal"} (CSV)</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
@@ -92,7 +103,8 @@ const CsvUploadModal = ({ onSuccess }: CsvUploadModalProps) => {
               <p className="text-sm font-medium">{message}</p>
               {stats && (
                 <div className="text-xs text-muted-foreground text-center">
-                  <p>{stats.sellers} sellers · {stats.kpis} registros de KPI</p>
+                  {stats.sellers != null && <p>{stats.sellers} sellers · {stats.kpis} registros de KPI</p>}
+                  {stats.listings != null && <p>{stats.listings} registros de listings</p>}
                 </div>
               )}
               <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
