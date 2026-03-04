@@ -71,7 +71,7 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
         {[
           { label: "Total Visitas", value: totalVisits.toLocaleString(), icon: TrendingUp, color: "neon-text", tooltip: "Total de visitas nos anúncios do seller no período." },
           { label: "Visitas c/ Preço Alto", value: totalExpensive.toLocaleString(), icon: AlertTriangle, color: "text-destructive", tooltip: "Visitas onde seu preço era maior que o concorrente mais barato." },
-          { label: "% Preço Não Competitivo", value: `${pctExpensive.toFixed(1)}%`, icon: TrendingDown, color: pctExpensive > 30 ? "text-warning" : "emerald-text", tooltip: "Proporção de visitas onde seu preço era mais caro. Acima de 30% é crítico." },
+          { label: "% Preço Não Competitivo", value: `${pctExpensive.toFixed(1)}%`, icon: TrendingDown, color: pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: "Proporção de visitas onde seu preço era mais caro. Acima de 30% é crítico." },
           { label: "Preço Rival Mínimo", value: `R$ ${(products[0]?.minPriceRival || 0).toFixed(2)}`, icon: TrendingDown, color: "neon-text", tooltip: "Menor preço encontrado entre seus concorrentes diretos." },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">

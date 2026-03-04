@@ -62,7 +62,7 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
 
   const metrics = [
     { label: "Faturamento Bruto (GMV)", value: `R$ ${(totalGmv / 1000).toFixed(0)}K`, color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado." },
-    { label: "ROAS Médio", value: avgRoas.toFixed(2), color: avgRoas >= 2 ? "emerald-text" : "text-destructive", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é saudável." },
+    { label: "ROAS Médio", value: avgRoas.toFixed(2), color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é saudável." },
     { label: "CPA Médio", value: `R$ ${avgCpa.toFixed(2)}`, color: "neon-text", tooltip: "Custo por aquisição. Quanto menor, mais eficiente a campanha." },
     { label: "Investimento em Marketing", value: `R$ ${(totalAds / 1000).toFixed(0)}K`, color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
   ];
