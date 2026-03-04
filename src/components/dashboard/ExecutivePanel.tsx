@@ -130,7 +130,7 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
             </h3>
             <TooltipInfo text="Comparativo entre faturamento bruto (GMV) e faturamento realizado ao longo do tempo." />
           </div>
-          <PeriodSelector value={period} onChange={setPeriod} />
+          
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={chartData} key={period}>
