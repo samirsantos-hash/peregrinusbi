@@ -201,8 +201,26 @@ const Admin = () => {
 
                   <div className="space-y-2">
                     <Label>Lojas Autorizadas (CUST_ID)</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        value={sellerSearch}
+                        onChange={(e) => setSellerSearch(e.target.value)}
+                        placeholder="Pesquisar por Nickname ou Cust ID..."
+                        className="pl-9"
+                      />
+                    </div>
+                    {selectedCustIds.length > 0 && (
+                      <p className="text-xs text-muted-foreground">{selectedCustIds.length} loja(s) selecionada(s)</p>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[240px] overflow-y-auto scrollbar-thin p-2 border border-border rounded-lg">
-                      {sellers.map((s) => (
+                      {sellers
+                        .filter((s) => {
+                          if (!sellerSearch) return true;
+                          const q = sellerSearch.toLowerCase();
+                          return s.nickname.toLowerCase().includes(q) || s.custId.toLowerCase().includes(q);
+                        })
+                        .map((s) => (
                         <label key={s.custId} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer text-sm">
                           <Checkbox
                             checked={selectedCustIds.includes(s.custId)}
