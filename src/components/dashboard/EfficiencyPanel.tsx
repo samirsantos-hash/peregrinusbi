@@ -161,7 +161,7 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
           
         </div>
         <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={roasData} key={periodRoas}>
+          <LineChart data={roasData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
             <XAxis
               dataKey="date"
