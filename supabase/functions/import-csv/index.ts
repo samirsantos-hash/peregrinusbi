@@ -187,6 +187,7 @@ Deno.serve(async (req) => {
         rep_current_level: cols[iRepLevel]?.trim() || null,
         rep_claims_rate: parseBrNumber(cols[iRepClaims] || "0"),
         rep_delayed_ht_rate: parseBrNumber(cols[iRepDelayed] || "0"),
+        pontuacao_ipi: parseBrNumber(cols[iPontuacaoIpi] || "0"),
       };
     }).filter(Boolean);
 
