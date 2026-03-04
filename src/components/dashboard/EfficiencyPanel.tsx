@@ -168,9 +168,9 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
-              angle={daysRoas >= 30 ? -45 : 0}
-              textAnchor={daysRoas >= 30 ? "end" : "middle"}
-              height={daysRoas >= 30 ? 50 : 30}
+              angle={allDates.length > 6 ? -45 : 0}
+              textAnchor={allDates.length > 6 ? "end" : "middle"}
+              height={allDates.length > 6 ? 50 : 30}
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
