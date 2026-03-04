@@ -134,7 +134,7 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
           <PeriodSelector value={period} onChange={setPeriod} />
         </div>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={chartData}>
+          <AreaChart data={chartData} key={period}>
             <defs>
               <linearGradient id="gradBlueExec" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
@@ -157,8 +157,8 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} />
-            <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} />
+            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>

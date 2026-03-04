@@ -124,7 +124,7 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
           <PeriodSelector value={periodAds} onChange={setPeriodAds} />
         </div>
         <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={adsData}>
+          <AreaChart data={adsData} key={periodAds}>
             <defs>
               <linearGradient id="gradBlueEff" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
@@ -147,8 +147,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueEff)" strokeWidth={2} />
-            <Area type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldEff)" strokeWidth={2} />
+            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
@@ -166,7 +166,7 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
           <PeriodSelector value={periodRoas} onChange={setPeriodRoas} />
         </div>
         <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={roasData}>
+          <LineChart data={roasData} key={periodRoas}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
             <XAxis
               dataKey="date"
@@ -179,9 +179,9 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
-            <Line type="monotone" dataKey="ROAS" stroke="hsl(199, 100%, 50%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-            <Line type="monotone" dataKey="ACOS" stroke="hsl(280, 80%, 60%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
-            <Line type="monotone" dataKey="TACOS" stroke="hsl(40, 95%, 55%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+            <Line type="monotone" dataKey="ROAS" stroke="hsl(199, 100%, 50%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
+            <Line type="monotone" dataKey="ACOS" stroke="hsl(280, 80%, 60%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
+            <Line type="monotone" dataKey="TACOS" stroke="hsl(40, 95%, 55%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </LineChart>
         </ResponsiveContainer>
