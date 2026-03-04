@@ -28,6 +28,14 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    const authHeader = req.headers.get("authorization");
+    let uploadedBy: string | null = null;
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user } } = await supabase.auth.getUser(token);
+      uploadedBy = user?.id || null;
+    }
+
     const body = await req.json();
     const csvText: string = body.csv;
 
@@ -83,6 +91,7 @@ Deno.serve(async (req) => {
     const iRepLevel = colIdx("REP_CURRENT_LEVEL");
     const iRepClaims = colIdx("REP_CLAIMS_RATE");
     const iRepDelayed = colIdx("REP_DELAYED_HT_RATE");
+    const iPontuacaoIpi = colIdx("PONTUACAO_IPI");
 
     // Process rows - collect unique sellers first
     const sellerMap = new Map<string, { nickname: string; cluster: string; subCluster: string; state: string }>();
@@ -178,6 +187,7 @@ Deno.serve(async (req) => {
         rep_current_level: cols[iRepLevel]?.trim() || null,
         rep_claims_rate: parseBrNumber(cols[iRepClaims] || "0"),
         rep_delayed_ht_rate: parseBrNumber(cols[iRepDelayed] || "0"),
+        pontuacao_ipi: parseBrNumber(cols[iPontuacaoIpi] || "0"),
       };
     }).filter(Boolean);
 
@@ -190,6 +200,15 @@ Deno.serve(async (req) => {
         .upsert(batch as any[], { onConflict: "seller_id,data", ignoreDuplicates: false });
       if (error) throw new Error(`KPI insert error batch ${i}: ${error.message}`);
       inserted += batch.length;
+    }
+
+    // Log the upload
+    if (uploadedBy) {
+      await supabase.from("upload_logs").insert({
+        uploaded_by: uploadedBy,
+        upload_type: "cpp_mensal",
+        rows_imported: inserted,
+      });
     }
 
     return new Response(
