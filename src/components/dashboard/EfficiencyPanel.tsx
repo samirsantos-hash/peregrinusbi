@@ -66,17 +66,13 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
   }, [allDates]);
 
   const roasData = useMemo(() => {
-    const days = parseInt(periodRoas);
-    const cutoff = subDays(new Date(), days).toISOString().slice(0, 10);
-    const filtered = allDates.filter((d) => d.date >= cutoff);
-    const dataToUse = filtered.length > 0 ? filtered : allDates;
-    return dataToUse.map((d) => ({
-      date: formatDate(d.date, days),
+    return allDates.map((d) => ({
+      date: formatDate(d.date, 0),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
       ACOS: Math.round((d.acos / d.count) * 100) / 100,
       TACOS: Math.round((d.tacos / d.count) * 100) / 100,
     }));
-  }, [allDates, periodRoas]);
+  }, [allDates]);
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
