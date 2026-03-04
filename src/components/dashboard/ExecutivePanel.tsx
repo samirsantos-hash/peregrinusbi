@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { subDays } from "date-fns";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock } from "lucide-react";
