@@ -35,12 +35,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const formatDateLabel = (dateStr: string, totalDays: number) => {
-  const [m, d] = dateStr.split("-");
-  if (totalDays <= 7) return `${d}/${m}`;
-  if (totalDays <= 15) return `${d}/${m}`;
-  return `${d}/${m}`;
-};
 
 const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
 
