@@ -202,6 +202,15 @@ Deno.serve(async (req) => {
       inserted += batch.length;
     }
 
+    // Log the upload
+    if (uploadedBy) {
+      await supabase.from("upload_logs").insert({
+        uploaded_by: uploadedBy,
+        upload_type: "cpp_mensal",
+        rows_imported: inserted,
+      });
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
