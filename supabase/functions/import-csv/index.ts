@@ -191,6 +191,13 @@ Deno.serve(async (req) => {
       };
     }).filter(Boolean);
 
+    // Deduplicate by seller_id + data (keep last occurrence)
+    const deduped = new Map<string, any>();
+    for (const row of kpiRows) {
+      deduped.set(`${(row as any).seller_id}|${(row as any).data}`, row);
+    }
+    const uniqueKpiRows = Array.from(deduped.values());
+
     // Insert KPIs in batches (upsert on seller_id + data)
     let inserted = 0;
     for (let i = 0; i < kpiRows.length; i += 200) {
