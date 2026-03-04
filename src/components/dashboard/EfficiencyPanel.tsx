@@ -37,8 +37,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
-  const [periodAds, setPeriodAds] = useState("15");
-  const [periodRoas, setPeriodRoas] = useState("15");
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
