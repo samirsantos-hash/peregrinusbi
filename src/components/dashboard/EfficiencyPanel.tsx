@@ -86,8 +86,6 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
     { label: "Investimento em Marketing", value: `R$ ${(totalAds / 1000).toFixed(0)}K`, color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
   ];
 
-  const daysAds = parseInt(periodAds);
-  const daysRoas = parseInt(periodRoas);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
