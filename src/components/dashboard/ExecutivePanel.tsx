@@ -91,9 +91,9 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
   const days = parseInt(period);
 
   const chartData = useMemo(() => {
-    const cutoff = subDays(new Date(), days);
-    const filtered = allDates.filter((d) => new Date(d.date) >= cutoff);
-    const dataToUse = filtered.length > 0 ? filtered : allDates.slice(-days);
+    const cutoff = subDays(new Date(), days).toISOString().slice(0, 10);
+    const filtered = allDates.filter((d) => d.date >= cutoff);
+    const dataToUse = filtered.length > 0 ? filtered : allDates;
     return dataToUse.map((d) => ({
       date: formatDateLabel(d.date.slice(5), days),
       "Faturamento Bruto": Math.round(d.gmv),

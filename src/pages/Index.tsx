@@ -73,11 +73,13 @@ const Index = () => {
 
     if (!dateRange?.from) return kpis;
 
+    // Compare date strings (YYYY-MM-DD) to avoid timezone issues
+    const fromStr = dateRange.from.toISOString().slice(0, 10);
+    const toStr = (dateRange.to || dateRange.from).toISOString().slice(0, 10);
+
     return kpis.filter((k: any) => {
-      const d = new Date(k.date);
-      const from = dateRange.from!;
-      const to = dateRange.to || from;
-      return d >= from && d <= to;
+      const dateStr = k.date; // "YYYY-MM-DD"
+      return dateStr >= fromStr && dateStr <= toStr;
     });
   }, [hasRealData, dbKpis, selectedSeller, dateRange]);
 
