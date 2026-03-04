@@ -28,6 +28,14 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    const authHeader = req.headers.get("authorization");
+    let uploadedBy: string | null = null;
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user } } = await supabase.auth.getUser(token);
+      uploadedBy = user?.id || null;
+    }
+
     const body = await req.json();
     const csvText: string = body.csv;
 
