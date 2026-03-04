@@ -87,18 +87,17 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
   }, {});
 
   const allDates = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
-  const days = parseInt(period);
 
   const chartData = useMemo(() => {
-    const cutoff = subDays(new Date(), days).toISOString().slice(0, 10);
-    const filtered = allDates.filter((d) => d.date >= cutoff);
-    const dataToUse = filtered.length > 0 ? filtered : allDates;
-    return dataToUse.map((d) => ({
-      date: formatDateLabel(d.date.slice(5), days),
-      "Faturamento Bruto": Math.round(d.gmv),
-      "Faturamento Realizado": Math.round(d.tgmv),
-    }));
-  }, [allDates, days]);
+    return allDates.map((d) => {
+      const [m, day] = d.date.slice(5).split("-");
+      return {
+        date: `${day}/${m}`,
+        "Faturamento Bruto": Math.round(d.gmv),
+        "Faturamento Realizado": Math.round(d.tgmv),
+      };
+    });
+  }, [allDates]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
