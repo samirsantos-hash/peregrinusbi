@@ -101,6 +101,16 @@
     text-shadow: 0 0 10px hsl(var(--emerald) / 0.5), 0 0 20px hsl(var(--emerald) / 0.3);
   }
 
+  .critical-text {
+    color: hsl(var(--destructive));
+    text-shadow: 0 0 10px hsl(var(--destructive) / 0.5), 0 0 20px hsl(var(--destructive) / 0.3);
+  }
+
+  .warning-text {
+    color: hsl(var(--warning));
+    text-shadow: 0 0 10px hsl(var(--warning) / 0.5), 0 0 20px hsl(var(--warning) / 0.3);
+  }
+
   .neon-border {
     border-color: hsl(var(--neon-blue) / 0.3);
     box-shadow: 0 0 10px hsl(var(--neon-blue) / 0.1);
