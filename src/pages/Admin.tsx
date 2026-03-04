@@ -52,6 +52,7 @@ const Admin = () => {
   const [newCnpj, setNewCnpj] = useState("");
   const [selectedCustIds, setSelectedCustIds] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
+  const [sellerSearch, setSellerSearch] = useState("");
 
   useEffect(() => {
     loadData();
