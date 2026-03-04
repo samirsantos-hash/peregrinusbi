@@ -61,7 +61,10 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
 
   const adsData = useMemo(() => {
     const days = parseInt(periodAds);
-    return allDates.slice(-days).map((d) => ({
+    const cutoff = subDays(new Date(), days);
+    const filtered = allDates.filter((d) => new Date(d.date) >= cutoff);
+    const dataToUse = filtered.length > 0 ? filtered : allDates.slice(-days);
+    return dataToUse.map((d) => ({
       date: formatDate(d.date, days),
       "Faturamento Bruto": Math.round(d.gmv),
       "Investimento em Marketing": Math.round(d.adsInvestment),
@@ -70,7 +73,10 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
 
   const roasData = useMemo(() => {
     const days = parseInt(periodRoas);
-    return allDates.slice(-days).map((d) => ({
+    const cutoff = subDays(new Date(), days);
+    const filtered = allDates.filter((d) => new Date(d.date) >= cutoff);
+    const dataToUse = filtered.length > 0 ? filtered : allDates.slice(-days);
+    return dataToUse.map((d) => ({
       date: formatDate(d.date, days),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
       ACOS: Math.round((d.acos / d.count) * 100) / 100,
