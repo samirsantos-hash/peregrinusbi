@@ -45,7 +45,6 @@ const formatDateLabel = (dateStr: string, totalDays: number) => {
 };
 
 const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
-  const [period, setPeriod] = useState("7");
 
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
   const totalTgmv = kpis.reduce((s, k) => s + k.tgmv, 0);
