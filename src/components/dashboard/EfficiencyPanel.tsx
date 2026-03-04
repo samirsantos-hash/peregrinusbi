@@ -58,16 +58,12 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
   };
 
   const adsData = useMemo(() => {
-    const days = parseInt(periodAds);
-    const cutoff = subDays(new Date(), days).toISOString().slice(0, 10);
-    const filtered = allDates.filter((d) => d.date >= cutoff);
-    const dataToUse = filtered.length > 0 ? filtered : allDates;
-    return dataToUse.map((d) => ({
-      date: formatDate(d.date, days),
+    return allDates.map((d) => ({
+      date: formatDate(d.date, 0),
       "Faturamento Bruto": Math.round(d.gmv),
       "Investimento em Marketing": Math.round(d.adsInvestment),
     }));
-  }, [allDates, periodAds]);
+  }, [allDates]);
 
   const roasData = useMemo(() => {
     const days = parseInt(periodRoas);
