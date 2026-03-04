@@ -1,10 +1,8 @@
-import { useState, useMemo } from "react";
-import { subDays } from "date-fns";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
-import PeriodSelector from "./PeriodSelector";
 
 interface KpiLike {
   date: string;
@@ -37,15 +35,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const formatDateLabel = (dateStr: string, totalDays: number) => {
-  const [m, d] = dateStr.split("-");
-  if (totalDays <= 7) return `${d}/${m}`;
-  if (totalDays <= 15) return `${d}/${m}`;
-  return `${d}/${m}`;
-};
 
 const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
-  const [period, setPeriod] = useState("7");
 
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
   const totalTgmv = kpis.reduce((s, k) => s + k.tgmv, 0);
@@ -88,18 +79,17 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
   }, {});
 
   const allDates = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
-  const days = parseInt(period);
 
   const chartData = useMemo(() => {
-    const cutoff = subDays(new Date(), days).toISOString().slice(0, 10);
-    const filtered = allDates.filter((d) => d.date >= cutoff);
-    const dataToUse = filtered.length > 0 ? filtered : allDates;
-    return dataToUse.map((d) => ({
-      date: formatDateLabel(d.date.slice(5), days),
-      "Faturamento Bruto": Math.round(d.gmv),
-      "Faturamento Realizado": Math.round(d.tgmv),
-    }));
-  }, [allDates, days]);
+    return allDates.map((d) => {
+      const [m, day] = d.date.slice(5).split("-");
+      return {
+        date: `${day}/${m}`,
+        "Faturamento Bruto": Math.round(d.gmv),
+        "Faturamento Realizado": Math.round(d.tgmv),
+      };
+    });
+  }, [allDates]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -132,10 +122,10 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
             </h3>
             <TooltipInfo text="Comparativo entre faturamento bruto (GMV) e faturamento realizado ao longo do tempo." />
           </div>
-          <PeriodSelector value={period} onChange={setPeriod} />
+          
         </div>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={chartData} key={period}>
+          <AreaChart data={chartData}>
             <defs>
               <linearGradient id="gradBlueExec" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
@@ -152,9 +142,9 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
-              angle={days >= 30 ? -45 : 0}
-              textAnchor={days >= 30 ? "end" : "middle"}
-              height={days >= 30 ? 50 : 30}
+              angle={allDates.length > 6 ? -45 : 0}
+              textAnchor={allDates.length > 6 ? "end" : "middle"}
+              height={allDates.length > 6 ? 50 : 30}
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={<CustomTooltip />} />

@@ -1,12 +1,10 @@
-import { useState, useMemo } from "react";
-import { subDays } from "date-fns";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   AreaChart, Area, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
-import PeriodSelector from "./PeriodSelector";
 
 interface KpiLike {
   date: string;
@@ -37,8 +35,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
-  const [periodAds, setPeriodAds] = useState("15");
-  const [periodRoas, setPeriodRoas] = useState("15");
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
@@ -60,29 +56,21 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
   };
 
   const adsData = useMemo(() => {
-    const days = parseInt(periodAds);
-    const cutoff = subDays(new Date(), days).toISOString().slice(0, 10);
-    const filtered = allDates.filter((d) => d.date >= cutoff);
-    const dataToUse = filtered.length > 0 ? filtered : allDates;
-    return dataToUse.map((d) => ({
-      date: formatDate(d.date, days),
+    return allDates.map((d) => ({
+      date: formatDate(d.date, 0),
       "Faturamento Bruto": Math.round(d.gmv),
       "Investimento em Marketing": Math.round(d.adsInvestment),
     }));
-  }, [allDates, periodAds]);
+  }, [allDates]);
 
   const roasData = useMemo(() => {
-    const days = parseInt(periodRoas);
-    const cutoff = subDays(new Date(), days).toISOString().slice(0, 10);
-    const filtered = allDates.filter((d) => d.date >= cutoff);
-    const dataToUse = filtered.length > 0 ? filtered : allDates;
-    return dataToUse.map((d) => ({
-      date: formatDate(d.date, days),
+    return allDates.map((d) => ({
+      date: formatDate(d.date, 0),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
       ACOS: Math.round((d.acos / d.count) * 100) / 100,
       TACOS: Math.round((d.tacos / d.count) * 100) / 100,
     }));
-  }, [allDates, periodRoas]);
+  }, [allDates]);
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
@@ -96,8 +84,6 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
     { label: "Investimento em Marketing", value: `R$ ${(totalAds / 1000).toFixed(0)}K`, color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
   ];
 
-  const daysAds = parseInt(periodAds);
-  const daysRoas = parseInt(periodRoas);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -128,10 +114,10 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             </h3>
             <TooltipInfo text="Comparativo entre o GMV gerado e o valor investido em Ads ao longo do tempo." />
           </div>
-          <PeriodSelector value={periodAds} onChange={setPeriodAds} />
+          
         </div>
         <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={adsData} key={periodAds}>
+          <AreaChart data={adsData}>
             <defs>
               <linearGradient id="gradBlueEff" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
@@ -148,9 +134,9 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
-              angle={daysAds >= 30 ? -45 : 0}
-              textAnchor={daysAds >= 30 ? "end" : "middle"}
-              height={daysAds >= 30 ? 50 : 30}
+              angle={allDates.length > 6 ? -45 : 0}
+              textAnchor={allDates.length > 6 ? "end" : "middle"}
+              height={allDates.length > 6 ? 50 : 30}
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
             <Tooltip content={<CustomTooltip />} />
@@ -170,19 +156,19 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             </h3>
             <TooltipInfo text="ROAS: retorno sobre Ads. ACOS: custo de Ads sobre vendas de Ads. TACOS: custo de Ads sobre vendas totais." />
           </div>
-          <PeriodSelector value={periodRoas} onChange={setPeriodRoas} />
+          
         </div>
         <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={roasData} key={periodRoas}>
+          <LineChart data={roasData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
             <XAxis
               dataKey="date"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
-              angle={daysRoas >= 30 ? -45 : 0}
-              textAnchor={daysRoas >= 30 ? "end" : "middle"}
-              height={daysRoas >= 30 ? 50 : 30}
+              angle={allDates.length > 6 ? -45 : 0}
+              textAnchor={allDates.length > 6 ? "end" : "middle"}
+              height={allDates.length > 6 ? 50 : 30}
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
