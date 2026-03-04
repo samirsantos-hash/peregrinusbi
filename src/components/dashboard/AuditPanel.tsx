@@ -113,36 +113,50 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
           <TooltipInfo text="Verificação automática dos critérios de qualidade de cada anúncio." />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           {checklist.map((item, i) => {
             const status = getScoreStatus(item.score);
+            const barPct = Math.min(item.score, 100);
+            const barColor = item.score >= 80 ? "bg-emerald" : item.score >= 70 ? "bg-neon-blue" : item.score >= 50 ? "bg-warning" : "bg-destructive";
+            const barGlow = item.score >= 80 ? "shadow-[0_0_8px_hsl(160,84%,39%/0.4)]" : item.score < 50 ? "shadow-[0_0_8px_hsl(0,84%,60%/0.4)]" : "";
             return (
               <motion.div
                 key={item.label}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.08 }}
-                className={`flex items-center justify-between p-3.5 rounded-lg ${status.bg} transition-colors`}
+                className={`p-4 rounded-lg ${status.bg} transition-colors`}
               >
-                <div className="flex items-center gap-3">
-                  <item.icon className={`w-4 h-4 ${status.color}`} />
-                  <span className="text-sm font-medium">{item.label}</span>
-                  <TooltipInfo text={item.tooltip} />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <item.icon className={`w-4 h-4 ${status.color}`} />
+                    <span className="text-sm font-medium">{item.label}</span>
+                    <TooltipInfo text={item.tooltip} />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`font-mono font-bold text-lg ${status.color}`}>
+                      {item.score > 0 ? item.score.toFixed(0) : "—"}
+                    </span>
+                    <span className={`status-badge text-[11px] ${
+                      status.label === "Excelente" ? "bg-emerald/10 text-emerald border-emerald/20" :
+                      status.label === "Bom" ? "bg-neon-blue/10 text-neon-blue border-neon-blue/20" :
+                      status.label === "Regular" ? "bg-warning/10 text-warning border-warning/20" :
+                      status.label === "Crítico" ? "bg-destructive/10 text-destructive border-destructive/20" :
+                      "bg-muted/30 text-muted-foreground border-border"
+                    }`}>
+                      <status.icon className="w-3 h-3" />
+                      {status.label}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className={`font-mono font-bold text-lg ${status.color}`}>
-                    {item.score > 0 ? item.score.toFixed(0) : "—"}
-                  </span>
-                  <span className={`status-badge text-[11px] ${
-                    status.label === "Excelente" ? "bg-emerald/10 text-emerald border-emerald/20" :
-                    status.label === "Bom" ? "bg-neon-blue/10 text-neon-blue border-neon-blue/20" :
-                    status.label === "Regular" ? "bg-warning/10 text-warning border-warning/20" :
-                    status.label === "Crítico" ? "bg-destructive/10 text-destructive border-destructive/20" :
-                    "bg-muted/30 text-muted-foreground border-border"
-                  }`}>
-                    <status.icon className="w-3 h-3" />
-                    {status.label}
-                  </span>
+                {/* Progress bar */}
+                <div className="w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                  <motion.div
+                    className={`h-full rounded-full ${barColor} ${barGlow}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${barPct}%` }}
+                    transition={{ duration: 1, delay: i * 0.1, ease: "easeOut" }}
+                  />
                 </div>
               </motion.div>
             );
