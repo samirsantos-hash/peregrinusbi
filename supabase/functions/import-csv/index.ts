@@ -91,6 +91,7 @@ Deno.serve(async (req) => {
     const iRepLevel = colIdx("REP_CURRENT_LEVEL");
     const iRepClaims = colIdx("REP_CLAIMS_RATE");
     const iRepDelayed = colIdx("REP_DELAYED_HT_RATE");
+    const iPontuacaoIpi = colIdx("PONTUACAO_IPI");
 
     // Process rows - collect unique sellers first
     const sellerMap = new Map<string, { nickname: string; cluster: string; subCluster: string; state: string }>();
