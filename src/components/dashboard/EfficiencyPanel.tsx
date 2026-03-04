@@ -158,7 +158,7 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             </h3>
             <TooltipInfo text="ROAS: retorno sobre Ads. ACOS: custo de Ads sobre vendas de Ads. TACOS: custo de Ads sobre vendas totais." />
           </div>
-          <PeriodSelector value={periodRoas} onChange={setPeriodRoas} />
+          
         </div>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={roasData} key={periodRoas}>
