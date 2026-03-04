@@ -191,10 +191,17 @@ Deno.serve(async (req) => {
       };
     }).filter(Boolean);
 
+    // Deduplicate by seller_id + data (keep last occurrence)
+    const deduped = new Map<string, any>();
+    for (const row of kpiRows) {
+      deduped.set(`${(row as any).seller_id}|${(row as any).data}`, row);
+    }
+    const uniqueKpiRows = Array.from(deduped.values());
+
     // Insert KPIs in batches (upsert on seller_id + data)
     let inserted = 0;
-    for (let i = 0; i < kpiRows.length; i += 200) {
-      const batch = kpiRows.slice(i, i + 200);
+    for (let i = 0; i < uniqueKpiRows.length; i += 200) {
+      const batch = uniqueKpiRows.slice(i, i + 200);
       const { error } = await supabase
         .from("sellers_kpi")
         .upsert(batch as any[], { onConflict: "seller_id,data", ignoreDuplicates: false });
