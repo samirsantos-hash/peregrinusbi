@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText } from "lucide-react";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -52,6 +52,7 @@ const Admin = () => {
   const [newCnpj, setNewCnpj] = useState("");
   const [selectedCustIds, setSelectedCustIds] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
+  const [sellerSearch, setSellerSearch] = useState("");
 
   useEffect(() => {
     loadData();
@@ -200,8 +201,26 @@ const Admin = () => {
 
                   <div className="space-y-2">
                     <Label>Lojas Autorizadas (CUST_ID)</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        value={sellerSearch}
+                        onChange={(e) => setSellerSearch(e.target.value)}
+                        placeholder="Pesquisar por Nickname ou Cust ID..."
+                        className="pl-9"
+                      />
+                    </div>
+                    {selectedCustIds.length > 0 && (
+                      <p className="text-xs text-muted-foreground">{selectedCustIds.length} loja(s) selecionada(s)</p>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[240px] overflow-y-auto scrollbar-thin p-2 border border-border rounded-lg">
-                      {sellers.map((s) => (
+                      {sellers
+                        .filter((s) => {
+                          if (!sellerSearch) return true;
+                          const q = sellerSearch.toLowerCase();
+                          return s.nickname.toLowerCase().includes(q) || s.custId.toLowerCase().includes(q);
+                        })
+                        .map((s) => (
                         <label key={s.custId} className="flex items-center gap-2 p-2 rounded-lg hover:bg-muted/50 cursor-pointer text-sm">
                           <Checkbox
                             checked={selectedCustIds.includes(s.custId)}
