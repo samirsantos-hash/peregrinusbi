@@ -116,7 +116,7 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             </h3>
             <TooltipInfo text="Comparativo entre o GMV gerado e o valor investido em Ads ao longo do tempo." />
           </div>
-          <PeriodSelector value={periodAds} onChange={setPeriodAds} />
+          
         </div>
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={adsData} key={periodAds}>
