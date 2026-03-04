@@ -134,7 +134,7 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
           <PeriodSelector value={period} onChange={setPeriod} />
         </div>
         <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={chartData}>
+          <AreaChart data={chartData} key={period}>
             <defs>
               <linearGradient id="gradBlueExec" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
