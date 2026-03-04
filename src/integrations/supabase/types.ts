@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      live_listings: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          data: string
+          dom_domain_agg1: string | null
+          id: string
+          itens: number | null
+          seller_id: string
+          vertical: string | null
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          data: string
+          dom_domain_agg1?: string | null
+          id?: string
+          itens?: number | null
+          seller_id: string
+          vertical?: string | null
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          data?: string
+          dom_domain_agg1?: string | null
+          id?: string
+          itens?: number | null
+          seller_id?: string
+          vertical?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_listings_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -78,6 +119,7 @@ export type Database = {
           id: string
           inv_pads: number | null
           min_price_rival: number | null
+          pontuacao_ipi: number | null
           rep_claims_rate: number | null
           rep_current_level: string | null
           rep_delayed_ht_rate: number | null
@@ -115,6 +157,7 @@ export type Database = {
           id?: string
           inv_pads?: number | null
           min_price_rival?: number | null
+          pontuacao_ipi?: number | null
           rep_claims_rate?: number | null
           rep_current_level?: string | null
           rep_delayed_ht_rate?: number | null
@@ -152,6 +195,7 @@ export type Database = {
           id?: string
           inv_pads?: number | null
           min_price_rival?: number | null
+          pontuacao_ipi?: number | null
           rep_claims_rate?: number | null
           rep_current_level?: string | null
           rep_delayed_ht_rate?: number | null
@@ -186,6 +230,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      upload_logs: {
+        Row: {
+          id: string
+          rows_imported: number
+          upload_type: string
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          id?: string
+          rows_imported?: number
+          upload_type: string
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          id?: string
+          rows_imported?: number
+          upload_type?: string
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: []
       }
       user_access_control: {
         Row: {
