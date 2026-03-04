@@ -91,13 +91,13 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
   const days = parseInt(period);
 
   const chartData = useMemo(() => {
-    const sliced = allDates.slice(-days);
-    const interval = days >= 30 ? 3 : days >= 15 ? 2 : 1;
-    return sliced.map((d, i) => ({
+    const cutoff = subDays(new Date(), days);
+    const filtered = allDates.filter((d) => new Date(d.date) >= cutoff);
+    const dataToUse = filtered.length > 0 ? filtered : allDates.slice(-days);
+    return dataToUse.map((d) => ({
       date: formatDateLabel(d.date.slice(5), days),
       "Faturamento Bruto": Math.round(d.gmv),
       "Faturamento Realizado": Math.round(d.tgmv),
-      showLabel: i % interval === 0 || i === sliced.length - 1,
     }));
   }, [allDates, days]);
 
