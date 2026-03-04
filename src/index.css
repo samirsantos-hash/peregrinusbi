@@ -118,6 +118,8 @@
 
   .metric-value {
     @apply text-3xl font-bold font-mono tracking-tight;
+    letter-spacing: -0.02em;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
   }
 
   .metric-label {
