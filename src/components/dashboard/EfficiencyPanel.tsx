@@ -1,12 +1,10 @@
-import { useState, useMemo } from "react";
-import { subDays } from "date-fns";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   AreaChart, Area, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
-import PeriodSelector from "./PeriodSelector";
 
 interface KpiLike {
   date: string;
