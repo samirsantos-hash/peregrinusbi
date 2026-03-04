@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
+import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
@@ -173,8 +174,9 @@ const Index = () => {
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.25 }}
                   className="mt-5">
-                  <TabsContent value="executive" className="mt-0">
+                  <TabsContent value="executive" className="mt-0 space-y-6">
                     <ExecutivePanel kpis={filteredKpis} />
+                    <TrendAnalysisPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
                     <EfficiencyPanel kpis={filteredKpis} />
