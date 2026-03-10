@@ -36,7 +36,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
   const [status, setStatus] = useState<"idle" | "validating" | "cleaning" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [errorDetail, setErrorDetail] = useState("");
-  const [stats, setStats] = useState<{ sellers?: number; kpis?: number; listings?: number } | null>(null);
+  const [stats, setStats] = useState<{ sellers?: number; kpis?: number; listings?: number; eligibility?: number } | null>(null);
   const [safraLabel, setSafraLabel] = useState("");
   const [progress, setProgress] = useState(0);
   const [activeGroup, setActiveGroup] = useState(0);
