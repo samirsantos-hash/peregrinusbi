@@ -140,9 +140,10 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
 
   /* ── Scatter data (McKinsey Adapted) ── */
   const { scatterData, medianX, medianY } = useMemo(() => {
-    const days = parseInt(scatterPeriod);
     const allDates = [...new Set(kpis.map((k: any) => k.date))].sort();
-    const cutoffDates = new Set(allDates.slice(-days));
+    const cutoffDates = scatterPeriod === "all"
+      ? new Set(allDates)
+      : new Set(allDates.slice(-parseInt(scatterPeriod)));
 
     const filtered = kpis.filter((k: any) => cutoffDates.has(k.date));
 
