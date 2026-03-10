@@ -41,9 +41,15 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
   const [progress, setProgress] = useState(0);
   const [activeGroup, setActiveGroup] = useState(0);
 
-  const functionName = uploadType === "live_listings" ? "import-live-listings" : "import-csv";
+  const functionName = uploadType === "live_listings"
+    ? "import-live-listings"
+    : uploadType === "elegibilidade"
+    ? "import-eligibility"
+    : "import-csv";
   const displayLabel = label || (uploadType === "live_listings"
     ? "📤 Upload Live Listings"
+    : uploadType === "elegibilidade"
+    ? "📤 Upload Elegibilidade (SFTP)"
     : "📤 Upload de Dados - Ecom Solutions (SFTP)");
 
   const validateFile = (file: File): { valid: boolean; safra: string; error?: string } => {
