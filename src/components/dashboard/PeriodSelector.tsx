@@ -16,6 +16,7 @@ const PeriodSelector = ({ value, onChange }: PeriodSelectorProps) => (
       { val: "7", label: "7D" },
       { val: "15", label: "15D" },
       { val: "30", label: "30D" },
+      { val: "all", label: "Tudo" },
     ].map((opt) => (
       <ToggleGroupItem
         key={opt.val}
