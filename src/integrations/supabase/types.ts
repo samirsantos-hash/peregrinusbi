@@ -76,6 +76,92 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_listings_quality: {
+        Row: {
+          created_at: string
+          data: string
+          id: string
+          item_id: string
+          ll_description_score: number | null
+          ll_free_shipping_score: number | null
+          ll_pictures_score: number | null
+          ll_price_score: number | null
+          ll_promotions_score: number | null
+          ll_stock_availability_score: number | null
+          ll_tech_specs_score: number | null
+          ll_title_score: number | null
+          orders_clips: number | null
+          score_caracteristica_final: number | null
+          score_oferta_final: number | null
+          score_photo: number | null
+          score_qualidade_final: number | null
+          score_title: number | null
+          seller_id: string
+          sellers_clips_publi: number | null
+          si_clips: number | null
+          tgmv_lc_clips: number | null
+          visitas_clips: number | null
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          id?: string
+          item_id: string
+          ll_description_score?: number | null
+          ll_free_shipping_score?: number | null
+          ll_pictures_score?: number | null
+          ll_price_score?: number | null
+          ll_promotions_score?: number | null
+          ll_stock_availability_score?: number | null
+          ll_tech_specs_score?: number | null
+          ll_title_score?: number | null
+          orders_clips?: number | null
+          score_caracteristica_final?: number | null
+          score_oferta_final?: number | null
+          score_photo?: number | null
+          score_qualidade_final?: number | null
+          score_title?: number | null
+          seller_id: string
+          sellers_clips_publi?: number | null
+          si_clips?: number | null
+          tgmv_lc_clips?: number | null
+          visitas_clips?: number | null
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          id?: string
+          item_id?: string
+          ll_description_score?: number | null
+          ll_free_shipping_score?: number | null
+          ll_pictures_score?: number | null
+          ll_price_score?: number | null
+          ll_promotions_score?: number | null
+          ll_stock_availability_score?: number | null
+          ll_tech_specs_score?: number | null
+          ll_title_score?: number | null
+          orders_clips?: number | null
+          score_caracteristica_final?: number | null
+          score_oferta_final?: number | null
+          score_photo?: number | null
+          score_qualidade_final?: number | null
+          score_title?: number | null
+          seller_id?: string
+          sellers_clips_publi?: number | null
+          si_clips?: number | null
+          tgmv_lc_clips?: number | null
+          visitas_clips?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_listings_quality_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sellers: {
         Row: {
           cluster_seller: string | null
