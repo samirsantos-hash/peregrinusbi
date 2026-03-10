@@ -95,8 +95,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
     return allDates.map((d) => ({
       date: formatDate(d.date),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
-      ACOS: Math.round((d.acos / d.count) * 10000) / 100,
-      TACOS: Math.round((d.tacos / d.count) * 10000) / 100,
+      ACOS: Math.round((d.acos / d.count) * 100) / 100,
+      TACOS: Math.round((d.tacos / d.count) * 100) / 100,
     }));
   }, [allDates]);
 
@@ -110,8 +110,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
   const metrics = [
     { label: "Faturamento Bruto (GMV)", value: fmtBRLCompact(totalGmv), color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado." },
     { label: "ROAS Médio", value: fmtNum(avgRoas, 2), color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é saudável." },
-    { label: "ACOS Médio", value: `${(avgAcos * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgAcos <= 0.15 ? "emerald-text" : "critical-text", tooltip: "Custo de Ads sobre vendas de Ads. Quanto menor, mais eficiente." },
-    { label: "TACOS Médio", value: `${(avgTacos * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgTacos <= 0.10 ? "emerald-text" : "text-muted-foreground", tooltip: "Custo de Ads sobre vendas totais. Quanto menor, melhor." },
+    { label: "ACOS Médio", value: `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgAcos <= 15 ? "emerald-text" : "critical-text", tooltip: "Custo de Ads sobre vendas de Ads. Quanto menor, mais eficiente." },
+    { label: "TACOS Médio", value: `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgTacos <= 10 ? "emerald-text" : "text-muted-foreground", tooltip: "Custo de Ads sobre vendas totais. Quanto menor, melhor." },
     { label: "CPA Médio", value: fmtBRL(avgCpa), color: "neon-text", tooltip: "Custo por aquisição. Quanto menor, mais eficiente a campanha." },
     { label: "Investimento em Marketing", value: fmtBRLCompact(totalAds), color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
   ];

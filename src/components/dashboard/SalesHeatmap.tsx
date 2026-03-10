@@ -12,10 +12,6 @@ const HOURS = Array.from({ length: 24 }, (_, i) => i);
 
 const SalesHeatmap = ({ kpis }: Props) => {
   const { grid, maxVal, primeTime } = useMemo(() => {
-    // Build a 7x24 grid (day x hour)
-    // Since we only have daily data (no hour), we simulate distribution
-    // using day-of-week aggregation. Hours will show uniform per day.
-    // We distribute daily revenue across business hours (8-22) with a peak pattern.
     const hourWeights = HOURS.map((h) => {
       if (h < 6) return 0.01;
       if (h < 8) return 0.03;
@@ -67,9 +63,20 @@ const SalesHeatmap = ({ kpis }: Props) => {
 
   if (!kpis.length) return null;
 
+  // Interpolate from blue (cold) to red (hot)
+  const getHeatColor = (val: number): string => {
+    if (maxVal === 0) return "hsl(210, 80%, 50%)";
+    const ratio = Math.max(0, Math.min(1, val / maxVal));
+    // Blue (210°) → Red (0°) via hue interpolation
+    const hue = 210 - ratio * 210;
+    const saturation = 70 + ratio * 20;
+    const lightness = 45 + (1 - ratio) * 10;
+    return `hsl(${Math.round(hue)}, ${Math.round(saturation)}%, ${Math.round(lightness)}%)`;
+  };
+
   const getOpacity = (val: number) => {
-    if (maxVal === 0) return 0.05;
-    return Math.max(0.05, val / maxVal);
+    if (maxVal === 0) return 0.15;
+    return Math.max(0.15, 0.15 + (val / maxVal) * 0.85);
   };
 
   return (
@@ -82,7 +89,7 @@ const SalesHeatmap = ({ kpis }: Props) => {
           <TooltipInfo text="Distribuição estimada do faturamento por dia da semana e horário, baseada nos dados históricos. Identifica o 'Prime Time' para otimização de campanhas de Ads." />
         </div>
         <div className="text-xs text-muted-foreground">
-          Prime Time: <span className="font-semibold text-amber-500">{primeTime.day} {primeTime.hour}</span>
+          Prime Time: <span className="font-semibold" style={{ color: "hsl(0, 90%, 50%)" }}>{primeTime.day} {primeTime.hour}</span>
         </div>
       </div>
 
@@ -110,7 +117,6 @@ const SalesHeatmap = ({ kpis }: Props) => {
               <div className="flex flex-1 gap-[1px]">
                 {HOURS.map((hour) => {
                   const val = grid[dayIdx][hour];
-                  const opacity = getOpacity(val);
                   return (
                     <motion.div
                       key={hour}
@@ -119,8 +125,8 @@ const SalesHeatmap = ({ kpis }: Props) => {
                       transition={{ delay: (dayIdx * 24 + hour) * 0.001 }}
                       className="flex-1 h-6 rounded-[2px] relative group cursor-default"
                       style={{
-                        backgroundColor: `hsl(199, 100%, 50%)`,
-                        opacity,
+                        backgroundColor: getHeatColor(val),
+                        opacity: getOpacity(val),
                       }}
                       title={`${day} ${hour}:00 — ${fmtBRLCompact(val)}`}
                     >
@@ -134,19 +140,24 @@ const SalesHeatmap = ({ kpis }: Props) => {
             </div>
           ))}
 
-          {/* Color scale */}
+          {/* Color scale legend — blue to red */}
           <div className="flex items-center justify-end gap-2 mt-3">
-            <span className="text-[10px] text-muted-foreground">Menor</span>
+            <span className="text-[10px] text-muted-foreground">Frio</span>
             <div className="flex gap-[1px]">
-              {[0.1, 0.25, 0.4, 0.55, 0.7, 0.85, 1].map((o, i) => (
-                <div
-                  key={i}
-                  className="w-4 h-3 rounded-[1px]"
-                  style={{ backgroundColor: "hsl(199, 100%, 50%)", opacity: o }}
-                />
-              ))}
+              {[0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1].map((ratio, i) => {
+                const hue = 210 - ratio * 210;
+                const sat = 70 + ratio * 20;
+                const light = 45 + (1 - ratio) * 10;
+                return (
+                  <div
+                    key={i}
+                    className="w-5 h-3 rounded-[1px]"
+                    style={{ backgroundColor: `hsl(${Math.round(hue)}, ${Math.round(sat)}%, ${Math.round(light)}%)` }}
+                  />
+                );
+              })}
             </div>
-            <span className="text-[10px] text-muted-foreground">Maior</span>
+            <span className="text-[10px] text-muted-foreground">Quente</span>
           </div>
         </div>
       </div>
