@@ -92,6 +92,22 @@ Deno.serve(async (req) => {
     const iRepClaims = colIdx("REP_CLAIMS_RATE");
     const iRepDelayed = colIdx("REP_DELAYED_HT_RATE");
     const iPontuacaoIpi = colIdx("PONTUACAO_IPI");
+    // LL Granular – Técnico
+    const iLlPictures = colIdx("PONTUACAO_LL_CHARACTERISTICS_PICTURES_OK_SCORE");
+    const iLlTitle = colIdx("PONTUACAO_LL_CHARACTERISTICS_TITLE_OK_SCORE");
+    const iLlTechSpecs = colIdx("PONTUACAO_LL_CHARACTERISTICS_TECHNICAL_SPECIFICATIONS_MAIN_OK_SCORE");
+    const iLlDescription = colIdx("PONTUACAO_LL_CHARACTERISTICS_DESCRIPTION_OK_SCORE");
+    // LL Granular – Oferta
+    const iLlPrice = colIdx("PONTUACAO_LL_OFFER_PRICE_OK_SCORE");
+    const iLlStock = colIdx("PONTUACAO_LL_OFFER_STOCK_AVAILABILITY_TIME_OK_SCORE");
+    const iLlFreeShipping = colIdx("PONTUACAO_LL_OFFER_FREE_SHIPPING_OK_SCORE");
+    const iLlPromotions = colIdx("PONTUACAO_LL_OFFER_PROMOTIONS_OK_SCORE");
+    // Clips / Conteúdo
+    const iSellersClipsPub = colIdx("SELLERS_CLIPS_PUBLI");
+    const iVisitasClips = colIdx("VISITAS_CLIPS");
+    const iSiClips = colIdx("SI_CLIPS");
+    const iOrdersClips = colIdx("ORDERS_CLIPS");
+    const iTgmvClips = colIdx("TGMV_LC_CLIPS");
 
     // Process rows - collect unique sellers first
     const sellerMap = new Map<string, { nickname: string; cluster: string; subCluster: string; state: string }>();
