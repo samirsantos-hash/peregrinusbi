@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <p className="font-mono text-muted-foreground">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} style={{ color: p.color }} className="font-medium">
-          {p.name}: {typeof p.value === "number" ? p.value.toLocaleString("pt-BR") : p.value}
+          {p.name}: {typeof p.value === "number" ? `R$ ${p.value.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` : p.value}
         </p>
       ))}
     </div>
