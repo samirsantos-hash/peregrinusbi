@@ -39,65 +39,67 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-/* ── Scatter Tooltip ── */
+/* ── Scatter Tooltip (McKinsey) ── */
 const ScatterTooltipContent = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d) return null;
 
-  const diag =
-    d.gap > 5 && d.visits < d.medianVisits
-      ? "⚠ Fora de Mercado"
-      : d.gap > 5
-        ? "💎 Premium / Campeão"
-        : d.gap <= 0 && d.visits >= d.medianVisits
-          ? "🚀 Volume & Tração"
-          : "👻 Invisível — requer SEO";
+  const getQuadrant = (x: number, y: number, mx: number, my: number) => {
+    if (x >= mx && y >= my) return { label: "🚀 Investir Agressivamente", color: "hsl(160, 84%, 39%)" };
+    if (x < mx && y >= my) return { label: "🔄 Otimizar Conversão", color: "hsl(199, 100%, 50%)" };
+    if (x >= mx && y < my) return { label: "⚙ Manter Eficiência", color: "hsl(40, 95%, 55%)" };
+    return { label: "⚠ Descontinuar / Liquidar", color: "hsl(0, 84%, 60%)" };
+  };
+
+  const q = getQuadrant(d.forcaCompetitiva, d.atratividade, d.medianX, d.medianY);
 
   return (
-    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1 max-w-[220px]">
-      <p className="font-semibold text-foreground truncate">{d.name}</p>
+    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1 max-w-[240px]">
+      <p className="font-semibold text-foreground truncate">Produto: {d.name}</p>
       <p className="text-muted-foreground">
-        Gap: <span className={d.gap > 0 ? "text-destructive" : "text-emerald"}>{d.gap > 0 ? "+" : ""}{d.gap.toFixed(1)}%</span>
+        Gap vs Rival: <span className={d.gapPct > 0 ? "text-destructive" : "text-emerald"}>{d.gapPct > 0 ? "+" : ""}{d.gapPct.toFixed(1)}%</span>
       </p>
-      <p className="text-muted-foreground">Visitas: <span className="text-foreground font-mono">{d.visits.toLocaleString("pt-BR")}</span></p>
+      <p className="text-muted-foreground">Força Competitiva: <span className="text-foreground font-mono">{d.forcaCompetitiva.toFixed(1)}</span></p>
+      <p className="text-muted-foreground">Atratividade: <span className="text-foreground font-mono">{d.atratividade.toFixed(1)}</span></p>
       <p className="text-muted-foreground">GMV: <span className="text-foreground font-mono">R$ {d.gmv.toLocaleString("pt-BR")}</span></p>
-      <p className="mt-1 font-medium" style={{ color: d.gap > 5 && d.visits < d.medianVisits ? "hsl(0,84%,60%)" : "hsl(199,100%,50%)" }}>
-        {diag}
+      <p className="mt-1 font-medium" style={{ color: q.color }}>
+        Status: {q.label}
       </p>
     </div>
   );
 };
 
-/* ── Quadrant background ── */
-const QuadrantBackground = ({ xAxisMap, yAxisMap }: any) => {
+/* ── Quadrant background (McKinsey) ── */
+const QuadrantBackground = ({ xAxisMap, yAxisMap, medianX, medianY }: any) => {
   const xAxis = xAxisMap && Object.values(xAxisMap)[0] as any;
   const yAxis = yAxisMap && Object.values(yAxisMap)[0] as any;
   if (!xAxis || !yAxis) return null;
 
-  const cx = xAxis.scale(0);
+  const cx = xAxis.scale(medianX ?? 50);
+  const cy = yAxis.scale(medianY ?? 50);
   const left = xAxis.x;
   const right = xAxis.x + xAxis.width;
   const top = yAxis.y;
-  const cy = yAxis.y + yAxis.height / 2;
+  const bottom = yAxis.y + yAxis.height;
 
   return (
     <g>
-      {/* Top-Left: Verde — Volume & Tração */}
-      <rect x={left} y={top} width={cx - left} height={cy - top} fill="hsl(160, 84%, 39%)" fillOpacity={0.04} />
-      <text x={left + 8} y={top + 16} fill="hsl(160, 84%, 39%)" fontSize={10} opacity={0.6}>Volume & Tração</text>
+      {/* Top-Right: Investir Agressivamente (Verde) */}
+      <rect x={cx} y={top} width={right - cx} height={cy - top} fill="hsl(160, 84%, 39%)" fillOpacity={0.05} />
+      <text x={right - 8} y={top + 16} fill="hsl(160, 84%, 39%)" fontSize={10} opacity={0.7} textAnchor="end">Investir Agressivamente</text>
 
-      {/* Top-Right: Azul — Premium */}
-      <rect x={cx} y={top} width={right - cx} height={cy - top} fill="hsl(199, 100%, 50%)" fillOpacity={0.04} />
-      <text x={right - 8} y={top + 16} fill="hsl(199, 100%, 50%)" fontSize={10} opacity={0.6} textAnchor="end">Premium / Campeões</text>
+      {/* Top-Left: Otimizar Conversão (Azul) */}
+      <rect x={left} y={top} width={cx - left} height={cy - top} fill="hsl(199, 100%, 50%)" fillOpacity={0.05} />
+      <text x={left + 8} y={top + 16} fill="hsl(199, 100%, 50%)" fontSize={10} opacity={0.7}>Otimizar Conversão</text>
 
-      {/* Bottom-Left: Amarelo — Invisíveis */}
-      <rect x={left} y={cy} width={cx - left} height={yAxis.height - (cy - top)} fill="hsl(40, 95%, 55%)" fillOpacity={0.04} />
-      <text x={left + 8} y={yAxis.y + yAxis.height - 8} fill="hsl(40, 95%, 55%)" fontSize={10} opacity={0.6}>Invisíveis</text>
+      {/* Bottom-Right: Manter Eficiência (Amarelo) */}
+      <rect x={cx} y={cy} width={right - cx} height={bottom - cy} fill="hsl(40, 95%, 55%)" fillOpacity={0.05} />
+      <text x={right - 8} y={bottom - 8} fill="hsl(40, 95%, 55%)" fontSize={10} opacity={0.7} textAnchor="end">Manter Eficiência</text>
 
-      {/* Bottom-Right: Vermelho — Fora de Mercado */}
-      <rect x={cx} y={cy} width={right - cx} height={yAxis.height - (cy - top)} fill="hsl(0, 84%, 60%)" fillOpacity={0.04} />
-      <text x={right - 8} y={yAxis.y + yAxis.height - 8} fill="hsl(0, 84%, 60%)" fontSize={10} opacity={0.6} textAnchor="end">Fora de Mercado</text>
+      {/* Bottom-Left: Descontinuar / Liquidar (Vermelho) */}
+      <rect x={left} y={cy} width={cx - left} height={bottom - cy} fill="hsl(0, 84%, 60%)" fillOpacity={0.05} />
+      <text x={left + 8} y={bottom - 8} fill="hsl(0, 84%, 60%)" fontSize={10} opacity={0.7}>Descontinuar / Liquidar</text>
     </g>
   );
 };
@@ -136,54 +138,87 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  /* ── Scatter data ── */
-  const scatterData = useMemo(() => {
+  /* ── Scatter data (McKinsey Adapted) ── */
+  const { scatterData, medianX, medianY } = useMemo(() => {
     const days = parseInt(scatterPeriod);
-    const allDates = [...new Set(kpis.map((k) => k.date))].sort();
+    const allDates = [...new Set(kpis.map((k: any) => k.date))].sort();
     const cutoffDates = new Set(allDates.slice(-days));
 
-    const filtered = kpis.filter((k) => cutoffDates.has(k.date));
+    const filtered = kpis.filter((k: any) => cutoffDates.has(k.date));
 
-    // Aggregate per seller
-    const bySeller: Record<string, { name: string; gmv: number; visits: number; visitsExpensive: number; minPriceRival: number; count: number }> = {};
-    for (const k of filtered) {
+    // Aggregate per seller/period
+    const bySeller: Record<string, {
+      name: string; gmv: number; visits: number; visitsExpensive: number;
+      minPriceRival: number; count: number; scoreQualidade: number;
+      upliftGmvM1: number; upliftCount: number;
+    }> = {};
+    for (const k of filtered as any[]) {
       if (!bySeller[k.productId]) {
-        bySeller[k.productId] = { name: k.productName, gmv: 0, visits: 0, visitsExpensive: 0, minPriceRival: 0, count: 0 };
+        bySeller[k.productId] = {
+          name: k.productName, gmv: 0, visits: 0, visitsExpensive: 0,
+          minPriceRival: 0, count: 0, scoreQualidade: 0,
+          upliftGmvM1: 0, upliftCount: 0,
+        };
       }
-      bySeller[k.productId].gmv += k.gmv || 0;
-      bySeller[k.productId].visits += k.visits;
-      bySeller[k.productId].visitsExpensive += k.visitsExpensive;
+      const s = bySeller[k.productId];
+      s.gmv += k.gmv || 0;
+      s.visits += k.visits || 0;
+      s.visitsExpensive += k.visitsExpensive || 0;
       if (k.minPriceRival > 0) {
-        bySeller[k.productId].minPriceRival += k.minPriceRival;
-        bySeller[k.productId].count++;
+        s.minPriceRival += k.minPriceRival;
+        s.count++;
+      }
+      if (k.scoreQualidade > 0) {
+        s.scoreQualidade += k.scoreQualidade;
+      }
+      if (k.upliftGmvM1 !== 0) {
+        s.upliftGmvM1 += k.upliftGmvM1;
+        s.upliftCount++;
       }
     }
 
-    const entries = Object.values(bySeller).filter((s) => s.count > 0 && s.visits > 0);
-    const medianVisits = entries.length > 0
-      ? entries.map((e) => e.visits).sort((a, b) => a - b)[Math.floor(entries.length / 2)]
-      : 0;
+    const entries = Object.values(bySeller).filter((s) => s.visits > 0);
 
-    return entries.map((s) => {
-      const avgRival = s.minPriceRival / s.count;
-      // Use visitsExpensive ratio as proxy for price gap since we don't have actual seller price
-      const gap = s.visits > 0 ? ((s.visitsExpensive / s.visits) * 100) - 15 : 0; // Centered around 15% baseline
+    const points = entries.map((s) => {
+      // Eixo X: Força Competitiva = invertedGap + scoreQualidade
+      const gapPct = s.visits > 0 ? ((s.visitsExpensive / s.visits) * 100) : 0;
+      const invertedGap = 100 - gapPct; // Higher = more competitive price
+      const avgQualidade = s.count > 0 ? s.scoreQualidade / Math.max(s.count, 1) : s.scoreQualidade;
+      const forcaCompetitiva = (invertedGap * 0.5) + (avgQualidade * 0.5);
+
+      // Eixo Y: Atratividade = visits normalized by uplift
+      const avgUplift = s.upliftCount > 0 ? s.upliftGmvM1 / s.upliftCount : 0;
+      const upliftFactor = 1 + Math.max(Math.min(avgUplift, 2), -0.5); // clamp
+      const atratividade = s.visits * upliftFactor;
+
       return {
         name: s.name,
-        gap: Math.round(gap * 10) / 10,
-        visits: s.visits,
+        forcaCompetitiva: Math.round(forcaCompetitiva * 10) / 10,
+        atratividade: Math.round(atratividade),
+        gapPct: Math.round(gapPct * 10) / 10,
         gmv: Math.round(s.gmv),
-        medianVisits,
         z: Math.max(s.gmv, 1),
+        medianX: 0, // placeholder, filled below
+        medianY: 0,
       };
     });
+
+    // Calculate medians for quadrant lines
+    const sortedX = points.map(p => p.forcaCompetitiva).sort((a, b) => a - b);
+    const sortedY = points.map(p => p.atratividade).sort((a, b) => a - b);
+    const mx = sortedX.length > 0 ? sortedX[Math.floor(sortedX.length / 2)] : 50;
+    const my = sortedY.length > 0 ? sortedY[Math.floor(sortedY.length / 2)] : 50;
+
+    points.forEach(p => { p.medianX = mx; p.medianY = my; });
+
+    return { scatterData: points, medianX: mx, medianY: my };
   }, [kpis, scatterPeriod]);
 
-  const getBubbleColor = (gap: number, visits: number, medianVisits: number) => {
-    if (gap <= 0 && visits >= medianVisits) return "hsl(160, 84%, 39%)"; // Volume & Tração
-    if (gap > 0 && visits >= medianVisits) return "hsl(199, 100%, 50%)"; // Premium
-    if (gap <= 0 && visits < medianVisits) return "hsl(40, 95%, 55%)"; // Invisível
-    return "hsl(0, 84%, 60%)"; // Fora de Mercado
+  const getBubbleColor = (x: number, y: number) => {
+    if (x >= medianX && y >= medianY) return "hsl(160, 84%, 39%)"; // Investir
+    if (x < medianX && y >= medianY) return "hsl(199, 100%, 50%)"; // Otimizar
+    if (x >= medianX && y < medianY) return "hsl(40, 95%, 55%)"; // Manter
+    return "hsl(0, 84%, 60%)"; // Descontinuar
   };
 
   return (
@@ -214,39 +249,43 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Matriz de Elasticidade e Competitividade
             </h3>
-            <TooltipInfo text="Cada bolha é um seller. Eixo X = Gap de preço vs rival (%). Eixo Y = Volume de visitas. Tamanho = GMV. Quadrantes indicam posicionamento estratégico." />
+            <TooltipInfo text="McKinsey Adaptada. Eixo X = Força Competitiva (preço invertido + qualidade). Eixo Y = Atratividade (visitas × uplift). Tamanho = GMV." />
           </div>
           <PeriodSelector value={scatterPeriod} onChange={setScatterPeriod} />
         </div>
-        <ResponsiveContainer width="100%" height={380}>
-          <ScatterChart key={scatterPeriod} margin={{ top: 20, right: 30, bottom: 20, left: 10 }}>
+        <ResponsiveContainer width="100%" height={420}>
+          <ScatterChart key={scatterPeriod} margin={{ top: 20, right: 30, bottom: 30, left: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
             <XAxis
               type="number"
-              dataKey="gap"
-              name="Gap de Preço"
-              unit="%"
+              dataKey="forcaCompetitiva"
+              name="Força Competitiva"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-              label={{ value: "Gap de Preço (%)", position: "bottom", offset: 0, fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              label={{ value: "Força Competitiva →", position: "bottom", offset: 5, fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               domain={['auto', 'auto']}
             />
             <YAxis
               type="number"
-              dataKey="visits"
-              name="Visitas"
+              dataKey="atratividade"
+              name="Atratividade"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
               tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
-              label={{ value: "Visitas", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              label={{ value: "Atratividade ↑", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
             />
             <ZAxis type="number" dataKey="z" range={[80, 600]} name="GMV" />
             <ReferenceLine
-              x={0}
-              stroke="hsl(199, 100%, 50%)"
+              x={medianX}
+              stroke="hsl(215, 20%, 35%)"
               strokeDasharray="6 3"
-              strokeOpacity={0.5}
-              label={{ value: "Equilíbrio", position: "top", fill: "hsl(199, 100%, 50%)", fontSize: 10 }}
+              strokeOpacity={0.6}
+            />
+            <ReferenceLine
+              y={medianY}
+              stroke="hsl(215, 20%, 35%)"
+              strokeDasharray="6 3"
+              strokeOpacity={0.6}
             />
             <Tooltip content={<ScatterTooltipContent />} cursor={{ strokeDasharray: "3 3", stroke: "hsl(215, 20%, 35%)" }} />
             <Scatter
@@ -258,9 +297,9 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
               {scatterData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={getBubbleColor(entry.gap, entry.visits, entry.medianVisits)}
+                  fill={getBubbleColor(entry.forcaCompetitiva, entry.atratividade)}
                   fillOpacity={0.75}
-                  stroke={getBubbleColor(entry.gap, entry.visits, entry.medianVisits)}
+                  stroke={getBubbleColor(entry.forcaCompetitiva, entry.atratividade)}
                   strokeWidth={1}
                 />
               ))}
@@ -269,10 +308,10 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
         </ResponsiveContainer>
         {/* Quadrant legend */}
         <div className="flex flex-wrap gap-4 mt-3 justify-center text-[11px]">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(160, 84%, 39%)" }} /> Volume & Tração</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(199, 100%, 50%)" }} /> Premium / Campeões</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(40, 95%, 55%)" }} /> Invisíveis</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(0, 84%, 60%)" }} /> Fora de Mercado</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(160, 84%, 39%)" }} /> Investir Agressivamente</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(199, 100%, 50%)" }} /> Otimizar Conversão</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(40, 95%, 55%)" }} /> Manter Eficiência</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(0, 84%, 60%)" }} /> Descontinuar / Liquidar</span>
         </div>
       </div>
 
