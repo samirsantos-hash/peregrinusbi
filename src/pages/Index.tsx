@@ -12,6 +12,7 @@ import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
+import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import AuditPanel from "@/components/dashboard/AuditPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
@@ -187,6 +188,7 @@ const Index = () => {
                 className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     <ExecutivePanel kpis={filteredKpis} />
+                    <GrowthPotentialPanel kpis={filteredKpis} />
                     <TrendAnalysisPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
