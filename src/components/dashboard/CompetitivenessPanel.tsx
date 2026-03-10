@@ -71,7 +71,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
       </p>
       <p className="text-muted-foreground">Força Competitiva: <span className="text-foreground font-mono">{d.forcaCompetitiva.toFixed(1)}</span></p>
       <p className="text-muted-foreground">Atratividade: <span className="text-foreground font-mono">{d.atratividade.toFixed(1)}</span></p>
-      <p className="text-muted-foreground">GMV: <span className="text-foreground font-mono">R$ {d.gmv.toLocaleString("pt-BR")}</span></p>
+      <p className="text-muted-foreground">GMV: <span className="text-foreground font-mono">{fmtBRL(d.gmv)}</span></p>
       <p className="mt-1 font-medium" style={{ color: q.color }}>
         Status: {q.label}
       </p>
