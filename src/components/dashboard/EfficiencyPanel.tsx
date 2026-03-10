@@ -5,7 +5,9 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
-import ElasticityAdsChart from "./ElasticityAdsChart";
+import SalesRecordCard from "./SalesRecordCard";
+import SalesHeatmap from "./SalesHeatmap";
+import BestInvestmentPeriod from "./BestInvestmentPeriod";
 import { fmtBRLCompact, fmtBRL, fmtNum } from "@/utils/formatters";
 
 interface KpiLike {
@@ -40,6 +42,26 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
+const RatioTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1">
+      <p className="font-mono text-muted-foreground">{label}</p>
+      {payload.map((p: any, i: number) => {
+        const isPercent = p.name === "ACOS" || p.name === "TACOS";
+        const formatted = isPercent
+          ? `${p.value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
+          : fmtNum(p.value, 2);
+        return (
+          <p key={i} style={{ color: p.color }} className="font-medium">
+            {p.name}: {formatted}
+          </p>
+        );
+      })}
+    </div>
+  );
+};
+
 const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
@@ -56,14 +78,14 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
 
   const allDates = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
 
-  const formatDate = (dateStr: string, days: number) => {
+  const formatDate = (dateStr: string) => {
     const [m, d] = dateStr.slice(5).split("-");
     return `${d}/${m}`;
   };
 
   const adsData = useMemo(() => {
     return allDates.map((d) => ({
-      date: formatDate(d.date, 0),
+      date: formatDate(d.date),
       "Faturamento Bruto": Math.round(d.gmv),
       "Investimento em Marketing": Math.round(d.adsInvestment),
     }));
@@ -71,29 +93,32 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
 
   const roasData = useMemo(() => {
     return allDates.map((d) => ({
-      date: formatDate(d.date, 0),
+      date: formatDate(d.date),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
-      ACOS: Math.round((d.acos / d.count) * 100) / 100,
-      TACOS: Math.round((d.tacos / d.count) * 100) / 100,
+      ACOS: Math.round((d.acos / d.count) * 10000) / 100,
+      TACOS: Math.round((d.tacos / d.count) * 10000) / 100,
     }));
   }, [allDates]);
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
   const avgRoas = kpis.length > 0 ? kpis.reduce((s, k) => s + k.roas, 0) / kpis.length : 0;
+  const avgAcos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.acos, 0) / kpis.length : 0;
+  const avgTacos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.tacos, 0) / kpis.length : 0;
   const avgCpa = kpis.length > 0 ? kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length : 0;
 
   const metrics = [
     { label: "Faturamento Bruto (GMV)", value: fmtBRLCompact(totalGmv), color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado." },
-    { label: "ROAS Médio", value: fmtNum(avgRoas), color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é saudável." },
+    { label: "ROAS Médio", value: fmtNum(avgRoas, 2), color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é saudável." },
+    { label: "ACOS Médio", value: `${(avgAcos * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgAcos <= 0.15 ? "emerald-text" : "critical-text", tooltip: "Custo de Ads sobre vendas de Ads. Quanto menor, mais eficiente." },
+    { label: "TACOS Médio", value: `${(avgTacos * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgTacos <= 0.10 ? "emerald-text" : "text-muted-foreground", tooltip: "Custo de Ads sobre vendas totais. Quanto menor, melhor." },
     { label: "CPA Médio", value: fmtBRL(avgCpa), color: "neon-text", tooltip: "Custo por aquisição. Quanto menor, mais eficiente a campanha." },
     { label: "Investimento em Marketing", value: fmtBRLCompact(totalAds), color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
   ];
 
-
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {metrics.map((m, i) => (
           <motion.div
             key={m.label}
@@ -111,6 +136,12 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
         ))}
       </div>
 
+      {/* Sales Record + Best Investment Period */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <SalesRecordCard kpis={kpis} />
+        <BestInvestmentPeriod kpis={kpis} />
+      </div>
+
       {/* Area Chart — Faturamento vs Ads */}
       <div className="glass-card p-5">
         <div className="flex items-center justify-between mb-4">
@@ -120,7 +151,6 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             </h3>
             <TooltipInfo text="Comparativo entre o GMV gerado e o valor investido em Ads ao longo do tempo." />
           </div>
-          
         </div>
         <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={adsData}>
@@ -160,9 +190,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               ROAS · ACOS · TACOS
             </h3>
-            <TooltipInfo text="ROAS: retorno sobre Ads. ACOS: custo de Ads sobre vendas de Ads. TACOS: custo de Ads sobre vendas totais." />
+            <TooltipInfo text="ROAS: retorno sobre Ads (decimal). ACOS: custo de Ads sobre vendas de Ads (%). TACOS: custo de Ads sobre vendas totais (%)." />
           </div>
-          
         </div>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={roasData}>
@@ -177,7 +206,7 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
               height={allDates.length > 6 ? 50 : 30}
             />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<RatioTooltip />} />
             <Line type="monotone" dataKey="ROAS" stroke="hsl(199, 100%, 50%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
             <Line type="monotone" dataKey="ACOS" stroke="hsl(280, 80%, 60%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
             <Line type="monotone" dataKey="TACOS" stroke="hsl(40, 95%, 55%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
@@ -185,8 +214,9 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
           </LineChart>
         </ResponsiveContainer>
       </div>
-      {/* Elasticity Ads vs Sales */}
-      <ElasticityAdsChart kpis={kpis} />
+
+      {/* Heatmap */}
+      <SalesHeatmap kpis={kpis} />
     </motion.div>
   );
 };
