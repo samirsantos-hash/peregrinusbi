@@ -199,9 +199,6 @@ const Index = () => {
                   <TabsContent value="competitiveness" className="mt-0">
                     <CompetitivenessPanel kpis={filteredKpis} sellers={sellers.map(s => ({ id: s.id, cluster: (s as any).cluster }))} />
                   </TabsContent>
-                  <TabsContent value="audit" className="mt-0">
-                    <AuditPanel kpis={filteredKpis} />
-                  </TabsContent>
                   <TabsContent value="logistics" className="mt-0">
                     <LogisticsPanel kpis={filteredKpis} />
                   </TabsContent>
