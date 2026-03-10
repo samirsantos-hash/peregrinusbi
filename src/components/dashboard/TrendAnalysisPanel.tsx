@@ -60,9 +60,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         )}
         <div className="flex justify-between items-center border-t border-border/50 pt-1.5">
           <span className="text-muted-foreground font-medium">ROI (ROAS)</span>
-          <span className={`font-mono font-bold ${roas >= 2 ? "text-emerald" : "text-destructive"}`}>
-            {roas.toFixed(2)}x
-          </span>
+           <span className={`font-mono font-bold ${roas >= 2 ? "text-emerald" : "text-destructive"}`}>
+             {fmtNum(roas)}x
+           </span>
         </div>
       </div>
     </div>
