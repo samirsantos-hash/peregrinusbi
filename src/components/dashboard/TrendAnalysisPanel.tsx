@@ -104,18 +104,18 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
     return Object.values(map).sort((a, b) => a.date.localeCompare(b.date));
   }, [kpis]);
 
-  // Filter by period
+  // Filter by period — relative to the latest date in the dataset (not today)
   const filteredData = useMemo(() => {
-    if (period === "all" || isNaN(parseInt(period))) {
+    if (period === "all" || isNaN(parseInt(period)) || byDate.length === 0) {
       return byDate;
     }
     const days = parseInt(period);
-    const now = new Date();
-    const cutoff = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-    const cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days);
+    const latestDateStr = byDate[byDate.length - 1].date; // already sorted asc
+    const [ly, lm, ld] = latestDateStr.split("-").map(Number);
+    const latestDate = new Date(ly, lm - 1, ld);
+    const cutoffDate = new Date(ly, lm - 1, ld - days);
     const cutoffStr = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, "0")}-${String(cutoffDate.getDate()).padStart(2, "0")}`;
-    const filtered = byDate.filter((d) => d.date >= cutoffStr);
-    return filtered.length > 0 ? filtered : byDate;
+    return byDate.filter((d) => d.date >= cutoffStr);
   }, [byDate, period]);
 
   // Group by granularity
