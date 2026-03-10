@@ -60,11 +60,15 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
       return { valid: false, safra: "", error: `Formato "${ext}" não suportado. Aceitos: ${ACCEPTED_EXTENSIONS.join(", ")}` };
     }
 
-    if (uploadType === "cpp_mensal" && !SFTP_PATTERN.test(name)) {
+    const pattern = SFTP_PATTERNS[uploadType];
+    if (pattern && !pattern.test(name)) {
+      const expected = uploadType === "elegibilidade"
+        ? "SFTP_ECOMCONSULT_ELEGIBILIDADE_..."
+        : "SFTP_ECOMCONSULT_CPP_MENSAL_...";
       return {
         valid: false,
         safra: "",
-        error: "❌ Arquivo fora do padrão esperado. Verifique o nome do arquivo SFTP (esperado: SFTP_ECOMCONSULT_CPP_MENSAL_...)",
+        error: `❌ Arquivo fora do padrão esperado. Verifique o nome do arquivo SFTP (esperado: ${expected})`,
       };
     }
 
