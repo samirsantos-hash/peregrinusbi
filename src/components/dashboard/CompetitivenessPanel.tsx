@@ -249,39 +249,43 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Matriz de Elasticidade e Competitividade
             </h3>
-            <TooltipInfo text="Cada bolha é um seller. Eixo X = Gap de preço vs rival (%). Eixo Y = Volume de visitas. Tamanho = GMV. Quadrantes indicam posicionamento estratégico." />
+            <TooltipInfo text="McKinsey Adaptada. Eixo X = Força Competitiva (preço invertido + qualidade). Eixo Y = Atratividade (visitas × uplift). Tamanho = GMV." />
           </div>
           <PeriodSelector value={scatterPeriod} onChange={setScatterPeriod} />
         </div>
-        <ResponsiveContainer width="100%" height={380}>
-          <ScatterChart key={scatterPeriod} margin={{ top: 20, right: 30, bottom: 20, left: 10 }}>
+        <ResponsiveContainer width="100%" height={420}>
+          <ScatterChart key={scatterPeriod} margin={{ top: 20, right: 30, bottom: 30, left: 20 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
             <XAxis
               type="number"
-              dataKey="gap"
-              name="Gap de Preço"
-              unit="%"
+              dataKey="forcaCompetitiva"
+              name="Força Competitiva"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-              label={{ value: "Gap de Preço (%)", position: "bottom", offset: 0, fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              label={{ value: "Força Competitiva →", position: "bottom", offset: 5, fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               domain={['auto', 'auto']}
             />
             <YAxis
               type="number"
-              dataKey="visits"
-              name="Visitas"
+              dataKey="atratividade"
+              name="Atratividade"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
               tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
-              label={{ value: "Visitas", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              label={{ value: "Atratividade ↑", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
             />
             <ZAxis type="number" dataKey="z" range={[80, 600]} name="GMV" />
             <ReferenceLine
-              x={0}
-              stroke="hsl(199, 100%, 50%)"
+              x={medianX}
+              stroke="hsl(215, 20%, 35%)"
               strokeDasharray="6 3"
-              strokeOpacity={0.5}
-              label={{ value: "Equilíbrio", position: "top", fill: "hsl(199, 100%, 50%)", fontSize: 10 }}
+              strokeOpacity={0.6}
+            />
+            <ReferenceLine
+              y={medianY}
+              stroke="hsl(215, 20%, 35%)"
+              strokeDasharray="6 3"
+              strokeOpacity={0.6}
             />
             <Tooltip content={<ScatterTooltipContent />} cursor={{ strokeDasharray: "3 3", stroke: "hsl(215, 20%, 35%)" }} />
             <Scatter
@@ -293,9 +297,9 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
               {scatterData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
-                  fill={getBubbleColor(entry.gap, entry.visits, entry.medianVisits)}
+                  fill={getBubbleColor(entry.forcaCompetitiva, entry.atratividade)}
                   fillOpacity={0.75}
-                  stroke={getBubbleColor(entry.gap, entry.visits, entry.medianVisits)}
+                  stroke={getBubbleColor(entry.forcaCompetitiva, entry.atratividade)}
                   strokeWidth={1}
                 />
               ))}
@@ -304,10 +308,10 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
         </ResponsiveContainer>
         {/* Quadrant legend */}
         <div className="flex flex-wrap gap-4 mt-3 justify-center text-[11px]">
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(160, 84%, 39%)" }} /> Volume & Tração</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(199, 100%, 50%)" }} /> Premium / Campeões</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(40, 95%, 55%)" }} /> Invisíveis</span>
-          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(0, 84%, 60%)" }} /> Fora de Mercado</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(160, 84%, 39%)" }} /> Investir Agressivamente</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(199, 100%, 50%)" }} /> Otimizar Conversão</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(40, 95%, 55%)" }} /> Manter Eficiência</span>
+          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(0, 84%, 60%)" }} /> Descontinuar / Liquidar</span>
         </div>
       </div>
 
