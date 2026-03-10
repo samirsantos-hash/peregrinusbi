@@ -377,9 +377,9 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
                 </div>
                 <div>
                   <p className="text-[11px] text-muted-foreground mb-0.5">Total Investido</p>
-                  <p className="text-sm font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
-                    R$ {(insights.totalAds / 1000).toFixed(0)}K
-                  </p>
+                   <p className="text-sm font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
+                     {fmtBRLCompact(insights.totalAds)}
+                   </p>
                 </div>
               </div>
 
