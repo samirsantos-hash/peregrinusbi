@@ -362,9 +362,9 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
               {/* ROAS médio */}
               <div>
                 <p className="text-[11px] text-muted-foreground mb-1">ROAS Médio do Período</p>
-                <p className={`text-2xl font-mono font-bold ${insights.avgRoas >= 2 ? "emerald-text" : "critical-text"}`}>
-                  {insights.avgRoas.toFixed(2)}x
-                </p>
+                 <p className={`text-2xl font-mono font-bold ${insights.avgRoas >= 2 ? "emerald-text" : "critical-text"}`}>
+                   {fmtNum(insights.avgRoas)}x
+                 </p>
               </div>
 
               {/* Totals */}
