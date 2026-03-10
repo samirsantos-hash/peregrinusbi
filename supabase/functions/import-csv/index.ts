@@ -108,6 +108,8 @@ Deno.serve(async (req) => {
     const iSiClips = colIdx("SI_CLIPS");
     const iOrdersClips = colIdx("ORDERS_CLIPS");
     const iTgmvClips = colIdx("TGMV_LC_CLIPS");
+    // Item ID (MLB)
+    const iItemId = colIdx("ITE_ITEM_ID");
 
     // Process rows - collect unique sellers first
     const sellerMap = new Map<string, { nickname: string; cluster: string; subCluster: string; state: string }>();
@@ -239,6 +241,58 @@ Deno.serve(async (req) => {
         .upsert(batch as any[], { onConflict: "seller_id,data", ignoreDuplicates: false });
       if (error) throw new Error(`KPI insert error batch ${i}: ${error.message}`);
       inserted += batch.length;
+    }
+
+    // Build listing-level quality rows (per item)
+    if (iItemId >= 0) {
+      const listingRows = rows.map((cols) => {
+        const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
+        const sellerId = sellerIdMap.get(cleanCustId);
+        const itemId = cols[iItemId]?.trim().replace(/[.,]0$/, "");
+        if (!sellerId || !itemId) return null;
+
+        return {
+          seller_id: sellerId,
+          item_id: itemId,
+          data: cols[iData]?.trim() || "2026-01-01",
+          ll_pictures_score: iLlPictures >= 0 ? parseBrNumber(cols[iLlPictures] || "0") : 0,
+          ll_title_score: iLlTitle >= 0 ? parseBrNumber(cols[iLlTitle] || "0") : 0,
+          ll_tech_specs_score: iLlTechSpecs >= 0 ? parseBrNumber(cols[iLlTechSpecs] || "0") : 0,
+          ll_description_score: iLlDescription >= 0 ? parseBrNumber(cols[iLlDescription] || "0") : 0,
+          ll_price_score: iLlPrice >= 0 ? parseBrNumber(cols[iLlPrice] || "0") : 0,
+          ll_stock_availability_score: iLlStock >= 0 ? parseBrNumber(cols[iLlStock] || "0") : 0,
+          ll_free_shipping_score: iLlFreeShipping >= 0 ? parseBrNumber(cols[iLlFreeShipping] || "0") : 0,
+          ll_promotions_score: iLlPromotions >= 0 ? parseBrNumber(cols[iLlPromotions] || "0") : 0,
+          score_photo: parseBrNumber(cols[iScorePhoto] || "0"),
+          score_title: parseBrNumber(cols[iScoreTitle] || "0"),
+          score_oferta_final: parseBrNumber(cols[iScoreOferta] || "0"),
+          score_caracteristica_final: parseBrNumber(cols[iScoreCaract] || "0"),
+          score_qualidade_final: parseBrNumber(cols[iScoreQual] || "0"),
+          sellers_clips_publi: iSellersClipsPub >= 0 ? parseBrNumber(cols[iSellersClipsPub] || "0") : 0,
+          visitas_clips: iVisitasClips >= 0 ? parseBrNumber(cols[iVisitasClips] || "0") : 0,
+          si_clips: iSiClips >= 0 ? parseBrNumber(cols[iSiClips] || "0") : 0,
+          orders_clips: iOrdersClips >= 0 ? parseBrNumber(cols[iOrdersClips] || "0") : 0,
+          tgmv_lc_clips: iTgmvClips >= 0 ? parseBrNumber(cols[iTgmvClips] || "0") : 0,
+        };
+      }).filter(Boolean);
+
+      // Deduplicate by seller_id + item_id + data
+      const dedupedListings = new Map<string, any>();
+      for (const row of listingRows) {
+        dedupedListings.set(`${(row as any).seller_id}|${(row as any).item_id}|${(row as any).data}`, row);
+      }
+      const uniqueListings = Array.from(dedupedListings.values());
+
+      let listingsInserted = 0;
+      for (let i = 0; i < uniqueListings.length; i += 200) {
+        const batch = uniqueListings.slice(i, i + 200);
+        const { error } = await supabase
+          .from("seller_listings_quality")
+          .upsert(batch as any[], { onConflict: "seller_id,item_id,data", ignoreDuplicates: false });
+        if (error) throw new Error(`Listings insert error batch ${i}: ${error.message}`);
+        listingsInserted += batch.length;
+      }
+      console.log(`Listings quality inserted: ${listingsInserted}`);
     }
 
     // Log the upload

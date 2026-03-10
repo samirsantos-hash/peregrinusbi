@@ -15,6 +15,8 @@ import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
+import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
+import { useListingsQuality } from "@/hooks/useListingsQuality";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
@@ -66,6 +68,10 @@ const Index = () => {
   }, [sellers]);
 
   const { data: dbKpis, isLoading: loadingKpis } = useSellerKpis(
+    hasRealData ? selectedSeller : undefined
+  );
+
+  const { data: listingsQuality } = useListingsQuality(
     hasRealData ? selectedSeller : undefined
   );
 
@@ -202,8 +208,9 @@ const Index = () => {
                   <TabsContent value="logistics" className="mt-0">
                     <LogisticsPanel kpis={filteredKpis} />
                   </TabsContent>
-                  <TabsContent value="quality" className="mt-0">
+                  <TabsContent value="quality" className="mt-0 space-y-5">
                     <QualityRadarPanel kpis={filteredKpis} />
+                    <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0">
                     <ReputationPanel kpis={filteredKpis} />
