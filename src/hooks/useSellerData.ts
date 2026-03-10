@@ -34,6 +34,22 @@ export interface SellerKPI {
   scorePads: number;
   statusPhoto: string;
   statusTitle: string;
+  // LL Granular Scores (Técnico)
+  llPicturesScore: number;
+  llTitleScore: number;
+  llTechSpecsScore: number;
+  llDescriptionScore: number;
+  // LL Granular Scores (Oferta)
+  llPriceScore: number;
+  llStockAvailabilityScore: number;
+  llFreeShippingScore: number;
+  llPromotionsScore: number;
+  // Clips / Conteúdo
+  sellersClipsPubli: number;
+  visitasClips: number;
+  siClips: number;
+  ordersClips: number;
+  tgmvLcClips: number;
   // Competitiveness
   minPriceRival: number;
   visits: number;
@@ -103,6 +119,22 @@ function transformKpi(row: any, sellerNickname: string): SellerKPI {
     scorePads: Number(row.score_final_pads) || 0,
     statusPhoto: scorePhoto < 70 ? "Revisar" : "OK",
     statusTitle: scoreTitle < 70 ? "Revisar" : "OK",
+    // LL Granular – Técnico
+    llPicturesScore: Number(row.ll_pictures_score) || 0,
+    llTitleScore: Number(row.ll_title_score) || 0,
+    llTechSpecsScore: Number(row.ll_tech_specs_score) || 0,
+    llDescriptionScore: Number(row.ll_description_score) || 0,
+    // LL Granular – Oferta
+    llPriceScore: Number(row.ll_price_score) || 0,
+    llStockAvailabilityScore: Number(row.ll_stock_availability_score) || 0,
+    llFreeShippingScore: Number(row.ll_free_shipping_score) || 0,
+    llPromotionsScore: Number(row.ll_promotions_score) || 0,
+    // Clips
+    sellersClipsPubli: Number(row.sellers_clips_publi) || 0,
+    visitasClips: Number(row.visitas_clips) || 0,
+    siClips: Number(row.si_clips) || 0,
+    ordersClips: Number(row.orders_clips) || 0,
+    tgmvLcClips: Number(row.tgmv_lc_clips) || 0,
     minPriceRival: Number(row.min_price_rival) || 0,
     visits: Number(row.visits) || 0,
     visitsExpensive: Number(row.visits_expensive) || 0,
