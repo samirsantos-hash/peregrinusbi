@@ -95,8 +95,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
     return allDates.map((d) => ({
       date: formatDate(d.date),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
-      ACOS: Math.round((d.acos / d.count) * 10000) / 100,
-      TACOS: Math.round((d.tacos / d.count) * 10000) / 100,
+      ACOS: Math.round((d.acos / d.count) * 100) / 100,
+      TACOS: Math.round((d.tacos / d.count) * 100) / 100,
     }));
   }, [allDates]);
 
