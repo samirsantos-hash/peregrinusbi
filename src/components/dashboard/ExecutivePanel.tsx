@@ -59,15 +59,36 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
     ? validDelayed.reduce((s, k) => s + k.repDelayedRate, 0) / validDelayed.length
     : 0;
 
+  // Calculate number of distinct months in the data
+  const monthsAnalyzed = useMemo(() => {
+    const uniqueMonths = new Set(kpis.map((k) => k.date.slice(0, 7))); // "YYYY-MM"
+    return uniqueMonths.size;
+  }, [kpis]);
+
+  // Format currency in BRL
+  const fmtBRL = (value: number) => {
+    return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
+  const fmtBRLCompact = (value: number) => {
+    if (value >= 1_000_000) {
+      return `R$ ${(value / 1_000_000).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`;
+    }
+    if (value >= 1_000) {
+      return `R$ ${(value / 1_000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}K`;
+    }
+    return fmtBRL(value);
+  };
+
   const metrics = [
-    { label: "Faturamento Bruto (GMV)", value: `R$ ${(totalGmv / 1000).toFixed(0)}K`, icon: DollarSign, color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado (GMV = Gross Merchandise Value)." },
-    { label: "Faturamento Realizado", value: `R$ ${(totalTgmv / 1000).toFixed(0)}K`, icon: TrendingUp, color: "emerald-text", tooltip: "Valor de vendas confirmadas e faturadas, descontando cancelamentos e devoluções." },
+    { label: "Faturamento Bruto (GMV)", value: fmtBRLCompact(totalGmv), icon: DollarSign, color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado (GMV = Gross Merchandise Value)." },
+    { label: "Faturamento Realizado", value: fmtBRLCompact(totalTgmv), icon: TrendingUp, color: "emerald-text", tooltip: "Valor de vendas confirmadas e faturadas, descontando cancelamentos e devoluções." },
     { label: "Volume de Itens Vendidos", value: totalTsi.toLocaleString("pt-BR"), icon: ShoppingCart, color: "neon-text", tooltip: "Quantidade total de itens vendidos (TSI = Total Sold Items) no período." },
-    { label: "Investimento em Marketing", value: `R$ ${(totalAds / 1000).toFixed(0)}K`, icon: Activity, color: "text-muted-foreground", tooltip: "Total investido em campanhas de Ads (Product Ads) no Mercado Livre." },
-    { label: "Potencial de Crescimento", value: `${avgUplift >= 0 ? "+" : ""}${(avgUplift * 100).toFixed(1)}%`, icon: avgUplift >= 0 ? TrendingUp : TrendingDown, color: avgUplift >= 0 ? "emerald-text" : "critical-text", tooltip: "Calculado comparando sua performance real com a média esperada da sua Vertical e Domínio." },
-    { label: "Nota de Saúde da Operação", value: avgSaude > 0 ? avgSaude.toFixed(0) : "—", icon: Activity, color: avgSaude >= 70 ? "emerald-text" : avgSaude >= 50 ? "warning-text" : "critical-text", tooltip: "Média ponderada de preço, qualidade de fotos, descrições e logística." },
-    { label: "ROAS Médio", value: avgRoas.toFixed(2), icon: DollarSign, color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é considerado saudável." },
-    { label: "Índice de Atrasos no Envio", value: avgDelayed > 0 ? `${(avgDelayed * 100).toFixed(1)}%` : "—", icon: Clock, color: avgDelayed <= 0.05 ? "emerald-text" : "critical-text", tooltip: "Percentual de envios atrasados. Abaixo de 5% é considerado saudável para manter reputação." },
+    { label: "Investimento em Marketing", value: fmtBRLCompact(totalAds), icon: Activity, color: "text-muted-foreground", tooltip: "Total investido em campanhas de Ads (Product Ads) no Mercado Livre." },
+    { label: "Potencial de Crescimento", value: `${avgUplift >= 0 ? "+" : ""}${(avgUplift * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`, icon: avgUplift >= 0 ? TrendingUp : TrendingDown, color: avgUplift >= 0 ? "emerald-text" : "critical-text", tooltip: "Calculado comparando sua performance real com a média esperada da sua Vertical e Domínio." },
+    { label: "Nota de Saúde da Operação", value: avgSaude > 0 ? avgSaude.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : "—", icon: Activity, color: avgSaude >= 70 ? "emerald-text" : avgSaude >= 50 ? "warning-text" : "critical-text", tooltip: "Média ponderada de preço, qualidade de fotos, descrições e logística." },
+    { label: "ROAS Médio", value: avgRoas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), icon: DollarSign, color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é considerado saudável." },
+    { label: "Índice de Atrasos no Envio", value: avgDelayed > 0 ? `${(avgDelayed * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : "—", icon: Clock, color: avgDelayed <= 0.05 ? "emerald-text" : "critical-text", tooltip: "Percentual de envios atrasados. Abaixo de 5% é considerado saudável para manter reputação." },
   ];
 
   // Aggregate by date
