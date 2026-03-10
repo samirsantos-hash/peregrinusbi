@@ -207,6 +207,12 @@ const Index = () => {
                   <TabsContent value="logistics" className="mt-0">
                     <LogisticsPanel kpis={filteredKpis} />
                   </TabsContent>
+                  <TabsContent value="quality" className="mt-0">
+                    <QualityRadarPanel kpis={filteredKpis} />
+                  </TabsContent>
+                  <TabsContent value="reputation" className="mt-0">
+                    <ReputationPanel kpis={filteredKpis} />
+                  </TabsContent>
                 </motion.div>
               </AnimatePresence>
             </Tabs>
