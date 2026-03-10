@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis,
   CartesianGrid, Tooltip, ResponsiveContainer,
-  ReferenceLine, Cell, Legend,
+  Cell,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
@@ -21,6 +21,8 @@ interface MultidimensionalBubbleChartProps {
   nameKey: string;
   period: string;
   onPeriodChange: (v: string) => void;
+  facetKey?: string;
+  facetLabel?: string;
 }
 
 /* ── Linear regression for trend line ── */
@@ -43,14 +45,13 @@ function trendLine(data: { x: number; y: number }[]) {
   ];
 }
 
-/* ── Color scale (blue gradient for marketing investment) ── */
+/* ── Color scale (blue gradient) ── */
 function colorScale(value: number, min: number, max: number): string {
   const range = max - min || 1;
   const t = Math.max(0, Math.min(1, (value - min) / range));
-  // From cool grey to vibrant blue
   const h = 199;
-  const s = 30 + t * 70; // 30% → 100%
-  const l = 70 - t * 35; // 70% → 35%
+  const s = 30 + t * 70;
+  const l = 70 - t * 35;
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
 
@@ -61,6 +62,7 @@ const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel 
   return (
     <div className="glass-card p-3 !bg-card/95 text-xs space-y-1 max-w-[260px]">
       <p className="font-semibold text-foreground truncate">{d.name}</p>
+      {d.facet && <p className="text-muted-foreground text-[10px]">Cluster: {d.facet}</p>}
       <p className="text-muted-foreground">
         {xLabel}: <span className="text-foreground font-mono">{d.x?.toLocaleString("pt-BR")}</span>
       </p>
@@ -68,7 +70,7 @@ const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel 
         {yLabel}: <span className="text-foreground font-mono">R$ {d.y?.toLocaleString("pt-BR")}</span>
       </p>
       <p className="text-muted-foreground">
-        {colorLabel}: <span className="text-foreground font-mono">R$ {d.colorVal?.toLocaleString("pt-BR")}</span>
+        {colorLabel}: <span className="text-foreground font-mono">{d.colorVal?.toLocaleString("pt-BR")}</span>
       </p>
       <p className="text-muted-foreground">
         {sizeLabel}: <span className="text-foreground font-mono">R$ {d.sizeVal?.toLocaleString("pt-BR")}</span>
@@ -82,44 +84,130 @@ const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel 
   );
 };
 
+interface ChartPoint {
+  name: string;
+  x: number;
+  y: number;
+  colorVal: number;
+  sizeVal: number;
+  z: number;
+  elasticity: number;
+  facet?: string;
+}
+
+function buildPoints(
+  data: Record<string, number | string>[],
+  xVar: BubbleVariable, yVar: BubbleVariable,
+  colorVar: BubbleVariable, sizeVar: BubbleVariable,
+  nameKey: string, facetKey?: string,
+): ChartPoint[] {
+  const filtered = data.filter(d =>
+    d[xVar.key] != null && d[yVar.key] != null &&
+    isFinite(Number(d[xVar.key])) && isFinite(Number(d[yVar.key]))
+  );
+  const avgX = filtered.reduce((s, r) => s + (Number(r[xVar.key]) || 0), 0) / Math.max(filtered.length, 1);
+  const avgY = filtered.reduce((s, r) => s + (Number(r[yVar.key]) || 0), 0) / Math.max(filtered.length, 1);
+
+  return filtered.map(d => {
+    const pctX = avgX === 0 ? 0 : (Number(d[xVar.key]) - avgX) / avgX;
+    const pctY = avgY === 0 ? 0 : (Number(d[yVar.key]) - avgY) / avgY;
+    return {
+      name: String(d[nameKey] || ""),
+      x: Number(d[xVar.key]),
+      y: Number(d[yVar.key]),
+      colorVal: Number(d[colorVar.key]) || 0,
+      sizeVal: Number(d[sizeVar.key]) || 0,
+      z: Math.max(Number(d[sizeVar.key]) || 1, 1),
+      elasticity: pctX === 0 ? 0 : pctY / pctX,
+      facet: facetKey ? String(d[facetKey] || "Sem Cluster") : undefined,
+    };
+  });
+}
+
+/* ── Single facet chart ── */
+const FacetChart = ({
+  title, points, xVar, yVar, colorVar, sizeVar, colorMin, colorMax, height,
+}: {
+  title?: string;
+  points: ChartPoint[];
+  xVar: BubbleVariable; yVar: BubbleVariable;
+  colorVar: BubbleVariable; sizeVar: BubbleVariable;
+  colorMin: number; colorMax: number;
+  height: number;
+}) => {
+  const trend = trendLine(points.map(p => ({ x: p.x, y: p.y })));
+
+  return (
+    <div className="flex-1 min-w-0">
+      {title && (
+        <p className="text-[11px] font-semibold text-muted-foreground text-center mb-1 uppercase tracking-wider truncate px-1">
+          {title}
+        </p>
+      )}
+      <ResponsiveContainer width="100%" height={height}>
+        <ScatterChart margin={{ top: 10, right: 15, bottom: 35, left: 15 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+          <XAxis
+            type="number" dataKey="x" name={xVar.label}
+            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
+            axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+            label={{ value: xVar.label, position: "bottom", offset: 10, fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
+            domain={["auto", "auto"]}
+          />
+          <YAxis
+            type="number" dataKey="y" name={yVar.label}
+            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
+            axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+            tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
+            label={{ value: yVar.label, angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
+          />
+          <ZAxis type="number" dataKey="z" range={[50, 400]} name={sizeVar.label} />
+          <Tooltip
+            content={<BubbleTooltip xLabel={xVar.label} yLabel={yVar.label} colorLabel={colorVar.label} sizeLabel={sizeVar.label} />}
+            cursor={{ strokeDasharray: "3 3", stroke: "hsl(215, 20%, 35%)" }}
+          />
+          <Scatter name="Sellers" data={points} animationDuration={600}>
+            {points.map((entry, i) => (
+              <Cell key={i} fill={colorScale(entry.colorVal, colorMin, colorMax)} fillOpacity={0.8} stroke={colorScale(entry.colorVal, colorMin, colorMax)} strokeWidth={1} />
+            ))}
+          </Scatter>
+          {trend.length === 2 && (
+            <Scatter name="Tendência" data={trend} fill="none" line={{ stroke: "hsl(0, 84%, 60%)", strokeWidth: 2, strokeDasharray: "6 3" }} legendType="none" r={0} />
+          )}
+        </ScatterChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
 const MultidimensionalBubbleChart = ({
   data, xVar, yVar, colorVar, sizeVar, nameKey,
-  period, onPeriodChange,
+  period, onPeriodChange, facetKey, facetLabel,
 }: MultidimensionalBubbleChartProps) => {
-  const { chartData, trend, colorMin, colorMax } = useMemo(() => {
-    const points = data
-      .filter(d =>
-        d[xVar.key] != null && d[yVar.key] != null &&
-        isFinite(Number(d[xVar.key])) && isFinite(Number(d[yVar.key]))
-      )
-      .map(d => ({
-        name: String(d[nameKey] || ""),
-        x: Number(d[xVar.key]),
-        y: Number(d[yVar.key]),
-        colorVal: Number(d[colorVar.key]) || 0,
-        sizeVal: Number(d[sizeVar.key]) || 0,
-        z: Math.max(Number(d[sizeVar.key]) || 1, 1),
-        elasticity: (() => {
-          // Simple point elasticity proxy: (% change Y) / (% change X) vs mean
-          const avgX = data.reduce((s, r) => s + (Number(r[xVar.key]) || 0), 0) / Math.max(data.length, 1);
-          const avgY = data.reduce((s, r) => s + (Number(r[yVar.key]) || 0), 0) / Math.max(data.length, 1);
-          if (avgX === 0 || avgY === 0) return 0;
-          const pctX = (Number(d[xVar.key]) - avgX) / avgX;
-          const pctY = (Number(d[yVar.key]) - avgY) / avgY;
-          return pctX === 0 ? 0 : pctY / pctX;
-        })(),
-      }));
+  const { facets, allPoints, colorMin, colorMax } = useMemo(() => {
+    const points = buildPoints(data, xVar, yVar, colorVar, sizeVar, nameKey, facetKey);
 
     const colorVals = points.map(p => p.colorVal);
     const cMin = colorVals.length > 0 ? Math.min(...colorVals) : 0;
     const cMax = colorVals.length > 0 ? Math.max(...colorVals) : 1;
 
-    const tLine = trendLine(points.map(p => ({ x: p.x, y: p.y })));
+    if (!facetKey) {
+      return { facets: null, allPoints: points, colorMin: cMin, colorMax: cMax };
+    }
 
-    return { chartData: points, trend: tLine, colorMin: cMin, colorMax: cMax };
-  }, [data, xVar, yVar, colorVar, sizeVar, nameKey]);
+    // Group by facet
+    const grouped: Record<string, ChartPoint[]> = {};
+    for (const p of points) {
+      const key = p.facet || "Sem Cluster";
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(p);
+    }
 
-  if (chartData.length === 0) return null;
+    const sortedFacets = Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0]));
+    return { facets: sortedFacets, allPoints: points, colorMin: cMin, colorMax: cMax };
+  }, [data, xVar, yVar, colorVar, sizeVar, nameKey, facetKey]);
+
+  if (allPoints.length === 0) return null;
 
   return (
     <div className="glass-card p-5">
@@ -128,80 +216,61 @@ const MultidimensionalBubbleChart = ({
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Análise Multidimensional de Elasticidade
           </h3>
-          <TooltipInfo text={`Eixo X: ${xVar.label}. Eixo Y: ${yVar.label}. Cor: ${colorVar.label} (mais escuro = maior valor). Tamanho: ${sizeVar.label}. Linha vermelha: tendência (sensibilidade).`} />
+          <TooltipInfo text={`Eixo X: ${xVar.label}. Eixo Y: ${yVar.label}. Cor: ${colorVar.label} (mais escuro = maior valor). Tamanho: ${sizeVar.label}. Linha vermelha: tendência.${facetKey ? ` Facetas: ${facetLabel || facetKey}.` : ""}`} />
         </div>
         <PeriodSelector value={period} onChange={onPeriodChange} />
       </div>
 
-      <ResponsiveContainer width="100%" height={420}>
-        <ScatterChart margin={{ top: 20, right: 30, bottom: 40, left: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-          <XAxis
-            type="number"
-            dataKey="x"
-            name={xVar.label}
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-            axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-            label={{ value: `${xVar.label} →`, position: "bottom", offset: 10, fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-            domain={["auto", "auto"]}
-          />
-          <YAxis
-            type="number"
-            dataKey="y"
-            name={yVar.label}
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-            axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-            tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
-            label={{ value: `${yVar.label} ↑`, angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-          />
-          <ZAxis type="number" dataKey="z" range={[60, 500]} name={sizeVar.label} />
-          <Tooltip
-            content={
-              <BubbleTooltip
-                xLabel={xVar.label}
-                yLabel={yVar.label}
-                colorLabel={colorVar.label}
-                sizeLabel={sizeVar.label}
-              />
-            }
-            cursor={{ strokeDasharray: "3 3", stroke: "hsl(215, 20%, 35%)" }}
-          />
-          <Scatter name="Sellers" data={chartData} animationDuration={800}>
-            {chartData.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={colorScale(entry.colorVal, colorMin, colorMax)}
-                fillOpacity={0.8}
-                stroke={colorScale(entry.colorVal, colorMin, colorMax)}
-                strokeWidth={1}
-              />
+      {facets ? (
+        /* ── Faceted layout ── */
+        <div className="space-y-2">
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {facets.map(([facetName, points]) => (
+              <div key={facetName} className="flex-1 min-w-[280px] border border-border/30 rounded-lg p-2">
+                <FacetChart
+                  title={facetName}
+                  points={points}
+                  xVar={xVar} yVar={yVar} colorVar={colorVar} sizeVar={sizeVar}
+                  colorMin={colorMin} colorMax={colorMax}
+                  height={320}
+                />
+                <p className="text-[10px] text-muted-foreground text-center mt-1">
+                  {points.length} seller{points.length !== 1 ? "s" : ""}
+                </p>
+              </div>
             ))}
-          </Scatter>
-          {/* Trend line */}
-          {trend.length === 2 && (
-            <Scatter
-              name="Tendência"
-              data={trend}
-              fill="none"
-              line={{ stroke: "hsl(0, 84%, 60%)", strokeWidth: 2, strokeDasharray: "6 3" }}
-              legendType="none"
-              r={0}
-            />
-          )}
-        </ScatterChart>
-      </ResponsiveContainer>
+          </div>
+          {/* Consolidated view */}
+          <details className="group">
+            <summary className="text-[11px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors flex items-center gap-1 py-1">
+              <span className="group-open:rotate-90 transition-transform">▶</span> Visão consolidada (todos os clusters)
+            </summary>
+            <div className="mt-2">
+              <FacetChart
+                points={allPoints}
+                xVar={xVar} yVar={yVar} colorVar={colorVar} sizeVar={sizeVar}
+                colorMin={colorMin} colorMax={colorMax}
+                height={380}
+              />
+            </div>
+          </details>
+        </div>
+      ) : (
+        /* ── Single chart (no facets) ── */
+        <FacetChart
+          points={allPoints}
+          xVar={xVar} yVar={yVar} colorVar={colorVar} sizeVar={sizeVar}
+          colorMin={colorMin} colorMax={colorMax}
+          height={420}
+        />
+      )}
 
       {/* Color scale legend */}
-      <div className="flex items-center justify-center gap-3 mt-3">
+      <div className="flex items-center justify-center gap-3 mt-3 flex-wrap">
         <span className="text-[10px] text-muted-foreground">{colorVar.label}:</span>
         <div className="flex items-center gap-1">
           <span className="text-[10px] text-muted-foreground">Baixo</span>
-          <div
-            className="h-2.5 w-24 rounded-full"
-            style={{
-              background: `linear-gradient(to right, hsl(199, 30%, 70%), hsl(199, 100%, 35%))`,
-            }}
-          />
+          <div className="h-2.5 w-24 rounded-full" style={{ background: `linear-gradient(to right, hsl(199, 30%, 70%), hsl(199, 100%, 35%))` }} />
           <span className="text-[10px] text-muted-foreground">Alto</span>
         </div>
         <span className="mx-2 text-border">|</span>
@@ -210,6 +279,12 @@ const MultidimensionalBubbleChart = ({
         </span>
         <span className="mx-2 text-border">|</span>
         <span className="text-[10px] text-muted-foreground">Tamanho = {sizeVar.label}</span>
+        {facetKey && (
+          <>
+            <span className="mx-2 text-border">|</span>
+            <span className="text-[10px] text-muted-foreground">Facetas = {facetLabel || facetKey}</span>
+          </>
+        )}
       </div>
     </div>
   );

@@ -23,8 +23,14 @@ interface KpiLike {
   productId: string;
 }
 
+interface SellerInfo {
+  id: string;
+  cluster?: string;
+}
+
 interface CompetitivenessPanelProps {
   kpis: KpiLike[];
+  sellers?: SellerInfo[];
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -106,7 +112,7 @@ const QuadrantBackground = ({ xAxisMap, yAxisMap, medianX, medianY }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
@@ -426,9 +432,11 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
           : new Set(allDates.slice(-parseInt(bubblePeriod)));
         const filtered = kpis.filter(k => cutoff.has(k.date));
 
-        const bySeller: Record<string, { name: string; visits: number; gmv: number; minPriceRival: number; count: number; visitsExpensive: number }> = {};
+        const sellerClusterMap = new Map(sellers.map(s => [s.id, s.cluster || "Sem Cluster"]));
+
+        const bySeller: Record<string, { name: string; visits: number; gmv: number; minPriceRival: number; count: number; visitsExpensive: number; cluster: string }> = {};
         for (const k of filtered) {
-          if (!bySeller[k.productId]) bySeller[k.productId] = { name: k.productName, visits: 0, gmv: 0, minPriceRival: 0, count: 0, visitsExpensive: 0 };
+          if (!bySeller[k.productId]) bySeller[k.productId] = { name: k.productName, visits: 0, gmv: 0, minPriceRival: 0, count: 0, visitsExpensive: 0, cluster: sellerClusterMap.get(k.productId) || "Sem Cluster" };
           const s = bySeller[k.productId];
           s.visits += k.visits;
           s.gmv += k.gmv;
@@ -442,6 +450,7 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
           gmv: s.gmv,
           avgRivalPrice: s.count > 0 ? s.minPriceRival / s.count : 0,
           visitsExpensive: s.visitsExpensive,
+          cluster: s.cluster,
         }));
 
         return (
@@ -454,6 +463,8 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
             nameKey="name"
             period={bubblePeriod}
             onPeriodChange={setBubblePeriod}
+            facetKey="cluster"
+            facetLabel="Cluster do Seller"
           />
         );
       })()}
