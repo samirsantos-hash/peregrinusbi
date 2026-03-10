@@ -15,6 +15,8 @@ import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import AuditPanel from "@/components/dashboard/AuditPanel";
+import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
+import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
