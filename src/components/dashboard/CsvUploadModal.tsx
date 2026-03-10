@@ -6,9 +6,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 
-type UploadType = "cpp_mensal" | "live_listings";
+type UploadType = "cpp_mensal" | "live_listings" | "elegibilidade";
 
-const SFTP_PATTERN = /SFTP_ECOMCONSULT_CPP_MENSAL/i;
+const SFTP_PATTERNS: Record<string, RegExp> = {
+  cpp_mensal: /SFTP_ECOMCONSULT_CPP_MENSAL/i,
+  elegibilidade: /SFTP_ECOMCONSULT_ELEGIBILIDADE/i,
+};
 const SAFRA_PATTERN = /(\d{2})[._](\d{2})[._](\d{2,4})/;
 const ACCEPTED_EXTENSIONS = [".csv", ".xlsx", ".txt"];
 
