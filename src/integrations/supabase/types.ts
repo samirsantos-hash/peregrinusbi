@@ -118,7 +118,16 @@ export type Database = {
           gmv_lc_m1: number | null
           id: string
           inv_pads: number | null
+          ll_description_score: number | null
+          ll_free_shipping_score: number | null
+          ll_pictures_score: number | null
+          ll_price_score: number | null
+          ll_promotions_score: number | null
+          ll_stock_availability_score: number | null
+          ll_tech_specs_score: number | null
+          ll_title_score: number | null
           min_price_rival: number | null
+          orders_clips: number | null
           pontuacao_ipi: number | null
           rep_claims_rate: number | null
           rep_current_level: string | null
@@ -131,7 +140,10 @@ export type Database = {
           score_qualidade_final: number | null
           score_title: number | null
           seller_id: string
+          sellers_clips_publi: number | null
+          si_clips: number | null
           tgmv_lc: number | null
+          tgmv_lc_clips: number | null
           tgmv_lc_flex: number | null
           tgmv_lc_full: number | null
           tgmv_lc_pads: number | null
@@ -140,6 +152,7 @@ export type Database = {
           tsi_flex: number | null
           tsi_pads: number | null
           uplift_gmv_lc_m1: number | null
+          visitas_clips: number | null
           visits: number | null
           visits_cheaper: number | null
           visits_expensive: number | null
@@ -156,7 +169,16 @@ export type Database = {
           gmv_lc_m1?: number | null
           id?: string
           inv_pads?: number | null
+          ll_description_score?: number | null
+          ll_free_shipping_score?: number | null
+          ll_pictures_score?: number | null
+          ll_price_score?: number | null
+          ll_promotions_score?: number | null
+          ll_stock_availability_score?: number | null
+          ll_tech_specs_score?: number | null
+          ll_title_score?: number | null
           min_price_rival?: number | null
+          orders_clips?: number | null
           pontuacao_ipi?: number | null
           rep_claims_rate?: number | null
           rep_current_level?: string | null
@@ -169,7 +191,10 @@ export type Database = {
           score_qualidade_final?: number | null
           score_title?: number | null
           seller_id: string
+          sellers_clips_publi?: number | null
+          si_clips?: number | null
           tgmv_lc?: number | null
+          tgmv_lc_clips?: number | null
           tgmv_lc_flex?: number | null
           tgmv_lc_full?: number | null
           tgmv_lc_pads?: number | null
@@ -178,6 +203,7 @@ export type Database = {
           tsi_flex?: number | null
           tsi_pads?: number | null
           uplift_gmv_lc_m1?: number | null
+          visitas_clips?: number | null
           visits?: number | null
           visits_cheaper?: number | null
           visits_expensive?: number | null
@@ -194,7 +220,16 @@ export type Database = {
           gmv_lc_m1?: number | null
           id?: string
           inv_pads?: number | null
+          ll_description_score?: number | null
+          ll_free_shipping_score?: number | null
+          ll_pictures_score?: number | null
+          ll_price_score?: number | null
+          ll_promotions_score?: number | null
+          ll_stock_availability_score?: number | null
+          ll_tech_specs_score?: number | null
+          ll_title_score?: number | null
           min_price_rival?: number | null
+          orders_clips?: number | null
           pontuacao_ipi?: number | null
           rep_claims_rate?: number | null
           rep_current_level?: string | null
@@ -207,7 +242,10 @@ export type Database = {
           score_qualidade_final?: number | null
           score_title?: number | null
           seller_id?: string
+          sellers_clips_publi?: number | null
+          si_clips?: number | null
           tgmv_lc?: number | null
+          tgmv_lc_clips?: number | null
           tgmv_lc_flex?: number | null
           tgmv_lc_full?: number | null
           tgmv_lc_pads?: number | null
@@ -216,6 +254,7 @@ export type Database = {
           tsi_flex?: number | null
           tsi_pads?: number | null
           uplift_gmv_lc_m1?: number | null
+          visitas_clips?: number | null
           visits?: number | null
           visits_cheaper?: number | null
           visits_expensive?: number | null
