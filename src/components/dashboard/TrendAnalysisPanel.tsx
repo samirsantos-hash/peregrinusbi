@@ -375,6 +375,36 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
                   </p>
                 </div>
               </div>
+
+              {/* Investimento Ideal 3% */}
+              <div className="border-t border-border/50 pt-3 space-y-2">
+                <p className="text-[11px] text-muted-foreground mb-1">Investimento Ideal (3% do Faturamento)</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-lg font-mono font-bold text-primary">
+                    R$ {((insights.totalGmv * 0.03) / 1000).toFixed(1)}K
+                  </p>
+                  {insights.totalGmv > 0 && (
+                    <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                      insights.totalAds <= insights.totalGmv * 0.03
+                        ? "bg-emerald/10 emerald-text"
+                        : "bg-destructive/10 critical-text"
+                    }`}>
+                      {insights.totalAds <= insights.totalGmv * 0.03
+                        ? `${((insights.totalAds / (insights.totalGmv * 0.03)) * 100).toFixed(0)}% utilizado`
+                        : `${(((insights.totalAds - insights.totalGmv * 0.03) / (insights.totalGmv * 0.03)) * 100).toFixed(0)}% acima`
+                      }
+                    </span>
+                  )}
+                </div>
+                <div className="w-full bg-muted/50 rounded-full h-1.5">
+                  <div
+                    className={`h-1.5 rounded-full transition-all ${
+                      insights.totalAds <= insights.totalGmv * 0.03 ? "bg-emerald" : "bg-destructive"
+                    }`}
+                    style={{ width: `${Math.min(insights.totalGmv > 0 ? (insights.totalAds / (insights.totalGmv * 0.03)) * 100 : 0, 100)}%` }}
+                  />
+                </div>
+              </div>
             </div>
           </motion.div>
 
