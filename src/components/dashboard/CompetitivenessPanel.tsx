@@ -39,31 +39,32 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-/* ── Scatter Tooltip ── */
+/* ── Scatter Tooltip (McKinsey) ── */
 const ScatterTooltipContent = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d) return null;
 
-  const diag =
-    d.gap > 5 && d.visits < d.medianVisits
-      ? "⚠ Fora de Mercado"
-      : d.gap > 5
-        ? "💎 Premium / Campeão"
-        : d.gap <= 0 && d.visits >= d.medianVisits
-          ? "🚀 Volume & Tração"
-          : "👻 Invisível — requer SEO";
+  const getQuadrant = (x: number, y: number, mx: number, my: number) => {
+    if (x >= mx && y >= my) return { label: "🚀 Investir Agressivamente", color: "hsl(160, 84%, 39%)" };
+    if (x < mx && y >= my) return { label: "🔄 Otimizar Conversão", color: "hsl(199, 100%, 50%)" };
+    if (x >= mx && y < my) return { label: "⚙ Manter Eficiência", color: "hsl(40, 95%, 55%)" };
+    return { label: "⚠ Descontinuar / Liquidar", color: "hsl(0, 84%, 60%)" };
+  };
+
+  const q = getQuadrant(d.forcaCompetitiva, d.atratividade, d.medianX, d.medianY);
 
   return (
-    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1 max-w-[220px]">
-      <p className="font-semibold text-foreground truncate">{d.name}</p>
+    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1 max-w-[240px]">
+      <p className="font-semibold text-foreground truncate">Produto: {d.name}</p>
       <p className="text-muted-foreground">
-        Gap: <span className={d.gap > 0 ? "text-destructive" : "text-emerald"}>{d.gap > 0 ? "+" : ""}{d.gap.toFixed(1)}%</span>
+        Gap vs Rival: <span className={d.gapPct > 0 ? "text-destructive" : "text-emerald"}>{d.gapPct > 0 ? "+" : ""}{d.gapPct.toFixed(1)}%</span>
       </p>
-      <p className="text-muted-foreground">Visitas: <span className="text-foreground font-mono">{d.visits.toLocaleString("pt-BR")}</span></p>
+      <p className="text-muted-foreground">Força Competitiva: <span className="text-foreground font-mono">{d.forcaCompetitiva.toFixed(1)}</span></p>
+      <p className="text-muted-foreground">Atratividade: <span className="text-foreground font-mono">{d.atratividade.toFixed(1)}</span></p>
       <p className="text-muted-foreground">GMV: <span className="text-foreground font-mono">R$ {d.gmv.toLocaleString("pt-BR")}</span></p>
-      <p className="mt-1 font-medium" style={{ color: d.gap > 5 && d.visits < d.medianVisits ? "hsl(0,84%,60%)" : "hsl(199,100%,50%)" }}>
-        {diag}
+      <p className="mt-1 font-medium" style={{ color: q.color }}>
+        Status: {q.label}
       </p>
     </div>
   );
