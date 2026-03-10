@@ -220,6 +220,9 @@ const Index = () => {
                     <QualityRadarPanel kpis={filteredKpis} />
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
+                  <TabsContent value="opportunities" className="mt-0">
+                    <OpportunitiesPanel items={eligibilityItems || []} />
+                  </TabsContent>
                   <TabsContent value="reputation" className="mt-0">
                     <ReputationPanel kpis={filteredKpis} />
                   </TabsContent>
