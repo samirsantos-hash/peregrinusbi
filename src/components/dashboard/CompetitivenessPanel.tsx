@@ -108,6 +108,7 @@ const QuadrantBackground = ({ xAxisMap, yAxisMap, medianX, medianY }: any) => {
 
 const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
+  const [bubblePeriod, setBubblePeriod] = useState("15");
 
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
     if (!acc[k.productId] || k.date > acc[k.productId].date) acc[k.productId] = k;
