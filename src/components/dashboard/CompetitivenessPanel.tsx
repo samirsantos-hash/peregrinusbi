@@ -112,7 +112,7 @@ const QuadrantBackground = ({ xAxisMap, yAxisMap, medianX, medianY }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
