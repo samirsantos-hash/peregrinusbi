@@ -76,6 +76,74 @@ export type Database = {
         }
         Relationships: []
       }
+      seller_eligibility: {
+        Row: {
+          acao_recomendada: string | null
+          campaign_id_best: string | null
+          created_at: string
+          data: string
+          discount_best: number | null
+          discount_total: number | null
+          dom_domain_agg1: string | null
+          estoque_medio_7d: number | null
+          estoque_medio_full_7d: number | null
+          flag_best_promo: boolean | null
+          flag_item_s_optin: boolean | null
+          id: string
+          item_id: string
+          item_name: string
+          pedidos_7d: number | null
+          seller_id: string
+          vertical_item: string | null
+        }
+        Insert: {
+          acao_recomendada?: string | null
+          campaign_id_best?: string | null
+          created_at?: string
+          data: string
+          discount_best?: number | null
+          discount_total?: number | null
+          dom_domain_agg1?: string | null
+          estoque_medio_7d?: number | null
+          estoque_medio_full_7d?: number | null
+          flag_best_promo?: boolean | null
+          flag_item_s_optin?: boolean | null
+          id?: string
+          item_id: string
+          item_name?: string
+          pedidos_7d?: number | null
+          seller_id: string
+          vertical_item?: string | null
+        }
+        Update: {
+          acao_recomendada?: string | null
+          campaign_id_best?: string | null
+          created_at?: string
+          data?: string
+          discount_best?: number | null
+          discount_total?: number | null
+          dom_domain_agg1?: string | null
+          estoque_medio_7d?: number | null
+          estoque_medio_full_7d?: number | null
+          flag_best_promo?: boolean | null
+          flag_item_s_optin?: boolean | null
+          id?: string
+          item_id?: string
+          item_name?: string
+          pedidos_7d?: number | null
+          seller_id?: string
+          vertical_item?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_eligibility_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_listings_quality: {
         Row: {
           created_at: string
