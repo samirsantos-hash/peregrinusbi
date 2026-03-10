@@ -45,11 +45,12 @@ interface QualityRadarPanelProps {
 }
 
 // Category-level goals for normalizing raw clip numbers to 0-100
+// Benchmarks based on Mercado Livre operational standards for active sellers
 const CLIPS_GOALS = {
-  sellersClipsPubli: 50,
-  visitasClips: 5000,
-  siClips: 500,
-  ordersClips: 200,
+  sellersClipsPubli: 20,      // Meta: 20 clips publicados/mês (ativo)
+  visitasClips: 8000,         // Meta: 8K visitas totais (~400 por clip)
+  siClips: 800,               // Meta: 800 sessões iniciadas (10% CTR)
+  ordersClips: 40,            // Meta: 40 pedidos (~0.5% conversão)
 };
 
 const DIMENSIONS = [
