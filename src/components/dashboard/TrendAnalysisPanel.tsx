@@ -7,7 +7,7 @@ import {
 import { TrendingUp, TrendingDown, Zap, BarChart3, Calendar } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
-import { subDays, startOfWeek, format, parseISO } from "date-fns";
+import { startOfWeek, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 interface KpiLike {
@@ -106,9 +106,15 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
 
   // Filter by period
   const filteredData = useMemo(() => {
+    if (period === "all" || isNaN(parseInt(period))) {
+      return byDate;
+    }
     const days = parseInt(period);
-    const cutoff = subDays(new Date(), days).toISOString().slice(0, 10);
-    const filtered = byDate.filter((d) => d.date >= cutoff);
+    const now = new Date();
+    const cutoff = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    const cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - days);
+    const cutoffStr = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, "0")}-${String(cutoffDate.getDate()).padStart(2, "0")}`;
+    const filtered = byDate.filter((d) => d.date >= cutoffStr);
     return filtered.length > 0 ? filtered : byDate;
   }, [byDate, period]);
 
