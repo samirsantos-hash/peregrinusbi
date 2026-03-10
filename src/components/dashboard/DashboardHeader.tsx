@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag } from "lucide-react";
+import { CalendarIcon, TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag, RefreshCw } from "lucide-react";
 import { format, subDays, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
@@ -32,11 +32,14 @@ interface DashboardHeaderProps {
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
   kpis: KpiLike[];
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
-const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, onDateRangeChange, kpis }: DashboardHeaderProps) => {
+const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, onDateRangeChange, kpis, onRefresh, isRefreshing }: DashboardHeaderProps) => {
   const [calOpen, setCalOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
+  const [activePeriod, setActivePeriod] = useState<string>("all");
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
@@ -44,7 +47,7 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
     if (dateRange?.from && dateRange?.to) {
       return Math.max(differenceInDays(dateRange.to, dateRange.from), 1);
     }
-    return 30;
+    return 365;
   }, [dateRange]);
 
   const validUplifts = kpis.filter((k) => k.upliftGmvM1 !== 0);
@@ -62,10 +65,22 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
   ];
 
   const quickRanges = [
-    { label: "7 dias", days: 7 },
-    { label: "15 dias", days: 15 },
-    { label: "30 dias", days: 30 },
+    { label: "7D", key: "7", days: 7 },
+    { label: "15D", key: "15", days: 15 },
+    { label: "30D", key: "30", days: 30 },
+    { label: "Todo Período", key: "all", days: null },
   ];
+
+  const handleQuickRange = (qr: typeof quickRanges[0]) => {
+    setActivePeriod(qr.key);
+    if (qr.days) {
+      onDateRangeChange({ from: subDays(new Date(), qr.days), to: new Date() });
+    } else {
+      // "Todo Período" - set a very wide range
+      onDateRangeChange({ from: new Date("2020-01-01"), to: new Date() });
+    }
+    setCalOpen(false);
+  };
 
   const clusterColors: Record<string, string> = {
     emerging: "bg-neon-blue/10 text-neon-blue border-neon-blue/20",
@@ -148,11 +163,29 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
             </Popover>
           </div>
 
-          {/* Date Range Picker */}
+          {/* Date Range Picker with Quick Periods */}
           <div className="flex items-center gap-2">
+            {/* Quick period buttons */}
+            <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5 border border-border/50">
+              {quickRanges.map((qr) => (
+                <button
+                  key={qr.key}
+                  onClick={() => handleQuickRange(qr)}
+                  className={cn(
+                    "px-2.5 py-1.5 text-[11px] font-medium rounded-md transition-all",
+                    activePeriod === qr.key
+                      ? "bg-primary/15 text-primary shadow-sm"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {qr.label}
+                </button>
+              ))}
+            </div>
+
             <Popover open={calOpen} onOpenChange={setCalOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal glass-card border-glass-border bg-card/60", !dateRange && "text-muted-foreground")}>
+                <Button variant="outline" className={cn("w-[200px] justify-start text-left font-normal glass-card border-glass-border bg-card/60", !dateRange && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4 text-neon-blue" />
                   {dateRange?.from ?
                   dateRange.to ?
@@ -164,31 +197,33 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-card border-glass-border" align="start">
-                <div className="flex gap-1 p-2 border-b border-border">
-                  {quickRanges.map((qr) =>
-                  <Button
-                    key={qr.days}
-                    variant="ghost"
-                    size="sm"
-                    className="text-xs hover:bg-muted"
-                    onClick={() => {
-                      onDateRangeChange({ from: subDays(new Date(), qr.days), to: new Date() });
-                      setCalOpen(false);
-                    }}>
-                      {qr.label}
-                    </Button>
-                  )}
-                </div>
                 <Calendar
                   initialFocus
                   mode="range"
                   defaultMonth={dateRange?.from}
                   selected={dateRange}
-                  onSelect={onDateRangeChange}
+                  onSelect={(range) => {
+                    onDateRangeChange(range);
+                    setActivePeriod("custom");
+                  }}
                   numberOfMonths={2}
                   className="p-3 pointer-events-auto" />
               </PopoverContent>
             </Popover>
+
+            {/* Refresh button */}
+            {onRefresh && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                className="glass-card border-glass-border bg-card/60 h-9 w-9"
+                title="Atualizar dados"
+              >
+                <RefreshCw className={cn("h-4 w-4 text-neon-blue", isRefreshing && "animate-spin")} />
+              </Button>
+            )}
           </div>
         </div>
 
