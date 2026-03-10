@@ -23,8 +23,14 @@ interface KpiLike {
   productId: string;
 }
 
+interface SellerInfo {
+  id: string;
+  cluster?: string;
+}
+
 interface CompetitivenessPanelProps {
   kpis: KpiLike[];
+  sellers?: SellerInfo[];
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
