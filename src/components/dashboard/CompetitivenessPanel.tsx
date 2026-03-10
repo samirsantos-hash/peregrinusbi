@@ -138,54 +138,87 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  /* ── Scatter data ── */
-  const scatterData = useMemo(() => {
+  /* ── Scatter data (McKinsey Adapted) ── */
+  const { scatterData, medianX, medianY } = useMemo(() => {
     const days = parseInt(scatterPeriod);
-    const allDates = [...new Set(kpis.map((k) => k.date))].sort();
+    const allDates = [...new Set(kpis.map((k: any) => k.date))].sort();
     const cutoffDates = new Set(allDates.slice(-days));
 
-    const filtered = kpis.filter((k) => cutoffDates.has(k.date));
+    const filtered = kpis.filter((k: any) => cutoffDates.has(k.date));
 
-    // Aggregate per seller
-    const bySeller: Record<string, { name: string; gmv: number; visits: number; visitsExpensive: number; minPriceRival: number; count: number }> = {};
-    for (const k of filtered) {
+    // Aggregate per seller/period
+    const bySeller: Record<string, {
+      name: string; gmv: number; visits: number; visitsExpensive: number;
+      minPriceRival: number; count: number; scoreQualidade: number;
+      upliftGmvM1: number; upliftCount: number;
+    }> = {};
+    for (const k of filtered as any[]) {
       if (!bySeller[k.productId]) {
-        bySeller[k.productId] = { name: k.productName, gmv: 0, visits: 0, visitsExpensive: 0, minPriceRival: 0, count: 0 };
+        bySeller[k.productId] = {
+          name: k.productName, gmv: 0, visits: 0, visitsExpensive: 0,
+          minPriceRival: 0, count: 0, scoreQualidade: 0,
+          upliftGmvM1: 0, upliftCount: 0,
+        };
       }
-      bySeller[k.productId].gmv += k.gmv || 0;
-      bySeller[k.productId].visits += k.visits;
-      bySeller[k.productId].visitsExpensive += k.visitsExpensive;
+      const s = bySeller[k.productId];
+      s.gmv += k.gmv || 0;
+      s.visits += k.visits || 0;
+      s.visitsExpensive += k.visitsExpensive || 0;
       if (k.minPriceRival > 0) {
-        bySeller[k.productId].minPriceRival += k.minPriceRival;
-        bySeller[k.productId].count++;
+        s.minPriceRival += k.minPriceRival;
+        s.count++;
+      }
+      if (k.scoreQualidade > 0) {
+        s.scoreQualidade += k.scoreQualidade;
+      }
+      if (k.upliftGmvM1 !== 0) {
+        s.upliftGmvM1 += k.upliftGmvM1;
+        s.upliftCount++;
       }
     }
 
-    const entries = Object.values(bySeller).filter((s) => s.count > 0 && s.visits > 0);
-    const medianVisits = entries.length > 0
-      ? entries.map((e) => e.visits).sort((a, b) => a - b)[Math.floor(entries.length / 2)]
-      : 0;
+    const entries = Object.values(bySeller).filter((s) => s.visits > 0);
 
-    return entries.map((s) => {
-      const avgRival = s.minPriceRival / s.count;
-      // Use visitsExpensive ratio as proxy for price gap since we don't have actual seller price
-      const gap = s.visits > 0 ? ((s.visitsExpensive / s.visits) * 100) - 15 : 0; // Centered around 15% baseline
+    const points = entries.map((s) => {
+      // Eixo X: Força Competitiva = invertedGap + scoreQualidade
+      const gapPct = s.visits > 0 ? ((s.visitsExpensive / s.visits) * 100) : 0;
+      const invertedGap = 100 - gapPct; // Higher = more competitive price
+      const avgQualidade = s.count > 0 ? s.scoreQualidade / Math.max(s.count, 1) : s.scoreQualidade;
+      const forcaCompetitiva = (invertedGap * 0.5) + (avgQualidade * 0.5);
+
+      // Eixo Y: Atratividade = visits normalized by uplift
+      const avgUplift = s.upliftCount > 0 ? s.upliftGmvM1 / s.upliftCount : 0;
+      const upliftFactor = 1 + Math.max(Math.min(avgUplift, 2), -0.5); // clamp
+      const atratividade = s.visits * upliftFactor;
+
       return {
         name: s.name,
-        gap: Math.round(gap * 10) / 10,
-        visits: s.visits,
+        forcaCompetitiva: Math.round(forcaCompetitiva * 10) / 10,
+        atratividade: Math.round(atratividade),
+        gapPct: Math.round(gapPct * 10) / 10,
         gmv: Math.round(s.gmv),
-        medianVisits,
         z: Math.max(s.gmv, 1),
+        medianX: 0, // placeholder, filled below
+        medianY: 0,
       };
     });
+
+    // Calculate medians for quadrant lines
+    const sortedX = points.map(p => p.forcaCompetitiva).sort((a, b) => a - b);
+    const sortedY = points.map(p => p.atratividade).sort((a, b) => a - b);
+    const mx = sortedX.length > 0 ? sortedX[Math.floor(sortedX.length / 2)] : 50;
+    const my = sortedY.length > 0 ? sortedY[Math.floor(sortedY.length / 2)] : 50;
+
+    points.forEach(p => { p.medianX = mx; p.medianY = my; });
+
+    return { scatterData: points, medianX: mx, medianY: my };
   }, [kpis, scatterPeriod]);
 
-  const getBubbleColor = (gap: number, visits: number, medianVisits: number) => {
-    if (gap <= 0 && visits >= medianVisits) return "hsl(160, 84%, 39%)"; // Volume & Tração
-    if (gap > 0 && visits >= medianVisits) return "hsl(199, 100%, 50%)"; // Premium
-    if (gap <= 0 && visits < medianVisits) return "hsl(40, 95%, 55%)"; // Invisível
-    return "hsl(0, 84%, 60%)"; // Fora de Mercado
+  const getBubbleColor = (x: number, y: number) => {
+    if (x >= medianX && y >= medianY) return "hsl(160, 84%, 39%)"; // Investir
+    if (x < medianX && y >= medianY) return "hsl(199, 100%, 50%)"; // Otimizar
+    if (x >= medianX && y < medianY) return "hsl(40, 95%, 55%)"; // Manter
+    return "hsl(0, 84%, 60%)"; // Descontinuar
   };
 
   return (
