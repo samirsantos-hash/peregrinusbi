@@ -387,9 +387,9 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
               <div className="border-t border-border/50 pt-3 space-y-2">
                 <p className="text-[11px] text-muted-foreground mb-1">Investimento Ideal (3% do Faturamento)</p>
                 <div className="flex items-center justify-between">
-                  <p className="text-lg font-mono font-bold text-primary">
-                    R$ {((insights.totalGmv * 0.03) / 1000).toFixed(1)}K
-                  </p>
+                   <p className="text-lg font-mono font-bold text-primary">
+                     {fmtBRLCompact(insights.totalGmv * 0.03)}
+                   </p>
                   {insights.totalGmv > 0 && (
                     <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
                       insights.totalAds <= insights.totalGmv * 0.03
