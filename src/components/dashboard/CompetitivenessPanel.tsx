@@ -395,6 +395,68 @@ const CompetitivenessPanel = ({ kpis }: CompetitivenessPanelProps) => {
           </BarChart>
         </ResponsiveContainer>
       </div>
+      {/* ── Pairplot Matrix ── */}
+      {(() => {
+        const pairplotData = products.map(p => ({
+          visits: p.visits,
+          minPriceRival: p.minPriceRival,
+          visitsExpensive: p.visits > 0 ? (p.visitsExpensive / p.visits) * 100 : 0,
+          visitsCheaper: p.visits > 0 ? (p.visitsCheaper / p.visits) * 100 : 0,
+          gmv: p.gmv,
+        }));
+        return (
+          <PairplotMatrix
+            data={pairplotData}
+            variables={[
+              { key: "minPriceRival", label: "Preço Rival Mínimo", shortLabel: "Preço Rival" },
+              { key: "visitsExpensive", label: "% Visitas c/ Preço Alto", shortLabel: "% Preço Alto" },
+              { key: "visitsCheaper", label: "% Visitas c/ Preço Baixo", shortLabel: "% Preço Baixo" },
+              { key: "visits", label: "Visitas Totais", shortLabel: "Visitas" },
+            ]}
+            resultVar={{ key: "gmv", label: "GMV (Faturamento)", shortLabel: "GMV" }}
+          />
+        );
+      })()}
+
+      {/* ── Multidimensional Bubble Chart ── */}
+      {(() => {
+        const allDates = [...new Set(kpis.map(k => k.date))].sort();
+        const cutoff = bubblePeriod === "all"
+          ? new Set(allDates)
+          : new Set(allDates.slice(-parseInt(bubblePeriod)));
+        const filtered = kpis.filter(k => cutoff.has(k.date));
+
+        const bySeller: Record<string, { name: string; visits: number; gmv: number; minPriceRival: number; count: number; visitsExpensive: number }> = {};
+        for (const k of filtered) {
+          if (!bySeller[k.productId]) bySeller[k.productId] = { name: k.productName, visits: 0, gmv: 0, minPriceRival: 0, count: 0, visitsExpensive: 0 };
+          const s = bySeller[k.productId];
+          s.visits += k.visits;
+          s.gmv += k.gmv;
+          s.visitsExpensive += k.visitsExpensive;
+          if (k.minPriceRival > 0) { s.minPriceRival += k.minPriceRival; s.count++; }
+        }
+
+        const bubbleData = Object.values(bySeller).map(s => ({
+          name: s.name,
+          visits: s.visits,
+          gmv: s.gmv,
+          avgRivalPrice: s.count > 0 ? s.minPriceRival / s.count : 0,
+          visitsExpensive: s.visitsExpensive,
+        }));
+
+        return (
+          <MultidimensionalBubbleChart
+            data={bubbleData}
+            xVar={{ key: "visits", label: "Visitas" }}
+            yVar={{ key: "gmv", label: "GMV (R$)" }}
+            colorVar={{ key: "visitsExpensive", label: "Visitas c/ Preço Alto" }}
+            sizeVar={{ key: "avgRivalPrice", label: "Preço Rival Médio" }}
+            nameKey="name"
+            period={bubblePeriod}
+            onPeriodChange={setBubblePeriod}
+          />
+        );
+      })()}
     </motion.div>
   );
 };
