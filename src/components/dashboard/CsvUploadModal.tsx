@@ -6,9 +6,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 
-type UploadType = "cpp_mensal" | "live_listings";
+type UploadType = "cpp_mensal" | "live_listings" | "elegibilidade";
 
-const SFTP_PATTERN = /SFTP_ECOMCONSULT_CPP_MENSAL/i;
+const SFTP_PATTERNS: Record<string, RegExp> = {
+  cpp_mensal: /SFTP_ECOMCONSULT_CPP_MENSAL/i,
+  elegibilidade: /SFTP_ECOMCONSULT_ELEGIBILIDADE/i,
+};
 const SAFRA_PATTERN = /(\d{2})[._](\d{2})[._](\d{2,4})/;
 const ACCEPTED_EXTENSIONS = [".csv", ".xlsx", ".txt"];
 
@@ -33,14 +36,20 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
   const [status, setStatus] = useState<"idle" | "validating" | "cleaning" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [errorDetail, setErrorDetail] = useState("");
-  const [stats, setStats] = useState<{ sellers?: number; kpis?: number; listings?: number } | null>(null);
+  const [stats, setStats] = useState<{ sellers?: number; kpis?: number; listings?: number; eligibility?: number } | null>(null);
   const [safraLabel, setSafraLabel] = useState("");
   const [progress, setProgress] = useState(0);
   const [activeGroup, setActiveGroup] = useState(0);
 
-  const functionName = uploadType === "live_listings" ? "import-live-listings" : "import-csv";
+  const functionName = uploadType === "live_listings"
+    ? "import-live-listings"
+    : uploadType === "elegibilidade"
+    ? "import-eligibility"
+    : "import-csv";
   const displayLabel = label || (uploadType === "live_listings"
     ? "📤 Upload Live Listings"
+    : uploadType === "elegibilidade"
+    ? "📤 Upload Elegibilidade (SFTP)"
     : "📤 Upload de Dados - Ecom Solutions (SFTP)");
 
   const validateFile = (file: File): { valid: boolean; safra: string; error?: string } => {
@@ -51,11 +60,15 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
       return { valid: false, safra: "", error: `Formato "${ext}" não suportado. Aceitos: ${ACCEPTED_EXTENSIONS.join(", ")}` };
     }
 
-    if (uploadType === "cpp_mensal" && !SFTP_PATTERN.test(name)) {
+    const pattern = SFTP_PATTERNS[uploadType];
+    if (pattern && !pattern.test(name)) {
+      const expected = uploadType === "elegibilidade"
+        ? "SFTP_ECOMCONSULT_ELEGIBILIDADE_..."
+        : "SFTP_ECOMCONSULT_CPP_MENSAL_...";
       return {
         valid: false,
         safra: "",
-        error: "❌ Arquivo fora do padrão esperado. Verifique o nome do arquivo SFTP (esperado: SFTP_ECOMCONSULT_CPP_MENSAL_...)",
+        error: `❌ Arquivo fora do padrão esperado. Verifique o nome do arquivo SFTP (esperado: ${expected})`,
       };
     }
 
@@ -121,6 +134,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
         sellers: data.sellers,
         kpis: data.kpis,
         listings: data.listings,
+        eligibility: data.eligibility,
       });
       setStatus("success");
       setMessage(`✅ Safra ${validation.safra} processada com sucesso no Peregrinus BI`);
@@ -236,6 +250,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
                 <div className="text-xs text-muted-foreground text-center space-y-0.5">
                   {stats.sellers != null && <p>{stats.sellers} sellers · {stats.kpis} registros de KPI</p>}
                   {stats.listings != null && <p>{stats.listings} registros de listings</p>}
+                  {stats.eligibility != null && <p>{stats.eligibility} itens de elegibilidade</p>}
                 </div>
               )}
               <Button variant="outline" size="sm" onClick={() => setOpen(false)}>

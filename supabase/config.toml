@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.import-live-listings]
 verify_jwt = false
+
+[functions.import-eligibility]
+verify_jwt = false

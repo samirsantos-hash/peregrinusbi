@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -16,7 +16,9 @@ import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
+import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
+import { useEligibility } from "@/hooks/useEligibility";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
@@ -75,6 +77,10 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
+  const { data: eligibilityItems } = useEligibility(
+    hasRealData ? selectedSeller : undefined
+  );
+
   const filteredKpis = useMemo(() => {
     let kpis: any[];
     if (hasRealData) {
@@ -107,6 +113,7 @@ const Index = () => {
   { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
   { id: "logistics", label: "Logística", icon: Truck },
   { id: "quality", label: "Qualidade", icon: Shield },
+  { id: "opportunities", label: "Oportunidades de Oferta", icon: Gift },
   { id: "reputation", label: "Reputação", icon: HeartPulse }];
 
 
@@ -139,6 +146,7 @@ const Index = () => {
             {isAdmin &&
             <>
                 <CsvUploadModal onSuccess={handleRefresh} />
+                <CsvUploadModal onSuccess={handleRefresh} uploadType="elegibilidade" />
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
                   <Settings className="w-4 h-4" />
                   Admin
@@ -211,6 +219,9 @@ const Index = () => {
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <QualityRadarPanel kpis={filteredKpis} />
                     <CriticalListingsTable listings={listingsQuality || []} />
+                  </TabsContent>
+                  <TabsContent value="opportunities" className="mt-0">
+                    <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0">
                     <ReputationPanel kpis={filteredKpis} />
