@@ -5,16 +5,21 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
+import ElasticityAdsChart from "./ElasticityAdsChart";
 import { fmtBRLCompact, fmtBRL, fmtNum } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
   revenue: number;
   adsInvestment: number;
+  gmv: number;
+  tgmv: number;
   roas: number;
   acos: number;
   tacos: number;
   cpa: number;
+  productName: string;
+  productId: string;
 }
 
 interface EfficiencyPanelProps {
@@ -180,6 +185,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      {/* Elasticity Ads vs Sales */}
+      <ElasticityAdsChart kpis={kpis} />
     </motion.div>
   );
 };
