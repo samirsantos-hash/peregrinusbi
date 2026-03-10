@@ -99,7 +99,6 @@ const Index = () => {
   { id: "executive", label: "Dashboard Executivo", icon: LayoutDashboard },
   { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
   { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
-  { id: "audit", label: "Auditoria de Anúncios", icon: ClipboardCheck },
   { id: "logistics", label: "Logística", icon: Truck },
   { id: "quality", label: "Qualidade", icon: Shield },
   { id: "reputation", label: "Reputação", icon: HeartPulse }];
