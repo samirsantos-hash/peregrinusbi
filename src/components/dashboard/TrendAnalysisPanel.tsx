@@ -46,9 +46,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         </div>
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Investimento Ads</span>
-          <span className="font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
-            R$ {ads.toLocaleString("pt-BR")}
-          </span>
+           <span className="font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
+             {fmtBRL(ads)}
+           </span>
         </div>
         {tgmvAds !== undefined && (
           <div className="flex justify-between items-center">
