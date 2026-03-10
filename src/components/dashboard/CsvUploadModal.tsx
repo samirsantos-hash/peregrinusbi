@@ -134,6 +134,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
         sellers: data.sellers,
         kpis: data.kpis,
         listings: data.listings,
+        eligibility: data.eligibility,
       });
       setStatus("success");
       setMessage(`✅ Safra ${validation.safra} processada com sucesso no Peregrinus BI`);
