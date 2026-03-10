@@ -12,10 +12,14 @@ interface KpiLike {
   date: string;
   revenue: number;
   adsInvestment: number;
+  gmv: number;
+  tgmv: number;
   roas: number;
   acos: number;
   tacos: number;
   cpa: number;
+  productName: string;
+  productId: string;
 }
 
 interface EfficiencyPanelProps {
