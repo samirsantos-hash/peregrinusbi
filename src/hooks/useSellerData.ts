@@ -34,6 +34,22 @@ export interface SellerKPI {
   scorePads: number;
   statusPhoto: string;
   statusTitle: string;
+  // LL Granular Scores (Técnico)
+  llPicturesScore: number;
+  llTitleScore: number;
+  llTechSpecsScore: number;
+  llDescriptionScore: number;
+  // LL Granular Scores (Oferta)
+  llPriceScore: number;
+  llStockAvailabilityScore: number;
+  llFreeShippingScore: number;
+  llPromotionsScore: number;
+  // Clips / Conteúdo
+  sellersClipsPubli: number;
+  visitasClips: number;
+  siClips: number;
+  ordersClips: number;
+  tgmvLcClips: number;
   // Competitiveness
   minPriceRival: number;
   visits: number;
