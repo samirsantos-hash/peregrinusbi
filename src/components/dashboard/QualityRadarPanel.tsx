@@ -90,6 +90,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
           tecnico: 0,
           oferta: 0,
           conteudo: 0,
+          _value: 0,
         })),
         avgScore: 0,
         scoreLevel: { text: "Sem Dados", color: "hsl(var(--muted-foreground))" },
