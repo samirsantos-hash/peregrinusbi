@@ -40,9 +40,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="space-y-1.5">
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Faturamento Bruto</span>
-          <span className="font-mono font-semibold" style={{ color: "hsl(199, 100%, 50%)" }}>
-            R$ {gmv.toLocaleString("pt-BR")}
-          </span>
+           <span className="font-mono font-semibold" style={{ color: "hsl(199, 100%, 50%)" }}>
+             {fmtBRL(gmv)}
+           </span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Investimento Ads</span>
