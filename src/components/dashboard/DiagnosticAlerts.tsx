@@ -52,7 +52,7 @@ const DiagnosticAlerts = ({ kpis }: DiagnosticAlertsProps) => {
     <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-          Diagnóstico Automático
+          DIAGNÓSTICO 
         </h3>
         <div className="flex gap-2">
           {criticalCount > 0 && (
