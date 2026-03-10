@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, ClipboardCheck, Loader2, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, ClipboardCheck, Loader2, Settings, LogOut, Shield, HeartPulse } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
