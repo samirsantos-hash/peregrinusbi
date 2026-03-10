@@ -250,6 +250,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
                 <div className="text-xs text-muted-foreground text-center space-y-0.5">
                   {stats.sellers != null && <p>{stats.sellers} sellers · {stats.kpis} registros de KPI</p>}
                   {stats.listings != null && <p>{stats.listings} registros de listings</p>}
+                  {stats.eligibility != null && <p>{stats.eligibility} itens de elegibilidade</p>}
                 </div>
               )}
               <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
