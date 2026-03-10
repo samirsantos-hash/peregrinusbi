@@ -359,11 +359,11 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
                     className="border-b border-border/50 hover:bg-muted/20 transition-colors"
                   >
                     <td className="py-2.5 px-3 font-medium">{p.productName}</td>
-                    <td className="text-right py-2.5 px-3 font-mono">{p.visits.toLocaleString()}</td>
-                    <td className="text-right py-2.5 px-3 font-mono text-destructive">{p.visitsExpensive.toLocaleString()}</td>
-                    <td className="text-right py-2.5 px-3 font-mono text-neon-blue">{p.visitsMatch.toLocaleString()}</td>
-                    <td className="text-right py-2.5 px-3 font-mono text-emerald">{p.visitsCheaper.toLocaleString()}</td>
-                    <td className="text-right py-2.5 px-3 font-mono">R$ {p.minPriceRival.toFixed(2)}</td>
+                    <td className="text-right py-2.5 px-3 font-mono">{p.visits.toLocaleString("pt-BR")}</td>
+                    <td className="text-right py-2.5 px-3 font-mono text-destructive">{p.visitsExpensive.toLocaleString("pt-BR")}</td>
+                    <td className="text-right py-2.5 px-3 font-mono text-neon-blue">{p.visitsMatch.toLocaleString("pt-BR")}</td>
+                    <td className="text-right py-2.5 px-3 font-mono text-emerald">{p.visitsCheaper.toLocaleString("pt-BR")}</td>
+                    <td className="text-right py-2.5 px-3 font-mono">{fmtBRL(p.minPriceRival)}</td>
                     <td className="text-center py-2.5 px-3">
                       <span className={`status-badge text-[11px] ${
                         pctExp > 30 ? "bg-destructive/10 text-destructive border-destructive/20" :
