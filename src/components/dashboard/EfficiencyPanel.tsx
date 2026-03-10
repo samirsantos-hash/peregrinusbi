@@ -185,6 +185,8 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
           </LineChart>
         </ResponsiveContainer>
       </div>
+      {/* Elasticity Ads vs Sales */}
+      <ElasticityAdsChart kpis={kpis} />
     </motion.div>
   );
 };
