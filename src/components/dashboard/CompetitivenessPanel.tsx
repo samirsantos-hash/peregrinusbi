@@ -8,6 +8,8 @@ import {
 import { TrendingDown, TrendingUp, AlertTriangle } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
+import PairplotMatrix from "./PairplotMatrix";
+import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 
 interface KpiLike {
   date: string;
