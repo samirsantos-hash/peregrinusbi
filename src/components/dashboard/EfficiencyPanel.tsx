@@ -5,6 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
+import ElasticityAdsChart from "./ElasticityAdsChart";
 import { fmtBRLCompact, fmtBRL, fmtNum } from "@/utils/formatters";
 
 interface KpiLike {
