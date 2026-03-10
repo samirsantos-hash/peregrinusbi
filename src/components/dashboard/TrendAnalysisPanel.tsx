@@ -9,6 +9,7 @@ import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import { startOfWeek, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { fmtBRL, fmtBRLCompact, fmtNum } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
@@ -39,29 +40,29 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="space-y-1.5">
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Faturamento Bruto</span>
-          <span className="font-mono font-semibold" style={{ color: "hsl(199, 100%, 50%)" }}>
-            R$ {gmv.toLocaleString("pt-BR")}
-          </span>
+           <span className="font-mono font-semibold" style={{ color: "hsl(199, 100%, 50%)" }}>
+             {fmtBRL(gmv)}
+           </span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Investimento Ads</span>
-          <span className="font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
-            R$ {ads.toLocaleString("pt-BR")}
-          </span>
+           <span className="font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
+             {fmtBRL(ads)}
+           </span>
         </div>
         {tgmvAds !== undefined && (
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Vendas via Ads</span>
-            <span className="font-mono font-semibold" style={{ color: "hsl(160, 84%, 39%)" }}>
-              R$ {tgmvAds.toLocaleString("pt-BR")}
-            </span>
+             <span className="font-mono font-semibold" style={{ color: "hsl(160, 84%, 39%)" }}>
+               {fmtBRL(tgmvAds)}
+             </span>
           </div>
         )}
         <div className="flex justify-between items-center border-t border-border/50 pt-1.5">
           <span className="text-muted-foreground font-medium">ROI (ROAS)</span>
-          <span className={`font-mono font-bold ${roas >= 2 ? "text-emerald" : "text-destructive"}`}>
-            {roas.toFixed(2)}x
-          </span>
+           <span className={`font-mono font-bold ${roas >= 2 ? "text-emerald" : "text-destructive"}`}>
+             {fmtNum(roas)}x
+           </span>
         </div>
       </div>
     </div>
@@ -361,24 +362,24 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
               {/* ROAS médio */}
               <div>
                 <p className="text-[11px] text-muted-foreground mb-1">ROAS Médio do Período</p>
-                <p className={`text-2xl font-mono font-bold ${insights.avgRoas >= 2 ? "emerald-text" : "critical-text"}`}>
-                  {insights.avgRoas.toFixed(2)}x
-                </p>
+                 <p className={`text-2xl font-mono font-bold ${insights.avgRoas >= 2 ? "emerald-text" : "critical-text"}`}>
+                   {fmtNum(insights.avgRoas)}x
+                 </p>
               </div>
 
               {/* Totals */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <p className="text-[11px] text-muted-foreground mb-0.5">Faturamento Total</p>
-                  <p className="text-sm font-mono font-semibold neon-text">
-                    R$ {(insights.totalGmv / 1000).toFixed(0)}K
-                  </p>
+                   <p className="text-sm font-mono font-semibold neon-text">
+                     {fmtBRLCompact(insights.totalGmv)}
+                   </p>
                 </div>
                 <div>
                   <p className="text-[11px] text-muted-foreground mb-0.5">Total Investido</p>
-                  <p className="text-sm font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
-                    R$ {(insights.totalAds / 1000).toFixed(0)}K
-                  </p>
+                   <p className="text-sm font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
+                     {fmtBRLCompact(insights.totalAds)}
+                   </p>
                 </div>
               </div>
 
@@ -386,9 +387,9 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
               <div className="border-t border-border/50 pt-3 space-y-2">
                 <p className="text-[11px] text-muted-foreground mb-1">Investimento Ideal (3% do Faturamento)</p>
                 <div className="flex items-center justify-between">
-                  <p className="text-lg font-mono font-bold text-primary">
-                    R$ {((insights.totalGmv * 0.03) / 1000).toFixed(1)}K
-                  </p>
+                   <p className="text-lg font-mono font-bold text-primary">
+                     {fmtBRLCompact(insights.totalGmv * 0.03)}
+                   </p>
                   {insights.totalGmv > 0 && (
                     <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
                       insights.totalAds <= insights.totalGmv * 0.03

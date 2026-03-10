@@ -10,6 +10,7 @@ import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
+import { fmtBRL, fmtNum } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
@@ -70,7 +71,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
       </p>
       <p className="text-muted-foreground">Força Competitiva: <span className="text-foreground font-mono">{d.forcaCompetitiva.toFixed(1)}</span></p>
       <p className="text-muted-foreground">Atratividade: <span className="text-foreground font-mono">{d.atratividade.toFixed(1)}</span></p>
-      <p className="text-muted-foreground">GMV: <span className="text-foreground font-mono">R$ {d.gmv.toLocaleString("pt-BR")}</span></p>
+      <p className="text-muted-foreground">GMV: <span className="text-foreground font-mono">{fmtBRL(d.gmv)}</span></p>
       <p className="mt-1 font-medium" style={{ color: q.color }}>
         Status: {q.label}
       </p>
@@ -236,10 +237,10 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
       {/* Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: "Total Visitas", value: totalVisits.toLocaleString(), icon: TrendingUp, color: "neon-text", tooltip: "Total de visitas nos anúncios do seller no período." },
-          { label: "Visitas c/ Preço Alto", value: totalExpensive.toLocaleString(), icon: AlertTriangle, color: "text-destructive", tooltip: "Visitas onde seu preço era maior que o concorrente mais barato." },
-          { label: "% Preço Não Competitivo", value: `${pctExpensive.toFixed(1)}%`, icon: TrendingDown, color: pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: "Proporção de visitas onde seu preço era mais caro. Acima de 30% é crítico." },
-          { label: "Preço Rival Mínimo", value: `R$ ${(products[0]?.minPriceRival || 0).toFixed(2)}`, icon: TrendingDown, color: "neon-text", tooltip: "Menor preço encontrado entre seus concorrentes diretos." },
+          { label: "Total Visitas", value: totalVisits.toLocaleString("pt-BR"), icon: TrendingUp, color: "neon-text", tooltip: "Total de visitas nos anúncios do seller no período." },
+          { label: "Visitas c/ Preço Alto", value: totalExpensive.toLocaleString("pt-BR"), icon: AlertTriangle, color: "text-destructive", tooltip: "Visitas onde seu preço era maior que o concorrente mais barato." },
+          { label: "% Preço Não Competitivo", value: `${fmtNum(pctExpensive, 1)}%`, icon: TrendingDown, color: pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: "Proporção de visitas onde seu preço era mais caro. Acima de 30% é crítico." },
+          { label: "Preço Rival Mínimo", value: fmtBRL(products[0]?.minPriceRival || 0), icon: TrendingDown, color: "neon-text", tooltip: "Menor preço encontrado entre seus concorrentes diretos." },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
             <div className="flex items-center gap-1.5 mb-1">
@@ -358,11 +359,11 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
                     className="border-b border-border/50 hover:bg-muted/20 transition-colors"
                   >
                     <td className="py-2.5 px-3 font-medium">{p.productName}</td>
-                    <td className="text-right py-2.5 px-3 font-mono">{p.visits.toLocaleString()}</td>
-                    <td className="text-right py-2.5 px-3 font-mono text-destructive">{p.visitsExpensive.toLocaleString()}</td>
-                    <td className="text-right py-2.5 px-3 font-mono text-neon-blue">{p.visitsMatch.toLocaleString()}</td>
-                    <td className="text-right py-2.5 px-3 font-mono text-emerald">{p.visitsCheaper.toLocaleString()}</td>
-                    <td className="text-right py-2.5 px-3 font-mono">R$ {p.minPriceRival.toFixed(2)}</td>
+                    <td className="text-right py-2.5 px-3 font-mono">{p.visits.toLocaleString("pt-BR")}</td>
+                    <td className="text-right py-2.5 px-3 font-mono text-destructive">{p.visitsExpensive.toLocaleString("pt-BR")}</td>
+                    <td className="text-right py-2.5 px-3 font-mono text-neon-blue">{p.visitsMatch.toLocaleString("pt-BR")}</td>
+                    <td className="text-right py-2.5 px-3 font-mono text-emerald">{p.visitsCheaper.toLocaleString("pt-BR")}</td>
+                    <td className="text-right py-2.5 px-3 font-mono">{fmtBRL(p.minPriceRival)}</td>
                     <td className="text-center py-2.5 px-3">
                       <span className={`status-badge text-[11px] ${
                         pctExp > 30 ? "bg-destructive/10 text-destructive border-destructive/20" :
