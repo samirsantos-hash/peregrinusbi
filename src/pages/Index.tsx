@@ -45,7 +45,7 @@ const Index = () => {
       custId: s.custId,
       cluster: s.cluster,
       subCluster: s.subCluster,
-      state: s.state,
+      state: s.state
     }));
     if (isAdmin) return mockSellers;
     return [];
@@ -94,12 +94,12 @@ const Index = () => {
   }, [queryClient, selectedSeller]);
 
   const tabs = [
-    { id: "executive", label: "Dashboard Executivo", icon: LayoutDashboard },
-    { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
-    { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
-    { id: "audit", label: "Auditoria de Anúncios", icon: ClipboardCheck },
-    { id: "logistics", label: "Logística", icon: Truck },
-  ];
+  { id: "executive", label: "Dashboard Executivo", icon: LayoutDashboard },
+  { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
+  { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
+  { id: "audit", label: "Auditoria de Anúncios", icon: ClipboardCheck },
+  { id: "logistics", label: "Logística", icon: Truck }];
+
 
   const isLoading = !sellersFetched || hasRealData && loadingKpis;
 
@@ -118,7 +118,7 @@ const Index = () => {
             </div>
             <div className="w-2 h-8 rounded-full bg-neon-blue" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Peregrinus Dashboard</h1>
+              <h1 className="text-xl font-bold tracking-tight">Peregrinus Business Intelligence</h1>
               <p className="text-xs text-muted-foreground">
                 Gestão de Performance · Mercado Livre
                 {sellersFetched && hasRealData && <span className="ml-2 text-emerald">● Dados reais</span>}
@@ -153,38 +153,38 @@ const Index = () => {
         {!isLoading && sellers.length > 0 &&
         <>
             <DashboardHeader
-              sellers={sellers}
-              selectedSeller={selectedSeller}
-              onSellerChange={setSelectedSeller}
-              dateRange={dateRange}
-              onDateRangeChange={setDateRange}
-              kpis={filteredKpis}
-              onRefresh={handleRefresh}
-              isRefreshing={isRefreshing} />
+            sellers={sellers}
+            selectedSeller={selectedSeller}
+            onSellerChange={setSelectedSeller}
+            dateRange={dateRange}
+            onDateRangeChange={setDateRange}
+            kpis={filteredKpis}
+            onRefresh={handleRefresh}
+            isRefreshing={isRefreshing} />
 
             <DiagnosticAlerts kpis={filteredKpis} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto flex-wrap">
                 {tabs.map((tab) =>
-                <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className="flex items-center gap-2 px-4 py-2.5 text-sm data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="flex items-center gap-2 px-4 py-2.5 text-sm data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
                     <tab.icon className="w-4 h-4" />
                     {tab.label}
                   </TabsTrigger>
-                )}
+              )}
               </TabsList>
 
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={`${activeTab}-${selectedSeller}`}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
-                  className="mt-5">
+                key={`${activeTab}-${selectedSeller}`}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     <ExecutivePanel kpis={filteredKpis} />
                     <TrendAnalysisPanel kpis={filteredKpis} />
@@ -207,8 +207,8 @@ const Index = () => {
           </>
         }
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;
