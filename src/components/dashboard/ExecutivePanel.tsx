@@ -115,6 +115,11 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       {/* KPI Cards */}
+      <div className="flex items-center justify-between mb-1">
+        <p className="text-xs text-muted-foreground font-medium">
+          Período analisado: <span className="font-mono font-semibold text-foreground">{monthsAnalyzed} {monthsAnalyzed === 1 ? "mês" : "meses"}</span> de dados
+        </p>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {metrics.map((m, i) => (
           <motion.div
