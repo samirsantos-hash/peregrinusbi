@@ -204,6 +204,22 @@ Deno.serve(async (req) => {
         rep_claims_rate: parseBrNumber(cols[iRepClaims] || "0"),
         rep_delayed_ht_rate: parseBrNumber(cols[iRepDelayed] || "0"),
         pontuacao_ipi: parseBrNumber(cols[iPontuacaoIpi] || "0"),
+        // LL Granular – Técnico
+        ll_pictures_score: iLlPictures >= 0 ? parseBrNumber(cols[iLlPictures] || "0") : 0,
+        ll_title_score: iLlTitle >= 0 ? parseBrNumber(cols[iLlTitle] || "0") : 0,
+        ll_tech_specs_score: iLlTechSpecs >= 0 ? parseBrNumber(cols[iLlTechSpecs] || "0") : 0,
+        ll_description_score: iLlDescription >= 0 ? parseBrNumber(cols[iLlDescription] || "0") : 0,
+        // LL Granular – Oferta
+        ll_price_score: iLlPrice >= 0 ? parseBrNumber(cols[iLlPrice] || "0") : 0,
+        ll_stock_availability_score: iLlStock >= 0 ? parseBrNumber(cols[iLlStock] || "0") : 0,
+        ll_free_shipping_score: iLlFreeShipping >= 0 ? parseBrNumber(cols[iLlFreeShipping] || "0") : 0,
+        ll_promotions_score: iLlPromotions >= 0 ? parseBrNumber(cols[iLlPromotions] || "0") : 0,
+        // Clips / Conteúdo
+        sellers_clips_publi: iSellersClipsPub >= 0 ? parseBrNumber(cols[iSellersClipsPub] || "0") : 0,
+        visitas_clips: iVisitasClips >= 0 ? parseBrNumber(cols[iVisitasClips] || "0") : 0,
+        si_clips: iSiClips >= 0 ? parseBrNumber(cols[iSiClips] || "0") : 0,
+        orders_clips: iOrdersClips >= 0 ? parseBrNumber(cols[iOrdersClips] || "0") : 0,
+        tgmv_lc_clips: iTgmvClips >= 0 ? parseBrNumber(cols[iTgmvClips] || "0") : 0,
       };
     }).filter(Boolean);
 
