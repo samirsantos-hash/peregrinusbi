@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { LayoutDashboard, DollarSign, Swords, Truck, ClipboardCheck, Loader2, Settings, LogOut } from "lucide-react";
 import { type DateRange } from "react-day-picker";
-import { subDays } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
@@ -23,12 +23,15 @@ import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/moc
 const Index = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
+  // Default to full history
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: subDays(new Date(), 365),
+    from: new Date("2020-01-01"),
     to: new Date()
   });
   const [activeTab, setActiveTab] = useState("executive");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
 
@@ -74,15 +77,21 @@ const Index = () => {
 
     if (!dateRange?.from) return kpis;
 
-    // Compare date strings (YYYY-MM-DD) to avoid timezone issues
     const fromStr = dateRange.from.toISOString().slice(0, 10);
     const toStr = (dateRange.to || dateRange.from).toISOString().slice(0, 10);
 
     return kpis.filter((k: any) => {
-      const dateStr = k.date; // "YYYY-MM-DD"
+      const dateStr = k.date;
       return dateStr >= fromStr && dateStr <= toStr;
     });
   }, [hasRealData, dbKpis, selectedSeller, dateRange]);
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ["sellers"] });
+    await queryClient.invalidateQueries({ queryKey: ["seller-kpis", selectedSeller] });
+    setIsRefreshing(false);
+  }, [queryClient, selectedSeller]);
 
   const tabs = [
     { id: "executive", label: "Dashboard Executivo", icon: LayoutDashboard },
@@ -120,7 +129,7 @@ const Index = () => {
           <div className="flex items-center gap-2">
             {isAdmin &&
             <>
-                <CsvUploadModal onSuccess={() => window.location.reload()} />
+                <CsvUploadModal onSuccess={handleRefresh} />
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
                   <Settings className="w-4 h-4" />
                   Admin
@@ -149,7 +158,9 @@ const Index = () => {
               onSellerChange={setSelectedSeller}
               dateRange={dateRange}
               onDateRangeChange={setDateRange}
-              kpis={filteredKpis} />
+              kpis={filteredKpis}
+              onRefresh={handleRefresh}
+              isRefreshing={isRefreshing} />
 
             <DiagnosticAlerts kpis={filteredKpis} />
 
