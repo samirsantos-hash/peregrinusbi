@@ -71,6 +71,10 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
+  const { data: listingsQuality } = useListingsQuality(
+    hasRealData ? selectedSeller : undefined
+  );
+
   const filteredKpis = useMemo(() => {
     let kpis: any[];
     if (hasRealData) {
