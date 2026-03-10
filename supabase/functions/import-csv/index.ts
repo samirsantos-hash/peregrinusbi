@@ -108,6 +108,8 @@ Deno.serve(async (req) => {
     const iSiClips = colIdx("SI_CLIPS");
     const iOrdersClips = colIdx("ORDERS_CLIPS");
     const iTgmvClips = colIdx("TGMV_LC_CLIPS");
+    // Item ID (MLB)
+    const iItemId = colIdx("ITE_ITEM_ID");
 
     // Process rows - collect unique sellers first
     const sellerMap = new Map<string, { nickname: string; cluster: string; subCluster: string; state: string }>();
