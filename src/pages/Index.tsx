@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, ClipboardCheck, Loader2, Settings, LogOut, Shield, HeartPulse } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,7 +14,6 @@ import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
-import AuditPanel from "@/components/dashboard/AuditPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
@@ -100,7 +99,6 @@ const Index = () => {
   { id: "executive", label: "Dashboard Executivo", icon: LayoutDashboard },
   { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
   { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
-  { id: "audit", label: "Auditoria de Anúncios", icon: ClipboardCheck },
   { id: "logistics", label: "Logística", icon: Truck },
   { id: "quality", label: "Qualidade", icon: Shield },
   { id: "reputation", label: "Reputação", icon: HeartPulse }];
@@ -200,9 +198,6 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0">
                     <CompetitivenessPanel kpis={filteredKpis} sellers={sellers.map(s => ({ id: s.id, cluster: (s as any).cluster }))} />
-                  </TabsContent>
-                  <TabsContent value="audit" className="mt-0">
-                    <AuditPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0">
                     <LogisticsPanel kpis={filteredKpis} />
