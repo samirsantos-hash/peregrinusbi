@@ -70,35 +70,36 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   );
 };
 
-/* ── Quadrant background ── */
-const QuadrantBackground = ({ xAxisMap, yAxisMap }: any) => {
+/* ── Quadrant background (McKinsey) ── */
+const QuadrantBackground = ({ xAxisMap, yAxisMap, medianX, medianY }: any) => {
   const xAxis = xAxisMap && Object.values(xAxisMap)[0] as any;
   const yAxis = yAxisMap && Object.values(yAxisMap)[0] as any;
   if (!xAxis || !yAxis) return null;
 
-  const cx = xAxis.scale(0);
+  const cx = xAxis.scale(medianX ?? 50);
+  const cy = yAxis.scale(medianY ?? 50);
   const left = xAxis.x;
   const right = xAxis.x + xAxis.width;
   const top = yAxis.y;
-  const cy = yAxis.y + yAxis.height / 2;
+  const bottom = yAxis.y + yAxis.height;
 
   return (
     <g>
-      {/* Top-Left: Verde — Volume & Tração */}
-      <rect x={left} y={top} width={cx - left} height={cy - top} fill="hsl(160, 84%, 39%)" fillOpacity={0.04} />
-      <text x={left + 8} y={top + 16} fill="hsl(160, 84%, 39%)" fontSize={10} opacity={0.6}>Volume & Tração</text>
+      {/* Top-Right: Investir Agressivamente (Verde) */}
+      <rect x={cx} y={top} width={right - cx} height={cy - top} fill="hsl(160, 84%, 39%)" fillOpacity={0.05} />
+      <text x={right - 8} y={top + 16} fill="hsl(160, 84%, 39%)" fontSize={10} opacity={0.7} textAnchor="end">Investir Agressivamente</text>
 
-      {/* Top-Right: Azul — Premium */}
-      <rect x={cx} y={top} width={right - cx} height={cy - top} fill="hsl(199, 100%, 50%)" fillOpacity={0.04} />
-      <text x={right - 8} y={top + 16} fill="hsl(199, 100%, 50%)" fontSize={10} opacity={0.6} textAnchor="end">Premium / Campeões</text>
+      {/* Top-Left: Otimizar Conversão (Azul) */}
+      <rect x={left} y={top} width={cx - left} height={cy - top} fill="hsl(199, 100%, 50%)" fillOpacity={0.05} />
+      <text x={left + 8} y={top + 16} fill="hsl(199, 100%, 50%)" fontSize={10} opacity={0.7}>Otimizar Conversão</text>
 
-      {/* Bottom-Left: Amarelo — Invisíveis */}
-      <rect x={left} y={cy} width={cx - left} height={yAxis.height - (cy - top)} fill="hsl(40, 95%, 55%)" fillOpacity={0.04} />
-      <text x={left + 8} y={yAxis.y + yAxis.height - 8} fill="hsl(40, 95%, 55%)" fontSize={10} opacity={0.6}>Invisíveis</text>
+      {/* Bottom-Right: Manter Eficiência (Amarelo) */}
+      <rect x={cx} y={cy} width={right - cx} height={bottom - cy} fill="hsl(40, 95%, 55%)" fillOpacity={0.05} />
+      <text x={right - 8} y={bottom - 8} fill="hsl(40, 95%, 55%)" fontSize={10} opacity={0.7} textAnchor="end">Manter Eficiência</text>
 
-      {/* Bottom-Right: Vermelho — Fora de Mercado */}
-      <rect x={cx} y={cy} width={right - cx} height={yAxis.height - (cy - top)} fill="hsl(0, 84%, 60%)" fillOpacity={0.04} />
-      <text x={right - 8} y={yAxis.y + yAxis.height - 8} fill="hsl(0, 84%, 60%)" fontSize={10} opacity={0.6} textAnchor="end">Fora de Mercado</text>
+      {/* Bottom-Left: Descontinuar / Liquidar (Vermelho) */}
+      <rect x={left} y={cy} width={cx - left} height={bottom - cy} fill="hsl(0, 84%, 60%)" fillOpacity={0.05} />
+      <text x={left + 8} y={bottom - 8} fill="hsl(0, 84%, 60%)" fontSize={10} opacity={0.7}>Descontinuar / Liquidar</text>
     </g>
   );
 };
