@@ -43,12 +43,22 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
+  // Calculate actual data span (not the date picker range) to avoid inflated denominators
   const rangeDays = useMemo(() => {
-    if (dateRange?.from && dateRange?.to) {
-      return Math.max(differenceInDays(dateRange.to, dateRange.from), 1);
-    }
-    return 365;
-  }, [dateRange]);
+    if (kpis.length === 0) return 30;
+    // Use the actual number of distinct data points as months, estimate ~30 days each
+    // This prevents "Todo Período" from dividing by thousands of empty days
+    const dates = kpis.map((k: any) => k.date).filter(Boolean);
+    if (dates.length === 0) return 30;
+    const uniqueDates = [...new Set(dates)].sort();
+    const firstDate = uniqueDates[0];
+    const lastDate = uniqueDates[uniqueDates.length - 1];
+    const first = new Date(firstDate + "T00:00:00");
+    const last = new Date(lastDate + "T00:00:00");
+    const diff = differenceInDays(last, first);
+    // If all data is from one date/month, use 30 as baseline
+    return Math.max(diff, 30);
+  }, [kpis]);
 
   const validUplifts = kpis.filter((k) => k.upliftGmvM1 !== 0);
   const avgUplift = validUplifts.length > 0
