@@ -138,6 +138,36 @@ const Admin = () => {
     }
   };
 
+  const handleResetPassword = async (userId: string, email: string) => {
+    if (!confirm(`Gerar nova senha temporária para ${email}?`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "reset_password", targetUserId: userId },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Nova senha gerada!", description: `Senha: ${data.tempPassword}` });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+
+  const togglePasswordVisibility = (id: string) => {
+    setVisiblePasswords((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Senha copiada!" });
+  };
+
   const toggleCustId = (custId: string) => {
     setSelectedCustIds((prev) =>
       prev.includes(custId) ? prev.filter((c) => c !== custId) : [...prev, custId]
