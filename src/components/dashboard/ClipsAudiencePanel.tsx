@@ -34,6 +34,15 @@ const fmtBRL = (v: number) => `R$ ${fmt(v)}`;
 
 const pct = (a: number, b: number) => (b > 0 ? (a / b) * 100 : 0);
 
+/** Normalize discount value for display. Values >1 are treated as already in % form. */
+const fmtDiscount = (v: number): string => {
+  if (v <= 0) return "—";
+  // If stored as decimal (e.g. 0.35 = 35%), multiply by 100
+  if (v > 0 && v <= 1) return `${(v * 100).toFixed(1)}%`;
+  // Already in percentage form (e.g. 5.94 = 5.94%)
+  return `${v.toFixed(1)}%`;
+};
+
 /* ── Metric Card ── */
 const MetricCard = ({
   icon: Icon, label, value, sub, alert, tooltip, accentClass = "text-neon-blue",
