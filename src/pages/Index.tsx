@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +17,7 @@ import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
 import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
+import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
@@ -113,6 +114,7 @@ const Index = () => {
   { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
   { id: "logistics", label: "Logística", icon: Truck },
   { id: "quality", label: "Qualidade", icon: Shield },
+  { id: "clips", label: "Clips & Audiência", icon: Video },
   { id: "opportunities", label: "Oportunidades de Oferta", icon: Gift },
   { id: "reputation", label: "Reputação", icon: HeartPulse }];
 
@@ -219,6 +221,9 @@ const Index = () => {
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <QualityRadarPanel kpis={filteredKpis} />
                     <CriticalListingsTable listings={listingsQuality || []} />
+                  </TabsContent>
+                  <TabsContent value="clips" className="mt-0">
+                    <ClipsAudiencePanel kpis={filteredKpis} eligibilityItems={eligibilityItems || []} />
                   </TabsContent>
                   <TabsContent value="opportunities" className="mt-0">
                     <OpportunitiesPanel items={eligibilityItems || []} />
