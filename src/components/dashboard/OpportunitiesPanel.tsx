@@ -257,10 +257,10 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
                       {item.pedidos7d.toLocaleString("pt-BR")}
                     </td>
                     <td className="text-right py-2 px-2 font-mono text-xs">
-                      {fmtNum(item.discountTotal, 1)}%
+                      {fmtNum(item.discountTotal / 10, 1)}%
                     </td>
                     <td className="text-right py-2 px-2 font-mono text-xs text-emerald">
-                      {fmtNum(item.discountBest, 1)}%
+                      {fmtNum(item.discountBest / 10, 1)}%
                     </td>
                     <td className="text-right py-2 px-2 font-mono text-xs">
                       {item.gainAttractiveness > 0 ? (
