@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
@@ -8,14 +8,18 @@ import {
   Eye, Video, TrendingUp, Flame, AlertTriangle,
   Play, ShoppingCart, ExternalLink, ChevronDown, ChevronUp,
   FileVideo, Clapperboard, Target, Monitor, CheckCircle2, Circle,
+  Ban,
 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
+import { Badge } from "@/components/ui/badge";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { EligibilityItem } from "@/hooks/useEligibility";
+import type { ListingQuality } from "@/hooks/useListingsQuality";
 
 interface ClipsAudiencePanelProps {
   kpis: SellerKPI[];
   eligibilityItems: EligibilityItem[];
+  listingsQuality?: ListingQuality[];
   sellerCustIdMap?: Record<string, string>;
   selectedSeller?: string;
 }
@@ -81,27 +85,52 @@ const AUDIT_CHECKLIST = [
   { icon: Monitor, label: "Demonstração de Uso", question: "O produto é mostrado sendo utilizado na prática (Contexto Real)?" },
 ];
 
+/* ── Video Status Logic ── */
+type VideoStatus = "no-video" | "low-conversion" | "no-reach" | "champion";
+
+function getVideoStatus(
+  hasVideo: boolean,
+  ordersClips: number,
+  visitasClips: number,
+  siClips: number,
+  avgOrdersClips: number,
+): { status: VideoStatus; label: string; badgeClass: string } {
+  if (!hasVideo) {
+    return { status: "no-video", label: "Sem Vídeo", badgeClass: "bg-destructive/15 text-destructive border-destructive/20" };
+  }
+  // Has video but zero reach
+  if (visitasClips === 0 && siClips === 0) {
+    return { status: "no-reach", label: "Sem Alcance", badgeClass: "bg-destructive/15 text-destructive border-destructive/20" };
+  }
+  // Has video, has some reach, but low conversion
+  if (ordersClips < avgOrdersClips || ordersClips < 3) {
+    return { status: "low-conversion", label: "Otimizar Roteiro", badgeClass: "bg-neon-blue/15 text-neon-blue border-neon-blue/20" };
+  }
+  return { status: "champion", label: "Vídeo Campeão", badgeClass: "bg-emerald/10 text-emerald border-emerald/20" };
+}
+
+/* ── Hot Item Card ── */
 interface HotItemCardProps {
   item: EligibilityItem;
-  clipsPubli: number;
-  avgSiClips: number;
-  avgOrdersClips: number;
+  videoStatus: { status: VideoStatus; label: string; badgeClass: string };
   clipsLink: string | null;
   idx: number;
 }
 
-const HotItemCard = ({ item, clipsPubli, avgSiClips, avgOrdersClips, clipsLink, idx }: HotItemCardProps) => {
+const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) => {
   const [expanded, setExpanded] = useState(false);
   const [checks, setChecks] = useState<boolean[]>(new Array(AUDIT_CHECKLIST.length).fill(false));
-
-  const hasVideo = clipsPubli > 0;
-  const lowPerformance = hasVideo && (avgSiClips < 5 || avgOrdersClips < 3);
 
   const toggleCheck = (i: number) => {
     const next = [...checks];
     next[i] = !next[i];
     setChecks(next);
   };
+
+  // Format discount properly — if value > 1 it's already in percent form (e.g. 35 means 35%)
+  const discountDisplay = item.discountBest > 0
+    ? `${item.discountBest > 1 ? Math.round(item.discountBest) : Math.round(item.discountBest * 100)}%`
+    : "—";
 
   return (
     <motion.div
@@ -110,7 +139,6 @@ const HotItemCard = ({ item, clipsPubli, avgSiClips, avgOrdersClips, clipsLink, 
       transition={{ delay: idx * 0.05 }}
       className="glass-card overflow-hidden"
     >
-      {/* Header row */}
       <button
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/20 transition-colors"
@@ -128,42 +156,42 @@ const HotItemCard = ({ item, clipsPubli, avgSiClips, avgOrdersClips, clipsLink, 
             <ExternalLink className="w-3 h-3 shrink-0 opacity-60" />
           </a>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            {item.pedidos7d} pedidos/7d · Estoque: {item.estoqueMedio7d}
+            {Math.round(item.pedidos7d)} ped/7d · Est: {Math.round(item.estoqueMedio7d)} · Desc: {discountDisplay}
           </p>
         </div>
-        {/* Status badge */}
-        <div className="shrink-0">
-          {!hasVideo ? (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
-              <FileVideo className="w-3 h-3" /> Gravação Urgente
-            </span>
-          ) : lowPerformance ? (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border"
-              style={{ backgroundColor: "hsl(50 100% 50% / 0.12)", color: "hsl(50 100% 50%)", borderColor: "hsl(50 100% 50% / 0.25)" }}
-            >
-              <AlertTriangle className="w-3 h-3" /> Requer Novo Roteiro
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald/10 text-emerald border border-emerald/20">
-              <CheckCircle2 className="w-3 h-3" /> OK
-            </span>
-          )}
-        </div>
+        <Badge className={`shrink-0 text-[11px] ${videoStatus.badgeClass}`}>
+          {videoStatus.status === "no-video" && <FileVideo className="w-3 h-3 mr-1" />}
+          {videoStatus.status === "low-conversion" && <AlertTriangle className="w-3 h-3 mr-1" />}
+          {videoStatus.status === "no-reach" && <Ban className="w-3 h-3 mr-1" />}
+          {videoStatus.status === "champion" && <CheckCircle2 className="w-3 h-3 mr-1" />}
+          {videoStatus.label}
+        </Badge>
         {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
       </button>
 
-      {/* Expanded checklist */}
       {expanded && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-        >
-            <div className="px-4 pb-4 space-y-3 border-t border-border/50 pt-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Diagnóstico de Produção
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.2 }}>
+          <div className="px-4 pb-4 space-y-3 border-t border-border/50 pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Diagnóstico de Produção
+            </p>
+            {videoStatus.status === "no-video" ? (
+              <p className="text-xs text-destructive flex items-center gap-1.5">
+                <FileVideo className="w-3.5 h-3.5" />
+                🎥 Gravação Urgente — Sem Vídeo Publicado
               </p>
+            ) : videoStatus.status === "no-reach" ? (
+              <p className="text-xs text-destructive flex items-center gap-1.5">
+                <Ban className="w-3.5 h-3.5" />
+                🚫 Vídeo sem Alcance (Verificar Indexação ou Qualidade)
+              </p>
+            ) : (
               <div className="space-y-2">
+                {videoStatus.status === "low-conversion" && (
+                  <p className="text-xs font-medium" style={{ color: "hsl(50 100% 50%)" }}>
+                    ⚠️ Refazer Roteiro/Edição (Baixa Conversão)
+                  </p>
+                )}
                 {AUDIT_CHECKLIST.map((c, i) => (
                   <button
                     key={c.label}
@@ -184,32 +212,35 @@ const HotItemCard = ({ item, clipsPubli, avgSiClips, avgOrdersClips, clipsLink, 
                   </button>
                 ))}
               </div>
+            )}
 
-              {/* Action bar */}
-              <div className="flex items-center gap-3 pt-2 border-t border-border/30">
-                <span className="text-xs text-warning font-medium flex items-center gap-1">
-                  <Clapperboard className="w-3.5 h-3.5" />
-                  {hasVideo ? "Revisar Roteiro e Edição (Foco em Conversão)" : "Gravação Urgente — Sem Vídeo Publicado"}
-                </span>
-                {clipsLink && (
-                  <a
-                    href={clipsLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ml-auto text-xs text-neon-blue hover:underline flex items-center gap-1"
-                  >
-                    Ver Clips do Seller <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
-              </div>
+            <div className="flex items-center gap-3 pt-2 border-t border-border/30">
+              <span className="text-xs text-warning font-medium flex items-center gap-1">
+                <Clapperboard className="w-3.5 h-3.5" />
+                {videoStatus.status === "no-video"
+                  ? "Gravação Urgente — Sem Vídeo Publicado"
+                  : "Revisar Roteiro e Edição (Foco em Conversão)"}
+              </span>
+              {clipsLink && (
+                <a
+                  href={clipsLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-auto text-xs text-neon-blue hover:underline flex items-center gap-1"
+                >
+                  Ver Clips do Seller <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
             </div>
-          </motion.div>
-        )}
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 };
 
-const ClipsAudiencePanel = ({ kpis, eligibilityItems, sellerCustIdMap, selectedSeller }: ClipsAudiencePanelProps) => {
+/* ── Main Panel ── */
+const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCustIdMap, selectedSeller }: ClipsAudiencePanelProps) => {
   /* ── 1. Aggregate KPI totals ── */
   const totals = useMemo(() => {
     const t = { visits: 0, visitasClips: 0, tgmvClips: 0, ordersClips: 0, siClips: 0, clipsPubli: 0 };
@@ -230,7 +261,34 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, sellerCustIdMap, selectedS
   const videoPct = pct(totals.visitasClips, totals.visits);
   const lowExposure = videoPct < 5 && totals.visits > 0;
 
-  /* ── 2. Temporal data for combo chart ── */
+  /* ── 2. Per-item video map from listings quality ── */
+  const itemVideoMap = useMemo(() => {
+    const map = new Map<string, { clipsPubli: number; visitasClips: number; siClips: number; ordersClips: number }>();
+    if (!listingsQuality) return map;
+    for (const lq of listingsQuality) {
+      map.set(lq.itemId, {
+        clipsPubli: lq.sellersClipsPubli,
+        visitasClips: lq.visitasClips,
+        siClips: lq.siClips,
+        ordersClips: lq.ordersClips,
+      });
+    }
+    return map;
+  }, [listingsQuality]);
+
+  /* ── 3. Count of items with videos ── */
+  const itemsWithVideo = useMemo(() => {
+    if (!listingsQuality) return 0;
+    return listingsQuality.filter(lq => lq.sellersClipsPubli > 0).length;
+  }, [listingsQuality]);
+
+  /* ── 4. Average orders for threshold ── */
+  const avgOrdersClips = useMemo(() => {
+    if (kpis.length === 0) return 0;
+    return kpis.reduce((s, k) => s + k.ordersClips, 0) / kpis.length;
+  }, [kpis]);
+
+  /* ── 5. Temporal data for combo chart ── */
   const chartData = useMemo(() =>
     kpis.map((k) => ({
       date: k.date.slice(0, 7),
@@ -239,32 +297,65 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, sellerCustIdMap, selectedS
     }))
   , [kpis]);
 
-  /* ── 3. Top 5 items by pedidos ── */
+  /* ── 6. Top 5 items by pedidos — deduplicated ── */
   const topContentItems = useMemo(() => {
-    const withClips = eligibilityItems
-      .filter((e) => e.pedidos7d > 0)
+    const seen = new Set<string>();
+    return eligibilityItems
+      .filter((e) => {
+        if (e.pedidos7d <= 0 || seen.has(e.itemId)) return false;
+        seen.add(e.itemId);
+        return true;
+      })
       .sort((a, b) => b.pedidos7d - a.pedidos7d)
       .slice(0, 5);
-    return withClips;
   }, [eligibilityItems]);
 
-  /* ── 4. Hot items: high visits but low clip conversion ── */
+  /* ── 7. Hot items: high pedidos, deduplicated ── */
   const hotItems = useMemo(() => {
-    const avgSi = kpis.length > 0 ? kpis.reduce((s, k) => s + k.siClips, 0) / kpis.length : 0;
-    const avgOrders = kpis.length > 0 ? kpis.reduce((s, k) => s + k.ordersClips, 0) / kpis.length : 0;
+    const seen = new Set<string>();
     return eligibilityItems
-      .filter((e) => e.pedidos7d > 5)
+      .filter((e) => {
+        if (e.pedidos7d <= 5 || seen.has(e.itemId)) return false;
+        seen.add(e.itemId);
+        return true;
+      })
       .sort((a, b) => b.pedidos7d - a.pedidos7d)
-      .slice(0, 8)
-      .map((item) => ({ item, avgSi, avgOrders }));
-  }, [eligibilityItems, kpis]);
+      .slice(0, 8);
+  }, [eligibilityItems]);
 
-  /* ── 5. Conversion rate ── */
+  /* ── 8. Conversion rate ── */
   const conversionRate = pct(totals.ordersClips, totals.visitasClips);
 
   /* ── Clips link for seller ── */
   const sellerCustId = selectedSeller && sellerCustIdMap ? sellerCustIdMap[selectedSeller] : null;
   const clipsLink = sellerCustId ? `https://lista.mercadolivre.com.br/_CustId_${sellerCustId}` : null;
+
+  /* ── Get video status for an item ── */
+  const getItemVideoStatus = (item: EligibilityItem) => {
+    const vid = itemVideoMap.get(item.itemId);
+    const hasVideo = vid ? vid.clipsPubli > 0 : false;
+    const ordersC = vid ? vid.ordersClips : 0;
+    const visitasC = vid ? vid.visitasClips : 0;
+    const siC = vid ? vid.siClips : 0;
+    return getVideoStatus(hasVideo, ordersC, visitasC, siC, avgOrdersClips);
+  };
+
+  /* ── Items with video issues for summary ── */
+  const videoIssuesSummary = useMemo(() => {
+    if (!listingsQuality) return { noReach: 0, lowConversion: 0, champion: 0, noVideo: 0 };
+    let noReach = 0, lowConversion = 0, champion = 0, noVideo = 0;
+    const seen = new Set<string>();
+    for (const lq of listingsQuality) {
+      if (seen.has(lq.itemId)) continue;
+      seen.add(lq.itemId);
+      const hasVideo = lq.sellersClipsPubli > 0;
+      if (!hasVideo) { noVideo++; continue; }
+      if (lq.visitasClips === 0 && lq.siClips === 0) { noReach++; continue; }
+      if (lq.ordersClips < avgOrdersClips || lq.ordersClips < 3) { lowConversion++; continue; }
+      champion++;
+    }
+    return { noReach, lowConversion, champion, noVideo };
+  }, [listingsQuality, avgOrdersClips]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -317,55 +408,19 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, sellerCustIdMap, selectedS
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={chartData} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-              <XAxis
-                dataKey="date"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-              />
-              <YAxis
-                yAxisId="left"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-                tickFormatter={(v) => fmt(v)}
-                label={{ value: "Visitas Clips", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
-              />
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-                tickFormatter={(v) => fmt(v)}
-                label={{ value: "Faturamento (R$)", angle: 90, position: "insideRight", fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
-              />
+              <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
+              <YAxis yAxisId="left" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Visitas Clips", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 10 }} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Faturamento (R$)", angle: 90, position: "insideRight", fill: "hsl(215, 20%, 55%)", fontSize: 10 }} />
               <Tooltip content={<ComboTooltipContent />} />
-              <Legend
-                wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }}
-              />
-              <Bar
-                yAxisId="left"
-                dataKey="visitasClips"
-                name="Visitas Clips"
-                fill="hsl(var(--neon-blue))"
-                fillOpacity={0.7}
-                radius={[4, 4, 0, 0]}
-                barSize={32}
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="tgmvClips"
-                name="Faturamento Clips"
-                stroke="hsl(var(--warning))"
-                strokeWidth={2.5}
-                dot={{ fill: "hsl(var(--warning))", r: 4 }}
-                activeDot={{ r: 6 }}
-              />
+              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
+              <Bar yAxisId="left" dataKey="visitasClips" name="Visitas Clips" fill="hsl(var(--neon-blue))" fillOpacity={0.7} radius={[4, 4, 0, 0]} barSize={32} />
+              <Line yAxisId="right" type="monotone" dataKey="tgmvClips" name="Faturamento Clips" stroke="hsl(var(--warning))" strokeWidth={2.5} dot={{ fill: "hsl(var(--warning))", r: 4 }} activeDot={{ r: 6 }} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>
       )}
 
-      {/* ── Row 3: Content Efficiency Table ── */}
+      {/* ── Row 3: Content Efficiency Table — deduplicated, proper columns ── */}
       {topContentItems.length > 0 && (
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-4">
@@ -381,64 +436,64 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, sellerCustIdMap, selectedS
                 <tr className="border-b border-border">
                   <th className="text-left py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Produto</th>
                   <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Pedidos 7D</th>
-                  <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Estoque 7D</th>
-                  <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Desconto</th>
-                  <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Status</th>
+                  <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Estoque</th>
+                  <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Desconto %</th>
+                  <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Status do Vídeo</th>
                 </tr>
               </thead>
               <tbody>
-                {topContentItems.map((item, idx) => (
-                  <motion.tr
-                    key={item.id}
-                    initial={{ opacity: 0, x: -5 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className="border-b border-border/50 hover:bg-muted/20 transition-colors"
-                  >
-                    <td className="py-2.5 px-3">
-                      <a
-                        href={item.mlbLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-neon-blue hover:underline flex items-center gap-1.5 max-w-[300px] truncate"
-                      >
-                        {item.itemName || item.itemId}
-                        <ExternalLink className="w-3 h-3 shrink-0 opacity-60" />
-                      </a>
-                    </td>
-                    <td className="text-center py-2.5 px-3 font-mono font-bold text-foreground">
-                      {item.pedidos7d}
-                    </td>
-                    <td className="text-center py-2.5 px-3 font-mono">
-                      <span className={item.estoqueMedio7d < 5 ? "text-destructive font-bold" : "text-foreground"}>
-                        {item.estoqueMedio7d}
-                      </span>
-                    </td>
-                    <td className="text-center py-2.5 px-3 font-mono text-foreground">
-                      {item.discountBest > 0 ? `${(item.discountBest * 100).toFixed(0)}%` : "—"}
-                    </td>
-                    <td className="text-center py-2.5 px-3">
-                      {item.pedidos7d > 10 && totals.clipsPubli === 0 ? (
-                        <span className="inline-flex items-center gap-1 text-warning text-xs">
-                          <Flame className="w-3.5 h-3.5" /> Sem Vídeo
+                {topContentItems.map((item, idx) => {
+                  const vs = getItemVideoStatus(item);
+                  // Format discount: if > 1 treat as already percentage, else multiply
+                  const discountVal = item.discountBest > 0
+                    ? `${item.discountBest > 1 ? Math.round(item.discountBest) : Math.round(item.discountBest * 100)}%`
+                    : "—";
+
+                  return (
+                    <motion.tr
+                      key={`${item.itemId}-${idx}`}
+                      initial={{ opacity: 0, x: -5 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="border-b border-border/50 hover:bg-muted/20 transition-colors"
+                    >
+                      <td className="py-2.5 px-3">
+                        <a
+                          href={item.mlbLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-neon-blue hover:underline flex items-center gap-1.5 max-w-[300px] truncate"
+                        >
+                          {item.itemName || item.itemId}
+                          <ExternalLink className="w-3 h-3 shrink-0 opacity-60" />
+                        </a>
+                      </td>
+                      <td className="text-center py-2.5 px-3 font-mono font-bold text-foreground">
+                        {Math.round(item.pedidos7d)}
+                      </td>
+                      <td className="text-center py-2.5 px-3 font-mono">
+                        <span className={item.estoqueMedio7d < 5 ? "text-destructive font-bold" : "text-foreground"}>
+                          {Math.round(item.estoqueMedio7d)}
                         </span>
-                      ) : item.flagBestPromo ? (
-                        <span className="status-badge bg-emerald/10 text-emerald border-emerald/20 text-[11px]">
-                          Best Promo
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground text-xs">—</span>
-                      )}
-                    </td>
-                  </motion.tr>
-                ))}
+                      </td>
+                      <td className="text-center py-2.5 px-3 font-mono text-foreground">
+                        {discountVal}
+                      </td>
+                      <td className="text-center py-2.5 px-3">
+                        <Badge className={`text-[11px] ${vs.badgeClass}`}>
+                          {vs.label}
+                        </Badge>
+                      </td>
+                    </motion.tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         </div>
       )}
 
-      {/* ── Row 4: 🔥 Alerta de Conversão — Itens Quentes ── */}
+      {/* ── Row 4: 🔥 Alerta de Conversão ── */}
       {hotItems.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-3">
@@ -449,13 +504,11 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, sellerCustIdMap, selectedS
             <TooltipInfo text="Itens com alto volume de vendas que precisam de otimização de vídeo. Expanda cada card para acessar o checklist de diagnóstico de produção." />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-            {hotItems.map(({ item, avgSi, avgOrders }, idx) => (
+            {hotItems.map((item, idx) => (
               <HotItemCard
-                key={item.id}
+                key={`${item.itemId}-${idx}`}
                 item={item}
-                clipsPubli={totals.clipsPubli}
-                avgSiClips={avgSi}
-                avgOrdersClips={avgOrders}
+                videoStatus={getItemVideoStatus(item)}
                 clipsLink={clipsLink}
                 idx={idx}
               />
@@ -474,22 +527,15 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, sellerCustIdMap, selectedS
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Clips Publicados", value: totals.clipsPubli, color: "text-neon-blue" },
-            { label: "Itens Vendidos via Clip", value: totals.siClips, color: "text-emerald" },
-            { label: "Pedidos via Clip", value: totals.ordersClips, color: "text-warning" },
-            {
-              label: "ROI de Audiência",
-              value: totals.visitasClips > 0
-                ? `R$ ${(totals.tgmvClips / totals.visitasClips).toFixed(2)}/visita`
-                : "—",
-              color: "text-foreground",
-              isText: true,
-            },
+            { label: "Anúncios com Vídeo", value: itemsWithVideo, color: "text-neon-blue" },
+            { label: "Vídeo Campeão", value: videoIssuesSummary.champion, color: "text-emerald" },
+            { label: "Baixa Conversão", value: videoIssuesSummary.lowConversion, color: "text-warning" },
+            { label: "Sem Alcance / Sem Vídeo", value: videoIssuesSummary.noReach + videoIssuesSummary.noVideo, color: "text-destructive" },
           ].map((m) => (
             <div key={m.label} className="text-center">
               <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{m.label}</p>
               <p className={`font-mono text-lg font-bold ${m.color}`}>
-                {(m as any).isText ? m.value : fmt(m.value as number)}
+                {fmt(m.value)}
               </p>
             </div>
           ))}
