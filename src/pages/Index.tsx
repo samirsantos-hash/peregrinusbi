@@ -230,7 +230,7 @@ const Index = () => {
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
                   <TabsContent value="clips" className="mt-0">
-                    <ClipsAudiencePanel kpis={filteredKpis} eligibilityItems={eligibilityItems || []} />
+                    <ClipsAudiencePanel kpis={filteredKpis} eligibilityItems={eligibilityItems || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} />
                   </TabsContent>
                   <TabsContent value="opportunities" className="mt-0">
                     <OpportunitiesPanel items={eligibilityItems || []} />
