@@ -56,7 +56,7 @@ const Admin = () => {
   const [selectedCustIds, setSelectedCustIds] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
   const [sellerSearch, setSellerSearch] = useState("");
-
+  const [createdPasswordDialog, setCreatedPasswordDialog] = useState<{ email: string; password: string } | null>(null);
   useEffect(() => {
     loadData();
   }, []);
