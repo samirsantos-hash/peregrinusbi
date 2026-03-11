@@ -2,8 +2,8 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
-} from "recharts";
+  Tooltip, ResponsiveContainer, Legend } from
+"recharts";
 import { TrendingUp, TrendingDown, Zap, BarChart3, Calendar } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
@@ -50,14 +50,14 @@ const CustomTooltip = ({ active, payload, label }: any) => {
              {fmtBRL(ads)}
            </span>
         </div>
-        {tgmvAds !== undefined && (
-          <div className="flex justify-between items-center">
+        {tgmvAds !== undefined &&
+        <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Vendas via Ads</span>
              <span className="font-mono font-semibold" style={{ color: "hsl(160, 84%, 39%)" }}>
                {fmtBRL(tgmvAds)}
              </span>
           </div>
-        )}
+        }
         <div className="flex justify-between items-center border-t border-border/50 pt-1.5">
           <span className="text-muted-foreground font-medium">ROI (ROAS)</span>
            <span className={`font-mono font-bold ${roas >= 2 ? "text-emerald" : "text-destructive"}`}>
@@ -65,8 +65,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
            </span>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 function computeCorrelation(xs: number[], ys: number[]): number {
@@ -74,7 +74,7 @@ function computeCorrelation(xs: number[], ys: number[]): number {
   if (n < 2) return 0;
   const meanX = xs.reduce((a, b) => a + b, 0) / n;
   const meanY = ys.reduce((a, b) => a + b, 0) / n;
-  let num = 0, denX = 0, denY = 0;
+  let num = 0,denX = 0,denY = 0;
   for (let i = 0; i < n; i++) {
     const dx = xs[i] - meanX;
     const dy = ys[i] - meanY;
@@ -92,7 +92,7 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
 
   // Aggregate by date
   const byDate = useMemo(() => {
-    const map: Record<string, { date: string; gmv: number; ads: number; tgmvAds: number; roas: number; tsi: number; count: number }> = {};
+    const map: Record<string, {date: string;gmv: number;ads: number;tgmvAds: number;roas: number;tsi: number;count: number;}> = {};
     for (const k of kpis) {
       if (!map[k.date]) map[k.date] = { date: k.date, gmv: 0, ads: 0, tgmvAds: 0, roas: 0, tsi: 0, count: 0 };
       map[k.date].gmv += k.gmv;
@@ -129,13 +129,13 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
           gmv: Math.round(d.gmv),
           ads: Math.round(d.ads),
           tgmvAds: Math.round(d.tgmvAds),
-          roas: d.count > 0 ? Math.round((d.roas / d.count) * 100) / 100 : 0,
+          roas: d.count > 0 ? Math.round(d.roas / d.count * 100) / 100 : 0
         };
       });
     }
 
     // Week grouping
-    const weeks: Record<string, { label: string; gmv: number; ads: number; tgmvAds: number; roas: number; count: number }> = {};
+    const weeks: Record<string, {label: string;gmv: number;ads: number;tgmvAds: number;roas: number;count: number;}> = {};
     for (const d of filteredData) {
       const parsed = parseISO(d.date);
       const weekStart = startOfWeek(parsed, { locale: ptBR });
@@ -148,15 +148,15 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
       weeks[key].roas += d.roas;
       weeks[key].count += d.count;
     }
-    return Object.entries(weeks)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, w]) => ({
-        label: w.label,
-        gmv: Math.round(w.gmv),
-        ads: Math.round(w.ads),
-        tgmvAds: Math.round(w.tgmvAds),
-        roas: w.count > 0 ? Math.round((w.roas / w.count) * 100) / 100 : 0,
-      }));
+    return Object.entries(weeks).
+    sort(([a], [b]) => a.localeCompare(b)).
+    map(([, w]) => ({
+      label: w.label,
+      gmv: Math.round(w.gmv),
+      ads: Math.round(w.ads),
+      tgmvAds: Math.round(w.tgmvAds),
+      roas: w.count > 0 ? Math.round(w.roas / w.count * 100) / 100 : 0
+    }));
   }, [filteredData, granularity]);
 
   // Insights calculations
@@ -169,9 +169,9 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
         correlationColor: "text-muted-foreground",
         totalGmv: filteredData.reduce((s, d) => s + d.gmv, 0),
         totalAds: filteredData.reduce((s, d) => s + d.ads, 0),
-        avgRoas: filteredData.length > 0
-          ? filteredData.reduce((s, d) => s + d.roas / d.count, 0) / filteredData.length
-          : 0,
+        avgRoas: filteredData.length > 0 ?
+        filteredData.reduce((s, d) => s + d.roas / d.count, 0) / filteredData.length :
+        0
       };
     }
 
@@ -232,22 +232,22 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
                 <button
                   onClick={() => setGranularity("day")}
                   className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
-                    granularity === "day"
-                      ? "bg-primary/15 text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
+                  granularity === "day" ?
+                  "bg-primary/15 text-primary" :
+                  "text-muted-foreground hover:text-foreground"}`
+                  }>
+                  
                   <Calendar className="w-3 h-3 inline mr-1" />
                   Dia
                 </button>
                 <button
                   onClick={() => setGranularity("week")}
                   className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
-                    granularity === "week"
-                      ? "bg-primary/15 text-primary"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
+                  granularity === "week" ?
+                  "bg-primary/15 text-primary" :
+                  "text-muted-foreground hover:text-foreground"}`
+                  }>
+                  
                   <Calendar className="w-3 h-3 inline mr-1" />
                   Semana
                 </button>
@@ -256,12 +256,12 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
             </div>
           </div>
 
-          {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-[340px] text-muted-foreground text-sm">
+          {chartData.length === 0 ?
+          <div className="flex items-center justify-center h-[340px] text-muted-foreground text-sm">
               Sem dados disponíveis para o período selecionado
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={340}>
+            </div> :
+
+          <ResponsiveContainer width="100%" height={340}>
               <ComposedChart data={chartData} key={`${period}-${granularity}`}>
                 <defs>
                   <linearGradient id="gradGmvBar" x1="0" y1="0" x2="0" y2="1">
@@ -271,76 +271,76 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" vertical={false} />
                 <XAxis
-                  dataKey="label"
-                  tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  interval="preserveStartEnd"
-                  angle={chartData.length > 8 ? -45 : 0}
-                  textAnchor={chartData.length > 8 ? "end" : "middle"}
-                  height={chartData.length > 8 ? 50 : 30}
-                />
+                dataKey="label"
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+                angle={chartData.length > 8 ? -45 : 0}
+                textAnchor={chartData.length > 8 ? "end" : "middle"}
+                height={chartData.length > 8 ? 50 : 30} />
+              
                 <YAxis
-                  yAxisId="left"
-                  tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
-                  width={55}
-                />
+                yAxisId="left"
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                width={55} />
+              
                 <YAxis
-                  yAxisId="right"
-                  orientation="right"
-                  tick={{ fill: "hsl(40, 95%, 55%)", fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
-                  width={55}
-                />
+                yAxisId="right"
+                orientation="right"
+                tick={{ fill: "hsl(40, 95%, 55%)", fontSize: 11 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                width={55} />
+              
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(215, 25%, 14%, 0.3)" }} />
                 <Legend
-                  wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11, paddingTop: 8 }}
-                  iconType="circle"
-                  iconSize={8}
-                />
+                wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11, paddingTop: 8 }}
+                iconType="circle"
+                iconSize={8} />
+              
                 <Bar
-                  yAxisId="left"
-                  dataKey="gmv"
-                  name="Faturamento Bruto"
-                  fill="url(#gradGmvBar)"
-                  radius={[4, 4, 0, 0]}
-                  maxBarSize={40}
-                  animationDuration={800}
-                  animationEasing="ease-in-out"
-                />
+                yAxisId="left"
+                dataKey="gmv"
+                name="Faturamento Bruto"
+                fill="url(#gradGmvBar)"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={40}
+                animationDuration={800}
+                animationEasing="ease-in-out" />
+              
                 <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="ads"
-                  name="Investimento Ads"
-                  stroke="hsl(40, 95%, 55%)"
-                  strokeWidth={2.5}
-                  dot={{ r: 3, fill: "hsl(40, 95%, 55%)", strokeWidth: 0 }}
-                  activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(40, 95%, 65%)" }}
-                  animationDuration={800}
-                  animationEasing="ease-in-out"
-                />
+                yAxisId="right"
+                type="monotone"
+                dataKey="ads"
+                name="Investimento Ads"
+                stroke="hsl(40, 95%, 55%)"
+                strokeWidth={2.5}
+                dot={{ r: 3, fill: "hsl(40, 95%, 55%)", strokeWidth: 0 }}
+                activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(40, 95%, 65%)" }}
+                animationDuration={800}
+                animationEasing="ease-in-out" />
+              
                 <Line
-                  yAxisId="left"
-                  type="monotone"
-                  dataKey="roas"
-                  name="ROAS"
-                  stroke="hsl(280, 80%, 60%)"
-                  strokeWidth={2}
-                  strokeDasharray="6 3"
-                  dot={{ r: 3, fill: "hsl(280, 80%, 60%)", strokeWidth: 0 }}
-                  activeDot={{ r: 5 }}
-                  animationDuration={800}
-                  animationEasing="ease-in-out"
-                />
+                yAxisId="left"
+                type="monotone"
+                dataKey="roas"
+                name="ROAS"
+                stroke="hsl(280, 80%, 60%)"
+                strokeWidth={2}
+                strokeDasharray="6 3"
+                dot={{ r: 3, fill: "hsl(280, 80%, 60%)", strokeWidth: 0 }}
+                activeDot={{ r: 5 }}
+                animationDuration={800}
+                animationEasing="ease-in-out" />
+              
               </ComposedChart>
             </ResponsiveContainer>
-          )}
+          }
         </div>
 
         {/* Insights Panel */}
@@ -350,11 +350,11 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.1 }}
-            className="glass-card-highlight p-4"
-          >
+            className="glass-card-highlight p-4">
+            
             <div className="flex items-center gap-1.5 mb-3">
               <Zap className="w-3.5 h-3.5 text-primary" />
-              <p className="metric-label">Insights Rápidos</p>
+              <p className="metric-label text-secondary">Insights Rápidos</p>
               <TooltipInfo text="Análise inteligente da relação entre investimento em Ads e retorno de faturamento." />
             </div>
 
@@ -390,26 +390,26 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
                    <p className="text-lg font-mono font-bold text-primary">
                      {fmtBRLCompact(insights.totalGmv * 0.03)}
                    </p>
-                  {insights.totalGmv > 0 && (
-                    <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
-                      insights.totalAds <= insights.totalGmv * 0.03
-                        ? "bg-emerald/10 emerald-text"
-                        : "bg-destructive/10 critical-text"
-                    }`}>
-                      {insights.totalAds <= insights.totalGmv * 0.03
-                        ? `${((insights.totalAds / (insights.totalGmv * 0.03)) * 100).toFixed(0)}% utilizado`
-                        : `${(((insights.totalAds - insights.totalGmv * 0.03) / (insights.totalGmv * 0.03)) * 100).toFixed(0)}% acima`
-                      }
+                  {insights.totalGmv > 0 &&
+                  <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                  insights.totalAds <= insights.totalGmv * 0.03 ?
+                  "bg-emerald/10 emerald-text" :
+                  "bg-destructive/10 critical-text"}`
+                  }>
+                      {insights.totalAds <= insights.totalGmv * 0.03 ?
+                    `${(insights.totalAds / (insights.totalGmv * 0.03) * 100).toFixed(0)}% utilizado` :
+                    `${((insights.totalAds - insights.totalGmv * 0.03) / (insights.totalGmv * 0.03) * 100).toFixed(0)}% acima`
+                    }
                     </span>
-                  )}
+                  }
                 </div>
                 <div className="w-full bg-muted/50 rounded-full h-1.5">
                   <div
                     className={`h-1.5 rounded-full transition-all ${
-                      insights.totalAds <= insights.totalGmv * 0.03 ? "bg-emerald" : "bg-destructive"
-                    }`}
-                    style={{ width: `${Math.min(insights.totalGmv > 0 ? (insights.totalAds / (insights.totalGmv * 0.03)) * 100 : 0, 100)}%` }}
-                  />
+                    insights.totalAds <= insights.totalGmv * 0.03 ? "bg-emerald" : "bg-destructive"}`
+                    }
+                    style={{ width: `${Math.min(insights.totalGmv > 0 ? insights.totalAds / (insights.totalGmv * 0.03) * 100 : 0, 100)}%` }} />
+                  
                 </div>
               </div>
             </div>
@@ -420,16 +420,16 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="glass-card p-4"
-          >
+            className="glass-card p-4">
+            
             <div className="flex items-center gap-1.5 mb-2">
               <TrendingUp className="w-3.5 h-3.5 text-emerald" />
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
                 Eficiência de Escala
               </p>
             </div>
-            {insights.efficiency !== null ? (
-              <div className="space-y-2">
+            {insights.efficiency !== null ?
+            <div className="space-y-2">
                 <p className="text-sm text-foreground/80 leading-relaxed">
                   Para cada <span className="font-mono font-semibold neon-text">R$ 1,00</span> investido a mais em Ads, o Faturamento Bruto
                   {insights.efficiency >= 0 ? " cresceu " : " caiu "}
@@ -438,23 +438,23 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
                   </span>
                 </p>
                 <div className="flex items-center gap-1.5">
-                  {insights.efficiency >= 1 ? (
-                    <TrendingUp className="w-3.5 h-3.5 text-emerald" />
-                  ) : (
-                    <TrendingDown className="w-3.5 h-3.5 text-destructive" />
-                  )}
+                  {insights.efficiency >= 1 ?
+                <TrendingUp className="w-3.5 h-3.5 text-emerald" /> :
+
+                <TrendingDown className="w-3.5 h-3.5 text-destructive" />
+                }
                   <span className={`text-[11px] font-medium ${
-                    insights.efficiency >= 1 ? "emerald-text" : "critical-text"
-                  }`}>
+                insights.efficiency >= 1 ? "emerald-text" : "critical-text"}`
+                }>
                     {insights.efficiency >= 2 ? "Escala Excelente" : insights.efficiency >= 1 ? "Escala Positiva" : "Retorno Negativo"}
                   </span>
                 </div>
-              </div>
-            ) : (
-              <p className="text-xs text-muted-foreground">
+              </div> :
+
+            <p className="text-xs text-muted-foreground">
                 Dados insuficientes para calcular eficiência de escala. São necessários ao menos 2 períodos.
               </p>
-            )}
+            }
           </motion.div>
 
           {/* Correlation */}
@@ -462,8 +462,8 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="glass-card p-4"
-          >
+            className="glass-card p-4">
+            
             <div className="flex items-center gap-1.5 mb-2">
               <BarChart3 className="w-3.5 h-3.5 text-primary" />
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium">
@@ -475,33 +475,33 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
                 <p className={`text-lg font-mono font-bold ${insights.correlationColor}`}>
                   {insights.correlationLabel}
                 </p>
-                {insights.correlation !== null && (
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                {insights.correlation !== null &&
+                <p className="text-[11px] text-muted-foreground mt-0.5">
                     Coeficiente: <span className="font-mono">{insights.correlation.toFixed(3)}</span>
                   </p>
-                )}
+                }
               </div>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                insights.correlation !== null && insights.correlation >= 0.7
-                  ? "bg-emerald/10"
-                  : insights.correlation !== null && insights.correlation >= 0.4
-                  ? "bg-warning/10"
-                  : "bg-destructive/10"
-              }`}>
-                {insights.correlation !== null && insights.correlation >= 0.7 ? (
-                  <TrendingUp className="w-5 h-5 text-emerald" />
-                ) : insights.correlation !== null && insights.correlation >= 0.4 ? (
-                  <TrendingUp className="w-5 h-5 text-warning" />
-                ) : (
-                  <TrendingDown className="w-5 h-5 text-destructive" />
-                )}
+              insights.correlation !== null && insights.correlation >= 0.7 ?
+              "bg-emerald/10" :
+              insights.correlation !== null && insights.correlation >= 0.4 ?
+              "bg-warning/10" :
+              "bg-destructive/10"}`
+              }>
+                {insights.correlation !== null && insights.correlation >= 0.7 ?
+                <TrendingUp className="w-5 h-5 text-emerald" /> :
+                insights.correlation !== null && insights.correlation >= 0.4 ?
+                <TrendingUp className="w-5 h-5 text-warning" /> :
+
+                <TrendingDown className="w-5 h-5 text-destructive" />
+                }
               </div>
             </div>
           </motion.div>
         </div>
       </div>
-    </motion.div>
-  );
+    </motion.div>);
+
 };
 
 export default TrendAnalysisPanel;
