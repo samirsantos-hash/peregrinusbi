@@ -303,10 +303,10 @@ Deno.serve(async (req) => {
           score_oferta_final: parseBrNumber(cols[iScoreOferta] || "0"),
           score_caracteristica_final: parseBrNumber(cols[iScoreCaract] || "0"),
           score_qualidade_final: parseBrNumber(cols[iScoreQual] || "0"),
-          sellers_clips_publi: iSellersClipsPub >= 0 ? parseBrNumber(cols[iSellersClipsPub] || "0") : 0,
-          visitas_clips: iVisitasClips >= 0 ? parseBrNumber(cols[iVisitasClips] || "0") : 0,
-          si_clips: iSiClips >= 0 ? parseBrNumber(cols[iSiClips] || "0") : 0,
-          orders_clips: iOrdersClips >= 0 ? parseBrNumber(cols[iOrdersClips] || "0") : 0,
+          sellers_clips_publi: iSellersClipsPub >= 0 ? safeClipsValue(cols[iSellersClipsPub] || "0") : 0,
+          visitas_clips: iVisitasClips >= 0 ? safeClipsValue(cols[iVisitasClips] || "0") : 0,
+          si_clips: iSiClips >= 0 ? safeClipsValue(cols[iSiClips] || "0") : 0,
+          orders_clips: iOrdersClips >= 0 ? safeClipsValue(cols[iOrdersClips] || "0") : 0,
           tgmv_lc_clips: iTgmvClips >= 0 ? parseBrNumber(cols[iTgmvClips] || "0") : 0,
         };
       }).filter(Boolean);
