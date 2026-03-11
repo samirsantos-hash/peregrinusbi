@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { getDiagnostic, type SellerKPI } from "@/hooks/useSellerData";
+import SellerLink from "./SellerLink";
 
 // Also support mock data shape
 interface KpiLike {
@@ -16,6 +17,7 @@ interface KpiLike {
 
 interface DiagnosticAlertsProps {
   kpis: KpiLike[];
+  sellerCustIdMap?: Record<string, string>;
 }
 
 function getDiagnosticGeneric(kpi: KpiLike) {
