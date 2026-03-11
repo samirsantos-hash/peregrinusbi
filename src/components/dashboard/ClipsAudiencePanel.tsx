@@ -396,7 +396,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     if (hc) {
       return <Badge className="text-[11px] bg-emerald/10 text-emerald border-emerald/20">✅ Ativo no Clips</Badge>;
     }
-    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20">❌ Sem Clip</Badge>;
+    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20">❌ Analisar</Badge>;
   };
 
   /* ── Summary using performance-based detection ── */
