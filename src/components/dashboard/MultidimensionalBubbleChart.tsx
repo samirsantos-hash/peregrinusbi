@@ -197,7 +197,7 @@ const FacetChart = ({
 
 const MultidimensionalBubbleChart = ({
   data, xVar, yVar, colorVar, sizeVar, nameKey,
-  period, onPeriodChange, facetKey, facetLabel,
+  period, onPeriodChange, facetKey, facetLabel, sellerCustIdMap,
 }: MultidimensionalBubbleChartProps) => {
   const { facets, allPoints, colorMin, colorMax } = useMemo(() => {
     const points = buildPoints(data, xVar, yVar, colorVar, sizeVar, nameKey, facetKey);
