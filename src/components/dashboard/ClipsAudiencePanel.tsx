@@ -105,7 +105,7 @@ function getVideoStatus(
   avgOrdersClips: number,
 ): { status: VideoStatus; label: string; badgeClass: string } {
   if (!hasVideo) {
-    return { status: "no-video", label: "Sem Vídeo", badgeClass: "bg-destructive/15 text-destructive border-destructive/20" };
+    return { status: "no-video", label: "Analisar", badgeClass: "bg-destructive/15 text-destructive border-destructive/20" };
   }
   // Has video but zero reach
   if (visitasClips === 0 && siClips === 0) {
