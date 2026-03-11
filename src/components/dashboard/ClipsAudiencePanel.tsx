@@ -461,10 +461,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               <tbody>
                 {topContentItems.map((item, idx) => {
                   const vs = getItemVideoStatus(item);
-                  // Format discount: if > 1 treat as already percentage, else multiply
-                  const discountVal = item.discountBest > 0
-                    ? `${item.discountBest > 1 ? Math.round(item.discountBest) : Math.round(item.discountBest * 100)}%`
-                    : "—";
+                  const discountVal = fmtDiscount(item.discountBest);
 
                   return (
                     <motion.tr
