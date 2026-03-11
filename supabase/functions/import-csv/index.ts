@@ -251,11 +251,11 @@ Deno.serve(async (req) => {
         ll_stock_availability_score: iLlStock >= 0 ? parseBrNumber(cols[iLlStock] || "0") : 0,
         ll_free_shipping_score: iLlFreeShipping >= 0 ? parseBrNumber(cols[iLlFreeShipping] || "0") : 0,
         ll_promotions_score: iLlPromotions >= 0 ? parseBrNumber(cols[iLlPromotions] || "0") : 0,
-        // Clips / Conteúdo
-        sellers_clips_publi: iSellersClipsPub >= 0 ? parseBrNumber(cols[iSellersClipsPub] || "0") : 0,
-        visitas_clips: iVisitasClips >= 0 ? parseBrNumber(cols[iVisitasClips] || "0") : 0,
-        si_clips: iSiClips >= 0 ? parseBrNumber(cols[iSiClips] || "0") : 0,
-        orders_clips: iOrdersClips >= 0 ? parseBrNumber(cols[iOrdersClips] || "0") : 0,
+        // Clips / Conteúdo (use safeClipsValue to reject anomalous values like CUST_ID)
+        sellers_clips_publi: iSellersClipsPub >= 0 ? safeClipsValue(cols[iSellersClipsPub] || "0") : 0,
+        visitas_clips: iVisitasClips >= 0 ? safeClipsValue(cols[iVisitasClips] || "0") : 0,
+        si_clips: iSiClips >= 0 ? safeClipsValue(cols[iSiClips] || "0") : 0,
+        orders_clips: iOrdersClips >= 0 ? safeClipsValue(cols[iOrdersClips] || "0") : 0,
         tgmv_lc_clips: iTgmvClips >= 0 ? parseBrNumber(cols[iTgmvClips] || "0") : 0,
       };
     }).filter(Boolean);
