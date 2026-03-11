@@ -83,7 +83,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {} }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
