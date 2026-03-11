@@ -153,15 +153,15 @@ const GrowthPotentialPanel = ({ kpis }: GrowthPotentialPanelProps) => {
           </div>
 
           {/* Insight */}
-          <div className={`rounded-lg p-4 border ${isGaining ? "bg-emerald-500/5 border-emerald-500/20" : "bg-amber-500/5 border-amber-500/20"}`}>
+          <div className={`rounded-lg p-4 border ${isGaining ? "bg-amber-500/5 border-amber-500/20" : "bg-amber-500/5 border-amber-500/20"}`}>
             <div className="flex items-center gap-2">
               {isGaining ?
-              <TrendingUp className="w-5 h-5 text-emerald-500 shrink-0" /> :
+              <TrendingUp className="w-5 h-5 text-amber-500 shrink-0" /> :
 
               <TrendingDown className="w-5 h-5 text-amber-500 shrink-0" />
               }
               <div>
-                <p className={`text-sm font-semibold ${isGaining ? "text-emerald-500" : "text-amber-500"}`}>
+                <p className={`text-sm font-semibold ${isGaining ? "text-amber-500" : "text-amber-500"}`}>
                   {isGaining ? "Market Share Gain" : "Market Share Opportunity"}
                 </p>
                 <p className="text-muted-foreground mt-0.5 text-base">
