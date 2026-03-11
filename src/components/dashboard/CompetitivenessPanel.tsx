@@ -87,11 +87,13 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
   /* ── Aggregate totals across all dates ── */
+  // NOTE: visitsExpensive, visitsMatch, visitsCheaper are MONETARY values (R$), not counts
   const totalVisits = kpis.reduce((s, k) => s + k.visits, 0);
   const totalExpensive = kpis.reduce((s, k) => s + k.visitsExpensive, 0);
   const totalMatch = kpis.reduce((s, k) => s + k.visitsMatch, 0);
   const totalCheaper = kpis.reduce((s, k) => s + k.visitsCheaper, 0);
-  const pctExpensive = totalVisits > 0 ? (totalExpensive / totalVisits) * 100 : 0;
+  const totalPriceBands = totalExpensive + totalMatch + totalCheaper;
+  const pctExpensive = totalPriceBands > 0 ? (totalExpensive / totalPriceBands) * 100 : 0;
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
 
   // Average min price rival (non-zero entries)
@@ -126,18 +128,20 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
 
   /* ── Pricing diagnostic table data (per date) ── */
   const diagnosticRows = byDate.map((d) => {
-    const pctExp = d.visits > 0 ? (d.expensive / d.visits) * 100 : 0;
-    const pctMatch = d.visits > 0 ? (d.match / d.visits) * 100 : 0;
-    const pctCheap = d.visits > 0 ? (d.cheaper / d.visits) * 100 : 0;
+    const totalBands = d.expensive + d.match + d.cheaper;
+    const pctExp = totalBands > 0 ? (d.expensive / totalBands) * 100 : 0;
+    const pctMatch = totalBands > 0 ? (d.match / totalBands) * 100 : 0;
+    const pctCheap = totalBands > 0 ? (d.cheaper / totalBands) * 100 : 0;
     const avgRival = d.rivalCount > 0 ? d.minPriceRival / d.rivalCount : 0;
     return { date: d.date, visits: d.visits, expensive: d.expensive, match: d.match, cheaper: d.cheaper, pctExp, pctMatch, pctCheap, avgRival, gmv: d.gmv };
   });
 
   /* ── Price evolution line chart ── */
   const priceEvolutionData = byDate.map((d) => {
-    const pctExp = d.visits > 0 ? (d.expensive / d.visits) * 100 : 0;
-    const pctMatch = d.visits > 0 ? (d.match / d.visits) * 100 : 0;
-    const pctCheap = d.visits > 0 ? (d.cheaper / d.visits) * 100 : 0;
+    const totalBands = d.expensive + d.match + d.cheaper;
+    const pctExp = totalBands > 0 ? (d.expensive / totalBands) * 100 : 0;
+    const pctMatch = totalBands > 0 ? (d.match / totalBands) * 100 : 0;
+    const pctCheap = totalBands > 0 ? (d.cheaper / totalBands) * 100 : 0;
     const avgRival = d.rivalCount > 0 ? d.minPriceRival / d.rivalCount : 0;
     return {
       date: d.date.slice(5),
@@ -160,6 +164,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
     // Group by date for scatter (each date is a point)
     const byDateMap: Record<string, {
       date: string; gmv: number; visits: number; visitsExpensive: number;
+      visitsMatch: number; visitsCheaper: number;
       scoreQualidade: number; qualCount: number;
       upliftGmvM1: number; upliftCount: number;
     }> = {};
@@ -167,6 +172,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
       if (!byDateMap[k.date]) {
         byDateMap[k.date] = {
           date: k.date, gmv: 0, visits: 0, visitsExpensive: 0,
+          visitsMatch: 0, visitsCheaper: 0,
           scoreQualidade: 0, qualCount: 0,
           upliftGmvM1: 0, upliftCount: 0,
         };
@@ -175,6 +181,8 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
       s.gmv += k.gmv || 0;
       s.visits += k.visits || 0;
       s.visitsExpensive += k.visitsExpensive || 0;
+      s.visitsMatch += k.visitsMatch || 0;
+      s.visitsCheaper += k.visitsCheaper || 0;
       if (k.scoreQualidade > 0) { s.scoreQualidade += k.scoreQualidade; s.qualCount++; }
       if (k.upliftGmvM1 !== 0) { s.upliftGmvM1 += k.upliftGmvM1; s.upliftCount++; }
     }
@@ -182,7 +190,8 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
     const entries = Object.values(byDateMap).filter((s) => s.visits > 0);
 
     const points = entries.map((s) => {
-      const gapPct = s.visits > 0 ? ((s.visitsExpensive / s.visits) * 100) : 0;
+      const totalBands = s.visitsExpensive + s.visitsMatch + s.visitsCheaper;
+      const gapPct = totalBands > 0 ? ((s.visitsExpensive / totalBands) * 100) : 0;
       const invertedGap = 100 - gapPct;
       const avgQualidade = s.qualCount > 0 ? s.scoreQualidade / s.qualCount : 50;
       const forcaCompetitiva = (invertedGap * 0.5) + (avgQualidade * 0.5);
@@ -225,8 +234,8 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: "Total Visitas", value: totalVisits.toLocaleString("pt-BR"), icon: TrendingUp, color: "neon-text", tooltip: "Total de visitas nos anúncios do seller no período selecionado." },
-          { label: "Visitas c/ Preço Alto", value: totalExpensive.toLocaleString("pt-BR"), icon: AlertTriangle, color: "text-destructive", tooltip: "Visitas onde seu preço era maior que o concorrente mais barato." },
+          { label: "Total Visitas", value: fmtNum(totalVisits, 0), icon: TrendingUp, color: "neon-text", tooltip: "Total de visitas nos anúncios do seller no período selecionado." },
+          { label: "Receita c/ Preço Alto", value: fmtBRL(totalExpensive), icon: AlertTriangle, color: "text-destructive", tooltip: "Receita (R$) em visitas onde seu preço era maior que o concorrente." },
           { label: "% Não Competitivo", value: `${fmtNum(pctExpensive, 1)}%`, icon: TrendingDown, color: pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: "Proporção de visitas onde seu preço era mais caro. Acima de 30% é crítico." },
           { label: "Preço Rival Médio", value: fmtBRL(avgMinPriceRival), icon: DollarSign, color: "neon-text", tooltip: "Média do menor preço encontrado entre concorrentes no período." },
           { label: "GMV Total", value: fmtBRL(totalGmv), icon: TrendingUp, color: "neon-text", tooltip: "Faturamento total no período analisado." },
