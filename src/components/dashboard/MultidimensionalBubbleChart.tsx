@@ -178,7 +178,7 @@ const FacetChart = ({
           />
           <ZAxis type="number" dataKey="z" range={[50, 400]} name={sizeVar.label} />
           <Tooltip
-            content={<BubbleTooltip xLabel={xVar.label} yLabel={yVar.label} colorLabel={colorVar.label} sizeLabel={sizeVar.label} />}
+            content={<BubbleTooltip xLabel={xVar.label} yLabel={yVar.label} colorLabel={colorVar.label} sizeLabel={sizeVar.label} sellerCustIdMap={sellerCustIdMap} />}
             cursor={{ strokeDasharray: "3 3", stroke: "hsl(215, 20%, 35%)" }}
           />
           <Scatter name="Sellers" data={points} animationDuration={600}>
