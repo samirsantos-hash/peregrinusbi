@@ -140,7 +140,7 @@ function buildPoints(
 
 /* ── Single facet chart ── */
 const FacetChart = ({
-  title, points, xVar, yVar, colorVar, sizeVar, colorMin, colorMax, height,
+  title, points, xVar, yVar, colorVar, sizeVar, colorMin, colorMax, height, sellerCustIdMap,
 }: {
   title?: string;
   points: ChartPoint[];
@@ -148,6 +148,7 @@ const FacetChart = ({
   colorVar: BubbleVariable; sizeVar: BubbleVariable;
   colorMin: number; colorMax: number;
   height: number;
+  sellerCustIdMap?: Record<string, string>;
 }) => {
   const trend = trendLine(points.map(p => ({ x: p.x, y: p.y })));
 
