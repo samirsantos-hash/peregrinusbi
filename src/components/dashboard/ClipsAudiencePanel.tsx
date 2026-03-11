@@ -80,7 +80,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems }: ClipsAudiencePanelProps)
       t.tgmvClips += k.tgmvLcClips;
       t.ordersClips += k.ordersClips;
       t.siClips += k.siClips;
-      t.clipsPubli += k.sellersClipsPubli;
+      // clipsPubli é um valor acumulado do seller, não deve somar - pega o máximo/more recente
+      t.clipsPubli = Math.max(t.clipsPubli, k.sellersClipsPubli);
     }
     return t;
   }, [kpis]);
