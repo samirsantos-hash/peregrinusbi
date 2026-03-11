@@ -396,7 +396,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     if (hc) {
       return <Badge className="text-[11px] bg-emerald/10 text-emerald border-emerald/20">✅ Ativo no Clips</Badge>;
     }
-    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20">❌ Sem Clip</Badge>;
+    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20">❌ Analisar</Badge>;
   };
 
   /* ── Summary using performance-based detection ── */
@@ -681,12 +681,13 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
             Resumo de Performance de Clips
           </h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             { label: "Anúncios com Clip", value: clipCoverage.withClip, color: "text-emerald" },
             { label: "Vídeo Campeão", value: videoIssuesSummary.champion, color: "text-emerald" },
             { label: "Baixa Conversão", value: videoIssuesSummary.lowConversion, color: "text-warning" },
-            { label: "Sem Alcance / Sem Clip", value: videoIssuesSummary.noReach + videoIssuesSummary.noClip, color: "text-destructive" },
+            { label: "Sem Alcance", value: videoIssuesSummary.noReach, color: "text-destructive" },
+            { label: "Analisar", value: videoIssuesSummary.noClip, color: "text-muted-foreground" },
           ].map((m) => (
             <div key={m.label} className="text-center">
               <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{m.label}</p>
