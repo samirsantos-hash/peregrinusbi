@@ -148,7 +148,8 @@ const Admin = () => {
       });
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
-      toast({ title: "Nova senha gerada!", description: `Senha: ${data.tempPassword}` });
+      setCreatedPasswordDialog({ email, password: data.tempPassword });
+      toast({ title: "Nova senha gerada!" });
       loadData();
     } catch (err: any) {
       toast({ title: "Erro", description: err.message, variant: "destructive" });
