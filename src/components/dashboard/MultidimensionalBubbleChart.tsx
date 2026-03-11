@@ -100,6 +100,7 @@ const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel,
 
 interface ChartPoint {
   name: string;
+  sellerId?: string;
   x: number;
   y: number;
   colorVal: number;
