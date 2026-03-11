@@ -119,6 +119,13 @@ const Index = () => {
   { id: "reputation", label: "Reputação", icon: HeartPulse }];
 
 
+  // Map seller UUID -> custId for external links
+  const sellerCustIdMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const s of sellers) map[s.id] = s.custId;
+    return map;
+  }, [sellers]);
+
   const isLoading = !sellersFetched || hasRealData && loadingKpis;
 
   return (
