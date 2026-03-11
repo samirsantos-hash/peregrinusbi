@@ -8,8 +8,8 @@ import {
   PolarRadiusAxis,
   ResponsiveContainer,
   Tooltip,
-  Legend,
-} from "recharts";
+  Legend } from
+"recharts";
 import { Shield, Video, TrendingUp, Zap } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
@@ -63,29 +63,29 @@ const CLIPS_GOALS = {
   sellersClipsPubli: 20,
   visitasClips: 8000,
   siClips: 800,
-  ordersClips: 40,
+  ordersClips: 40
 };
 
 /* Dimension definitions (9 spokes) */
 const DIMENSIONS = [
-  // Técnico (3)
-  { key: "pictures", label: "Fotos", group: "tecnico" },
-  { key: "title", label: "Título", group: "tecnico" },
-  { key: "description", label: "Descrição", group: "tecnico" },
-  // Comercial (3)
-  { key: "price", label: "Preço", group: "comercial" },
-  { key: "freeShipping", label: "Frete Grátis", group: "comercial" },
-  { key: "promotions", label: "Promoções", group: "comercial" },
-  // Engajamento / Clips (3) — NEW HIGHLIGHT
-  { key: "clipsPubli", label: "Clips Publicados", group: "engajamento" },
-  { key: "clipsSI", label: "Vendas via Clip", group: "engajamento" },
-  { key: "clipsOrders", label: "Pedidos Clips", group: "engajamento" },
-] as const;
+// Técnico (3)
+{ key: "pictures", label: "Fotos", group: "tecnico" },
+{ key: "title", label: "Título", group: "tecnico" },
+{ key: "description", label: "Descrição", group: "tecnico" },
+// Comercial (3)
+{ key: "price", label: "Preço", group: "comercial" },
+{ key: "freeShipping", label: "Frete Grátis", group: "comercial" },
+{ key: "promotions", label: "Promoções", group: "comercial" },
+// Engajamento / Clips (3) — NEW HIGHLIGHT
+{ key: "clipsPubli", label: "Clips Publicados", group: "engajamento" },
+{ key: "clipsSI", label: "Vendas via Clip", group: "engajamento" },
+{ key: "clipsOrders", label: "Pedidos Clips", group: "engajamento" }] as
+const;
 
 const GROUP_META = {
   tecnico: { label: "Técnico", color: "hsl(var(--neon-blue))" },
   comercial: { label: "Comercial", color: "hsl(var(--emerald))" },
-  engajamento: { label: "Engajamento", color: "#00E676" },
+  engajamento: { label: "Engajamento", color: "#00E676" }
 };
 
 /* ------------------------------------------------------------------ */
@@ -99,7 +99,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
     rawClipsTgmv,
     hasClipsActive,
     rawSiClips,
-    clipsConversionPct,
+    clipsConversionPct
   } = useMemo(() => {
     if (kpis.length === 0) {
       return {
@@ -109,14 +109,14 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
           tecnico: 0,
           comercial: 0,
           engajamento: 0,
-          _value: 0,
+          _value: 0
         })),
         avgScore: 0,
         scoreLevel: { text: "Sem Dados", color: "hsl(var(--muted-foreground))" },
         rawClipsTgmv: 0,
         hasClipsActive: false,
         rawSiClips: 0,
-        clipsConversionPct: 0,
+        clipsConversionPct: 0
       };
     }
 
@@ -135,7 +135,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
       siClips: safe(lat.siClips),
       ordersClips: safe(lat.ordersClips),
       visitasClips: safe(lat.visitasClips),
-      tgmvClips: safe(lat.tgmvLcClips),
+      tgmvClips: safe(lat.tgmvLcClips)
     };
 
     const scores: Record<string, number> = {
@@ -145,9 +145,9 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
       price: clamp(v.llPrice),
       freeShipping: clamp(v.llFreeShipping),
       promotions: clamp(v.llPromotions),
-      clipsPubli: clamp((v.sellersClipsPub / CLIPS_GOALS.sellersClipsPubli) * 100),
-      clipsSI: clamp((v.siClips / CLIPS_GOALS.siClips) * 100),
-      clipsOrders: clamp((v.ordersClips / CLIPS_GOALS.ordersClips) * 100),
+      clipsPubli: clamp(v.sellersClipsPub / CLIPS_GOALS.sellersClipsPubli * 100),
+      clipsSI: clamp(v.siClips / CLIPS_GOALS.siClips * 100),
+      clipsOrders: clamp(v.ordersClips / CLIPS_GOALS.ordersClips * 100)
     };
 
     const data = DIMENSIONS.map((d) => {
@@ -158,7 +158,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
         tecnico: d.group === "tecnico" ? val : 0,
         comercial: d.group === "comercial" ? val : 0,
         engajamento: d.group === "engajamento" ? val : 0,
-        _value: val,
+        _value: val
       };
     });
 
@@ -166,15 +166,15 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
     const avg = Math.round(allVals.reduce((s, vl) => s + vl, 0) / allVals.length);
 
     const level =
-      avg >= 80
-        ? { text: "Excelente", color: "hsl(var(--emerald))" }
-        : avg >= 60
-        ? { text: "Bom", color: "hsl(var(--neon-blue))" }
-        : avg >= 40
-        ? { text: "Regular", color: "hsl(var(--warning))" }
-        : { text: "Crítico", color: "hsl(var(--destructive))" };
+    avg >= 80 ?
+    { text: "Excelente", color: "hsl(var(--emerald))" } :
+    avg >= 60 ?
+    { text: "Bom", color: "hsl(var(--neon-blue))" } :
+    avg >= 40 ?
+    { text: "Regular", color: "hsl(var(--warning))" } :
+    { text: "Crítico", color: "hsl(var(--destructive))" };
 
-    const convPct = v.visitasClips > 0 ? (v.ordersClips / v.visitasClips) * 100 : 0;
+    const convPct = v.visitasClips > 0 ? v.ordersClips / v.visitasClips * 100 : 0;
 
     return {
       radarData: data,
@@ -183,7 +183,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
       rawClipsTgmv: v.tgmvClips,
       hasClipsActive: v.sellersClipsPub > 0,
       rawSiClips: v.siClips,
-      clipsConversionPct: Math.round(convPct * 100) / 100,
+      clipsConversionPct: Math.round(convPct * 100) / 100
     };
   }, [kpis]);
 
@@ -204,8 +204,8 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
         <p className="text-muted-foreground">
           Score: <span className="font-mono font-bold text-foreground">{val}/100</span>
         </p>
-        {item.group === "engajamento" && (
-          <div className="mt-2 space-y-1 border-t border-border pt-2">
+        {item.group === "engajamento" &&
+        <div className="mt-2 space-y-1 border-t border-border pt-2">
             <p className="text-muted-foreground">
               Itens vendidos via Clips:{" "}
               <span className="font-mono font-bold text-foreground">{rawSiClips.toLocaleString("pt-BR")}</span>
@@ -223,9 +223,9 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
               </span>
             </p>
           </div>
-        )}
-      </div>
-    );
+        }
+      </div>);
+
   };
 
   return (
@@ -245,8 +245,8 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
               </span>
               <span
                 className="text-xs px-2 py-0.5 rounded-full border"
-                style={{ color: scoreLevel.color, borderColor: scoreLevel.color }}
-              >
+                style={{ color: scoreLevel.color, borderColor: scoreLevel.color }}>
+                
                 {scoreLevel.text}
               </span>
             </div>
@@ -275,41 +275,41 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                 <PolarGrid stroke="hsl(215,25%,16%)" strokeOpacity={0.6} />
                 <PolarAngleAxis
                   dataKey="dimension"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                />
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                
                 <PolarRadiusAxis
                   angle={90}
                   domain={[0, 100]}
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                  axisLine={false}
-                />
+                  axisLine={false} />
+                
                 <Radar
                   name="Técnico"
                   dataKey="tecnico"
                   stroke="hsl(var(--neon-blue))"
                   fill="url(#gradTecnico)"
                   fillOpacity={0.4}
-                  strokeWidth={2}
-                />
+                  strokeWidth={2} />
+                
                 <Radar
                   name="Comercial"
                   dataKey="comercial"
                   stroke="hsl(var(--emerald))"
                   fill="url(#gradComercial)"
                   fillOpacity={0.4}
-                  strokeWidth={2}
-                />
+                  strokeWidth={2} />
+                
                 <Radar
                   name="Engajamento"
                   dataKey="engajamento"
                   stroke={engajamentoColor}
                   fill="url(#gradEngajamento)"
                   fillOpacity={0.4}
-                  strokeWidth={3}
-                />
+                  strokeWidth={3} />
+                
                 <Legend
-                  wrapperStyle={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }}
-                />
+                  wrapperStyle={{ fontSize: "12px", color: "hsl(var(--muted-foreground))" }} />
+                
                 <Tooltip content={<CustomTooltip />} />
               </RadarChart>
             </ResponsiveContainer>
@@ -325,11 +325,11 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
               className="rounded-xl p-4 border"
               style={{
                 borderColor: hasClipsActive ? "#00E67640" : "hsl(var(--border))",
-                background: hasClipsActive
-                  ? "linear-gradient(135deg, rgba(0,230,118,0.08), rgba(0,230,118,0.02))"
-                  : "hsl(var(--card))",
-              }}
-            >
+                background: hasClipsActive ?
+                "linear-gradient(135deg, rgba(0,230,118,0.08), rgba(0,230,118,0.02))" :
+                "hsl(var(--card))"
+              }}>
+              
               <div className="flex items-center gap-2 mb-2">
                 <Video className="w-4 h-4" style={{ color: engajamentoColor }} />
                 <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: engajamentoColor }}>
@@ -340,19 +340,19 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                 R$ {rawClipsTgmv.toLocaleString("pt-BR")}
               </p>
               <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 text-base">
                   <Zap className="w-3 h-3" /> {rawSiClips} vendas
                 </span>
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1 text-base">
                   <TrendingUp className="w-3 h-3" /> {clipsConversionPct}% conversão
                 </span>
               </div>
-              {hasClipsActive && (
-                <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                  style={{ background: "#00E67620", color: "#00E676" }}>
+              {hasClipsActive &&
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
+              style={{ background: "#00E67620", color: "#00E676" }}>
                   <Video className="w-3 h-3" /> Clips Ativo
                 </div>
-              )}
+              }
             </motion.div>
 
             {/* Score breakdown by group */}
@@ -363,25 +363,25 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                 <div key={group}>
                   <p
                     className="text-xs font-semibold uppercase tracking-wider mb-2"
-                    style={{ color: group === "engajamento" ? engajamentoColor : meta.color }}
-                  >
+                    style={{ color: group === "engajamento" ? engajamentoColor : meta.color }}>
+                    
                     {meta.label}
                   </p>
                   <div className="space-y-2">
                     {items.map((d) => {
                       const pct = d._value;
                       const barColor =
-                        pct >= 80
-                          ? "bg-emerald"
-                          : pct >= 60
-                          ? "bg-neon-blue"
-                          : pct >= 40
-                          ? "bg-warning"
-                          : "bg-destructive";
+                      pct >= 80 ?
+                      "bg-emerald" :
+                      pct >= 60 ?
+                      "bg-neon-blue" :
+                      pct >= 40 ?
+                      "bg-warning" :
+                      "bg-destructive";
                       return (
                         <div key={d.dimension} className="space-y-1">
                           <div className="flex justify-between text-xs">
-                            <span className="text-muted-foreground">{d.dimension}</span>
+                            <span className="text-muted-foreground text-sm">{d.dimension}</span>
                             <span className="font-mono font-bold text-foreground">{pct}</span>
                           </div>
                           <div className="h-1.5 rounded-full bg-muted/30 overflow-hidden">
@@ -389,45 +389,45 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                               className={`h-full rounded-full ${barColor}`}
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
-                              transition={{ duration: 0.8, ease: "easeOut" }}
-                            />
+                              transition={{ duration: 0.8, ease: "easeOut" }} />
+                            
                           </div>
-                        </div>
-                      );
+                        </div>);
+
                     })}
                   </div>
-                </div>
-              );
+                </div>);
+
             })}
           </div>
         </div>
       </div>
 
       {/* Alerts for low scores */}
-      {lowScores.length > 0 && (
-        <div className="glass-card p-5">
+      {lowScores.length > 0 &&
+      <div className="glass-card p-5">
           <h4 className="text-sm font-semibold uppercase tracking-wider text-warning mb-3 flex items-center gap-2">
             <Zap className="w-4 h-4" />
             Dimensões que Precisam de Atenção (Score &lt; 70)
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {lowScores.map((d) => (
-              <div
-                key={d.dimension}
-                className="flex items-center gap-3 p-3 rounded-lg border border-warning/20 bg-warning/5"
-              >
+            {lowScores.map((d) =>
+          <div
+            key={d.dimension}
+            className="flex items-center gap-3 p-3 rounded-lg border border-warning/20 bg-warning/5">
+            
                 <span className="text-2xl font-bold font-mono text-warning">{d._value}</span>
                 <div>
                   <p className="text-sm font-medium text-foreground">{d.dimension}</p>
                   <p className="text-xs text-muted-foreground">Abaixo do padrão recomendado</p>
                 </div>
               </div>
-            ))}
+          )}
           </div>
         </div>
-      )}
-    </motion.div>
-  );
+      }
+    </motion.div>);
+
 };
 
 export default QualityRadarPanel;
