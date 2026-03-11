@@ -151,7 +151,7 @@ Deno.serve(async (req) => {
     const rows: string[][] = [];
 
     for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(";");
+      const cols = parseCSVLine(lines[i]);
       if (cols.length < 10) continue;
 
       const custId = cols[iCustId]?.trim();
