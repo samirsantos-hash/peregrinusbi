@@ -264,9 +264,9 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
                     </td>
                     <td className="text-right py-2 px-2 font-mono text-xs">
                       {item.gainAttractiveness > 0 ? (
-                        <span className="text-emerald">+{fmtNum(item.gainAttractiveness, 1)}pp</span>
+                        <span className="text-emerald">+{fmtNum(item.gainAttractiveness / 10, 1)}pp</span>
                       ) : item.gainAttractiveness < 0 ? (
-                        <span className="text-destructive">{fmtNum(item.gainAttractiveness, 1)}pp</span>
+                        <span className="text-destructive">{fmtNum(item.gainAttractiveness / 10, 1)}pp</span>
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )}
