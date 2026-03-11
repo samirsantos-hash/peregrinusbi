@@ -80,7 +80,7 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {} }: DiagnosticAlertsProps)
             className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{item.kpi.productName}</p>
+              <SellerLink name={item.kpi.productName} custId={sellerCustIdMap[item.kpi.productId]} className="text-sm font-medium truncate" />
             </div>
             <div className="flex gap-1.5 ml-3 flex-shrink-0">
               {item.alerts.map((alert, aIdx) => (

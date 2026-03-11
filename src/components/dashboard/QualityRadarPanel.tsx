@@ -41,6 +41,7 @@ interface KpiLike {
 
 interface QualityRadarPanelProps {
   kpis: KpiLike[];
+  sellerCustIdMap?: Record<string, string>;
 }
 
 /* ------------------------------------------------------------------ */

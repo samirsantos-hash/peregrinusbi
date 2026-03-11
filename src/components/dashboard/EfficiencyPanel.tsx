@@ -26,6 +26,7 @@ interface KpiLike {
 
 interface EfficiencyPanelProps {
   kpis: KpiLike[];
+  sellerCustIdMap?: Record<string, string>;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {

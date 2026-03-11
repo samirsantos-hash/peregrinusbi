@@ -34,6 +34,7 @@ interface SellerInfo {
 interface CompetitivenessPanelProps {
   kpis: KpiLike[];
   sellers?: SellerInfo[];
+  sellerCustIdMap?: Record<string, string>;
 }
 
 /* ── Shared Tooltip ── */
