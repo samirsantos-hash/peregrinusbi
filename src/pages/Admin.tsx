@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy } from "lucide-react";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -55,7 +56,7 @@ const Admin = () => {
   const [selectedCustIds, setSelectedCustIds] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
   const [sellerSearch, setSellerSearch] = useState("");
-
+  const [createdPasswordDialog, setCreatedPasswordDialog] = useState<{ email: string; password: string } | null>(null);
   useEffect(() => {
     loadData();
   }, []);
@@ -112,7 +113,8 @@ const Admin = () => {
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
 
-      toast({ title: "Usuário criado!", description: `Senha temporária: ${data.tempPassword}` });
+      setCreatedPasswordDialog({ email: newEmail, password: data.tempPassword });
+      toast({ title: "Usuário criado com sucesso!" });
       setNewEmail("");
       setNewCnpj("");
       setSelectedCustIds([]);
@@ -146,7 +148,8 @@ const Admin = () => {
       });
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
-      toast({ title: "Nova senha gerada!", description: `Senha: ${data.tempPassword}` });
+      setCreatedPasswordDialog({ email, password: data.tempPassword });
+      toast({ title: "Nova senha gerada!" });
       loadData();
     } catch (err: any) {
       toast({ title: "Erro", description: err.message, variant: "destructive" });
@@ -416,6 +419,49 @@ const Admin = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Password Dialog */}
+        <AlertDialog open={!!createdPasswordDialog} onOpenChange={(open) => !open && setCreatedPasswordDialog(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                Senha Provisória Gerada
+              </AlertDialogTitle>
+              <AlertDialogDescription asChild>
+                <div className="space-y-4 pt-2">
+                  <p className="text-sm">
+                    Usuário: <strong>{createdPasswordDialog?.email}</strong>
+                  </p>
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-muted border border-border">
+                    <code className="text-lg font-mono font-bold tracking-widest flex-1">
+                      {createdPasswordDialog?.password}
+                    </code>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (createdPasswordDialog?.password) {
+                          navigator.clipboard.writeText(createdPasswordDialog.password);
+                          toast({ title: "Senha copiada!" });
+                        }
+                      }}
+                    >
+                      <Copy className="w-4 h-4 mr-1" />
+                      Copiar
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    ⚠️ Anote esta senha agora. O usuário deverá alterá-la no primeiro acesso. A senha expira em 48 horas.
+                  </p>
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction>Entendido</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
