@@ -10,6 +10,7 @@ import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
+import McKinseyActionPlans from "./McKinseyActionPlans";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact } from "@/utils/formatters";
 
 interface KpiLike {
