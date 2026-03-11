@@ -114,7 +114,7 @@ function buildPoints(
   data: Record<string, number | string>[],
   xVar: BubbleVariable, yVar: BubbleVariable,
   colorVar: BubbleVariable, sizeVar: BubbleVariable,
-  nameKey: string, facetKey?: string,
+  nameKey: string, facetKey?: string, sellerIdKey?: string,
 ): ChartPoint[] {
   const filtered = data.filter(d =>
     d[xVar.key] != null && d[yVar.key] != null &&
