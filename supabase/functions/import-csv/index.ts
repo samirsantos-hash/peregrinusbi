@@ -6,9 +6,38 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function parseCSVLine(line: string, delimiter = ";"): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === delimiter) {
+      result.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
 function parseBrNumber(val: string): number {
   if (!val || val.trim() === "") return 0;
-  // Brazilian format: 1.234,56 → 1234.56
   const cleaned = val.trim().replace(/\./g, "").replace(",", ".");
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
@@ -16,6 +45,14 @@ function parseBrNumber(val: string): number {
 
 function parseBrInt(val: string): number {
   return Math.round(parseBrNumber(val));
+}
+
+// Clips fields should never exceed this — values above indicate column misalignment (e.g. CUST_ID leaking in)
+const MAX_CLIPS_VALUE = 100_000;
+
+function safeClipsValue(val: string): number {
+  const n = parseBrNumber(val);
+  return n > MAX_CLIPS_VALUE ? 0 : n;
 }
 
 Deno.serve(async (req) => {
@@ -49,9 +86,7 @@ Deno.serve(async (req) => {
     // Parse CSV (semicolon-separated, BR format)
     const lines = csvText.split("\n").filter((l: string) => l.trim());
     const headerLine = lines[0].replace(/^\uFEFF/, ""); // Remove BOM
-    const headers = headerLine.split(";");
-
-    const colIdx = (name: string) => headers.indexOf(name);
+    const headers = parseCSVLine(headerLine).map(h => h.trim());
 
     // Column indices
     const iData = colIdx("DATA");
@@ -116,7 +151,7 @@ Deno.serve(async (req) => {
     const rows: string[][] = [];
 
     for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(";");
+      const cols = parseCSVLine(lines[i]);
       if (cols.length < 10) continue;
 
       const custId = cols[iCustId]?.trim();
@@ -216,11 +251,11 @@ Deno.serve(async (req) => {
         ll_stock_availability_score: iLlStock >= 0 ? parseBrNumber(cols[iLlStock] || "0") : 0,
         ll_free_shipping_score: iLlFreeShipping >= 0 ? parseBrNumber(cols[iLlFreeShipping] || "0") : 0,
         ll_promotions_score: iLlPromotions >= 0 ? parseBrNumber(cols[iLlPromotions] || "0") : 0,
-        // Clips / Conteúdo
-        sellers_clips_publi: iSellersClipsPub >= 0 ? parseBrNumber(cols[iSellersClipsPub] || "0") : 0,
-        visitas_clips: iVisitasClips >= 0 ? parseBrNumber(cols[iVisitasClips] || "0") : 0,
-        si_clips: iSiClips >= 0 ? parseBrNumber(cols[iSiClips] || "0") : 0,
-        orders_clips: iOrdersClips >= 0 ? parseBrNumber(cols[iOrdersClips] || "0") : 0,
+        // Clips / Conteúdo (use safeClipsValue to reject anomalous values like CUST_ID)
+        sellers_clips_publi: iSellersClipsPub >= 0 ? safeClipsValue(cols[iSellersClipsPub] || "0") : 0,
+        visitas_clips: iVisitasClips >= 0 ? safeClipsValue(cols[iVisitasClips] || "0") : 0,
+        si_clips: iSiClips >= 0 ? safeClipsValue(cols[iSiClips] || "0") : 0,
+        orders_clips: iOrdersClips >= 0 ? safeClipsValue(cols[iOrdersClips] || "0") : 0,
         tgmv_lc_clips: iTgmvClips >= 0 ? parseBrNumber(cols[iTgmvClips] || "0") : 0,
       };
     }).filter(Boolean);
@@ -268,10 +303,10 @@ Deno.serve(async (req) => {
           score_oferta_final: parseBrNumber(cols[iScoreOferta] || "0"),
           score_caracteristica_final: parseBrNumber(cols[iScoreCaract] || "0"),
           score_qualidade_final: parseBrNumber(cols[iScoreQual] || "0"),
-          sellers_clips_publi: iSellersClipsPub >= 0 ? parseBrNumber(cols[iSellersClipsPub] || "0") : 0,
-          visitas_clips: iVisitasClips >= 0 ? parseBrNumber(cols[iVisitasClips] || "0") : 0,
-          si_clips: iSiClips >= 0 ? parseBrNumber(cols[iSiClips] || "0") : 0,
-          orders_clips: iOrdersClips >= 0 ? parseBrNumber(cols[iOrdersClips] || "0") : 0,
+          sellers_clips_publi: iSellersClipsPub >= 0 ? safeClipsValue(cols[iSellersClipsPub] || "0") : 0,
+          visitas_clips: iVisitasClips >= 0 ? safeClipsValue(cols[iVisitasClips] || "0") : 0,
+          si_clips: iSiClips >= 0 ? safeClipsValue(cols[iSiClips] || "0") : 0,
+          orders_clips: iOrdersClips >= 0 ? safeClipsValue(cols[iOrdersClips] || "0") : 0,
           tgmv_lc_clips: iTgmvClips >= 0 ? parseBrNumber(cols[iTgmvClips] || "0") : 0,
         };
       }).filter(Boolean);
