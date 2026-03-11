@@ -6,6 +6,36 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function parseCSVLine(line: string, delimiter = ";"): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === delimiter) {
+      result.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
 function parseBrNumber(val: string): number {
   if (!val || val.trim() === "") return 0;
   const cleaned = val.trim().replace(/\./g, "").replace(",", ".");
@@ -48,7 +78,7 @@ Deno.serve(async (req) => {
 
     const lines = csvText.split("\n").filter((l: string) => l.trim());
     const headerLine = lines[0].replace(/^\uFEFF/, "");
-    const headers = headerLine.split(";");
+    const headers = parseCSVLine(headerLine).map(h => h.trim());
     const colIdx = (name: string) => headers.indexOf(name);
 
     // Column indices
@@ -79,7 +109,7 @@ Deno.serve(async (req) => {
     const custIds = new Set<string>();
     const rows: string[][] = [];
     for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(";");
+      const cols = parseCSVLine(lines[i]);
       if (cols.length < 5) continue;
       const custId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
       if (!custId) continue;

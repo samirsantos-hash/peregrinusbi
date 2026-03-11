@@ -34,6 +34,15 @@ const fmtBRL = (v: number) => `R$ ${fmt(v)}`;
 
 const pct = (a: number, b: number) => (b > 0 ? (a / b) * 100 : 0);
 
+/** Normalize discount value for display. Values >1 are treated as already in % form. */
+const fmtDiscount = (v: number): string => {
+  if (v <= 0) return "—";
+  // If stored as decimal (e.g. 0.35 = 35%), multiply by 100
+  if (v > 0 && v <= 1) return `${(v * 100).toFixed(1)}%`;
+  // Already in percentage form (e.g. 5.94 = 5.94%)
+  return `${v.toFixed(1)}%`;
+};
+
 /* ── Metric Card ── */
 const MetricCard = ({
   icon: Icon, label, value, sub, alert, tooltip, accentClass = "text-neon-blue",
@@ -127,10 +136,7 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
     setChecks(next);
   };
 
-  // Format discount properly — if value > 1 it's already in percent form (e.g. 35 means 35%)
-  const discountDisplay = item.discountBest > 0
-    ? `${item.discountBest > 1 ? Math.round(item.discountBest) : Math.round(item.discountBest * 100)}%`
-    : "—";
+  const discountDisplay = fmtDiscount(item.discountBest);
 
   return (
     <motion.div
@@ -342,20 +348,31 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── Items with video issues for summary ── */
   const videoIssuesSummary = useMemo(() => {
-    if (!listingsQuality) return { noReach: 0, lowConversion: 0, champion: 0, noVideo: 0 };
     let noReach = 0, lowConversion = 0, champion = 0, noVideo = 0;
     const seen = new Set<string>();
-    for (const lq of listingsQuality) {
-      if (seen.has(lq.itemId)) continue;
-      seen.add(lq.itemId);
-      const hasVideo = lq.sellersClipsPubli > 0;
-      if (!hasVideo) { noVideo++; continue; }
-      if (lq.visitasClips === 0 && lq.siClips === 0) { noReach++; continue; }
-      if (lq.ordersClips < avgOrdersClips || lq.ordersClips < 3) { lowConversion++; continue; }
-      champion++;
+
+    // Count from listings quality data
+    if (listingsQuality) {
+      for (const lq of listingsQuality) {
+        if (seen.has(lq.itemId)) continue;
+        seen.add(lq.itemId);
+        const hasVideo = lq.sellersClipsPubli > 0;
+        if (!hasVideo) { noVideo++; continue; }
+        if (lq.visitasClips === 0 && lq.siClips === 0) { noReach++; continue; }
+        if (lq.ordersClips < avgOrdersClips || lq.ordersClips < 3) { lowConversion++; continue; }
+        champion++;
+      }
     }
+
+    // Also count eligibility items that have NO listings quality entry as "noVideo"
+    for (const ei of eligibilityItems) {
+      if (seen.has(ei.itemId) || ei.pedidos7d <= 0) continue;
+      seen.add(ei.itemId);
+      noVideo++;
+    }
+
     return { noReach, lowConversion, champion, noVideo };
-  }, [listingsQuality, avgOrdersClips]);
+  }, [listingsQuality, eligibilityItems, avgOrdersClips]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -444,10 +461,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               <tbody>
                 {topContentItems.map((item, idx) => {
                   const vs = getItemVideoStatus(item);
-                  // Format discount: if > 1 treat as already percentage, else multiply
-                  const discountVal = item.discountBest > 0
-                    ? `${item.discountBest > 1 ? Math.round(item.discountBest) : Math.round(item.discountBest * 100)}%`
-                    : "—";
+                  const discountVal = fmtDiscount(item.discountBest);
 
                   return (
                     <motion.tr
