@@ -247,9 +247,42 @@ const Admin = () => {
                         className="pl-9"
                       />
                     </div>
-                    {selectedCustIds.length > 0 && (
-                      <p className="text-xs text-muted-foreground">{selectedCustIds.length} loja(s) selecionada(s)</p>
-                    )}
+                    <div className="flex items-center justify-between">
+                      {selectedCustIds.length > 0 && (
+                        <p className="text-xs text-muted-foreground">{selectedCustIds.length} loja(s) selecionada(s)</p>
+                      )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                        onClick={() => {
+                          const filtered = sellers
+                            .filter((s) => {
+                              if (!sellerSearch) return true;
+                              const q = sellerSearch.toLowerCase();
+                              return s.nickname.toLowerCase().includes(q) || s.custId.toLowerCase().includes(q);
+                            })
+                            .map((s) => s.custId);
+                          const allSelected = filtered.every((id) => selectedCustIds.includes(id));
+                          if (allSelected) {
+                            setSelectedCustIds((prev) => prev.filter((id) => !filtered.includes(id)));
+                          } else {
+                            setSelectedCustIds((prev) => [...new Set([...prev, ...filtered])]);
+                          }
+                        }}
+                      >
+                        {sellers
+                          .filter((s) => {
+                            if (!sellerSearch) return true;
+                            const q = sellerSearch.toLowerCase();
+                            return s.nickname.toLowerCase().includes(q) || s.custId.toLowerCase().includes(q);
+                          })
+                          .every((s) => selectedCustIds.includes(s.custId))
+                          ? "Desmarcar Todos"
+                          : "Selecionar Todos"}
+                      </Button>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-[240px] overflow-y-auto scrollbar-thin p-2 border border-border rounded-lg">
                       {sellers
                         .filter((s) => {
