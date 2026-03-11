@@ -17,6 +17,7 @@ import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
 import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
+import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
