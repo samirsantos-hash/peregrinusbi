@@ -109,7 +109,7 @@ const Index = () => {
   }, [queryClient, selectedSeller]);
 
   const tabs = [
-  { id: "executive", label: "Dashboard Executivo", icon: LayoutDashboard },
+  { id: "executive", label: "Contexto", icon: LayoutDashboard },
   { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
   { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
   { id: "logistics", label: "Logística", icon: Truck },

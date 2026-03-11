@@ -40,8 +40,8 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
 
     const best = months[0];
     const [y, m] = best.month.split("-");
-    const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-    const label = `${monthNames[parseInt(m) - 1]}/${y}`;
+    const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    const label = `${monthNames[parseInt(m) - 1]} ${y}`;
 
     return { ...best, label };
   }, [kpis]);
