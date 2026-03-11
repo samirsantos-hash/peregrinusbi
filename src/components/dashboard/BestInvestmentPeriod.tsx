@@ -5,7 +5,7 @@ import TooltipInfo from "./TooltipInfo";
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 
 interface Props {
-  kpis: { date: string; revenue: number; adsInvestment: number; cpa: number }[];
+  kpis: {date: string;revenue: number;adsInvestment: number;cpa: number;}[];
 }
 
 const BestInvestmentPeriod = ({ kpis }: Props) => {
@@ -13,7 +13,7 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
     if (kpis.length < 2) return null;
 
     // Group by month (YYYY-MM)
-    const byMonth: Record<string, { revenue: number; ads: number; cpa: number; count: number; dates: string[] }> = {};
+    const byMonth: Record<string, {revenue: number;ads: number;cpa: number;count: number;dates: string[];}> = {};
 
     for (const k of kpis) {
       const month = k.date.slice(0, 7);
@@ -25,16 +25,16 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
       byMonth[month].dates.push(k.date);
     }
 
-    const months = Object.entries(byMonth)
-      .filter(([, v]) => v.ads > 0 && v.revenue > 0)
-      .map(([month, v]) => ({
-        month,
-        avgCpa: v.cpa / v.count,
-        revenue: v.revenue,
-        ads: v.ads,
-        efficiency: v.revenue / v.ads, // revenue per R$ invested
-      }))
-      .sort((a, b) => a.avgCpa - b.avgCpa);
+    const months = Object.entries(byMonth).
+    filter(([, v]) => v.ads > 0 && v.revenue > 0).
+    map(([month, v]) => ({
+      month,
+      avgCpa: v.cpa / v.count,
+      revenue: v.revenue,
+      ads: v.ads,
+      efficiency: v.revenue / v.ads // revenue per R$ invested
+    })).
+    sort((a, b) => a.avgCpa - b.avgCpa);
 
     if (months.length === 0) return null;
 
@@ -59,7 +59,7 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
 
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-          <TrendingDown className="w-6 h-6 text-emerald-500" />
+          <TrendingDown className="w-6 h-6 text-emerald-500 text-destructive-foreground" />
         </div>
         <div className="flex-1">
           <p className="text-lg font-bold text-foreground">
@@ -76,8 +76,8 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-muted/30 rounded-lg p-3"
-        >
+          className="bg-muted/30 rounded-lg p-3">
+          
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">CPA Médio</p>
           <p className="text-sm font-bold font-mono text-emerald-500 mt-1">{fmtBRL(best.avgCpa)}</p>
         </motion.div>
@@ -85,8 +85,8 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="bg-muted/30 rounded-lg p-3"
-        >
+          className="bg-muted/30 rounded-lg p-3">
+          
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Faturamento</p>
           <p className="text-sm font-bold font-mono text-foreground mt-1">{fmtBRLCompact(best.revenue)}</p>
         </motion.div>
@@ -94,14 +94,14 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-muted/30 rounded-lg p-3"
-        >
+          className="bg-muted/30 rounded-lg p-3">
+          
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Retorno / R$ Investido</p>
           <p className="text-sm font-bold font-mono text-foreground mt-1">{best.efficiency.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}x</p>
         </motion.div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default BestInvestmentPeriod;
