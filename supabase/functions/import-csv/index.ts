@@ -6,9 +6,38 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function parseCSVLine(line: string, delimiter = ";"): string[] {
+  const result: string[] = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === delimiter) {
+      result.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current);
+  return result;
+}
+
 function parseBrNumber(val: string): number {
   if (!val || val.trim() === "") return 0;
-  // Brazilian format: 1.234,56 → 1234.56
   const cleaned = val.trim().replace(/\./g, "").replace(",", ".");
   const num = parseFloat(cleaned);
   return isNaN(num) ? 0 : num;
@@ -16,6 +45,14 @@ function parseBrNumber(val: string): number {
 
 function parseBrInt(val: string): number {
   return Math.round(parseBrNumber(val));
+}
+
+// Clips fields should never exceed this — values above indicate column misalignment (e.g. CUST_ID leaking in)
+const MAX_CLIPS_VALUE = 100_000;
+
+function safeClipsValue(val: string): number {
+  const n = parseBrNumber(val);
+  return n > MAX_CLIPS_VALUE ? 0 : n;
 }
 
 Deno.serve(async (req) => {
