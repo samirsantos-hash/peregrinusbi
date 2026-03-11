@@ -75,10 +75,12 @@ const Admin = () => {
       setManagedUsers(
         usersRes.data.map((u: any) => ({
           id: u.id,
+          userId: u.user_id,
           email: u.user_email,
           cnpj: u.cnpj,
           allowed_cust_ids: u.allowed_cust_ids || [],
           must_change_password: u.must_change_password,
+          temp_password: u.temp_password,
           created_at: u.created_at,
         }))
       );
