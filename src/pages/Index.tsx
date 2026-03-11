@@ -181,7 +181,7 @@ const Index = () => {
             onRefresh={handleRefresh}
             isRefreshing={isRefreshing} />
 
-            <DiagnosticAlerts kpis={filteredKpis} />
+            <DiagnosticAlerts kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto flex-wrap">
