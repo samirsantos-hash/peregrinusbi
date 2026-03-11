@@ -164,6 +164,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
     // Group by date for scatter (each date is a point)
     const byDateMap: Record<string, {
       date: string; gmv: number; visits: number; visitsExpensive: number;
+      visitsMatch: number; visitsCheaper: number;
       scoreQualidade: number; qualCount: number;
       upliftGmvM1: number; upliftCount: number;
     }> = {};
@@ -171,6 +172,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
       if (!byDateMap[k.date]) {
         byDateMap[k.date] = {
           date: k.date, gmv: 0, visits: 0, visitsExpensive: 0,
+          visitsMatch: 0, visitsCheaper: 0,
           scoreQualidade: 0, qualCount: 0,
           upliftGmvM1: 0, upliftCount: 0,
         };
@@ -179,6 +181,8 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
       s.gmv += k.gmv || 0;
       s.visits += k.visits || 0;
       s.visitsExpensive += k.visitsExpensive || 0;
+      s.visitsMatch += k.visitsMatch || 0;
+      s.visitsCheaper += k.visitsCheaper || 0;
       if (k.scoreQualidade > 0) { s.scoreQualidade += k.scoreQualidade; s.qualCount++; }
       if (k.upliftGmvM1 !== 0) { s.upliftGmvM1 += k.upliftGmvM1; s.upliftCount++; }
     }
