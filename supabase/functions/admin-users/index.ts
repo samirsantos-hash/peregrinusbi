@@ -110,6 +110,7 @@ Deno.serve(async (req) => {
         allowed_cust_ids: allowedCustIds,
         temp_password_expires_at: expiresAt,
         must_change_password: true,
+        temp_password: tempPassword,
       });
 
       return new Response(
@@ -122,12 +123,43 @@ Deno.serve(async (req) => {
       const { userId } = body;
       await adminClient
         .from("user_access_control")
-        .update({ must_change_password: false })
+        .update({ must_change_password: false, temp_password: null })
         .eq("user_id", userId);
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    if (action === "reset_password") {
+      const { targetUserId } = body;
+      const newTempPassword = generateTempPassword();
+      const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
+
+      const { error: updateErr } = await adminClient.auth.admin.updateUserById(targetUserId, {
+        password: newTempPassword,
+      });
+
+      if (updateErr) {
+        return new Response(JSON.stringify({ error: updateErr.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      await adminClient
+        .from("user_access_control")
+        .update({
+          must_change_password: true,
+          temp_password: newTempPassword,
+          temp_password_expires_at: expiresAt,
+        })
+        .eq("user_id", targetUserId);
+
+      return new Response(
+        JSON.stringify({ success: true, tempPassword: newTempPassword }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     if (action === "delete_user") {

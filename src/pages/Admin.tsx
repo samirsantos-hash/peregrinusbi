@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search } from "lucide-react";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -23,10 +23,12 @@ interface SellerOption {
 
 interface ManagedUser {
   id: string;
+  userId: string;
   email: string;
   cnpj: string | null;
   allowed_cust_ids: string[];
   must_change_password: boolean;
+  temp_password: string | null;
   created_at: string;
 }
 
@@ -73,10 +75,12 @@ const Admin = () => {
       setManagedUsers(
         usersRes.data.map((u: any) => ({
           id: u.id,
+          userId: u.user_id,
           email: u.user_email,
           cnpj: u.cnpj,
           allowed_cust_ids: u.allowed_cust_ids || [],
           must_change_password: u.must_change_password,
+          temp_password: u.temp_password,
           created_at: u.created_at,
         }))
       );
@@ -132,6 +136,36 @@ const Admin = () => {
     } catch (err: any) {
       toast({ title: "Erro", description: err.message, variant: "destructive" });
     }
+  };
+
+  const handleResetPassword = async (userId: string, email: string) => {
+    if (!confirm(`Gerar nova senha temporária para ${email}?`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "reset_password", targetUserId: userId },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      toast({ title: "Nova senha gerada!", description: `Senha: ${data.tempPassword}` });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
+
+  const togglePasswordVisibility = (id: string) => {
+    setVisiblePasswords((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Senha copiada!" });
   };
 
   const toggleCustId = (custId: string) => {
@@ -254,16 +288,35 @@ const Admin = () => {
                   <div className="space-y-3">
                     {managedUsers.map((u) => (
                       <div key={u.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                        <div>
+                        <div className="space-y-1 flex-1 min-w-0">
                           <p className="text-sm font-medium">{u.email}</p>
                           <p className="text-xs text-muted-foreground">
                             CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
                             {u.must_change_password && <span className="ml-2 text-warning">● Senha temporária</span>}
                           </p>
+                          {u.temp_password && u.must_change_password && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-muted-foreground">Senha:</span>
+                              <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded">
+                                {visiblePasswords.has(u.id) ? u.temp_password : "••••••••••"}
+                              </code>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => togglePasswordVisibility(u.id)}>
+                                {visiblePasswords.has(u.id) ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(u.temp_password!)}>
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.id, u.email)}>
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => handleResetPassword(u.userId, u.email)}>
+                            <RotateCcw className="w-4 h-4 text-neon-blue" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.userId, u.email)}>
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
