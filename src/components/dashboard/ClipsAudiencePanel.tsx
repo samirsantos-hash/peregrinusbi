@@ -348,20 +348,31 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── Items with video issues for summary ── */
   const videoIssuesSummary = useMemo(() => {
-    if (!listingsQuality) return { noReach: 0, lowConversion: 0, champion: 0, noVideo: 0 };
     let noReach = 0, lowConversion = 0, champion = 0, noVideo = 0;
     const seen = new Set<string>();
-    for (const lq of listingsQuality) {
-      if (seen.has(lq.itemId)) continue;
-      seen.add(lq.itemId);
-      const hasVideo = lq.sellersClipsPubli > 0;
-      if (!hasVideo) { noVideo++; continue; }
-      if (lq.visitasClips === 0 && lq.siClips === 0) { noReach++; continue; }
-      if (lq.ordersClips < avgOrdersClips || lq.ordersClips < 3) { lowConversion++; continue; }
-      champion++;
+
+    // Count from listings quality data
+    if (listingsQuality) {
+      for (const lq of listingsQuality) {
+        if (seen.has(lq.itemId)) continue;
+        seen.add(lq.itemId);
+        const hasVideo = lq.sellersClipsPubli > 0;
+        if (!hasVideo) { noVideo++; continue; }
+        if (lq.visitasClips === 0 && lq.siClips === 0) { noReach++; continue; }
+        if (lq.ordersClips < avgOrdersClips || lq.ordersClips < 3) { lowConversion++; continue; }
+        champion++;
+      }
     }
+
+    // Also count eligibility items that have NO listings quality entry as "noVideo"
+    for (const ei of eligibilityItems) {
+      if (seen.has(ei.itemId) || ei.pedidos7d <= 0) continue;
+      seen.add(ei.itemId);
+      noVideo++;
+    }
+
     return { noReach, lowConversion, champion, noVideo };
-  }, [listingsQuality, avgOrdersClips]);
+  }, [listingsQuality, eligibilityItems, avgOrdersClips]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
