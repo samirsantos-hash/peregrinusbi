@@ -342,6 +342,15 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {} }: Comp
         </div>
       </div>
 
+      {/* ── Planos de Ação por Segmento ── */}
+      <McKinseyActionPlans
+        scatterData={scatterData}
+        medianX={medianX}
+        medianY={medianY}
+        kpis={kpis as any}
+        sellerName={kpis[0]?.productName}
+      />
+
       {/* ── Diagnóstico de Preço por Período ── */}
       <div className="glass-card p-5">
         <div className="flex items-center gap-2 mb-4">
