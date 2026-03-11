@@ -24,6 +24,7 @@ interface MultidimensionalBubbleChartProps {
   onPeriodChange: (v: string) => void;
   facetKey?: string;
   facetLabel?: string;
+  sellerCustIdMap?: Record<string, string>;
 }
 
 /* ── Linear regression for trend line ── */
