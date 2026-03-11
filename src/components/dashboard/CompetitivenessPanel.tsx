@@ -483,6 +483,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {} }: Comp
             onPeriodChange={setBubblePeriod}
             facetKey="cluster"
             facetLabel="Período"
+            sellerCustIdMap={sellerCustIdMap}
           />
         );
       })()}
