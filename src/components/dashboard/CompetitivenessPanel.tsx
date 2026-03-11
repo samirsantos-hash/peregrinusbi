@@ -10,7 +10,7 @@ import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
-import { fmtBRL, fmtNum } from "@/utils/formatters";
+import { fmtBRL, fmtBRLCompact, fmtNum } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
@@ -235,10 +235,10 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
           { label: "Total Visitas", value: fmtNum(totalVisits, 0), icon: TrendingUp, color: "neon-text", tooltip: "Total de visitas nos anúncios do seller no período selecionado." },
-          { label: "Receita c/ Preço Alto", value: fmtBRL(totalExpensive), icon: AlertTriangle, color: "text-destructive", tooltip: "Receita (R$) em visitas onde seu preço era maior que o concorrente." },
+          { label: "Receita c/ Preço Alto", value: fmtBRLCompact(totalExpensive), icon: AlertTriangle, color: "text-destructive", tooltip: "Receita (R$) em visitas onde seu preço era maior que o concorrente." },
           { label: "% Não Competitivo", value: `${fmtNum(pctExpensive, 1)}%`, icon: TrendingDown, color: pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: "Proporção de visitas onde seu preço era mais caro. Acima de 30% é crítico." },
           { label: "Preço Rival Médio", value: fmtBRL(avgMinPriceRival), icon: DollarSign, color: "neon-text", tooltip: "Média do menor preço encontrado entre concorrentes no período." },
-          { label: "GMV Total", value: fmtBRL(totalGmv), icon: TrendingUp, color: "neon-text", tooltip: "Faturamento total no período analisado." },
+          { label: "GMV Total", value: fmtBRLCompact(totalGmv), icon: TrendingUp, color: "neon-text", tooltip: "Faturamento total no período analisado." },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
             <div className="flex items-center gap-1.5 mb-1">
