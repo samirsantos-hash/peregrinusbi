@@ -2,16 +2,17 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Legend,
+  Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell,
 } from "recharts";
 import {
   Eye, Video, TrendingUp, Flame, AlertTriangle,
   Play, ShoppingCart, ExternalLink, ChevronDown, ChevronUp,
   FileVideo, Clapperboard, Target, Monitor, CheckCircle2, Circle,
-  Ban,
+  Ban, Filter, PieChart as PieChartIcon,
 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { EligibilityItem } from "@/hooks/useEligibility";
 import type { ListingQuality } from "@/hooks/useListingsQuality";
@@ -37,11 +38,17 @@ const pct = (a: number, b: number) => (b > 0 ? (a / b) * 100 : 0);
 /** Normalize discount value for display. Values >1 are treated as already in % form. */
 const fmtDiscount = (v: number): string => {
   if (v <= 0) return "—";
-  // If stored as decimal (e.g. 0.35 = 35%), multiply by 100
   if (v > 0 && v <= 1) return `${(v * 100).toFixed(1)}%`;
-  // Already in percentage form (e.g. 5.94 = 5.94%)
   return `${v.toFixed(1)}%`;
 };
+
+/**
+ * Binary clip detection: an item HAS a clip if any performance metric > 0.
+ * VIDEOS_PUBLI alone is not reliable — a video may exist but not be indexed as a Clip.
+ */
+function hasClipData(visitasClips: number, siClips: number, ordersClips: number): boolean {
+  return visitasClips > 0 || siClips > 0 || ordersClips > 0;
+}
 
 /* ── Metric Card ── */
 const MetricCard = ({
@@ -98,20 +105,18 @@ const AUDIT_CHECKLIST = [
 type VideoStatus = "no-video" | "low-conversion" | "no-reach" | "champion";
 
 function getVideoStatus(
-  hasVideo: boolean,
+  hasClip: boolean,
   ordersClips: number,
   visitasClips: number,
   siClips: number,
   avgOrdersClips: number,
 ): { status: VideoStatus; label: string; badgeClass: string } {
-  if (!hasVideo) {
+  if (!hasClip) {
     return { status: "no-video", label: "Analisar", badgeClass: "bg-destructive/15 text-destructive border-destructive/20" };
   }
-  // Has video but zero reach
   if (visitasClips === 0 && siClips === 0) {
     return { status: "no-reach", label: "Sem Alcance", badgeClass: "bg-destructive/15 text-destructive border-destructive/20" };
   }
-  // Has video, has some reach, but low conversion
   if (ordersClips < avgOrdersClips || ordersClips < 3) {
     return { status: "low-conversion", label: "Otimizar Roteiro", badgeClass: "bg-neon-blue/15 text-neon-blue border-neon-blue/20" };
   }
@@ -184,7 +189,7 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
             {videoStatus.status === "no-video" ? (
               <p className="text-xs text-destructive flex items-center gap-1.5">
                 <FileVideo className="w-3.5 h-3.5" />
-                🎥 Gravação Urgente — Sem Vídeo Publicado
+                🎥 Gravação Urgente — Sem Clip Ativo
               </p>
             ) : videoStatus.status === "no-reach" ? (
               <p className="text-xs text-destructive flex items-center gap-1.5">
@@ -224,7 +229,7 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
               <span className="text-xs text-warning font-medium flex items-center gap-1">
                 <Clapperboard className="w-3.5 h-3.5" />
                 {videoStatus.status === "no-video"
-                  ? "Gravação Urgente — Sem Vídeo Publicado"
+                  ? "Gravação Urgente — Sem Clip Ativo"
                   : "Revisar Roteiro e Edição (Foco em Conversão)"}
               </span>
               {clipsLink && (
@@ -245,8 +250,22 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
   );
 };
 
+/* ── Donut Chart Label ── */
+const DonutLabel = ({ viewBox, total, withClip }: any) => {
+  const { cx, cy } = viewBox;
+  const coveragePct = total > 0 ? ((withClip / total) * 100).toFixed(0) : "0";
+  return (
+    <text x={cx} y={cy} textAnchor="middle" dominantBaseline="central">
+      <tspan x={cx} dy="-8" className="fill-foreground font-bold text-xl">{coveragePct}%</tspan>
+      <tspan x={cx} dy="20" className="fill-muted-foreground text-[10px]">cobertura</tspan>
+    </text>
+  );
+};
+
 /* ── Main Panel ── */
 const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCustIdMap, selectedSeller }: ClipsAudiencePanelProps) => {
+  const [filterNoClips, setFilterNoClips] = useState(false);
+
   /* ── 1. Aggregate KPI totals ── */
   const totals = useMemo(() => {
     const t = { visits: 0, visitasClips: 0, tgmvClips: 0, ordersClips: 0, siClips: 0, clipsPubli: 0 };
@@ -267,26 +286,41 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
   const videoPct = pct(totals.visitasClips, totals.visits);
   const lowExposure = videoPct < 5 && totals.visits > 0;
 
-  /* ── 2. Per-item video map from listings quality ── */
-  const itemVideoMap = useMemo(() => {
-    const map = new Map<string, { clipsPubli: number; visitasClips: number; siClips: number; ordersClips: number }>();
+  /* ── 2. Per-item clip data map from listings quality ── */
+  const itemClipMap = useMemo(() => {
+    const map = new Map<string, { visitasClips: number; siClips: number; ordersClips: number; hasClip: boolean }>();
     if (!listingsQuality) return map;
     for (const lq of listingsQuality) {
+      const hc = hasClipData(lq.visitasClips, lq.siClips, lq.ordersClips);
       map.set(lq.itemId, {
-        clipsPubli: lq.sellersClipsPubli,
         visitasClips: lq.visitasClips,
         siClips: lq.siClips,
         ordersClips: lq.ordersClips,
+        hasClip: hc,
       });
     }
     return map;
   }, [listingsQuality]);
 
-  /* ── 3. Count of items with videos ── */
-  const itemsWithVideo = useMemo(() => {
-    if (!listingsQuality) return 0;
-    return listingsQuality.filter(lq => lq.sellersClipsPubli > 0).length;
-  }, [listingsQuality]);
+  /* ── 3. Clip coverage: count unique items with/without clip data ── */
+  const clipCoverage = useMemo(() => {
+    const allItems = new Map<string, boolean>();
+    // From listings quality
+    if (listingsQuality) {
+      for (const lq of listingsQuality) {
+        allItems.set(lq.itemId, hasClipData(lq.visitasClips, lq.siClips, lq.ordersClips));
+      }
+    }
+    // From eligibility (items not in quality data count as no clip)
+    for (const ei of eligibilityItems) {
+      if (!allItems.has(ei.itemId)) {
+        allItems.set(ei.itemId, false);
+      }
+    }
+    let withClip = 0, withoutClip = 0;
+    allItems.forEach((hc) => { if (hc) withClip++; else withoutClip++; });
+    return { withClip, withoutClip, total: withClip + withoutClip };
+  }, [listingsQuality, eligibilityItems]);
 
   /* ── 4. Average orders for threshold ── */
   const avgOrdersClips = useMemo(() => {
@@ -306,15 +340,22 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
   /* ── 6. Top 5 items by pedidos — deduplicated ── */
   const topContentItems = useMemo(() => {
     const seen = new Set<string>();
-    return eligibilityItems
+    const items = eligibilityItems
       .filter((e) => {
         if (e.pedidos7d <= 0 || seen.has(e.itemId)) return false;
         seen.add(e.itemId);
         return true;
       })
-      .sort((a, b) => b.pedidos7d - a.pedidos7d)
-      .slice(0, 5);
-  }, [eligibilityItems]);
+      .sort((a, b) => b.pedidos7d - a.pedidos7d);
+
+    if (filterNoClips) {
+      return items.filter((e) => {
+        const clip = itemClipMap.get(e.itemId);
+        return !clip || !clip.hasClip;
+      }).slice(0, 10);
+    }
+    return items.slice(0, 5);
+  }, [eligibilityItems, filterNoClips, itemClipMap]);
 
   /* ── 7. Hot items: high pedidos, deduplicated ── */
   const hotItems = useMemo(() => {
@@ -336,46 +377,127 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
   const sellerCustId = selectedSeller && sellerCustIdMap ? sellerCustIdMap[selectedSeller] : null;
   const clipsLink = sellerCustId ? `https://lista.mercadolivre.com.br/_CustId_${sellerCustId}` : null;
 
-  /* ── Get video status for an item ── */
+  /* ── Get video status for an item (using performance-based detection) ── */
   const getItemVideoStatus = (item: EligibilityItem) => {
-    const vid = itemVideoMap.get(item.itemId);
-    const hasVideo = vid ? vid.clipsPubli > 0 : false;
-    const ordersC = vid ? vid.ordersClips : 0;
-    const visitasC = vid ? vid.visitasClips : 0;
-    const siC = vid ? vid.siClips : 0;
-    return getVideoStatus(hasVideo, ordersC, visitasC, siC, avgOrdersClips);
+    const clip = itemClipMap.get(item.itemId);
+    const hasClip = clip ? clip.hasClip : false;
+    const ordersC = clip ? clip.ordersClips : 0;
+    const visitasC = clip ? clip.visitasClips : 0;
+    const siC = clip ? clip.siClips : 0;
+    return getVideoStatus(hasClip, ordersC, visitasC, siC, avgOrdersClips);
   };
 
-  /* ── Items with video issues for summary ── */
+  /* ── Get clip status badge for an item ── */
+  const getClipStatusBadge = (itemId: string) => {
+    const clip = itemClipMap.get(itemId);
+    const hc = clip ? clip.hasClip : false;
+    if (hc) {
+      return <Badge className="text-[11px] bg-emerald/10 text-emerald border-emerald/20">✅ Ativo no Clips</Badge>;
+    }
+    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20">❌ Sem Clip</Badge>;
+  };
+
+  /* ── Summary using performance-based detection ── */
   const videoIssuesSummary = useMemo(() => {
-    let noReach = 0, lowConversion = 0, champion = 0, noVideo = 0;
+    let noReach = 0, lowConversion = 0, champion = 0, noClip = 0;
     const seen = new Set<string>();
 
-    // Count from listings quality data
     if (listingsQuality) {
       for (const lq of listingsQuality) {
         if (seen.has(lq.itemId)) continue;
         seen.add(lq.itemId);
-        const hasVideo = lq.sellersClipsPubli > 0;
-        if (!hasVideo) { noVideo++; continue; }
+        const hc = hasClipData(lq.visitasClips, lq.siClips, lq.ordersClips);
+        if (!hc) { noClip++; continue; }
         if (lq.visitasClips === 0 && lq.siClips === 0) { noReach++; continue; }
         if (lq.ordersClips < avgOrdersClips || lq.ordersClips < 3) { lowConversion++; continue; }
         champion++;
       }
     }
 
-    // Also count eligibility items that have NO listings quality entry as "noVideo"
     for (const ei of eligibilityItems) {
       if (seen.has(ei.itemId) || ei.pedidos7d <= 0) continue;
       seen.add(ei.itemId);
-      noVideo++;
+      noClip++;
     }
 
-    return { noReach, lowConversion, champion, noVideo };
+    return { noReach, lowConversion, champion, noClip };
   }, [listingsQuality, eligibilityItems, avgOrdersClips]);
+
+  /* ── Donut data ── */
+  const donutData = useMemo(() => [
+    { name: "Anúncios com Clip", value: clipCoverage.withClip },
+    { name: "Anúncios sem Clip", value: clipCoverage.withoutClip },
+  ], [clipCoverage]);
+
+  const DONUT_COLORS = ["hsl(var(--emerald))", "hsl(var(--muted))"];
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+      {/* ── Row 0: Clip Coverage Donut ── */}
+      {clipCoverage.total > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <PieChartIcon className="w-4 h-4 text-emerald" />
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Cobertura de Clips no Catálogo
+            </h3>
+            <TooltipInfo text="Proporção de anúncios únicos (MLBs) que possuem dados de performance de Clips ativos (visitas, impressões ou pedidos via clip) vs. anúncios sem nenhum dado de clips." />
+          </div>
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            <div className="w-[200px] h-[200px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={donutData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={85}
+                    paddingAngle={3}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {donutData.map((_, idx) => (
+                      <Cell key={idx} fill={DONUT_COLORS[idx]} />
+                    ))}
+                  </Pie>
+                  <text x="50%" y="46%" textAnchor="middle" dominantBaseline="central" className="fill-foreground font-bold text-xl">
+                    {clipCoverage.total > 0 ? `${((clipCoverage.withClip / clipCoverage.total) * 100).toFixed(0)}%` : "0%"}
+                  </text>
+                  <text x="50%" y="58%" textAnchor="middle" dominantBaseline="central" className="fill-muted-foreground text-[10px]">
+                    cobertura
+                  </text>
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="flex-1 space-y-3">
+              <p className="text-sm text-foreground">
+                <span className="font-bold text-emerald">{clipCoverage.withClip}</span>
+                <span className="text-muted-foreground"> de </span>
+                <span className="font-bold">{clipCoverage.total}</span>
+                <span className="text-muted-foreground"> anúncios possuem Clips ativos</span>
+              </p>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-sm bg-emerald" />
+                  <span className="text-xs text-muted-foreground">Anúncios com Clip ({clipCoverage.withClip})</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-sm bg-muted" />
+                  <span className="text-xs text-muted-foreground">Anúncios sem Clip ({clipCoverage.withoutClip})</span>
+                </div>
+              </div>
+              {clipCoverage.withoutClip > 0 && (
+                <p className="text-xs text-warning flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  {clipCoverage.withoutClip} anúncios sem Clip representam oportunidades perdidas de conversão
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Row 1: Metric cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
@@ -437,15 +559,26 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         </div>
       )}
 
-      {/* ── Row 3: Content Efficiency Table — deduplicated, proper columns ── */}
-      {topContentItems.length > 0 && (
+      {/* ── Row 3: Content Efficiency Table with Status Clips column & filter ── */}
+      {(topContentItems.length > 0 || filterNoClips) && (
         <div className="glass-card p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-4 h-4 text-emerald" />
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              Eficiência de Conteúdo — Top Itens
-            </h3>
-            <TooltipInfo text="Top 5 itens com maior volume de vendas. Avalie a tração desses produtos para priorizar criação de Clips." />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-emerald" />
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                {filterNoClips ? "Oportunidade: Anúncios sem Clips" : "Eficiência de Conteúdo — Top Itens"}
+              </h3>
+              <TooltipInfo text={filterNoClips ? "Itens com alto volume de vendas que ainda não possuem Clips ativos — oportunidade perdida de conversão." : "Top itens com maior volume de vendas. Avalie a tração desses produtos para priorizar criação de Clips."} />
+            </div>
+            <Button
+              variant={filterNoClips ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilterNoClips(!filterNoClips)}
+              className="gap-1.5 text-xs"
+            >
+              <Filter className="w-3.5 h-3.5" />
+              {filterNoClips ? "Mostrar Todos" : "Ver anúncios sem Clips"}
+            </Button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -455,10 +588,14 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                   <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Pedidos 7D</th>
                   <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Estoque</th>
                   <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Desconto %</th>
+                  <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Status Clips</th>
                   <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Status do Vídeo</th>
                 </tr>
               </thead>
               <tbody>
+                {topContentItems.length === 0 && filterNoClips && (
+                  <tr><td colSpan={6} className="text-center py-6 text-muted-foreground text-sm">Nenhum anúncio sem Clip encontrado com vendas relevantes.</td></tr>
+                )}
                 {topContentItems.map((item, idx) => {
                   const vs = getItemVideoStatus(item);
                   const discountVal = fmtDiscount(item.discountBest);
@@ -492,6 +629,9 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                       </td>
                       <td className="text-center py-2.5 px-3 font-mono text-foreground">
                         {discountVal}
+                      </td>
+                      <td className="text-center py-2.5 px-3">
+                        {getClipStatusBadge(item.itemId)}
                       </td>
                       <td className="text-center py-2.5 px-3">
                         <Badge className={`text-[11px] ${vs.badgeClass}`}>
@@ -541,10 +681,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Anúncios com Vídeo", value: itemsWithVideo, color: "text-neon-blue" },
+            { label: "Anúncios com Clip", value: clipCoverage.withClip, color: "text-emerald" },
             { label: "Vídeo Campeão", value: videoIssuesSummary.champion, color: "text-emerald" },
             { label: "Baixa Conversão", value: videoIssuesSummary.lowConversion, color: "text-warning" },
-            { label: "Sem Alcance / Sem Vídeo", value: videoIssuesSummary.noReach + videoIssuesSummary.noVideo, color: "text-destructive" },
+            { label: "Sem Alcance / Sem Clip", value: videoIssuesSummary.noReach + videoIssuesSummary.noClip, color: "text-destructive" },
           ].map((m) => (
             <div key={m.label} className="text-center">
               <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{m.label}</p>
