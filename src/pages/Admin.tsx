@@ -113,7 +113,8 @@ const Admin = () => {
       if (error) throw new Error(error.message);
       if (data?.error) throw new Error(data.error);
 
-      toast({ title: "Usuário criado!", description: `Senha temporária: ${data.tempPassword}` });
+      setCreatedPasswordDialog({ email: newEmail, password: data.tempPassword });
+      toast({ title: "Usuário criado com sucesso!" });
       setNewEmail("");
       setNewCnpj("");
       setSelectedCustIds([]);
