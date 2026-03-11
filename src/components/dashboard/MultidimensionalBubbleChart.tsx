@@ -248,6 +248,7 @@ const MultidimensionalBubbleChart = ({
                   xVar={xVar} yVar={yVar} colorVar={colorVar} sizeVar={sizeVar}
                   colorMin={colorMin} colorMax={colorMax}
                   height={320}
+                  sellerCustIdMap={sellerCustIdMap}
                 />
                 <p className="text-[10px] text-muted-foreground text-center mt-1">
                   {points.length} seller{points.length !== 1 ? "s" : ""}
