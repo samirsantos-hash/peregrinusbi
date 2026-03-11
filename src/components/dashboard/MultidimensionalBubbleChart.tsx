@@ -4,6 +4,7 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer,
   Cell,
 } from "recharts";
+import { ExternalLink } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 
