@@ -1,12 +1,13 @@
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import {
   Eye, Video, TrendingUp, Flame, AlertTriangle,
-  Play, ShoppingCart, ExternalLink,
+  Play, ShoppingCart, ExternalLink, ChevronDown, ChevronUp,
+  FileVideo, Clapperboard, Target, Monitor, CheckCircle2, Circle,
 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import type { SellerKPI } from "@/hooks/useSellerData";
@@ -15,6 +16,8 @@ import type { EligibilityItem } from "@/hooks/useEligibility";
 interface ClipsAudiencePanelProps {
   kpis: SellerKPI[];
   eligibilityItems: EligibilityItem[];
+  sellerCustIdMap?: Record<string, string>;
+  selectedSeller?: string;
 }
 
 /* ── Helpers ── */
@@ -70,7 +73,147 @@ const ComboTooltipContent = ({ active, payload, label }: any) => {
   );
 };
 
-const ClipsAudiencePanel = ({ kpis, eligibilityItems }: ClipsAudiencePanelProps) => {
+/* ── Audit Checklist ── */
+const AUDIT_CHECKLIST = [
+  { icon: Clapperboard, label: "Script/Roteiro", question: "O vídeo responde às principais dúvidas técnicas do campo de perguntas?" },
+  { icon: Target, label: "Edição/Gancho", question: "Os primeiros 3 segundos prendem a atenção do comprador?" },
+  { icon: ShoppingCart, label: "CTA (Chamada para Ação)", question: "Existe uma instrução clara para o cliente comprar agora?" },
+  { icon: Monitor, label: "Demonstração de Uso", question: "O produto é mostrado sendo utilizado na prática (Contexto Real)?" },
+];
+
+interface HotItemCardProps {
+  item: EligibilityItem;
+  clipsPubli: number;
+  avgSiClips: number;
+  avgOrdersClips: number;
+  clipsLink: string | null;
+  idx: number;
+}
+
+const HotItemCard = ({ item, clipsPubli, avgSiClips, avgOrdersClips, clipsLink, idx }: HotItemCardProps) => {
+  const [expanded, setExpanded] = useState(false);
+  const [checks, setChecks] = useState<boolean[]>(new Array(AUDIT_CHECKLIST.length).fill(false));
+
+  const hasVideo = clipsPubli > 0;
+  const lowPerformance = hasVideo && (avgSiClips < 5 || avgOrdersClips < 3);
+
+  const toggleCheck = (i: number) => {
+    const next = [...checks];
+    next[i] = !next[i];
+    setChecks(next);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: -5 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: idx * 0.05 }}
+      className="glass-card overflow-hidden"
+    >
+      {/* Header row */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-3 p-4 text-left hover:bg-muted/20 transition-colors"
+      >
+        <Flame className="w-4 h-4 text-warning shrink-0" />
+        <div className="flex-1 min-w-0">
+          <a
+            href={item.mlbLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-sm text-neon-blue hover:underline flex items-center gap-1.5 truncate max-w-[300px]"
+          >
+            {item.itemName || item.itemId}
+            <ExternalLink className="w-3 h-3 shrink-0 opacity-60" />
+          </a>
+          <p className="text-[11px] text-muted-foreground mt-0.5">
+            {item.pedidos7d} pedidos/7d · Estoque: {item.estoqueMedio7d}
+          </p>
+        </div>
+        {/* Status badge */}
+        <div className="shrink-0">
+          {!hasVideo ? (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
+              <FileVideo className="w-3 h-3" /> Gravação Urgente
+            </span>
+          ) : lowPerformance ? (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border"
+              style={{ backgroundColor: "hsl(50 100% 50% / 0.12)", color: "hsl(50 100% 50%)", borderColor: "hsl(50 100% 50% / 0.25)" }}
+            >
+              <AlertTriangle className="w-3 h-3" /> Requer Novo Roteiro
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald/10 text-emerald border border-emerald/20">
+              <CheckCircle2 className="w-3 h-3" /> OK
+            </span>
+          )}
+        </div>
+        {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
+      </button>
+
+      {/* Expanded checklist */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4 space-y-3 border-t border-border/50 pt-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Diagnóstico de Produção
+              </p>
+              <div className="space-y-2">
+                {AUDIT_CHECKLIST.map((c, i) => (
+                  <button
+                    key={c.label}
+                    onClick={() => toggleCheck(i)}
+                    className="flex items-start gap-2.5 w-full text-left group"
+                  >
+                    {checks[i] ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald shrink-0 mt-0.5" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5 group-hover:text-neon-blue transition-colors" />
+                    )}
+                    <div>
+                      <p className={`text-xs font-medium ${checks[i] ? "text-emerald line-through opacity-70" : "text-foreground"}`}>
+                        {c.label}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">{c.question}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              {/* Action bar */}
+              <div className="flex items-center gap-3 pt-2 border-t border-border/30">
+                <span className="text-xs text-warning font-medium flex items-center gap-1">
+                  <Clapperboard className="w-3.5 h-3.5" />
+                  {hasVideo ? "Revisar Roteiro e Edição (Foco em Conversão)" : "Gravação Urgente — Sem Vídeo Publicado"}
+                </span>
+                {clipsLink && (
+                  <a
+                    href={clipsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-auto text-xs text-neon-blue hover:underline flex items-center gap-1"
+                  >
+                    Ver Clips do Seller <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+};
+
+const ClipsAudiencePanel = ({ kpis, eligibilityItems, sellerCustIdMap, selectedSeller }: ClipsAudiencePanelProps) => {
   /* ── 1. Aggregate KPI totals ── */
   const totals = useMemo(() => {
     const t = { visits: 0, visitasClips: 0, tgmvClips: 0, ordersClips: 0, siClips: 0, clipsPubli: 0 };
@@ -80,8 +223,6 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems }: ClipsAudiencePanelProps)
       t.tgmvClips += k.tgmvLcClips;
       t.ordersClips += k.ordersClips;
       t.siClips += k.siClips;
-      // clipsPubli é um valor acumulado do seller, não deve somar - pega o máximo/mais recente
-      // Sanitiza valores absurdos (ex: cust_id importado erroneamente neste campo)
       const clipsVal = k.sellersClipsPubli;
       if (clipsVal > 0 && clipsVal < 100_000) {
         t.clipsPubli = Math.max(t.clipsPubli, clipsVal);
@@ -102,10 +243,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems }: ClipsAudiencePanelProps)
     }))
   , [kpis]);
 
-  /* ── 3. Top 5 items by SI_CLIPS (from eligibility cross-reference) ── */
+  /* ── 3. Top 5 items by pedidos ── */
   const topContentItems = useMemo(() => {
-    // Use KPI-level clips data since it's per-seller temporal
-    // For item-level, we'd need seller_listings_quality; use eligibility items with orders as proxy
     const withClips = eligibilityItems
       .filter((e) => e.pedidos7d > 0)
       .sort((a, b) => b.pedidos7d - a.pedidos7d)
@@ -113,16 +252,23 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems }: ClipsAudiencePanelProps)
     return withClips;
   }, [eligibilityItems]);
 
-  /* ── 4. Repressed potential: high sales but no clips ── */
-  const repressedItems = useMemo(() =>
-    eligibilityItems.filter((e) => e.pedidos7d > 10)
-    // We check against KPI-level sellersClipsPubli since item-level clips not in eligibility
-  , [eligibilityItems]);
-
-  const hasRepressedPotential = repressedItems.length > 0 && totals.clipsPubli === 0;
+  /* ── 4. Hot items: high visits but low clip conversion ── */
+  const hotItems = useMemo(() => {
+    const avgSi = kpis.length > 0 ? kpis.reduce((s, k) => s + k.siClips, 0) / kpis.length : 0;
+    const avgOrders = kpis.length > 0 ? kpis.reduce((s, k) => s + k.ordersClips, 0) / kpis.length : 0;
+    return eligibilityItems
+      .filter((e) => e.pedidos7d > 5)
+      .sort((a, b) => b.pedidos7d - a.pedidos7d)
+      .slice(0, 8)
+      .map((item) => ({ item, avgSi, avgOrders }));
+  }, [eligibilityItems, kpis]);
 
   /* ── 5. Conversion rate ── */
   const conversionRate = pct(totals.ordersClips, totals.visitasClips);
+
+  /* ── Clips link for seller ── */
+  const sellerCustId = selectedSeller && sellerCustIdMap ? sellerCustIdMap[selectedSeller] : null;
+  const clipsLink = sellerCustId ? `https://lista.mercadolivre.com.br/_CustId_${sellerCustId}` : null;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -296,44 +442,30 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems }: ClipsAudiencePanelProps)
         </div>
       )}
 
-      {/* ── Row 4: Repressed Potential Alert ── */}
-      {hasRepressedPotential && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="glass-card p-5 border-l-4 border-l-warning"
-        >
-          <div className="flex items-center gap-3 mb-3">
+      {/* ── Row 4: 🔥 Alerta de Conversão — Itens Quentes ── */}
+      {hotItems.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
             <Flame className="w-5 h-5 text-warning" />
             <h3 className="text-sm font-semibold uppercase tracking-wider text-warning">
-              Potencial de Audiência Reprimida
+              🔥 Alerta de Conversão: Otimização de Vídeo e Script
             </h3>
-            <TooltipInfo text="Itens com alta demanda (>10 pedidos/7d) mas seller sem nenhum clip publicado. Priorize gravação de vídeos para estes produtos." />
+            <TooltipInfo text="Itens com alto volume de vendas que precisam de otimização de vídeo. Expanda cada card para acessar o checklist de diagnóstico de produção." />
           </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            🔥 <strong className="text-foreground">{repressedItems.length} Itens Quentes sem Vídeo</strong> — Prioridade de Gravação
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {repressedItems.slice(0, 8).map((item) => (
-              <a
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+            {hotItems.map(({ item, avgSi, avgOrders }, idx) => (
+              <HotItemCard
                 key={item.id}
-                href={item.mlbLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="status-badge bg-warning/10 text-warning border-warning/20 text-[11px] hover:bg-warning/20 transition-colors cursor-pointer flex items-center gap-1"
-              >
-                {item.itemName?.slice(0, 40) || item.itemId}
-                <span className="text-[10px] opacity-70">({item.pedidos7d}v)</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
+                item={item}
+                clipsPubli={totals.clipsPubli}
+                avgSiClips={avgSi}
+                avgOrdersClips={avgOrders}
+                clipsLink={clipsLink}
+                idx={idx}
+              />
             ))}
-            {repressedItems.length > 8 && (
-              <span className="text-[11px] text-muted-foreground self-center">
-                +{repressedItems.length - 8} itens
-              </span>
-            )}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* ── Summary KPIs row ── */}
@@ -357,7 +489,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems }: ClipsAudiencePanelProps)
               color: "text-foreground",
               isText: true,
             },
-          ].map((m, i) => (
+          ].map((m) => (
             <div key={m.label} className="text-center">
               <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{m.label}</p>
               <p className={`font-mono text-lg font-bold ${m.color}`}>
