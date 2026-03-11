@@ -681,7 +681,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
             Resumo de Performance de Clips
           </h3>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             { label: "Anúncios com Clip", value: clipCoverage.withClip, color: "text-emerald" },
             { label: "Vídeo Campeão", value: videoIssuesSummary.champion, color: "text-emerald" },
