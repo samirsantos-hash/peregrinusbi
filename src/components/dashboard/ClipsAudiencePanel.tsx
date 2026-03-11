@@ -686,7 +686,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
             { label: "Anúncios com Clip", value: clipCoverage.withClip, color: "text-emerald" },
             { label: "Vídeo Campeão", value: videoIssuesSummary.champion, color: "text-emerald" },
             { label: "Baixa Conversão", value: videoIssuesSummary.lowConversion, color: "text-warning" },
-            { label: "Sem Alcance / Sem Clip", value: videoIssuesSummary.noReach + videoIssuesSummary.noClip, color: "text-destructive" },
+            { label: "Sem Alcance", value: videoIssuesSummary.noReach, color: "text-destructive" },
+            { label: "Analisar", value: videoIssuesSummary.noClip, color: "text-muted-foreground" },
           ].map((m) => (
             <div key={m.label} className="text-center">
               <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{m.label}</p>
