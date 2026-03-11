@@ -37,7 +37,7 @@ function getDiagnosticGeneric(kpi: KpiLike) {
   return alerts;
 }
 
-const DiagnosticAlerts = ({ kpis }: DiagnosticAlertsProps) => {
+const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {} }: DiagnosticAlertsProps) => {
   // Get unique products with their latest diagnostics
   const productDiags = kpis.reduce<Record<string, { kpi: KpiLike; alerts: ReturnType<typeof getDiagnosticGeneric> }>>((acc, kpi) => {
     if (!acc[kpi.productId]) {
