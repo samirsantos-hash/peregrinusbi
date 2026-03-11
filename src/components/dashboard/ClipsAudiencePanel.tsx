@@ -80,8 +80,12 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems }: ClipsAudiencePanelProps)
       t.tgmvClips += k.tgmvLcClips;
       t.ordersClips += k.ordersClips;
       t.siClips += k.siClips;
-      // clipsPubli é um valor acumulado do seller, não deve somar - pega o máximo/more recente
-      t.clipsPubli = Math.max(t.clipsPubli, k.sellersClipsPubli);
+      // clipsPubli é um valor acumulado do seller, não deve somar - pega o máximo/mais recente
+      // Sanitiza valores absurdos (ex: cust_id importado erroneamente neste campo)
+      const clipsVal = k.sellersClipsPubli;
+      if (clipsVal > 0 && clipsVal < 100_000) {
+        t.clipsPubli = Math.max(t.clipsPubli, clipsVal);
+      }
     }
     return t;
   }, [kpis]);
