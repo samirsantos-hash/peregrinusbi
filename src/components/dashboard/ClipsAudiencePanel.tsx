@@ -205,7 +205,6 @@ const HotItemCard = ({ item, clipsPubli, avgSiClips, avgOrdersClips, clipsLink, 
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
     </motion.div>
   );
 };
