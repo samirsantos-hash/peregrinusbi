@@ -10,7 +10,7 @@ import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
-import { fmtBRL, fmtNum } from "@/utils/formatters";
+import { fmtBRL, fmtBRLCompact, fmtNum } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
