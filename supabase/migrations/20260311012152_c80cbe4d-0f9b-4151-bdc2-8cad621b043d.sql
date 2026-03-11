@@ -1,0 +1,1 @@
+ALTER TABLE public.user_access_control ADD COLUMN temp_password text DEFAULT NULL;
