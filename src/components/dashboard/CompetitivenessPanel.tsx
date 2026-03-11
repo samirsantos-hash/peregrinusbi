@@ -128,9 +128,10 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
 
   /* ── Pricing diagnostic table data (per date) ── */
   const diagnosticRows = byDate.map((d) => {
-    const pctExp = d.visits > 0 ? (d.expensive / d.visits) * 100 : 0;
-    const pctMatch = d.visits > 0 ? (d.match / d.visits) * 100 : 0;
-    const pctCheap = d.visits > 0 ? (d.cheaper / d.visits) * 100 : 0;
+    const totalBands = d.expensive + d.match + d.cheaper;
+    const pctExp = totalBands > 0 ? (d.expensive / totalBands) * 100 : 0;
+    const pctMatch = totalBands > 0 ? (d.match / totalBands) * 100 : 0;
+    const pctCheap = totalBands > 0 ? (d.cheaper / totalBands) * 100 : 0;
     const avgRival = d.rivalCount > 0 ? d.minPriceRival / d.rivalCount : 0;
     return { date: d.date, visits: d.visits, expensive: d.expensive, match: d.match, cheaper: d.cheaper, pctExp, pctMatch, pctCheap, avgRival, gmv: d.gmv };
   });
