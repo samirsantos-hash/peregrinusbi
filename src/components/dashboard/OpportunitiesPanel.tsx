@@ -108,7 +108,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { label: "Total Itens Elegíveis", value: totalEligible.toLocaleString("pt-BR"), icon: Package, color: "neon-text", tooltip: "Contagem total de itens elegíveis para ofertas." },
-          { label: "Melhor Desconto", value: `${fmtNum(bestDiscount, 1)}%`, icon: Tag, color: "text-emerald", tooltip: "Maior desconto disponível (DISCOUNT_BEST)." },
+          { label: "Melhor Desconto", value: `${fmtNum(bestDiscount / 10, 1)}%`, icon: Tag, color: "text-emerald", tooltip: "Maior desconto disponível (DISCOUNT_BEST)." },
           { label: "Itens sem Optin", value: itemsSemOptin.toLocaleString("pt-BR"), icon: AlertTriangle, color: "text-warning", tooltip: "Itens onde FLAG_ITEM_S_OPTIN é True — oportunidade de ativação." },
           { label: "Quick Wins (Best Promo)", value: bestPromoCount.toLocaleString("pt-BR"), icon: TrendingUp, color: "text-neon-blue", tooltip: "Itens com FLAG_BEST_PROMO = True. Quick wins para sugerir ao seller." },
         ].map((m, i) => (
