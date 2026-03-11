@@ -10,6 +10,7 @@ import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
+import McKinseyActionPlans from "./McKinseyActionPlans";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact } from "@/utils/formatters";
 
 interface KpiLike {
@@ -340,6 +341,15 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {} }: Comp
           <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: "hsl(0, 84%, 60%)" }} /> Descontinuar / Liquidar</span>
         </div>
       </div>
+
+      {/* ── Planos de Ação por Segmento ── */}
+      <McKinseyActionPlans
+        scatterData={scatterData}
+        medianX={medianX}
+        medianY={medianY}
+        kpis={kpis as any}
+        sellerName={kpis[0]?.productName}
+      />
 
       {/* ── Diagnóstico de Preço por Período ── */}
       <div className="glass-card p-5">
