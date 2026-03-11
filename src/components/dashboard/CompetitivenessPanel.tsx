@@ -12,6 +12,7 @@ import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact } from "@/utils/formatters";
+import { type ListingQuality } from "@/hooks/useListingsQuality";
 
 interface KpiLike {
   date: string;
