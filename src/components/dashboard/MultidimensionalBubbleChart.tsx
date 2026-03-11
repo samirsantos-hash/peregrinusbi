@@ -128,6 +128,7 @@ function buildPoints(
     const pctY = avgY === 0 ? 0 : (Number(d[yVar.key]) - avgY) / avgY;
     return {
       name: String(d[nameKey] || ""),
+      sellerId: sellerIdKey ? String(d[sellerIdKey] || "") : undefined,
       x: Number(d[xVar.key]),
       y: Number(d[yVar.key]),
       colorVal: Number(d[colorVar.key]) || 0,
