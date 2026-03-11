@@ -186,7 +186,8 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
     const entries = Object.values(byDateMap).filter((s) => s.visits > 0);
 
     const points = entries.map((s) => {
-      const gapPct = s.visits > 0 ? ((s.visitsExpensive / s.visits) * 100) : 0;
+      const totalBands = s.visitsExpensive + (byDateMap[s.date] as any).match + (byDateMap[s.date] as any).cheaper;
+      const gapPct = totalBands > 0 ? ((s.visitsExpensive / totalBands) * 100) : 0;
       const invertedGap = 100 - gapPct;
       const avgQualidade = s.qualCount > 0 ? s.scoreQualidade / s.qualCount : 50;
       const forcaCompetitiva = (invertedGap * 0.5) + (avgQualidade * 0.5);
