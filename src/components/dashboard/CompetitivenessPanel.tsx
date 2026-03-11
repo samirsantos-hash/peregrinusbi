@@ -87,11 +87,13 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
   /* ── Aggregate totals across all dates ── */
+  // NOTE: visitsExpensive, visitsMatch, visitsCheaper are MONETARY values (R$), not counts
   const totalVisits = kpis.reduce((s, k) => s + k.visits, 0);
   const totalExpensive = kpis.reduce((s, k) => s + k.visitsExpensive, 0);
   const totalMatch = kpis.reduce((s, k) => s + k.visitsMatch, 0);
   const totalCheaper = kpis.reduce((s, k) => s + k.visitsCheaper, 0);
-  const pctExpensive = totalVisits > 0 ? (totalExpensive / totalVisits) * 100 : 0;
+  const totalPriceBands = totalExpensive + totalMatch + totalCheaper;
+  const pctExpensive = totalPriceBands > 0 ? (totalExpensive / totalPriceBands) * 100 : 0;
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
 
   // Average min price rival (non-zero entries)
