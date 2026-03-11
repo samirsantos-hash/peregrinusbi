@@ -86,9 +86,7 @@ Deno.serve(async (req) => {
     // Parse CSV (semicolon-separated, BR format)
     const lines = csvText.split("\n").filter((l: string) => l.trim());
     const headerLine = lines[0].replace(/^\uFEFF/, ""); // Remove BOM
-    const headers = headerLine.split(";");
-
-    const colIdx = (name: string) => headers.indexOf(name);
+    const headers = parseCSVLine(headerLine).map(h => h.trim());
 
     // Column indices
     const iData = colIdx("DATA");
