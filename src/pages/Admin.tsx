@@ -288,16 +288,35 @@ const Admin = () => {
                   <div className="space-y-3">
                     {managedUsers.map((u) => (
                       <div key={u.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
-                        <div>
+                        <div className="space-y-1 flex-1 min-w-0">
                           <p className="text-sm font-medium">{u.email}</p>
                           <p className="text-xs text-muted-foreground">
                             CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
                             {u.must_change_password && <span className="ml-2 text-warning">● Senha temporária</span>}
                           </p>
+                          {u.temp_password && u.must_change_password && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-muted-foreground">Senha:</span>
+                              <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded">
+                                {visiblePasswords.has(u.id) ? u.temp_password : "••••••••••"}
+                              </code>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => togglePasswordVisibility(u.id)}>
+                                {visiblePasswords.has(u.id) ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                              </Button>
+                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(u.temp_password!)}>
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.id, u.email)}>
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => handleResetPassword(u.userId, u.email)}>
+                            <RotateCcw className="w-4 h-4 text-neon-blue" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.userId, u.email)}>
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </div>
                       </div>
                     ))}
                   </div>
