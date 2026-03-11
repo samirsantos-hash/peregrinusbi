@@ -346,10 +346,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
 
       {/* ── Planos de Ação por Segmento ── */}
       <McKinseyActionPlans
-        scatterData={scatterData}
-        medianX={medianX}
-        medianY={medianY}
-        kpis={kpis as any}
+        listingsQuality={listingsQuality}
         sellerName={kpis[0]?.productName}
       />
 
