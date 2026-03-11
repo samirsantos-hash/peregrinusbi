@@ -136,10 +136,7 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
     setChecks(next);
   };
 
-  // Format discount properly — if value > 1 it's already in percent form (e.g. 35 means 35%)
-  const discountDisplay = item.discountBest > 0
-    ? `${item.discountBest > 1 ? Math.round(item.discountBest) : Math.round(item.discountBest * 100)}%`
-    : "—";
+  const discountDisplay = fmtDiscount(item.discountBest);
 
   return (
     <motion.div
