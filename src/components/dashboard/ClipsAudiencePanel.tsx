@@ -153,15 +153,12 @@ const HotItemCard = ({ item, clipsPubli, avgSiClips, avgOrdersClips, clipsLink, 
       </button>
 
       {/* Expanded checklist */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
+      {expanded && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
+        >
             <div className="px-4 pb-4 space-y-3 border-t border-border/50 pt-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Diagnóstico de Produção
