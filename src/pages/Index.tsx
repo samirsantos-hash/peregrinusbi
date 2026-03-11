@@ -119,6 +119,13 @@ const Index = () => {
   { id: "reputation", label: "Reputação", icon: HeartPulse }];
 
 
+  // Map seller UUID -> custId for external links
+  const sellerCustIdMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const s of sellers) map[s.id] = s.custId;
+    return map;
+  }, [sellers]);
+
   const isLoading = !sellersFetched || hasRealData && loadingKpis;
 
   return (
@@ -181,7 +188,7 @@ const Index = () => {
             onRefresh={handleRefresh}
             isRefreshing={isRefreshing} />
 
-            <DiagnosticAlerts kpis={filteredKpis} />
+            <DiagnosticAlerts kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto flex-wrap">
@@ -210,16 +217,16 @@ const Index = () => {
                     <TrendAnalysisPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
-                    <EfficiencyPanel kpis={filteredKpis} />
+                    <EfficiencyPanel kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0">
-                    <CompetitivenessPanel kpis={filteredKpis} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} />
+                    <CompetitivenessPanel kpis={filteredKpis} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} />
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0">
                     <LogisticsPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
-                    <QualityRadarPanel kpis={filteredKpis} />
+                    <QualityRadarPanel kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
                   <TabsContent value="clips" className="mt-0">

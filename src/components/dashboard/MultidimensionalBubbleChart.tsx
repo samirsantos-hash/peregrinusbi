@@ -4,6 +4,7 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer,
   Cell,
 } from "recharts";
+import { ExternalLink } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 
@@ -23,6 +24,7 @@ interface MultidimensionalBubbleChartProps {
   onPeriodChange: (v: string) => void;
   facetKey?: string;
   facetLabel?: string;
+  sellerCustIdMap?: Record<string, string>;
 }
 
 /* ── Linear regression for trend line ── */
@@ -55,10 +57,11 @@ function colorScale(value: number, min: number, max: number): string {
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
 
-const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel }: any) => {
+const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel, sellerCustIdMap }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d) return null;
+  const custId = sellerCustIdMap?.[d.sellerId];
   return (
     <div className="glass-card p-3 !bg-card/95 text-xs space-y-1 max-w-[260px]">
       <p className="font-semibold text-foreground truncate">{d.name}</p>
@@ -80,12 +83,24 @@ const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel 
           {d.elasticity?.toFixed(2)}
         </span>
       </p>
+      {custId && (
+        <a
+          href={`https://lista.mercadolivre.com.br/_CustId_${custId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 mt-1 text-primary hover:text-blue-400 hover:underline transition-colors text-[11px] font-medium"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Ir para a Loja <ExternalLink className="w-3 h-3" />
+        </a>
+      )}
     </div>
   );
 };
 
 interface ChartPoint {
   name: string;
+  sellerId?: string;
   x: number;
   y: number;
   colorVal: number;
@@ -99,7 +114,7 @@ function buildPoints(
   data: Record<string, number | string>[],
   xVar: BubbleVariable, yVar: BubbleVariable,
   colorVar: BubbleVariable, sizeVar: BubbleVariable,
-  nameKey: string, facetKey?: string,
+  nameKey: string, facetKey?: string, sellerIdKey?: string,
 ): ChartPoint[] {
   const filtered = data.filter(d =>
     d[xVar.key] != null && d[yVar.key] != null &&
@@ -113,6 +128,7 @@ function buildPoints(
     const pctY = avgY === 0 ? 0 : (Number(d[yVar.key]) - avgY) / avgY;
     return {
       name: String(d[nameKey] || ""),
+      sellerId: sellerIdKey ? String(d[sellerIdKey] || "") : undefined,
       x: Number(d[xVar.key]),
       y: Number(d[yVar.key]),
       colorVal: Number(d[colorVar.key]) || 0,
@@ -126,7 +142,7 @@ function buildPoints(
 
 /* ── Single facet chart ── */
 const FacetChart = ({
-  title, points, xVar, yVar, colorVar, sizeVar, colorMin, colorMax, height,
+  title, points, xVar, yVar, colorVar, sizeVar, colorMin, colorMax, height, sellerCustIdMap,
 }: {
   title?: string;
   points: ChartPoint[];
@@ -134,6 +150,7 @@ const FacetChart = ({
   colorVar: BubbleVariable; sizeVar: BubbleVariable;
   colorMin: number; colorMax: number;
   height: number;
+  sellerCustIdMap?: Record<string, string>;
 }) => {
   const trend = trendLine(points.map(p => ({ x: p.x, y: p.y })));
 
@@ -163,7 +180,7 @@ const FacetChart = ({
           />
           <ZAxis type="number" dataKey="z" range={[50, 400]} name={sizeVar.label} />
           <Tooltip
-            content={<BubbleTooltip xLabel={xVar.label} yLabel={yVar.label} colorLabel={colorVar.label} sizeLabel={sizeVar.label} />}
+            content={<BubbleTooltip xLabel={xVar.label} yLabel={yVar.label} colorLabel={colorVar.label} sizeLabel={sizeVar.label} sellerCustIdMap={sellerCustIdMap} />}
             cursor={{ strokeDasharray: "3 3", stroke: "hsl(215, 20%, 35%)" }}
           />
           <Scatter name="Sellers" data={points} animationDuration={600}>
@@ -182,7 +199,7 @@ const FacetChart = ({
 
 const MultidimensionalBubbleChart = ({
   data, xVar, yVar, colorVar, sizeVar, nameKey,
-  period, onPeriodChange, facetKey, facetLabel,
+  period, onPeriodChange, facetKey, facetLabel, sellerCustIdMap,
 }: MultidimensionalBubbleChartProps) => {
   const { facets, allPoints, colorMin, colorMax } = useMemo(() => {
     const points = buildPoints(data, xVar, yVar, colorVar, sizeVar, nameKey, facetKey);
@@ -233,6 +250,7 @@ const MultidimensionalBubbleChart = ({
                   xVar={xVar} yVar={yVar} colorVar={colorVar} sizeVar={sizeVar}
                   colorMin={colorMin} colorMax={colorMax}
                   height={320}
+                  sellerCustIdMap={sellerCustIdMap}
                 />
                 <p className="text-[10px] text-muted-foreground text-center mt-1">
                   {points.length} seller{points.length !== 1 ? "s" : ""}
@@ -251,6 +269,7 @@ const MultidimensionalBubbleChart = ({
                 xVar={xVar} yVar={yVar} colorVar={colorVar} sizeVar={sizeVar}
                 colorMin={colorMin} colorMax={colorMax}
                 height={380}
+                sellerCustIdMap={sellerCustIdMap}
               />
             </div>
           </details>
@@ -262,6 +281,7 @@ const MultidimensionalBubbleChart = ({
           xVar={xVar} yVar={yVar} colorVar={colorVar} sizeVar={sizeVar}
           colorMin={colorMin} colorMax={colorMax}
           height={420}
+          sellerCustIdMap={sellerCustIdMap}
         />
       )}
 

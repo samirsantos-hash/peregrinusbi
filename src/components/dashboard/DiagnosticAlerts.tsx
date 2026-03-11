@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { getDiagnostic, type SellerKPI } from "@/hooks/useSellerData";
+import SellerLink from "./SellerLink";
 
 // Also support mock data shape
 interface KpiLike {
@@ -16,6 +17,7 @@ interface KpiLike {
 
 interface DiagnosticAlertsProps {
   kpis: KpiLike[];
+  sellerCustIdMap?: Record<string, string>;
 }
 
 function getDiagnosticGeneric(kpi: KpiLike) {
@@ -35,7 +37,7 @@ function getDiagnosticGeneric(kpi: KpiLike) {
   return alerts;
 }
 
-const DiagnosticAlerts = ({ kpis }: DiagnosticAlertsProps) => {
+const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {} }: DiagnosticAlertsProps) => {
   // Get unique products with their latest diagnostics
   const productDiags = kpis.reduce<Record<string, { kpi: KpiLike; alerts: ReturnType<typeof getDiagnosticGeneric> }>>((acc, kpi) => {
     if (!acc[kpi.productId]) {
@@ -78,7 +80,7 @@ const DiagnosticAlerts = ({ kpis }: DiagnosticAlertsProps) => {
             className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
           >
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{item.kpi.productName}</p>
+              <SellerLink name={item.kpi.productName} custId={sellerCustIdMap[item.kpi.productId]} className="text-sm font-medium truncate" />
             </div>
             <div className="flex gap-1.5 ml-3 flex-shrink-0">
               {item.alerts.map((alert, aIdx) => (

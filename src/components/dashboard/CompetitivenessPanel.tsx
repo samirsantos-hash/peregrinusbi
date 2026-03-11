@@ -34,6 +34,7 @@ interface SellerInfo {
 interface CompetitivenessPanelProps {
   kpis: KpiLike[];
   sellers?: SellerInfo[];
+  sellerCustIdMap?: Record<string, string>;
 }
 
 /* ── Shared Tooltip ── */
@@ -82,7 +83,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {} }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
@@ -482,6 +483,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [] }: CompetitivenessPanelProps)
             onPeriodChange={setBubblePeriod}
             facetKey="cluster"
             facetLabel="Período"
+            sellerCustIdMap={sellerCustIdMap}
           />
         );
       })()}
