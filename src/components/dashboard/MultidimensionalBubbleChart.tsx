@@ -57,10 +57,11 @@ function colorScale(value: number, min: number, max: number): string {
   return `hsl(${h}, ${s}%, ${l}%)`;
 }
 
-const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel }: any) => {
+const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel, sellerCustIdMap }: any) => {
   if (!active || !payload?.length) return null;
   const d = payload[0]?.payload;
   if (!d) return null;
+  const custId = sellerCustIdMap?.[d.sellerId];
   return (
     <div className="glass-card p-3 !bg-card/95 text-xs space-y-1 max-w-[260px]">
       <p className="font-semibold text-foreground truncate">{d.name}</p>
@@ -82,6 +83,17 @@ const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel 
           {d.elasticity?.toFixed(2)}
         </span>
       </p>
+      {custId && (
+        <a
+          href={`https://lista.mercadolivre.com.br/_CustId_${custId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 mt-1 text-primary hover:text-blue-400 hover:underline transition-colors text-[11px] font-medium"
+          onClick={(e) => e.stopPropagation()}
+        >
+          Ir para a Loja <ExternalLink className="w-3 h-3" />
+        </a>
+      )}
     </div>
   );
 };
