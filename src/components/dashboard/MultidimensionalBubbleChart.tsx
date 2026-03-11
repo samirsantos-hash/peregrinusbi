@@ -279,6 +279,7 @@ const MultidimensionalBubbleChart = ({
           xVar={xVar} yVar={yVar} colorVar={colorVar} sizeVar={sizeVar}
           colorMin={colorMin} colorMax={colorMax}
           height={420}
+          sellerCustIdMap={sellerCustIdMap}
         />
       )}
 
