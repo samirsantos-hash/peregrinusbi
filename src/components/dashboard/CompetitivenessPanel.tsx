@@ -12,6 +12,7 @@ import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact } from "@/utils/formatters";
+import { type ListingQuality } from "@/hooks/useListingsQuality";
 
 interface KpiLike {
   date: string;
@@ -36,6 +37,7 @@ interface CompetitivenessPanelProps {
   kpis: KpiLike[];
   sellers?: SellerInfo[];
   sellerCustIdMap?: Record<string, string>;
+  listingsQuality?: ListingQuality[];
 }
 
 /* ── Shared Tooltip ── */
@@ -84,7 +86,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {} }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listingsQuality = [] }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
@@ -344,10 +346,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {} }: Comp
 
       {/* ── Planos de Ação por Segmento ── */}
       <McKinseyActionPlans
-        scatterData={scatterData}
-        medianX={medianX}
-        medianY={medianY}
-        kpis={kpis as any}
+        listingsQuality={listingsQuality}
         sellerName={kpis[0]?.productName}
       />
 
