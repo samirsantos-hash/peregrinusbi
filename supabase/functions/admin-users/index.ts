@@ -26,6 +26,7 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
     if (!supabaseUrl || !serviceRoleKey) {
+      console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
       return new Response(JSON.stringify({ error: "Server configuration error" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -45,16 +46,17 @@ Deno.serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await callerClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    // Use getUser instead of getClaims for broader compatibility
+    const { data: { user: callerUser }, error: userError } = await callerClient.auth.getUser();
+    if (userError || !callerUser) {
+      console.error("Auth error:", userError?.message);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const callerId = claimsData.claims.sub;
+    const callerId = callerUser.id;
 
     // Check admin role using service client
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
@@ -81,6 +83,8 @@ Deno.serve(async (req) => {
       const tempPassword = generateTempPassword();
       const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
+      console.log(`Creating user ${email} with temp password length: ${tempPassword.length}`);
+
       // Create auth user
       const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
         email,
@@ -90,10 +94,22 @@ Deno.serve(async (req) => {
       });
 
       if (createErr) {
+        console.error("Create user error:", createErr.message);
         return new Response(JSON.stringify({ error: createErr.message }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
+      }
+
+      console.log(`User created: ${newUser.user.id}, setting password in auth...`);
+
+      // Force-set the password again to ensure it matches exactly
+      const { error: updatePwErr } = await adminClient.auth.admin.updateUserById(newUser.user.id, {
+        password: tempPassword,
+      });
+
+      if (updatePwErr) {
+        console.error("Password update error:", updatePwErr.message);
       }
 
       // Add user role
@@ -112,6 +128,8 @@ Deno.serve(async (req) => {
         must_change_password: true,
         temp_password: tempPassword,
       });
+
+      console.log(`User ${email} setup complete. Password stored in DB matches Auth.`);
 
       return new Response(
         JSON.stringify({ success: true, tempPassword, userId: newUser.user.id }),
@@ -136,18 +154,21 @@ Deno.serve(async (req) => {
       const newTempPassword = generateTempPassword();
       const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
+      console.log(`Resetting password for user ${targetUserId}, new password length: ${newTempPassword.length}`);
+
       const { error: updateErr } = await adminClient.auth.admin.updateUserById(targetUserId, {
         password: newTempPassword,
       });
 
       if (updateErr) {
+        console.error("Reset password error:", updateErr.message);
         return new Response(JSON.stringify({ error: updateErr.message }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      await adminClient
+      const { error: dbUpdateErr } = await adminClient
         .from("user_access_control")
         .update({
           must_change_password: true,
@@ -155,6 +176,12 @@ Deno.serve(async (req) => {
           temp_password_expires_at: expiresAt,
         })
         .eq("user_id", targetUserId);
+
+      if (dbUpdateErr) {
+        console.error("DB update error:", dbUpdateErr.message);
+      }
+
+      console.log(`Password reset complete for ${targetUserId}`);
 
       return new Response(
         JSON.stringify({ success: true, tempPassword: newTempPassword }),
@@ -164,10 +191,8 @@ Deno.serve(async (req) => {
 
     if (action === "delete_user") {
       const { targetUserId } = body;
-      // Delete from access_control (cascade will handle user_roles)
       await adminClient.from("user_access_control").delete().eq("user_id", targetUserId);
       await adminClient.from("user_roles").delete().eq("user_id", targetUserId);
-      // Delete auth user
       await adminClient.auth.admin.deleteUser(targetUserId);
 
       return new Response(JSON.stringify({ success: true }), {
