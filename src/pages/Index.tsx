@@ -115,7 +115,7 @@ const Index = () => {
   { id: "logistics", label: "Logística", icon: Truck },
   { id: "quality", label: "Qualidade", icon: Shield },
   { id: "clips", label: "Clips & Audiência", icon: Video },
-  { id: "opportunities", label: "Oportunidades de Oferta", icon: Gift },
+  { id: "opportunities", label: "Oportunidades", icon: Gift },
   { id: "reputation", label: "Reputação", icon: HeartPulse }];
 
 
