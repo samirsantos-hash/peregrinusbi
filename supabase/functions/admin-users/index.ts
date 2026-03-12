@@ -57,9 +57,40 @@ Deno.serve(async (req) => {
     }
 
     const callerId = callerUser.id;
-
-    // Check admin role using service client
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
+
+    const body = await req.json();
+    const { action } = body;
+
+    // Allow users to finalize their own temporary-password flow
+    if (action === "mark_password_changed") {
+      const { userId } = body;
+
+      if (!userId || userId !== callerId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: updateAccessError } = await adminClient
+        .from("user_access_control")
+        .update({ must_change_password: false, temp_password: null, temp_password_expires_at: null })
+        .eq("user_id", userId);
+
+      if (updateAccessError) {
+        return new Response(JSON.stringify({ error: updateAccessError.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Remaining actions are admin-only
     const { data: roleData } = await adminClient
       .from("user_roles")
       .select("role")
@@ -73,9 +104,6 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const body = await req.json();
-    const { action } = body;
 
     if (action === "create_user") {
       const { email, cnpj, allowedCustIds } = body;
