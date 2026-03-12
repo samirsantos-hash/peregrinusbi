@@ -165,18 +165,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (action === "mark_password_changed") {
-      const { userId } = body;
-      await adminClient
-        .from("user_access_control")
-        .update({ must_change_password: false, temp_password: null })
-        .eq("user_id", userId);
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
     if (action === "reset_password") {
       const { targetUserId } = body;
       const newTempPassword = generateTempPassword();

@@ -81,14 +81,21 @@ export function useAuth() {
 
   const updatePassword = async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (!error && user) {
-      // Mark password as changed via edge function
-      await supabase.functions.invoke("admin-users", {
+    if (error) return { error };
+
+    if (user) {
+      const { data, error: markError } = await supabase.functions.invoke("admin-users", {
         body: { action: "mark_password_changed", userId: user.id },
       });
+
+      if (markError || data?.error) {
+        return { error: new Error(data?.error || markError?.message || "Falha ao finalizar troca de senha") };
+      }
+
       setMustChangePassword(false);
     }
-    return { error };
+
+    return { error: null };
   };
 
   return { user, session, loading, isAdmin, mustChangePassword, signIn, signOut, updatePassword };

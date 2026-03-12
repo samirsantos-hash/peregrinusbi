@@ -33,7 +33,7 @@ const ChangePassword = () => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Senha alterada com sucesso!" });
-      navigate("/");
+      navigate("/", { replace: true });
     }
   };
 
