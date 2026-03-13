@@ -107,7 +107,7 @@ const Index = () => {
   );
 
   // ALL kpis (unfiltered) — used for anchor date computation
-  const allKpis = useMemo(() => {
+  const allKpis: any[] = useMemo(() => {
     if (hasRealData) return dbKpis || [];
     return mockSellerKPIs[selectedSeller] || [];
   }, [hasRealData, dbKpis, selectedSeller]);
