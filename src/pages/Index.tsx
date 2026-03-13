@@ -104,7 +104,17 @@ const Index = () => {
     });
   }, [hasRealData, dbKpis, selectedSeller, dateRange]);
 
-  const handleRefresh = useCallback(async () => {
+  // Anchor date range to dataset on first load
+  useEffect(() => {
+    const kpisRaw = hasRealData ? (dbKpis || []) : (mockSellerKPIs[selectedSeller] || []);
+    if (kpisRaw.length > 0 && !dateRange) {
+      const dates = kpisRaw.map((k: any) => k.date || k.data).filter(Boolean).sort();
+      const maxDate = new Date(dates[dates.length - 1] + "T00:00:00");
+      const minDate = new Date(dates[0] + "T00:00:00");
+      setDateRange({ from: minDate, to: maxDate });
+    }
+  }, [dbKpis, hasRealData, selectedSeller]);
+
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["sellers"] });
     await queryClient.invalidateQueries({ queryKey: ["seller-kpis", selectedSeller] });
