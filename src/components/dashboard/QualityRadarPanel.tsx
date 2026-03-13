@@ -424,11 +424,11 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {lowScores.map((d) =>
-          <div
-            key={d.dimension}
-            className="flex items-center gap-3 p-3 rounded-lg border border-warning/20 bg-warning/5">
-            
-                <span className="text-2xl font-bold font-mono text-warning">{d._value}</span>
+                <div
+                  key={d.dimension}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-warning/20 bg-warning/5">
+
+                    <span className="text-2xl font-bold font-mono text-warning">{d._value}/100</span>
                 <div>
                   <p className="text-sm font-medium text-foreground">{d.dimension}</p>
                   <p className="text-xs text-muted-foreground">Abaixo do padrão recomendado</p>
