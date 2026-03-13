@@ -225,6 +225,8 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Sound toggle */}
+            <SoundToggleButton />
             {isAdmin &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
                 <Settings className="w-4 h-4" />
