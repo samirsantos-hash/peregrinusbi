@@ -71,6 +71,8 @@ export interface SellerKPI {
   repLevel: string;
   repClaimsRate: number;
   repDelayedRate: number;
+  // GTIN
+  pontuacaoLlGtin: number;
   // For compatibility with product-based panels
   productName: string;
   productId: string;
