@@ -68,6 +68,7 @@ const DashboardHeader = ({
   const [calOpen, setCalOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("all");
+  const { playClick } = useSoundFeedback();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
   const { anchorDate, minDate, availableDays } = useMemo(() => {
