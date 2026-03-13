@@ -394,7 +394,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                         <div key={d.dimension} className="space-y-1">
                           <div className="flex justify-between text-xs">
                             <span className="text-muted-foreground text-sm">{d.dimension}</span>
-                            <span className="font-mono font-bold text-foreground">{pct}</span>
+                            <span className="font-mono font-bold text-foreground">{pct}/100</span>
                           </div>
                           <div className="h-1.5 rounded-full bg-muted/30 overflow-hidden">
                             <motion.div
