@@ -128,6 +128,7 @@ Deno.serve(async (req) => {
     const iRepClaims = colIdx("REP_CLAIMS_RATE");
     const iRepDelayed = colIdx("REP_DELAYED_HT_RATE");
     const iPontuacaoIpi = colIdx("PONTUACAO_IPI");
+    const iPontuacaoLlGtin = colIdx("PONTUACAO_LL_GTIN");
     // LL Granular – Técnico
     const iLlPictures = colIdx("PONTUACAO_LL_CHARACTERISTICS_PICTURES_OK_SCORE");
     const iLlTitle = colIdx("PONTUACAO_LL_CHARACTERISTICS_TITLE_OK_SCORE");
