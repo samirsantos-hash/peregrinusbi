@@ -115,6 +115,7 @@ const Index = () => {
     }
   }, [dbKpis, hasRealData, selectedSeller]);
 
+  const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["sellers"] });
     await queryClient.invalidateQueries({ queryKey: ["seller-kpis", selectedSeller] });
