@@ -325,6 +325,7 @@ const Index = () => {
                     <ExecutivePanel kpis={filteredKpis} />
                     <GrowthPotentialPanel kpis={filteredKpis} />
                     <TrendAnalysisPanel kpis={filteredKpis} />
+                    <SynergyAnalysisPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
                     <EfficiencyPanel kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
