@@ -24,7 +24,7 @@ interface KpiLike {
   gmv: number;
   productName: string;
   productId: string;
-  scoreQualidade?: number;
+  repCancellationsRate?: number;
   upliftGmvM1?: number;
 }
 
