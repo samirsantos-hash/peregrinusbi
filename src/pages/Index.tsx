@@ -63,6 +63,25 @@ const Index = () => {
     }
   }, [sellersFetched, sellers.length, isAdmin, navigate]);
 
+  // Set initial date range anchored to data once kpis load
+  useEffect(() => {
+    if (!dateRange && filteredKpis.length === 0 && (dbKpis || !hasRealData)) {
+      // Set a wide fallback range
+      setDateRange({ from: new Date("2020-01-01"), to: new Date() });
+    }
+  }, [dbKpis, hasRealData]);
+
+  // Once we have real KPI data, anchor the range to the latest date
+  useEffect(() => {
+    const kpis = hasRealData ? (dbKpis || []) : (mockSellerKPIs[selectedSeller] || []);
+    if (kpis.length > 0 && !dateRange) {
+      const dates = kpis.map((k: any) => k.date || k.data).filter(Boolean).sort();
+      const maxDate = new Date(dates[dates.length - 1] + "T00:00:00");
+      const minDate = new Date(dates[0] + "T00:00:00");
+      setDateRange({ from: minDate, to: maxDate });
+    }
+  }, [dbKpis, hasRealData, selectedSeller]);
+
   useEffect(() => {
     if (sellers.length > 0 && (!selectedSeller || !sellers.find((s) => s.id === selectedSeller))) {
       setSelectedSeller(sellers[0].id);
