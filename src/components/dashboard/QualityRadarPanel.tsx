@@ -55,8 +55,19 @@ function safe(v: unknown): number {
   return isNaN(n) ? 0 : n;
 }
 
+/** Normaliza e arredonda o valor para 0-100 */
+function normalizeScore(value: number): number {
+  const num = Number(value) || 0;
+  // Se o valor parece estar em escala 0-1 (ex: 0.42), converte para 0-100
+  if (num > 0 && num <= 1) {
+    return Math.round(num * 100);
+  }
+  // Limita entre 0 e 100 e arredonda
+  return Math.min(100, Math.max(0, Math.round(num)));
+}
+
 function clamp(v: number): number {
-  return Math.min(100, Math.max(0, Math.round(v)));
+  return normalizeScore(v);
 }
 
 /* Benchmarks for normalizing raw clip volumes → 0-100 */
