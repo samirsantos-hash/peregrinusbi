@@ -48,7 +48,17 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
   const avgTitle = avg("scoreTitle");
   const avgOferta = avg("scoreOferta");
   const avgCaracteristica = avg("scoreCaracteristica");
-  const avgQualidade = avg("scoreQualidade");
+  const avgCancellations = (() => {
+    const valid = products.filter((p) => (p.repCancellationsRate as number) > 0);
+    return valid.length > 0 ? valid.reduce((s, p) => s + (p.repCancellationsRate as number), 0) / valid.length : 0;
+  })();
+
+  const getCancellationScore = (rate: number) => {
+    // Invert: lower rate = higher score for display
+    if (rate <= 2) return 95;
+    if (rate <= 5) return 60;
+    return 25;
+  };
 
   const checklist = [
     {
@@ -76,10 +86,12 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
       tooltip: "Preenchimento das fichas técnicas e atributos obrigatórios do produto.",
     },
     {
-      label: "Qualidade Geral",
-      score: avgQualidade,
+      label: "Taxa de Cancelamento",
+      score: getCancellationScore(avgCancellations),
       icon: Award,
-      tooltip: "Score final de qualidade ponderando todos os critérios de avaliação do anúncio.",
+      tooltip: `Taxa média de cancelamento: ${avgCancellations.toFixed(1)}%. Verde: ≤2% | Amarelo: 2-5% | Vermelho: >5%.`,
+      isRate: true,
+      rateValue: avgCancellations,
     },
   ];
 
