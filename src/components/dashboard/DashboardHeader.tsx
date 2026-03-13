@@ -217,6 +217,12 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
               ))}
             </div>
 
+            {periodWarning && (
+              <span className="text-[10px] text-warning bg-warning/10 border border-warning/20 px-2 py-1 rounded-md whitespace-nowrap">
+                ⚠ {periodWarning}
+              </span>
+            )}
+
             <Popover open={calOpen} onOpenChange={setCalOpen}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className={cn("w-[200px] justify-start text-left font-normal glass-card border-glass-border bg-card/60", !dateRange && "text-muted-foreground")}>
