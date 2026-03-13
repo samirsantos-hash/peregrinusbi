@@ -169,7 +169,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
     const byDateMap: Record<string, {
       date: string; gmv: number; visits: number; visitsExpensive: number;
       visitsMatch: number; visitsCheaper: number;
-      scoreQualidade: number; qualCount: number;
+      cancellationsRate: number; qualCount: number;
       upliftGmvM1: number; upliftCount: number;
     }> = {};
     for (const k of filtered as any[]) {
