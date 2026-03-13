@@ -55,8 +55,19 @@ function safe(v: unknown): number {
   return isNaN(n) ? 0 : n;
 }
 
+/** Normaliza e arredonda o valor para 0-100 */
+function normalizeScore(value: number): number {
+  const num = Number(value) || 0;
+  // Se o valor parece estar em escala 0-1 (ex: 0.42), converte para 0-100
+  if (num > 0 && num <= 1) {
+    return Math.round(num * 100);
+  }
+  // Limita entre 0 e 100 e arredonda
+  return Math.min(100, Math.max(0, Math.round(num)));
+}
+
 function clamp(v: number): number {
-  return Math.min(100, Math.max(0, Math.round(v)));
+  return normalizeScore(v);
 }
 
 /* Benchmarks for normalizing raw clip volumes → 0-100 */
@@ -383,7 +394,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                         <div key={d.dimension} className="space-y-1">
                           <div className="flex justify-between text-xs">
                             <span className="text-muted-foreground text-sm">{d.dimension}</span>
-                            <span className="font-mono font-bold text-foreground">{pct}</span>
+                            <span className="font-mono font-bold text-foreground">{pct}/100</span>
                           </div>
                           <div className="h-1.5 rounded-full bg-muted/30 overflow-hidden">
                             <motion.div
@@ -413,11 +424,11 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {lowScores.map((d) =>
-          <div
-            key={d.dimension}
-            className="flex items-center gap-3 p-3 rounded-lg border border-warning/20 bg-warning/5">
-            
-                <span className="text-2xl font-bold font-mono text-warning">{d._value}</span>
+                <div
+                  key={d.dimension}
+                  className="flex items-center gap-3 p-3 rounded-lg border border-warning/20 bg-warning/5">
+
+                    <span className="text-2xl font-bold font-mono text-warning">{d._value}/100</span>
                 <div>
                   <p className="text-sm font-medium text-foreground">{d.dimension}</p>
                   <p className="text-xs text-muted-foreground">Abaixo do padrão recomendado</p>
