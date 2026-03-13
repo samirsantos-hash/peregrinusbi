@@ -47,6 +47,35 @@ function formatDateString(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/* Sound Toggle Button */
+const SoundToggleButton = () => {
+  const { soundEnabled, toggleSound, playClick } = useSoundFeedback();
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9"
+          onClick={() => {
+            toggleSound();
+            if (!soundEnabled) playClick(); // Play sound when enabling
+          }}
+        >
+          {soundEnabled ? (
+            <Volume2 className="w-4 h-4 text-neon-blue" />
+          ) : (
+            <VolumeX className="w-4 h-4 text-muted-foreground" />
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Ativar/Desativar sons de confirmação</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
+
 const Index = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
