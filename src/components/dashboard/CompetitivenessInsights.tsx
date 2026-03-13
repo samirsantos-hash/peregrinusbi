@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Lightbulb, AlertTriangle, TrendingUp, TrendingDown, Target } from "lucide-react";
 import { fmtNum, fmtBRLCompact } from "@/utils/formatters";
+import TooltipInfo from "./TooltipInfo";
 
 interface KpiLike {
   date: string;
