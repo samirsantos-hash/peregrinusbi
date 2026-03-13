@@ -110,9 +110,8 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                     {investRows.map((r, idx) => (
                       <motion.tr key={r.itemId} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.03 }} className="border-b border-border/30 hover:bg-emerald/5 transition-colors">
                         <td className="py-2 px-3 font-mono font-medium text-xs">{r.itemId}</td>
-                        <td className="text-right py-2 px-3 font-mono text-emerald font-semibold">{fmtNum(r.avgScore, 0)}</td>
-                        <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scoreQualidadeFinal, 0)}</td>
-                        <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scoreOfertaFinal, 0)}</td>
+                         <td className="text-right py-2 px-3 font-mono text-emerald font-semibold">{fmtNum(r.avgScore, 0)}</td>
+                         <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scoreOfertaFinal, 0)}</td>
                         <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scorePhoto, 0)}</td>
                         <td className="text-center py-2 px-3">
                           <a href={r.mlbUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:text-blue-400 transition-colors">

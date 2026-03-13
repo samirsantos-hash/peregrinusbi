@@ -151,8 +151,8 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
                     <TooltipInfo text={item.tooltip} />
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`font-mono font-bold text-lg ${status.color}`}>
-                      {item.score > 0 ? item.score.toFixed(0) : "—"}
+                    <span className={`font-mono font-bold text-lg ${(item as any).isRate ? ((item as any).rateValue <= 2 ? "text-emerald" : (item as any).rateValue <= 5 ? "text-warning" : "text-destructive") : status.color}`}>
+                      {(item as any).isRate ? `${(item as any).rateValue.toFixed(1)}%` : (item.score > 0 ? item.score.toFixed(0) : "—")}
                     </span>
                     <span className={`status-badge text-[11px] ${
                       status.label === "Excelente" ? "bg-emerald/10 text-emerald border-emerald/20" :

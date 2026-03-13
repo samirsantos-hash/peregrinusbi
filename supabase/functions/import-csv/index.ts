@@ -243,6 +243,7 @@ Deno.serve(async (req) => {
         rep_current_level: cols[iRepLevel]?.trim() || null,
         rep_claims_rate: parseBrNumber(cols[iRepClaims] || "0"),
         rep_delayed_ht_rate: parseBrNumber(cols[iRepDelayed] || "0"),
+        rep_cancellations_rate: iRepCancellations >= 0 ? parseBrNumber(cols[iRepCancellations] || "0") : 0,
         pontuacao_ipi: parseBrNumber(cols[iPontuacaoIpi] || "0"),
         pontuacao_ll_gtin: iPontuacaoLlGtin >= 0 ? parseBrNumber(cols[iPontuacaoLlGtin] || "0") : 0,
         // LL Granular – Técnico
