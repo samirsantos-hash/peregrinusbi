@@ -18,6 +18,7 @@ export interface ListingQuality {
   scoreTitle: number;
   scoreOfertaFinal: number;
   scoreCaracteristicaFinal: number;
+  /** @deprecated Use repCancellationsRate from seller KPIs instead */
   scoreQualidadeFinal: number;
   sellersClipsPubli: number;
   visitasClips: number;
