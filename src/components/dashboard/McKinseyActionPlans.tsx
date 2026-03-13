@@ -227,10 +227,10 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                     {criticalRows.map((r, idx) => (
                       <motion.tr key={r.itemId} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.03 }} className="border-b border-border/30 hover:bg-destructive/5 transition-colors">
                         <td className="py-2 px-3 font-mono font-medium text-xs">{r.itemId}</td>
-                        <td className="text-right py-2 px-3 font-mono text-destructive font-semibold">{fmtNum(r.avgScore, 0)}</td>
-                        <td className="text-right py-2 px-3 font-mono">
-                          <span className={r.scoreQualidadeFinal < 70 ? "text-destructive" : "text-emerald"}>{fmtNum(r.scoreQualidadeFinal, 0)}</span>
-                        </td>
+                         <td className="text-right py-2 px-3 font-mono text-destructive font-semibold">{fmtNum(r.avgScore, 0)}</td>
+                         <td className="text-right py-2 px-3 font-mono">
+                           <span className={r.scoreOfertaFinal < 70 ? "text-destructive" : "text-emerald"}>{fmtNum(r.scoreOfertaFinal, 0)}</span>
+                         </td>
                         <td className="text-right py-2 px-3 font-mono">
                           <span className={r.llPriceScore < 70 ? "text-destructive" : "text-emerald"}>{fmtNum(r.llPriceScore, 0)}</span>
                         </td>
