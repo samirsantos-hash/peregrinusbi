@@ -34,11 +34,8 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
-  // Default to full history
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date("2020-01-01"),
-    to: new Date()
-  });
+  // Default to undefined; will be set once data loads
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [activeTab, setActiveTab] = useState("executive");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -106,6 +103,17 @@ const Index = () => {
       return dateStr >= fromStr && dateStr <= toStr;
     });
   }, [hasRealData, dbKpis, selectedSeller, dateRange]);
+
+  // Anchor date range to dataset on first load
+  useEffect(() => {
+    const kpisRaw = hasRealData ? (dbKpis || []) : (mockSellerKPIs[selectedSeller] || []);
+    if (kpisRaw.length > 0 && !dateRange) {
+      const dates = kpisRaw.map((k: any) => k.date || k.data).filter(Boolean).sort();
+      const maxDate = new Date(dates[dates.length - 1] + "T00:00:00");
+      const minDate = new Date(dates[0] + "T00:00:00");
+      setDateRange({ from: minDate, to: maxDate });
+    }
+  }, [dbKpis, hasRealData, selectedSeller]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);

@@ -41,13 +41,37 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
   const [storeOpen, setStoreOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("all");
 
+  // Anchor date = max date in the dataset
+  const { anchorDate, minDate, availableDays } = useMemo(() => {
+    const dates = kpis.map((k: any) => k.date).filter(Boolean).sort();
+    if (dates.length === 0) {
+      return { anchorDate: new Date(), minDate: new Date("2020-01-01"), availableDays: 0 };
+    }
+    const uniqueDates = [...new Set(dates)].sort();
+    const maxStr = uniqueDates[uniqueDates.length - 1];
+    const minStr = uniqueDates[0];
+    const anchor = new Date(maxStr + "T00:00:00");
+    const min = new Date(minStr + "T00:00:00");
+    const days = differenceInDays(anchor, min);
+    return { anchorDate: anchor, minDate: min, availableDays: days };
+  }, [kpis]);
+
+  // Warning when selected period exceeds available data
+  const periodWarning = useMemo(() => {
+    if (activePeriod === "all" || activePeriod === "custom") return null;
+    const requestedDays = parseInt(activePeriod);
+    if (isNaN(requestedDays)) return null;
+    if (availableDays < requestedDays && availableDays > 0) {
+      return `Exibindo histórico disponível (${availableDays} dias)`;
+    }
+    return null;
+  }, [activePeriod, availableDays]);
+
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
   // Calculate actual data span (not the date picker range) to avoid inflated denominators
   const rangeDays = useMemo(() => {
     if (kpis.length === 0) return 30;
-    // Use the actual number of distinct data points as months, estimate ~30 days each
-    // This prevents "Todo Período" from dividing by thousands of empty days
     const dates = kpis.map((k: any) => k.date).filter(Boolean);
     if (dates.length === 0) return 30;
     const uniqueDates = [...new Set(dates)].sort();
@@ -56,7 +80,6 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
     const first = new Date(firstDate + "T00:00:00");
     const last = new Date(lastDate + "T00:00:00");
     const diff = differenceInDays(last, first);
-    // If all data is from one date/month, use 30 as baseline
     return Math.max(diff, 30);
   }, [kpis]);
 
@@ -84,10 +107,11 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
   const handleQuickRange = (qr: typeof quickRanges[0]) => {
     setActivePeriod(qr.key);
     if (qr.days) {
-      onDateRangeChange({ from: subDays(new Date(), qr.days), to: new Date() });
+      // Anchor to the latest date in the dataset, NOT today
+      onDateRangeChange({ from: subDays(anchorDate, qr.days), to: anchorDate });
     } else {
-      // "Todo Período" - set a very wide range
-      onDateRangeChange({ from: new Date("2020-01-01"), to: new Date() });
+      // "Todo Período" - use full available range
+      onDateRangeChange({ from: minDate, to: anchorDate });
     }
     setCalOpen(false);
   };
@@ -192,6 +216,12 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
                 </button>
               ))}
             </div>
+
+            {periodWarning && (
+              <span className="text-[10px] text-warning bg-warning/10 border border-warning/20 px-2 py-1 rounded-md whitespace-nowrap">
+                ⚠ {periodWarning}
+              </span>
+            )}
 
             <Popover open={calOpen} onOpenChange={setCalOpen}>
               <PopoverTrigger asChild>
