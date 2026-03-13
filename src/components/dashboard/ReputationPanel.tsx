@@ -9,7 +9,7 @@ interface KpiLike {
   repLevel: string;
   repClaimsRate: number;
   repDelayedRate: number;
-  scoreQualidade: number;
+  repCancellationsRate: number;
 }
 
 interface ReputationPanelProps {
@@ -73,7 +73,8 @@ const ReputationPanel = ({ kpis }: ReputationPanelProps) => {
 
     const claimsSev = getSeverity(lat.repClaimsRate * 100, 2, 5);
     const delaySev = getSeverity(lat.repDelayedRate * 100, 5, 10);
-    const qualSev: Severity = lat.scoreQualidade >= 70 ? "green" : lat.scoreQualidade >= 50 ? "yellow" : "red";
+    const cancRate = (lat.repCancellationsRate || 0) * 100;
+    const cancSev = getSeverity(cancRate, 2, 5);
 
     const lightsArr: TrafficLight[] = [
       {
@@ -93,12 +94,12 @@ const ReputationPanel = ({ kpis }: ReputationPanelProps) => {
         thresholds: "🟢 ≤5% · 🟡 ≤10% · 🔴 >10%",
       },
       {
-        label: "Score de Qualidade",
-        value: lat.scoreQualidade,
-        formatted: `${lat.scoreQualidade.toFixed(0)}/100`,
-        severity: qualSev,
-        description: "Pontuação geral de qualidade dos anúncios",
-        thresholds: "🟢 ≥70 · 🟡 ≥50 · 🔴 <50",
+        label: "Taxa de Cancelamento",
+        value: cancRate,
+        formatted: `${cancRate.toFixed(1)}%`,
+        severity: cancSev,
+        description: "Percentual de vendas canceladas",
+        thresholds: "🟢 ≤2% · 🟡 ≤5% · 🔴 >5%",
       },
     ];
 
@@ -108,7 +109,7 @@ const ReputationPanel = ({ kpis }: ReputationPanelProps) => {
       delays: +(k.repDelayedRate * 100).toFixed(2),
     }));
 
-    const worst = [claimsSev, delaySev, qualSev];
+    const worst = [claimsSev, delaySev, cancSev];
     const overall: Severity = worst.includes("red") ? "red" : worst.includes("yellow") ? "yellow" : "green";
 
     return { lights: lightsArr, latest: lat, trendData: trend, overallSeverity: overall };
