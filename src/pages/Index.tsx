@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
+import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
