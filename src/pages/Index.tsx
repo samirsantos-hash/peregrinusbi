@@ -145,7 +145,7 @@ const Index = () => {
   }, [allKpis, dateRange, minDate, anchorDate]);
 
   // FILTERED kpis — used by all panels
-  const filteredKpis = useMemo(() => {
+  const filteredKpis: any[] = useMemo(() => {
     if (!dateRange?.from) return allKpis;
 
     const fromStr = formatDateString(dateRange.from);
