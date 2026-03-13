@@ -187,7 +187,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
       s.visitsExpensive += k.visitsExpensive || 0;
       s.visitsMatch += k.visitsMatch || 0;
       s.visitsCheaper += k.visitsCheaper || 0;
-      if (k.scoreQualidade > 0) { s.scoreQualidade += k.scoreQualidade; s.qualCount++; }
+      if (k.repCancellationsRate !== undefined) { s.cancellationsRate += k.repCancellationsRate || 0; s.qualCount++; }
       if (k.upliftGmvM1 !== 0) { s.upliftGmvM1 += k.upliftGmvM1; s.upliftCount++; }
     }
 
