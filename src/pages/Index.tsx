@@ -232,6 +232,21 @@ const Index = () => {
                     <LogisticsPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
+                    <QualityKpiCards
+                      scoreCaracteristica={(() => {
+                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).scoreCaracteristica || 0 : 0;
+                      })()}
+                      pontuacaoLlGtin={(() => {
+                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).pontuacaoLlGtin || 0 : 0;
+                      })()}
+                      scoreOfertaFinal={(() => {
+                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).scoreOferta || 0 : 0;
+                      })()}
+                      totalLiveListings={liveListingsCount || 0}
+                    />
                     <QualityRadarPanel kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
