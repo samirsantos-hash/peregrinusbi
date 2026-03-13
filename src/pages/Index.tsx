@@ -2,7 +2,9 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { type DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -44,6 +46,35 @@ function formatDateString(date: Date): string {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+
+/* Sound Toggle Button */
+const SoundToggleButton = () => {
+  const { soundEnabled, toggleSound, playClick } = useSoundFeedback();
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9"
+          onClick={() => {
+            toggleSound();
+            if (!soundEnabled) playClick(); // Play sound when enabling
+          }}
+        >
+          {soundEnabled ? (
+            <Volume2 className="w-4 h-4 text-neon-blue" />
+          ) : (
+            <VolumeX className="w-4 h-4 text-muted-foreground" />
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>Ativar/Desativar sons de confirmação</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+};
 
 const Index = () => {
   const { user, isAdmin, signOut } = useAuth();
@@ -223,6 +254,8 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            {/* Sound toggle */}
+            <SoundToggleButton />
             {isAdmin &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
                 <Settings className="w-4 h-4" />
