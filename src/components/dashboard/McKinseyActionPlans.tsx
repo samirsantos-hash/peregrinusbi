@@ -54,7 +54,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
     rows.forEach((r, i) => {
       const link = r.mlbUrl;
       if (type === "invest") {
-        text += `${i + 1}. *${r.itemId}*\n   🏆 Score: ${fmtNum(r.avgScore, 0)} | Qualidade: ${fmtNum(r.scoreQualidadeFinal, 0)} | Oferta: ${fmtNum(r.scoreOfertaFinal, 0)}\n   🔗 ${link}\n`;
+        text += `${i + 1}. *${r.itemId}*\n   🏆 Score: ${fmtNum(r.avgScore, 0)} | Oferta: ${fmtNum(r.scoreOfertaFinal, 0)}\n   🔗 ${link}\n`;
       } else if (type === "seo") {
         text += `${i + 1}. *${r.itemId}*\n   📸 Fotos: ${fmtNum(r.scorePhoto, 0)} | 📝 Título: ${fmtNum(r.scoreTitle, 0)} | Problemas: ${r.issues.length > 0 ? r.issues.join(", ") : "Nenhum"}\n   🔗 ${link}\n`;
       } else {
