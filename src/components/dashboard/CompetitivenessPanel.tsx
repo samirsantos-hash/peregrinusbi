@@ -24,7 +24,7 @@ interface KpiLike {
   gmv: number;
   productName: string;
   productId: string;
-  scoreQualidade?: number;
+  repCancellationsRate?: number;
   upliftGmvM1?: number;
 }
 
@@ -169,7 +169,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
     const byDateMap: Record<string, {
       date: string; gmv: number; visits: number; visitsExpensive: number;
       visitsMatch: number; visitsCheaper: number;
-      scoreQualidade: number; qualCount: number;
+      cancellationsRate: number; qualCount: number;
       upliftGmvM1: number; upliftCount: number;
     }> = {};
     for (const k of filtered as any[]) {
@@ -177,7 +177,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
         byDateMap[k.date] = {
           date: k.date, gmv: 0, visits: 0, visitsExpensive: 0,
           visitsMatch: 0, visitsCheaper: 0,
-          scoreQualidade: 0, qualCount: 0,
+          cancellationsRate: 0, qualCount: 0,
           upliftGmvM1: 0, upliftCount: 0,
         };
       }
@@ -187,7 +187,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
       s.visitsExpensive += k.visitsExpensive || 0;
       s.visitsMatch += k.visitsMatch || 0;
       s.visitsCheaper += k.visitsCheaper || 0;
-      if (k.scoreQualidade > 0) { s.scoreQualidade += k.scoreQualidade; s.qualCount++; }
+      if (k.repCancellationsRate !== undefined) { s.cancellationsRate += k.repCancellationsRate || 0; s.qualCount++; }
       if (k.upliftGmvM1 !== 0) { s.upliftGmvM1 += k.upliftGmvM1; s.upliftCount++; }
     }
 
@@ -197,8 +197,10 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
       const totalBands = s.visitsExpensive + s.visitsMatch + s.visitsCheaper;
       const gapPct = totalBands > 0 ? ((s.visitsExpensive / totalBands) * 100) : 0;
       const invertedGap = 100 - gapPct;
-      const avgQualidade = s.qualCount > 0 ? s.scoreQualidade / s.qualCount : 50;
-      const forcaCompetitiva = (invertedGap * 0.5) + (avgQualidade * 0.5);
+      // Lower cancellation rate = better competitiveness (invert: 0% → 100, 10% → 0)
+      const avgCancRate = s.qualCount > 0 ? s.cancellationsRate / s.qualCount : 0;
+      const cancScore = Math.max(0, 100 - avgCancRate * 20); // 5% → 0 score
+      const forcaCompetitiva = (invertedGap * 0.5) + (cancScore * 0.5);
 
       const avgUplift = s.upliftCount > 0 ? s.upliftGmvM1 / s.upliftCount : 0;
       const upliftFactor = 1 + Math.max(Math.min(avgUplift, 2), -0.5);

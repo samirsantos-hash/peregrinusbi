@@ -9,7 +9,7 @@ interface KpiLike {
   scoreTitle: number;
   scoreOferta: number;
   scoreCaracteristica: number;
-  scoreQualidade: number;
+  repCancellationsRate: number;
   scoreFull: number;
   scorePads: number;
   statusPhoto: string;
@@ -48,7 +48,17 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
   const avgTitle = avg("scoreTitle");
   const avgOferta = avg("scoreOferta");
   const avgCaracteristica = avg("scoreCaracteristica");
-  const avgQualidade = avg("scoreQualidade");
+  const avgCancellations = (() => {
+    const valid = products.filter((p) => (p.repCancellationsRate as number) > 0);
+    return valid.length > 0 ? valid.reduce((s, p) => s + (p.repCancellationsRate as number), 0) / valid.length : 0;
+  })();
+
+  const getCancellationScore = (rate: number) => {
+    // Invert: lower rate = higher score for display
+    if (rate <= 2) return 95;
+    if (rate <= 5) return 60;
+    return 25;
+  };
 
   const checklist = [
     {
@@ -76,10 +86,12 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
       tooltip: "Preenchimento das fichas técnicas e atributos obrigatórios do produto.",
     },
     {
-      label: "Qualidade Geral",
-      score: avgQualidade,
+      label: "Taxa de Cancelamento",
+      score: getCancellationScore(avgCancellations),
       icon: Award,
-      tooltip: "Score final de qualidade ponderando todos os critérios de avaliação do anúncio.",
+      tooltip: `Taxa média de cancelamento: ${avgCancellations.toFixed(1)}%. Verde: ≤2% | Amarelo: 2-5% | Vermelho: >5%.`,
+      isRate: true,
+      rateValue: avgCancellations,
     },
   ];
 
@@ -100,7 +112,12 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
         <div className="flex justify-center gap-10 flex-wrap">
           <GaugeChart value={Math.round(avgPhoto)} label="Fotos" color="blue" />
           <GaugeChart value={Math.round(avgTitle)} label="Título" color="emerald" />
-          <GaugeChart value={Math.round(avgQualidade)} label="Qualidade" color="blue" />
+    <div className="flex flex-col items-center">
+              <span className={`text-2xl font-bold font-mono ${avgCancellations <= 2 ? "text-emerald" : avgCancellations <= 5 ? "text-warning" : "text-destructive"}`}>
+                {avgCancellations.toFixed(1)}%
+              </span>
+              <span className="text-xs text-muted-foreground mt-1">Taxa de Cancelamento</span>
+            </div>
         </div>
       </div>
 
@@ -134,8 +151,8 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
                     <TooltipInfo text={item.tooltip} />
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className={`font-mono font-bold text-lg ${status.color}`}>
-                      {item.score > 0 ? item.score.toFixed(0) : "—"}
+                    <span className={`font-mono font-bold text-lg ${(item as any).isRate ? ((item as any).rateValue <= 2 ? "text-emerald" : (item as any).rateValue <= 5 ? "text-warning" : "text-destructive") : status.color}`}>
+                      {(item as any).isRate ? `${(item as any).rateValue.toFixed(1)}%` : (item.score > 0 ? item.score.toFixed(0) : "—")}
                     </span>
                     <span className={`status-badge text-[11px] ${
                       status.label === "Excelente" ? "bg-emerald/10 text-emerald border-emerald/20" :

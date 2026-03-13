@@ -21,7 +21,7 @@ interface KpiLike {
   scoreTitle: number;
   scoreOferta: number;
   scoreCaracteristica: number;
-  scoreQualidade: number;
+  repCancellationsRate: number;
   scoreFull: number;
   scorePads: number;
   llPicturesScore: number;
@@ -128,7 +128,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
     const v = {
       llPictures: safe(lat.llPicturesScore) || safe(lat.scorePhoto),
       llTitle: safe(lat.llTitleScore) || safe(lat.scoreTitle),
-      llDescription: safe(lat.llDescriptionScore) || safe(lat.scoreQualidade),
+      llDescription: safe(lat.llDescriptionScore),
       llPrice: safe(lat.llPriceScore) || safe(lat.scoreOferta),
       llFreeShipping: safe(lat.llFreeShippingScore),
       llPromotions: safe(lat.llPromotionsScore),

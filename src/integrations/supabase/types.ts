@@ -284,6 +284,7 @@ export type Database = {
           orders_clips: number | null
           pontuacao_ipi: number | null
           pontuacao_ll_gtin: number | null
+          rep_cancellations_rate: number | null
           rep_claims_rate: number | null
           rep_current_level: string | null
           rep_delayed_ht_rate: number | null
@@ -336,6 +337,7 @@ export type Database = {
           orders_clips?: number | null
           pontuacao_ipi?: number | null
           pontuacao_ll_gtin?: number | null
+          rep_cancellations_rate?: number | null
           rep_claims_rate?: number | null
           rep_current_level?: string | null
           rep_delayed_ht_rate?: number | null
@@ -388,6 +390,7 @@ export type Database = {
           orders_clips?: number | null
           pontuacao_ipi?: number | null
           pontuacao_ll_gtin?: number | null
+          rep_cancellations_rate?: number | null
           rep_claims_rate?: number | null
           rep_current_level?: string | null
           rep_delayed_ht_rate?: number | null

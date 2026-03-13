@@ -54,7 +54,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
     rows.forEach((r, i) => {
       const link = r.mlbUrl;
       if (type === "invest") {
-        text += `${i + 1}. *${r.itemId}*\n   🏆 Score: ${fmtNum(r.avgScore, 0)} | Qualidade: ${fmtNum(r.scoreQualidadeFinal, 0)} | Oferta: ${fmtNum(r.scoreOfertaFinal, 0)}\n   🔗 ${link}\n`;
+        text += `${i + 1}. *${r.itemId}*\n   🏆 Score: ${fmtNum(r.avgScore, 0)} | Oferta: ${fmtNum(r.scoreOfertaFinal, 0)}\n   🔗 ${link}\n`;
       } else if (type === "seo") {
         text += `${i + 1}. *${r.itemId}*\n   📸 Fotos: ${fmtNum(r.scorePhoto, 0)} | 📝 Título: ${fmtNum(r.scoreTitle, 0)} | Problemas: ${r.issues.length > 0 ? r.issues.join(", ") : "Nenhum"}\n   🔗 ${link}\n`;
       } else {
@@ -101,8 +101,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                     <tr className="border-b border-emerald/20">
                       <th className="text-left py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Item ID</th>
                       <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Score Geral</th>
-                      <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Qualidade</th>
-                      <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Oferta</th>
+                       <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Oferta</th>
                       <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Fotos</th>
                       <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Ver Anúncio</th>
                     </tr>
@@ -111,9 +110,8 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                     {investRows.map((r, idx) => (
                       <motion.tr key={r.itemId} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.03 }} className="border-b border-border/30 hover:bg-emerald/5 transition-colors">
                         <td className="py-2 px-3 font-mono font-medium text-xs">{r.itemId}</td>
-                        <td className="text-right py-2 px-3 font-mono text-emerald font-semibold">{fmtNum(r.avgScore, 0)}</td>
-                        <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scoreQualidadeFinal, 0)}</td>
-                        <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scoreOfertaFinal, 0)}</td>
+                         <td className="text-right py-2 px-3 font-mono text-emerald font-semibold">{fmtNum(r.avgScore, 0)}</td>
+                         <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scoreOfertaFinal, 0)}</td>
                         <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scorePhoto, 0)}</td>
                         <td className="text-center py-2 px-3">
                           <a href={r.mlbUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:text-blue-400 transition-colors">
