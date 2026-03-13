@@ -6,7 +6,7 @@ import {
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
 import SalesRecordCard from "./SalesRecordCard";
-import SalesHeatmap from "./SalesHeatmap";
+import TrafficHeatmap from "./TrafficHeatmap";
 import BestInvestmentPeriod from "./BestInvestmentPeriod";
 import { fmtBRLCompact, fmtBRL, fmtNum } from "@/utils/formatters";
 
