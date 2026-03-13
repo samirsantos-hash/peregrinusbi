@@ -76,12 +76,12 @@ Deno.serve(async (req) => {
       });
     }
 
-    const lines = csvText.split("\n").filter((l: string) => l.trim());
-    const headerLine = lines[0].replace(/^\uFEFF/, "");
+    // Split lines and parse header, then discard raw text progressively
+    const lines = csvText.split("\n");
+    const headerLine = (lines[0] || "").replace(/^\uFEFF/, "");
     const headers = parseCSVLine(headerLine).map(h => h.trim());
     const colIdx = (name: string) => headers.indexOf(name);
 
-    // Column indices
     const iCustId = colIdx("CUS_CUST_ID_SEL");
     const iItemId = colIdx("ITEM_ID");
     const iItemName = colIdx("ITEM_NAME");
@@ -105,41 +105,59 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Collect unique seller cust_ids
+    // First pass: collect unique cust_ids (lightweight — only store strings)
     const custIds = new Set<string>();
-    const rows: string[][] = [];
     for (let i = 1; i < lines.length; i++) {
-      const cols = parseCSVLine(lines[i]);
-      if (cols.length < 5) continue;
+      const line = lines[i];
+      if (!line || !line.trim()) continue;
+      // Fast extraction: split only up to the needed column index
+      const maxNeeded = Math.max(iCustId, iItemId) + 1;
+      const cols = parseCSVLine(line);
+      if (cols.length < maxNeeded) continue;
       const custId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
-      if (!custId) continue;
-      custIds.add(custId);
-      rows.push(cols);
+      if (custId) custIds.add(custId);
     }
 
-    // Get seller IDs from existing sellers
-    const { data: sellerRows, error: sellerErr } = await supabase
-      .from("sellers")
-      .select("id, cust_id")
-      .in("cust_id", Array.from(custIds));
-    if (sellerErr) throw new Error(`Seller fetch error: ${sellerErr.message}`);
-
+    // Fetch seller IDs in batches to avoid huge IN queries
     const sellerIdMap = new Map<string, string>();
-    for (const s of sellerRows || []) {
-      sellerIdMap.set(s.cust_id, s.id);
+    const custIdArray = Array.from(custIds);
+    for (let i = 0; i < custIdArray.length; i += 500) {
+      const batch = custIdArray.slice(i, i + 500);
+      const { data: sellerRows, error: sellerErr } = await supabase
+        .from("sellers")
+        .select("id, cust_id")
+        .in("cust_id", batch);
+      if (sellerErr) throw new Error(`Seller fetch error: ${sellerErr.message}`);
+      for (const s of sellerRows || []) {
+        sellerIdMap.set(s.cust_id, s.id);
+      }
     }
+    // Free memory
+    custIds.clear();
 
-    // Determine default date
     const today = new Date().toISOString().slice(0, 10);
 
-    // Build eligibility rows
-    const eligibilityRows = rows.map((cols) => {
+    // Second pass: process rows in chunks and upsert directly
+    let inserted = 0;
+    const CHUNK_SIZE = 200;
+    const deduped = new Map<string, any>();
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (!line || !line.trim()) continue;
+
+      const cols = parseCSVLine(line);
+      if (cols.length < 5) continue;
+
       const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
       const sellerId = sellerIdMap.get(cleanCustId);
       const itemId = (cols[iItemId]?.trim() || "").replace(/[.,]0$/, "");
-      if (!sellerId || !itemId) return null;
+      if (!sellerId || !itemId) continue;
 
-      return {
+      const dataVal = iData >= 0 && cols[iData]?.trim() ? cols[iData].trim() : today;
+      const key = `${sellerId}|${itemId}|${dataVal}`;
+
+      deduped.set(key, {
         seller_id: sellerId,
         item_id: itemId,
         item_name: iItemName >= 0 ? cols[iItemName]?.trim() || "" : "",
@@ -154,24 +172,29 @@ Deno.serve(async (req) => {
         vertical_item: iVertical >= 0 ? cols[iVertical]?.trim() || "" : "",
         dom_domain_agg1: iDomain >= 0 ? cols[iDomain]?.trim() || "" : "",
         campaign_id_best: iCampaignBest >= 0 ? (cols[iCampaignBest]?.trim() || "").replace(/[.,]0$/, "") : "",
-        data: iData >= 0 && cols[iData]?.trim() ? cols[iData].trim() : today,
-      };
-    }).filter(Boolean);
+        data: dataVal,
+      });
 
-    // Deduplicate
-    const deduped = new Map<string, any>();
-    for (const row of eligibilityRows) {
-      deduped.set(`${(row as any).seller_id}|${(row as any).item_id}|${(row as any).data}`, row);
+      // Flush when deduped map gets large enough
+      if (deduped.size >= CHUNK_SIZE) {
+        const batch = Array.from(deduped.values());
+        deduped.clear();
+        const { error } = await supabase
+          .from("seller_eligibility")
+          .upsert(batch, { onConflict: "seller_id,item_id,data", ignoreDuplicates: false });
+        if (error) throw new Error(`Eligibility insert error: ${error.message}`);
+        inserted += batch.length;
+      }
     }
-    const unique = Array.from(deduped.values());
 
-    let inserted = 0;
-    for (let i = 0; i < unique.length; i += 200) {
-      const batch = unique.slice(i, i + 200);
+    // Flush remaining
+    if (deduped.size > 0) {
+      const batch = Array.from(deduped.values());
+      deduped.clear();
       const { error } = await supabase
         .from("seller_eligibility")
-        .upsert(batch as any[], { onConflict: "seller_id,item_id,data", ignoreDuplicates: false });
-      if (error) throw new Error(`Eligibility insert error batch ${i}: ${error.message}`);
+        .upsert(batch, { onConflict: "seller_id,item_id,data", ignoreDuplicates: false });
+      if (error) throw new Error(`Eligibility insert error: ${error.message}`);
       inserted += batch.length;
     }
 
