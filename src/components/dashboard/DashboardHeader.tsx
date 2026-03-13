@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag, RefreshCw } from "lucide-react";
+import { CalendarIcon, TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag, RefreshCw, CalendarDays, Clock } from "lucide-react";
 import { format, subDays, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
