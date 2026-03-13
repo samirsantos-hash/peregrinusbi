@@ -112,7 +112,12 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
         <div className="flex justify-center gap-10 flex-wrap">
           <GaugeChart value={Math.round(avgPhoto)} label="Fotos" color="blue" />
           <GaugeChart value={Math.round(avgTitle)} label="Título" color="emerald" />
-          <GaugeChart value={Math.round(avgQualidade)} label="Qualidade" color="blue" />
+    <div className="flex flex-col items-center">
+              <span className={`text-2xl font-bold font-mono ${avgCancellations <= 2 ? "text-emerald" : avgCancellations <= 5 ? "text-warning" : "text-destructive"}`}>
+                {avgCancellations.toFixed(1)}%
+              </span>
+              <span className="text-xs text-muted-foreground mt-1">Taxa de Cancelamento</span>
+            </div>
         </div>
       </div>
 
