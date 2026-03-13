@@ -22,6 +22,8 @@ interface KpiLike {
   cpa: number;
   productName: string;
   productId: string;
+  visits: number;
+  tsi: number;
 }
 
 interface EfficiencyPanelProps {
