@@ -9,7 +9,7 @@ interface KpiLike {
   repLevel: string;
   repClaimsRate: number;
   repDelayedRate: number;
-  scoreQualidade: number;
+  repCancellationsRate: number;
 }
 
 interface ReputationPanelProps {
