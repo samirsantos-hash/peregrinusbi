@@ -11,6 +11,8 @@ import PeriodSelector from "./PeriodSelector";
 import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
+import PriceAuditTable from "./PriceAuditTable";
+import CompetitivenessInsights from "./CompetitivenessInsights";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
 
@@ -256,6 +258,12 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
           </motion.div>
         ))}
       </div>
+
+      {/* ── Insights Estratégicos ── */}
+      <CompetitivenessInsights kpis={kpis} />
+
+      {/* ── Auditoria de Preço ── */}
+      <PriceAuditTable kpis={kpis} sellerCustIdMap={sellerCustIdMap} />
 
       {/* ── Price Evolution Line Chart ── */}
       <div className="glass-card p-5">
