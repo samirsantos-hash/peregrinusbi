@@ -673,31 +673,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         </div>
       )}
 
-      {/* ── Summary KPIs row ── */}
-      <div className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Video className="w-4 h-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Resumo de Performance de Clips
-          </h3>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {[
-            { label: "Anúncios com Clip", value: clipCoverage.withClip, color: "text-emerald" },
-            { label: "Vídeo Campeão", value: videoIssuesSummary.champion, color: "text-emerald" },
-            { label: "Baixa Conversão", value: videoIssuesSummary.lowConversion, color: "text-warning" },
-            { label: "Sem Alcance", value: videoIssuesSummary.noReach, color: "text-destructive" },
-            { label: "Analisar", value: videoIssuesSummary.noClip, color: "text-muted-foreground" },
-          ].map((m) => (
-            <div key={m.label} className="text-center">
-              <p className="text-[11px] text-muted-foreground uppercase tracking-wider mb-1">{m.label}</p>
-              <p className={`font-mono text-lg font-bold ${m.color}`}>
-                {fmt(m.value)}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* ── End of ClipsAudiencePanel ── */}
     </motion.div>
   );
 };
