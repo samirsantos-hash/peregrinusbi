@@ -11,6 +11,8 @@ import PeriodSelector from "./PeriodSelector";
 import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
+import PriceAuditTable from "./PriceAuditTable";
+import CompetitivenessInsights from "./CompetitivenessInsights";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
 
