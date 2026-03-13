@@ -132,13 +132,12 @@ const DashboardHeader = ({
   ];
 
   const handleQuickRange = (qr: typeof quickRanges[0]) => {
+    playClick();
     setActivePeriod(qr.key);
     if (qr.days) {
-      // Anchor to the latest date in the FULL dataset, NOT today
       const from = subLocalDays(anchorDate, qr.days);
       onDateRangeChange({ from, to: anchorDate });
     } else {
-      // "Todo Período" - use full available range
       onDateRangeChange({ from: minDate, to: anchorDate });
     }
     setCalOpen(false);
