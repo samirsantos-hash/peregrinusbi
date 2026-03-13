@@ -21,7 +21,7 @@ interface KpiLike {
   scoreTitle: number;
   scoreOferta: number;
   scoreCaracteristica: number;
-  scoreQualidade: number;
+  repCancellationsRate: number;
   scoreFull: number;
   scorePads: number;
   llPicturesScore: number;
