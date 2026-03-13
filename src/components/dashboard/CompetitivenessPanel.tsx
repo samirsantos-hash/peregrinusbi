@@ -259,6 +259,12 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
         ))}
       </div>
 
+      {/* ── Insights Estratégicos ── */}
+      <CompetitivenessInsights kpis={kpis} />
+
+      {/* ── Auditoria de Preço ── */}
+      <PriceAuditTable kpis={kpis} sellerCustIdMap={sellerCustIdMap} />
+
       {/* ── Price Evolution Line Chart ── */}
       <div className="glass-card p-5">
         <div className="flex items-center gap-2 mb-4">
