@@ -217,7 +217,7 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
       </div>
 
       {/* Heatmap */}
-      <SalesHeatmap kpis={kpis} />
+      <TrafficHeatmap kpis={kpis} />
     </motion.div>
   );
 };
