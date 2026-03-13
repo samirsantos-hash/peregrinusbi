@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock, Crown, Target, BarChart3 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 
 interface KpiLike {
@@ -35,9 +35,19 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
+/* ------------------------------------------------------------------ */
+/*  Strategic uplift label                                             */
+/* ------------------------------------------------------------------ */
+function getUpliftDisplay(uplift: number): { label: string; color: string; icon: typeof TrendingUp } {
+  const pct = uplift * 100;
+  if (pct >= 50) return { label: "Líder de Categoria", color: "emerald-text", icon: Crown };
+  if (pct >= 20) return { label: "Performance Excedente", color: "emerald-text", icon: TrendingUp };
+  if (pct >= 0) return { label: "Otimização de Margem", color: "emerald-text", icon: Target };
+  if (pct >= -15) return { label: "Gap de Vendas", color: "warning-text", icon: BarChart3 };
+  return { label: "Potencial de Recuperação", color: "critical-text", icon: TrendingDown };
+}
 
 const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
-
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
   const totalTgmv = kpis.reduce((s, k) => s + k.tgmv, 0);
   const totalTsi = kpis.reduce((s, k) => s + k.tsi, 0);
@@ -49,6 +59,9 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
     ? validUplifts.reduce((s, k) => s + k.upliftGmvM1, 0) / validUplifts.length
     : 0;
 
+  const upliftDisplay = getUpliftDisplay(avgUplift);
+  const UpliftIcon = upliftDisplay.icon;
+
   const validScores = kpis.filter((k) => k.scoreFull > 0);
   const avgSaude = validScores.length > 0
     ? validScores.reduce((s, k) => s + k.scoreFull, 0) / validScores.length
@@ -59,13 +72,11 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
     ? validDelayed.reduce((s, k) => s + k.repDelayedRate, 0) / validDelayed.length
     : 0;
 
-  // Calculate number of distinct months in the data
   const monthsAnalyzed = useMemo(() => {
-    const uniqueMonths = new Set(kpis.map((k) => k.date.slice(0, 7))); // "YYYY-MM"
+    const uniqueMonths = new Set(kpis.map((k) => k.date.slice(0, 7)));
     return uniqueMonths.size;
   }, [kpis]);
 
-  // Format currency in BRL
   const fmtBRL = (value: number) => {
     return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
@@ -80,12 +91,24 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
     return fmtBRL(value);
   };
 
+  // Uplift value: always show absolute value with strategic label
+  const upliftPctAbs = Math.abs(avgUplift * 100);
+  const upliftValueStr = `${avgUplift >= 0 ? "+" : ""}${(avgUplift * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+
   const metrics = [
     { label: "Faturamento Bruto (GMV)", value: fmtBRLCompact(totalGmv), icon: DollarSign, color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado (GMV = Gross Merchandise Value)." },
     { label: "Faturamento Realizado", value: fmtBRLCompact(totalTgmv), icon: TrendingUp, color: "emerald-text", tooltip: "Valor de vendas confirmadas e faturadas, descontando cancelamentos e devoluções." },
     { label: "Volume de Itens Vendidos", value: totalTsi.toLocaleString("pt-BR"), icon: ShoppingCart, color: "neon-text", tooltip: "Quantidade total de itens vendidos (TSI = Total Sold Items) no período." },
     { label: "Investimento em Marketing", value: fmtBRLCompact(totalAds), icon: Activity, color: "text-muted-foreground", tooltip: "Total investido em campanhas de Ads (Product Ads) no Mercado Livre." },
-    { label: "Potencial de Crescimento", value: `${avgUplift >= 0 ? "+" : ""}${(avgUplift * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`, icon: avgUplift >= 0 ? TrendingUp : TrendingDown, color: avgUplift >= 0 ? "emerald-text" : "critical-text", tooltip: "Calculado comparando sua performance real com a média esperada da sua Vertical e Domínio." },
+    {
+      label: upliftDisplay.label,
+      value: upliftValueStr,
+      icon: UpliftIcon,
+      color: upliftDisplay.color,
+      tooltip: avgUplift >= 0
+        ? "O seller está acima do potencial esperado para sua categoria/domínio. Considere otimizar margens ou expandir mix."
+        : "Existe um gap entre a performance atual e o potencial da categoria. Invista em visibilidade e competitividade.",
+    },
     { label: "Nota de Saúde da Operação", value: avgSaude > 0 ? avgSaude.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : "—", icon: Activity, color: avgSaude >= 70 ? "emerald-text" : avgSaude >= 50 ? "warning-text" : "critical-text", tooltip: "Média ponderada de preço, qualidade de fotos, descrições e logística." },
     { label: "ROAS Médio", value: avgRoas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), icon: DollarSign, color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é considerado saudável." },
     { label: "Índice de Atrasos no Envio", value: avgDelayed > 0 ? `${(avgDelayed * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : "—", icon: Clock, color: avgDelayed <= 0.05 ? "emerald-text" : "critical-text", tooltip: "Percentual de envios atrasados. Abaixo de 5% é considerado saudável para manter reputação." },
@@ -148,7 +171,6 @@ const ExecutivePanel = ({ kpis }: ExecutivePanelProps) => {
             </h3>
             <TooltipInfo text="Comparativo entre faturamento bruto (GMV) e faturamento realizado ao longo do tempo." />
           </div>
-          
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={chartData}>
