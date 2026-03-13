@@ -127,6 +127,7 @@ Deno.serve(async (req) => {
     const iRepLevel = colIdx("REP_CURRENT_LEVEL");
     const iRepClaims = colIdx("REP_CLAIMS_RATE");
     const iRepDelayed = colIdx("REP_DELAYED_HT_RATE");
+    const iRepCancellations = colIdx("REP_CANCELLATIONS_RATE");
     const iPontuacaoIpi = colIdx("PONTUACAO_IPI");
     const iPontuacaoLlGtin = colIdx("PONTUACAO_LL_GTIN");
     // LL Granular – Técnico
