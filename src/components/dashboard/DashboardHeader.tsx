@@ -273,14 +273,42 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
         </motion.div>
       </div>
 
-      {/* Segmentation Badges */}
-      {selectedSellerObj && (selectedSellerObj.cluster || selectedSellerObj.subCluster || selectedSellerObj.state) && (
+      {/* Segmentation & Context Badges */}
+      {selectedSellerObj && (
         <motion.div
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
           className="flex items-center gap-2 flex-wrap"
         >
+          {/* Safra (latest date in kpis) */}
+          {kpis.length > 0 && (() => {
+            const dates = kpis.map((k: any) => k.date).filter(Boolean).sort();
+            const latestDate = dates[dates.length - 1];
+            const safraLabel = latestDate ? new Date(latestDate + "T00:00:00").toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) : null;
+            return safraLabel ? (
+              <span className="status-badge bg-neon-blue/10 text-neon-blue border-neon-blue/20">
+                <CalendarDays className="w-3 h-3" />
+                Safra: {safraLabel.charAt(0).toUpperCase() + safraLabel.slice(1)}
+              </span>
+            ) : null;
+          })()}
+
+          {/* Meses no Programa */}
+          {kpis.length > 0 && (() => {
+            const dates = kpis.map((k: any) => k.date).filter(Boolean).sort();
+            if (dates.length < 2) return null;
+            const first = new Date(dates[0] + "T00:00:00");
+            const last = new Date(dates[dates.length - 1] + "T00:00:00");
+            const months = Math.max(1, Math.round((last.getTime() - first.getTime()) / (30.44 * 24 * 60 * 60 * 1000)));
+            return (
+              <span className="status-badge bg-primary/10 text-primary border-primary/20">
+                <Clock className="w-3 h-3" />
+                {months} {months === 1 ? "mês" : "meses"} no programa
+              </span>
+            );
+          })()}
+
           {selectedSellerObj.cluster && (
             <span className={`status-badge ${getClusterStyle(selectedSellerObj.cluster)}`}>
               <Layers className="w-3 h-3" />
