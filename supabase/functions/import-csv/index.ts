@@ -128,6 +128,7 @@ Deno.serve(async (req) => {
     const iRepClaims = colIdx("REP_CLAIMS_RATE");
     const iRepDelayed = colIdx("REP_DELAYED_HT_RATE");
     const iPontuacaoIpi = colIdx("PONTUACAO_IPI");
+    const iPontuacaoLlGtin = colIdx("PONTUACAO_LL_GTIN");
     // LL Granular – Técnico
     const iLlPictures = colIdx("PONTUACAO_LL_CHARACTERISTICS_PICTURES_OK_SCORE");
     const iLlTitle = colIdx("PONTUACAO_LL_CHARACTERISTICS_TITLE_OK_SCORE");
@@ -242,6 +243,7 @@ Deno.serve(async (req) => {
         rep_claims_rate: parseBrNumber(cols[iRepClaims] || "0"),
         rep_delayed_ht_rate: parseBrNumber(cols[iRepDelayed] || "0"),
         pontuacao_ipi: parseBrNumber(cols[iPontuacaoIpi] || "0"),
+        pontuacao_ll_gtin: iPontuacaoLlGtin >= 0 ? parseBrNumber(cols[iPontuacaoLlGtin] || "0") : 0,
         // LL Granular – Técnico
         ll_pictures_score: iLlPictures >= 0 ? parseBrNumber(cols[iLlPictures] || "0") : 0,
         ll_title_score: iLlTitle >= 0 ? parseBrNumber(cols[iLlTitle] || "0") : 0,

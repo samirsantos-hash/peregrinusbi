@@ -20,9 +20,11 @@ import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
 import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
+import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
+import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
 import { useAuth } from "@/hooks/useAuth";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
@@ -79,6 +81,10 @@ const Index = () => {
   );
 
   const { data: eligibilityItems } = useEligibility(
+    hasRealData ? selectedSeller : undefined
+  );
+
+  const { data: liveListingsCount } = useLiveListingsCount(
     hasRealData ? selectedSeller : undefined
   );
 
@@ -154,8 +160,6 @@ const Index = () => {
           <div className="flex items-center gap-2">
             {isAdmin &&
             <>
-                <CsvUploadModal onSuccess={handleRefresh} />
-                <CsvUploadModal onSuccess={handleRefresh} uploadType="elegibilidade" />
                 <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
                   <Settings className="w-4 h-4" />
                   Admin
@@ -226,6 +230,21 @@ const Index = () => {
                     <LogisticsPanel kpis={filteredKpis} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
+                    <QualityKpiCards
+                      scoreCaracteristica={(() => {
+                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).scoreCaracteristica || 0 : 0;
+                      })()}
+                      pontuacaoLlGtin={(() => {
+                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).pontuacaoLlGtin || 0 : 0;
+                      })()}
+                      scoreOfertaFinal={(() => {
+                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).scoreOferta || 0 : 0;
+                      })()}
+                      totalLiveListings={liveListingsCount || 0}
+                    />
                     <QualityRadarPanel kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>

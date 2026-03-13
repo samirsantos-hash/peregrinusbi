@@ -6,14 +6,34 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 
-type UploadType = "cpp_mensal" | "live_listings" | "elegibilidade";
+type UploadType = "cpp_mensal" | "cpp_diarizada" | "live_listings" | "elegibilidade" | "elegibilidade_diarizada";
 
 const SFTP_PATTERNS: Record<string, RegExp> = {
   cpp_mensal: /SFTP_ECOMCONSULT_CPP_MENSAL/i,
+  cpp_diarizada: /SFTP_ECOMCONSULT_CPP_DIARI/i,
   elegibilidade: /SFTP_ECOMCONSULT_ELEGIBILIDADE/i,
+  elegibilidade_diarizada: /SFTP_ECOMCONSULT_ELEGIBILIDADE_DIARI/i,
 };
 const SAFRA_PATTERN = /(\d{2})[._](\d{2})[._](\d{2,4})/;
 const ACCEPTED_EXTENSIONS = [".csv", ".xlsx", ".txt"];
+
+/** Maps upload type to the edge function name */
+const FUNCTION_MAP: Record<UploadType, string> = {
+  cpp_mensal: "import-csv",
+  cpp_diarizada: "import-csv",
+  live_listings: "import-live-listings",
+  elegibilidade: "import-eligibility",
+  elegibilidade_diarizada: "import-eligibility",
+};
+
+/** Maps upload type to display label */
+const LABEL_MAP: Record<UploadType, string> = {
+  cpp_mensal: "CPP Mensal",
+  cpp_diarizada: "CPP Diarizada",
+  live_listings: "Live Listings",
+  elegibilidade: "Elegibilidade",
+  elegibilidade_diarizada: "Elegibilidade Diarizada",
+};
 
 interface CsvUploadModalProps {
   onSuccess?: () => void;
@@ -41,16 +61,8 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
   const [progress, setProgress] = useState(0);
   const [activeGroup, setActiveGroup] = useState(0);
 
-  const functionName = uploadType === "live_listings"
-    ? "import-live-listings"
-    : uploadType === "elegibilidade"
-    ? "import-eligibility"
-    : "import-csv";
-  const displayLabel = label || (uploadType === "live_listings"
-    ? "📤 Upload Live Listings"
-    : uploadType === "elegibilidade"
-    ? "📤 Upload Elegibilidade (SFTP)"
-    : "📤 Upload de Dados - Ecom Solutions (SFTP)");
+  const functionName = FUNCTION_MAP[uploadType];
+  const displayLabel = label || `📤 ${LABEL_MAP[uploadType]}`;
 
   const validateFile = (file: File): { valid: boolean; safra: string; error?: string } => {
     const name = file.name;
@@ -62,13 +74,10 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
 
     const pattern = SFTP_PATTERNS[uploadType];
     if (pattern && !pattern.test(name)) {
-      const expected = uploadType === "elegibilidade"
-        ? "SFTP_ECOMCONSULT_ELEGIBILIDADE_..."
-        : "SFTP_ECOMCONSULT_CPP_MENSAL_...";
       return {
         valid: false,
         safra: "",
-        error: `❌ Arquivo fora do padrão esperado. Verifique o nome do arquivo SFTP (esperado: ${expected})`,
+        error: `❌ Arquivo fora do padrão esperado. Verifique o nome do arquivo SFTP.`,
       };
     }
 
@@ -159,7 +168,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
   return (
     <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="glass-card border-glass-border bg-card/60 gap-2">
+        <Button variant="outline" size="sm" className="glass-card border-glass-border bg-card/60 gap-2 w-full justify-start">
           <Upload className="w-4 h-4" />
           {displayLabel}
         </Button>
@@ -167,7 +176,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
       <DialogContent className="bg-card border-glass-border sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            📤 Importar {uploadType === "live_listings" ? "Live Listings" : "CPP Mensal"} (SFTP)
+            📤 Importar {LABEL_MAP[uploadType]} (SFTP)
           </DialogTitle>
         </DialogHeader>
 
@@ -178,7 +187,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
               <div>
                 <p className="text-sm font-medium mb-1">Selecione o arquivo SFTP</p>
                 <p className="text-xs text-muted-foreground">
-                  Padrão: <code className="bg-muted px-1 py-0.5 rounded text-[10px]">SFTP_ECOMCONSULT_CPP_MENSAL_*.csv</code>
+                  Tipo: <code className="bg-muted px-1 py-0.5 rounded text-[10px]">{LABEL_MAP[uploadType]}</code>
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
                   Formatos aceitos: <span className="font-medium">.csv, .xlsx, .txt</span> · Separador <code>;</code>

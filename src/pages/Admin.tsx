@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle } from "lucide-react";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -40,6 +40,14 @@ interface UploadLog {
   uploaded_at: string;
 }
 
+const UPLOAD_TYPE_LABELS: Record<string, { label: string; color: string }> = {
+  cpp_mensal: { label: "CPP Mensal", color: "bg-neon-blue/10 text-neon-blue" },
+  cpp_diarizada: { label: "CPP Diarizada", color: "bg-primary/10 text-primary" },
+  live_listings: { label: "Live Listings", color: "bg-emerald/10 text-emerald" },
+  elegibilidade: { label: "Elegibilidade", color: "bg-warning/10 text-warning" },
+  elegibilidade_diarizada: { label: "Eleg. Diarizada", color: "bg-orange-500/10 text-orange-400" },
+};
+
 const Admin = () => {
   const { user, isAdmin, signOut } = useAuth();
   const { toast } = useToast();
@@ -57,6 +65,7 @@ const Admin = () => {
   const [creating, setCreating] = useState(false);
   const [sellerSearch, setSellerSearch] = useState("");
   const [createdPasswordDialog, setCreatedPasswordDialog] = useState<{ email: string; password: string } | null>(null);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -184,6 +193,37 @@ const Admin = () => {
       </div>
     );
   }
+
+  const uploadSources = [
+    {
+      type: "cpp_mensal" as const,
+      title: "CPP Mensal",
+      description: "Performance e financeiro (GMV, Ads, Scores, Reputação).",
+      icon: BarChart3,
+      color: "text-neon-blue",
+    },
+    {
+      type: "cpp_diarizada" as const,
+      title: "CPP Diarizada",
+      description: "Performance diária para gráficos de oscilação 7/15/30D.",
+      icon: CalendarDays,
+      color: "text-primary",
+    },
+    {
+      type: "live_listings" as const,
+      title: "Live Listings",
+      description: "Inventário e catálogo (Categoria, Itens, Vertical).",
+      icon: Package,
+      color: "text-emerald",
+    },
+    {
+      type: "elegibilidade" as const,
+      title: "Elegibilidade",
+      description: "Oportunidades de oferta, promoções e campanhas.",
+      icon: Gift,
+      color: "text-warning",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -362,46 +402,39 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="upload" className="mt-5 space-y-6">
-            {/* Dual Upload Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="glass-card border-glass-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Upload className="w-5 h-5 text-neon-blue" />
-                    CPP Mensal
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Planilha de performance e financeiro (GMV, Ads, Scores, Reputação).
-                  </p>
-                  <CsvUploadModal
-                    uploadType="cpp_mensal"
-                    label="Upload CPP Mensal"
-                    onSuccess={() => { toast({ title: "CPP Mensal importado!" }); loadData(); }}
-                  />
-                </CardContent>
-              </Card>
-
-              <Card className="glass-card border-glass-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Upload className="w-5 h-5 text-emerald" />
-                    Live Listings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Planilha de inventário e catálogo (Categoria, Itens, Vertical).
-                  </p>
-                  <CsvUploadModal
-                    uploadType="live_listings"
-                    label="Upload Live Listings"
-                    onSuccess={() => { toast({ title: "Live Listings importado!" }); loadData(); }}
-                  />
-                </CardContent>
-              </Card>
-            </div>
+            {/* Compact 4-Source Upload Grid */}
+            <Card className="glass-card border-glass-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Upload className="w-5 h-5 text-neon-blue" />
+                  Central de Upload — Fontes de Dados
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {uploadSources.map((source) => (
+                    <div
+                      key={source.type}
+                      className="rounded-xl border border-border/50 bg-muted/10 p-4 space-y-3 flex flex-col"
+                    >
+                      <div className="flex items-center gap-2">
+                        <source.icon className={`w-5 h-5 ${source.color}`} />
+                        <h4 className="text-sm font-semibold">{source.title}</h4>
+                      </div>
+                      <p className="text-xs text-muted-foreground flex-1">{source.description}</p>
+                      <CsvUploadModal
+                        uploadType={source.type}
+                        label={source.title}
+                        onSuccess={() => { toast({ title: `${source.title} importado!` }); loadData(); }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-3 text-center">
+                  Todos os uploads operam em modo <span className="font-semibold text-foreground">INSERT</span> — o histórico é sempre preservado.
+                </p>
+              </CardContent>
+            </Card>
 
             {/* Upload Logs */}
             <Card className="glass-card border-glass-border">
@@ -425,25 +458,24 @@ const Admin = () => {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {uploadLogs.map((log) => (
-                          <TableRow key={log.id}>
-                            <TableCell className="text-sm">
-                              {format(new Date(log.uploaded_at), "dd/MM/yyyy HH:mm")}
-                            </TableCell>
-                            <TableCell>
-                              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                log.upload_type === "cpp_mensal"
-                                  ? "bg-neon-blue/10 text-neon-blue"
-                                  : "bg-emerald/10 text-emerald"
-                              }`}>
-                                {log.upload_type === "cpp_mensal" ? "CPP Mensal" : "Live Listings"}
-                              </span>
-                            </TableCell>
-                            <TableCell className="text-right font-mono text-sm">
-                              {log.rows_imported.toLocaleString("pt-BR")}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {uploadLogs.map((log) => {
+                          const typeInfo = UPLOAD_TYPE_LABELS[log.upload_type] || { label: log.upload_type, color: "bg-muted/20 text-muted-foreground" };
+                          return (
+                            <TableRow key={log.id}>
+                              <TableCell className="text-sm">
+                                {format(new Date(log.uploaded_at), "dd/MM/yyyy HH:mm")}
+                              </TableCell>
+                              <TableCell>
+                                <span className={`text-xs font-medium px-2 py-1 rounded-full ${typeInfo.color}`}>
+                                  {typeInfo.label}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-right font-mono text-sm">
+                                {log.rows_imported.toLocaleString("pt-BR")}
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
                       </TableBody>
                     </Table>
                   </div>
