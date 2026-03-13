@@ -109,7 +109,7 @@ const ReputationPanel = ({ kpis }: ReputationPanelProps) => {
       delays: +(k.repDelayedRate * 100).toFixed(2),
     }));
 
-    const worst = [claimsSev, delaySev, qualSev];
+    const worst = [claimsSev, delaySev, cancSev];
     const overall: Severity = worst.includes("red") ? "red" : worst.includes("yellow") ? "yellow" : "green";
 
     return { lights: lightsArr, latest: lat, trendData: trend, overallSeverity: overall };
