@@ -177,7 +177,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
         byDateMap[k.date] = {
           date: k.date, gmv: 0, visits: 0, visitsExpensive: 0,
           visitsMatch: 0, visitsCheaper: 0,
-          scoreQualidade: 0, qualCount: 0,
+          cancellationsRate: 0, qualCount: 0,
           upliftGmvM1: 0, upliftCount: 0,
         };
       }
