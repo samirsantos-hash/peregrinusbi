@@ -150,12 +150,15 @@ const CompetitivenessInsights = ({ kpis }: Props) => {
     }
 
     // ── Market Share / Dominance Insight ──
-    const avgGmvPerDay = totalGmv / Math.max(dates.length, 1);
-    if (avgGmvPerDay > 50000 && pctExpensive < 20) {
+    // Each date entry is typically a monthly record, so avgGmvPerPeriod is per-month
+    const numPeriods = Math.max(dates.length, 1);
+    const avgGmvPerPeriod = totalGmv / numPeriods;
+    const periodLabel = numPeriods <= 1 ? "no período" : "/mês";
+    if (avgGmvPerPeriod > 50000 && pctExpensive < 20) {
       result.push({
         icon: Lightbulb,
         title: "Líder de Categoria",
-        text: `Com faturamento médio de ${fmtBRLCompact(avgGmvPerDay)}/dia e apenas ${fmtNum(pctExpensive, 0)}% de visitas caras, sua conta atingiu a Liderança de Categoria. O crescimento agora virá da otimização de margem e não apenas de volume.`,
+        text: `Com faturamento médio de ${fmtBRLCompact(avgGmvPerPeriod)}${periodLabel} e apenas ${fmtNum(pctExpensive, 0)}% de visitas caras, sua conta atingiu a Liderança de Categoria. O crescimento agora virá da otimização de margem e não apenas de volume.`,
         type: "positive",
       });
     }
