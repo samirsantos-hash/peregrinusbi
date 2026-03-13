@@ -101,8 +101,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                     <tr className="border-b border-emerald/20">
                       <th className="text-left py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Item ID</th>
                       <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Score Geral</th>
-                      <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Qualidade</th>
-                      <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Oferta</th>
+                       <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Oferta</th>
                       <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Fotos</th>
                       <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Ver Anúncio</th>
                     </tr>
