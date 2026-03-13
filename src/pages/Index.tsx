@@ -28,13 +28,28 @@ import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
 import { useAuth } from "@/hooks/useAuth";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
+import { Skeleton } from "@/components/ui/skeleton";
+
+/* ------------------------------------------------------------------ */
+/*  Helpers — timezone-safe date parsing                               */
+/* ------------------------------------------------------------------ */
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function formatDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 const Index = () => {
   const { user, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
-  // Default to undefined; will be set once data loads
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [activeTab, setActiveTab] = useState("executive");
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -63,6 +78,12 @@ const Index = () => {
     }
   }, [sellersFetched, sellers.length, isAdmin, navigate]);
 
+  // When seller changes, reset date range so it re-anchors to the new dataset
+  const handleSellerChange = useCallback((id: string) => {
+    setSelectedSeller(id);
+    setDateRange(undefined); // Reset → will be re-anchored by effect below
+  }, []);
+
   useEffect(() => {
     if (sellers.length > 0 && (!selectedSeller || !sellers.find((s) => s.id === selectedSeller))) {
       setSelectedSeller(sellers[0].id);
@@ -85,35 +106,63 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
-  const filteredKpis = useMemo(() => {
-    let kpis: any[];
-    if (hasRealData) {
-      kpis = dbKpis || [];
-    } else {
-      kpis = mockSellerKPIs[selectedSeller] || [];
+  // ALL kpis (unfiltered) — used for anchor date computation
+  const allKpis = useMemo(() => {
+    if (hasRealData) return dbKpis || [];
+    return mockSellerKPIs[selectedSeller] || [];
+  }, [hasRealData, dbKpis, selectedSeller]);
+
+  // Compute anchor (max date) and min date from ALL data
+  const { anchorDate, minDate, anchorStr, minStr } = useMemo(() => {
+    const dates = allKpis
+      .map((k: any) => k.date)
+      .filter(Boolean)
+      .sort();
+    if (dates.length === 0) {
+      return {
+        anchorDate: new Date(),
+        minDate: new Date("2020-01-01"),
+        anchorStr: formatDateString(new Date()),
+        minStr: "2020-01-01",
+      };
     }
+    const uniqueDates = [...new Set(dates)].sort() as string[];
+    const maxStr = uniqueDates[uniqueDates.length - 1];
+    const minStr = uniqueDates[0];
+    return {
+      anchorDate: parseLocalDate(maxStr),
+      minDate: parseLocalDate(minStr),
+      anchorStr: maxStr,
+      minStr,
+    };
+  }, [allKpis]);
 
-    if (!dateRange?.from) return kpis;
+  // Auto-anchor dateRange on first load / seller change
+  useEffect(() => {
+    if (allKpis.length > 0 && !dateRange) {
+      setDateRange({ from: minDate, to: anchorDate });
+    }
+  }, [allKpis, dateRange, minDate, anchorDate]);
 
-    const fromStr = dateRange.from.toISOString().slice(0, 10);
-    const toStr = (dateRange.to || dateRange.from).toISOString().slice(0, 10);
+  // FILTERED kpis — used by all panels
+  const filteredKpis = useMemo(() => {
+    if (!dateRange?.from) return allKpis;
 
-    return kpis.filter((k: any) => {
+    const fromStr = formatDateString(dateRange.from);
+    const toStr = formatDateString(dateRange.to || dateRange.from);
+
+    const filtered = allKpis.filter((k: any) => {
       const dateStr = k.date;
       return dateStr >= fromStr && dateStr <= toStr;
     });
-  }, [hasRealData, dbKpis, selectedSeller, dateRange]);
 
-  // Anchor date range to dataset on first load
-  useEffect(() => {
-    const kpisRaw = hasRealData ? (dbKpis || []) : (mockSellerKPIs[selectedSeller] || []);
-    if (kpisRaw.length > 0 && !dateRange) {
-      const dates = kpisRaw.map((k: any) => k.date || k.data).filter(Boolean).sort();
-      const maxDate = new Date(dates[dates.length - 1] + "T00:00:00");
-      const minDate = new Date(dates[0] + "T00:00:00");
-      setDateRange({ from: minDate, to: maxDate });
-    }
-  }, [dbKpis, hasRealData, selectedSeller]);
+    // Debug log for date range
+    console.log(
+      `[Filtro de Datas] Exibindo de ${fromStr} até ${toStr} — ${filtered.length} registros de ${allKpis.length} total`
+    );
+
+    return filtered;
+  }, [allKpis, dateRange]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -123,15 +172,15 @@ const Index = () => {
   }, [queryClient, selectedSeller]);
 
   const tabs = [
-  { id: "executive", label: "Faturamento", icon: LayoutDashboard },
-  { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
-  { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
-  { id: "logistics", label: "Logística", icon: Truck },
-  { id: "quality", label: "Qualidade", icon: Shield },
-  { id: "clips", label: "Clips & Audiência", icon: Video },
-  { id: "opportunities", label: "Oportunidades", icon: Gift },
-  { id: "reputation", label: "Reputação", icon: HeartPulse }];
-
+    { id: "executive", label: "Faturamento", icon: LayoutDashboard },
+    { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
+    { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
+    { id: "logistics", label: "Logística", icon: Truck },
+    { id: "quality", label: "Qualidade", icon: Shield },
+    { id: "clips", label: "Clips & Audiência", icon: Video },
+    { id: "opportunities", label: "Oportunidades", icon: Gift },
+    { id: "reputation", label: "Reputação", icon: HeartPulse },
+  ];
 
   // Map seller UUID -> custId for external links
   const sellerCustIdMap = useMemo(() => {
@@ -140,7 +189,15 @@ const Index = () => {
     return map;
   }, [sellers]);
 
-  const isLoading = !sellersFetched || hasRealData && loadingKpis;
+  const isLoading = !sellersFetched || (hasRealData && loadingKpis);
+
+  // Active date range debug label
+  const dateDebugLabel = useMemo(() => {
+    if (!dateRange?.from) return null;
+    const fromStr = formatDateString(dateRange.from);
+    const toStr = formatDateString(dateRange.to || dateRange.from);
+    return `Exibindo de ${fromStr} até ${toStr}`;
+  }, [dateRange]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -157,7 +214,7 @@ const Index = () => {
             </div>
             <div className="w-2 h-8 rounded-full bg-neon-blue" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
             <div>
-              <h1 className="text-xl font-bold tracking-tight">Peregrinus Business Intelligence</h1>
+              <h1 className="text-xl font-bold tracking-tight">Peregrinus Business Intelligence</h1>
               <p className="text-xs text-muted-foreground">
                 Gestão de Performance · Mercado Livre
                 {sellersFetched && hasRealData && <span className="ml-2 text-emerald">● Dados reais</span>}
@@ -167,12 +224,10 @@ const Index = () => {
           </div>
           <div className="flex items-center gap-2">
             {isAdmin &&
-            <>
-                <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
-                  <Settings className="w-4 h-4" />
-                  Admin
-                </Button>
-              </>
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
+                <Settings className="w-4 h-4" />
+                Admin
+              </Button>
             }
             <Button variant="ghost" size="sm" onClick={signOut} className="gap-2">
               <LogOut className="w-4 h-4" />
@@ -182,47 +237,56 @@ const Index = () => {
         </motion.div>
 
         {isLoading &&
-        <div className="flex items-center justify-center py-12">
+          <div className="flex items-center justify-center py-12">
             <Loader2 className="w-6 h-6 animate-spin text-neon-blue" />
             <span className="ml-2 text-sm text-muted-foreground">Carregando dados...</span>
           </div>
         }
 
         {!isLoading && sellers.length > 0 &&
-        <>
+          <>
             <DashboardHeader
-            sellers={sellers}
-            selectedSeller={selectedSeller}
-            onSellerChange={setSelectedSeller}
-            dateRange={dateRange}
-            onDateRangeChange={setDateRange}
-            kpis={filteredKpis}
-            onRefresh={handleRefresh}
-            isRefreshing={isRefreshing} />
+              sellers={sellers}
+              selectedSeller={selectedSeller}
+              onSellerChange={handleSellerChange}
+              dateRange={dateRange}
+              onDateRangeChange={setDateRange}
+              allKpis={allKpis}
+              filteredKpis={filteredKpis}
+              onRefresh={handleRefresh}
+              isRefreshing={isRefreshing}
+            />
+
+            {/* Debug: active date range */}
+            {dateDebugLabel && (
+              <div className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-3 py-1 rounded-md inline-flex items-center gap-2">
+                📅 {dateDebugLabel} · {filteredKpis.length} registros
+              </div>
+            )}
 
             <DiagnosticAlerts kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto flex-wrap">
                 {tabs.map((tab) =>
-              <TabsTrigger
-                key={tab.id}
-                value={tab.id}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
+                  <TabsTrigger
+                    key={tab.id}
+                    value={tab.id}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
                     <tab.icon className="w-4 h-4" />
                     {tab.label}
                   </TabsTrigger>
-              )}
+                )}
               </TabsList>
 
               <AnimatePresence mode="wait">
                 <motion.div
-                key={`${activeTab}-${selectedSeller}`}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
-                className="mt-5">
+                  key={`${activeTab}-${selectedSeller}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.25 }}
+                  className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     <ExecutivePanel kpis={filteredKpis} />
                     <GrowthPotentialPanel kpis={filteredKpis} />
@@ -271,8 +335,8 @@ const Index = () => {
           </>
         }
       </div>
-    </div>);
-
+    </div>
+  );
 };
 
 export default Index;

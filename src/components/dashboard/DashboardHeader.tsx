@@ -5,11 +5,24 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag, RefreshCw, CalendarDays, Clock } from "lucide-react";
-import { format, subDays, differenceInDays } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
+
+/* ------------------------------------------------------------------ */
+/*  Helpers — timezone-safe date parsing                               */
+/* ------------------------------------------------------------------ */
+function parseLocalDate(dateStr: string): Date {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function subLocalDays(date: Date, days: number): Date {
+  const result = new Date(date.getFullYear(), date.getMonth(), date.getDate() - days);
+  return result;
+}
 
 interface Seller {
   id: string;
@@ -21,6 +34,7 @@ interface Seller {
 }
 
 interface KpiLike {
+  date?: string;
   gmv: number;
   upliftGmvM1: number;
 }
@@ -31,30 +45,43 @@ interface DashboardHeaderProps {
   onSellerChange: (id: string) => void;
   dateRange: DateRange | undefined;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  kpis: KpiLike[];
+  /** ALL kpis (unfiltered) — used for anchor date computation */
+  allKpis: KpiLike[];
+  /** Filtered kpis — used for display metrics */
+  filteredKpis: KpiLike[];
   onRefresh?: () => void;
   isRefreshing?: boolean;
 }
 
-const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, onDateRangeChange, kpis, onRefresh, isRefreshing }: DashboardHeaderProps) => {
+const DashboardHeader = ({
+  sellers,
+  selectedSeller,
+  onSellerChange,
+  dateRange,
+  onDateRangeChange,
+  allKpis,
+  filteredKpis,
+  onRefresh,
+  isRefreshing,
+}: DashboardHeaderProps) => {
   const [calOpen, setCalOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("all");
 
-  // Anchor date = max date in the dataset
+  // Anchor date = max date in the FULL (unfiltered) dataset
   const { anchorDate, minDate, availableDays } = useMemo(() => {
-    const dates = kpis.map((k: any) => k.date).filter(Boolean).sort();
+    const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
     if (dates.length === 0) {
       return { anchorDate: new Date(), minDate: new Date("2020-01-01"), availableDays: 0 };
     }
-    const uniqueDates = [...new Set(dates)].sort();
+    const uniqueDates = [...new Set(dates)].sort() as string[];
     const maxStr = uniqueDates[uniqueDates.length - 1];
     const minStr = uniqueDates[0];
-    const anchor = new Date(maxStr + "T00:00:00");
-    const min = new Date(minStr + "T00:00:00");
+    const anchor = parseLocalDate(maxStr);
+    const min = parseLocalDate(minStr);
     const days = differenceInDays(anchor, min);
     return { anchorDate: anchor, minDate: min, availableDays: days };
-  }, [kpis]);
+  }, [allKpis]);
 
   // Warning when selected period exceeds available data
   const periodWarning = useMemo(() => {
@@ -69,26 +96,24 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
-  // Calculate actual data span (not the date picker range) to avoid inflated denominators
+  // Calculate actual data span from FILTERED kpis for projection
   const rangeDays = useMemo(() => {
-    if (kpis.length === 0) return 30;
-    const dates = kpis.map((k: any) => k.date).filter(Boolean);
+    if (filteredKpis.length === 0) return 30;
+    const dates = filteredKpis.map((k: any) => k.date).filter(Boolean);
     if (dates.length === 0) return 30;
-    const uniqueDates = [...new Set(dates)].sort();
-    const firstDate = uniqueDates[0];
-    const lastDate = uniqueDates[uniqueDates.length - 1];
-    const first = new Date(firstDate + "T00:00:00");
-    const last = new Date(lastDate + "T00:00:00");
+    const uniqueDates = [...new Set(dates)].sort() as string[];
+    const first = parseLocalDate(uniqueDates[0]);
+    const last = parseLocalDate(uniqueDates[uniqueDates.length - 1]);
     const diff = differenceInDays(last, first);
     return Math.max(diff, 30);
-  }, [kpis]);
+  }, [filteredKpis]);
 
-  const validUplifts = kpis.filter((k) => k.upliftGmvM1 !== 0);
+  const validUplifts = filteredKpis.filter((k) => k.upliftGmvM1 !== 0);
   const avgUplift = validUplifts.length > 0
     ? validUplifts.reduce((s, k) => s + k.upliftGmvM1, 0) / validUplifts.length
     : 0;
   const clampedUplift = Math.max(-0.5, Math.min(2, avgUplift));
-  const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
+  const totalGmv = filteredKpis.reduce((s, k) => s + k.gmv, 0);
   const dailyGmv = rangeDays > 0 ? totalGmv / rangeDays : 0;
 
   const projections = [
@@ -107,8 +132,9 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
   const handleQuickRange = (qr: typeof quickRanges[0]) => {
     setActivePeriod(qr.key);
     if (qr.days) {
-      // Anchor to the latest date in the dataset, NOT today
-      onDateRangeChange({ from: subDays(anchorDate, qr.days), to: anchorDate });
+      // Anchor to the latest date in the FULL dataset, NOT today
+      const from = subLocalDays(anchorDate, qr.days);
+      onDateRangeChange({ from, to: anchorDate });
     } else {
       // "Todo Período" - use full available range
       onDateRangeChange({ from: minDate, to: anchorDate });
@@ -177,6 +203,7 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
                           onSelect={() => {
                             onSellerChange(s.id);
                             setStoreOpen(false);
+                            setActivePeriod("all"); // Reset period on seller change
                           }}
                           className="cursor-pointer"
                         >
@@ -228,12 +255,12 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
                 <Button variant="outline" className={cn("w-[200px] justify-start text-left font-normal glass-card border-glass-border bg-card/60", !dateRange && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4 text-neon-blue" />
                   {dateRange?.from ?
-                  dateRange.to ?
-                  <>
+                    dateRange.to ?
+                      <>
                         {format(dateRange.from, "dd MMM", { locale: ptBR })} - {format(dateRange.to, "dd MMM", { locale: ptBR })}
                       </> :
-                  format(dateRange.from, "dd MMM yyyy", { locale: ptBR }) :
-                  "Selecionar período"}
+                      format(dateRange.from, "dd MMM yyyy", { locale: ptBR }) :
+                    "Selecionar período"}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-card border-glass-border" align="start">
@@ -288,7 +315,7 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
           </div>
           <div className="flex gap-8 justify-around">
             {projections.map((p) =>
-            <div key={p.days} className="text-center min-w-[80px]">
+              <div key={p.days} className="text-center min-w-[80px]">
                 <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{p.days} dias</p>
                 <p className="font-mono font-bold text-2xl emerald-text">
                   R$ {(p.value / 1000).toFixed(0)}K
@@ -311,11 +338,11 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
           transition={{ delay: 0.15 }}
           className="flex items-center gap-2 flex-wrap"
         >
-          {/* Safra (latest date in kpis) */}
-          {kpis.length > 0 && (() => {
-            const dates = kpis.map((k: any) => k.date).filter(Boolean).sort();
+          {/* Safra (latest date in ALL kpis) */}
+          {allKpis.length > 0 && (() => {
+            const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
             const latestDate = dates[dates.length - 1];
-            const safraLabel = latestDate ? new Date(latestDate + "T00:00:00").toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) : null;
+            const safraLabel = latestDate ? parseLocalDate(latestDate).toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) : null;
             return safraLabel ? (
               <span className="status-badge bg-neon-blue/10 text-neon-blue border-neon-blue/20">
                 <CalendarDays className="w-3 h-3" />
@@ -325,11 +352,11 @@ const DashboardHeader = ({ sellers, selectedSeller, onSellerChange, dateRange, o
           })()}
 
           {/* Meses no Programa */}
-          {kpis.length > 0 && (() => {
-            const dates = kpis.map((k: any) => k.date).filter(Boolean).sort();
+          {allKpis.length > 0 && (() => {
+            const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
             if (dates.length < 2) return null;
-            const first = new Date(dates[0] + "T00:00:00");
-            const last = new Date(dates[dates.length - 1] + "T00:00:00");
+            const first = parseLocalDate(dates[0]);
+            const last = parseLocalDate(dates[dates.length - 1]);
             const months = Math.max(1, Math.round((last.getTime() - first.getTime()) / (30.44 * 24 * 60 * 60 * 1000)));
             return (
               <span className="status-badge bg-primary/10 text-primary border-primary/20">
