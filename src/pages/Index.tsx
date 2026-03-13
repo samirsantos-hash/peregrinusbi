@@ -34,11 +34,8 @@ const Index = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
-  // Default to full history
-  const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date("2020-01-01"),
-    to: new Date()
-  });
+  // Default to undefined; will be set once data loads
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [activeTab, setActiveTab] = useState("executive");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
