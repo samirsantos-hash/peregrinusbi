@@ -1,0 +1,1 @@
+ALTER TABLE public.sellers_kpi ADD COLUMN IF NOT EXISTS rep_cancellations_rate numeric DEFAULT 0;
