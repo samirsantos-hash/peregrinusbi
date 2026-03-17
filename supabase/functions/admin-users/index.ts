@@ -216,6 +216,34 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "update_wallet") {
+      const { targetUserId, allowedCustIds } = body;
+
+      if (!targetUserId || !Array.isArray(allowedCustIds)) {
+        return new Response(JSON.stringify({ error: "targetUserId and allowedCustIds are required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: updateErr } = await adminClient
+        .from("user_access_control")
+        .update({ allowed_cust_ids: allowedCustIds })
+        .eq("user_id", targetUserId);
+
+      if (updateErr) {
+        console.error("Update wallet error:", updateErr.message);
+        return new Response(JSON.stringify({ error: updateErr.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

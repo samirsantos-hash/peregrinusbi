@@ -8,12 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift } from "lucide-react";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
+import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import { format } from "date-fns";
 
 interface SellerOption {
@@ -65,6 +66,7 @@ const Admin = () => {
   const [creating, setCreating] = useState(false);
   const [sellerSearch, setSellerSearch] = useState("");
   const [createdPasswordDialog, setCreatedPasswordDialog] = useState<{ email: string; password: string } | null>(null);
+  const [walletUser, setWalletUser] = useState<ManagedUser | null>(null);
 
   useEffect(() => {
     loadData();
@@ -386,6 +388,9 @@ const Admin = () => {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" title="Editar carteira de lojas" onClick={() => setWalletUser(u)}>
+                            <Store className="w-4 h-4 text-emerald" />
+                          </Button>
                           <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => handleResetPassword(u.userId, u.email)}>
                             <RotateCcw className="w-4 h-4 text-neon-blue" />
                           </Button>
@@ -527,6 +532,19 @@ const Admin = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Wallet Sheet */}
+        {walletUser && (
+          <UserWalletSheet
+            open={!!walletUser}
+            onOpenChange={(v) => { if (!v) setWalletUser(null); }}
+            userId={walletUser.userId}
+            userEmail={walletUser.email}
+            currentCustIds={walletUser.allowed_cust_ids}
+            sellers={sellers}
+            onSaved={loadData}
+          />
+        )}
       </div>
     </div>
   );
