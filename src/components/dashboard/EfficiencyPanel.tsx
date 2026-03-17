@@ -84,11 +84,11 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily" }: E
 
   const adsData = useMemo(() => {
     return allDates.map((d) => ({
-      date: formatDate(d.date),
+      date: formatChartDate(d.date, dataGranularity),
       "Faturamento Bruto": Math.round(d.gmv),
       "Investimento em Marketing": Math.round(d.adsInvestment),
     }));
-  }, [allDates]);
+  }, [allDates, dataGranularity]);
 
   const roasData = useMemo(() => {
     return allDates.map((d) => ({
