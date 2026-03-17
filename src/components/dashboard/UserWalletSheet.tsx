@@ -2,8 +2,9 @@ import { useState, useMemo } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Search, Save, Store } from "lucide-react";
+import { Loader2, Search, Save, Store, Plus, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -23,6 +24,41 @@ interface UserWalletSheetProps {
   onSaved: () => void;
 }
 
+interface BulkResult {
+  matched: number;
+  notFound: string[];
+}
+
+function parseBulkInput(
+  input: string,
+  sellers: SellerOption[],
+  alreadySelected: string[]
+): { toAdd: string[]; notFound: string[] } {
+  const items = input
+    .split(";")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  const toAdd: string[] = [];
+  const notFound: string[] = [];
+
+  for (const item of items) {
+    const q = item.toLowerCase();
+    const match = sellers.find(
+      (s) => s.custId.toLowerCase() === q || s.nickname.toLowerCase() === q
+    );
+    if (match) {
+      if (!alreadySelected.includes(match.custId) && !toAdd.includes(match.custId)) {
+        toAdd.push(match.custId);
+      }
+    } else {
+      notFound.push(item);
+    }
+  }
+
+  return { toAdd, notFound };
+}
+
 const UserWalletSheet = ({
   open,
   onOpenChange,
@@ -36,12 +72,15 @@ const UserWalletSheet = ({
   const [selectedIds, setSelectedIds] = useState<string[]>(currentCustIds);
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [bulkInput, setBulkInput] = useState("");
+  const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
 
-  // Reset state when sheet opens with new user
   const handleOpenChange = (v: boolean) => {
     if (v) {
       setSelectedIds(currentCustIds);
       setSearch("");
+      setBulkInput("");
+      setBulkResult(null);
     }
     onOpenChange(v);
   };
@@ -60,7 +99,8 @@ const UserWalletSheet = ({
     );
   };
 
-  const allFilteredSelected = filteredSellers.length > 0 && filteredSellers.every((s) => selectedIds.includes(s.custId));
+  const allFilteredSelected =
+    filteredSellers.length > 0 && filteredSellers.every((s) => selectedIds.includes(s.custId));
 
   const toggleAll = () => {
     const ids = filteredSellers.map((s) => s.custId);
@@ -71,7 +111,16 @@ const UserWalletSheet = ({
     }
   };
 
-  const hasChanges = JSON.stringify([...selectedIds].sort()) !== JSON.stringify([...currentCustIds].sort());
+  const handleBulkAdd = () => {
+    if (!bulkInput.trim()) return;
+    const { toAdd, notFound } = parseBulkInput(bulkInput, sellers, selectedIds);
+    setSelectedIds((prev) => [...new Set([...prev, ...toAdd])]);
+    setBulkResult({ matched: toAdd.length, notFound });
+    setBulkInput("");
+  };
+
+  const hasChanges =
+    JSON.stringify([...selectedIds].sort()) !== JSON.stringify([...currentCustIds].sort());
 
   const handleSave = async () => {
     setSaving(true);
@@ -102,6 +151,54 @@ const UserWalletSheet = ({
         </SheetHeader>
 
         <div className="mt-6 space-y-4">
+          {/* Bulk Insert Section */}
+          <div className="space-y-2 p-3 rounded-lg border border-border bg-muted/30">
+            <label className="text-xs font-semibold text-foreground">
+              Adicionar múltiplos Sellers em lote
+            </label>
+            <Textarea
+              value={bulkInput}
+              onChange={(e) => {
+                setBulkInput(e.target.value);
+                setBulkResult(null);
+              }}
+              placeholder="Cole os IDs ou Nomes separados por ponto e vírgula (;). Ex: 12345; 67890; 11121"
+              className="min-h-[60px] text-xs"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full gap-1.5 text-xs"
+              onClick={handleBulkAdd}
+              disabled={!bulkInput.trim()}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Adicionar em Lote
+            </Button>
+
+            {bulkResult && (
+              <div className="space-y-1.5 text-xs">
+                {bulkResult.matched > 0 && (
+                  <div className="flex items-center gap-1.5 text-emerald-400">
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>{bulkResult.matched} Seller(s) identificado(s) e adicionado(s) à seleção.</span>
+                  </div>
+                )}
+                {bulkResult.notFound.length > 0 && (
+                  <div className="flex items-start gap-1.5 text-amber-400">
+                    <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <span>
+                      Atenção: Os seguintes IDs não foram encontrados:{" "}
+                      <strong>{bulkResult.notFound.join(", ")}</strong>
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -121,7 +218,7 @@ const UserWalletSheet = ({
             </Button>
           </div>
 
-          <div className="space-y-1 max-h-[calc(100vh-320px)] overflow-y-auto scrollbar-thin pr-1">
+          <div className="space-y-1 max-h-[calc(100vh-480px)] overflow-y-auto scrollbar-thin pr-1">
             {filteredSellers.map((s) => (
               <label
                 key={s.custId}
