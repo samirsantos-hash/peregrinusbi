@@ -80,11 +80,22 @@ const Admin = () => {
 
   const loadData = async () => {
     setLoading(true);
-    const [sellersRes, usersRes, logsRes] = await Promise.all([
+    const [sellersRes, usersRes, logsRes, rolesRes] = await Promise.all([
       supabase.from("sellers").select("id, nickname, cust_id").order("nickname"),
       supabase.from("user_access_control").select("*").order("created_at", { ascending: false }),
       supabase.from("upload_logs").select("*").order("uploaded_at", { ascending: false }).limit(50),
+      supabase.from("user_roles").select("user_id, role"),
     ]);
+
+    const rolesMap: Record<string, AppRole> = {};
+    if (rolesRes.data) {
+      for (const r of rolesRes.data) {
+        // Prefer admin if user has multiple roles
+        if (!rolesMap[r.user_id] || r.role === "admin") {
+          rolesMap[r.user_id] = r.role as AppRole;
+        }
+      }
+    }
 
     if (sellersRes.data) {
       setSellers(sellersRes.data.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.cust_id })));
@@ -100,6 +111,7 @@ const Admin = () => {
           must_change_password: u.must_change_password,
           temp_password: u.temp_password,
           created_at: u.created_at,
+          role: rolesMap[u.user_id] || "user",
         }))
       );
     }
