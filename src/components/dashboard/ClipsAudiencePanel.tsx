@@ -11,6 +11,7 @@ import {
   Ban, Filter, PieChart as PieChartIcon,
 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
+import { formatChartDate } from "@/utils/formatters";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { SellerKPI } from "@/hooks/useSellerData";
@@ -23,6 +24,7 @@ interface ClipsAudiencePanelProps {
   listingsQuality?: ListingQuality[];
   sellerCustIdMap?: Record<string, string>;
   selectedSeller?: string;
+  dataGranularity?: "consolidated" | "daily";
 }
 
 /* ── Helpers ── */
@@ -265,7 +267,7 @@ const DonutLabel = ({ viewBox, total, withClip }: any) => {
 };
 
 /* ── Main Panel ── */
-const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCustIdMap, selectedSeller }: ClipsAudiencePanelProps) => {
+const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCustIdMap, selectedSeller, dataGranularity = "daily" }: ClipsAudiencePanelProps) => {
   const [filterNoClips, setFilterNoClips] = useState(false);
 
   /* ── 1. Aggregate KPI totals ── */
@@ -333,11 +335,11 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
   /* ── 5. Temporal data for combo chart ── */
   const chartData = useMemo(() =>
     kpis.map((k) => ({
-      date: k.date.slice(0, 7),
+      date: formatChartDate(k.date, dataGranularity),
       visitasClips: k.visitasClips,
       tgmvClips: k.tgmvLcClips,
     }))
-  , [kpis]);
+  , [kpis, dataGranularity]);
 
   /* ── 6. Top 5 items by pedidos — deduplicated ── */
   const topContentItems = useMemo(() => {

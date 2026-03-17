@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Activity, TrendingUp, TrendingDown, ShieldCheck } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { fmtPct } from "@/utils/formatters";
+import { fmtPct, formatChartDate } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
@@ -14,6 +14,7 @@ interface KpiLike {
 
 interface ReputationPanelProps {
   kpis: KpiLike[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 type Severity = "green" | "yellow" | "red";
@@ -57,7 +58,7 @@ const SEVERITY_CONFIG: Record<Severity, { emoji: string; bg: string; border: str
   },
 };
 
-const ReputationPanel = ({ kpis }: ReputationPanelProps) => {
+const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelProps) => {
   const { lights, latest, trendData, overallSeverity } = useMemo(() => {
     if (kpis.length === 0) {
       return {
@@ -195,7 +196,7 @@ const ReputationPanel = ({ kpis }: ReputationPanelProps) => {
                 <XAxis
                   dataKey="date"
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                  tickFormatter={(v) => v.slice(5)}
+                  tickFormatter={(v) => formatChartDate(v, dataGranularity)}
                 />
                 <YAxis
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}

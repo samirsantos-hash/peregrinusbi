@@ -337,15 +337,15 @@ const Index = () => {
                   className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     <ExecutivePanel kpis={displayKpis} />
-                    <GrowthPotentialPanel kpis={displayKpis} />
+                    <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} />
                     <TrendAnalysisPanel kpis={displayKpis} dataGranularity={granularity} />
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
-                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
+                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0">
-                    <CompetitivenessPanel kpis={displayKpis} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} />
+                    <CompetitivenessPanel kpis={displayKpis} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0">
                     <LogisticsPanel kpis={displayKpis} />
@@ -370,13 +370,13 @@ const Index = () => {
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
                   <TabsContent value="clips" className="mt-0">
-                    <ClipsAudiencePanel kpis={displayKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} />
+                    <ClipsAudiencePanel kpis={displayKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} dataGranularity={granularity} />
                   </TabsContent>
                   <TabsContent value="opportunities" className="mt-0">
                     <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0">
-                    <ReputationPanel kpis={displayKpis} />
+                    <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>

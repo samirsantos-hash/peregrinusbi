@@ -8,7 +8,7 @@ import TooltipInfo from "./TooltipInfo";
 import SalesRecordCard from "./SalesRecordCard";
 import TrafficHeatmap from "./TrafficHeatmap";
 import BestInvestmentPeriod from "./BestInvestmentPeriod";
-import { fmtBRLCompact, fmtBRL, fmtNum } from "@/utils/formatters";
+import { fmtBRLCompact, fmtBRL, fmtNum, formatChartDate } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
@@ -29,6 +29,7 @@ interface KpiLike {
 interface EfficiencyPanelProps {
   kpis: KpiLike[];
   sellerCustIdMap?: Record<string, string>;
+  dataGranularity?: "consolidated" | "daily";
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -65,7 +66,7 @@ const RatioTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
+const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily" }: EfficiencyPanelProps) => {
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
@@ -81,22 +82,17 @@ const EfficiencyPanel = ({ kpis }: EfficiencyPanelProps) => {
 
   const allDates = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
 
-  const formatDate = (dateStr: string) => {
-    const [m, d] = dateStr.slice(5).split("-");
-    return `${d}/${m}`;
-  };
-
   const adsData = useMemo(() => {
     return allDates.map((d) => ({
-      date: formatDate(d.date),
+      date: formatChartDate(d.date, dataGranularity),
       "Faturamento Bruto": Math.round(d.gmv),
       "Investimento em Marketing": Math.round(d.adsInvestment),
     }));
-  }, [allDates]);
+  }, [allDates, dataGranularity]);
 
   const roasData = useMemo(() => {
     return allDates.map((d) => ({
-      date: formatDate(d.date),
+      date: formatChartDate(d.date, dataGranularity),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
       ACOS: Math.round((d.acos / d.count) * 100) / 100,
       TACOS: Math.round((d.tacos / d.count) * 100) / 100,

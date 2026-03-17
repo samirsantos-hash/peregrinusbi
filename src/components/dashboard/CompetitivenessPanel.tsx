@@ -13,7 +13,7 @@ import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
 import PriceAuditTable from "./PriceAuditTable";
 import CompetitivenessInsights from "./CompetitivenessInsights";
-import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact } from "@/utils/formatters";
+import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
 
 interface KpiLike {
@@ -40,6 +40,7 @@ interface CompetitivenessPanelProps {
   sellers?: SellerInfo[];
   sellerCustIdMap?: Record<string, string>;
   listingsQuality?: ListingQuality[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 /* ── Shared Tooltip ── */
@@ -88,7 +89,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listingsQuality = [] }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listingsQuality = [], dataGranularity = "daily" }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
@@ -126,7 +127,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
 
   /* ── Stacked bar chart data ── */
   const chartData = byDate.map((d) => ({
-    date: d.date.slice(5),
+    date: formatChartDate(d.date, dataGranularity),
     "Preço Mais Alto": d.expensive,
     "Preço Equivalente": d.match,
     "Preço Mais Baixo": d.cheaper,
@@ -150,7 +151,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
     const pctCheap = totalBands > 0 ? (d.cheaper / totalBands) * 100 : 0;
     const avgRival = d.rivalCount > 0 ? d.minPriceRival / d.rivalCount : 0;
     return {
-      date: d.date.slice(5),
+      date: formatChartDate(d.date, dataGranularity),
       "% Preço Alto": Math.round(pctExp * 10) / 10,
       "% Equivalente": Math.round(pctMatch * 10) / 10,
       "% Mais Barato": Math.round(pctCheap * 10) / 10,

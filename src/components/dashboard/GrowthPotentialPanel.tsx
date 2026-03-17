@@ -7,7 +7,7 @@ import {
 import { TrendingUp, TrendingDown, Crown, Target, BarChart3 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import GaugeChart from "./GaugeChart";
-import { fmtBRLCompact } from "@/utils/formatters";
+import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
@@ -20,6 +20,7 @@ interface KpiLike {
 
 interface GrowthPotentialPanelProps {
   kpis: KpiLike[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -104,7 +105,7 @@ function getStrategicInsight(potentialPct: number, isGaining: boolean): Strategi
   };
 }
 
-const GrowthPotentialPanel = ({ kpis }: GrowthPotentialPanelProps) => {
+const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotentialPanelProps) => {
   const {
     chartData,
     sellerTotal,
@@ -139,9 +140,9 @@ const GrowthPotentialPanel = ({ kpis }: GrowthPotentialPanelProps) => {
     const data = sortedDates.map((date) => {
       cumSeller += byDate[date].sellerGmv;
       cumBenchmark += byDate[date].benchmarkGmv;
-      const [m, d] = date.slice(5).split("-");
+      const label = formatChartDate(date, dataGranularity);
       return {
-        date: `${d}/${m}`,
+        date: label,
         "Seller (Acumulado)": Math.round(cumSeller),
         "Benchmark Categoria": Math.round(cumBenchmark),
       };

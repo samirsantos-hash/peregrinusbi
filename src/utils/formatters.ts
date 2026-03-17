@@ -42,3 +42,20 @@ export const fmtPct = (value: number, decimals = 1): string => {
   const sign = value >= 0 ? "+" : "";
   return `${sign}${value.toFixed(decimals)}%`;
 };
+
+const MONTH_NAMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+/**
+ * Formata data do eixo X dos gráficos baseado na granularidade.
+ * - consolidated: "Mar 2025" (MMM YYYY)
+ * - daily: "12/03" (DD/MM)
+ * @param dateStr formato YYYY-MM-DD
+ * @param granularity "consolidated" | "daily"
+ */
+export const formatChartDate = (dateStr: string, granularity: "consolidated" | "daily" = "daily"): string => {
+  const [y, m, d] = dateStr.split("-");
+  if (granularity === "consolidated") {
+    return `${MONTH_NAMES[parseInt(m, 10) - 1]} ${y}`;
+  }
+  return `${d}/${m}`;
+};
