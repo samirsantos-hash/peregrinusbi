@@ -105,7 +105,7 @@ function getStrategicInsight(potentialPct: number, isGaining: boolean): Strategi
   };
 }
 
-const GrowthPotentialPanel = ({ kpis }: GrowthPotentialPanelProps) => {
+const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotentialPanelProps) => {
   const {
     chartData,
     sellerTotal,
