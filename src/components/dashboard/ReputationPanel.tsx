@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Activity, TrendingUp, TrendingDown, ShieldCheck } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { fmtPct } from "@/utils/formatters";
+import { fmtPct, formatChartDate } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
