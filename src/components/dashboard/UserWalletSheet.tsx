@@ -35,7 +35,7 @@ function parseBulkInput(
   alreadySelected: string[]
 ): { toAdd: string[]; notFound: string[] } {
   const items = input
-    .split(";")
+    .split(/[;,]/)
     .map((s) => s.trim())
     .filter(Boolean);
 
@@ -113,9 +113,17 @@ const UserWalletSheet = ({
 
   const handleBulkAdd = () => {
     if (!bulkInput.trim()) return;
-    const { toAdd, notFound } = parseBulkInput(bulkInput, sellers, selectedIds);
-    setSelectedIds((prev) => [...new Set([...prev, ...toAdd])]);
-    setBulkResult({ matched: toAdd.length, notFound });
+    const result = parseBulkInput(bulkInput, sellers, selectedIds);
+    setSelectedIds((prev) => [...new Set([...prev, ...result.toAdd])]);
+    setBulkResult({ matched: result.toAdd.length, notFound: result.notFound });
+    setBulkInput("");
+  };
+
+  const handleBulkReplace = () => {
+    if (!bulkInput.trim()) return;
+    const result = parseBulkInput(bulkInput, sellers, []);
+    setSelectedIds(result.toAdd);
+    setBulkResult({ matched: result.toAdd.length, notFound: result.notFound });
     setBulkInput("");
   };
 
@@ -162,20 +170,33 @@ const UserWalletSheet = ({
                 setBulkInput(e.target.value);
                 setBulkResult(null);
               }}
-              placeholder="Cole os IDs ou Nomes separados por ponto e vírgula (;). Ex: 12345; 67890; 11121"
+              placeholder="Cole os IDs ou Nomes separados por ponto e vírgula (;) ou vírgula (,). Ex: 12345; 67890, 11121"
               className="min-h-[60px] text-xs"
             />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="w-full gap-1.5 text-xs"
-              onClick={handleBulkAdd}
-              disabled={!bulkInput.trim()}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Adicionar em Lote
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex-1 gap-1.5 text-xs"
+                onClick={handleBulkAdd}
+                disabled={!bulkInput.trim()}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Adicionar em Lote
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="flex-1 gap-1.5 text-xs"
+                onClick={handleBulkReplace}
+                disabled={!bulkInput.trim()}
+              >
+                <Save className="w-3.5 h-3.5" />
+                Salvar Somente Encontrados
+              </Button>
+            </div>
 
             {bulkResult && (
               <div className="space-y-1.5 text-xs">
