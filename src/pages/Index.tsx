@@ -327,7 +327,7 @@ const Index = () => {
 
             {/* Granularity Toggle + Debug label */}
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <GranularityToggle value={granularity} onChange={setGranularity} />
+              <GranularityToggle value={granularity} onChange={handleGranularityChange} />
               {dateDebugLabel && (
                 <div className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-3 py-1 rounded-md inline-flex items-center gap-2">
                   📅 {dateDebugLabel} · {displayKpis.length} registros ({granularity === "consolidated" ? "mensal" : "diário"})
