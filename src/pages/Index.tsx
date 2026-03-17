@@ -130,6 +130,11 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
+  const { data: dbDailyKpis, isLoading: loadingDailyKpis } = useSellerDailyKpis(
+    hasRealData ? selectedSeller : undefined,
+    granularity === "daily"
+  );
+
   const { data: listingsQuality } = useListingsQuality(
     hasRealData ? selectedSeller : undefined
   );
@@ -142,11 +147,22 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
-  // ALL kpis (unfiltered) — used for anchor date computation
-  const allKpis: any[] = useMemo(() => {
+  // ALL kpis (unfiltered) — monthly source for consolidated view
+  const allKpisMonthly: any[] = useMemo(() => {
     if (hasRealData) return dbKpis || [];
     return mockSellerKPIs[selectedSeller] || [];
   }, [hasRealData, dbKpis, selectedSeller]);
+
+  // Daily kpis from dedicated daily table
+  const allKpisDaily: any[] = useMemo(() => {
+    if (hasRealData) return dbDailyKpis || [];
+    return [];
+  }, [hasRealData, dbDailyKpis]);
+
+  // Select source based on granularity
+  const allKpis: any[] = useMemo(() => {
+    return granularity === "daily" ? allKpisDaily : allKpisMonthly;
+  }, [granularity, allKpisDaily, allKpisMonthly]);
 
   // Compute anchor (max date) and min date from ALL data
   const { anchorDate, minDate, anchorStr, minStr } = useMemo(() => {
