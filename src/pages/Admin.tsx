@@ -67,6 +67,7 @@ const Admin = () => {
   // New user form
   const [newEmail, setNewEmail] = useState("");
   const [newCnpj, setNewCnpj] = useState("");
+  const [newRole, setNewRole] = useState<AppRole>("user");
   const [selectedCustIds, setSelectedCustIds] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
   const [sellerSearch, setSellerSearch] = useState("");
