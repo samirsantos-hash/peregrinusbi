@@ -196,36 +196,7 @@ const Admin = () => {
     );
   }
 
-  const uploadSources = [
-    {
-      type: "cpp_mensal" as const,
-      title: "CPP Mensal",
-      description: "Performance e financeiro (GMV, Ads, Scores, Reputação).",
-      icon: BarChart3,
-      color: "text-neon-blue",
-    },
-    {
-      type: "cpp_diarizada" as const,
-      title: "CPP Diarizada",
-      description: "Performance diária para gráficos de oscilação 7/15/30D.",
-      icon: CalendarDays,
-      color: "text-primary",
-    },
-    {
-      type: "live_listings" as const,
-      title: "Live Listings",
-      description: "Inventário e catálogo (Categoria, Itens, Vertical).",
-      icon: Package,
-      color: "text-emerald",
-    },
-    {
-      type: "elegibilidade" as const,
-      title: "Elegibilidade",
-      description: "Oportunidades de oferta, promoções e campanhas.",
-      icon: Gift,
-      color: "text-warning",
-    },
-  ];
+  // uploadSources removed — now handled by BatchUploadPanel
 
   return (
     <div className="min-h-screen bg-background">
