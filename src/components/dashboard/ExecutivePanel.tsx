@@ -146,7 +146,7 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
       {/* KPI Cards */}
       <div className="flex items-center justify-between mb-1">
         <p className="text-xs text-muted-foreground font-medium">
-          Período analisado: <span className="font-mono font-semibold text-foreground">{monthsAnalyzed} {monthsAnalyzed === 1 ? "mês" : "meses"}</span> de dados
+          Período analisado: <span className="font-mono font-semibold text-foreground">{periodLabel}</span> de dados
         </p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
