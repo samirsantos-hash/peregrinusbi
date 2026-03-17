@@ -350,7 +350,13 @@ const Admin = () => {
                         </label>
                       ))}
                     </div>
-                  </div>
+                  </div>}
+
+                  {newRole === "admin" && (
+                    <p className="text-xs text-muted-foreground bg-muted/30 border border-border rounded-lg p-3">
+                      ℹ️ O perfil <strong>Admin</strong> terá acesso total a todas as lojas e ao Painel Administrativo. Não é necessário vincular lojas manualmente.
+                    </p>
+                  )}
 
                   <Button type="submit" disabled={creating}>
                     {creating && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
