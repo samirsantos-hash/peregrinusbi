@@ -58,7 +58,7 @@ const SEVERITY_CONFIG: Record<Severity, { emoji: string; bg: string; border: str
   },
 };
 
-const ReputationPanel = ({ kpis }: ReputationPanelProps) => {
+const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelProps) => {
   const { lights, latest, trendData, overallSeverity } = useMemo(() => {
     if (kpis.length === 0) {
       return {
