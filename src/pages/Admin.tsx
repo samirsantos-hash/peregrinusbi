@@ -407,39 +407,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="upload" className="mt-5 space-y-6">
-            {/* Compact 4-Source Upload Grid */}
-            <Card className="glass-card border-glass-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Upload className="w-5 h-5 text-neon-blue" />
-                  Central de Upload — Fontes de Dados
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {uploadSources.map((source) => (
-                    <div
-                      key={source.type}
-                      className="rounded-xl border border-border/50 bg-muted/10 p-4 space-y-3 flex flex-col"
-                    >
-                      <div className="flex items-center gap-2">
-                        <source.icon className={`w-5 h-5 ${source.color}`} />
-                        <h4 className="text-sm font-semibold">{source.title}</h4>
-                      </div>
-                      <p className="text-xs text-muted-foreground flex-1">{source.description}</p>
-                      <CsvUploadModal
-                        uploadType={source.type}
-                        label={source.title}
-                        onSuccess={() => { toast({ title: `${source.title} importado!` }); loadData(); }}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-3 text-center">
-                  Todos os uploads operam em modo <span className="font-semibold text-foreground">INSERT</span> — o histórico é sempre preservado.
-                </p>
-              </CardContent>
-            </Card>
+            <BatchUploadPanel onSuccess={loadData} />
 
             {/* Upload Logs */}
             <Card className="glass-card border-glass-border">
