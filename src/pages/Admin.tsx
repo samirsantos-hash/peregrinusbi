@@ -139,7 +139,8 @@ const Admin = () => {
           action: "create_user",
           email: newEmail,
           cnpj: newCnpj || null,
-          allowedCustIds: selectedCustIds,
+          allowedCustIds: newRole === "admin" ? [] : selectedCustIds,
+          role: newRole,
         },
       });
 
