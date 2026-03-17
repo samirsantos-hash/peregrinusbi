@@ -197,14 +197,14 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           <Line
             yAxisId="left"
             type="monotone"
-            dataKey="tsi"
+            dataKey="tsiLog"
             name="Unidades Vendidas"
             stroke="hsl(160, 84%, 39%)"
             strokeWidth={1.5}
             dot={false}
             activeDot={{ r: 4, strokeWidth: 2 }}
             animationDuration={800}
-            hide={hidden.has("tsi")}
+            hide={hidden.has("tsiLog")}
           />
 
           <Legend
