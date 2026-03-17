@@ -151,7 +151,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
     const pctCheap = totalBands > 0 ? (d.cheaper / totalBands) * 100 : 0;
     const avgRival = d.rivalCount > 0 ? d.minPriceRival / d.rivalCount : 0;
     return {
-      date: d.date.slice(5),
+      date: formatChartDate(d.date, dataGranularity),
       "% Preço Alto": Math.round(pctExp * 10) / 10,
       "% Equivalente": Math.round(pctMatch * 10) / 10,
       "% Mais Barato": Math.round(pctCheap * 10) / 10,

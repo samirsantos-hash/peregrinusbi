@@ -14,6 +14,7 @@ interface KpiLike {
 
 interface ReputationPanelProps {
   kpis: KpiLike[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 type Severity = "green" | "yellow" | "red";

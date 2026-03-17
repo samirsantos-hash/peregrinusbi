@@ -140,9 +140,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
     const data = sortedDates.map((date) => {
       cumSeller += byDate[date].sellerGmv;
       cumBenchmark += byDate[date].benchmarkGmv;
-      const [m, d] = date.slice(5).split("-");
+      const label = formatChartDate(date, dataGranularity);
       return {
-        date: `${d}/${m}`,
+        date: label,
         "Seller (Acumulado)": Math.round(cumSeller),
         "Benchmark Categoria": Math.round(cumBenchmark),
       };
