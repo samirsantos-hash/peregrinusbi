@@ -285,7 +285,7 @@ const Admin = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  {newRole === "user" && <div className="space-y-2">
                     <Label>Lojas Autorizadas (CUST_ID)</Label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
