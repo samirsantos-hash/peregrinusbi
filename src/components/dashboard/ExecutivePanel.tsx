@@ -168,46 +168,50 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
         ))}
       </div>
 
-      {/* Line chart */}
-      <div className="glass-card p-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              Evolução de Faturamento
-            </h3>
-            <TooltipInfo text="Comparativo entre faturamento bruto (GMV) e faturamento realizado ao longo do tempo." />
+      {/* Chart — daily vs consolidated */}
+      {dataGranularity === "daily" ? (
+        <DailyPerformanceChart kpis={kpis} />
+      ) : (
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                Evolução de Faturamento
+              </h3>
+              <TooltipInfo text="Comparativo entre faturamento bruto (GMV) e faturamento realizado ao longo do tempo." />
+            </div>
           </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="gradBlueExec" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="gradEmeraldExec" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={false}
+                interval="preserveStartEnd"
+                angle={allDates.length > 6 ? -45 : 0}
+                textAnchor={allDates.length > 6 ? "end" : "middle"}
+                height={allDates.length > 6 ? 50 : 30}
+              />
+              <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+              <Tooltip content={<CustomTooltip />} />
+              <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+              <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+              <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="gradBlueExec" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="gradEmeraldExec" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-            <XAxis
-              dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-              axisLine={false}
-              interval="preserveStartEnd"
-              angle={allDates.length > 6 ? -45 : 0}
-              textAnchor={allDates.length > 6 ? "end" : "middle"}
-              height={allDates.length > 6 ? 50 : 30}
-            />
-            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-            <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      )}
     </motion.div>
   );
 };
