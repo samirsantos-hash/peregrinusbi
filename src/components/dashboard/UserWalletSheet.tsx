@@ -125,6 +125,7 @@ const UserWalletSheet = ({
     setSelectedIds(result.toAdd);
     setBulkResult({ matched: result.toAdd.length, notFound: result.notFound });
     setBulkInput("");
+  };
 
   const hasChanges =
     JSON.stringify([...selectedIds].sort()) !== JSON.stringify([...currentCustIds].sort());
