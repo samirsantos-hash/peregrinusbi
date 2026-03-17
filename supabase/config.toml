@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.import-eligibility]
 verify_jwt = false
+
+[functions.import-csv-daily]
+verify_jwt = false
