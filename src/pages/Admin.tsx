@@ -532,6 +532,19 @@ const Admin = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Wallet Sheet */}
+        {walletUser && (
+          <UserWalletSheet
+            open={!!walletUser}
+            onOpenChange={(v) => { if (!v) setWalletUser(null); }}
+            userId={walletUser.userId}
+            userEmail={walletUser.email}
+            currentCustIds={walletUser.allowed_cust_ids}
+            sellers={sellers}
+            onSaved={loadData}
+          />
+        )}
       </div>
     </div>
   );
