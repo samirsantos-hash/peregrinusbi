@@ -37,7 +37,7 @@ function fillGaps(kpis: DailyKpi[]) {
   const start = parseLocal(sortedDates[0]);
   const end = parseLocal(sortedDates[sortedDates.length - 1]);
 
-  const result: { date: string; label: string; tgmv: number; ads: number; tsi: number }[] = [];
+  const result: { date: string; label: string; tgmv: number; ads: number; tsi: number; tgmvLog: number; adsLog: number; tsiLog: number }[] = [];
   const cursor = new Date(start);
 
   while (cursor <= end) {
@@ -45,7 +45,15 @@ function fillGaps(kpis: DailyKpi[]) {
     const vals = byDate.get(iso) || { tgmv: 0, ads: 0, tsi: 0 };
     const dd = String(cursor.getDate()).padStart(2, "0");
     const mm = String(cursor.getMonth() + 1).padStart(2, "0");
-    result.push({ date: iso, label: `${dd}/${mm}`, ...vals });
+    result.push({
+      date: iso,
+      label: `${dd}/${mm}`,
+      ...vals,
+      // Log-safe values (log scale can't handle 0)
+      tgmvLog: vals.tgmv > 0 ? vals.tgmv : 1,
+      adsLog: vals.ads > 0 ? vals.ads : 1,
+      tsiLog: vals.tsi > 0 ? vals.tsi : 1,
+    });
     cursor.setDate(cursor.getDate() + 1);
   }
 
@@ -77,7 +85,7 @@ const ChartTooltip = ({ active, payload }: any) => {
   );
 };
 
-const SERIES_KEYS = ["tgmv", "ads", "tsi"] as const;
+const SERIES_KEYS = ["tgmvLog", "adsLog", "tsiLog"] as const;
 
 const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
   const chartData = useMemo(() => fillGaps(kpis), [kpis]);
@@ -130,6 +138,9 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           {/* Left Y-axis: Faturamento + TSI */}
           <YAxis
             yAxisId="left"
+            scale="log"
+            domain={["auto", "auto"]}
+            allowDataOverflow
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
@@ -141,6 +152,9 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           <YAxis
             yAxisId="right"
             orientation="right"
+            scale="log"
+            domain={["auto", "auto"]}
+            allowDataOverflow
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
@@ -154,21 +168,21 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           <Line
             yAxisId="left"
             type="monotone"
-            dataKey="tgmv"
+            dataKey="tgmvLog"
             name="Faturamento (R$)"
             stroke="hsl(199, 100%, 50%)"
             strokeWidth={2.5}
             dot={chartData.length <= 31 ? { r: 3, fill: "hsl(199, 100%, 50%)" } : false}
             activeDot={{ r: 5, strokeWidth: 2 }}
             animationDuration={800}
-            hide={hidden.has("tgmv")}
+            hide={hidden.has("tgmvLog")}
           />
 
           {/* Ads line */}
           <Line
             yAxisId="right"
             type="monotone"
-            dataKey="ads"
+            dataKey="adsLog"
             name="Investimento Ads (R$)"
             stroke="hsl(var(--warning))"
             strokeWidth={2}
@@ -176,21 +190,21 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             dot={false}
             activeDot={{ r: 4, strokeWidth: 2 }}
             animationDuration={800}
-            hide={hidden.has("ads")}
+            hide={hidden.has("adsLog")}
           />
 
           {/* TSI line */}
           <Line
             yAxisId="left"
             type="monotone"
-            dataKey="tsi"
+            dataKey="tsiLog"
             name="Unidades Vendidas"
             stroke="hsl(160, 84%, 39%)"
             strokeWidth={1.5}
             dot={false}
             activeDot={{ r: 4, strokeWidth: 2 }}
             animationDuration={800}
-            hide={hidden.has("tsi")}
+            hide={hidden.has("tsiLog")}
           />
 
           <Legend
