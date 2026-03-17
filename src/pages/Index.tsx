@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
