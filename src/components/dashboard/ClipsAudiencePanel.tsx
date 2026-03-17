@@ -266,7 +266,7 @@ const DonutLabel = ({ viewBox, total, withClip }: any) => {
 };
 
 /* ── Main Panel ── */
-const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCustIdMap, selectedSeller }: ClipsAudiencePanelProps) => {
+const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCustIdMap, selectedSeller, dataGranularity = "daily" }: ClipsAudiencePanelProps) => {
   const [filterNoClips, setFilterNoClips] = useState(false);
 
   /* ── 1. Aggregate KPI totals ── */
