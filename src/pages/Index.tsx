@@ -329,54 +329,54 @@ const Index = () => {
 
               <AnimatePresence mode="wait">
                 <motion.div
-                  key={`${activeTab}-${selectedSeller}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
+                  key={`${activeTab}-${selectedSeller}-${granularity}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.25 }}
                   className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
-                    <ExecutivePanel kpis={filteredKpis} />
-                    <GrowthPotentialPanel kpis={filteredKpis} />
-                    <TrendAnalysisPanel kpis={filteredKpis} />
-                    <SynergyAnalysisPanel kpis={filteredKpis} />
+                    <ExecutivePanel kpis={displayKpis} />
+                    <GrowthPotentialPanel kpis={displayKpis} />
+                    <TrendAnalysisPanel kpis={displayKpis} />
+                    <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
-                    <EfficiencyPanel kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
+                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0">
-                    <CompetitivenessPanel kpis={filteredKpis} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} />
+                    <CompetitivenessPanel kpis={displayKpis} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} />
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0">
-                    <LogisticsPanel kpis={filteredKpis} />
+                    <LogisticsPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <QualityKpiCards
                       scoreCaracteristica={(() => {
-                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
                         return latest ? (latest as any).scoreCaracteristica || 0 : 0;
                       })()}
                       pontuacaoLlGtin={(() => {
-                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
                         return latest ? (latest as any).pontuacaoLlGtin || 0 : 0;
                       })()}
                       scoreOfertaFinal={(() => {
-                        const latest = [...filteredKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
                         return latest ? (latest as any).scoreOferta || 0 : 0;
                       })()}
                       totalLiveListings={liveListingsCount || 0}
                     />
-                    <QualityRadarPanel kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
+                    <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
                   <TabsContent value="clips" className="mt-0">
-                    <ClipsAudiencePanel kpis={filteredKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} />
+                    <ClipsAudiencePanel kpis={displayKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} />
                   </TabsContent>
                   <TabsContent value="opportunities" className="mt-0">
                     <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0">
-                    <ReputationPanel kpis={filteredKpis} />
+                    <ReputationPanel kpis={displayKpis} />
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>
