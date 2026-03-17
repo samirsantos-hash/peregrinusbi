@@ -74,10 +74,14 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
     ? validDelayed.reduce((s, k) => s + k.repDelayedRate, 0) / validDelayed.length
     : 0;
 
-  const monthsAnalyzed = useMemo(() => {
+  const periodLabel = useMemo(() => {
+    if (dataGranularity === "daily") {
+      const uniqueDays = new Set(kpis.map((k) => k.date));
+      return `${uniqueDays.size} ${uniqueDays.size === 1 ? "dia" : "dias"}`;
+    }
     const uniqueMonths = new Set(kpis.map((k) => k.date.slice(0, 7)));
-    return uniqueMonths.size;
-  }, [kpis]);
+    return `${uniqueMonths.size} ${uniqueMonths.size === 1 ? "mês" : "meses"}`;
+  }, [kpis, dataGranularity]);
 
   const fmtBRL = (value: number) => {
     return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
