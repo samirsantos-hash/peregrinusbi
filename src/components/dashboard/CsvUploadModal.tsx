@@ -19,7 +19,7 @@ const ACCEPTED_EXTENSIONS = [".csv", ".xlsx", ".txt"];
 
 const FUNCTION_MAP: Record<UploadType, string> = {
   cpp_mensal: "import-csv",
-  cpp_diarizada: "import-csv",
+  cpp_diarizada: "import-csv-daily",
   live_listings: "import-live-listings",
   elegibilidade: "import-eligibility",
   elegibilidade_diarizada: "import-eligibility",
