@@ -85,7 +85,7 @@ const ChartTooltip = ({ active, payload }: any) => {
   );
 };
 
-const SERIES_KEYS = ["tgmv", "ads", "tsi"] as const;
+const SERIES_KEYS = ["tgmvLog", "adsLog", "tsiLog"] as const;
 
 const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
   const chartData = useMemo(() => fillGaps(kpis), [kpis]);
