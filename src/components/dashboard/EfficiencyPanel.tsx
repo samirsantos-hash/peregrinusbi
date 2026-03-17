@@ -8,7 +8,7 @@ import TooltipInfo from "./TooltipInfo";
 import SalesRecordCard from "./SalesRecordCard";
 import TrafficHeatmap from "./TrafficHeatmap";
 import BestInvestmentPeriod from "./BestInvestmentPeriod";
-import { fmtBRLCompact, fmtBRL, fmtNum } from "@/utils/formatters";
+import { fmtBRLCompact, fmtBRL, fmtNum, formatChartDate } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
