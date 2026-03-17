@@ -152,6 +152,9 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           <YAxis
             yAxisId="right"
             orientation="right"
+            scale="log"
+            domain={["auto", "auto"]}
+            allowDataOverflow
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
