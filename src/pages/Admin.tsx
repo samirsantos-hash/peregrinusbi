@@ -16,12 +16,17 @@ import { useNavigate } from "react-router-dom";
 import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface SellerOption {
   id: string;
   nickname: string;
   custId: string;
 }
+
+type AppRole = "admin" | "user";
 
 interface ManagedUser {
   id: string;
@@ -32,6 +37,7 @@ interface ManagedUser {
   must_change_password: boolean;
   temp_password: string | null;
   created_at: string;
+  role: AppRole;
 }
 
 interface UploadLog {
@@ -62,6 +68,7 @@ const Admin = () => {
   // New user form
   const [newEmail, setNewEmail] = useState("");
   const [newCnpj, setNewCnpj] = useState("");
+  const [newRole, setNewRole] = useState<AppRole>("user");
   const [selectedCustIds, setSelectedCustIds] = useState<string[]>([]);
   const [creating, setCreating] = useState(false);
   const [sellerSearch, setSellerSearch] = useState("");
@@ -74,11 +81,22 @@ const Admin = () => {
 
   const loadData = async () => {
     setLoading(true);
-    const [sellersRes, usersRes, logsRes] = await Promise.all([
+    const [sellersRes, usersRes, logsRes, rolesRes] = await Promise.all([
       supabase.from("sellers").select("id, nickname, cust_id").order("nickname"),
       supabase.from("user_access_control").select("*").order("created_at", { ascending: false }),
       supabase.from("upload_logs").select("*").order("uploaded_at", { ascending: false }).limit(50),
+      supabase.from("user_roles").select("user_id, role"),
     ]);
+
+    const rolesMap: Record<string, AppRole> = {};
+    if (rolesRes.data) {
+      for (const r of rolesRes.data) {
+        // Prefer admin if user has multiple roles
+        if (!rolesMap[r.user_id] || r.role === "admin") {
+          rolesMap[r.user_id] = r.role as AppRole;
+        }
+      }
+    }
 
     if (sellersRes.data) {
       setSellers(sellersRes.data.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.cust_id })));
@@ -94,6 +112,7 @@ const Admin = () => {
           must_change_password: u.must_change_password,
           temp_password: u.temp_password,
           created_at: u.created_at,
+          role: rolesMap[u.user_id] || "user",
         }))
       );
     }
@@ -105,8 +124,12 @@ const Admin = () => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail || selectedCustIds.length === 0) {
-      toast({ title: "Preencha o e-mail e selecione ao menos uma loja", variant: "destructive" });
+    if (!newEmail) {
+      toast({ title: "Preencha o e-mail", variant: "destructive" });
+      return;
+    }
+    if (newRole === "user" && selectedCustIds.length === 0) {
+      toast({ title: "Selecione ao menos uma loja para o Consultor", variant: "destructive" });
       return;
     }
 
@@ -117,7 +140,8 @@ const Admin = () => {
           action: "create_user",
           email: newEmail,
           cnpj: newCnpj || null,
-          allowedCustIds: selectedCustIds,
+          allowedCustIds: newRole === "admin" ? [] : selectedCustIds,
+          role: newRole,
         },
       });
 
@@ -128,6 +152,7 @@ const Admin = () => {
       toast({ title: "Usuário criado com sucesso!" });
       setNewEmail("");
       setNewCnpj("");
+      setNewRole("user");
       setSelectedCustIds([]);
       loadData();
     } catch (err: any) {
@@ -238,7 +263,7 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleCreateUser} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label>E-mail do Cliente</Label>
                       <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="cliente@email.com" required />
@@ -247,9 +272,21 @@ const Admin = () => {
                       <Label>CNPJ</Label>
                       <Input value={newCnpj} onChange={(e) => setNewCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Nível de Acesso</Label>
+                      <Select value={newRole} onValueChange={(v) => setNewRole(v as AppRole)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">Consultor</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
 
-                  <div className="space-y-2">
+                  {newRole === "user" && <div className="space-y-2">
                     <Label>Lojas Autorizadas (CUST_ID)</Label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -314,7 +351,13 @@ const Admin = () => {
                         </label>
                       ))}
                     </div>
-                  </div>
+                  </div>}
+
+                  {newRole === "admin" && (
+                    <p className="text-xs text-muted-foreground bg-muted/30 border border-border rounded-lg p-3">
+                      ℹ️ O perfil <strong>Admin</strong> terá acesso total a todas as lojas e ao Painel Administrativo. Não é necessário vincular lojas manualmente.
+                    </p>
+                  )}
 
                   <Button type="submit" disabled={creating}>
                     {creating && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
@@ -338,7 +381,17 @@ const Admin = () => {
                     {managedUsers.map((u) => (
                       <div key={u.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                         <div className="space-y-1 flex-1 min-w-0">
-                          <p className="text-sm font-medium">{u.email}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium">{u.email}</p>
+                            <span className={cn(
+                              "text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider",
+                              u.role === "admin"
+                                ? "bg-neon-blue/15 text-neon-blue border border-neon-blue/30"
+                                : "bg-muted/50 text-muted-foreground border border-border"
+                            )}>
+                              {u.role === "admin" ? "Admin" : "Consultor"}
+                            </span>
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
                             {u.must_change_password && <span className="ml-2 text-warning">● Senha temporária</span>}

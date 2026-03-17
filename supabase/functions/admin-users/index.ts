@@ -106,12 +106,13 @@ Deno.serve(async (req) => {
     }
 
     if (action === "create_user") {
-      const { email, cnpj, allowedCustIds } = body;
+      const { email, cnpj, allowedCustIds, role } = body;
+      const userRole = role === "admin" ? "admin" : "user";
 
       const tempPassword = generateTempPassword();
       const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
-      console.log(`Creating user ${email} with temp password length: ${tempPassword.length}`);
+      console.log(`Creating user ${email} with role ${userRole}, temp password length: ${tempPassword.length}`);
 
       // Create auth user
       const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
@@ -143,7 +144,7 @@ Deno.serve(async (req) => {
       // Add user role
       await adminClient.from("user_roles").insert({
         user_id: newUser.user.id,
-        role: "user",
+        role: userRole,
       });
 
       // Create access control entry
