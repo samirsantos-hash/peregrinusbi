@@ -199,6 +199,14 @@ const Index = () => {
     return filtered;
   }, [allKpis, dateRange]);
 
+  // Apply granularity: consolidated = aggregate by month, daily = raw
+  const displayKpis: any[] = useMemo(() => {
+    if (granularity === "consolidated") {
+      return aggregateKpisByMonth(filteredKpis);
+    }
+    return filteredKpis;
+  }, [filteredKpis, granularity]);
+
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["sellers"] });
@@ -294,14 +302,17 @@ const Index = () => {
               isRefreshing={isRefreshing}
             />
 
-            {/* Debug: active date range */}
-            {dateDebugLabel && (
-              <div className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-3 py-1 rounded-md inline-flex items-center gap-2">
-                📅 {dateDebugLabel} · {filteredKpis.length} registros
-              </div>
-            )}
+            {/* Granularity Toggle + Debug label */}
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <GranularityToggle value={granularity} onChange={setGranularity} />
+              {dateDebugLabel && (
+                <div className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-3 py-1 rounded-md inline-flex items-center gap-2">
+                  📅 {dateDebugLabel} · {displayKpis.length} registros ({granularity === "consolidated" ? "mensal" : "diário"})
+                </div>
+              )}
+            </div>
 
-            <DiagnosticAlerts kpis={filteredKpis} sellerCustIdMap={sellerCustIdMap} />
+            <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto flex-wrap">
