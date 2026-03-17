@@ -66,6 +66,7 @@ const Admin = () => {
   const [creating, setCreating] = useState(false);
   const [sellerSearch, setSellerSearch] = useState("");
   const [createdPasswordDialog, setCreatedPasswordDialog] = useState<{ email: string; password: string } | null>(null);
+  const [walletUser, setWalletUser] = useState<ManagedUser | null>(null);
 
   useEffect(() => {
     loadData();
