@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
+import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import { format } from "date-fns";
 
