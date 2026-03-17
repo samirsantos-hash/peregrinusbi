@@ -127,7 +127,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
 
   /* ── Stacked bar chart data ── */
   const chartData = byDate.map((d) => ({
-    date: d.date.slice(5),
+    date: formatChartDate(d.date, dataGranularity),
     "Preço Mais Alto": d.expensive,
     "Preço Equivalente": d.match,
     "Preço Mais Baixo": d.cheaper,
