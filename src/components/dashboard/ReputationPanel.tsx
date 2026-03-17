@@ -196,7 +196,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                 <XAxis
                   dataKey="date"
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                  tickFormatter={(v) => v.slice(5)}
+                  tickFormatter={(v) => formatChartDate(v, dataGranularity)}
                 />
                 <YAxis
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
