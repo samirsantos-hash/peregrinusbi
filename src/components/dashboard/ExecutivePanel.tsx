@@ -19,6 +19,7 @@ interface KpiLike {
 
 interface ExecutivePanelProps {
   kpis: KpiLike[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
