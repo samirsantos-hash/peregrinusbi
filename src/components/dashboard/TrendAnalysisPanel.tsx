@@ -10,7 +10,7 @@ import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import { startOfWeek, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { fmtBRL, fmtBRLCompact, fmtNum } from "@/utils/formatters";
+import { fmtBRL, fmtBRLCompact, fmtNum, formatChartDate } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
