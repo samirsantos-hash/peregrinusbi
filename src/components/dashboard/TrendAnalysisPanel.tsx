@@ -229,6 +229,9 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
               <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
                 GMV × Ads × ROAS
               </p>
+              <Badge variant="outline" className="text-[10px] px-2 py-0 font-mono border-primary/30 text-primary">
+                {axisLabel}
+              </Badge>
             </div>
             <div className="flex items-center gap-2">
               {/* Granularity toggle */}
