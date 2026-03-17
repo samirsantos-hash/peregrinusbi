@@ -262,7 +262,7 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleCreateUser} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label>E-mail do Cliente</Label>
                       <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="cliente@email.com" required />
@@ -270,6 +270,18 @@ const Admin = () => {
                     <div className="space-y-2">
                       <Label>CNPJ</Label>
                       <Input value={newCnpj} onChange={(e) => setNewCnpj(e.target.value)} placeholder="00.000.000/0000-00" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Nível de Acesso</Label>
+                      <Select value={newRole} onValueChange={(v) => setNewRole(v as AppRole)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">Consultor</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
