@@ -11,6 +11,7 @@ import {
   Ban, Filter, PieChart as PieChartIcon,
 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
+import { formatChartDate } from "@/utils/formatters";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { SellerKPI } from "@/hooks/useSellerData";
