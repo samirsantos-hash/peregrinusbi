@@ -337,7 +337,7 @@ const Index = () => {
                   className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     <ExecutivePanel kpis={displayKpis} />
-                    <GrowthPotentialPanel kpis={displayKpis} />
+                    <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} />
                     <TrendAnalysisPanel kpis={displayKpis} dataGranularity={granularity} />
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
