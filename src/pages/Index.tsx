@@ -234,6 +234,7 @@ const Index = () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["sellers"] });
     await queryClient.invalidateQueries({ queryKey: ["seller-kpis", selectedSeller] });
+    await queryClient.invalidateQueries({ queryKey: ["seller-kpis-daily", selectedSeller] });
     setIsRefreshing(false);
   }, [queryClient, selectedSeller]);
 
