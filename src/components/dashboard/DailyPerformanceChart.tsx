@@ -18,6 +18,38 @@ interface DailyPerformanceChartProps {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Robust date parsing: handles YYYY-MM-DD and DD/MM/YYYY             */
+/* ------------------------------------------------------------------ */
+function parseFlexDate(raw: string): string {
+  if (!raw) return "";
+  const trimmed = raw.trim();
+
+  // Already ISO: YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
+    return trimmed.slice(0, 10);
+  }
+
+  // DD/MM/YYYY
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
+    const [d, m, y] = trimmed.split("/");
+    return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
+  }
+
+  // Fallback: try native parse
+  const fallback = new Date(trimmed);
+  if (!isNaN(fallback.getTime())) return fmtISO(fallback);
+
+  return trimmed; // return as-is if unparseable
+}
+
+/** Parse numeric value that may use comma as decimal separator */
+function parseNumericValue(val: any): number {
+  if (typeof val === "number") return val;
+  if (typeof val === "string") return Number(val.replace(",", ".")) || 0;
+  return Number(val) || 0;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Gap-fill: ensure every calendar day in range has a data point      */
 /* ------------------------------------------------------------------ */
 function fillGaps(kpis: DailyKpi[]) {
@@ -25,15 +57,19 @@ function fillGaps(kpis: DailyKpi[]) {
 
   const byDate = new Map<string, { tgmv: number; ads: number; tsi: number }>();
   for (const k of kpis) {
-    const prev = byDate.get(k.date) || { tgmv: 0, ads: 0, tsi: 0 };
-    byDate.set(k.date, {
-      tgmv: prev.tgmv + k.tgmv,
-      ads: prev.ads + k.adsInvestment,
-      tsi: prev.tsi + k.tsi,
+    const iso = parseFlexDate(k.date);
+    if (!iso) continue;
+    const prev = byDate.get(iso) || { tgmv: 0, ads: 0, tsi: 0 };
+    byDate.set(iso, {
+      tgmv: prev.tgmv + parseNumericValue(k.tgmv),
+      ads: prev.ads + parseNumericValue(k.adsInvestment),
+      tsi: prev.tsi + parseNumericValue(k.tsi),
     });
   }
 
   const sortedDates = [...byDate.keys()].sort();
+  if (sortedDates.length === 0) return [];
+
   const start = parseLocal(sortedDates[0]);
   const end = parseLocal(sortedDates[sortedDates.length - 1]);
 
@@ -49,7 +85,6 @@ function fillGaps(kpis: DailyKpi[]) {
       date: iso,
       label: `${dd}/${mm}`,
       ...vals,
-      // Log-safe values (log scale can't handle 0)
       tgmvLog: vals.tgmv > 0 ? vals.tgmv : 1,
       adsLog: vals.ads > 0 ? vals.ads : 1,
       tsiLog: vals.tsi > 0 ? vals.tsi : 1,
