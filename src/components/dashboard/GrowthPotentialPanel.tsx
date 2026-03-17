@@ -20,6 +20,7 @@ interface KpiLike {
 
 interface GrowthPotentialPanelProps {
   kpis: KpiLike[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
