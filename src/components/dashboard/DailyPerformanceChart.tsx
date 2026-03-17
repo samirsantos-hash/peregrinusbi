@@ -138,6 +138,9 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           {/* Left Y-axis: Faturamento + TSI */}
           <YAxis
             yAxisId="left"
+            scale="log"
+            domain={["auto", "auto"]}
+            allowDataOverflow
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
