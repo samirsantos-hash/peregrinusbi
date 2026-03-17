@@ -29,6 +29,7 @@ interface KpiLike {
 interface EfficiencyPanelProps {
   kpis: KpiLike[];
   sellerCustIdMap?: Record<string, string>;
+  dataGranularity?: "consolidated" | "daily";
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
