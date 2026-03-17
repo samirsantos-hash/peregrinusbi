@@ -151,6 +151,7 @@ const Admin = () => {
       toast({ title: "Usuário criado com sucesso!" });
       setNewEmail("");
       setNewCnpj("");
+      setNewRole("user");
       setSelectedCustIds([]);
       loadData();
     } catch (err: any) {
