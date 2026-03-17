@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
-import { Upload, CheckCircle, Loader2, AlertTriangle, FileWarning } from "lucide-react";
+import { Upload, CheckCircle, Loader2, FileWarning, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
@@ -17,7 +17,6 @@ const SFTP_PATTERNS: Record<string, RegExp> = {
 const SAFRA_PATTERN = /(\d{2})[._](\d{2})[._](\d{2,4})/;
 const ACCEPTED_EXTENSIONS = [".csv", ".xlsx", ".txt"];
 
-/** Maps upload type to the edge function name */
 const FUNCTION_MAP: Record<UploadType, string> = {
   cpp_mensal: "import-csv",
   cpp_diarizada: "import-csv",
@@ -26,7 +25,6 @@ const FUNCTION_MAP: Record<UploadType, string> = {
   elegibilidade_diarizada: "import-eligibility",
 };
 
-/** Maps upload type to display label */
 const LABEL_MAP: Record<UploadType, string> = {
   cpp_mensal: "CPP Mensal",
   cpp_diarizada: "CPP Diarizada",
@@ -51,15 +49,26 @@ const STRATEGIC_GROUPS = [
   { name: "Saúde", icon: "💚" },
 ];
 
+function countCsvLines(text: string): number {
+  const lines = text.split("\n").filter((l) => l.trim().length > 0);
+  return Math.max(0, lines.length - 1); // subtract header
+}
+
 const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUploadModalProps) => {
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<"idle" | "validating" | "cleaning" | "uploading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "staged" | "cleaning" | "uploading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [errorDetail, setErrorDetail] = useState("");
   const [stats, setStats] = useState<{ sellers?: number; kpis?: number; listings?: number; eligibility?: number } | null>(null);
   const [safraLabel, setSafraLabel] = useState("");
   const [progress, setProgress] = useState(0);
   const [activeGroup, setActiveGroup] = useState(0);
+
+  // Staging state
+  const [stagedFile, setStagedFile] = useState<File | null>(null);
+  const [stagedText, setStagedText] = useState<string>("");
+  const [stagedLineCount, setStagedLineCount] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const functionName = FUNCTION_MAP[uploadType];
   const displayLabel = label || `📤 ${LABEL_MAP[uploadType]}`;
@@ -74,20 +83,43 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
 
     const pattern = SFTP_PATTERNS[uploadType];
     if (pattern && !pattern.test(name)) {
-      return {
-        valid: false,
-        safra: "",
-        error: `❌ Arquivo fora do padrão esperado. Verifique o nome do arquivo SFTP.`,
-      };
+      return { valid: false, safra: "", error: `❌ Arquivo fora do padrão esperado. Verifique o nome do arquivo SFTP.` };
     }
 
     const safraMatch = name.match(SAFRA_PATTERN);
     const safra = safraMatch ? `${safraMatch[1]}.${safraMatch[2]}.${safraMatch[3]}` : "atual";
-
     return { valid: true, safra };
   };
 
-  const simulateDataCleaning = useCallback(async () => {
+  // Step 1: Stage the file (read + validate only)
+  const handleFileSelect = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setErrorDetail("");
+    const validation = validateFile(file);
+    if (!validation.valid) {
+      setStatus("error");
+      setMessage("Arquivo inválido");
+      setErrorDetail(validation.error || "");
+      return;
+    }
+
+    setSafraLabel(validation.safra);
+    const text = await file.text();
+    const lineCount = countCsvLines(text);
+
+    setStagedFile(file);
+    setStagedText(text);
+    setStagedLineCount(lineCount);
+    setStatus("staged");
+    setMessage("");
+  }, [uploadType]);
+
+  // Step 2: Commit (process + upload)
+  const handleCommit = useCallback(async () => {
+    if (!stagedText) return;
+
     setStatus("cleaning");
     setProgress(0);
     setActiveGroup(0);
@@ -102,37 +134,14 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
     setProgress(85);
     setMessage("Finalizando Data Cleaning de 150+ colunas...");
     await new Promise((r) => setTimeout(r, 300));
-  }, []);
-
-  const handleFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setErrorDetail("");
-    setStatus("validating");
-    setMessage("Validando arquivo...");
-
-    const validation = validateFile(file);
-    if (!validation.valid) {
-      setStatus("error");
-      setMessage("Arquivo inválido");
-      setErrorDetail(validation.error || "");
-      return;
-    }
-
-    setSafraLabel(validation.safra);
-
-    await simulateDataCleaning();
 
     setStatus("uploading");
     setProgress(90);
     setMessage("Importando dados para o banco...");
 
     try {
-      const text = await file.text();
-
       const { data, error } = await supabase.functions.invoke(functionName, {
-        body: { csv: text },
+        body: { csv: stagedText },
       });
 
       if (error) throw new Error(error.message);
@@ -146,14 +155,14 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
         eligibility: data.eligibility,
       });
       setStatus("success");
-      setMessage(`✅ Safra ${validation.safra} processada com sucesso no Peregrinus BI`);
+      setMessage(`✅ Safra ${safraLabel} processada com sucesso no Peregrinus BI`);
       onSuccess?.();
     } catch (err) {
       setStatus("error");
       setMessage("Erro na importação");
       setErrorDetail(err instanceof Error ? err.message : "Erro desconhecido");
     }
-  }, [onSuccess, functionName, simulateDataCleaning]);
+  }, [stagedText, functionName, safraLabel, onSuccess]);
 
   const reset = () => {
     setStatus("idle");
@@ -163,17 +172,33 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
     setSafraLabel("");
     setProgress(0);
     setActiveGroup(0);
+    setStagedFile(null);
+    setStagedText("");
+    setStagedLineCount(0);
+    if (inputRef.current) inputRef.current.value = "";
   };
 
+  const canClose = status === "idle" || status === "staged" || status === "success" || status === "error";
+
   return (
-    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) reset(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v && !canClose) return; // block close during processing
+        setOpen(v);
+        if (!v) reset();
+      }}
+    >
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="glass-card border-glass-border bg-card/60 gap-2 w-full justify-start">
           <Upload className="w-4 h-4" />
           {displayLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-card border-glass-border sm:max-w-lg">
+      <DialogContent
+        className="bg-card border-glass-border sm:max-w-lg"
+        onInteractOutside={(e) => { if (!canClose) e.preventDefault(); }}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             📤 Importar {LABEL_MAP[uploadType]} (SFTP)
@@ -181,6 +206,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          {/* Step 1: File selection */}
           {status === "idle" && (
             <div className="border-2 border-dashed border-border rounded-lg p-8 text-center space-y-3">
               <Upload className="w-8 h-8 mx-auto text-muted-foreground" />
@@ -194,7 +220,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
                 </p>
               </div>
               <label className="cursor-pointer inline-block">
-                <input type="file" accept=".csv,.xlsx,.txt" className="hidden" onChange={handleFile} />
+                <input ref={inputRef} type="file" accept=".csv,.xlsx,.txt" className="hidden" onChange={handleFileSelect} />
                 <Button variant="outline" asChild>
                   <span>Escolher arquivo</span>
                 </Button>
@@ -202,13 +228,47 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
             </div>
           )}
 
-          {status === "validating" && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 py-6">
-              <Loader2 className="w-8 h-8 animate-spin text-neon-blue" />
-              <p className="text-sm text-muted-foreground">{message}</p>
+          {/* Step 1.5: Staged — show summary, await commit */}
+          {status === "staged" && stagedFile && (
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+              <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-2">
+                <div className="flex items-start gap-3">
+                  <FileText className="w-6 h-6 text-neon-blue shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold truncate">{stagedFile.name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      📊 <strong>{stagedLineCount.toLocaleString("pt-BR")}</strong> linhas detectadas
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      📦 Tamanho: <strong>{(stagedFile.size / 1024).toFixed(1)} KB</strong>
+                    </p>
+                    {safraLabel && (
+                      <p className="text-xs text-muted-foreground">
+                        📅 Safra: <strong>{safraLabel}</strong>
+                      </p>
+                    )}
+                  </div>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={reset}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <Button
+                className="w-full gap-2 h-11 text-sm font-semibold"
+                onClick={handleCommit}
+              >
+                <Upload className="w-4 h-4" />
+                Salvar e Processar Dados
+              </Button>
+
+              <p className="text-[11px] text-muted-foreground text-center">
+                Clique acima para iniciar a importação. O modal permanecerá aberto até a conclusão.
+              </p>
             </motion.div>
           )}
 
+          {/* Processing: Data cleaning */}
           {status === "cleaning" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4 py-4">
               <div className="flex items-center gap-2 justify-center">
@@ -243,6 +303,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
             </motion.div>
           )}
 
+          {/* Processing: Uploading */}
           {status === "uploading" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 py-6">
               <Loader2 className="w-8 h-8 animate-spin text-neon-blue" />
@@ -251,10 +312,11 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
             </motion.div>
           )}
 
+          {/* Success */}
           {status === "success" && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-3 py-6">
               <CheckCircle className="w-10 h-10 text-emerald" />
-              <p className="text-sm font-medium text-center">{message}</p>
+              <p className="text-sm font-medium text-center text-emerald">{message}</p>
               {stats && (
                 <div className="text-xs text-muted-foreground text-center space-y-0.5">
                   {stats.sellers != null && <p>{stats.sellers} sellers · {stats.kpis} registros de KPI</p>}
@@ -268,6 +330,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
             </motion.div>
           )}
 
+          {/* Error */}
           {status === "error" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 py-6">
               <FileWarning className="w-10 h-10 text-destructive" />
