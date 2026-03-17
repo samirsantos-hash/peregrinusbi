@@ -87,6 +87,7 @@ const Index = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [activeTab, setActiveTab] = useState("executive");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [granularity, setGranularity] = useState<Granularity>("consolidated");
 
   const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
 
