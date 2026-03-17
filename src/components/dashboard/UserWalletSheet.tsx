@@ -35,7 +35,7 @@ function parseBulkInput(
   alreadySelected: string[]
 ): { toAdd: string[]; notFound: string[] } {
   const items = input
-    .split(";")
+    .split(/[;,]/)
     .map((s) => s.trim())
     .filter(Boolean);
 
