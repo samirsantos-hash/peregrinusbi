@@ -90,6 +90,12 @@ const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
 
+  // Clear date range and cache when granularity changes
+  const handleGranularityChange = useCallback((val: Granularity) => {
+    setGranularity(val);
+    setDateRange(undefined); // Force re-anchor to new dataset
+  }, []);
+
   const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
 
   const hasRealData = sellersFetched && dbSellers && dbSellers.length > 0;
