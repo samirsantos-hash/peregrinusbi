@@ -88,9 +88,11 @@ function computeCorrelation(xs: number[], ys: number[]): number {
   return den === 0 ? 0 : num / den;
 }
 
-const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
+const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPanelProps) => {
   const [period, setPeriod] = useState("30");
   const [granularity, setGranularity] = useState<Granularity>("day");
+
+  const axisLabel = dataGranularity === "consolidated" ? "Meses" : "Dias";
 
   // Aggregate by date
   const byDate = useMemo(() => {
