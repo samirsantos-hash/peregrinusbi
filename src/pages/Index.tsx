@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
+import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
