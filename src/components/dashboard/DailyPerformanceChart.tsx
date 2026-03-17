@@ -182,7 +182,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           <Line
             yAxisId="right"
             type="monotone"
-            dataKey="ads"
+            dataKey="adsLog"
             name="Investimento Ads (R$)"
             stroke="hsl(var(--warning))"
             strokeWidth={2}
@@ -190,7 +190,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             dot={false}
             activeDot={{ r: 4, strokeWidth: 2 }}
             animationDuration={800}
-            hide={hidden.has("ads")}
+            hide={hidden.has("adsLog")}
           />
 
           {/* TSI line */}
