@@ -380,7 +380,17 @@ const Admin = () => {
                     {managedUsers.map((u) => (
                       <div key={u.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
                         <div className="space-y-1 flex-1 min-w-0">
-                          <p className="text-sm font-medium">{u.email}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium">{u.email}</p>
+                            <span className={cn(
+                              "text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider",
+                              u.role === "admin"
+                                ? "bg-neon-blue/15 text-neon-blue border border-neon-blue/30"
+                                : "bg-muted/50 text-muted-foreground border border-border"
+                            )}>
+                              {u.role === "admin" ? "Admin" : "Consultor"}
+                            </span>
+                          </div>
                           <p className="text-xs text-muted-foreground">
                             CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
                             {u.must_change_password && <span className="ml-2 text-warning">● Senha temporária</span>}
