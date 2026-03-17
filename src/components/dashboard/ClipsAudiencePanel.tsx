@@ -23,6 +23,7 @@ interface ClipsAudiencePanelProps {
   listingsQuality?: ListingQuality[];
   sellerCustIdMap?: Record<string, string>;
   selectedSeller?: string;
+  dataGranularity?: "consolidated" | "daily";
 }
 
 /* ── Helpers ── */
