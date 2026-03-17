@@ -104,21 +104,27 @@ function fmtISO(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/* Custom tooltip */
-const ChartTooltip = ({ active, payload }: any) => {
+/* Custom tooltip — full date + R$ formatting */
+function ChartTooltipContent({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const row = payload[0]?.payload;
   if (!row) return null;
 
+  // Build full date display: DD/MM/YYYY from ISO date
+  const fullDate = (() => {
+    const [y, m, d] = (row.date || "").split("-");
+    return y && m && d ? `${d}/${m}/${y}` : row.label;
+  })();
+
   return (
-    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1.5 min-w-[200px]">
-      <p className="font-mono text-muted-foreground font-semibold">📅 Data: {row.label}</p>
+    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1.5 min-w-[220px]">
+      <p className="font-mono text-muted-foreground font-semibold">📅 {fullDate}</p>
       <p className="text-neon-blue font-medium">💰 Faturamento: {fmtBRL(row.tgmv)}</p>
       <p className="text-warning font-medium">📣 Ads: {fmtBRL(row.ads)}</p>
       <p className="text-emerald-400 font-medium">📦 Unidades Vendidas: {row.tsi.toLocaleString("pt-BR")}</p>
     </div>
   );
-};
+}
 
 const SERIES_KEYS = ["tgmvLog", "adsLog", "tsiLog"] as const;
 
@@ -197,7 +203,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             width={55}
           />
 
-          <Tooltip content={<ChartTooltip />} />
+          <Tooltip content={<ChartTooltipContent />} />
 
           {/* Faturamento line */}
           <Line
