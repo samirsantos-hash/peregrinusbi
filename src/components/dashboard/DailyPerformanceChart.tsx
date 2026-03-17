@@ -1,6 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import {
-  ComposedChart, Line, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend
 } from "recharts";
 import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
@@ -23,7 +23,6 @@ interface DailyPerformanceChartProps {
 function fillGaps(kpis: DailyKpi[]) {
   if (kpis.length === 0) return [];
 
-  // Aggregate by date first (in case of duplicates)
   const byDate = new Map<string, { tgmv: number; ads: number; tsi: number }>();
   for (const k of kpis) {
     const prev = byDate.get(k.date) || { tgmv: 0, ads: 0, tsi: 0 };
@@ -63,7 +62,7 @@ function fmtISO(d: Date) {
 }
 
 /* Custom tooltip */
-const ChartTooltip = ({ active, payload, label }: any) => {
+const ChartTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   const row = payload[0]?.payload;
   if (!row) return null;
@@ -71,15 +70,27 @@ const ChartTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="glass-card p-3 !bg-card/95 text-xs space-y-1.5 min-w-[200px]">
       <p className="font-mono text-muted-foreground font-semibold">📅 Data: {row.label}</p>
-      <p className="text-neon-blue font-medium">Faturamento: {fmtBRL(row.tgmv)}</p>
-      <p className="text-warning font-medium">Ads: {fmtBRL(row.ads)}</p>
-      <p className="text-muted-foreground">Itens Vendidos: {row.tsi.toLocaleString("pt-BR")}</p>
+      <p className="text-neon-blue font-medium">💰 Faturamento: {fmtBRL(row.tgmv)}</p>
+      <p className="text-warning font-medium">📣 Ads: {fmtBRL(row.ads)}</p>
+      <p className="text-emerald-400 font-medium">📦 Unidades Vendidas: {row.tsi.toLocaleString("pt-BR")}</p>
     </div>
   );
 };
 
+const SERIES_KEYS = ["tgmv", "ads", "tsi"] as const;
+
 const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
   const chartData = useMemo(() => fillGaps(kpis), [kpis]);
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+
+  const handleLegendClick = useCallback((entry: any) => {
+    const key = entry.dataKey as string;
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      return next;
+    });
+  }, []);
 
   if (chartData.length === 0) return null;
 
@@ -90,7 +101,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Desempenho Diário (Ciclo 24h)
           </h3>
-          <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Eixo esquerdo: Faturamento (R$). Eixo direito: Investimento em Ads (R$)." />
+          <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar linhas." />
         </div>
         <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
           {chartData.length} dias
@@ -99,13 +110,6 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
 
       <ResponsiveContainer width="100%" height={340}>
         <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="gradDailyTgmv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-
           <CartesianGrid
             vertical={false}
             strokeDasharray="3 3"
@@ -123,7 +127,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             height={chartData.length > 15 ? 50 : 30}
           />
 
-          {/* Left Y-axis: Faturamento */}
+          {/* Left Y-axis: Faturamento + TSI */}
           <YAxis
             yAxisId="left"
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
@@ -157,6 +161,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             dot={chartData.length <= 31 ? { r: 3, fill: "hsl(199, 100%, 50%)" } : false}
             activeDot={{ r: 5, strokeWidth: 2 }}
             animationDuration={800}
+            hide={hidden.has("tgmv")}
           />
 
           {/* Ads line */}
@@ -171,12 +176,36 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             dot={false}
             activeDot={{ r: 4, strokeWidth: 2 }}
             animationDuration={800}
+            hide={hidden.has("ads")}
+          />
+
+          {/* TSI line */}
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="tsi"
+            name="Unidades Vendidas"
+            stroke="hsl(160, 84%, 39%)"
+            strokeWidth={1.5}
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 2 }}
+            animationDuration={800}
+            hide={hidden.has("tsi")}
           />
 
           <Legend
-            wrapperStyle={{ fontSize: 11 }}
-            formatter={(value: string) => (
-              <span className="text-muted-foreground text-xs">{value}</span>
+            wrapperStyle={{ fontSize: 11, cursor: "pointer" }}
+            onClick={handleLegendClick}
+            formatter={(value: string, entry: any) => (
+              <span
+                className="text-xs"
+                style={{
+                  color: hidden.has(entry.dataKey) ? "hsl(var(--muted-foreground) / 0.4)" : "hsl(var(--muted-foreground))",
+                  textDecoration: hidden.has(entry.dataKey) ? "line-through" : "none",
+                }}
+              >
+                {value}
+              </span>
             )}
           />
         </ComposedChart>
