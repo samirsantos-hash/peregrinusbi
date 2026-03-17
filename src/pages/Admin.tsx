@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
