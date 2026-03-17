@@ -388,6 +388,9 @@ const Admin = () => {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" title="Editar carteira de lojas" onClick={() => setWalletUser(u)}>
+                            <Store className="w-4 h-4 text-emerald" />
+                          </Button>
                           <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => handleResetPassword(u.userId, u.email)}>
                             <RotateCcw className="w-4 h-4 text-neon-blue" />
                           </Button>
