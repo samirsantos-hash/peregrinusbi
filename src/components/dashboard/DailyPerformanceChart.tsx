@@ -203,7 +203,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             width={55}
           />
 
-          <Tooltip content={<ChartTooltip />} />
+          <Tooltip content={<ChartTooltipContent />} />
 
           {/* Faturamento line */}
           <Line
