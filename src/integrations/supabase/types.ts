@@ -430,6 +430,173 @@ export type Database = {
           },
         ]
       }
+      sellers_kpi_daily: {
+        Row: {
+          cdp_tgmv_lc: number | null
+          cdp_tsi: number | null
+          created_at: string
+          data: string
+          f_tgmv_lc: number | null
+          f_tsi: number | null
+          gmv_lc: number | null
+          gmv_lc_m1: number | null
+          id: string
+          inv_pads: number | null
+          ll_description_score: number | null
+          ll_free_shipping_score: number | null
+          ll_pictures_score: number | null
+          ll_price_score: number | null
+          ll_promotions_score: number | null
+          ll_stock_availability_score: number | null
+          ll_tech_specs_score: number | null
+          ll_title_score: number | null
+          min_price_rival: number | null
+          orders_clips: number | null
+          pontuacao_ipi: number | null
+          pontuacao_ll_gtin: number | null
+          rep_cancellations_rate: number | null
+          rep_claims_rate: number | null
+          rep_current_level: string | null
+          rep_delayed_ht_rate: number | null
+          score_caracteristica_final: number | null
+          score_final_full: number | null
+          score_final_pads: number | null
+          score_oferta_final: number | null
+          score_photo: number | null
+          score_qualidade_final: number | null
+          score_title: number | null
+          seller_id: string
+          sellers_clips_publi: number | null
+          si_clips: number | null
+          tgmv_lc: number | null
+          tgmv_lc_clips: number | null
+          tgmv_lc_flex: number | null
+          tgmv_lc_full: number | null
+          tgmv_lc_pads: number | null
+          tsi: number | null
+          tsi_flex: number | null
+          tsi_pads: number | null
+          uplift_gmv_lc_m1: number | null
+          visitas_clips: number | null
+          visits: number | null
+          visits_cheaper: number | null
+          visits_expensive: number | null
+          visits_match: number | null
+        }
+        Insert: {
+          cdp_tgmv_lc?: number | null
+          cdp_tsi?: number | null
+          created_at?: string
+          data: string
+          f_tgmv_lc?: number | null
+          f_tsi?: number | null
+          gmv_lc?: number | null
+          gmv_lc_m1?: number | null
+          id?: string
+          inv_pads?: number | null
+          ll_description_score?: number | null
+          ll_free_shipping_score?: number | null
+          ll_pictures_score?: number | null
+          ll_price_score?: number | null
+          ll_promotions_score?: number | null
+          ll_stock_availability_score?: number | null
+          ll_tech_specs_score?: number | null
+          ll_title_score?: number | null
+          min_price_rival?: number | null
+          orders_clips?: number | null
+          pontuacao_ipi?: number | null
+          pontuacao_ll_gtin?: number | null
+          rep_cancellations_rate?: number | null
+          rep_claims_rate?: number | null
+          rep_current_level?: string | null
+          rep_delayed_ht_rate?: number | null
+          score_caracteristica_final?: number | null
+          score_final_full?: number | null
+          score_final_pads?: number | null
+          score_oferta_final?: number | null
+          score_photo?: number | null
+          score_qualidade_final?: number | null
+          score_title?: number | null
+          seller_id: string
+          sellers_clips_publi?: number | null
+          si_clips?: number | null
+          tgmv_lc?: number | null
+          tgmv_lc_clips?: number | null
+          tgmv_lc_flex?: number | null
+          tgmv_lc_full?: number | null
+          tgmv_lc_pads?: number | null
+          tsi?: number | null
+          tsi_flex?: number | null
+          tsi_pads?: number | null
+          uplift_gmv_lc_m1?: number | null
+          visitas_clips?: number | null
+          visits?: number | null
+          visits_cheaper?: number | null
+          visits_expensive?: number | null
+          visits_match?: number | null
+        }
+        Update: {
+          cdp_tgmv_lc?: number | null
+          cdp_tsi?: number | null
+          created_at?: string
+          data?: string
+          f_tgmv_lc?: number | null
+          f_tsi?: number | null
+          gmv_lc?: number | null
+          gmv_lc_m1?: number | null
+          id?: string
+          inv_pads?: number | null
+          ll_description_score?: number | null
+          ll_free_shipping_score?: number | null
+          ll_pictures_score?: number | null
+          ll_price_score?: number | null
+          ll_promotions_score?: number | null
+          ll_stock_availability_score?: number | null
+          ll_tech_specs_score?: number | null
+          ll_title_score?: number | null
+          min_price_rival?: number | null
+          orders_clips?: number | null
+          pontuacao_ipi?: number | null
+          pontuacao_ll_gtin?: number | null
+          rep_cancellations_rate?: number | null
+          rep_claims_rate?: number | null
+          rep_current_level?: string | null
+          rep_delayed_ht_rate?: number | null
+          score_caracteristica_final?: number | null
+          score_final_full?: number | null
+          score_final_pads?: number | null
+          score_oferta_final?: number | null
+          score_photo?: number | null
+          score_qualidade_final?: number | null
+          score_title?: number | null
+          seller_id?: string
+          sellers_clips_publi?: number | null
+          si_clips?: number | null
+          tgmv_lc?: number | null
+          tgmv_lc_clips?: number | null
+          tgmv_lc_flex?: number | null
+          tgmv_lc_full?: number | null
+          tgmv_lc_pads?: number | null
+          tsi?: number | null
+          tsi_flex?: number | null
+          tsi_pads?: number | null
+          uplift_gmv_lc_m1?: number | null
+          visitas_clips?: number | null
+          visits?: number | null
+          visits_cheaper?: number | null
+          visits_expensive?: number | null
+          visits_match?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sellers_kpi_daily_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       upload_logs: {
         Row: {
           id: string
