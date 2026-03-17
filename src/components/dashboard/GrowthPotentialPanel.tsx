@@ -7,7 +7,7 @@ import {
 import { TrendingUp, TrendingDown, Crown, Target, BarChart3 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import GaugeChart from "./GaugeChart";
-import { fmtBRLCompact } from "@/utils/formatters";
+import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 
 interface KpiLike {
   date: string;
