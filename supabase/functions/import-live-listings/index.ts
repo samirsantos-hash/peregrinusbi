@@ -82,21 +82,27 @@ Deno.serve(async (req) => {
       sellerIdMap.set(s.cust_id, s.id);
     }
 
-    // Build listing rows
-    const listingRows = rows.map((cols) => {
+    // Build listing rows, deduplicating by composite key
+    const deduped = new Map<string, any>();
+    for (const cols of rows) {
       const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
       const sellerId = sellerIdMap.get(cleanCustId);
-      if (!sellerId) return null;
+      if (!sellerId) continue;
 
-      return {
+      const data = cols[iData]?.trim() || "2026-01-01";
+      const categoria = cols[iCategoria]?.trim() || null;
+      const key = `${sellerId}|${data}|${categoria}`;
+
+      deduped.set(key, {
         seller_id: sellerId,
-        data: cols[iData]?.trim() || "2026-01-01",
-        categoria: cols[iCategoria]?.trim() || null,
+        data,
+        categoria,
         itens: parseBrInt(cols[iItens] || "0"),
         vertical: cols[iVertical]?.trim() || null,
         dom_domain_agg1: cols[iDomain]?.trim() || null,
-      };
-    }).filter(Boolean);
+      });
+    }
+    const listingRows = Array.from(deduped.values());
 
     // Upsert in batches
     let inserted = 0;
