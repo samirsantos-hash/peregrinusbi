@@ -123,8 +123,12 @@ const Admin = () => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newEmail || selectedCustIds.length === 0) {
-      toast({ title: "Preencha o e-mail e selecione ao menos uma loja", variant: "destructive" });
+    if (!newEmail) {
+      toast({ title: "Preencha o e-mail", variant: "destructive" });
+      return;
+    }
+    if (newRole === "user" && selectedCustIds.length === 0) {
+      toast({ title: "Selecione ao menos uma loja para o Consultor", variant: "destructive" });
       return;
     }
 
