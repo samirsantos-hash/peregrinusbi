@@ -92,7 +92,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily" }: E
 
   const roasData = useMemo(() => {
     return allDates.map((d) => ({
-      date: formatDate(d.date),
+      date: formatChartDate(d.date, dataGranularity),
       ROAS: Math.round((d.roas / d.count) * 100) / 100,
       ACOS: Math.round((d.acos / d.count) * 100) / 100,
       TACOS: Math.round((d.tacos / d.count) * 100) / 100,

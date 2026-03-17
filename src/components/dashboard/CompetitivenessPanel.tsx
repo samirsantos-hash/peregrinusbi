@@ -40,6 +40,7 @@ interface CompetitivenessPanelProps {
   sellers?: SellerInfo[];
   sellerCustIdMap?: Record<string, string>;
   listingsQuality?: ListingQuality[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 /* ── Shared Tooltip ── */
