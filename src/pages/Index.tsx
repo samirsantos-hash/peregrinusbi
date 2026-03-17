@@ -376,7 +376,7 @@ const Index = () => {
                     <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0">
-                    <ReputationPanel kpis={displayKpis} />
+                    <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>
