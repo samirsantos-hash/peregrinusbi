@@ -17,11 +17,15 @@ import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import { format } from "date-fns";
 
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 interface SellerOption {
   id: string;
   nickname: string;
   custId: string;
 }
+
+type AppRole = "admin" | "user";
 
 interface ManagedUser {
   id: string;
@@ -32,6 +36,7 @@ interface ManagedUser {
   must_change_password: boolean;
   temp_password: string | null;
   created_at: string;
+  role: AppRole;
 }
 
 interface UploadLog {
