@@ -8,12 +8,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift } from "lucide-react";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
+import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import { format } from "date-fns";
 
 interface SellerOption {
