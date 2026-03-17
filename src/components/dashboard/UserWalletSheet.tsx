@@ -162,7 +162,7 @@ const UserWalletSheet = ({
                 setBulkInput(e.target.value);
                 setBulkResult(null);
               }}
-              placeholder="Cole os IDs ou Nomes separados por ponto e vírgula (;). Ex: 12345; 67890; 11121"
+              placeholder="Cole os IDs ou Nomes separados por ponto e vírgula (;) ou vírgula (,). Ex: 12345; 67890, 11121"
               className="min-h-[60px] text-xs"
             />
             <Button
