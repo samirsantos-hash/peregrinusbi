@@ -123,19 +123,11 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
     return byDate.filter((d) => d.date >= cutoffStr);
   }, [byDate, period]);
 
-  // Group by granularity
   const chartData = useMemo(() => {
-    const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
-
     if (granularity === "day") {
       return filteredData.map((d) => {
-        const [y, m, day] = d.date.split("-");
-        // If consolidated (monthly), show "MMM YYYY"; if daily, show "DD/MM"
-        const label = dataGranularity === "consolidated"
-          ? `${monthNames[parseInt(m, 10) - 1]} ${y}`
-          : `${day}/${m}`;
         return {
-          label,
+          label: formatChartDate(d.date, dataGranularity),
           gmv: Math.round(d.gmv),
           ads: Math.round(d.ads),
           tgmvAds: Math.round(d.tgmvAds),
