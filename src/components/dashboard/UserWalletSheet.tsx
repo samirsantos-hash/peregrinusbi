@@ -113,9 +113,9 @@ const UserWalletSheet = ({
 
   const handleBulkAdd = () => {
     if (!bulkInput.trim()) return;
-    const { toAdd, notFound } = parseBulkInput(bulkInput, sellers, selectedIds);
-    setSelectedIds((prev) => [...new Set([...prev, ...toAdd])]);
-    setBulkResult({ matched: toAdd.length, notFound });
+    const result = parseBulkInput(bulkInput, sellers, selectedIds);
+    setSelectedIds((prev) => [...new Set([...prev, ...result.toAdd])]);
+    setBulkResult({ matched: result.toAdd.length, notFound: result.notFound });
     setBulkInput("");
   };
 
