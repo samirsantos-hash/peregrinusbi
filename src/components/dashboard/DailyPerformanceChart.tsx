@@ -37,7 +37,7 @@ function fillGaps(kpis: DailyKpi[]) {
   const start = parseLocal(sortedDates[0]);
   const end = parseLocal(sortedDates[sortedDates.length - 1]);
 
-  const result: { date: string; label: string; tgmv: number; ads: number; tsi: number }[] = [];
+  const result: { date: string; label: string; tgmv: number; ads: number; tsi: number; tgmvLog: number; adsLog: number; tsiLog: number }[] = [];
   const cursor = new Date(start);
 
   while (cursor <= end) {
@@ -45,7 +45,15 @@ function fillGaps(kpis: DailyKpi[]) {
     const vals = byDate.get(iso) || { tgmv: 0, ads: 0, tsi: 0 };
     const dd = String(cursor.getDate()).padStart(2, "0");
     const mm = String(cursor.getMonth() + 1).padStart(2, "0");
-    result.push({ date: iso, label: `${dd}/${mm}`, ...vals });
+    result.push({
+      date: iso,
+      label: `${dd}/${mm}`,
+      ...vals,
+      // Log-safe values (log scale can't handle 0)
+      tgmvLog: vals.tgmv > 0 ? vals.tgmv : 1,
+      adsLog: vals.ads > 0 ? vals.ads : 1,
+      tsiLog: vals.tsi > 0 ? vals.tsi : 1,
+    });
     cursor.setDate(cursor.getDate() + 1);
   }
 
