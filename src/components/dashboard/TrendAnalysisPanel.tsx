@@ -5,6 +5,7 @@ import {
   Tooltip, ResponsiveContainer, Legend } from
 "recharts";
 import { TrendingUp, TrendingDown, Zap, BarChart3, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import { startOfWeek, format, parseISO } from "date-fns";
@@ -22,6 +23,7 @@ interface KpiLike {
 
 interface TrendAnalysisPanelProps {
   kpis: KpiLike[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 type Granularity = "day" | "week";
@@ -86,9 +88,11 @@ function computeCorrelation(xs: number[], ys: number[]): number {
   return den === 0 ? 0 : num / den;
 }
 
-const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
+const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPanelProps) => {
   const [period, setPeriod] = useState("30");
   const [granularity, setGranularity] = useState<Granularity>("day");
+
+  const axisLabel = dataGranularity === "consolidated" ? "Meses" : "Dias";
 
   // Aggregate by date
   const byDate = useMemo(() => {
@@ -225,6 +229,9 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
               <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
                 GMV × Ads × ROAS
               </p>
+              <Badge variant="outline" className="text-[10px] px-2 py-0 font-mono border-primary/30 text-primary">
+                {axisLabel}
+              </Badge>
             </div>
             <div className="flex items-center gap-2">
               {/* Granularity toggle */}
@@ -278,7 +285,8 @@ const TrendAnalysisPanel = ({ kpis }: TrendAnalysisPanelProps) => {
                 interval="preserveStartEnd"
                 angle={chartData.length > 8 ? -45 : 0}
                 textAnchor={chartData.length > 8 ? "end" : "middle"}
-                height={chartData.length > 8 ? 50 : 30} />
+                height={chartData.length > 8 ? 50 : 30}
+                label={{ value: `Eixo X: ${axisLabel}`, position: "insideBottomRight", offset: 0, fill: "hsl(215, 20%, 55%)", fontSize: 10 }} />
               
                 <YAxis
                 yAxisId="left"
