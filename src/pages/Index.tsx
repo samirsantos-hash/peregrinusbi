@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
+import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
@@ -89,6 +90,12 @@ const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
 
+  // Clear date range and cache when granularity changes
+  const handleGranularityChange = useCallback((val: Granularity) => {
+    setGranularity(val);
+    setDateRange(undefined); // Force re-anchor to new dataset
+  }, []);
+
   const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
 
   const hasRealData = sellersFetched && dbSellers && dbSellers.length > 0;
@@ -129,6 +136,11 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
+  const { data: dbDailyKpis, isLoading: loadingDailyKpis } = useSellerDailyKpis(
+    hasRealData ? selectedSeller : undefined,
+    granularity === "daily"
+  );
+
   const { data: listingsQuality } = useListingsQuality(
     hasRealData ? selectedSeller : undefined
   );
@@ -141,11 +153,22 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
-  // ALL kpis (unfiltered) — used for anchor date computation
-  const allKpis: any[] = useMemo(() => {
+  // ALL kpis (unfiltered) — monthly source for consolidated view
+  const allKpisMonthly: any[] = useMemo(() => {
     if (hasRealData) return dbKpis || [];
     return mockSellerKPIs[selectedSeller] || [];
   }, [hasRealData, dbKpis, selectedSeller]);
+
+  // Daily kpis from dedicated daily table
+  const allKpisDaily: any[] = useMemo(() => {
+    if (hasRealData) return dbDailyKpis || [];
+    return [];
+  }, [hasRealData, dbDailyKpis]);
+
+  // Select source based on granularity
+  const allKpis: any[] = useMemo(() => {
+    return granularity === "daily" ? allKpisDaily : allKpisMonthly;
+  }, [granularity, allKpisDaily, allKpisMonthly]);
 
   // Compute anchor (max date) and min date from ALL data
   const { anchorDate, minDate, anchorStr, minStr } = useMemo(() => {
@@ -211,6 +234,7 @@ const Index = () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["sellers"] });
     await queryClient.invalidateQueries({ queryKey: ["seller-kpis", selectedSeller] });
+    await queryClient.invalidateQueries({ queryKey: ["seller-kpis-daily", selectedSeller] });
     setIsRefreshing(false);
   }, [queryClient, selectedSeller]);
 
@@ -232,7 +256,7 @@ const Index = () => {
     return map;
   }, [sellers]);
 
-  const isLoading = !sellersFetched || (hasRealData && loadingKpis);
+  const isLoading = !sellersFetched || (hasRealData && (loadingKpis || (granularity === "daily" && loadingDailyKpis)));
 
   // Active date range debug label
   const dateDebugLabel = useMemo(() => {
@@ -304,7 +328,7 @@ const Index = () => {
 
             {/* Granularity Toggle + Debug label */}
             <div className="flex items-center justify-between flex-wrap gap-3">
-              <GranularityToggle value={granularity} onChange={setGranularity} />
+              <GranularityToggle value={granularity} onChange={handleGranularityChange} />
               {dateDebugLabel && (
                 <div className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-3 py-1 rounded-md inline-flex items-center gap-2">
                   📅 {dateDebugLabel} · {displayKpis.length} registros ({granularity === "consolidated" ? "mensal" : "diário"})
