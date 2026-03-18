@@ -2,10 +2,11 @@ import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, MapPin, Camera, AlertTriangle, TrendingUp, Truck, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { ArrowUpDown, Camera, AlertTriangle, TrendingUp, TrendingDown, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
+import type { SellerTrend } from "@/hooks/usePortfolioTrends";
 import { toast } from "sonner";
 
 function safePct(num: number, den: number): number {
@@ -26,50 +27,69 @@ function getMedalStyle(level: string | null): { label: string; className: string
   return { label: level || "—", className: "bg-muted/30 text-muted-foreground border-border" };
 }
 
-type FilterPill = "all" | "platinum" | "ads3" | "full" | "growth";
-type SortKey = "nickname" | "cusState" | "repCurrentLevel" | "tgmvLc" | "roas" | "pctFull" | "pctFlex" | "pctAds" | "scoreQualidadeFinal";
+function getModalPrincipal(tsi: number, fTsi: number, tsiFlex: number): { label: string; emoji: string; className: string } {
+  const tsiOther = Math.max(0, tsi - fTsi - tsiFlex);
+  if (fTsi >= tsiFlex && fTsi >= tsiOther) return { label: "FULL", emoji: "⚡", className: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" };
+  if (tsiFlex >= fTsi && tsiFlex >= tsiOther) return { label: "FLEX", emoji: "🏍️", className: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" };
+  return { label: "AGÊNCIA / CROSS", emoji: "📦", className: "bg-muted/30 text-muted-foreground border-border" };
+}
+
+type FilterPill = "all" | "platinum" | "ads3" | "growth" | "trending_up" | "trending_down";
+type SortKey = "nickname" | "repCurrentLevel" | "tgmvLc" | "roas" | "modalPrincipal" | "pctAds" | "scoreQualidadeFinal";
 
 interface Props {
   sellers: SellerWithKpi[];
+  trends?: Record<string, SellerTrend>;
   portfolioName?: string;
 }
 
-function getExportRows(data: ReturnType<typeof enrichRows>) {
-  return data.map((s) => ({
-    Seller: s.nickname,
-    Medalha: getMedalStyle(s.repCurrentLevel).label,
-    "Faturamento (R$)": s.tgmvLc,
-    ROAS: Number(s.roas.toFixed(1)),
-    "Potência Full (%)": Number(s.pctFull.toFixed(1)),
-    "% Flex": Number(s.pctFlex.toFixed(1)),
-    "% Ads": Number(s.pctAds.toFixed(2)),
-    "Saúde Catálogo": Number(s.scoreQualidadeFinal.toFixed(0)),
-    Alertas: [
-      s.alertQuality ? "📸 Fotos" : "",
-      s.alertSubInvest ? "↗ SubInvest" : "",
-      s.alertHighAds ? "⚠ Alto Ads" : "",
-      s.alertLogistics ? "🚚 Full=0" : "",
-    ].filter(Boolean).join(", ") || "✓",
-  }));
+function TrendArrow({ value }: { value: number | undefined }) {
+  if (value === undefined) return null;
+  if (value > 0) return <TrendingUp className="w-3 h-3 text-emerald-400 shrink-0" />;
+  if (value < 0) return <TrendingDown className="w-3 h-3 text-destructive shrink-0" />;
+  return null;
 }
 
-type EnrichedSeller = SellerWithKpi & { pctFlex: number; pctFull: number; pctAds: number; roas: number; alertQuality: boolean; alertSubInvest: boolean; alertHighAds: boolean; alertLogistics: boolean };
+type EnrichedSeller = SellerWithKpi & {
+  pctAds: number;
+  roas: number;
+  modalPrincipal: ReturnType<typeof getModalPrincipal>;
+  alertQuality: boolean;
+  alertHighAds: boolean;
+};
 
 function enrichRows(sellers: SellerWithKpi[]): EnrichedSeller[] {
   return sellers.map((s) => {
-    const pctFlex = safePct(s.tsiFlex, s.tsi);
-    const pctFull = safePct(s.fTsi, s.tsi);
     const pctAds = safePct(s.invPads, s.tgmvLc);
     const roas = s.invPads > 0 ? (s.tgmvLcPads || 0) / s.invPads : 0;
+    const modalPrincipal = getModalPrincipal(s.tsi, s.fTsi, s.tsiFlex);
     const alertQuality = s.scoreQualidadeFinal < 50;
-    const alertSubInvest = s.tgmvLc > 0 && pctAds < 1.5;
     const alertHighAds = pctAds > 5;
-    const alertLogistics = s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
-    return { ...s, pctFlex, pctFull, pctAds, roas, alertQuality, alertSubInvest, alertHighAds, alertLogistics };
+    return { ...s, pctAds, roas, modalPrincipal, alertQuality, alertHighAds };
   });
 }
 
-export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Props) {
+function getExportRows(data: EnrichedSeller[], trends?: Record<string, SellerTrend>) {
+  return data.map((s) => {
+    const t = trends?.[s.sellerId];
+    return {
+      Seller: s.nickname,
+      Medalha: getMedalStyle(s.repCurrentLevel).label,
+      "Faturamento (R$)": s.tgmvLc,
+      "Tendência Fat. (%)": t ? Number(t.tgmvTrend.toFixed(1)) : "—",
+      ROAS: Number(s.roas.toFixed(1)),
+      "Modal Principal": `${s.modalPrincipal.emoji} ${s.modalPrincipal.label}`,
+      "% Ads": Number(s.pctAds.toFixed(2)),
+      "Saúde Catálogo": Number(s.scoreQualidadeFinal.toFixed(0)),
+      Alertas: [
+        s.alertQuality ? "📸 Fotos" : "",
+        s.alertHighAds ? "⚠ Alto Ads" : "",
+      ].filter(Boolean).join(", ") || "✓",
+    };
+  });
+}
+
+export default function RaioXTable({ sellers, trends, portfolioName = "Carteira" }: Props) {
   const [filter, setFilter] = useState<FilterPill>("all");
   const [sortKey, setSortKey] = useState<SortKey>("tgmvLc");
   const [sortAsc, setSortAsc] = useState(false);
@@ -85,23 +105,37 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
       case "ads3":
         list = list.filter((s) => s.pctAds > 3);
         break;
-      case "full":
-        list = list.filter((s) => s.pctFull > 20);
-        break;
       case "growth":
         list = list.filter((s) => s.fTgmvLc > s.tgmvLc);
         break;
+      case "trending_up":
+        list = list.filter((s) => {
+          const t = trends?.[s.sellerId];
+          return t && t.tgmvTrend > 0;
+        });
+        break;
+      case "trending_down":
+        list = list.filter((s) => {
+          const t = trends?.[s.sellerId];
+          return t && (t.tgmvTrend < 0 || t.visitsTrend < 0);
+        });
+        break;
     }
     return list;
-  }, [enriched, filter]);
+  }, [enriched, filter, trends]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
-      const av = a[sortKey as keyof typeof a];
-      const bv = b[sortKey as keyof typeof b];
-      const cmp = typeof av === "string"
-        ? (av || "").localeCompare(bv as string || "")
-        : (Number(av) || 0) - (Number(bv) || 0);
+      let cmp: number;
+      if (sortKey === "modalPrincipal") {
+        cmp = a.modalPrincipal.label.localeCompare(b.modalPrincipal.label);
+      } else {
+        const av = a[sortKey as keyof typeof a];
+        const bv = b[sortKey as keyof typeof b];
+        cmp = typeof av === "string"
+          ? (av || "").localeCompare(bv as string || "")
+          : (Number(av) || 0) - (Number(bv) || 0);
+      }
       return sortAsc ? cmp : -cmp;
     });
   }, [filtered, sortKey, sortAsc]);
@@ -113,7 +147,7 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
 
   const handleExportExcel = async () => {
     const XLSX = await import("xlsx");
-    const rows = getExportRows(sorted);
+    const rows = getExportRows(sorted, trends);
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Raio-X");
@@ -130,7 +164,7 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
     doc.setFontSize(9);
     doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 14, 24);
 
-    const rows = getExportRows(sorted);
+    const rows = getExportRows(sorted, trends);
     const headers = Object.keys(rows[0] || {});
     const body = rows.map((r) => headers.map((h) => String((r as any)[h] ?? "")));
 
@@ -141,9 +175,10 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
 
   const pills: { key: FilterPill; label: string }[] = [
     { key: "all", label: "Todos" },
+    { key: "trending_up", label: "📈 Em Crescimento" },
+    { key: "trending_down", label: "📉 Em Queda" },
     { key: "platinum", label: "Apenas Platinum" },
     { key: "ads3", label: "Gasto Ads > 3%" },
-    { key: "full", label: "Alta Adoção Full" },
     { key: "growth", label: "Oportunidade Crescimento" },
   ];
 
@@ -201,8 +236,7 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
                 <SortHeader label="Medalha" k="repCurrentLevel" />
                 <SortHeader label="Faturamento" k="tgmvLc" />
                 <SortHeader label="ROAS" k="roas" />
-                <SortHeader label="Potência Full (%)" k="pctFull" />
-                <SortHeader label="% Flex" k="pctFlex" />
+                <SortHeader label="Modal Principal" k="modalPrincipal" />
                 <SortHeader label="% Ads" k="pctAds" />
                 <SortHeader label="Saúde" k="scoreQualidadeFinal" />
                 <TableHead className="whitespace-nowrap">Alertas</TableHead>
@@ -211,13 +245,14 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
             <TableBody>
               {sorted.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                     Nenhum seller encontrado com esse filtro.
                   </TableCell>
                 </TableRow>
               ) : (
                 sorted.map((s) => {
                   const medal = getMedalStyle(s.repCurrentLevel);
+                  const trend = trends?.[s.sellerId];
                   return (
                     <TableRow key={s.custId}>
                       <TableCell className="font-medium text-sm">
@@ -238,11 +273,24 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
                           {medal.label}
                         </Badge>
                       </TableCell>
-                      <TableCell className="font-mono text-sm">{fmtBRL(s.tgmvLc)}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        <span className="inline-flex items-center gap-1.5">
+                          {fmtBRL(s.tgmvLc)}
+                          <TrendArrow value={trend?.tgmvTrend} />
+                        </span>
+                      </TableCell>
                       <TableCell className="font-mono text-sm">{s.roas.toFixed(1)}x</TableCell>
-                      <TableCell className="font-mono text-sm">{s.pctFull.toFixed(1)}%</TableCell>
-                      <TableCell className="font-mono text-sm">{s.pctFlex.toFixed(1)}%</TableCell>
-                      <TableCell className="font-mono text-sm">{s.pctAds.toFixed(2)}%</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`text-xs border ${s.modalPrincipal.className}`}>
+                          {s.modalPrincipal.emoji} {s.modalPrincipal.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">
+                        <span className="inline-flex items-center gap-1.5">
+                          {s.pctAds.toFixed(2)}%
+                          <TrendArrow value={trend?.adsTrend} />
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <div className="w-16 h-2 rounded-full bg-muted overflow-hidden">
@@ -256,14 +304,6 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          {s.alertSubInvest && (
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                              </TooltipTrigger>
-                              <TooltipContent>Subinvestimento em Ads ({'<'}1.5%)</TooltipContent>
-                            </Tooltip>
-                          )}
                           {s.alertHighAds && (
                             <Tooltip>
                               <TooltipTrigger>
@@ -272,15 +312,15 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
                               <TooltipContent>Vazamento de Margem (Ads {'>'} 5%)</TooltipContent>
                             </Tooltip>
                           )}
-                          {s.alertLogistics && (
+                          {trend && (trend.tgmvTrend < -15 || trend.visitsTrend < -15) && (
                             <Tooltip>
                               <TooltipTrigger>
-                                <Truck className="w-3.5 h-3.5 text-blue-400" />
+                                <TrendingDown className="w-3.5 h-3.5 text-destructive" />
                               </TooltipTrigger>
-                              <TooltipContent>Baixa Potência no Full (TSI_FULL = 0)</TooltipContent>
+                              <TooltipContent>🚨 Queda severa detectada</TooltipContent>
                             </Tooltip>
                           )}
-                          {!s.alertSubInvest && !s.alertHighAds && !s.alertLogistics && !s.alertQuality && (
+                          {!s.alertHighAds && !s.alertQuality && !(trend && (trend.tgmvTrend < -15 || trend.visitsTrend < -15)) && (
                             <span className="text-xs text-muted-foreground">✓</span>
                           )}
                         </div>

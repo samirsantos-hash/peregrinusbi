@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Loader2, Folder, TrendingUp, AlertTriangle, DollarSign, BarChart3, Truck, Tag } from "lucide-react";
 import { usePortfolioData, type Portfolio } from "@/hooks/usePortfolios";
+import { usePortfolioTrends } from "@/hooks/usePortfolioTrends";
 import TrophyCards from "./TrophyCards";
 import AlertMatrix from "./AlertMatrix";
 import RaioXTable from "./RaioXTable";
@@ -25,6 +26,9 @@ interface Props {
 export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const { sellers, loading } = usePortfolioData(portfolio.cust_ids);
   const [selectedMedals, setSelectedMedals] = useState<string[]>([]);
+
+  const sellerIds = useMemo(() => sellers.map((s) => s.sellerId), [sellers]);
+  const { trends } = usePortfolioTrends(sellerIds);
 
   const filteredSellers = useMemo(() => {
     if (selectedMedals.length === 0) return sellers;
@@ -52,7 +56,6 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
       return s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
     }).length;
 
-    // KPI cards
     const totalTgmvPads = filteredSellers.reduce((s, x) => s + (x.tgmvLcPads || 0), 0);
     const totalInvPads = filteredSellers.reduce((s, x) => s + x.invPads, 0);
     const roas = totalInvPads > 0 ? totalTgmvPads / totalInvPads : 0;
@@ -64,17 +67,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
     const pctFull = safePct(totalTsiFull, totalTsi);
     const pctFlex = safePct(totalTsiFlex, totalTsi);
 
-    return {
-      totalRevenue,
-      topSeller: topSeller.nickname,
-      subInvestCount,
-      lowFullCount,
-      roas,
-      adsRatio,
-      totalInvPads,
-      pctFull,
-      pctFlex,
-    };
+    return { totalRevenue, topSeller: topSeller.nickname, subInvestCount, lowFullCount, roas, adsRatio, totalInvPads, pctFull, pctFlex };
   }, [filteredSellers]);
 
   if (loading) {
@@ -195,12 +188,12 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
             <AlertTriangle className="w-4 h-4 text-amber-400" />
             Radar de Oportunidades
           </h3>
-          <AlertMatrix sellers={filteredSellers} />
+          <AlertMatrix sellers={filteredSellers} trends={trends} />
         </div>
 
         <div className="lg:col-span-2 space-y-3">
           <h3 className="text-sm font-bold">📊 Raio-X da Carteira</h3>
-          <RaioXTable sellers={filteredSellers} portfolioName={portfolio.name} />
+          <RaioXTable sellers={filteredSellers} trends={trends} portfolioName={portfolio.name} />
         </div>
       </div>
     </div>

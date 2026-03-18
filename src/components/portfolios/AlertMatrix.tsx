@@ -1,13 +1,22 @@
-import { AlertTriangle, TrendingUp, Truck, Camera } from "lucide-react";
+import { AlertTriangle, TrendingUp, Truck, Camera, TrendingDown } from "lucide-react";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
+import type { SellerTrend } from "@/hooks/usePortfolioTrends";
 
 function safePct(num: number, den: number): number {
   if (!den || den === 0) return 0;
   return (num / den) * 100;
 }
 
+function getModalPrincipal(tsi: number, fTsi: number, tsiFlex: number): string {
+  const tsiOther = Math.max(0, tsi - fTsi - tsiFlex);
+  if (fTsi >= tsiFlex && fTsi >= tsiOther) return "FULL";
+  if (tsiFlex >= fTsi && tsiFlex >= tsiOther) return "FLEX";
+  return "AGENCIA";
+}
+
 interface Props {
   sellers: SellerWithKpi[];
+  trends?: Record<string, SellerTrend>;
 }
 
 interface Alert {
@@ -16,7 +25,7 @@ interface Alert {
   message: string;
 }
 
-export default function AlertMatrix({ sellers }: Props) {
+export default function AlertMatrix({ sellers, trends }: Props) {
   if (!sellers.length) return null;
 
   const alerts: Alert[] = [];
@@ -27,6 +36,7 @@ export default function AlertMatrix({ sellers }: Props) {
 
   for (const s of sellers) {
     const adsRatio = safePct(s.invPads, s.tgmvLc);
+    const modal = getModalPrincipal(s.tsi, s.fTsi, s.tsiFlex);
 
     // 📸 Quality alert
     if (s.scoreQualidadeFinal < 50) {
@@ -55,12 +65,22 @@ export default function AlertMatrix({ sellers }: Props) {
       });
     }
 
-    // ⚠️ Oportunidade de Escala (Potência no Full)
-    if (s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0) {
+    // Oportunidade Logística — modal principal = AGENCIA em seller de alto faturamento
+    if (s.tgmvLc >= top20Threshold && modal === "AGENCIA") {
       alerts.push({
         icon: Truck,
         color: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-        message: `⚠️ Oportunidade de Escala: ${s.nickname} possui alto volume de vendas, mas baixa Potência no Full. Enviar a Curva A deste seller para o Fulfillment é a alavanca mais rápida para dobrar o faturamento atual.`,
+        message: `Oportunidade Logística: ${s.nickname} tem alto volume preso em Agência. A transição para FULL ou FLEX é mandatória para blindar a conta.`,
+      });
+    }
+
+    // 🚨 Risco de Churn — queda >15% em seller Curva A
+    const trend = trends?.[s.sellerId];
+    if (s.tgmvLc >= top20Threshold && trend && (trend.tgmvTrend < -15 || trend.visitsTrend < -15)) {
+      alerts.push({
+        icon: TrendingDown,
+        color: "text-red-500 bg-red-500/10 border-red-500/20",
+        message: `🚨 Risco de Churn: ${s.nickname} apresenta queda severa em visitas/vendas (Fat: ${trend.tgmvTrend.toFixed(0)}%, Visitas: ${trend.visitsTrend.toFixed(0)}%). Necessário plano de ação imediato.`,
       });
     }
   }
