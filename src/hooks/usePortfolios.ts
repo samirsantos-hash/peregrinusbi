@@ -24,6 +24,7 @@ export interface SellerWithKpi {
   tgmvLcFull: number;
   tgmvLcFlex: number;
   invPads: number;
+  tgmvLcPads: number;
   scoreQualidadeFinal: number;
   scoreOfertaFinal: number;
   scoreCaracteristicaFinal: number;
@@ -145,6 +146,7 @@ export function usePortfolioData(custIds: string[]) {
           tgmvLcFull: Number(k.tgmv_lc_full) || 0,
           tgmvLcFlex: Number(k.tgmv_lc_flex) || 0,
           invPads: Number(k.inv_pads) || 0,
+          tgmvLcPads: Number(k.tgmv_lc_pads) || 0,
           scoreQualidadeFinal: Number(k.score_qualidade_final) || 0,
           scoreOfertaFinal: Number(k.score_oferta_final) || 0,
           scoreCaracteristicaFinal: Number(k.score_caracteristica_final) || 0,

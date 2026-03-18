@@ -14,15 +14,15 @@ interface Props {
 export default function TrophyCards({ sellers }: Props) {
   if (!sellers.length) return null;
 
-  // 🏆 Campeão de Logística: max(f_tsi + tsi_flex)
-  const logisticsChamp = [...sellers].sort((a, b) => (b.fTsi + b.tsiFlex) - (a.fTsi + a.tsiFlex))[0];
-  const logisticsPct = safePct(logisticsChamp.fTsi + logisticsChamp.tsiFlex, logisticsChamp.tsi);
+  // 🏆 Campeão de Logística: max TSI_FULL (corrigido - apenas Full real)
+  const logisticsChamp = [...sellers].sort((a, b) => b.fTsi - a.fTsi)[0];
+  const logisticsPct = safePct(logisticsChamp.fTsi, logisticsChamp.tsi);
 
-  // 🚀 Maior Tração: max((tgmv_lc / f_tgmv_lc) * 100)
+  // 🚀 Maior Tração
   const tractionChamp = [...sellers].sort((a, b) => safePct(b.tgmvLc, b.fTgmvLc) - safePct(a.tgmvLc, a.fTgmvLc))[0];
   const tractionPct = safePct(tractionChamp.tgmvLc, tractionChamp.fTgmvLc);
 
-  // ⭐ Excelência em Qualidade: Platinum/Titanium + maior score
+  // ⭐ Excelência em Qualidade
   const qualitySellers = sellers.filter((s) =>
     s.repCurrentLevel?.toLowerCase().includes("platinum") ||
     s.repCurrentLevel?.toLowerCase().includes("titanium") ||
@@ -31,7 +31,7 @@ export default function TrophyCards({ sellers }: Props) {
   const qualityChamp = (qualitySellers.length > 0 ? qualitySellers : sellers)
     .sort((a, b) => b.scoreQualidadeFinal - a.scoreQualidadeFinal)[0];
 
-  // 🎯 Mestre do Ads: ratio closest to 3% with high revenue
+  // 🎯 Mestre do Ads
   const adsRatio3 = [...sellers]
     .filter((s) => s.tgmvLc > 0)
     .sort((a, b) => {
@@ -49,7 +49,7 @@ export default function TrophyCards({ sellers }: Props) {
       bg: "bg-yellow-400/10 border-yellow-400/20",
       title: "Campeão de Logística",
       seller: logisticsChamp.nickname,
-      detail: `${logisticsPct.toFixed(1)}% envios rápidos (Full+Flex)`,
+      detail: `${logisticsPct.toFixed(1)}% Full real (TSI_FULL)`,
     },
     {
       icon: Rocket,

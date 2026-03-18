@@ -1,4 +1,4 @@
-import { AlertTriangle, TrendingUp, Truck } from "lucide-react";
+import { AlertTriangle, TrendingUp, Truck, Camera } from "lucide-react";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 
 function safePct(num: number, den: number): number {
@@ -11,7 +11,6 @@ interface Props {
 }
 
 interface Alert {
-  type: "opportunity" | "warning" | "logistics";
   icon: typeof AlertTriangle;
   color: string;
   message: string;
@@ -22,7 +21,6 @@ export default function AlertMatrix({ sellers }: Props) {
 
   const alerts: Alert[] = [];
 
-  // Determine top 20% threshold by tgmvLc
   const sorted = [...sellers].sort((a, b) => b.tgmvLc - a.tgmvLc);
   const top20Idx = Math.max(1, Math.ceil(sellers.length * 0.2));
   const top20Threshold = sorted[top20Idx - 1]?.tgmvLc || 0;
@@ -30,10 +28,18 @@ export default function AlertMatrix({ sellers }: Props) {
   for (const s of sellers) {
     const adsRatio = safePct(s.invPads, s.tgmvLc);
 
+    // 📸 Quality alert
+    if (s.scoreQualidadeFinal < 50) {
+      alerts.push({
+        icon: Camera,
+        color: "text-red-400 bg-red-400/10 border-red-400/20",
+        message: `0STORE 📸 Melhorar Fotos: ${s.nickname} com score de catálogo ${s.scoreQualidadeFinal.toFixed(0)} (abaixo de 50).`,
+      });
+    }
+
     // Subinvestimento em Ads
     if (s.tgmvLc >= top20Threshold && adsRatio < 1.5) {
       alerts.push({
-        type: "opportunity",
         icon: TrendingUp,
         color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
         message: `Oportunidade: ${s.nickname} escalando organicamente (Ads ${adsRatio.toFixed(1)}%). Aumentar budget para 3% pode dominar a categoria.`,
@@ -43,20 +49,18 @@ export default function AlertMatrix({ sellers }: Props) {
     // Vazamento de Margem
     if (adsRatio > 5) {
       alerts.push({
-        type: "warning",
         icon: AlertTriangle,
         color: "text-amber-400 bg-amber-400/10 border-amber-400/20",
         message: `Atenção: ${s.nickname} com custo de aquisição alto (Ads ${adsRatio.toFixed(1)}%). Revisar campanhas.`,
       });
     }
 
-    // Oportunidade Logística
-    if (s.tgmvLc > 0 && s.tgmvLcFull < s.tgmvLc * 0.1) {
+    // Oportunidade Logística (corrigido: usa fTsi / TSI_FULL)
+    if (s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0) {
       alerts.push({
-        type: "logistics",
         icon: Truck,
         color: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-        message: `${s.nickname} com alto volume, mas baixa adoção de envios rápidos (Full ${safePct(s.tgmvLcFull, s.tgmvLc).toFixed(1)}%). Migrar curva A para FULL é urgente.`,
+        message: `${s.nickname} com alto volume, mas sem adoção de Full (TSI_FULL = 0). Migrar curva A para FULL é urgente.`,
       });
     }
   }
@@ -72,8 +76,8 @@ export default function AlertMatrix({ sellers }: Props) {
   }
 
   return (
-    <div className="space-y-2 max-h-[300px] overflow-y-auto scrollbar-thin pr-1">
-      {alerts.slice(0, 15).map((alert, i) => (
+    <div className="space-y-2 max-h-[400px] overflow-y-auto scrollbar-thin pr-1">
+      {alerts.slice(0, 20).map((alert, i) => (
         <div
           key={i}
           className={`flex items-start gap-3 p-3 rounded-lg border ${alert.color}`}
