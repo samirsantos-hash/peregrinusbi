@@ -281,6 +281,7 @@ const Admin = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="user">Consultor</SelectItem>
+                          <SelectItem value="gerente">Gerente de Conta</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
                       </Select>
