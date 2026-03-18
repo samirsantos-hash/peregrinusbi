@@ -27,7 +27,7 @@ interface SellerOption {
   custId: string;
 }
 
-type AppRole = "admin" | "user";
+type AppRole = "admin" | "user" | "gerente";
 
 interface ManagedUser {
   id: string;
