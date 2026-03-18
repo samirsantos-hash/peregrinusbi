@@ -24,6 +24,7 @@ export interface SellerWithKpi {
   tgmvLcFull: number;
   tgmvLcFlex: number;
   invPads: number;
+  tgmvLcPads: number;
   scoreQualidadeFinal: number;
   scoreOfertaFinal: number;
   scoreCaracteristicaFinal: number;
