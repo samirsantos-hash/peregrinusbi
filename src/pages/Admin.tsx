@@ -241,15 +241,23 @@ const Admin = () => {
           <Button variant="outline" size="sm" onClick={signOut}>Sair</Button>
         </motion.div>
 
-        <Tabs defaultValue="users" className="w-full">
+        <Tabs defaultValue={isAdmin ? "users" : "portfolios"} className="w-full">
           <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto">
-            <TabsTrigger value="users" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
-              <Users className="w-4 h-4" />
-              Gestão de Usuários
-            </TabsTrigger>
-            <TabsTrigger value="upload" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
-              <Upload className="w-4 h-4" />
-              Upload de Dados
+            {isAdmin && (
+              <TabsTrigger value="users" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+                <Users className="w-4 h-4" />
+                Gestão de Usuários
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="upload" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+                <Upload className="w-4 h-4" />
+                Upload de Dados
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="portfolios" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+              <Folder className="w-4 h-4" />
+              Gestão de Carteiras
             </TabsTrigger>
           </TabsList>
 
