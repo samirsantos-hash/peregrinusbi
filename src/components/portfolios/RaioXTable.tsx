@@ -131,7 +131,7 @@ export default function RaioXTable({ sellers }: Props) {
                 <SortHeader label="Medalha" k="repCurrentLevel" />
                 <SortHeader label="Faturamento" k="tgmvLc" />
                 <SortHeader label="ROAS" k="roas" />
-                <SortHeader label="% Full" k="pctFull" />
+                <SortHeader label="Potência Full (%)" k="pctFull" />
                 <SortHeader label="% Flex" k="pctFlex" />
                 <SortHeader label="% Ads" k="pctAds" />
                 <SortHeader label="Saúde" k="scoreQualidadeFinal" />
@@ -207,7 +207,7 @@ export default function RaioXTable({ sellers }: Props) {
                               <TooltipTrigger>
                                 <Truck className="w-3.5 h-3.5 text-blue-400" />
                               </TooltipTrigger>
-                              <TooltipContent>Sem adoção de Full (TSI_FULL = 0)</TooltipContent>
+                              <TooltipContent>Baixa Potência no Full (TSI_FULL = 0)</TooltipContent>
                             </Tooltip>
                           )}
                           {!s.alertSubInvest && !s.alertHighAds && !s.alertLogistics && !s.alertQuality && (

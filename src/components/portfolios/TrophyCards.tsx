@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, Rocket, Star, Target } from "lucide-react";
+import { Trophy, Rocket, Star, Target, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 
 function safePct(num: number, den: number): number {
@@ -47,9 +48,10 @@ export default function TrophyCards({ sellers }: Props) {
       icon: Trophy,
       color: "text-yellow-400",
       bg: "bg-yellow-400/10 border-yellow-400/20",
-      title: "Campeão de Logística",
+      title: "📦 Máxima Potência no Full",
       seller: logisticsChamp.nickname,
-      detail: `${logisticsPct.toFixed(1)}% Full real (TSI_FULL)`,
+      detail: `${logisticsPct.toFixed(1)}% Potência Full (TSI_FULL)`,
+      tooltip: "Mede o aproveitamento do potencial de escala do seller utilizando o ecossistema Fulfillment. Sellers com alta potência no Full possuem maior conversão e relevância no algoritmo.",
     },
     {
       icon: Rocket,
@@ -58,6 +60,7 @@ export default function TrophyCards({ sellers }: Props) {
       title: "Maior Tração",
       seller: tractionChamp.nickname,
       detail: `${tractionPct.toFixed(1)}% de efetividade (TGMV/Meta)`,
+      tooltip: null as string | null,
     },
     {
       icon: Star,
@@ -66,6 +69,7 @@ export default function TrophyCards({ sellers }: Props) {
       title: "Excelência em Qualidade",
       seller: qualityChamp.nickname,
       detail: `${qualityChamp.repCurrentLevel || "N/A"} · Score ${qualityChamp.scoreQualidadeFinal.toFixed(0)}`,
+      tooltip: null as string | null,
     },
     {
       icon: Target,
@@ -74,23 +78,36 @@ export default function TrophyCards({ sellers }: Props) {
       title: "Mestre do Ads",
       seller: adsChamp.nickname,
       detail: `Ratio Ads: ${adsPct.toFixed(2)}% (meta 3%)`,
+      tooltip: null as string | null,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-      {trophies.map((t) => (
-        <Card key={t.title} className={`border ${t.bg}`}>
-          <CardContent className="p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <t.icon className={`w-5 h-5 ${t.color}`} />
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t.title}</span>
-            </div>
-            <p className="text-sm font-bold truncate">{t.seller}</p>
-            <p className="text-xs text-muted-foreground">{t.detail}</p>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
+    <TooltipProvider>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {trophies.map((t) => (
+          <Card key={t.title} className={`border ${t.bg}`}>
+            <CardContent className="p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <t.icon className={`w-5 h-5 ${t.color}`} />
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t.title}</span>
+                {t.tooltip && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[280px] text-xs leading-relaxed">
+                      {t.tooltip}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+              <p className="text-sm font-bold truncate">{t.seller}</p>
+              <p className="text-xs text-muted-foreground">{t.detail}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </TooltipProvider>
   );
 }
