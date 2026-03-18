@@ -492,6 +492,10 @@ const Admin = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="portfolios" className="mt-5">
+            <PortfolioManager />
+          </TabsContent>
         </Tabs>
 
         {/* Password Dialog */}
