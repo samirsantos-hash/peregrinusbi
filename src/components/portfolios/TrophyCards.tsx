@@ -70,6 +70,8 @@ export default function TrophyCards({ sellers }: Props) {
       title: "Excelência em Qualidade",
       seller: qualityChamp.nickname,
       detail: `${qualityChamp.repCurrentLevel || "N/A"} · Score ${qualityChamp.scoreQualidadeFinal.toFixed(0)}`,
+      tooltip: null,
+      detail: `${qualityChamp.repCurrentLevel || "N/A"} · Score ${qualityChamp.scoreQualidadeFinal.toFixed(0)}`,
     },
     {
       icon: Target,
