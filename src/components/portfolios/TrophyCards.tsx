@@ -48,9 +48,10 @@ export default function TrophyCards({ sellers }: Props) {
       icon: Trophy,
       color: "text-yellow-400",
       bg: "bg-yellow-400/10 border-yellow-400/20",
-      title: "Campeão de Logística",
+      title: "📦 Máxima Potência no Full",
       seller: logisticsChamp.nickname,
-      detail: `${logisticsPct.toFixed(1)}% Full real (TSI_FULL)`,
+      detail: `${logisticsPct.toFixed(1)}% Potência Full (TSI_FULL)`,
+      tooltip: "Mede o aproveitamento do potencial de escala do seller utilizando o ecossistema Fulfillment. Sellers com alta potência no Full possuem maior conversão e relevância no algoritmo.",
     },
     {
       icon: Rocket,
