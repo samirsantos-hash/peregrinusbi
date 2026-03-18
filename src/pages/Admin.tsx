@@ -129,7 +129,7 @@ const Admin = () => {
       toast({ title: "Preencha o e-mail", variant: "destructive" });
       return;
     }
-    if (newRole === "user" && selectedCustIds.length === 0) {
+    if ((newRole === "user" || newRole === "gerente") && selectedCustIds.length === 0) {
       toast({ title: "Selecione ao menos uma loja para o Consultor", variant: "destructive" });
       return;
     }
