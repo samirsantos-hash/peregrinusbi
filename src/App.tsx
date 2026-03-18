@@ -19,7 +19,7 @@ import ResetPassword from "./pages/ResetPassword";
 const queryClient = new QueryClient();
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
-  const { user, loading, isAdmin, mustChangePassword } = useAuth();
+  const { user, loading, isAdmin, isGerente, mustChangePassword } = useAuth();
 
   if (loading) {
     return (
@@ -31,7 +31,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 
   if (!user) return <Navigate to="/auth" replace />;
   if (mustChangePassword) return <Navigate to="/change-password" replace />;
-  if (adminOnly && !isAdmin) return <Navigate to="/" replace />;
+  if (adminOnly && !isAdmin && !isGerente) return <Navigate to="/" replace />;
 
   return <>{children}</>;
 }

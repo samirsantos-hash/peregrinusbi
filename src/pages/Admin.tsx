@@ -8,13 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store } from "lucide-react";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Eye, EyeOff, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store, Folder } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
+import PortfolioManager from "@/components/portfolios/PortfolioManager";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +27,7 @@ interface SellerOption {
   custId: string;
 }
 
-type AppRole = "admin" | "user";
+type AppRole = "admin" | "user" | "gerente";
 
 interface ManagedUser {
   id: string;
@@ -56,7 +57,7 @@ const UPLOAD_TYPE_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const Admin = () => {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isGerente, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -91,9 +92,9 @@ const Admin = () => {
     const rolesMap: Record<string, AppRole> = {};
     if (rolesRes.data) {
       for (const r of rolesRes.data) {
-        // Prefer admin if user has multiple roles
-        if (!rolesMap[r.user_id] || r.role === "admin") {
-          rolesMap[r.user_id] = r.role as AppRole;
+        const role = r.role as AppRole;
+        if (!rolesMap[r.user_id] || role === "admin") {
+          rolesMap[r.user_id] = role;
         }
       }
     }
@@ -128,7 +129,7 @@ const Admin = () => {
       toast({ title: "Preencha o e-mail", variant: "destructive" });
       return;
     }
-    if (newRole === "user" && selectedCustIds.length === 0) {
+    if ((newRole === "user" || newRole === "gerente") && selectedCustIds.length === 0) {
       toast({ title: "Selecione ao menos uma loja para o Consultor", variant: "destructive" });
       return;
     }
@@ -240,15 +241,23 @@ const Admin = () => {
           <Button variant="outline" size="sm" onClick={signOut}>Sair</Button>
         </motion.div>
 
-        <Tabs defaultValue="users" className="w-full">
+        <Tabs defaultValue={isAdmin ? "users" : "portfolios"} className="w-full">
           <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto">
-            <TabsTrigger value="users" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
-              <Users className="w-4 h-4" />
-              Gestão de Usuários
-            </TabsTrigger>
-            <TabsTrigger value="upload" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
-              <Upload className="w-4 h-4" />
-              Upload de Dados
+            {isAdmin && (
+              <TabsTrigger value="users" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+                <Users className="w-4 h-4" />
+                Gestão de Usuários
+              </TabsTrigger>
+            )}
+            {isAdmin && (
+              <TabsTrigger value="upload" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+                <Upload className="w-4 h-4" />
+                Upload de Dados
+              </TabsTrigger>
+            )}
+            <TabsTrigger value="portfolios" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+              <Folder className="w-4 h-4" />
+              Gestão de Carteiras
             </TabsTrigger>
           </TabsList>
 
@@ -280,13 +289,14 @@ const Admin = () => {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="user">Consultor</SelectItem>
+                          <SelectItem value="gerente">Gerente de Conta</SelectItem>
                           <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                   </div>
 
-                  {newRole === "user" && <div className="space-y-2">
+                  {(newRole === "user" || newRole === "gerente") && <div className="space-y-2">
                     <Label>Lojas Autorizadas (CUST_ID)</Label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -387,9 +397,11 @@ const Admin = () => {
                               "text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider",
                               u.role === "admin"
                                 ? "bg-neon-blue/15 text-neon-blue border border-neon-blue/30"
+                                : u.role === "gerente"
+                                ? "bg-primary/15 text-primary border border-primary/30"
                                 : "bg-muted/50 text-muted-foreground border border-border"
                             )}>
-                              {u.role === "admin" ? "Admin" : "Consultor"}
+                              {u.role === "admin" ? "Admin" : u.role === "gerente" ? "Gerente" : "Consultor"}
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground">
@@ -479,6 +491,10 @@ const Admin = () => {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="portfolios" className="mt-5">
+            <PortfolioManager />
           </TabsContent>
         </Tabs>
 

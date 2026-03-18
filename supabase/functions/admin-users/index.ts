@@ -107,7 +107,7 @@ Deno.serve(async (req) => {
 
     if (action === "create_user") {
       const { email, cnpj, allowedCustIds, role } = body;
-      const userRole = role === "admin" ? "admin" : "user";
+      const userRole = ["admin", "gerente"].includes(role) ? role : "user";
 
       const tempPassword = generateTempPassword();
       const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();

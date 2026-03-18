@@ -55,6 +55,30 @@ export type Database = {
           },
         ]
       }
+      portfolios: {
+        Row: {
+          created_at: string
+          created_by: string
+          cust_ids: string[]
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          cust_ids?: string[]
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          cust_ids?: string[]
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -697,7 +721,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "gerente"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -825,7 +849,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "gerente"],
     },
   },
 } as const
