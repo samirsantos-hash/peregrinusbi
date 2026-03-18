@@ -389,9 +389,11 @@ const Admin = () => {
                               "text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider",
                               u.role === "admin"
                                 ? "bg-neon-blue/15 text-neon-blue border border-neon-blue/30"
+                                : u.role === "gerente"
+                                ? "bg-primary/15 text-primary border border-primary/30"
                                 : "bg-muted/50 text-muted-foreground border border-border"
                             )}>
-                              {u.role === "admin" ? "Admin" : "Consultor"}
+                              {u.role === "admin" ? "Admin" : u.role === "gerente" ? "Gerente" : "Consultor"}
                             </span>
                           </div>
                           <p className="text-xs text-muted-foreground">
