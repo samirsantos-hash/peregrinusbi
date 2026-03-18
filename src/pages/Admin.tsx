@@ -57,7 +57,7 @@ const UPLOAD_TYPE_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const Admin = () => {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isGerente, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
