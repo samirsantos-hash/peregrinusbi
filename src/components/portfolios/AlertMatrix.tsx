@@ -55,12 +55,12 @@ export default function AlertMatrix({ sellers }: Props) {
       });
     }
 
-    // Oportunidade Logística (corrigido: usa fTsi / TSI_FULL)
+    // ⚠️ Oportunidade de Escala (Potência no Full)
     if (s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0) {
       alerts.push({
         icon: Truck,
         color: "text-blue-400 bg-blue-400/10 border-blue-400/20",
-        message: `${s.nickname} com alto volume, mas sem adoção de Full (TSI_FULL = 0). Migrar curva A para FULL é urgente.`,
+        message: `⚠️ Oportunidade de Escala: ${s.nickname} possui alto volume de vendas, mas baixa Potência no Full. Enviar a Curva A deste seller para o Fulfillment é a alavanca mais rápida para dobrar o faturamento atual.`,
       });
     }
   }

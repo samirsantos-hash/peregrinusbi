@@ -207,7 +207,7 @@ export default function RaioXTable({ sellers }: Props) {
                               <TooltipTrigger>
                                 <Truck className="w-3.5 h-3.5 text-blue-400" />
                               </TooltipTrigger>
-                              <TooltipContent>Sem adoção de Full (TSI_FULL = 0)</TooltipContent>
+                              <TooltipContent>Baixa Potência no Full (TSI_FULL = 0)</TooltipContent>
                             </Tooltip>
                           )}
                           {!s.alertSubInvest && !s.alertHighAds && !s.alertLogistics && !s.alertQuality && (
