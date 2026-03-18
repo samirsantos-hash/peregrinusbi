@@ -81,7 +81,7 @@ const SoundToggleButton = () => {
 };
 
 const Index = () => {
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isGerente, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
