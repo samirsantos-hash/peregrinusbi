@@ -169,7 +169,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
             <CardContent className="p-4 space-y-1">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Truck className="w-4 h-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Logística</span>
+                <span className="text-xs font-semibold uppercase tracking-wider">Potência no Full</span>
               </div>
               <p className="text-xl font-bold">{summary.pctFull.toFixed(1)}% Potência Full</p>
               <p className="text-xs text-muted-foreground">

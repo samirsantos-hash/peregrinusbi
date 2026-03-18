@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Trophy, Rocket, Star, Target } from "lucide-react";
+import { Trophy, Rocket, Star, Target, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 
 function safePct(num: number, den: number): number {
