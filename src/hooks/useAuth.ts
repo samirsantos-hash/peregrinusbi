@@ -42,6 +42,7 @@ export function useAuth() {
       if (!mounted) return;
 
       setIsAdmin(rolesResult.data?.some((r) => r.role === "admin") ?? false);
+      setIsGerente(rolesResult.data?.some((r) => r.role === "gerente") ?? false);
 
       const access = accessResult.data;
       if (access) {
