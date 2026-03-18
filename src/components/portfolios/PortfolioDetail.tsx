@@ -171,7 +171,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
                 <Truck className="w-4 h-4" />
                 <span className="text-xs font-semibold uppercase tracking-wider">Logística</span>
               </div>
-              <p className="text-xl font-bold">{summary.pctFull.toFixed(1)}% Full</p>
+              <p className="text-xl font-bold">{summary.pctFull.toFixed(1)}% Potência Full</p>
               <p className="text-xs text-muted-foreground">
                 Flex: {summary.pctFlex.toFixed(1)}% · Baseado em TSI_FULL
               </p>
