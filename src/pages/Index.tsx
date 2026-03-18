@@ -292,10 +292,10 @@ const Index = () => {
           <div className="flex items-center gap-2">
             {/* Sound toggle */}
             <SoundToggleButton />
-            {isAdmin &&
+            {(isAdmin || isGerente) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
                 <Settings className="w-4 h-4" />
-                Admin
+                {isGerente && !isAdmin ? "Carteiras" : "Admin"}
               </Button>
             }
             <Button variant="ghost" size="sm" onClick={signOut} className="gap-2">
