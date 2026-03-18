@@ -60,6 +60,8 @@ export default function TrophyCards({ sellers }: Props) {
       title: "Maior Tração",
       seller: tractionChamp.nickname,
       detail: `${tractionPct.toFixed(1)}% de efetividade (TGMV/Meta)`,
+      tooltip: null,
+      detail: `${tractionPct.toFixed(1)}% de efetividade (TGMV/Meta)`,
     },
     {
       icon: Star,
