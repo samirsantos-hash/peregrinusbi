@@ -111,6 +111,34 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
     else { setSortKey(key); setSortAsc(false); }
   };
 
+  const handleExportExcel = async () => {
+    const XLSX = await import("xlsx");
+    const rows = getExportRows(sorted);
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Raio-X");
+    XLSX.writeFile(wb, `${portfolioName}_RaioX.xlsx`);
+    toast.success("Excel exportado com sucesso!");
+  };
+
+  const handleExportPdf = async () => {
+    const { default: jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
+    const doc = new jsPDF({ orientation: "landscape" });
+    doc.setFontSize(14);
+    doc.text(`Raio-X — ${portfolioName}`, 14, 18);
+    doc.setFontSize(9);
+    doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 14, 24);
+
+    const rows = getExportRows(sorted);
+    const headers = Object.keys(rows[0] || {});
+    const body = rows.map((r) => headers.map((h) => String((r as any)[h] ?? "")));
+
+    autoTable(doc, { head: [headers], body, startY: 28, styles: { fontSize: 7 }, headStyles: { fillColor: [30, 30, 30] } });
+    doc.save(`${portfolioName}_RaioX.pdf`);
+    toast.success("PDF exportado com sucesso!");
+  };
+
   const pills: { key: FilterPill; label: string }[] = [
     { key: "all", label: "Todos" },
     { key: "platinum", label: "Apenas Platinum" },
