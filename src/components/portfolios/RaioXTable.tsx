@@ -2,9 +2,11 @@ import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, MapPin, Camera, AlertTriangle, TrendingUp, Truck } from "lucide-react";
+import { ArrowUpDown, MapPin, Camera, AlertTriangle, TrendingUp, Truck, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
+import { toast } from "sonner";
 
 function safePct(num: number, den: number): number {
   if (!den || den === 0) return 0;
