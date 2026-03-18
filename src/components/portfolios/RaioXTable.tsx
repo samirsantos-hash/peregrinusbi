@@ -2,9 +2,11 @@ import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, MapPin, Camera, AlertTriangle, TrendingUp, Truck } from "lucide-react";
+import { ArrowUpDown, MapPin, Camera, AlertTriangle, TrendingUp, Truck, Download, FileSpreadsheet, FileText } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
+import { toast } from "sonner";
 
 function safePct(num: number, den: number): number {
   if (!den || den === 0) return 0;
@@ -29,30 +31,50 @@ type SortKey = "nickname" | "cusState" | "repCurrentLevel" | "tgmvLc" | "roas" |
 
 interface Props {
   sellers: SellerWithKpi[];
+  portfolioName?: string;
 }
 
-export default function RaioXTable({ sellers }: Props) {
+function getExportRows(data: ReturnType<typeof enrichRows>) {
+  return data.map((s) => ({
+    Seller: s.nickname,
+    Medalha: getMedalStyle(s.repCurrentLevel).label,
+    "Faturamento (R$)": s.tgmvLc,
+    ROAS: Number(s.roas.toFixed(1)),
+    "Potência Full (%)": Number(s.pctFull.toFixed(1)),
+    "% Flex": Number(s.pctFlex.toFixed(1)),
+    "% Ads": Number(s.pctAds.toFixed(2)),
+    "Saúde Catálogo": Number(s.scoreQualidadeFinal.toFixed(0)),
+    Alertas: [
+      s.alertQuality ? "📸 Fotos" : "",
+      s.alertSubInvest ? "↗ SubInvest" : "",
+      s.alertHighAds ? "⚠ Alto Ads" : "",
+      s.alertLogistics ? "🚚 Full=0" : "",
+    ].filter(Boolean).join(", ") || "✓",
+  }));
+}
+
+type EnrichedSeller = SellerWithKpi & { pctFlex: number; pctFull: number; pctAds: number; roas: number; alertQuality: boolean; alertSubInvest: boolean; alertHighAds: boolean; alertLogistics: boolean };
+
+function enrichRows(sellers: SellerWithKpi[]): EnrichedSeller[] {
+  return sellers.map((s) => {
+    const pctFlex = safePct(s.tsiFlex, s.tsi);
+    const pctFull = safePct(s.fTsi, s.tsi);
+    const pctAds = safePct(s.invPads, s.tgmvLc);
+    const roas = s.invPads > 0 ? (s.tgmvLcPads || 0) / s.invPads : 0;
+    const alertQuality = s.scoreQualidadeFinal < 50;
+    const alertSubInvest = s.tgmvLc > 0 && pctAds < 1.5;
+    const alertHighAds = pctAds > 5;
+    const alertLogistics = s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
+    return { ...s, pctFlex, pctFull, pctAds, roas, alertQuality, alertSubInvest, alertHighAds, alertLogistics };
+  });
+}
+
+export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Props) {
   const [filter, setFilter] = useState<FilterPill>("all");
   const [sortKey, setSortKey] = useState<SortKey>("tgmvLc");
   const [sortAsc, setSortAsc] = useState(false);
 
-  const enriched = useMemo(() =>
-    sellers.map((s) => {
-      const pctFlex = safePct(s.tsiFlex, s.tsi);
-      const pctFull = safePct(s.fTsi, s.tsi);
-      const pctAds = safePct(s.invPads, s.tgmvLc);
-      const roas = s.invPads > 0 ? (s.tgmvLcPads || 0) / s.invPads : 0;
-
-      // Alert flags
-      const alertQuality = s.scoreQualidadeFinal < 50;
-      const alertSubInvest = s.tgmvLc > 0 && pctAds < 1.5;
-      const alertHighAds = pctAds > 5;
-      const alertLogistics = s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
-
-      return { ...s, pctFlex, pctFull, pctAds, roas, alertQuality, alertSubInvest, alertHighAds, alertLogistics };
-    }),
-    [sellers]
-  );
+  const enriched = useMemo(() => enrichRows(sellers), [sellers]);
 
   const filtered = useMemo(() => {
     let list = enriched;
@@ -89,6 +111,34 @@ export default function RaioXTable({ sellers }: Props) {
     else { setSortKey(key); setSortAsc(false); }
   };
 
+  const handleExportExcel = async () => {
+    const XLSX = await import("xlsx");
+    const rows = getExportRows(sorted);
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Raio-X");
+    XLSX.writeFile(wb, `${portfolioName}_RaioX.xlsx`);
+    toast.success("Excel exportado com sucesso!");
+  };
+
+  const handleExportPdf = async () => {
+    const { default: jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
+    const doc = new jsPDF({ orientation: "landscape" });
+    doc.setFontSize(14);
+    doc.text(`Raio-X — ${portfolioName}`, 14, 18);
+    doc.setFontSize(9);
+    doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 14, 24);
+
+    const rows = getExportRows(sorted);
+    const headers = Object.keys(rows[0] || {});
+    const body = rows.map((r) => headers.map((h) => String((r as any)[h] ?? "")));
+
+    autoTable(doc, { head: [headers], body, startY: 28, styles: { fontSize: 7 }, headStyles: { fillColor: [30, 30, 30] } });
+    doc.save(`${portfolioName}_RaioX.pdf`);
+    toast.success("PDF exportado com sucesso!");
+  };
+
   const pills: { key: FilterPill; label: string }[] = [
     { key: "all", label: "Todos" },
     { key: "platinum", label: "Apenas Platinum" },
@@ -109,18 +159,38 @@ export default function RaioXTable({ sellers }: Props) {
   return (
     <TooltipProvider>
       <div className="space-y-3">
-        <div className="flex flex-wrap gap-2">
-          {pills.map((p) => (
-            <Button
-              key={p.key}
-              variant={filter === p.key ? "default" : "outline"}
-              size="sm"
-              className="text-xs"
-              onClick={() => setFilter(p.key)}
-            >
-              {p.label}
-            </Button>
-          ))}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-2">
+            {pills.map((p) => (
+              <Button
+                key={p.key}
+                variant={filter === p.key ? "default" : "outline"}
+                size="sm"
+                className="text-xs"
+                onClick={() => setFilter(p.key)}
+              >
+                {p.label}
+              </Button>
+            ))}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                <Download className="w-3.5 h-3.5" />
+                Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
+                <FileSpreadsheet className="w-4 h-4" />
+                Excel (.xlsx)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportPdf} className="gap-2 cursor-pointer">
+                <FileText className="w-4 h-4" />
+                PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="overflow-auto rounded-lg border border-border">
