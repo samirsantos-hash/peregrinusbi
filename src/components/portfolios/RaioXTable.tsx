@@ -131,7 +131,7 @@ export default function RaioXTable({ sellers }: Props) {
                 <SortHeader label="Medalha" k="repCurrentLevel" />
                 <SortHeader label="Faturamento" k="tgmvLc" />
                 <SortHeader label="ROAS" k="roas" />
-                <SortHeader label="% Full" k="pctFull" />
+                <SortHeader label="Potência Full (%)" k="pctFull" />
                 <SortHeader label="% Flex" k="pctFlex" />
                 <SortHeader label="% Ads" k="pctAds" />
                 <SortHeader label="Saúde" k="scoreQualidadeFinal" />
