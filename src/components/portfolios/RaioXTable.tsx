@@ -31,6 +31,42 @@ type SortKey = "nickname" | "cusState" | "repCurrentLevel" | "tgmvLc" | "roas" |
 
 interface Props {
   sellers: SellerWithKpi[];
+  portfolioName?: string;
+}
+
+function getExportRows(data: ReturnType<typeof enrichRows>) {
+  return data.map((s) => ({
+    Seller: s.nickname,
+    Medalha: getMedalStyle(s.repCurrentLevel).label,
+    "Faturamento (R$)": s.tgmvLc,
+    ROAS: Number(s.roas.toFixed(1)),
+    "Potência Full (%)": Number(s.pctFull.toFixed(1)),
+    "% Flex": Number(s.pctFlex.toFixed(1)),
+    "% Ads": Number(s.pctAds.toFixed(2)),
+    "Saúde Catálogo": Number(s.scoreQualidadeFinal.toFixed(0)),
+    Alertas: [
+      s.alertQuality ? "📸 Fotos" : "",
+      s.alertSubInvest ? "↗ SubInvest" : "",
+      s.alertHighAds ? "⚠ Alto Ads" : "",
+      s.alertLogistics ? "🚚 Full=0" : "",
+    ].filter(Boolean).join(", ") || "✓",
+  }));
+}
+
+type EnrichedSeller = SellerWithKpi & { pctFlex: number; pctFull: number; pctAds: number; roas: number; alertQuality: boolean; alertSubInvest: boolean; alertHighAds: boolean; alertLogistics: boolean };
+
+function enrichRows(sellers: SellerWithKpi[]): EnrichedSeller[] {
+  return sellers.map((s) => {
+    const pctFlex = safePct(s.tsiFlex, s.tsi);
+    const pctFull = safePct(s.fTsi, s.tsi);
+    const pctAds = safePct(s.invPads, s.tgmvLc);
+    const roas = s.invPads > 0 ? (s.tgmvLcPads || 0) / s.invPads : 0;
+    const alertQuality = s.scoreQualidadeFinal < 50;
+    const alertSubInvest = s.tgmvLc > 0 && pctAds < 1.5;
+    const alertHighAds = pctAds > 5;
+    const alertLogistics = s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
+    return { ...s, pctFlex, pctFull, pctAds, roas, alertQuality, alertSubInvest, alertHighAds, alertLogistics };
+  });
 }
 
 export default function RaioXTable({ sellers }: Props) {
