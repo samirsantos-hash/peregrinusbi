@@ -7,6 +7,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isGerente, setIsGerente] = useState(false);
   const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
