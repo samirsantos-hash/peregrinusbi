@@ -200,7 +200,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
 
         <div className="lg:col-span-2 space-y-3">
           <h3 className="text-sm font-bold">📊 Raio-X da Carteira</h3>
-          <RaioXTable sellers={filteredSellers} />
+          <RaioXTable sellers={filteredSellers} portfolioName={portfolio.name} />
         </div>
       </div>
     </div>
