@@ -159,18 +159,38 @@ export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Prop
   return (
     <TooltipProvider>
       <div className="space-y-3">
-        <div className="flex flex-wrap gap-2">
-          {pills.map((p) => (
-            <Button
-              key={p.key}
-              variant={filter === p.key ? "default" : "outline"}
-              size="sm"
-              className="text-xs"
-              onClick={() => setFilter(p.key)}
-            >
-              {p.label}
-            </Button>
-          ))}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap gap-2">
+            {pills.map((p) => (
+              <Button
+                key={p.key}
+                variant={filter === p.key ? "default" : "outline"}
+                size="sm"
+                className="text-xs"
+                onClick={() => setFilter(p.key)}
+              >
+                {p.label}
+              </Button>
+            ))}
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5 text-xs">
+                <Download className="w-3.5 h-3.5" />
+                Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
+                <FileSpreadsheet className="w-4 h-4" />
+                Excel (.xlsx)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportPdf} className="gap-2 cursor-pointer">
+                <FileText className="w-4 h-4" />
+                PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="overflow-auto rounded-lg border border-border">
