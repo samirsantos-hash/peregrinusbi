@@ -101,5 +101,5 @@ export function useAuth() {
     return { error: null };
   };
 
-  return { user, session, loading, isAdmin, mustChangePassword, signIn, signOut, updatePassword };
+  return { user, session, loading, isAdmin, isGerente, mustChangePassword, signIn, signOut, updatePassword };
 }
