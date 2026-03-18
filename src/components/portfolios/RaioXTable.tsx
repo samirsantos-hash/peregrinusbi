@@ -69,28 +69,12 @@ function enrichRows(sellers: SellerWithKpi[]): EnrichedSeller[] {
   });
 }
 
-export default function RaioXTable({ sellers }: Props) {
+export default function RaioXTable({ sellers, portfolioName = "Carteira" }: Props) {
   const [filter, setFilter] = useState<FilterPill>("all");
   const [sortKey, setSortKey] = useState<SortKey>("tgmvLc");
   const [sortAsc, setSortAsc] = useState(false);
 
-  const enriched = useMemo(() =>
-    sellers.map((s) => {
-      const pctFlex = safePct(s.tsiFlex, s.tsi);
-      const pctFull = safePct(s.fTsi, s.tsi);
-      const pctAds = safePct(s.invPads, s.tgmvLc);
-      const roas = s.invPads > 0 ? (s.tgmvLcPads || 0) / s.invPads : 0;
-
-      // Alert flags
-      const alertQuality = s.scoreQualidadeFinal < 50;
-      const alertSubInvest = s.tgmvLc > 0 && pctAds < 1.5;
-      const alertHighAds = pctAds > 5;
-      const alertLogistics = s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
-
-      return { ...s, pctFlex, pctFull, pctAds, roas, alertQuality, alertSubInvest, alertHighAds, alertLogistics };
-    }),
-    [sellers]
-  );
+  const enriched = useMemo(() => enrichRows(sellers), [sellers]);
 
   const filtered = useMemo(() => {
     let list = enriched;
