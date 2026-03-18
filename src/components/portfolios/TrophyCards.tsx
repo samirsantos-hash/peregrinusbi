@@ -80,6 +80,8 @@ export default function TrophyCards({ sellers }: Props) {
       title: "Mestre do Ads",
       seller: adsChamp.nickname,
       detail: `Ratio Ads: ${adsPct.toFixed(2)}% (meta 3%)`,
+      tooltip: null,
+      detail: `Ratio Ads: ${adsPct.toFixed(2)}% (meta 3%)`,
     },
   ];
 
