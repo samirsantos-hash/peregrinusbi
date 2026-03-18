@@ -15,6 +15,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
+import PortfolioManager from "@/components/portfolios/PortfolioManager";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
