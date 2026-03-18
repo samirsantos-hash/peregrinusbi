@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { ArrowUpDown, MapPin, Camera, AlertTriangle, TrendingUp, Truck } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 
 function safePct(num: number, den: number): number {
@@ -13,8 +15,17 @@ function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
 
+function getMedalStyle(level: string | null): { label: string; className: string } {
+  const l = (level || "").toLowerCase();
+  if (l.includes("platinum")) return { label: "Platinum", className: "bg-slate-500/20 text-slate-300 border-slate-500/30" };
+  if (l.includes("gold")) return { label: "Gold", className: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" };
+  if (l.includes("silver")) return { label: "Silver", className: "bg-gray-400/20 text-gray-300 border-gray-400/30" };
+  if (l.includes("leader") || l.includes("líder")) return { label: "Líder", className: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" };
+  return { label: level || "—", className: "bg-muted/30 text-muted-foreground border-border" };
+}
+
 type FilterPill = "all" | "platinum" | "ads3" | "full" | "growth";
-type SortKey = "nickname" | "cusState" | "repCurrentLevel" | "tgmvLc" | "pctFlex" | "pctFull" | "pctAds" | "scoreQualidadeFinal";
+type SortKey = "nickname" | "cusState" | "repCurrentLevel" | "tgmvLc" | "roas" | "pctFull" | "pctFlex" | "pctAds" | "scoreQualidadeFinal";
 
 interface Props {
   sellers: SellerWithKpi[];
@@ -26,12 +37,20 @@ export default function RaioXTable({ sellers }: Props) {
   const [sortAsc, setSortAsc] = useState(false);
 
   const enriched = useMemo(() =>
-    sellers.map((s) => ({
-      ...s,
-      pctFlex: safePct(s.tgmvLcFlex, s.tgmvLc),
-      pctFull: safePct(s.tgmvLcFull, s.tgmvLc),
-      pctAds: safePct(s.invPads, s.tgmvLc),
-    })),
+    sellers.map((s) => {
+      const pctFlex = safePct(s.tsiFlex, s.tsi);
+      const pctFull = safePct(s.fTsi, s.tsi);
+      const pctAds = safePct(s.invPads, s.tgmvLc);
+      const roas = s.invPads > 0 ? (s.tgmvLcPads || 0) / s.invPads : 0;
+
+      // Alert flags
+      const alertQuality = s.scoreQualidadeFinal < 50;
+      const alertSubInvest = s.tgmvLc > 0 && pctAds < 1.5;
+      const alertHighAds = pctAds > 5;
+      const alertLogistics = s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
+
+      return { ...s, pctFlex, pctFull, pctAds, roas, alertQuality, alertSubInvest, alertHighAds, alertLogistics };
+    }),
     [sellers]
   );
 
@@ -88,78 +107,122 @@ export default function RaioXTable({ sellers }: Props) {
   );
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        {pills.map((p) => (
-          <Button
-            key={p.key}
-            variant={filter === p.key ? "default" : "outline"}
-            size="sm"
-            className="text-xs"
-            onClick={() => setFilter(p.key)}
-          >
-            {p.label}
-          </Button>
-        ))}
-      </div>
+    <TooltipProvider>
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {pills.map((p) => (
+            <Button
+              key={p.key}
+              variant={filter === p.key ? "default" : "outline"}
+              size="sm"
+              className="text-xs"
+              onClick={() => setFilter(p.key)}
+            >
+              {p.label}
+            </Button>
+          ))}
+        </div>
 
-      <div className="overflow-auto rounded-lg border border-border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <SortHeader label="Seller" k="nickname" />
-              <SortHeader label="Região" k="cusState" />
-              <SortHeader label="Reputação" k="repCurrentLevel" />
-              <SortHeader label="Faturamento" k="tgmvLc" />
-              <SortHeader label="% Flex" k="pctFlex" />
-              <SortHeader label="% Full" k="pctFull" />
-              <SortHeader label="% Ads" k="pctAds" />
-              <SortHeader label="Saúde Catálogo" k="scoreQualidadeFinal" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sorted.length === 0 ? (
+        <div className="overflow-auto rounded-lg border border-border">
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                  Nenhum seller encontrado com esse filtro.
-                </TableCell>
+                <SortHeader label="Seller" k="nickname" />
+                <SortHeader label="Medalha" k="repCurrentLevel" />
+                <SortHeader label="Faturamento" k="tgmvLc" />
+                <SortHeader label="ROAS" k="roas" />
+                <SortHeader label="% Full" k="pctFull" />
+                <SortHeader label="% Flex" k="pctFlex" />
+                <SortHeader label="% Ads" k="pctAds" />
+                <SortHeader label="Saúde" k="scoreQualidadeFinal" />
+                <TableHead className="whitespace-nowrap">Alertas</TableHead>
               </TableRow>
-            ) : (
-              sorted.map((s) => (
-                <TableRow key={s.custId}>
-                  <TableCell className="font-medium text-sm">{s.nickname}</TableCell>
-                  <TableCell className="text-xs">
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-muted-foreground" />
-                      {s.cusState || "—"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-muted/50 border border-border">
-                      {s.repCurrentLevel || "—"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="font-mono text-sm">{fmtBRL(s.tgmvLc)}</TableCell>
-                  <TableCell className="font-mono text-sm">{s.pctFlex.toFixed(1)}%</TableCell>
-                  <TableCell className="font-mono text-sm">{s.pctFull.toFixed(1)}%</TableCell>
-                  <TableCell className="font-mono text-sm">{s.pctAds.toFixed(2)}%</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 h-2 rounded-full bg-muted overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-primary"
-                          style={{ width: `${Math.min(s.scoreQualidadeFinal, 100)}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-mono">{s.scoreQualidadeFinal.toFixed(0)}</span>
-                    </div>
+            </TableHeader>
+            <TableBody>
+              {sorted.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                    Nenhum seller encontrado com esse filtro.
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                sorted.map((s) => {
+                  const medal = getMedalStyle(s.repCurrentLevel);
+                  return (
+                    <TableRow key={s.custId}>
+                      <TableCell className="font-medium text-sm">
+                        <span className="inline-flex items-center gap-1.5">
+                          {s.alertQuality && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Camera className="w-3.5 h-3.5 text-destructive shrink-0" />
+                              </TooltipTrigger>
+                              <TooltipContent>📸 Melhorar Fotos / Catálogo</TooltipContent>
+                            </Tooltip>
+                          )}
+                          {s.nickname}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={`text-xs border ${medal.className}`}>
+                          {medal.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">{fmtBRL(s.tgmvLc)}</TableCell>
+                      <TableCell className="font-mono text-sm">{s.roas.toFixed(1)}x</TableCell>
+                      <TableCell className="font-mono text-sm">{s.pctFull.toFixed(1)}%</TableCell>
+                      <TableCell className="font-mono text-sm">{s.pctFlex.toFixed(1)}%</TableCell>
+                      <TableCell className="font-mono text-sm">{s.pctAds.toFixed(2)}%</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-2 rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-primary"
+                              style={{ width: `${Math.min(s.scoreQualidadeFinal, 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-mono">{s.scoreQualidadeFinal.toFixed(0)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {s.alertSubInvest && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>Subinvestimento em Ads ({'<'}1.5%)</TooltipContent>
+                            </Tooltip>
+                          )}
+                          {s.alertHighAds && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>Vazamento de Margem (Ads {'>'} 5%)</TooltipContent>
+                            </Tooltip>
+                          )}
+                          {s.alertLogistics && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Truck className="w-3.5 h-3.5 text-blue-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>Sem adoção de Full (TSI_FULL = 0)</TooltipContent>
+                            </Tooltip>
+                          )}
+                          {!s.alertSubInvest && !s.alertHighAds && !s.alertLogistics && !s.alertQuality && (
+                            <span className="text-xs text-muted-foreground">✓</span>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }

@@ -1,11 +1,12 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Loader2, Folder, TrendingUp, AlertTriangle } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Loader2, Folder, TrendingUp, AlertTriangle, DollarSign, BarChart3, Truck, Tag } from "lucide-react";
 import { usePortfolioData, type Portfolio } from "@/hooks/usePortfolios";
 import TrophyCards from "./TrophyCards";
 import AlertMatrix from "./AlertMatrix";
 import RaioXTable from "./RaioXTable";
+import MedalFilter from "./MedalFilter";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -23,29 +24,58 @@ interface Props {
 
 export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const { sellers, loading } = usePortfolioData(portfolio.cust_ids);
+  const [selectedMedals, setSelectedMedals] = useState<string[]>([]);
+
+  const filteredSellers = useMemo(() => {
+    if (selectedMedals.length === 0) return sellers;
+    return sellers.filter((s) => {
+      const level = (s.repCurrentLevel || "").toLowerCase();
+      return selectedMedals.some((m) => {
+        if (m === "sem_medalha") return !level || level === "" || level === "null";
+        return level.includes(m.toLowerCase());
+      });
+    });
+  }, [sellers, selectedMedals]);
 
   const summary = useMemo(() => {
-    if (!sellers.length) return null;
+    if (!filteredSellers.length) return null;
 
-    const totalRevenue = sellers.reduce((s, x) => s + x.tgmvLc, 0);
-    const topSeller = [...sellers].sort((a, b) => b.tgmvLc - a.tgmvLc)[0];
+    const totalRevenue = filteredSellers.reduce((s, x) => s + x.tgmvLc, 0);
+    const topSeller = [...filteredSellers].sort((a, b) => b.tgmvLc - a.tgmvLc)[0];
 
-    const subInvestCount = sellers.filter((s) => {
+    const subInvestCount = filteredSellers.filter((s) => {
       const ratio = safePct(s.invPads, s.tgmvLc);
       return s.tgmvLc > 0 && ratio < 1.5;
     }).length;
 
-    const lowFullCount = sellers.filter((s) => {
-      return s.tgmvLc > 0 && s.tgmvLcFull < s.tgmvLc * 0.1;
+    const lowFullCount = filteredSellers.filter((s) => {
+      return s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
     }).length;
+
+    // KPI cards
+    const totalTgmvPads = filteredSellers.reduce((s, x) => s + (x.tgmvLcPads || 0), 0);
+    const totalInvPads = filteredSellers.reduce((s, x) => s + x.invPads, 0);
+    const roas = totalInvPads > 0 ? totalTgmvPads / totalInvPads : 0;
+    const adsRatio = safePct(totalInvPads, totalRevenue);
+
+    const totalTsi = filteredSellers.reduce((s, x) => s + x.tsi, 0);
+    const totalTsiFull = filteredSellers.reduce((s, x) => s + x.fTsi, 0);
+    const totalTsiFlex = filteredSellers.reduce((s, x) => s + x.tsiFlex, 0);
+    const pctFull = safePct(totalTsiFull, totalTsi);
+    const pctFlex = safePct(totalTsiFlex, totalTsi);
 
     return {
       totalRevenue,
       topSeller: topSeller.nickname,
       subInvestCount,
       lowFullCount,
+      roas,
+      adsRatio,
+      totalInvPads,
+      pctFull,
+      pctFlex,
     };
-  }, [sellers]);
+  }, [filteredSellers]);
 
   if (loading) {
     return (
@@ -58,15 +88,20 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="w-5 h-5" />
-        </Button>
-        <Folder className="w-5 h-5 text-primary" />
-        <div>
-          <h2 className="text-lg font-bold">{portfolio.name}</h2>
-          <p className="text-xs text-muted-foreground">{portfolio.cust_ids.length} seller(s)</p>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack}>
+            <ArrowLeft className="w-5 h-5" />
+          </Button>
+          <Folder className="w-5 h-5 text-primary" />
+          <div>
+            <h2 className="text-lg font-bold">{portfolio.name}</h2>
+            <p className="text-xs text-muted-foreground">
+              {filteredSellers.length} de {sellers.length} seller(s)
+            </p>
+          </div>
         </div>
+        <MedalFilter selected={selectedMedals} onChange={setSelectedMedals} />
       </div>
 
       {/* Resumo Inteligente */}
@@ -84,7 +119,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
                 <> Atenção: <strong>{summary.subInvestCount}</strong> seller(s) apresentam subinvestimento em Ads</>
               )}
               {summary.lowFullCount > 0 && (
-                <> e <strong>{summary.lowFullCount}</strong> precisam melhorar a adoção do Full</>
+                <> e <strong>{summary.lowFullCount}</strong> possuem alto volume sem adoção de Full</>
               )}
               .
             </p>
@@ -92,28 +127,80 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
         </Card>
       )}
 
+      {/* 4 KPI Cards */}
+      {summary && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <Card className="border-border">
+            <CardContent className="p-4 space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <DollarSign className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Faturamento</span>
+              </div>
+              <p className="text-xl font-bold">{fmtBRL(summary.totalRevenue)}</p>
+              <p className="text-xs text-muted-foreground">{filteredSellers.length} sellers</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border">
+            <CardContent className="p-4 space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <BarChart3 className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Eficiência & Ads</span>
+              </div>
+              <p className="text-xl font-bold">ROAS {summary.roas.toFixed(1)}x</p>
+              <p className="text-xs text-muted-foreground">
+                Ratio Ads: {summary.adsRatio.toFixed(2)}% · Invest: {fmtBRL(summary.totalInvPads)}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border">
+            <CardContent className="p-4 space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Tag className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Diagnóstico de Preço</span>
+              </div>
+              <p className="text-xl font-bold">—</p>
+              <p className="text-xs text-muted-foreground">Dados de competitividade não disponíveis</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border">
+            <CardContent className="p-4 space-y-1">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Truck className="w-4 h-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Logística</span>
+              </div>
+              <p className="text-xl font-bold">{summary.pctFull.toFixed(1)}% Full</p>
+              <p className="text-xs text-muted-foreground">
+                Flex: {summary.pctFlex.toFixed(1)}% · Baseado em TSI_FULL
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Troféus */}
       <div className="space-y-3">
         <h3 className="text-sm font-bold flex items-center gap-2">
           🏆 Top Performers
         </h3>
-        <TrophyCards sellers={sellers} />
+        <TrophyCards sellers={filteredSellers} />
       </div>
 
-      {/* Alertas */}
+      {/* Alertas + Raio-X */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-3">
           <h3 className="text-sm font-bold flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-amber-400" />
             Radar de Oportunidades
           </h3>
-          <AlertMatrix sellers={sellers} />
+          <AlertMatrix sellers={filteredSellers} />
         </div>
 
-        {/* Raio-X */}
         <div className="lg:col-span-2 space-y-3">
           <h3 className="text-sm font-bold">📊 Raio-X da Carteira</h3>
-          <RaioXTable sellers={sellers} />
+          <RaioXTable sellers={filteredSellers} />
         </div>
       </div>
     </div>
