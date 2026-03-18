@@ -21,6 +21,7 @@ export function useAuth() {
 
       if (!currentSession?.user) {
         setIsAdmin(false);
+        setIsGerente(false);
         setMustChangePassword(false);
         setLoading(false);
         return;
