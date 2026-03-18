@@ -92,9 +92,9 @@ const Admin = () => {
     const rolesMap: Record<string, AppRole> = {};
     if (rolesRes.data) {
       for (const r of rolesRes.data) {
-        // Prefer admin if user has multiple roles
-        if (!rolesMap[r.user_id] || r.role === "admin") {
-          rolesMap[r.user_id] = r.role as AppRole;
+        const role = r.role as AppRole;
+        if (!rolesMap[r.user_id] || role === "admin") {
+          rolesMap[r.user_id] = role;
         }
       }
     }
