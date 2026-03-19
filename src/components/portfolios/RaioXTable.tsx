@@ -102,6 +102,14 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
 
   const filtered = useMemo(() => {
     let list = enriched;
+    // Apply grant filter from monitor widget
+    if (grantFilter && grants) {
+      list = list.filter((s) => {
+        const g = grants[s.sellerId];
+        if (!g) return false;
+        return getGrantLevel(g.daysToExpire) === grantFilter;
+      });
+    }
     switch (filter) {
       case "platinum":
         list = list.filter((s) => s.repCurrentLevel?.toLowerCase().includes("platinum"));
@@ -126,7 +134,7 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
         break;
     }
     return list;
-  }, [enriched, filter, trends]);
+  }, [enriched, filter, trends, grantFilter, grants]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
