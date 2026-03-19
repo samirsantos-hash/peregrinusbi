@@ -49,7 +49,7 @@ export default function GrantAlert({ grant }: GrantAlertProps) {
       default:
         return null;
     }
-  }, [level, grant.daysToExpire]);
+  }, [level, grant]);
 
   if (!config) return null;
 

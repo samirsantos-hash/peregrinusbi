@@ -35,7 +35,8 @@ import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/moc
 import { Skeleton } from "@/components/ui/skeleton";
 import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
 import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
-
+import GrantAlert from "@/components/dashboard/GrantAlert";
+import { useSellerGrants } from "@/hooks/useSellerGrants";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
