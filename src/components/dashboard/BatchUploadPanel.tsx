@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, CheckCircle, Loader2, FileText, X, BarChart3,
-  CalendarDays, Package, Gift, AlertCircle, PartyPopper,
+  CalendarDays, Package, Gift, AlertCircle, PartyPopper, ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 
-type UploadSlotKey = "cpp_mensal" | "cpp_diarizada" | "live_listings" | "elegibilidade";
+type UploadSlotKey = "cpp_mensal" | "cpp_diarizada" | "live_listings" | "elegibilidade" | "grants";
 
 interface SlotConfig {
   key: UploadSlotKey;
