@@ -333,6 +333,7 @@ const Index = () => {
             />
 
             {/* Granularity Toggle — desativado para v2.0 */}
+            <GrantAlert grant={currentGrant} />
 
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
