@@ -59,6 +59,15 @@ const SLOTS: SlotConfig[] = [
     functionName: "import-eligibility",
     sftpPattern: /SFTP_ECOMCONSULT_ELEGIBILIDADE/i,
   },
+  {
+    key: "grants",
+    title: "Grants (Permissões)",
+    description: "Concessões e datas de expiração dos sellers.",
+    icon: ShieldCheck,
+    colorClass: "text-cyan-400",
+    functionName: "import-grants",
+    sftpPattern: /grant/i,
+  },
 ];
 
 type SlotStatus = "empty" | "staged" | "uploading" | "success" | "error";
