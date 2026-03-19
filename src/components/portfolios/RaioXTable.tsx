@@ -93,7 +93,7 @@ function getExportRows(data: EnrichedSeller[], trends?: Record<string, SellerTre
   });
 }
 
-export default function RaioXTable({ sellers, trends, portfolioName = "Carteira" }: Props) {
+export default function RaioXTable({ sellers, trends, grants, grantFilter, portfolioName = "Carteira" }: Props) {
   const [filter, setFilter] = useState<FilterPill>("all");
   const [sortKey, setSortKey] = useState<SortKey>("tgmvLc");
   const [sortAsc, setSortAsc] = useState(false);
