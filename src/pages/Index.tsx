@@ -35,7 +35,8 @@ import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/moc
 import { Skeleton } from "@/components/ui/skeleton";
 import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
 import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
-
+import GrantAlert from "@/components/dashboard/GrantAlert";
+import { useSellerGrants } from "@/hooks/useSellerGrants";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -152,6 +153,11 @@ const Index = () => {
   const { data: liveListingsCount } = useLiveListingsCount(
     hasRealData ? selectedSeller : undefined
   );
+
+  // Fetch grant for selected seller
+  const sellerIdsForGrant = useMemo(() => selectedSeller ? [selectedSeller] : [], [selectedSeller]);
+  const { grants: sellerGrants } = useSellerGrants(sellerIdsForGrant);
+  const currentGrant = sellerGrants[selectedSeller] || null;
 
   // ALL kpis (unfiltered) — monthly source for consolidated view
   const allKpisMonthly: any[] = useMemo(() => {
@@ -327,6 +333,7 @@ const Index = () => {
             />
 
             {/* Granularity Toggle — desativado para v2.0 */}
+            <GrantAlert grant={currentGrant} />
 
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
