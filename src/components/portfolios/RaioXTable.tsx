@@ -255,6 +255,7 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                 <SortHeader label="Modal Principal" k="modalPrincipal" />
                 <SortHeader label="% Ads" k="pctAds" />
                 <SortHeader label="Saúde" k="scoreQualidadeFinal" />
+                <SortHeader label="Grant" k="grantDays" />
                 <TableHead className="whitespace-nowrap">Alertas</TableHead>
               </TableRow>
             </TableHeader>
