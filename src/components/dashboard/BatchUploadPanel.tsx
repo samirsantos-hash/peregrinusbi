@@ -129,11 +129,12 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
     cpp_diarizada: emptySlot(),
     live_listings: emptySlot(),
     elegibilidade: emptySlot(),
+    grants: emptySlot(),
   });
   const [batchStatus, setBatchStatus] = useState<"idle" | "processing" | "done">("idle");
   const [currentIdx, setCurrentIdx] = useState(-1);
   const inputRefs = useRef<Record<UploadSlotKey, HTMLInputElement | null>>({
-    cpp_mensal: null, cpp_diarizada: null, live_listings: null, elegibilidade: null,
+    cpp_mensal: null, cpp_diarizada: null, live_listings: null, elegibilidade: null, grants: null,
   });
 
   const updateSlot = (key: UploadSlotKey, patch: Partial<SlotState>) => {
