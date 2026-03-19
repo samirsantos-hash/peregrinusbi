@@ -168,6 +168,44 @@ export type Database = {
           },
         ]
       }
+      seller_grants: {
+        Row: {
+          created_at: string
+          cust_id: string
+          days_to_expire: number
+          expiration_date: string
+          id: string
+          salesforce_url: string | null
+          seller_id: string
+        }
+        Insert: {
+          created_at?: string
+          cust_id: string
+          days_to_expire?: number
+          expiration_date: string
+          id?: string
+          salesforce_url?: string | null
+          seller_id: string
+        }
+        Update: {
+          created_at?: string
+          cust_id?: string
+          days_to_expire?: number
+          expiration_date?: string
+          id?: string
+          salesforce_url?: string | null
+          seller_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_grants_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seller_listings_quality: {
         Row: {
           created_at: string

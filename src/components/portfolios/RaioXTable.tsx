@@ -2,11 +2,13 @@ import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, Camera, AlertTriangle, TrendingUp, TrendingDown, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { ArrowUpDown, Camera, AlertTriangle, TrendingUp, TrendingDown, Download, FileSpreadsheet, FileText, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 import type { SellerTrend } from "@/hooks/usePortfolioTrends";
+import type { SellerGrant, GrantLevel } from "@/hooks/useSellerGrants";
+import { getGrantLevel, getGrantBadge } from "@/hooks/useSellerGrants";
 import { toast } from "sonner";
 
 function safePct(num: number, den: number): number {
@@ -35,11 +37,13 @@ function getModalPrincipal(tsi: number, fTsi: number, tsiFlex: number): { label:
 }
 
 type FilterPill = "all" | "platinum" | "ads3" | "growth" | "trending_up" | "trending_down";
-type SortKey = "nickname" | "repCurrentLevel" | "tgmvLc" | "roas" | "modalPrincipal" | "pctAds" | "scoreQualidadeFinal";
+type SortKey = "nickname" | "repCurrentLevel" | "tgmvLc" | "roas" | "modalPrincipal" | "pctAds" | "scoreQualidadeFinal" | "grantDays";
 
 interface Props {
   sellers: SellerWithKpi[];
   trends?: Record<string, SellerTrend>;
+  grants?: Record<string, SellerGrant>;
+  grantFilter?: GrantLevel | null;
   portfolioName?: string;
 }
 
@@ -89,7 +93,7 @@ function getExportRows(data: EnrichedSeller[], trends?: Record<string, SellerTre
   });
 }
 
-export default function RaioXTable({ sellers, trends, portfolioName = "Carteira" }: Props) {
+export default function RaioXTable({ sellers, trends, grants, grantFilter, portfolioName = "Carteira" }: Props) {
   const [filter, setFilter] = useState<FilterPill>("all");
   const [sortKey, setSortKey] = useState<SortKey>("tgmvLc");
   const [sortAsc, setSortAsc] = useState(false);
@@ -98,6 +102,14 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
 
   const filtered = useMemo(() => {
     let list = enriched;
+    // Apply grant filter from monitor widget
+    if (grantFilter && grants) {
+      list = list.filter((s) => {
+        const g = grants[s.sellerId];
+        if (!g) return false;
+        return getGrantLevel(g.daysToExpire) === grantFilter;
+      });
+    }
     switch (filter) {
       case "platinum":
         list = list.filter((s) => s.repCurrentLevel?.toLowerCase().includes("platinum"));
@@ -122,13 +134,17 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
         break;
     }
     return list;
-  }, [enriched, filter, trends]);
+  }, [enriched, filter, trends, grantFilter, grants]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
       let cmp: number;
       if (sortKey === "modalPrincipal") {
         cmp = a.modalPrincipal.label.localeCompare(b.modalPrincipal.label);
+      } else if (sortKey === "grantDays") {
+        const ga = grants?.[a.sellerId]?.daysToExpire ?? 9999;
+        const gb = grants?.[b.sellerId]?.daysToExpire ?? 9999;
+        cmp = ga - gb;
       } else {
         const av = a[sortKey as keyof typeof a];
         const bv = b[sortKey as keyof typeof b];
@@ -138,7 +154,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
       }
       return sortAsc ? cmp : -cmp;
     });
-  }, [filtered, sortKey, sortAsc]);
+  }, [filtered, sortKey, sortAsc, grants]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
@@ -239,13 +255,14 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                 <SortHeader label="Modal Principal" k="modalPrincipal" />
                 <SortHeader label="% Ads" k="pctAds" />
                 <SortHeader label="Saúde" k="scoreQualidadeFinal" />
+                <SortHeader label="Grant" k="grantDays" />
                 <TableHead className="whitespace-nowrap">Alertas</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sorted.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                     Nenhum seller encontrado com esse filtro.
                   </TableCell>
                 </TableRow>
@@ -301,6 +318,26 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           </div>
                           <span className="text-xs font-mono">{s.scoreQualidadeFinal.toFixed(0)}</span>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const grant = grants?.[s.sellerId];
+                          if (!grant) return <span className="text-xs text-muted-foreground">—</span>;
+                          const level = getGrantLevel(grant.daysToExpire);
+                          const badge = getGrantBadge(level);
+                          return (
+                            <div className="flex items-center gap-1.5">
+                              <Badge variant="outline" className={`text-[10px] border ${badge.className}`}>
+                                {badge.emoji} {grant.daysToExpire}d
+                              </Badge>
+                              {grant.salesforceUrl && (
+                                <a href={grant.salesforceUrl} target="_blank" rel="noopener noreferrer">
+                                  <ExternalLink className="w-3.5 h-3.5 text-primary hover:text-blue-400 transition-colors" />
+                                </a>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">

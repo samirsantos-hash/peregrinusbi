@@ -4,10 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Loader2, Folder, TrendingUp, AlertTriangle, DollarSign, BarChart3, Truck, Tag } from "lucide-react";
 import { usePortfolioData, type Portfolio } from "@/hooks/usePortfolios";
 import { usePortfolioTrends } from "@/hooks/usePortfolioTrends";
+import { useSellerGrants, type GrantLevel } from "@/hooks/useSellerGrants";
 import TrophyCards from "./TrophyCards";
 import AlertMatrix from "./AlertMatrix";
 import RaioXTable from "./RaioXTable";
 import MedalFilter from "./MedalFilter";
+import GrantsMonitor from "./GrantsMonitor";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -26,9 +28,11 @@ interface Props {
 export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const { sellers, loading } = usePortfolioData(portfolio.cust_ids);
   const [selectedMedals, setSelectedMedals] = useState<string[]>([]);
+  const [grantFilter, setGrantFilter] = useState<GrantLevel | null>(null);
 
   const sellerIds = useMemo(() => sellers.map((s) => s.sellerId), [sellers]);
   const { trends } = usePortfolioTrends(sellerIds);
+  const { grants } = useSellerGrants(sellerIds);
 
   const filteredSellers = useMemo(() => {
     if (selectedMedals.length === 0) return sellers;
@@ -181,19 +185,33 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
         <TrophyCards sellers={filteredSellers} />
       </div>
 
-      {/* Alertas + Raio-X */}
+      {/* Grants Monitor + Alertas + Raio-X */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1 space-y-3">
-          <h3 className="text-sm font-bold flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
-            Radar de Oportunidades
-          </h3>
-          <AlertMatrix sellers={filteredSellers} trends={trends} />
+        <div className="lg:col-span-1 space-y-4">
+          <GrantsMonitor
+            sellers={filteredSellers}
+            grants={grants}
+            activeFilter={grantFilter}
+            onFilterChange={setGrantFilter}
+          />
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              Radar de Oportunidades
+            </h3>
+            <AlertMatrix sellers={filteredSellers} trends={trends} />
+          </div>
         </div>
 
         <div className="lg:col-span-2 space-y-3">
           <h3 className="text-sm font-bold">📊 Raio-X da Carteira</h3>
-          <RaioXTable sellers={filteredSellers} trends={trends} portfolioName={portfolio.name} />
+          <RaioXTable
+            sellers={filteredSellers}
+            trends={trends}
+            grants={grants}
+            grantFilter={grantFilter}
+            portfolioName={portfolio.name}
+          />
         </div>
       </div>
     </div>
