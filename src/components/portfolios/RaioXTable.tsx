@@ -141,6 +141,10 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
       let cmp: number;
       if (sortKey === "modalPrincipal") {
         cmp = a.modalPrincipal.label.localeCompare(b.modalPrincipal.label);
+      } else if (sortKey === "grantDays") {
+        const ga = grants?.[a.sellerId]?.daysToExpire ?? 9999;
+        const gb = grants?.[b.sellerId]?.daysToExpire ?? 9999;
+        cmp = ga - gb;
       } else {
         const av = a[sortKey as keyof typeof a];
         const bv = b[sortKey as keyof typeof b];
@@ -150,7 +154,7 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
       }
       return sortAsc ? cmp : -cmp;
     });
-  }, [filtered, sortKey, sortAsc]);
+  }, [filtered, sortKey, sortAsc, grants]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
