@@ -154,6 +154,11 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
+  // Fetch grant for selected seller
+  const sellerIdsForGrant = useMemo(() => selectedSeller ? [selectedSeller] : [], [selectedSeller]);
+  const { grants: sellerGrants } = useSellerGrants(sellerIdsForGrant);
+  const currentGrant = sellerGrants[selectedSeller] || null;
+
   // ALL kpis (unfiltered) — monthly source for consolidated view
   const allKpisMonthly: any[] = useMemo(() => {
     if (hasRealData) return dbKpis || [];
