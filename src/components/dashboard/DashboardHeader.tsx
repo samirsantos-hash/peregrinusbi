@@ -107,7 +107,8 @@ const DashboardHeader = ({
     const first = parseLocalDate(uniqueDates[0]);
     const last = parseLocalDate(uniqueDates[uniqueDates.length - 1]);
     const diff = differenceInDays(last, first);
-    return Math.max(diff, 30);
+    // For single-day selection, use 1 day instead of forcing 30
+    return Math.max(diff, 1);
   }, [filteredKpis]);
 
   const validUplifts = filteredKpis.filter((k) => k.upliftGmvM1 !== 0);
