@@ -2,11 +2,13 @@ import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, Camera, AlertTriangle, TrendingUp, TrendingDown, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { ArrowUpDown, Camera, AlertTriangle, TrendingUp, TrendingDown, Download, FileSpreadsheet, FileText, ExternalLink } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 import type { SellerTrend } from "@/hooks/usePortfolioTrends";
+import type { SellerGrant, GrantLevel } from "@/hooks/useSellerGrants";
+import { getGrantLevel, getGrantBadge } from "@/hooks/useSellerGrants";
 import { toast } from "sonner";
 
 function safePct(num: number, den: number): number {
