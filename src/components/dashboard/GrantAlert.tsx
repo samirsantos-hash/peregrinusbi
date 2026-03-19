@@ -9,14 +9,10 @@ interface GrantAlertProps {
 }
 
 export default function GrantAlert({ grant }: GrantAlertProps) {
-  if (!grant) return null;
-
-  const level = getGrantLevel(grant.daysToExpire);
-  if (level === "ok") return null;
-
-  const badge = getGrantBadge(level);
+  const level = grant ? getGrantLevel(grant.daysToExpire) : "ok";
 
   const config = useMemo(() => {
+    if (!grant || level === "ok") return null;
     switch (level) {
       case "blacklist":
         return {
