@@ -131,6 +131,7 @@ const SERIES_KEYS = ["tgmvLog", "adsLog", "tsiLog"] as const;
 const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
   const chartData = useMemo(() => fillGaps(kpis), [kpis]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const isSinglePoint = chartData.length === 1;
 
   const handleLegendClick = useCallback((entry: any) => {
     const key = entry.dataKey as string;
