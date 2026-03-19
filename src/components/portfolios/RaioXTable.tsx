@@ -37,11 +37,13 @@ function getModalPrincipal(tsi: number, fTsi: number, tsiFlex: number): { label:
 }
 
 type FilterPill = "all" | "platinum" | "ads3" | "growth" | "trending_up" | "trending_down";
-type SortKey = "nickname" | "repCurrentLevel" | "tgmvLc" | "roas" | "modalPrincipal" | "pctAds" | "scoreQualidadeFinal";
+type SortKey = "nickname" | "repCurrentLevel" | "tgmvLc" | "roas" | "modalPrincipal" | "pctAds" | "scoreQualidadeFinal" | "grantDays";
 
 interface Props {
   sellers: SellerWithKpi[];
   trends?: Record<string, SellerTrend>;
+  grants?: Record<string, SellerGrant>;
+  grantFilter?: GrantLevel | null;
   portfolioName?: string;
 }
 
