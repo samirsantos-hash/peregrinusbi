@@ -196,17 +196,18 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: chartData.length === 1 ? 12 : 11 }}
                 axisLine={false}
-                interval="preserveStartEnd"
+                interval={chartData.length === 1 ? 0 : "preserveStartEnd"}
                 angle={allDates.length > 6 ? -45 : 0}
-                textAnchor={allDates.length > 6 ? "end" : "middle"}
+                textAnchor={chartData.length === 1 ? "middle" : allDates.length > 6 ? "end" : "middle"}
                 height={allDates.length > 6 ? 50 : 30}
+                padding={chartData.length === 1 ? { left: 50, right: 50 } : undefined}
               />
               <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
               <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-              <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+              <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" dot={chartData.length === 1 ? { r: 6, fill: "hsl(199, 100%, 50%)", strokeWidth: 2 } : undefined} />
+              <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" dot={chartData.length === 1 ? { r: 6, fill: "hsl(160, 84%, 39%)", strokeWidth: 2 } : undefined} />
               <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
             </AreaChart>
           </ResponsiveContainer>

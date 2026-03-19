@@ -215,8 +215,8 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             name="Faturamento (R$)"
             stroke="hsl(199, 100%, 50%)"
             strokeWidth={2.5}
-            dot={chartData.length <= 31 ? { r: 3, fill: "hsl(199, 100%, 50%)" } : false}
-            activeDot={{ r: 5, strokeWidth: 2 }}
+            dot={isSinglePoint ? { r: 6, fill: "hsl(199, 100%, 50%)", strokeWidth: 2, stroke: "hsl(199, 100%, 70%)" } : chartData.length <= 31 ? { r: 3, fill: "hsl(199, 100%, 50%)" } : false}
+            activeDot={isSinglePoint ? { r: 8, strokeWidth: 2 } : { r: 5, strokeWidth: 2 }}
             animationDuration={800}
             hide={hidden.has("tgmvLog")}
           />
@@ -230,8 +230,8 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             stroke="hsl(var(--warning))"
             strokeWidth={2}
             strokeDasharray="5 3"
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 2 }}
+            dot={isSinglePoint ? { r: 6, fill: "hsl(var(--warning))", strokeWidth: 2 } : false}
+            activeDot={isSinglePoint ? { r: 8, strokeWidth: 2 } : { r: 4, strokeWidth: 2 }}
             animationDuration={800}
             hide={hidden.has("adsLog")}
           />
@@ -244,8 +244,8 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             name="Unidades Vendidas"
             stroke="hsl(160, 84%, 39%)"
             strokeWidth={1.5}
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 2 }}
+            dot={isSinglePoint ? { r: 6, fill: "hsl(160, 84%, 39%)", strokeWidth: 2 } : false}
+            activeDot={isSinglePoint ? { r: 8, strokeWidth: 2 } : { r: 4, strokeWidth: 2 }}
             animationDuration={800}
             hide={hidden.has("tsiLog")}
           />
