@@ -204,7 +204,7 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
   const handleReset = () => {
     setSlots({
       cpp_mensal: emptySlot(), cpp_diarizada: emptySlot(),
-      live_listings: emptySlot(), elegibilidade: emptySlot(),
+      live_listings: emptySlot(), elegibilidade: emptySlot(), grants: emptySlot(),
     });
     setBatchStatus("idle");
     setCurrentIdx(-1);
