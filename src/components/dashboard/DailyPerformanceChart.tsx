@@ -168,13 +168,14 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
 
           <XAxis
             dataKey="label"
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: isSinglePoint ? 12 : 10 }}
             axisLine={false}
             tickLine={false}
-            interval={chartData.length > 30 ? Math.floor(chartData.length / 15) : 0}
+            interval={isSinglePoint ? 0 : chartData.length > 30 ? Math.floor(chartData.length / 15) : 0}
             angle={chartData.length > 15 ? -45 : 0}
-            textAnchor={chartData.length > 15 ? "end" : "middle"}
+            textAnchor={isSinglePoint ? "middle" : chartData.length > 15 ? "end" : "middle"}
             height={chartData.length > 15 ? 50 : 30}
+            padding={isSinglePoint ? { left: 50, right: 50 } : undefined}
           />
 
           {/* Left Y-axis: Faturamento + TSI */}
