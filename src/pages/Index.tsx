@@ -37,6 +37,7 @@ import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
 import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
 import GrantAlert from "@/components/dashboard/GrantAlert";
 import { useSellerGrants } from "@/hooks/useSellerGrants";
+import GrantsPanel from "@/components/dashboard/GrantsPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
