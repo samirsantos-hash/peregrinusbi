@@ -56,6 +56,23 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
     return c;
   }, [rows]);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
+        Carregando dados de grants…
+      </div>
+    );
+  }
+
+  if (rows.length === 0) {
+    return (
+      <div className="glass-card p-8 text-center space-y-2">
+        <KeyRound className="w-10 h-10 mx-auto text-muted-foreground/40" />
+        <p className="text-sm text-muted-foreground">Nenhum dado de Grant disponível para os sellers da sua carteira.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5">
       {/* Summary cards */}
