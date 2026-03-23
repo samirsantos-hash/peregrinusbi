@@ -254,7 +254,7 @@ const Index = () => {
     { id: "clips", label: "Clips & Audiência", icon: Video },
     { id: "opportunities", label: "Oportunidades", icon: Gift },
     { id: "reputation", label: "Reputação", icon: HeartPulse },
-  ];
+    { id: "grants", label: "Grants", icon: KeyRound },
 
   // Map seller UUID -> custId for external links
   const sellerCustIdMap = useMemo(() => {
