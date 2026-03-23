@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { ExternalLink, ShieldAlert, AlertTriangle, Clock, CheckCircle, KeyRound } from "lucide-react";
 import { motion } from "framer-motion";
-import { useSellerGrants, getGrantLevel, getGrantBadge, type SellerGrant } from "@/hooks/useSellerGrants";
+import { useSellerGrants, getGrantLevel, getGrantBadge } from "@/hooks/useSellerGrants";
 import { Badge } from "@/components/ui/badge";
 
 interface GrantsPanelProps {
@@ -9,13 +9,7 @@ interface GrantsPanelProps {
 }
 
 const levelOrder = { blacklist: 0, critical: 1, warning: 2, ok: 3 };
-
-const levelIcon = {
-  blacklist: ShieldAlert,
-  critical: AlertTriangle,
-  warning: Clock,
-  ok: CheckCircle,
-};
+const levelIcon = { blacklist: ShieldAlert, critical: AlertTriangle, warning: Clock, ok: CheckCircle };
 
 export default function GrantsPanel({ sellers }: GrantsPanelProps) {
   const sellerIds = useMemo(() => sellers.map((s) => s.id), [sellers]);
@@ -32,24 +26,6 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
       .sort((a, b) => levelOrder[a.level!] - levelOrder[b.level!]);
   }, [sellers, grants]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
-        Carregando dados de grants…
-      </div>
-    );
-  }
-
-  if (rows.length === 0) {
-    return (
-      <div className="glass-card p-8 text-center space-y-2">
-        <KeyRound className="w-10 h-10 mx-auto text-muted-foreground/40" />
-        <p className="text-sm text-muted-foreground">Nenhum dado de Grant disponível para os sellers da sua carteira.</p>
-      </div>
-    );
-  }
-
-  // Summary counts
   const counts = useMemo(() => {
     const c = { blacklist: 0, critical: 0, warning: 0, ok: 0 };
     rows.forEach((r) => { if (r.level) c[r.level]++; });
@@ -77,10 +53,10 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
     <div className="space-y-5">
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <SummaryCard emoji="🔴" label="Urgente" count={counts.blacklist} className="border-destructive/50 bg-destructive/10 text-destructive" />
-        <SummaryCard emoji="🚨" label="Crítico" count={counts.critical} className="border-destructive/30 bg-destructive/5 text-destructive" />
-        <SummaryCard emoji="⚠️" label="Atenção" count={counts.warning} className="border-warning/40 bg-warning/5 text-warning" />
-        <SummaryCard emoji="✅" label="OK" count={counts.ok} className="border-emerald-500/30 bg-emerald-500/5 text-emerald-400" />
+        <SummaryCard emoji="🔴" label="Urgente" count={counts.blacklist} variant="destructive" />
+        <SummaryCard emoji="🚨" label="Crítico" count={counts.critical} variant="critical" />
+        <SummaryCard emoji="⚠️" label="Atenção" count={counts.warning} variant="warning" />
+        <SummaryCard emoji="✅" label="OK" count={counts.ok} variant="ok" />
       </div>
 
       {/* Table */}
@@ -117,7 +93,7 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
                       </Badge>
                     </td>
                     <td className="p-3 text-center font-mono font-bold">
-                      <span className={row.grant!.daysToExpire <= 0 ? "text-destructive" : row.level === "warning" ? "text-warning" : row.level === "ok" ? "text-emerald-400" : "text-destructive"}>
+                      <span className={row.grant!.daysToExpire <= 5 ? "text-destructive" : row.level === "warning" ? "text-warning" : "text-foreground"}>
                         {row.grant!.daysToExpire}
                       </span>
                     </td>
@@ -150,9 +126,15 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
   );
 }
 
-function SummaryCard({ emoji, label, count, className }: { emoji: string; label: string; count: number; className: string }) {
+function SummaryCard({ emoji, label, count, variant }: { emoji: string; label: string; count: number; variant: string }) {
+  const styles: Record<string, string> = {
+    destructive: "border-destructive/50 bg-destructive/10 text-destructive",
+    critical: "border-destructive/30 bg-destructive/5 text-destructive",
+    warning: "border-warning/40 bg-warning/5 text-warning",
+    ok: "border-accent/30 bg-accent/5 text-accent-foreground",
+  };
   return (
-    <div className={`rounded-lg border p-3 text-center ${className}`}>
+    <div className={`rounded-lg border p-3 text-center ${styles[variant] || ""}`}>
       <p className="text-2xl font-bold">{count}</p>
       <p className="text-xs mt-1">{emoji} {label}</p>
     </div>
