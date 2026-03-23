@@ -402,6 +402,9 @@ const Index = () => {
                   <TabsContent value="reputation" className="mt-0">
                     <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
+                  <TabsContent value="grants" className="mt-0">
+                    <GrantsPanel sellers={sellers.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.custId }))} />
+                  </TabsContent>
                 </motion.div>
               </AnimatePresence>
             </Tabs>
