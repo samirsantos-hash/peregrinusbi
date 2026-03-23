@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { type DateRange } from "react-day-picker";
@@ -37,6 +37,7 @@ import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
 import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
 import GrantAlert from "@/components/dashboard/GrantAlert";
 import { useSellerGrants } from "@/hooks/useSellerGrants";
+import GrantsPanel from "@/components/dashboard/GrantsPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -253,6 +254,7 @@ const Index = () => {
     { id: "clips", label: "Clips & Audiência", icon: Video },
     { id: "opportunities", label: "Oportunidades", icon: Gift },
     { id: "reputation", label: "Reputação", icon: HeartPulse },
+    { id: "grants", label: "Grants", icon: KeyRound },
   ];
 
   // Map seller UUID -> custId for external links
@@ -400,6 +402,9 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0">
                     <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
+                  </TabsContent>
+                  <TabsContent value="grants" className="mt-0">
+                    <GrantsPanel sellers={sellers.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.custId }))} />
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>
