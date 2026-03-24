@@ -9,6 +9,8 @@ import SalesRecordCard from "./SalesRecordCard";
 import TrafficHeatmap from "./TrafficHeatmap";
 import BestInvestmentPeriod from "./BestInvestmentPeriod";
 import { fmtBRLCompact, fmtBRL, fmtNum, formatChartDate } from "@/utils/formatters";
+import { type SellerCampaign, getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
+import { Badge } from "@/components/ui/badge";
 
 interface KpiLike {
   date: string;
@@ -24,12 +26,14 @@ interface KpiLike {
   productId: string;
   visits: number;
   tsi: number;
+  visitsCheaper?: number;
 }
 
 interface EfficiencyPanelProps {
   kpis: KpiLike[];
   sellerCustIdMap?: Record<string, string>;
   dataGranularity?: "consolidated" | "daily";
+  campaign?: SellerCampaign | null;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -66,7 +70,7 @@ const RatioTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily" }: EfficiencyPanelProps) => {
+const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", campaign }: EfficiencyPanelProps) => {
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
@@ -101,29 +105,136 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily" }: E
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
+  const totalTgmvPads = kpis.reduce((s, k) => s + (k.tgmv || 0), 0);
   const avgRoas = kpis.length > 0 ? kpis.reduce((s, k) => s + k.roas, 0) / kpis.length : 0;
   const avgAcos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.acos, 0) / kpis.length : 0;
   const avgTacos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.tacos, 0) / kpis.length : 0;
   const avgCpa = kpis.length > 0 ? kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length : 0;
 
+  // ROI = (TGMV_PADS - INV_PADS) / INV_PADS
+  const roi = totalAds > 0 ? ((totalTgmvPads - totalAds) / totalAds) * 100 : 0;
+
+  // CPC proxy: INV_PADS / VISITS
+  const totalVisits = kpis.reduce((s, k) => s + (k.visits || 0), 0);
+  const cpcProxy = totalVisits > 0 ? totalAds / totalVisits : 0;
+
+  // Campaign benchmarking alerts
+  const campaignAlerts = useMemo(() => {
+    const alerts: { icon: string; text: string; severity: "success" | "warning" | "critical" }[] = [];
+    if (!campaign) return alerts;
+
+    // ACOS vs vertical benchmark (using taxaConversaoVertical as proxy for category avg)
+    if (campaign.taxaConversaoVertical > 0 && avgAcos > 0) {
+      if (avgAcos < campaign.taxaConversaoVertical) {
+        alerts.push({
+          icon: "🟢",
+          text: `Escala Segura: Seu ACOS (${avgAcos.toFixed(1)}%) está abaixo do mercado (${campaign.taxaConversaoVertical.toFixed(1)}%). Pode aumentar o investimento em 20% para ganhar share.`,
+          severity: "success",
+        });
+      }
+    }
+
+    if (avgTacos > 10) {
+      alerts.push({
+        icon: "🔴",
+        text: `Alerta de Margem: TACOS ${avgTacos.toFixed(1)}% está consumindo muito do faturamento total. Revisar negativação de palavras e campanhas.`,
+        severity: "critical",
+      });
+    }
+
+    // Price vs Effectiveness: cheap visits but low effectiveness
+    const totalCheaper = kpis.reduce((s, k) => s + ((k as any).visitsCheaper || 0), 0);
+    if (totalVisits > 0 && totalCheaper / totalVisits > 0.5 && campaign.efectRtaVertical < 70) {
+      alerts.push({
+        icon: "⚠️",
+        text: `Erro de Algoritmo: Preço baixo (${((totalCheaper / totalVisits) * 100).toFixed(0)}% cheaper) não está gerando ranking. Efetividade ${campaign.efectRtaVertical.toFixed(0)}%. Problema provável de SEO ou Logística.`,
+        severity: "warning",
+      });
+    }
+
+    // Subaproveitamento
+    if (campaign.efectRtaVertical > 100 && totalGmv > 0 && (totalAds / totalGmv) * 100 < 1.5) {
+      alerts.push({
+        icon: "📈",
+        text: `Subaproveitamento de Escala: Efetividade ${campaign.efectRtaVertical.toFixed(0)}% mas Ads é apenas ${((totalAds / totalGmv) * 100).toFixed(1)}% do faturamento. Aumente para sufocar concorrência.`,
+        severity: "success",
+      });
+    }
+
+    return alerts;
+  }, [campaign, avgAcos, avgTacos, totalGmv, totalAds, totalVisits, kpis]);
+
   const metrics = [
     { label: "Faturamento Bruto (GMV)", value: fmtBRLCompact(totalGmv), color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado." },
-    { label: "ROAS Médio", value: fmtNum(avgRoas, 2), color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é saudável." },
-    { label: "ACOS Médio", value: `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgAcos <= 15 ? "emerald-text" : "critical-text", tooltip: "Custo de Ads sobre vendas de Ads. Quanto menor, mais eficiente." },
-    { label: "TACOS Médio", value: `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgTacos <= 10 ? "emerald-text" : "text-muted-foreground", tooltip: "Custo de Ads sobre vendas totais. Quanto menor, melhor." },
-    { label: "CPA Médio", value: fmtBRL(avgCpa), color: "neon-text", tooltip: "Custo por aquisição. Quanto menor, mais eficiente a campanha." },
+    { label: "ROAS Médio", value: fmtNum(avgRoas, 2), color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "TGMV_LC_PADS / INV_PADS. Acima de 2x é saudável." },
+    { label: "ACOS Médio", value: `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgAcos <= 15 ? "emerald-text" : "critical-text", tooltip: "(INV_PADS / TGMV_LC_PADS) × 100. Quanto menor, mais eficiente." },
+    { label: "TACOS Médio", value: `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgTacos <= 10 ? "emerald-text" : "critical-text", tooltip: "(INV_PADS / TGMV_LC) × 100. Termômetro real da saúde do negócio." },
+    { label: "CPA Médio", value: fmtBRL(avgCpa), color: "neon-text", tooltip: "Custo por aquisição. INV_PADS / TSI_PADS." },
+    { label: "ROI", value: `${roi.toFixed(1)}%`, color: roi > 0 ? "emerald-text" : "critical-text", tooltip: "(TGMV_LC_PADS − INV_PADS) / INV_PADS × 100." },
+    { label: "CPC Proxy", value: fmtBRL(cpcProxy), color: "text-muted-foreground", tooltip: "INV_PADS / VISITAS. Proxy do custo por clique." },
     { label: "Investimento em Marketing", value: fmtBRLCompact(totalAds), color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
   ];
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      {/* Campaign Intelligence Alerts */}
+      {campaignAlerts.length > 0 && (
+        <div className="space-y-2">
+          {campaignAlerts.map((alert, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className={`glass-card p-4 border-l-4 ${
+                alert.severity === "critical" ? "border-l-destructive bg-destructive/5" :
+                alert.severity === "success" ? "border-l-emerald bg-emerald/5" :
+                "border-l-warning bg-warning/5"
+              }`}
+            >
+              <p className="text-sm">
+                <span className="mr-2">{alert.icon}</span>
+                {alert.text}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
+      {/* Vertical Benchmark Card */}
+      {campaign && (
+        <div className="glass-card p-4 flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Média da sua Categoria</span>
+            {campaign.verticalPrincipal && (
+              <Badge variant="outline" className="text-xs">{campaign.verticalPrincipal}</Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-4 text-xs">
+            <div>
+              <span className="text-muted-foreground">Efetividade: </span>
+              <span className={`font-bold ${campaign.efectRtaVertical >= 100 ? "text-emerald" : campaign.efectRtaVertical >= 70 ? "text-neon-blue" : "text-destructive"}`}>
+                {campaign.efectRtaVertical.toFixed(1)}%
+              </span>
+            </div>
+            <div>
+              <span className="text-muted-foreground">Conv. Vertical: </span>
+              <span className="font-bold">{campaign.taxaConversaoVertical.toFixed(2)}%</span>
+            </div>
+            <Badge className={getEffectivenessBadge(campaign.efectRtaVertical).className}>
+              {getEffectivenessBadge(campaign.efectRtaVertical).label}
+            </Badge>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
         {metrics.map((m, i) => (
           <motion.div
             key={m.label}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
+            transition={{ delay: i * 0.06 }}
             className="glass-card p-4"
           >
             <div className="flex items-center gap-1">
