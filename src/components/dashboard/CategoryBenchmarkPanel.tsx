@@ -209,7 +209,7 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
       </div>
 
       {/* Radar + GMV + TACOS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Radar Chart: Seller vs Vertical vs Portfolio */}
         {radarData.length > 0 && (
           <div className="glass-card p-5">
@@ -242,23 +242,17 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Faturamento por Vertical
             </h3>
-            <TooltipInfo text="Faturamento total (TGMV_LC) acumulado por categoria. A vertical do seller atual é destacada." />
+            <TooltipInfo text="Faturamento total (TGMV_LC) acumulado por categoria." />
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={verticalGmvData} layout="vertical" margin={{ left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" horizontal={false} />
-              <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
-              <YAxis type="category" dataKey="vertical" width={120} tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={verticalGmvData} barCategoryGap="25%">
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis dataKey="vertical" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} interval={0} angle={verticals.length > 4 ? -25 : 0} textAnchor={verticals.length > 4 ? "end" : "middle"} height={verticals.length > 4 ? 60 : 30} />
+              <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="Faturamento Total" radius={[0, 4, 4, 0]} maxBarSize={28}>
+              <Bar dataKey="Faturamento Total" radius={[4, 4, 0, 0]} maxBarSize={60}>
                 {verticalGmvData.map((entry, i) => (
-                  <Cell
-                    key={i}
-                    fill={entry.isCurrentSeller ? "hsl(199, 100%, 50%)" : COLORS[i % COLORS.length]}
-                    fillOpacity={entry.isCurrentSeller ? 1 : 0.6}
-                    stroke={entry.isCurrentSeller ? "hsl(199, 100%, 70%)" : "none"}
-                    strokeWidth={entry.isCurrentSeller ? 2 : 0}
-                  />
+                  <Cell key={i} fill={entry.isCurrentSeller ? "hsl(199, 100%, 50%)" : COLORS[i % COLORS.length]} fillOpacity={entry.isCurrentSeller ? 1 : 0.7} stroke={entry.isCurrentSeller ? "hsl(199, 100%, 70%)" : "none"} strokeWidth={entry.isCurrentSeller ? 2 : 0} />
                 ))}
               </Bar>
             </BarChart>
@@ -271,25 +265,17 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               TACOS por Vertical
             </h3>
-            <TooltipInfo text="Total Advertising Cost of Sale (INV_PADS / TGMV_LC × 100) por categoria. Acima de 10% é crítico." />
+            <TooltipInfo text="INV_PADS / TGMV_LC × 100. Acima de 10% é crítico." />
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={verticalTacosData} layout="vertical" margin={{ left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" horizontal={false} />
-              <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} tickFormatter={(v) => `${v}%`} />
-              <YAxis type="category" dataKey="vertical" width={120} tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={verticalTacosData} barCategoryGap="25%">
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis dataKey="vertical" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} interval={0} angle={verticals.length > 4 ? -25 : 0} textAnchor={verticals.length > 4 ? "end" : "middle"} height={verticals.length > 4 ? 60 : 30} />
+              <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} tickFormatter={(v) => `${v}%`} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="TACOS (%)" radius={[0, 4, 4, 0]} maxBarSize={28}>
+              <Bar dataKey="TACOS (%)" radius={[4, 4, 0, 0]} maxBarSize={60}>
                 {verticalTacosData.map((entry, i) => (
-                  <Cell
-                    key={i}
-                    fill={entry.isCurrentSeller
-                      ? "hsl(199, 100%, 50%)"
-                      : (entry["TACOS (%)"] > 10 ? "hsl(0, 84%, 60%)" : "hsl(160, 84%, 39%)")}
-                    fillOpacity={entry.isCurrentSeller ? 1 : 0.6}
-                    stroke={entry.isCurrentSeller ? "hsl(199, 100%, 70%)" : "none"}
-                    strokeWidth={entry.isCurrentSeller ? 2 : 0}
-                  />
+                  <Cell key={i} fill={entry.isCurrentSeller ? "hsl(199, 100%, 50%)" : (entry["TACOS (%)"] > 10 ? "hsl(0, 84%, 60%)" : "hsl(160, 84%, 39%)")} fillOpacity={entry.isCurrentSeller ? 1 : 0.7} stroke={entry.isCurrentSeller ? "hsl(199, 100%, 70%)" : "none"} strokeWidth={entry.isCurrentSeller ? 2 : 0} />
                 ))}
               </Bar>
             </BarChart>
@@ -305,23 +291,17 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               ROAS por Vertical
             </h3>
-            <TooltipInfo text="Retorno sobre investimento em Ads por categoria. Barras destacadas indicam a vertical do seller analisado." />
+            <TooltipInfo text="Retorno sobre investimento em Ads por categoria." />
           </div>
-          <ResponsiveContainer width="100%" height={Math.max(200, verticals.length * 36)}>
-            <BarChart data={verticalRoasData} layout="vertical" margin={{ left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" horizontal={false} />
-              <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
-              <YAxis type="category" dataKey="vertical" width={120} tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={verticalRoasData} barCategoryGap="25%">
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis dataKey="vertical" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} interval={0} angle={verticals.length > 4 ? -25 : 0} textAnchor={verticals.length > 4 ? "end" : "middle"} height={verticals.length > 4 ? 60 : 30} />
+              <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="ROAS" radius={[0, 4, 4, 0]} maxBarSize={24}>
+              <Bar dataKey="ROAS" radius={[4, 4, 0, 0]} maxBarSize={60}>
                 {verticalRoasData.map((entry, i) => (
-                  <Cell
-                    key={i}
-                    fill={entry.isCurrentSeller ? "hsl(199, 100%, 50%)" : "hsl(160, 84%, 39%)"}
-                    fillOpacity={entry.isCurrentSeller ? 1 : 0.5}
-                    stroke={entry.isCurrentSeller ? "hsl(199, 100%, 70%)" : "none"}
-                    strokeWidth={entry.isCurrentSeller ? 2 : 0}
-                  />
+                  <Cell key={i} fill={entry.isCurrentSeller ? "hsl(199, 100%, 50%)" : "hsl(160, 84%, 39%)"} fillOpacity={entry.isCurrentSeller ? 1 : 0.6} stroke={entry.isCurrentSeller ? "hsl(199, 100%, 70%)" : "none"} strokeWidth={entry.isCurrentSeller ? 2 : 0} />
                 ))}
               </Bar>
             </BarChart>
@@ -334,23 +314,17 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               ACOS por Vertical
             </h3>
-            <TooltipInfo text="Custo de Ads como % do faturamento de Ads por categoria. Quanto menor, mais eficiente." />
+            <TooltipInfo text="Custo de Ads como % do faturamento de Ads. Quanto menor, mais eficiente." />
           </div>
-          <ResponsiveContainer width="100%" height={Math.max(200, verticals.length * 36)}>
-            <BarChart data={verticalAcosData} layout="vertical" margin={{ left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" horizontal={false} />
-              <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} tickFormatter={(v) => `${v}%`} />
-              <YAxis type="category" dataKey="vertical" width={120} tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={verticalAcosData} barCategoryGap="25%">
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis dataKey="vertical" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} interval={0} angle={verticals.length > 4 ? -25 : 0} textAnchor={verticals.length > 4 ? "end" : "middle"} height={verticals.length > 4 ? 60 : 30} />
+              <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} tickFormatter={(v) => `${v}%`} />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="ACOS (%)" radius={[0, 4, 4, 0]} maxBarSize={24}>
+              <Bar dataKey="ACOS (%)" radius={[4, 4, 0, 0]} maxBarSize={60}>
                 {verticalAcosData.map((entry, i) => (
-                  <Cell
-                    key={i}
-                    fill={entry.isCurrentSeller ? "hsl(280, 80%, 60%)" : "hsl(40, 95%, 55%)"}
-                    fillOpacity={entry.isCurrentSeller ? 1 : 0.5}
-                    stroke={entry.isCurrentSeller ? "hsl(280, 80%, 70%)" : "none"}
-                    strokeWidth={entry.isCurrentSeller ? 2 : 0}
-                  />
+                  <Cell key={i} fill={entry.isCurrentSeller ? "hsl(280, 80%, 60%)" : "hsl(40, 95%, 55%)"} fillOpacity={entry.isCurrentSeller ? 1 : 0.6} stroke={entry.isCurrentSeller ? "hsl(280, 80%, 70%)" : "none"} strokeWidth={entry.isCurrentSeller ? 2 : 0} />
                 ))}
               </Bar>
             </BarChart>
