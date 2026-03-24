@@ -22,19 +22,6 @@ interface ExecutivePanelProps {
   dataGranularity?: "consolidated" | "daily";
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1">
-      <p className="font-mono text-muted-foreground">{label}</p>
-      {payload.map((p: any, i: number) => (
-        <p key={i} style={{ color: p.color }} className="font-medium">
-          {p.name}: {typeof p.value === "number" ? p.value.toLocaleString("pt-BR") : p.value}
-        </p>
-      ))}
-    </div>
-  );
-};
 
 /* ------------------------------------------------------------------ */
 /*  Strategic uplift label                                             */
