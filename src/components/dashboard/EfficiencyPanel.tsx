@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-  AreaChart, Area, LineChart, Line,
+  AreaChart, Area, LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
@@ -10,6 +10,7 @@ import TrafficHeatmap from "./TrafficHeatmap";
 import BestInvestmentPeriod from "./BestInvestmentPeriod";
 import { fmtBRLCompact, fmtBRL, fmtNum, formatChartDate } from "@/utils/formatters";
 import { type SellerCampaign, getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
+import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { Badge } from "@/components/ui/badge";
 
 interface KpiLike {
@@ -34,6 +35,7 @@ interface EfficiencyPanelProps {
   sellerCustIdMap?: Record<string, string>;
   dataGranularity?: "consolidated" | "daily";
   campaign?: SellerCampaign | null;
+  benchmark?: VerticalBenchmark | null;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -56,7 +58,7 @@ const RatioTooltip = ({ active, payload, label }: any) => {
     <div className="glass-card p-3 !bg-card/95 text-xs space-y-1">
       <p className="font-mono text-muted-foreground">{label}</p>
       {payload.map((p: any, i: number) => {
-        const isPercent = p.name === "ACOS" || p.name === "TACOS";
+        const isPercent = p.name?.includes("ACOS") || p.name?.includes("TACOS") || p.name?.includes("%");
         const formatted = isPercent
           ? `${p.value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`
           : fmtNum(p.value, 2);
@@ -70,7 +72,27 @@ const RatioTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", campaign }: EfficiencyPanelProps) => {
+const BenchmarkBarTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1">
+      <p className="font-mono font-semibold text-foreground">{label}</p>
+      {payload.map((p: any, i: number) => (
+        <p key={i} style={{ color: p.color }} className="font-medium">
+          {p.name}: {typeof p.value === "number"
+            ? label === "Investimento Mensal"
+              ? fmtBRLCompact(p.value)
+              : label === "ROAS (x)"
+                ? `${p.value.toFixed(2)}x`
+                : `${p.value.toFixed(2)}%`
+            : p.value}
+        </p>
+      ))}
+    </div>
+  );
+};
+
+const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark }: EfficiencyPanelProps) => {
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
@@ -111,10 +133,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
   const avgTacos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.tacos, 0) / kpis.length : 0;
   const avgCpa = kpis.length > 0 ? kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length : 0;
 
-  // ROI = (TGMV_PADS - INV_PADS) / INV_PADS
   const roi = totalAds > 0 ? ((totalTgmvPads - totalAds) / totalAds) * 100 : 0;
-
-  // CPC proxy: INV_PADS / VISITS
   const totalVisits = kpis.reduce((s, k) => s + (k.visits || 0), 0);
   const cpcProxy = totalVisits > 0 ? totalAds / totalVisits : 0;
 
@@ -123,12 +142,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     const alerts: { icon: string; text: string; severity: "success" | "warning" | "critical" }[] = [];
     if (!campaign) return alerts;
 
-    // ACOS vs vertical benchmark (using taxaConversaoVertical as proxy for category avg)
-    if (campaign.taxaConversaoVertical > 0 && avgAcos > 0) {
-      if (avgAcos < campaign.taxaConversaoVertical) {
+    // ACOS vs vertical benchmark
+    if (benchmark && benchmark.avgAcos > 0 && avgAcos > 0) {
+      if (avgAcos < benchmark.avgAcos) {
         alerts.push({
           icon: "🟢",
-          text: `Escala Segura: Seu ACOS (${avgAcos.toFixed(1)}%) está abaixo do mercado (${campaign.taxaConversaoVertical.toFixed(1)}%). Pode aumentar o investimento em 20% para ganhar share.`,
+          text: `Escala Segura: Seu ACOS (${avgAcos.toFixed(1)}%) está abaixo do mercado (${benchmark.avgAcos.toFixed(1)}%). Pode aumentar o investimento em 20% para ganhar share.`,
           severity: "success",
         });
       }
@@ -142,7 +161,6 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       });
     }
 
-    // Price vs Effectiveness: cheap visits but low effectiveness
     const totalCheaper = kpis.reduce((s, k) => s + ((k as any).visitsCheaper || 0), 0);
     if (totalVisits > 0 && totalCheaper / totalVisits > 0.5 && campaign.efectRtaVertical < 70) {
       alerts.push({
@@ -152,7 +170,6 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       });
     }
 
-    // Subaproveitamento
     if (campaign.efectRtaVertical > 100 && totalGmv > 0 && (totalAds / totalGmv) * 100 < 1.5) {
       alerts.push({
         icon: "📈",
@@ -162,17 +179,90 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     }
 
     return alerts;
-  }, [campaign, avgAcos, avgTacos, totalGmv, totalAds, totalVisits, kpis]);
+  }, [campaign, benchmark, avgAcos, avgTacos, totalGmv, totalAds, totalVisits, kpis]);
 
+  // Benchmark comparison bar chart data
+  const benchmarkChartData = useMemo(() => {
+    if (!benchmark) return [];
+    return [
+      {
+        metric: "Investimento Mensal",
+        "Seu Desempenho": Math.round(totalAds),
+        "Média da Categoria": Math.round(benchmark.avgInvestment),
+      },
+      {
+        metric: "ROAS (x)",
+        "Seu Desempenho": Math.round(avgRoas * 100) / 100,
+        "Média da Categoria": Math.round(benchmark.avgRoas * 100) / 100,
+      },
+      {
+        metric: "ACOS (%)",
+        "Seu Desempenho": Math.round(avgAcos * 100) / 100,
+        "Média da Categoria": Math.round(benchmark.avgAcos * 100) / 100,
+      },
+    ];
+  }, [benchmark, totalAds, avgRoas, avgAcos]);
+
+  const verticalName = campaign?.verticalPrincipal || "—";
+
+  // Build metrics with benchmark sub-text
   const metrics = [
-    { label: "Faturamento Bruto (GMV)", value: fmtBRLCompact(totalGmv), color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado." },
-    { label: "ROAS Médio", value: fmtNum(avgRoas, 2), color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "TGMV_LC_PADS / INV_PADS. Acima de 2x é saudável." },
-    { label: "ACOS Médio", value: `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgAcos <= 15 ? "emerald-text" : "critical-text", tooltip: "(INV_PADS / TGMV_LC_PADS) × 100. Quanto menor, mais eficiente." },
-    { label: "TACOS Médio", value: `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`, color: avgTacos <= 10 ? "emerald-text" : "critical-text", tooltip: "(INV_PADS / TGMV_LC) × 100. Termômetro real da saúde do negócio." },
-    { label: "CPA Médio", value: fmtBRL(avgCpa), color: "neon-text", tooltip: "Custo por aquisição. INV_PADS / TSI_PADS." },
-    { label: "ROI", value: `${roi.toFixed(1)}%`, color: roi > 0 ? "emerald-text" : "critical-text", tooltip: "(TGMV_LC_PADS − INV_PADS) / INV_PADS × 100." },
-    { label: "CPC Proxy", value: fmtBRL(cpcProxy), color: "text-muted-foreground", tooltip: "INV_PADS / VISITAS. Proxy do custo por clique." },
-    { label: "Investimento em Marketing", value: fmtBRLCompact(totalAds), color: "text-muted-foreground", tooltip: "Total investido em campanhas de Product Ads no período." },
+    {
+      label: "Faturamento Bruto (GMV)",
+      value: fmtBRLCompact(totalGmv),
+      color: "neon-text",
+      tooltip: "Valor total das vendas brutas no período selecionado.",
+      benchmarkText: null,
+    },
+    {
+      label: "ROAS Médio",
+      value: fmtNum(avgRoas, 2),
+      color: avgRoas >= 2 ? "emerald-text" : "critical-text",
+      tooltip: "TGMV_LC_PADS / INV_PADS. Acima de 2x é saudável.",
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgRoas.toFixed(2)}x` : null,
+    },
+    {
+      label: "ACOS Médio",
+      value: `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
+      color: avgAcos <= 15 ? "emerald-text" : "critical-text",
+      tooltip: "(INV_PADS / TGMV_LC_PADS) × 100. Quanto menor, mais eficiente.",
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgAcos.toFixed(2)}%` : null,
+    },
+    {
+      label: "TACOS Médio",
+      value: `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
+      color: avgTacos <= 10 ? "emerald-text" : "critical-text",
+      tooltip: "(INV_PADS / TGMV_LC) × 100. Termômetro real da saúde do negócio.",
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgTacos.toFixed(2)}%` : null,
+    },
+    {
+      label: "CPA Médio",
+      value: fmtBRL(avgCpa),
+      color: "neon-text",
+      tooltip: "Custo por aquisição. INV_PADS / TSI_PADS.",
+      benchmarkText: null,
+    },
+    {
+      label: "ROI",
+      value: `${roi.toFixed(1)}%`,
+      color: roi > 0 ? "emerald-text" : "critical-text",
+      tooltip: "(TGMV_LC_PADS − INV_PADS) / INV_PADS × 100.",
+      benchmarkText: null,
+    },
+    {
+      label: "CPC Proxy",
+      value: fmtBRL(cpcProxy),
+      color: "text-muted-foreground",
+      tooltip: "INV_PADS / VISITAS. Proxy do custo por clique.",
+      benchmarkText: null,
+    },
+    {
+      label: "Investimento em Marketing",
+      value: fmtBRLCompact(totalAds),
+      color: "text-muted-foreground",
+      tooltip: "Total investido em campanhas de Product Ads no período.",
+      benchmarkText: benchmark ? `Média da categoria: ${fmtBRLCompact(benchmark.avgInvestment)}` : null,
+    },
   ];
 
   return (
@@ -209,6 +299,9 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             {campaign.verticalPrincipal && (
               <Badge variant="outline" className="text-xs">{campaign.verticalPrincipal}</Badge>
             )}
+            {benchmark && (
+              <span className="text-[10px] text-muted-foreground">({benchmark.sellersCount} sellers na vertical)</span>
+            )}
           </div>
           <div className="flex items-center gap-4 text-xs">
             <div>
@@ -228,6 +321,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         </div>
       )}
 
+      {/* KPI Cards with benchmark sub-text */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
         {metrics.map((m, i) => (
           <motion.div
@@ -242,6 +336,9 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
               <TooltipInfo text={m.tooltip} />
             </div>
             <p className={`metric-value mt-1 ${m.color}`}>{m.value}</p>
+            {m.benchmarkText && (
+              <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{m.benchmarkText}</p>
+            )}
           </motion.div>
         ))}
       </div>
@@ -251,6 +348,43 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         <SalesRecordCard kpis={kpis} />
         <BestInvestmentPeriod kpis={kpis} />
       </div>
+
+      {/* Benchmark Grouped Bar Chart */}
+      {benchmark && benchmarkChartData.length > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                Seu Desempenho vs. Média de Mercado
+              </h3>
+              <Badge variant="outline" className="text-[10px]">Vertical: {verticalName}</Badge>
+              <TooltipInfo text={`Comparativo entre suas métricas e a média de ${benchmark.sellersCount} sellers da mesma vertical (${verticalName}).`} />
+            </div>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={benchmarkChartData} barGap={4} barCategoryGap="25%">
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis
+                dataKey="metric"
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={false}
+              />
+              <YAxis
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={false}
+                tickFormatter={(v) => {
+                  if (Math.abs(v) >= 1000) return `${(v / 1000).toFixed(0)}K`;
+                  return String(v);
+                }}
+              />
+              <Tooltip content={<BenchmarkBarTooltip />} />
+              <Bar dataKey="Seu Desempenho" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
+              <Bar dataKey="Média da Categoria" fill="hsl(174, 60%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
+              <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Area Chart — Faturamento vs Ads */}
       <div className="glass-card p-5">
