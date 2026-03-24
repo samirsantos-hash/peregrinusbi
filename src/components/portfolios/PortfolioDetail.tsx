@@ -137,7 +137,13 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
               {summary.lowFullCount > 0 && (
                 <> <strong>{summary.lowFullCount}</strong> sem adoção de Full.</>
               )}
-              {summary.sellersEmQueda === 0 && summary.subInvestCount === 0 && summary.lowFullCount === 0 && (
+              {summary.promoAlertCount > 0 && (
+                <> <strong>{summary.promoAlertCount}</strong> seller(s) fora da Central de Promoções (potencial Full alto).</>
+              )}
+              {summary.kitOpportunityCount > 0 && (
+                <> <strong>{summary.kitOpportunityCount}</strong> com oportunidade de KIT (ticket médio baixo).</>
+              )}
+              {summary.sellersEmQueda === 0 && summary.subInvestCount === 0 && summary.lowFullCount === 0 && summary.promoAlertCount === 0 && (
                 <> Todos os indicadores estão saudáveis.</>
               )}
             </p>
