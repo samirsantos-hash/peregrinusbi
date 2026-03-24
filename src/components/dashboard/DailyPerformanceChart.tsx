@@ -178,7 +178,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Desempenho Diário (Ciclo 24h)
+            {isConsolidated ? "Evolução de Faturamento" : "Desempenho Diário (Ciclo 24h)"}
           </h3>
           <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar séries." />
         </div>
