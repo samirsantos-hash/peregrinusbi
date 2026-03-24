@@ -181,15 +181,18 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     return alerts;
   }, [campaign, benchmark, avgAcos, avgTacos, totalGmv, totalAds, totalVisits, kpis]);
 
-  // Benchmark comparison bar chart data
-  const benchmarkChartData = useMemo(() => {
+  // Benchmark comparison — separate charts for different scales
+  const benchmarkInvestmentData = useMemo(() => {
     if (!benchmark) return [];
     return [
-      {
-        metric: "Investimento Mensal",
-        "Seu Desempenho": Math.round(totalAds),
-        "Média da Categoria": Math.round(benchmark.avgInvestment),
-      },
+      { name: "Seu Investimento", value: Math.round(totalAds) },
+      { name: "Média da Categoria", value: Math.round(benchmark.avgInvestment) },
+    ];
+  }, [benchmark, totalAds]);
+
+  const benchmarkRatioData = useMemo(() => {
+    if (!benchmark) return [];
+    return [
       {
         metric: "ROAS (x)",
         "Seu Desempenho": Math.round(avgRoas * 100) / 100,
@@ -200,8 +203,13 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         "Seu Desempenho": Math.round(avgAcos * 100) / 100,
         "Média da Categoria": Math.round(benchmark.avgAcos * 100) / 100,
       },
+      {
+        metric: "TACOS (%)",
+        "Seu Desempenho": Math.round(avgTacos * 100) / 100,
+        "Média da Categoria": Math.round(benchmark.avgTacos * 100) / 100,
+      },
     ];
-  }, [benchmark, totalAds, avgRoas, avgAcos]);
+  }, [benchmark, avgRoas, avgAcos, avgTacos]);
 
   const verticalName = campaign?.verticalPrincipal || "—";
 
