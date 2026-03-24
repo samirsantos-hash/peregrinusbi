@@ -66,6 +66,7 @@ const DashboardHeader = ({
   filteredKpis,
   onRefresh,
   isRefreshing,
+  onPeriodChange,
 }: DashboardHeaderProps) => {
   const [calOpen, setCalOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
