@@ -4,10 +4,12 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { TrendingUp, TrendingDown, Crown, Target, BarChart3 } from "lucide-react";
+import { TrendingUp, TrendingDown, Crown, Target, BarChart3, Rocket } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import GaugeChart from "./GaugeChart";
+import { Badge } from "@/components/ui/badge";
 import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
+import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 
 interface KpiLike {
   date: string;
@@ -21,6 +23,7 @@ interface KpiLike {
 interface GrowthPotentialPanelProps {
   kpis: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
+  campaign?: SellerCampaign | null;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -49,9 +52,8 @@ interface StrategicInsight {
   borderColor: string;
 }
 
-function getStrategicInsight(potentialPct: number, isGaining: boolean): StrategicInsight {
+function getStrategicInsight(potentialPct: number): StrategicInsight {
   if (potentialPct >= 150) {
-    // Seller massively above benchmark
     return {
       label: "Líder de Categoria",
       sublabel: "Este seller domina o nicho. Para crescer mais, considere expandir o mix de produtos.",
@@ -62,7 +64,6 @@ function getStrategicInsight(potentialPct: number, isGaining: boolean): Strategi
     };
   }
   if (potentialPct >= 120) {
-    // Well above benchmark
     return {
       label: "Teto de Mercado Ativado",
       sublabel: "O seller já domina o nicho atual. Para crescer, considere novos produtos (mix) ou otimize margem.",
@@ -73,18 +74,16 @@ function getStrategicInsight(potentialPct: number, isGaining: boolean): Strategi
     };
   }
   if (potentialPct >= 100) {
-    // Above benchmark — performance excedente
     return {
       label: "Performance Excedente",
-      sublabel: "Seller acima da meta! Oportunidade para otimizar margem (testar aumento de preço) em vez de volume.",
-      icon: TrendingUp,
+      sublabel: "🚀 Seller acima da meta! Oportunidade para otimizar margem (testar aumento de preço ou redução de descontos) em vez de focar apenas em volume.",
+      icon: Rocket,
       color: "text-emerald",
       bgColor: "bg-emerald/5",
       borderColor: "border-emerald/20",
     };
   }
   if (potentialPct >= 70) {
-    // Close to benchmark — gap de vendas
     return {
       label: "Gap de Vendas",
       sublabel: "O seller está próximo ao potencial. Ajustes em Ads, preço ou logística podem fechar esse gap.",
@@ -94,7 +93,6 @@ function getStrategicInsight(potentialPct: number, isGaining: boolean): Strategi
       borderColor: "border-amber-500/20",
     };
   }
-  // Well below benchmark
   return {
     label: "Potencial de Recuperação",
     sublabel: "Existe um potencial significativo de crescimento para este seller. Invista em visibilidade e competitividade.",
@@ -105,7 +103,10 @@ function getStrategicInsight(potentialPct: number, isGaining: boolean): Strategi
   };
 }
 
-const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotentialPanelProps) => {
+const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign }: GrowthPotentialPanelProps) => {
+  // Primary source: Efect Rta Vertical from meli_campaigns
+  const hasCampaignData = !!campaign && campaign.efectRtaVertical > 0;
+
   const {
     chartData,
     sellerTotal,
@@ -118,18 +119,28 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
       return { chartData: [], sellerTotal: 0, benchmarkTotal: 0, potentialPct: 0, isGaining: false, gaugeValue: 0 };
     }
 
+    // If we have campaign data, use efectRtaVertical as the potentialPct directly
+    const efectPct = hasCampaignData ? campaign!.efectRtaVertical : 0;
+
     const byDate: Record<string, { sellerGmv: number; benchmarkGmv: number }> = {};
 
     for (const k of kpis) {
       if (!byDate[k.date]) byDate[k.date] = { sellerGmv: 0, benchmarkGmv: 0 };
       byDate[k.date].sellerGmv += k.revenue;
-      const cdp = k.cdpTgmv || 0;
-      if (cdp > 0) {
-        byDate[k.date].benchmarkGmv += cdp;
+
+      if (hasCampaignData) {
+        // Benchmark = seller revenue / (efectRtaVertical / 100) — reverse-engineer category potential
+        const benchmarkRevenue = efectPct > 0 ? k.revenue / (efectPct / 100) : k.revenue;
+        byDate[k.date].benchmarkGmv += benchmarkRevenue;
       } else {
-        const uplift = k.upliftGmvM1 || 0;
-        const estimated = k.revenue * (1 + Math.abs(uplift) * 0.5 + 0.15);
-        byDate[k.date].benchmarkGmv += estimated;
+        const cdp = k.cdpTgmv || 0;
+        if (cdp > 0) {
+          byDate[k.date].benchmarkGmv += cdp;
+        } else {
+          const uplift = k.upliftGmvM1 || 0;
+          const estimated = k.revenue * (1 + Math.abs(uplift) * 0.5 + 0.15);
+          byDate[k.date].benchmarkGmv += estimated;
+        }
       }
     }
 
@@ -144,14 +155,16 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
       return {
         date: label,
         "Seller (Acumulado)": Math.round(cumSeller),
-        "Benchmark Categoria": Math.round(cumBenchmark),
+        "Benchmark Vertical": Math.round(cumBenchmark),
       };
     });
 
     const sTotal = cumSeller;
     const bTotal = cumBenchmark;
-    const gaining = sTotal >= bTotal;
-    const pct = bTotal > 0 ? (sTotal / bTotal) * 100 : 0;
+
+    // Use efectRtaVertical directly if available, otherwise compute from totals
+    const pct = hasCampaignData ? efectPct : (bTotal > 0 ? (sTotal / bTotal) * 100 : 0);
+    const gaining = pct >= 100;
     const gauge = Math.min(100, Math.round(pct));
 
     return {
@@ -162,7 +175,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
       isGaining: gaining,
       gaugeValue: gauge,
     };
-  }, [kpis]);
+  }, [kpis, hasCampaignData, campaign]);
 
   if (kpis.length === 0) {
     return (
@@ -172,14 +185,16 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
     );
   }
 
-  const insight = getStrategicInsight(potentialPct, isGaining);
+  const insight = getStrategicInsight(potentialPct);
   const InsightIcon = insight.icon;
 
   const gapPct = Math.abs(100 - potentialPct);
-  const insightText =
-    potentialPct >= 100
-      ? `O Seller está operando a ${potentialPct.toFixed(1)}% do potencial da categoria — superando o benchmark!`
-      : `O Seller está operando a ${potentialPct.toFixed(1)}% do potencial total da categoria`;
+  const isExceedent = potentialPct > 100;
+  const overflowPct = isExceedent ? potentialPct - 100 : 0;
+
+  const insightText = isExceedent
+    ? `O Seller está operando a ${potentialPct.toFixed(1)}% do potencial da categoria — superando o benchmark!`
+    : `O Seller está operando a ${potentialPct.toFixed(1)}% do potencial total da categoria`;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -188,7 +203,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
         {/* Gauge */}
         <div className="glass-card p-5 flex flex-col items-center justify-center">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
-            Taxa de Crescimento Potencial
+            Efetividade da Vertical
           </h3>
           <GaugeChart
             value={gaugeValue}
@@ -196,6 +211,24 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
             color={isGaining ? "emerald" : "blue"}
             max={100}
           />
+          {/* Overflow indicator */}
+          {isExceedent && (
+            <div className="mt-2 flex items-center gap-2">
+              <Badge className="bg-emerald/20 text-emerald border-emerald/30 border text-xs font-mono">
+                +{overflowPct.toFixed(1)}% acima
+              </Badge>
+            </div>
+          )}
+          {/* Vertical name */}
+          {campaign?.verticalPrincipal && (
+            <p className="text-[10px] text-muted-foreground mt-2 text-center">
+              Vertical: <span className="font-semibold text-foreground">{campaign.verticalPrincipal}</span>
+            </p>
+          )}
+          {/* Data source badge */}
+          <Badge variant="outline" className="mt-2 text-[9px] border-border">
+            {hasCampaignData ? "Fonte: Efect Rta Vertical" : "Fonte: CDP estimado"}
+          </Badge>
         </div>
 
         {/* Insight card */}
@@ -203,9 +236,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
           <div>
             <div className="flex items-center gap-2 mb-3">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                Potencial de Crescimento vs Categoria
+                Potencial de Crescimento vs Vertical
               </h3>
-              <TooltipInfo text="Compara o faturamento acumulado do Seller com o benchmark médio da categoria/domínio. O CDP TGMV é usado como referência de mercado." />
+              <TooltipInfo text="Compara a efetividade real do Seller com o benchmark da vertical principal (Efect Rta Vertical). Valores acima de 100% indicam que o seller supera o mercado." />
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
@@ -214,8 +247,13 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
                 <p className="text-lg font-bold font-mono text-foreground mt-1">{fmtBRLCompact(sellerTotal)}</p>
               </div>
               <div className="bg-muted/30 rounded-lg p-3">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Benchmark Categoria</p>
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                  {hasCampaignData ? "Benchmark Vertical" : "Benchmark Categoria"}
+                </p>
                 <p className="text-lg font-bold font-mono text-foreground mt-1">{fmtBRLCompact(benchmarkTotal)}</p>
+                {campaign?.verticalPrincipal && (
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{campaign.verticalPrincipal}</p>
+                )}
               </div>
             </div>
           </div>
@@ -227,6 +265,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
               <div>
                 <p className={`text-sm font-semibold ${insight.color}`}>
                   {insight.label}
+                  {isExceedent && (
+                    <span className="ml-2 font-mono text-xs">({potentialPct.toFixed(1)}%)</span>
+                  )}
                 </p>
                 <p className="text-muted-foreground mt-0.5 text-base">
                   {insightText}
@@ -236,7 +277,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
                 </p>
                 {!isGaining && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Gap de <span className={`font-mono font-semibold ${insight.color}`}>{gapPct.toFixed(1)}%</span> para atingir o benchmark da categoria.
+                    Gap de <span className={`font-mono font-semibold ${insight.color}`}>{gapPct.toFixed(1)}%</span> para atingir o benchmark da vertical.
                   </p>
                 )}
               </div>
@@ -245,13 +286,36 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
         </div>
       </div>
 
+      {/* Progress bar with overflow */}
+      <div className="glass-card p-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs text-muted-foreground">Efetividade vs Vertical</span>
+          <span className="text-xs font-mono font-bold">{potentialPct.toFixed(1)}%</span>
+        </div>
+        <div className="relative w-full h-3 bg-muted/40 rounded-full overflow-hidden">
+          <motion.div
+            className={`h-full rounded-full ${isExceedent ? "bg-emerald" : potentialPct >= 70 ? "bg-warning" : "bg-destructive"}`}
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.min(potentialPct, 100)}%` }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          />
+        </div>
+        {isExceedent && (
+          <div className="flex items-center justify-end mt-1 gap-1">
+            <Badge className="bg-emerald/10 text-emerald border-emerald/20 border text-[10px]">
+              🏆 Overflow: +{overflowPct.toFixed(1)}% acima do benchmark
+            </Badge>
+          </div>
+        )}
+      </div>
+
       {/* Cumulative growth chart */}
       <div className="glass-card p-5">
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Curva de Crescimento Acumulado: Seller vs Categoria
+            Curva de Crescimento Acumulado: Seller vs Vertical
           </h3>
-          <TooltipInfo text="Eixo 1: faturamento acumulado do Seller. Eixo 2: benchmark de mercado da categoria. A área entre as curvas representa o gap ou ganho de market share." />
+          <TooltipInfo text="Eixo 1: faturamento acumulado do Seller. Eixo 2: benchmark da vertical. A área entre as curvas representa o gap ou ganho de market share." />
         </div>
         <ResponsiveContainer width="100%" height={320}>
           <AreaChart data={chartData}>
@@ -289,7 +353,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily" }: GrowthPotenti
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
-              dataKey="Benchmark Categoria"
+              dataKey="Benchmark Vertical"
               stroke="hsl(40, 95%, 55%)"
               fill="url(#gradBenchmark)"
               strokeWidth={2}
