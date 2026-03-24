@@ -34,6 +34,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
+import { aggregateKpisByQuarter } from "@/utils/aggregateByQuarter";
 import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
 import GrantAlert from "@/components/dashboard/GrantAlert";
 import { useSellerGrants } from "@/hooks/useSellerGrants";
@@ -94,11 +95,20 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("executive");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
+  const [activePeriod, setActivePeriod] = useState<string>("all");
+
+  // Handle period changes from DashboardHeader
+  const handlePeriodChange = useCallback((period: string) => {
+    setActivePeriod(period);
+    const isDaily = ["7", "15", "30"].includes(period);
+    setGranularity(isDaily ? "daily" : "consolidated");
+    setDateRange(undefined); // Force re-anchor to new dataset
+  }, []);
 
   // Clear date range and cache when granularity changes
   const handleGranularityChange = useCallback((val: Granularity) => {
     setGranularity(val);
-    setDateRange(undefined); // Force re-anchor to new dataset
+    setDateRange(undefined);
   }, []);
 
   const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
@@ -141,9 +151,10 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
+  // Always fetch daily data — needed for 7D/15D/30D periods
   const { data: dbDailyKpis, isLoading: loadingDailyKpis } = useSellerDailyKpis(
     hasRealData ? selectedSeller : undefined,
-    granularity === "daily"
+    true
   );
 
   const { data: listingsQuality } = useListingsQuality(
@@ -182,10 +193,11 @@ const Index = () => {
     return [];
   }, [hasRealData, dbDailyKpis]);
 
-  // Select source based on granularity
+  // Select source based on active period: 7/15/30 → daily, "all" → monthly
+  const isDailyPeriod = ["7", "15", "30"].includes(activePeriod);
   const allKpis: any[] = useMemo(() => {
-    return granularity === "daily" ? allKpisDaily : allKpisMonthly;
-  }, [granularity, allKpisDaily, allKpisMonthly]);
+    return isDailyPeriod ? allKpisDaily : allKpisMonthly;
+  }, [isDailyPeriod, allKpisDaily, allKpisMonthly]);
 
   // Compute anchor (max date) and min date from ALL data
   const { anchorDate, minDate, anchorStr, minStr } = useMemo(() => {
@@ -239,13 +251,14 @@ const Index = () => {
     return filtered;
   }, [allKpis, dateRange]);
 
-  // Apply granularity: consolidated = aggregate by month, daily = raw
+  // Apply aggregation: daily periods = raw data, "all" = quarter aggregation, consolidated = month
   const displayKpis: any[] = useMemo(() => {
-    if (granularity === "consolidated") {
-      return aggregateKpisByMonth(filteredKpis);
+    if (isDailyPeriod) {
+      return filteredKpis; // raw daily rows
     }
-    return filteredKpis;
-  }, [filteredKpis, granularity]);
+    // "all" or custom → aggregate by quarters
+    return aggregateKpisByQuarter(filteredKpis);
+  }, [filteredKpis, isDailyPeriod]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -278,7 +291,7 @@ const Index = () => {
     return map;
   }, [sellers]);
 
-  const isLoading = !sellersFetched || (hasRealData && (loadingKpis || (granularity === "daily" && loadingDailyKpis)));
+  const isLoading = !sellersFetched || (hasRealData && (loadingKpis || loadingDailyKpis));
 
   // Active date range debug label
   const dateDebugLabel = useMemo(() => {
@@ -346,6 +359,7 @@ const Index = () => {
               filteredKpis={filteredKpis}
               onRefresh={handleRefresh}
               isRefreshing={isRefreshing}
+              onPeriodChange={handlePeriodChange}
             />
 
             {/* Granularity Toggle — desativado para v2.0 */}

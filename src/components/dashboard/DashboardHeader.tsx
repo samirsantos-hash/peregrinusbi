@@ -52,6 +52,8 @@ interface DashboardHeaderProps {
   filteredKpis: KpiLike[];
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  /** Notify parent of period key changes (7, 15, 30, all, custom) */
+  onPeriodChange?: (period: string) => void;
 }
 
 const DashboardHeader = ({
@@ -64,6 +66,7 @@ const DashboardHeader = ({
   filteredKpis,
   onRefresh,
   isRefreshing,
+  onPeriodChange,
 }: DashboardHeaderProps) => {
   const [calOpen, setCalOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
@@ -135,6 +138,7 @@ const DashboardHeader = ({
   const handleQuickRange = (qr: typeof quickRanges[0]) => {
     playClick();
     setActivePeriod(qr.key);
+    onPeriodChange?.(qr.key);
     if (qr.days) {
       const from = subLocalDays(anchorDate, qr.days);
       onDateRangeChange({ from, to: anchorDate });
