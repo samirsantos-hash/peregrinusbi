@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpDown, Camera, AlertTriangle, TrendingUp, TrendingDown, Download, FileSpreadsheet, FileText, ExternalLink } from "lucide-react";
+import { ArrowUpDown, Camera, AlertTriangle, TrendingUp, TrendingDown, Download, FileSpreadsheet, FileText, ExternalLink, Zap, Search, ShoppingCart } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
@@ -37,7 +37,7 @@ function getModalPrincipal(tsi: number, fTsi: number, tsiFlex: number): { label:
 }
 
 type FilterPill = "all" | "platinum" | "ads3" | "growth" | "trending_up" | "trending_down";
-type SortKey = "nickname" | "repCurrentLevel" | "tgmvLc" | "roas" | "modalPrincipal" | "pctAds" | "scoreQualidadeFinal" | "grantDays";
+type SortKey = "nickname" | "repCurrentLevel" | "tgmvLc" | "roas" | "potenciaFull" | "modalPrincipal" | "pctAds" | "scoreQualidadeFinal" | "grantDays";
 
 interface Props {
   sellers: SellerWithKpi[];
@@ -57,19 +57,28 @@ function TrendArrow({ value }: { value: number | undefined }) {
 type EnrichedSeller = SellerWithKpi & {
   pctAds: number;
   roas: number;
+  potenciaFull: number;
   modalPrincipal: ReturnType<typeof getModalPrincipal>;
   alertQuality: boolean;
   alertHighAds: boolean;
+  alertRanking: boolean;
+  alertPromo: boolean;
+  alertKit: boolean;
 };
 
 function enrichRows(sellers: SellerWithKpi[]): EnrichedSeller[] {
   return sellers.map((s) => {
     const pctAds = safePct(s.invPads, s.tgmvLc);
     const roas = s.invPads > 0 ? (s.tgmvLcPads || 0) / s.invPads : 0;
+    const potenciaFull = safePct(s.fTsi, s.tsi);
     const modalPrincipal = getModalPrincipal(s.tsi, s.fTsi, s.tsiFlex);
     const alertQuality = s.scoreQualidadeFinal < 50;
     const alertHighAds = pctAds > 5;
-    return { ...s, pctAds, roas, modalPrincipal, alertQuality, alertHighAds };
+    const alertPromo = potenciaFull > 50 && s.scoreOfertaFinal < 30;
+    const ticketMedio = s.tsi > 0 ? s.tgmvLc / s.tsi : 0;
+    const alertKit = ticketMedio > 0 && ticketMedio < 50 && s.tsi >= 10;
+    const alertRanking = false; // computed in table render with context
+    return { ...s, pctAds, roas, potenciaFull, modalPrincipal, alertQuality, alertHighAds, alertRanking, alertPromo, alertKit };
   });
 }
 
@@ -82,12 +91,14 @@ function getExportRows(data: EnrichedSeller[], trends?: Record<string, SellerTre
       "Faturamento (R$)": s.tgmvLc,
       "Tendência Fat. (%)": t ? Number(t.tgmvTrend.toFixed(1)) : "—",
       ROAS: Number(s.roas.toFixed(1)),
+      "Potência Full (%)": Number(s.potenciaFull.toFixed(1)),
       "Modal Principal": `${s.modalPrincipal.emoji} ${s.modalPrincipal.label}`,
       "% Ads": Number(s.pctAds.toFixed(2)),
       "Saúde Catálogo": Number(s.scoreQualidadeFinal.toFixed(0)),
       Alertas: [
         s.alertQuality ? "📸 Fotos" : "",
         s.alertHighAds ? "⚠ Alto Ads" : "",
+        s.alertPromo ? "⚡ Promoções" : "",
       ].filter(Boolean).join(", ") || "✓",
     };
   });
@@ -102,7 +113,6 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
 
   const filtered = useMemo(() => {
     let list = enriched;
-    // Apply grant filter from monitor widget
     if (grantFilter && grants) {
       list = list.filter((s) => {
         const g = grants[s.sellerId];
@@ -252,6 +262,7 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                 <SortHeader label="Medalha" k="repCurrentLevel" />
                 <SortHeader label="Faturamento" k="tgmvLc" />
                 <SortHeader label="ROAS" k="roas" />
+                <SortHeader label="Potência Full" k="potenciaFull" />
                 <SortHeader label="Modal Principal" k="modalPrincipal" />
                 <SortHeader label="% Ads" k="pctAds" />
                 <SortHeader label="Saúde" k="scoreQualidadeFinal" />
@@ -262,7 +273,7 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
             <TableBody>
               {sorted.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
                     Nenhum seller encontrado com esse filtro.
                   </TableCell>
                 </TableRow>
@@ -270,6 +281,7 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                 sorted.map((s) => {
                   const medal = getMedalStyle(s.repCurrentLevel);
                   const trend = trends?.[s.sellerId];
+                  const potenciaColor = s.potenciaFull >= 70 ? "text-emerald-400" : s.potenciaFull >= 40 ? "text-yellow-400" : "text-red-400";
                   return (
                     <TableRow key={s.custId}>
                       <TableCell className="font-medium text-sm">
@@ -297,6 +309,11 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                         </span>
                       </TableCell>
                       <TableCell className="font-mono text-sm">{s.roas.toFixed(1)}x</TableCell>
+                      <TableCell>
+                        <span className={`font-mono text-sm font-semibold ${potenciaColor}`}>
+                          {s.potenciaFull.toFixed(1)}%
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={`text-xs border ${s.modalPrincipal.className}`}>
                           {s.modalPrincipal.emoji} {s.modalPrincipal.label}
@@ -341,12 +358,36 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
+                          {s.alertQuality && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Camera className="w-3.5 h-3.5 text-red-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>📸 Catálogo com score baixo</TooltipContent>
+                            </Tooltip>
+                          )}
                           {s.alertHighAds && (
                             <Tooltip>
                               <TooltipTrigger>
                                 <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
                               </TooltipTrigger>
-                              <TooltipContent>Vazamento de Margem (Ads {'>'} 5%)</TooltipContent>
+                              <TooltipContent>⚠️ Vazamento de Margem (Ads {'>'} 5%)</TooltipContent>
+                            </Tooltip>
+                          )}
+                          {s.alertPromo && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Zap className="w-3.5 h-3.5 text-violet-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>⚡ Fora da Central de Promoções</TooltipContent>
+                            </Tooltip>
+                          )}
+                          {s.alertKit && (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <ShoppingCart className="w-3.5 h-3.5 text-cyan-400" />
+                              </TooltipTrigger>
+                              <TooltipContent>🛒 Ticket baixo — oportunidade de KIT</TooltipContent>
                             </Tooltip>
                           )}
                           {trend && (trend.tgmvTrend < -15 || trend.visitsTrend < -15) && (
@@ -357,7 +398,7 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                               <TooltipContent>🚨 Queda severa detectada</TooltipContent>
                             </Tooltip>
                           )}
-                          {!s.alertHighAds && !s.alertQuality && !(trend && (trend.tgmvTrend < -15 || trend.visitsTrend < -15)) && (
+                          {!s.alertHighAds && !s.alertQuality && !s.alertPromo && !s.alertKit && !(trend && (trend.tgmvTrend < -15 || trend.visitsTrend < -15)) && (
                             <span className="text-xs text-muted-foreground">✓</span>
                           )}
                         </div>
