@@ -116,15 +116,19 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
               Resumo Inteligente da Carteira
             </h3>
             <p className="text-sm leading-relaxed text-foreground">
-              Esta carteira gerou <strong>{fmtBRL(summary.totalRevenue)}</strong> no período.
-              O maior destaque foi <strong>{summary.topSeller}</strong>.
+              Total faturado: <strong>{fmtBRL(summary.totalRevenue)}</strong>.
+              {summary.sellersEmQueda > 0 && (
+                <> <strong>{summary.sellersEmQueda}</strong> seller(s) em queda.</>
+              )}
               {summary.subInvestCount > 0 && (
-                <> Atenção: <strong>{summary.subInvestCount}</strong> seller(s) apresentam subinvestimento em Ads</>
+                <> <strong>{summary.subInvestCount}</strong> seller(s) com subpenetração de Ads.</>
               )}
               {summary.lowFullCount > 0 && (
-                <> e <strong>{summary.lowFullCount}</strong> possuem alto volume sem adoção de Full</>
+                <> <strong>{summary.lowFullCount}</strong> sem adoção de Full.</>
               )}
-              .
+              {summary.sellersEmQueda === 0 && summary.subInvestCount === 0 && summary.lowFullCount === 0 && (
+                <> Todos os indicadores estão saudáveis.</>
+              )}
             </p>
           </CardContent>
         </Card>
