@@ -7,7 +7,6 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag, RefreshCw, CalendarDays, Clock } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
-import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 
