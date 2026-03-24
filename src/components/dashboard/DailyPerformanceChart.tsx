@@ -127,10 +127,11 @@ function ChartTooltipContent({ active, payload }: any) {
   );
 }
 
-const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
+const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformanceChartProps) => {
   const chartData = useMemo(() => fillGaps(kpis), [kpis]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const isSinglePoint = chartData.length === 1;
+  const isConsolidated = granularity === "consolidated";
 
   // Compute nice Y domain with padding
   const yDomain = useMemo(() => {
