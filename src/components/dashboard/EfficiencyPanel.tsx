@@ -132,9 +132,11 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
-  const avgRoas = kpis.length > 0 ? kpis.reduce((s, k) => s + k.roas, 0) / kpis.length : 0;
-  const avgAcos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.acos, 0) / kpis.length : 0;
-  const avgTacos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.tacos, 0) / kpis.length : 0;
+  // Weighted metrics from totals (not simple averages)
+  const totalTgmvPadsForMetrics = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
+  const avgRoas = totalAds > 0 ? totalTgmvPadsForMetrics / totalAds : 0;
+  const avgAcos = totalTgmvPadsForMetrics > 0 ? (totalAds / totalTgmvPadsForMetrics) * 100 : 0;
+  const avgTacos = totalGmv > 0 ? (totalAds / totalGmv) * 100 : 0;
   const avgCpa = kpis.length > 0 ? kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length : 0;
 
   // ROI weighted: (Sum_TGMV_LC_PADS - Sum_INV_PADS) / Sum_INV_PADS * 100
