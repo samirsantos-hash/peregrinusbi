@@ -57,7 +57,7 @@ function fillGaps(kpis: DailyKpi[]) {
   const start = parseLocal(sortedDates[0]);
   const end = parseLocal(sortedDates[sortedDates.length - 1]);
 
-  const result: { date: string; label: string; tgmv: number; ads: number; tsi: number }[] = [];
+  const raw: { date: string; label: string; tgmv: number; ads: number; tsi: number; ma7tgmv?: number; ma7ads?: number; ma7tsi?: number }[] = [];
   const cursor = new Date(start);
 
   while (cursor <= end) {
@@ -65,8 +65,7 @@ function fillGaps(kpis: DailyKpi[]) {
     const vals = byDate.get(iso) || { tgmv: 0, ads: 0, tsi: 0 };
     const dd = String(cursor.getDate()).padStart(2, "0");
     const mm = String(cursor.getMonth() + 1).padStart(2, "0");
-    const yy = cursor.getFullYear();
-    result.push({
+    raw.push({
       date: iso,
       label: `${dd}/${mm}`,
       ...vals,
@@ -74,7 +73,21 @@ function fillGaps(kpis: DailyKpi[]) {
     cursor.setDate(cursor.getDate() + 1);
   }
 
-  return result;
+  // Compute 7-day moving averages
+  for (let i = 0; i < raw.length; i++) {
+    if (i < 6) continue; // need 7 points
+    let sumT = 0, sumA = 0, sumS = 0;
+    for (let j = i - 6; j <= i; j++) {
+      sumT += raw[j].tgmv;
+      sumA += raw[j].ads;
+      sumS += raw[j].tsi;
+    }
+    raw[i].ma7tgmv = Math.round(sumT / 7);
+    raw[i].ma7ads = Math.round(sumA / 7 * 100) / 100;
+    raw[i].ma7tsi = Math.round(sumS / 7 * 10) / 10;
+  }
+
+  return raw;
 }
 
 function parseLocal(s: string) {
