@@ -76,7 +76,7 @@ export function useSellerGrants(sellerIds: string[]) {
       setLoading(false);
     };
 
-    fetch();
+    fetchGrants();
   }, [sellerIds.join(",")]);
 
   return { grants, loading };
