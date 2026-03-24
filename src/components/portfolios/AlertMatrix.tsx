@@ -18,6 +18,7 @@ function getModalPrincipal(tsi: number, fTsi: number, tsiFlex: number): string {
 interface Props {
   sellers: SellerWithKpi[];
   trends?: Record<string, SellerTrend>;
+  campaigns?: Record<string, SellerCampaign>;
 }
 
 interface Alert {
