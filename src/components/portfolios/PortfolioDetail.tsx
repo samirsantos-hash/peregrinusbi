@@ -77,7 +77,18 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
     const pctFull = safePct(totalTsiFull, totalTsi);
     const pctFlex = safePct(totalTsiFlex, totalTsi);
 
-    return { totalRevenue, topSeller: topSeller.nickname, subInvestCount, lowFullCount, sellersEmQueda, roas, adsRatio, totalInvPads, pctFull, pctFlex };
+    // Algorithm audit counts
+    const promoAlertCount = filteredSellers.filter((s) => {
+      const potFull = safePct(s.fTsi, s.tsi);
+      return potFull > 50 && s.scoreOfertaFinal < 30;
+    }).length;
+
+    const kitOpportunityCount = filteredSellers.filter((s) => {
+      const ticket = s.tsi > 0 ? s.tgmvLc / s.tsi : 0;
+      return ticket > 0 && ticket < 50 && s.tsi >= 10;
+    }).length;
+
+    return { totalRevenue, topSeller: topSeller.nickname, subInvestCount, lowFullCount, sellersEmQueda, roas, adsRatio, totalInvPads, pctFull, pctFlex, promoAlertCount, kitOpportunityCount };
   }, [filteredSellers, trends]);
 
   if (loading) {
