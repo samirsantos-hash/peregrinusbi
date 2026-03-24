@@ -15,6 +15,7 @@ interface DailyKpi {
 
 interface DailyPerformanceChartProps {
   kpis: DailyKpi[];
+  granularity?: "consolidated" | "daily";
 }
 
 function parseFlexDate(raw: string): string {
@@ -126,10 +127,11 @@ function ChartTooltipContent({ active, payload }: any) {
   );
 }
 
-const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
+const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformanceChartProps) => {
   const chartData = useMemo(() => fillGaps(kpis), [kpis]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const isSinglePoint = chartData.length === 1;
+  const isConsolidated = granularity === "consolidated";
 
   // Compute nice Y domain with padding
   const yDomain = useMemo(() => {
@@ -176,12 +178,12 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Desempenho Diário (Ciclo 24h)
+            {isConsolidated ? "Evolução de Faturamento" : "Desempenho Diário (Ciclo 24h)"}
           </h3>
           <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar séries." />
         </div>
         <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
-          {chartData.length} dias
+          {isConsolidated ? `${chartData.length} períodos` : `${chartData.length} dias`}
         </span>
       </div>
 

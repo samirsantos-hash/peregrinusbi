@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock, Crown, Target, BarChart3 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import DailyPerformanceChart from "./DailyPerformanceChart";
@@ -23,19 +22,6 @@ interface ExecutivePanelProps {
   dataGranularity?: "consolidated" | "daily";
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1">
-      <p className="font-mono text-muted-foreground">{label}</p>
-      {payload.map((p: any, i: number) => (
-        <p key={i} style={{ color: p.color }} className="font-medium">
-          {p.name}: {typeof p.value === "number" ? p.value.toLocaleString("pt-BR") : p.value}
-        </p>
-      ))}
-    </div>
-  );
-};
 
 /* ------------------------------------------------------------------ */
 /*  Strategic uplift label                                             */
@@ -120,26 +106,6 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
     { label: "Índice de Atrasos no Envio", value: avgDelayed > 0 ? `${(avgDelayed * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : "—", icon: Clock, color: avgDelayed <= 0.05 ? "emerald-text" : "critical-text", tooltip: "Percentual de envios atrasados. Abaixo de 5% é considerado saudável para manter reputação." },
   ];
 
-  // Aggregate by date
-  const byDate = kpis.reduce<Record<string, { date: string; gmv: number; tgmv: number }>>((acc, k) => {
-    if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, tgmv: 0 };
-    acc[k.date].gmv += k.gmv;
-    acc[k.date].tgmv += k.tgmv;
-    return acc;
-  }, {});
-
-  const allDates = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
-
-  const chartData = useMemo(() => {
-    return allDates.map((d) => {
-      const [m, day] = d.date.slice(5).split("-");
-      return {
-        date: `${day}/${m}`,
-        "Faturamento Bruto": Math.round(d.gmv),
-        "Faturamento Realizado": Math.round(d.tgmv),
-      };
-    });
-  }, [allDates]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -168,51 +134,8 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
         ))}
       </div>
 
-      {/* Chart — daily vs consolidated */}
-      {dataGranularity === "daily" ? (
-        <DailyPerformanceChart kpis={kpis} />
-      ) : (
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                Evolução de Faturamento
-              </h3>
-              <TooltipInfo text="Comparativo entre faturamento bruto (GMV) e faturamento realizado ao longo do tempo." />
-            </div>
-          </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="gradBlueExec" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
-                </linearGradient>
-                <linearGradient id="gradEmeraldExec" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-              <XAxis
-                dataKey="date"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: chartData.length === 1 ? 12 : 11 }}
-                axisLine={false}
-                interval={chartData.length === 1 ? 0 : "preserveStartEnd"}
-                angle={allDates.length > 6 ? -45 : 0}
-                textAnchor={chartData.length === 1 ? "middle" : allDates.length > 6 ? "end" : "middle"}
-                height={allDates.length > 6 ? 50 : 30}
-                padding={chartData.length === 1 ? { left: 50, right: 50 } : undefined}
-              />
-              <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-              <Tooltip content={<CustomTooltip />} />
-              <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" dot={chartData.length === 1 ? { r: 6, fill: "hsl(199, 100%, 50%)", strokeWidth: 2 } : undefined} />
-              <Area type="monotone" dataKey="Faturamento Realizado" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldExec)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" dot={chartData.length === 1 ? { r: 6, fill: "hsl(160, 84%, 39%)", strokeWidth: 2 } : undefined} />
-              <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+      {/* Chart — unified component for both daily and consolidated */}
+      <DailyPerformanceChart kpis={kpis} granularity={dataGranularity} />
     </motion.div>
   );
 };
