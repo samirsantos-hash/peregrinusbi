@@ -55,6 +55,47 @@ export type Database = {
           },
         ]
       }
+      meli_campaigns: {
+        Row: {
+          created_at: string
+          cust_id: string
+          data: string
+          efect_rta_vertical: number | null
+          id: string
+          seller_id: string
+          taxa_conversao_vertical: number | null
+          vertical_principal: string | null
+        }
+        Insert: {
+          created_at?: string
+          cust_id: string
+          data: string
+          efect_rta_vertical?: number | null
+          id?: string
+          seller_id: string
+          taxa_conversao_vertical?: number | null
+          vertical_principal?: string | null
+        }
+        Update: {
+          created_at?: string
+          cust_id?: string
+          data?: string
+          efect_rta_vertical?: number | null
+          id?: string
+          seller_id?: string
+          taxa_conversao_vertical?: number | null
+          vertical_principal?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meli_campaigns_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolios: {
         Row: {
           created_at: string
