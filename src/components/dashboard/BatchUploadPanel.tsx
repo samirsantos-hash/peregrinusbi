@@ -162,7 +162,15 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
       return;
     }
 
-    const text = await file.text();
+    let text: string;
+    if (ext === ".xlsx") {
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      text = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+    } else {
+      text = await file.text();
+    }
     const lineCount = countLines(text);
     updateSlot(key, { file, text, lineCount, status: "staged", errorMsg: "", result: "" });
   }, []);
