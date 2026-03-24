@@ -87,8 +87,7 @@ const DashboardHeader = ({
 
   // Warning when selected period exceeds available data
   const periodWarning = useMemo(() => {
-    if (activePeriod === "custom") return null;
-    // For quarter filters, check if data exists in that quarter
+    if (activePeriod === "custom" || activePeriod === "all") return null;
     const qMatch = activePeriod.match(/^q(\d)$/);
     if (qMatch) {
       const qNum = parseInt(qMatch[1], 10);
