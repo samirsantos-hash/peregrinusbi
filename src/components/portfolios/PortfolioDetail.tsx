@@ -180,7 +180,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
               </div>
               <p className="text-xl font-bold">{summary.pctFull.toFixed(1)}% Potência Full</p>
               <p className="text-xs text-muted-foreground">
-                Flex: {summary.pctFlex.toFixed(1)}% · Baseado em TSI_FULL
+                Flex: {summary.pctFlex.toFixed(1)}% · Baseado em TSI_FULL / TSI
               </p>
             </CardContent>
           </Card>
