@@ -83,9 +83,31 @@ function QuarterTooltip({ active, payload }: any) {
   );
 }
 
+const PERIOD_OPTIONS = [
+  { key: "all", label: "Todo Período" },
+  { key: "q1", label: "Q1" },
+  { key: "q2", label: "Q2" },
+  { key: "q3", label: "Q3" },
+  { key: "q4", label: "Q4" },
+];
+
 const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => {
-  const chartData = useMemo(() => aggregateByQuarter(kpis), [kpis]);
+  const [selectedPeriod, setSelectedPeriod] = useState("all");
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+
+  const filteredKpis = useMemo(() => {
+    if (selectedPeriod === "all") return kpis;
+    const qNum = parseInt(selectedPeriod.replace("q", ""), 10);
+    const startMonth = (qNum - 1) * 3 + 1;
+    const endMonth = qNum * 3;
+    return kpis.filter((k) => {
+      if (!k.date) return false;
+      const m = parseInt(k.date.split("-")[1], 10);
+      return m >= startMonth && m <= endMonth;
+    });
+  }, [kpis, selectedPeriod]);
+
+  const chartData = useMemo(() => aggregateByQuarter(filteredKpis), [filteredKpis]);
 
   const yDomain = useMemo(() => {
     if (chartData.length === 0) return [0, 100];
