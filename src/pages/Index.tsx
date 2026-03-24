@@ -100,8 +100,8 @@ const Index = () => {
   // Handle period changes from DashboardHeader
   const handlePeriodChange = useCallback((period: string) => {
     setActivePeriod(period);
-    const isQuarter = period.startsWith("q");
-    setGranularity(isQuarter ? "consolidated" : "daily");
+    const useConsolidated = period.startsWith("q") || period === "all";
+    setGranularity(useConsolidated ? "consolidated" : "daily");
     setDateRange(undefined);
   }, []);
 
