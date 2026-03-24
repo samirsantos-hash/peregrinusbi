@@ -143,9 +143,10 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
+  // Always fetch daily data — needed for 7D/15D/30D periods
   const { data: dbDailyKpis, isLoading: loadingDailyKpis } = useSellerDailyKpis(
     hasRealData ? selectedSeller : undefined,
-    granularity === "daily"
+    true
   );
 
   const { data: listingsQuality } = useListingsQuality(
