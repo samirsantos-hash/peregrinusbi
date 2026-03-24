@@ -41,26 +41,38 @@ export function useSellerGrants(sellerIds: string[]) {
       return;
     }
 
-    const fetch = async () => {
+    const fetchGrants = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from("seller_grants" as any)
-        .select("*")
-        .in("seller_id", sellerIds);
+      const idSet = new Set(sellerIds);
 
-      if (!error && data) {
-        const map: Record<string, SellerGrant> = {};
-        for (const row of data as any[]) {
+      // Fetch all grants (RLS handles access control) to avoid .in() URL length limits
+      let allRows: any[] = [];
+      let from = 0;
+      const PAGE = 1000;
+      while (true) {
+        const { data, error } = await supabase
+          .from("seller_grants" as any)
+          .select("*")
+          .range(from, from + PAGE - 1);
+        if (error || !data || data.length === 0) break;
+        allRows = allRows.concat(data);
+        if (data.length < PAGE) break;
+        from += PAGE;
+      }
+
+      const map: Record<string, SellerGrant> = {};
+      for (const row of allRows as any[]) {
+        if (idSet.has(row.seller_id)) {
           map[row.seller_id] = {
             sellerId: row.seller_id,
             custId: row.cust_id,
             salesforceUrl: row.salesforce_url,
             expirationDate: row.expiration_date,
-            daysToExpire: row.days_to_expire,
+            daysToExpire: parseInt(String(row.days_to_expire), 10) || 0,
           };
         }
-        setGrants(map);
       }
+      setGrants(map);
       setLoading(false);
     };
 
