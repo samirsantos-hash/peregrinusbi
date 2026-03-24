@@ -18,6 +18,7 @@ export interface SellerKPI {
   gmv: number;
   tsi: number;
   tgmv: number;
+  tgmvPads: number;
   revenue: number;
   adsInvestment: number;
   roas: number;
