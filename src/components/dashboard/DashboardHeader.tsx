@@ -152,13 +152,22 @@ const DashboardHeader = ({
     playClick();
     setActivePeriod(qr.key);
     onPeriodChange?.(qr.key);
-    const year = latestYear;
-    const fromMonth = qr.months[0];
-    const toMonth = qr.months[qr.months.length - 1];
-    const from = new Date(year, fromMonth - 1, 1);
-    const to = new Date(year, toMonth, 0); // last day of the quarter's last month
-    onDateRangeChange({ from, to });
+
+    // Find the best year for this quarter: prefer latestYear, fallback to latestYear-1
+    const startMonth = qr.months[0];
+    const endMonth = qr.months[qr.months.length - 1];
     
+    const hasDataInYear = (y: number) =>
+      allKpis.some((k: any) => {
+        if (!k.date) return false;
+        const [ky, km] = k.date.split("-").map(Number);
+        return ky === y && km >= startMonth && km <= endMonth;
+      });
+
+    const year = hasDataInYear(latestYear) ? latestYear : latestYear - 1;
+    const from = new Date(year, startMonth - 1, 1);
+    const to = new Date(year, endMonth, 0);
+    onDateRangeChange({ from, to });
   };
 
   const clusterColors: Record<string, string> = {
