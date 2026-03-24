@@ -243,13 +243,14 @@ const Index = () => {
     return filtered;
   }, [allKpis, dateRange]);
 
-  // Apply granularity: consolidated = aggregate by month, daily = raw
+  // Apply aggregation: daily periods = raw data, "all" = quarter aggregation, consolidated = month
   const displayKpis: any[] = useMemo(() => {
-    if (granularity === "consolidated") {
-      return aggregateKpisByMonth(filteredKpis);
+    if (isDailyPeriod) {
+      return filteredKpis; // raw daily rows
     }
-    return filteredKpis;
-  }, [filteredKpis, granularity]);
+    // "all" or custom → aggregate by quarters
+    return aggregateKpisByQuarter(filteredKpis);
+  }, [filteredKpis, isDailyPeriod]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
