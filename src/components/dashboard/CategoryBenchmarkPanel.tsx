@@ -59,24 +59,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerBenchmark, sellerMetrics }: Props) => {
-  if (loading) {
-    return (
-      <div className="glass-card p-8 flex items-center justify-center gap-2 text-muted-foreground">
-        <Loader2 className="h-5 w-5 animate-spin" />
-        <span className="text-sm">Carregando benchmark da carteira…</span>
-      </div>
-    );
-  }
-
-  if (!portfolioBenchmark || portfolioBenchmark.verticals.length === 0) {
-    return (
-      <div className="glass-card p-6 text-center text-muted-foreground text-sm">
-        Nenhum dado de vertical disponível. Faça upload do CSV de Campanhas no Admin.
-      </div>
-    );
-  }
-
-  const { verticals, portfolio } = portfolioBenchmark;
+  const verticals = portfolioBenchmark?.verticals || [];
+  const portfolio = portfolioBenchmark?.portfolio || { totalSellers: 0, avgInv: 0, avgRoas: 0, avgAcos: 0, avgTacos: 0 };
   const sellerVertical = campaign?.verticalPrincipal || null;
 
   // Radar chart: seller vs their vertical vs portfolio
