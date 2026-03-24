@@ -319,6 +319,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
 
           {/* TSI line */}
           <Line
+            yAxisId="left"
             type="monotone"
             dataKey="tsi"
             name="Unidades Vendidas"
