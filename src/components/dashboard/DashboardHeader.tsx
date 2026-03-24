@@ -272,33 +272,22 @@ const DashboardHeader = ({
               </span>
             )}
 
-            <Popover open={calOpen} onOpenChange={setCalOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-[200px] justify-start text-left font-normal glass-card border-glass-border bg-card/60", !dateRange && "text-muted-foreground")}>
-                  <CalendarIcon className="mr-2 h-4 w-4 text-neon-blue" />
-                  {dateRange?.from ?
-                    dateRange.to ?
-                      <>
-                        {format(dateRange.from, "dd MMM", { locale: ptBR })} - {format(dateRange.to, "dd MMM", { locale: ptBR })}
-                      </> :
-                      format(dateRange.from, "dd MMM yyyy", { locale: ptBR }) :
-                    "Selecionar período"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-card border-glass-border" align="start">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={dateRange?.from}
-                  selected={dateRange}
-                  onSelect={(range) => {
-                    onDateRangeChange(range);
-                    setActivePeriod("custom");
-                  }}
-                  numberOfMonths={2}
-                  className="p-3 pointer-events-auto" />
-              </PopoverContent>
-            </Popover>
+            <button
+              onClick={() => {
+                playClick();
+                setActivePeriod("all");
+                onPeriodChange?.("all");
+                onDateRangeChange({ from: minDate, to: anchorDate });
+              }}
+              className={cn(
+                "px-3 py-1.5 text-[11px] font-medium rounded-md transition-all border",
+                activePeriod === "all"
+                  ? "bg-primary/15 text-primary border-primary/30 shadow-sm"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-border/50"
+              )}
+            >
+              Todo Período
+            </button>
 
             {/* Refresh button */}
             {onRefresh && (

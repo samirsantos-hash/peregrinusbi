@@ -193,8 +193,8 @@ const Index = () => {
     return [];
   }, [hasRealData, dbDailyKpis]);
 
-  // Quarter periods use consolidated (monthly) data; custom uses daily
-  const isDailyPeriod = !activePeriod.startsWith("q") && activePeriod !== "custom";
+  // Quarter periods and "all" use consolidated (monthly) data
+  const isDailyPeriod = !activePeriod.startsWith("q") && activePeriod !== "all" && activePeriod !== "custom";
   const allKpis: any[] = useMemo(() => {
     return isDailyPeriod ? allKpisDaily : allKpisMonthly;
   }, [isDailyPeriod, allKpisDaily, allKpisMonthly]);
