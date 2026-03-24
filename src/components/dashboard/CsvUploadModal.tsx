@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Upload, CheckCircle, Loader2, FileWarning, FileText, X } from "lucide-react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
@@ -105,8 +106,16 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
       return;
     }
 
-    setSafraLabel(validation.safra);
-    const text = await file.text();
+    const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+    let text: string;
+    if (ext === ".xlsx") {
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      text = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+    } else {
+      text = await file.text();
+    }
     const lineCount = countCsvLines(text);
 
     setStagedFile(file);

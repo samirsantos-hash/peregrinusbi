@@ -4,6 +4,7 @@ import {
   Upload, CheckCircle, Loader2, FileText, X, BarChart3,
   CalendarDays, Package, Gift, AlertCircle, PartyPopper, ShieldCheck, Megaphone,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -161,7 +162,15 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
       return;
     }
 
-    const text = await file.text();
+    let text: string;
+    if (ext === ".xlsx") {
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      text = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+    } else {
+      text = await file.text();
+    }
     const lineCount = countLines(text);
     updateSlot(key, { file, text, lineCount, status: "staged", errorMsg: "", result: "" });
   }, []);
