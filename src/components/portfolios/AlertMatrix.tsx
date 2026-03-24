@@ -133,13 +133,48 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       });
     }
 
+    // 📊 Campaign-based alerts (meli_campaigns)
+    const campaign = campaigns?.[s.sellerId];
+    if (campaign) {
+      // Gargalo de Conversão — seller conversion below vertical benchmark
+      const sellerConv = (s as any).visits > 0 ? (s.tsi / (s as any).visits) * 100 : 0;
+      if (campaign.taxaConversaoVertical > 0 && sellerConv > 0 && sellerConv < campaign.taxaConversaoVertical) {
+        alerts.push({
+          icon: BarChart3,
+          color: "text-orange-400 bg-orange-400/10 border-orange-400/20",
+          message: `🚨 Gargalo de Catálogo: ${s.nickname} com conversão ${sellerConv.toFixed(2)}% abaixo da vertical ${campaign.verticalPrincipal || ""} (${campaign.taxaConversaoVertical.toFixed(2)}%). Revise fotos e títulos.`,
+          priority: 2,
+        });
+      }
+
+      // Subaproveitamento de Escala — efetividade > 100% mas Ads < 1.5%
+      if (campaign.efectRtaVertical > 100 && adsRatio < 1.5 && s.tgmvLc > 0) {
+        alerts.push({
+          icon: TrendingUp,
+          color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+          message: `📈 Subaproveitamento de Escala: ${s.nickname} domina a vertical organicamente (Efet. ${campaign.efectRtaVertical.toFixed(0)}%) mas Ads em ${adsRatio.toFixed(1)}%. Aumentar Ads é a estratégia de menor risco.`,
+          priority: 3,
+        });
+      }
+
+      // Abaixo do Mercado — efetividade < 70%
+      if (campaign.efectRtaVertical > 0 && campaign.efectRtaVertical < 70) {
+        alerts.push({
+          icon: AlertTriangle,
+          color: "text-red-400 bg-red-400/10 border-red-400/20",
+          message: `⚠️ Abaixo do Mercado: ${s.nickname} com efetividade ${campaign.efectRtaVertical.toFixed(0)}% na vertical ${campaign.verticalPrincipal || ""}. Ação urgente para recuperar ranking.`,
+          priority: 4,
+        });
+      }
+    }
+
     // 🛒 Estratégia de Kit — Ticket médio baixo
     if (ticketMedio > 0 && ticketMedio < 50 && s.tsi >= 10) {
       alerts.push({
         icon: ShoppingCart,
         color: "text-cyan-400 bg-cyan-400/10 border-cyan-400/20",
         message: `Oportunidade: ${s.nickname} com ticket médio R$${ticketMedio.toFixed(0)}. Crie anúncios em formato KIT para diluir frete e ganhar prioridade no algoritmo.`,
-        priority: 7,
+        priority: 8,
       });
     }
   }
