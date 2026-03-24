@@ -162,6 +162,10 @@ const Index = () => {
   const { grants: sellerGrants } = useSellerGrants(sellerIdsForGrant);
   const currentGrant = sellerGrants[selectedSeller] || null;
 
+  // Fetch campaign data for selected seller
+  const { campaigns: sellerCampaigns } = useMeliCampaigns(sellerIdsForGrant);
+  const currentCampaign = sellerCampaigns[selectedSeller] || null;
+
   // ALL kpis (unfiltered) — monthly source for consolidated view
   const allKpisMonthly: any[] = useMemo(() => {
     if (hasRealData) return dbKpis || [];
