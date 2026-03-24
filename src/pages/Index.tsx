@@ -40,6 +40,7 @@ import { useSellerGrants } from "@/hooks/useSellerGrants";
 import GrantsPanel from "@/components/dashboard/GrantsPanel";
 import QualityIndexPanel from "@/components/dashboard/QualityIndexPanel";
 import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
+import { useVerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -165,6 +166,9 @@ const Index = () => {
   // Fetch campaign data for selected seller
   const { campaigns: sellerCampaigns } = useMeliCampaigns(sellerIdsForGrant);
   const currentCampaign = sellerCampaigns[selectedSeller] || null;
+
+  // Vertical benchmark for Ads panel
+  const { benchmark: verticalBenchmark } = useVerticalBenchmark(currentCampaign);
 
   // ALL kpis (unfiltered) — monthly source for consolidated view
   const allKpisMonthly: any[] = useMemo(() => {
@@ -377,7 +381,7 @@ const Index = () => {
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
-                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} />
+                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0">
                     <CompetitivenessPanel kpis={displayKpis} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />
