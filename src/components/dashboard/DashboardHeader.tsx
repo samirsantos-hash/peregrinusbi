@@ -225,7 +225,7 @@ const DashboardHeader = ({
                           onSelect={() => {
                             onSellerChange(s.id);
                             setStoreOpen(false);
-                            setActivePeriod("all"); // Reset period on seller change
+                            setActivePeriod("q1"); // Reset period on seller change
                           }}
                           className="cursor-pointer"
                         >
