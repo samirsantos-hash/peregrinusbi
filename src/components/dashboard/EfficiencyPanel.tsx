@@ -12,6 +12,8 @@ import { fmtBRLCompact, fmtBRL, fmtNum, formatChartDate } from "@/utils/formatte
 import { type SellerCampaign, getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { Badge } from "@/components/ui/badge";
+import CategoryBenchmarkPanel from "./CategoryBenchmarkPanel";
+import { usePortfolioBenchmark } from "@/hooks/usePortfolioBenchmark";
 
 interface KpiLike {
   date: string;
@@ -93,6 +95,8 @@ const BenchmarkBarTooltip = ({ active, payload, label }: any) => {
 };
 
 const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark }: EfficiencyPanelProps) => {
+
+  const { data: portfolioBenchmark, loading: portfolioLoading } = usePortfolioBenchmark();
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
@@ -478,6 +482,15 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
           </LineChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Category Benchmark — Full Portfolio */}
+      <CategoryBenchmarkPanel
+        portfolioBenchmark={portfolioBenchmark}
+        loading={portfolioLoading}
+        campaign={campaign || null}
+        sellerBenchmark={benchmark || null}
+        sellerMetrics={{ totalGmv, totalAds, avgRoas, avgAcos, avgTacos }}
+      />
 
       {/* Heatmap */}
       <TrafficHeatmap kpis={kpis} />
