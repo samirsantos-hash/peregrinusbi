@@ -47,6 +47,7 @@ interface Props {
   grants?: Record<string, SellerGrant>;
   grantFilter?: GrantLevel | null;
   portfolioName?: string;
+  campaigns?: Record<string, SellerCampaign>;
 }
 
 function TrendArrow({ value }: { value: number | undefined }) {
