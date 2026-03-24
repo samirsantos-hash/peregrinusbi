@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import {
-  ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, Brush
 } from "recharts";
 import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
@@ -37,7 +37,16 @@ function parseNumericValue(val: any): number {
   return Number(val) || 0;
 }
 
-function fillGaps(kpis: DailyKpi[]) {
+function parseLocal(s: string) {
+  const [y, m, d] = s.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function fmtISO(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function buildDailyData(kpis: DailyKpi[]) {
   if (kpis.length === 0) return [];
 
   const byDate = new Map<string, { tgmv: number; ads: number; tsi: number }>();
@@ -57,8 +66,7 @@ function fillGaps(kpis: DailyKpi[]) {
 
   const start = parseLocal(sortedDates[0]);
   const end = parseLocal(sortedDates[sortedDates.length - 1]);
-
-  const raw: { date: string; label: string; tgmv: number; ads: number; tsi: number; ma7tgmv?: number; ma7ads?: number; ma7tsi?: number }[] = [];
+  const result: { date: string; label: string; tgmv: number; ads: number; tsi: number }[] = [];
   const cursor = new Date(start);
 
   while (cursor <= end) {
@@ -66,41 +74,14 @@ function fillGaps(kpis: DailyKpi[]) {
     const vals = byDate.get(iso) || { tgmv: 0, ads: 0, tsi: 0 };
     const dd = String(cursor.getDate()).padStart(2, "0");
     const mm = String(cursor.getMonth() + 1).padStart(2, "0");
-    raw.push({
-      date: iso,
-      label: `${dd}/${mm}`,
-      ...vals,
-    });
+    result.push({ date: iso, label: `${dd}/${mm}`, ...vals });
     cursor.setDate(cursor.getDate() + 1);
   }
 
-  // Compute 7-day moving averages
-  for (let i = 0; i < raw.length; i++) {
-    if (i < 6) continue; // need 7 points
-    let sumT = 0, sumA = 0, sumS = 0;
-    for (let j = i - 6; j <= i; j++) {
-      sumT += raw[j].tgmv;
-      sumA += raw[j].ads;
-      sumS += raw[j].tsi;
-    }
-    raw[i].ma7tgmv = Math.round(sumT / 7);
-    raw[i].ma7ads = Math.round(sumA / 7 * 100) / 100;
-    raw[i].ma7tsi = Math.round(sumS / 7 * 10) / 10;
-  }
-
-  return raw;
+  return result;
 }
 
-function parseLocal(s: string) {
-  const [y, m, d] = s.split("-").map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function fmtISO(d: Date) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
-function ChartTooltipContent({ active, payload }: any) {
+function DailyTooltip({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const row = payload[0]?.payload;
   if (!row) return null;
@@ -115,52 +96,41 @@ function ChartTooltipContent({ active, payload }: any) {
       <p className="font-mono text-muted-foreground font-semibold">📅 {fullDate}</p>
       <p className="text-neon-blue font-medium">💰 Faturamento: {fmtBRL(row.tgmv)}</p>
       <p className="text-warning font-medium">📣 Ads: {fmtBRL(row.ads)}</p>
-      <p className="text-emerald-400 font-medium">📦 Unidades Vendidas: {row.tsi.toLocaleString("pt-BR")}</p>
-      {row.ma7tgmv != null && (
-        <div className="border-t border-border/30 pt-1.5 mt-1.5 space-y-1">
-          <p className="text-muted-foreground font-medium">📈 MM7 Faturamento: {fmtBRL(row.ma7tgmv)}</p>
-          <p className="text-muted-foreground font-medium">📈 MM7 Ads: {fmtBRL(row.ma7ads)}</p>
-          <p className="text-muted-foreground font-medium">📈 MM7 Unidades: {(row.ma7tsi ?? 0).toLocaleString("pt-BR")}</p>
-        </div>
-      )}
+      <p className="text-emerald-400 font-medium">📦 Unidades: {row.tsi.toLocaleString("pt-BR")}</p>
     </div>
   );
 }
 
 const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformanceChartProps) => {
-  const chartData = useMemo(() => fillGaps(kpis), [kpis]);
+  const chartData = useMemo(() => buildDailyData(kpis), [kpis]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
-  const isSinglePoint = chartData.length === 1;
-  const isConsolidated = granularity === "consolidated";
 
-  // Compute nice Y domain with padding
   const yDomain = useMemo(() => {
     if (chartData.length === 0) return [0, 100];
     let maxVal = 0;
     for (const d of chartData) {
       if (!hidden.has("tgmv") && d.tgmv > maxVal) maxVal = d.tgmv;
-      if (!hidden.has("tsi") && d.tsi > maxVal) maxVal = d.tsi;
     }
     return [0, Math.ceil(maxVal * 1.15) || 100];
   }, [chartData, hidden]);
 
-  const yDomainAds = useMemo(() => {
+  const yDomainRight = useMemo(() => {
     if (chartData.length === 0) return [0, 100];
-    let maxVal = 0;
+    let maxAds = 0, maxTsi = 0;
     for (const d of chartData) {
-      if (!hidden.has("ads") && d.ads > maxVal) maxVal = d.ads;
+      if (!hidden.has("ads") && d.ads > maxAds) maxAds = d.ads;
+      if (!hidden.has("tsi") && d.tsi > maxTsi) maxTsi = d.tsi;
     }
-    return [0, Math.ceil(maxVal * 1.15) || 100];
+    const max = Math.max(maxAds, maxTsi);
+    return [0, Math.ceil(max * 1.15) || 100];
   }, [chartData, hidden]);
 
-  // Smart interval: ~15 labels max
   const xInterval = useMemo(() => {
-    if (isSinglePoint) return 0;
-    if (chartData.length <= 15) return 0;
-    if (chartData.length <= 60) return Math.floor(chartData.length / 15);
-    // For long periods, show ~1 label per month
+    if (chartData.length <= 7) return 0;
+    if (chartData.length <= 15) return 1;
+    if (chartData.length <= 30) return 2;
     return Math.floor(chartData.length / 12);
-  }, [chartData.length, isSinglePoint]);
+  }, [chartData.length]);
 
   const handleLegendClick = useCallback((entry: any) => {
     const key = entry.dataKey as string;
@@ -178,29 +148,25 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            {isConsolidated ? "Evolução de Faturamento" : "Desempenho Diário (Ciclo 24h)"}
+            Desempenho Diário (Ciclo 24h)
           </h3>
-          <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar séries." />
+          <TooltipInfo text="Cada barra representa o faturamento de 1 dia. Linhas mostram Ads e Unidades. Clique na legenda para mostrar/ocultar séries." />
         </div>
         <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
-          {isConsolidated ? `${chartData.length} períodos` : `${chartData.length} dias`}
+          {chartData.length} dias
         </span>
       </div>
 
       <ResponsiveContainer width="100%" height={340}>
         <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
-            <linearGradient id="gradTgmv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.15} />
-              <stop offset="100%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+            <linearGradient id="gradDaily" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.9} />
+              <stop offset="100%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.4} />
             </linearGradient>
           </defs>
 
-          <CartesianGrid
-            vertical={false}
-            strokeDasharray="3 3"
-            stroke="hsl(var(--border) / 0.3)"
-          />
+          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border) / 0.3)" />
 
           <XAxis
             dataKey="label"
@@ -211,27 +177,22 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             angle={chartData.length > 15 ? -45 : 0}
             textAnchor={chartData.length > 15 ? "end" : "middle"}
             height={chartData.length > 15 ? 50 : 30}
-            padding={isSinglePoint ? { left: 50, right: 50 } : undefined}
           />
 
-          {/* Left Y-axis: LINEAR scale for Faturamento + TSI */}
           <YAxis
             yAxisId="left"
-            scale="linear"
             domain={yDomain}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}
-            width={55}
+            width={60}
           />
 
-          {/* Right Y-axis: LINEAR scale for Ads */}
           <YAxis
             yAxisId="right"
             orientation="right"
-            scale="linear"
-            domain={yDomainAds}
+            domain={yDomainRight}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
@@ -239,22 +200,20 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             width={55}
           />
 
-          <Tooltip content={<ChartTooltipContent />} />
+          <Tooltip content={<DailyTooltip />} />
 
-          {/* Faturamento — Area with gradient fill */}
-          <Area
-            yAxisId="left"
-            type="monotone"
-            dataKey="tgmv"
-            name="Faturamento (R$)"
-            stroke="hsl(199, 100%, 50%)"
-            strokeWidth={2.5}
-            fill="url(#gradTgmv)"
-            dot={isSinglePoint ? { r: 6, fill: "hsl(199, 100%, 50%)", strokeWidth: 2, stroke: "hsl(199, 100%, 70%)" } : false}
-            activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(199, 100%, 50%)" }}
-            animationDuration={800}
-            hide={hidden.has("tgmv")}
-          />
+          {/* Faturamento bars */}
+          {!hidden.has("tgmv") && (
+            <Bar
+              yAxisId="left"
+              dataKey="tgmv"
+              name="Faturamento (R$)"
+              fill="url(#gradDaily)"
+              radius={[4, 4, 0, 0]}
+              maxBarSize={chartData.length > 60 ? 6 : chartData.length > 30 ? 10 : 20}
+              animationDuration={800}
+            />
+          )}
 
           {/* Ads line */}
           <Line
@@ -266,69 +225,21 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             strokeWidth={2.5}
             strokeDasharray="5 3"
             dot={false}
-            activeDot={{ r: 5, strokeWidth: 2 }}
+            activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))" }}
             animationDuration={800}
             hide={hidden.has("ads")}
           />
 
-          {/* MA7 Faturamento */}
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="ma7tgmv"
-            name="MM7 Faturamento"
-            stroke="hsl(199, 70%, 70%)"
-            strokeWidth={1.5}
-            strokeDasharray="4 2"
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 1 }}
-            animationDuration={800}
-            hide={hidden.has("ma7tgmv")}
-            connectNulls
-          />
-
-          {/* MA7 Ads */}
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="ma7ads"
-            name="MM7 Ads"
-            stroke="hsl(var(--warning) / 0.6)"
-            strokeWidth={1.5}
-            strokeDasharray="4 2"
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 1 }}
-            animationDuration={800}
-            hide={hidden.has("ma7ads")}
-            connectNulls
-          />
-
-          {/* MA7 TSI */}
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="ma7tsi"
-            name="MM7 Unidades"
-            stroke="hsl(160, 60%, 60%)"
-            strokeWidth={1.5}
-            strokeDasharray="4 2"
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 1 }}
-            animationDuration={800}
-            hide={hidden.has("ma7tsi")}
-            connectNulls
-          />
-
           {/* TSI line */}
           <Line
-            yAxisId="left"
+            yAxisId="right"
             type="monotone"
             dataKey="tsi"
             name="Unidades Vendidas"
             stroke="hsl(160, 84%, 39%)"
             strokeWidth={2.5}
             dot={false}
-            activeDot={{ r: 5, strokeWidth: 2 }}
+            activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--background))" }}
             animationDuration={800}
             hide={hidden.has("tsi")}
           />
@@ -349,7 +260,6 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             )}
           />
 
-          {/* Brush for long datasets — allows zooming into a range */}
           {chartData.length > 60 && (
             <Brush
               dataKey="label"
