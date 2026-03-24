@@ -158,7 +158,7 @@ const DashboardHeader = ({
     const from = new Date(year, fromMonth - 1, 1);
     const to = new Date(year, toMonth, 0); // last day of the quarter's last month
     onDateRangeChange({ from, to });
-    setCalOpen(false);
+    
   };
 
   const clusterColors: Record<string, string> = {
