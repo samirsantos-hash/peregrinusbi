@@ -283,7 +283,7 @@ const Index = () => {
     return map;
   }, [sellers]);
 
-  const isLoading = !sellersFetched || (hasRealData && (loadingKpis || (granularity === "daily" && loadingDailyKpis)));
+  const isLoading = !sellersFetched || (hasRealData && (loadingKpis || loadingDailyKpis));
 
   // Active date range debug label
   const dateDebugLabel = useMemo(() => {
