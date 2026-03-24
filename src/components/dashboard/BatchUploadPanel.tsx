@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, CheckCircle, Loader2, FileText, X, BarChart3,
-  CalendarDays, Package, Gift, AlertCircle, PartyPopper, ShieldCheck,
+  CalendarDays, Package, Gift, AlertCircle, PartyPopper, ShieldCheck, Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
