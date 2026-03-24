@@ -209,7 +209,7 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
       </div>
 
       {/* Radar + GMV + TACOS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Radar Chart: Seller vs Vertical vs Portfolio */}
         {radarData.length > 0 && (
           <div className="glass-card p-5">
