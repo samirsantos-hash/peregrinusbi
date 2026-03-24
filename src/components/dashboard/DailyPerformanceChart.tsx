@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from "react";
 import {
-  ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend
+  ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, Legend, Brush
 } from "recharts";
 import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
 import TooltipInfo from "./TooltipInfo";
@@ -17,41 +17,25 @@ interface DailyPerformanceChartProps {
   kpis: DailyKpi[];
 }
 
-/* ------------------------------------------------------------------ */
-/*  Robust date parsing: handles YYYY-MM-DD and DD/MM/YYYY             */
-/* ------------------------------------------------------------------ */
 function parseFlexDate(raw: string): string {
   if (!raw) return "";
   const trimmed = raw.trim();
-
-  // Already ISO: YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) {
-    return trimmed.slice(0, 10);
-  }
-
-  // DD/MM/YYYY
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) return trimmed.slice(0, 10);
   if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
     const [d, m, y] = trimmed.split("/");
     return `${y}-${m.padStart(2, "0")}-${d.padStart(2, "0")}`;
   }
-
-  // Fallback: try native parse
   const fallback = new Date(trimmed);
   if (!isNaN(fallback.getTime())) return fmtISO(fallback);
-
-  return trimmed; // return as-is if unparseable
+  return trimmed;
 }
 
-/** Parse numeric value that may use comma as decimal separator */
 function parseNumericValue(val: any): number {
   if (typeof val === "number") return val;
   if (typeof val === "string") return Number(val.replace(",", ".")) || 0;
   return Number(val) || 0;
 }
 
-/* ------------------------------------------------------------------ */
-/*  Gap-fill: ensure every calendar day in range has a data point      */
-/* ------------------------------------------------------------------ */
 function fillGaps(kpis: DailyKpi[]) {
   if (kpis.length === 0) return [];
 
@@ -73,7 +57,7 @@ function fillGaps(kpis: DailyKpi[]) {
   const start = parseLocal(sortedDates[0]);
   const end = parseLocal(sortedDates[sortedDates.length - 1]);
 
-  const result: { date: string; label: string; tgmv: number; ads: number; tsi: number; tgmvLog: number; adsLog: number; tsiLog: number }[] = [];
+  const result: { date: string; label: string; tgmv: number; ads: number; tsi: number }[] = [];
   const cursor = new Date(start);
 
   while (cursor <= end) {
@@ -81,13 +65,11 @@ function fillGaps(kpis: DailyKpi[]) {
     const vals = byDate.get(iso) || { tgmv: 0, ads: 0, tsi: 0 };
     const dd = String(cursor.getDate()).padStart(2, "0");
     const mm = String(cursor.getMonth() + 1).padStart(2, "0");
+    const yy = cursor.getFullYear();
     result.push({
       date: iso,
       label: `${dd}/${mm}`,
       ...vals,
-      tgmvLog: vals.tgmv > 0 ? vals.tgmv : 1,
-      adsLog: vals.ads > 0 ? vals.ads : 1,
-      tsiLog: vals.tsi > 0 ? vals.tsi : 1,
     });
     cursor.setDate(cursor.getDate() + 1);
   }
@@ -104,13 +86,11 @@ function fmtISO(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-/* Custom tooltip — full date + R$ formatting */
 function ChartTooltipContent({ active, payload }: any) {
   if (!active || !payload?.length) return null;
   const row = payload[0]?.payload;
   if (!row) return null;
 
-  // Build full date display: DD/MM/YYYY from ISO date
   const fullDate = (() => {
     const [y, m, d] = (row.date || "").split("-");
     return y && m && d ? `${d}/${m}/${y}` : row.label;
@@ -126,12 +106,39 @@ function ChartTooltipContent({ active, payload }: any) {
   );
 }
 
-const SERIES_KEYS = ["tgmvLog", "adsLog", "tsiLog"] as const;
-
 const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
   const chartData = useMemo(() => fillGaps(kpis), [kpis]);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const isSinglePoint = chartData.length === 1;
+
+  // Compute nice Y domain with padding
+  const yDomain = useMemo(() => {
+    if (chartData.length === 0) return [0, 100];
+    let maxVal = 0;
+    for (const d of chartData) {
+      if (!hidden.has("tgmv") && d.tgmv > maxVal) maxVal = d.tgmv;
+      if (!hidden.has("tsi") && d.tsi > maxVal) maxVal = d.tsi;
+    }
+    return [0, Math.ceil(maxVal * 1.15) || 100];
+  }, [chartData, hidden]);
+
+  const yDomainAds = useMemo(() => {
+    if (chartData.length === 0) return [0, 100];
+    let maxVal = 0;
+    for (const d of chartData) {
+      if (!hidden.has("ads") && d.ads > maxVal) maxVal = d.ads;
+    }
+    return [0, Math.ceil(maxVal * 1.15) || 100];
+  }, [chartData, hidden]);
+
+  // Smart interval: ~15 labels max
+  const xInterval = useMemo(() => {
+    if (isSinglePoint) return 0;
+    if (chartData.length <= 15) return 0;
+    if (chartData.length <= 60) return Math.floor(chartData.length / 15);
+    // For long periods, show ~1 label per month
+    return Math.floor(chartData.length / 12);
+  }, [chartData.length, isSinglePoint]);
 
   const handleLegendClick = useCallback((entry: any) => {
     const key = entry.dataKey as string;
@@ -151,7 +158,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Desempenho Diário (Ciclo 24h)
           </h3>
-          <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar linhas." />
+          <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar séries." />
         </div>
         <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
           {chartData.length} dias
@@ -159,7 +166,14 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
       </div>
 
       <ResponsiveContainer width="100%" height={340}>
-        <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+        <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+          <defs>
+            <linearGradient id="gradTgmv" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.15} />
+              <stop offset="100%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+
           <CartesianGrid
             vertical={false}
             strokeDasharray="3 3"
@@ -168,22 +182,21 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
 
           <XAxis
             dataKey="label"
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: isSinglePoint ? 12 : 10 }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
-            interval={isSinglePoint ? 0 : chartData.length > 30 ? Math.floor(chartData.length / 15) : 0}
+            interval={xInterval}
             angle={chartData.length > 15 ? -45 : 0}
-            textAnchor={isSinglePoint ? "middle" : chartData.length > 15 ? "end" : "middle"}
+            textAnchor={chartData.length > 15 ? "end" : "middle"}
             height={chartData.length > 15 ? 50 : 30}
             padding={isSinglePoint ? { left: 50, right: 50 } : undefined}
           />
 
-          {/* Left Y-axis: Faturamento + TSI */}
+          {/* Left Y-axis: LINEAR scale for Faturamento + TSI */}
           <YAxis
             yAxisId="left"
-            scale="log"
-            domain={["auto", "auto"]}
-            allowDataOverflow
+            scale="linear"
+            domain={yDomain}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
@@ -191,13 +204,12 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             width={55}
           />
 
-          {/* Right Y-axis: Ads */}
+          {/* Right Y-axis: LINEAR scale for Ads */}
           <YAxis
             yAxisId="right"
             orientation="right"
-            scale="log"
-            domain={["auto", "auto"]}
-            allowDataOverflow
+            scale="linear"
+            domain={yDomainAds}
             tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
             axisLine={false}
             tickLine={false}
@@ -207,47 +219,48 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
 
           <Tooltip content={<ChartTooltipContent />} />
 
-          {/* Faturamento line */}
-          <Line
+          {/* Faturamento — Area with gradient fill */}
+          <Area
             yAxisId="left"
             type="monotone"
-            dataKey="tgmvLog"
+            dataKey="tgmv"
             name="Faturamento (R$)"
             stroke="hsl(199, 100%, 50%)"
             strokeWidth={2.5}
-            dot={isSinglePoint ? { r: 6, fill: "hsl(199, 100%, 50%)", strokeWidth: 2, stroke: "hsl(199, 100%, 70%)" } : chartData.length <= 31 ? { r: 3, fill: "hsl(199, 100%, 50%)" } : false}
-            activeDot={isSinglePoint ? { r: 8, strokeWidth: 2 } : { r: 5, strokeWidth: 2 }}
+            fill="url(#gradTgmv)"
+            dot={isSinglePoint ? { r: 6, fill: "hsl(199, 100%, 50%)", strokeWidth: 2, stroke: "hsl(199, 100%, 70%)" } : false}
+            activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(199, 100%, 50%)" }}
             animationDuration={800}
-            hide={hidden.has("tgmvLog")}
+            hide={hidden.has("tgmv")}
           />
 
           {/* Ads line */}
           <Line
             yAxisId="right"
             type="monotone"
-            dataKey="adsLog"
+            dataKey="ads"
             name="Investimento Ads (R$)"
             stroke="hsl(var(--warning))"
-            strokeWidth={2}
+            strokeWidth={2.5}
             strokeDasharray="5 3"
-            dot={isSinglePoint ? { r: 6, fill: "hsl(var(--warning))", strokeWidth: 2 } : false}
-            activeDot={isSinglePoint ? { r: 8, strokeWidth: 2 } : { r: 4, strokeWidth: 2 }}
+            dot={false}
+            activeDot={{ r: 5, strokeWidth: 2 }}
             animationDuration={800}
-            hide={hidden.has("adsLog")}
+            hide={hidden.has("ads")}
           />
 
           {/* TSI line */}
           <Line
             yAxisId="left"
             type="monotone"
-            dataKey="tsiLog"
+            dataKey="tsi"
             name="Unidades Vendidas"
             stroke="hsl(160, 84%, 39%)"
-            strokeWidth={1.5}
-            dot={isSinglePoint ? { r: 6, fill: "hsl(160, 84%, 39%)", strokeWidth: 2 } : false}
-            activeDot={isSinglePoint ? { r: 8, strokeWidth: 2 } : { r: 4, strokeWidth: 2 }}
+            strokeWidth={2.5}
+            dot={false}
+            activeDot={{ r: 5, strokeWidth: 2 }}
             animationDuration={800}
-            hide={hidden.has("tsiLog")}
+            hide={hidden.has("tsi")}
           />
 
           <Legend
@@ -265,6 +278,17 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
               </span>
             )}
           />
+
+          {/* Brush for long datasets — allows zooming into a range */}
+          {chartData.length > 60 && (
+            <Brush
+              dataKey="label"
+              height={20}
+              stroke="hsl(var(--border))"
+              fill="hsl(var(--muted) / 0.15)"
+              travellerWidth={8}
+            />
+          )}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
