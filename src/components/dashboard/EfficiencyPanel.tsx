@@ -330,7 +330,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       )}
 
       {/* KPI Cards with benchmark sub-text */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {metrics.map((m, i) => (
           <motion.div
             key={m.label}
