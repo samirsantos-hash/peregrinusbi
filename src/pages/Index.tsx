@@ -185,10 +185,11 @@ const Index = () => {
     return [];
   }, [hasRealData, dbDailyKpis]);
 
-  // Select source based on granularity
+  // Select source based on active period: 7/15/30 → daily, "all" → monthly
+  const isDailyPeriod = ["7", "15", "30"].includes(activePeriod);
   const allKpis: any[] = useMemo(() => {
-    return granularity === "daily" ? allKpisDaily : allKpisMonthly;
-  }, [granularity, allKpisDaily, allKpisMonthly]);
+    return isDailyPeriod ? allKpisDaily : allKpisMonthly;
+  }, [isDailyPeriod, allKpisDaily, allKpisMonthly]);
 
   // Compute anchor (max date) and min date from ALL data
   const { anchorDate, minDate, anchorStr, minStr } = useMemo(() => {
