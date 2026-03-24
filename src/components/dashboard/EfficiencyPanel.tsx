@@ -21,6 +21,7 @@ interface KpiLike {
   adsInvestment: number;
   gmv: number;
   tgmv: number;
+  tgmvPads: number;
   roas: number;
   acos: number;
   tacos: number;
@@ -131,13 +132,17 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
-  const avgRoas = kpis.length > 0 ? kpis.reduce((s, k) => s + k.roas, 0) / kpis.length : 0;
-  const avgAcos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.acos, 0) / kpis.length : 0;
-  const avgTacos = kpis.length > 0 ? kpis.reduce((s, k) => s + k.tacos, 0) / kpis.length : 0;
+  // Weighted metrics from totals (not simple averages)
+  const totalTgmvPadsForMetrics = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
+  const avgRoas = totalAds > 0 ? totalTgmvPadsForMetrics / totalAds : 0;
+  const avgAcos = totalTgmvPadsForMetrics > 0 ? (totalAds / totalTgmvPadsForMetrics) * 100 : 0;
+  const avgTacos = totalGmv > 0 ? (totalAds / totalGmv) * 100 : 0;
   const avgCpa = kpis.length > 0 ? kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length : 0;
 
-  // ROI = (ROAS - 1) * 100 — derived from avg ROAS which already uses tgmv_lc_pads/inv_pads
-  const roi = avgRoas > 0 ? (avgRoas - 1) * 100 : 0;
+  // ROI weighted: (Sum_TGMV_LC_PADS - Sum_INV_PADS) / Sum_INV_PADS * 100
+  const totalTgmvPads = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
+  const roi = totalAds > 0 ? ((totalTgmvPads - totalAds) / totalAds) * 100 : 0;
+  if (roi > 1000) console.warn(`[EfficiencyPanel] ROI=${roi.toFixed(1)}% — verificar integridade de INV_PADS e TGMV_LC_PADS`);
   const totalVisits = kpis.reduce((s, k) => s + (k.visits || 0), 0);
   const cpcProxy = totalVisits > 0 ? totalAds / totalVisits : 0;
 
