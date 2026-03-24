@@ -228,7 +228,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
               <AlertTriangle className="w-4 h-4 text-amber-400" />
               Radar de Oportunidades
             </h3>
-            <AlertMatrix sellers={filteredSellers} trends={trends} />
+            <AlertMatrix sellers={filteredSellers} trends={trends} campaigns={campaigns} />
           </div>
         </div>
 
@@ -240,6 +240,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
             grants={grants}
             grantFilter={grantFilter}
             portfolioName={portfolio.name}
+            campaigns={campaigns}
           />
         </div>
       </div>
