@@ -20,6 +20,7 @@ interface KpiLike {
 
 interface ExecutivePanelProps {
   kpis: KpiLike[];
+  allKpis?: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
 }
 
