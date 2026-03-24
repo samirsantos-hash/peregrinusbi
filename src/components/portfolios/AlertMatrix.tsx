@@ -1,6 +1,7 @@
-import { AlertTriangle, TrendingUp, Truck, Camera, TrendingDown, Zap, ShoppingCart, Search } from "lucide-react";
+import { AlertTriangle, TrendingUp, Truck, Camera, TrendingDown, Zap, ShoppingCart, Search, BarChart3 } from "lucide-react";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 import type { SellerTrend } from "@/hooks/usePortfolioTrends";
+import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 
 function safePct(num: number, den: number): number {
   if (!den || den === 0) return 0;
