@@ -106,8 +106,16 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
       return;
     }
 
-    setSafraLabel(validation.safra);
-    const text = await file.text();
+    const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
+    let text: string;
+    if (ext === ".xlsx") {
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: "array" });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      text = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+    } else {
+      text = await file.text();
+    }
     const lineCount = countCsvLines(text);
 
     setStagedFile(file);
