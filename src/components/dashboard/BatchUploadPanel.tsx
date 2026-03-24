@@ -197,6 +197,8 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
         if (data.kpis != null) parts.push(`${data.kpis} KPIs`);
         if (data.listings != null) parts.push(`${data.listings} listings`);
         if (data.eligibility != null) parts.push(`${data.eligibility} itens`);
+        if (data.grants != null) parts.push(`${data.grants} grants`);
+        if (data.campaigns != null) parts.push(`${data.campaigns} campanhas`);
         updateSlot(slot.key, { status: "success", result: parts.join(" · ") || "OK" });
       } catch (err) {
         updateSlot(slot.key, {
