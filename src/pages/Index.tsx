@@ -95,14 +95,14 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("executive");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
-  const [activePeriod, setActivePeriod] = useState<string>("all");
+  const [activePeriod, setActivePeriod] = useState<string>("q1");
 
   // Handle period changes from DashboardHeader
   const handlePeriodChange = useCallback((period: string) => {
     setActivePeriod(period);
-    const isDaily = ["7", "15", "30"].includes(period);
-    setGranularity(isDaily ? "daily" : "consolidated");
-    setDateRange(undefined); // Force re-anchor to new dataset
+    const isQuarter = period.startsWith("q");
+    setGranularity(isQuarter ? "consolidated" : "daily");
+    setDateRange(undefined);
   }, []);
 
   // Clear date range and cache when granularity changes
@@ -193,8 +193,8 @@ const Index = () => {
     return [];
   }, [hasRealData, dbDailyKpis]);
 
-  // Select source based on active period: 7/15/30 → daily, "all" → monthly
-  const isDailyPeriod = ["7", "15", "30"].includes(activePeriod);
+  // Quarter periods use consolidated (monthly) data; custom uses daily
+  const isDailyPeriod = !activePeriod.startsWith("q") && activePeriod !== "custom";
   const allKpis: any[] = useMemo(() => {
     return isDailyPeriod ? allKpisDaily : allKpisMonthly;
   }, [isDailyPeriod, allKpisDaily, allKpisMonthly]);

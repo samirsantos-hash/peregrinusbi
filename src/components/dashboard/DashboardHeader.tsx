@@ -70,7 +70,7 @@ const DashboardHeader = ({
 }: DashboardHeaderProps) => {
   const [calOpen, setCalOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
-  const [activePeriod, setActivePeriod] = useState<string>("all");
+  const [activePeriod, setActivePeriod] = useState<string>("q1");
   const { playClick } = useSoundFeedback();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
@@ -90,14 +90,22 @@ const DashboardHeader = ({
 
   // Warning when selected period exceeds available data
   const periodWarning = useMemo(() => {
-    if (activePeriod === "all" || activePeriod === "custom") return null;
-    const requestedDays = parseInt(activePeriod);
-    if (isNaN(requestedDays)) return null;
-    if (availableDays < requestedDays && availableDays > 0) {
-      return `Exibindo histórico disponível (${availableDays} dias)`;
+    if (activePeriod === "custom") return null;
+    // For quarter filters, check if data exists in that quarter
+    const qMatch = activePeriod.match(/^q(\d)$/);
+    if (qMatch) {
+      const qNum = parseInt(qMatch[1], 10);
+      const startMonth = (qNum - 1) * 3 + 1;
+      const endMonth = qNum * 3;
+      const hasData = allKpis.some((k: any) => {
+        if (!k.date) return false;
+        const m = parseInt(k.date.split("-")[1], 10);
+        return m >= startMonth && m <= endMonth;
+      });
+      if (!hasData) return `Sem dados disponíveis para ${activePeriod.toUpperCase()}`;
     }
     return null;
-  }, [activePeriod, availableDays]);
+  }, [activePeriod, allKpis]);
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
@@ -129,22 +137,30 @@ const DashboardHeader = ({
   ];
 
   const quickRanges = [
-    { label: "7D", key: "7", days: 7 },
-    { label: "15D", key: "15", days: 15 },
-    { label: "30D", key: "30", days: 30 },
-    { label: "Todo Período", key: "all", days: null },
+    { label: "Q1", key: "q1", months: [1, 2, 3] },
+    { label: "Q2", key: "q2", months: [4, 5, 6] },
+    { label: "Q3", key: "q3", months: [7, 8, 9] },
+    { label: "Q4", key: "q4", months: [10, 11, 12] },
   ];
+
+  // Determine the latest year from data for quarter filtering
+  const latestYear = useMemo(() => {
+    const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
+    if (dates.length === 0) return 2026;
+    const maxDate = dates[dates.length - 1] as string;
+    return parseInt(maxDate.split("-")[0], 10);
+  }, [allKpis]);
 
   const handleQuickRange = (qr: typeof quickRanges[0]) => {
     playClick();
     setActivePeriod(qr.key);
     onPeriodChange?.(qr.key);
-    if (qr.days) {
-      const from = subLocalDays(anchorDate, qr.days);
-      onDateRangeChange({ from, to: anchorDate });
-    } else {
-      onDateRangeChange({ from: minDate, to: anchorDate });
-    }
+    const year = latestYear;
+    const fromMonth = qr.months[0];
+    const toMonth = qr.months[qr.months.length - 1];
+    const from = new Date(year, fromMonth - 1, 1);
+    const to = new Date(year, toMonth, 0); // last day of the quarter's last month
+    onDateRangeChange({ from, to });
     setCalOpen(false);
   };
 
@@ -209,7 +225,7 @@ const DashboardHeader = ({
                           onSelect={() => {
                             onSellerChange(s.id);
                             setStoreOpen(false);
-                            setActivePeriod("all"); // Reset period on seller change
+                            setActivePeriod("q1"); // Reset period on seller change
                           }}
                           className="cursor-pointer"
                         >
