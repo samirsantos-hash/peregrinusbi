@@ -106,26 +106,6 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
     { label: "Índice de Atrasos no Envio", value: avgDelayed > 0 ? `${(avgDelayed * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : "—", icon: Clock, color: avgDelayed <= 0.05 ? "emerald-text" : "critical-text", tooltip: "Percentual de envios atrasados. Abaixo de 5% é considerado saudável para manter reputação." },
   ];
 
-  // Aggregate by date
-  const byDate = kpis.reduce<Record<string, { date: string; gmv: number; tgmv: number }>>((acc, k) => {
-    if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, tgmv: 0 };
-    acc[k.date].gmv += k.gmv;
-    acc[k.date].tgmv += k.tgmv;
-    return acc;
-  }, {});
-
-  const allDates = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
-
-  const chartData = useMemo(() => {
-    return allDates.map((d) => {
-      const [m, day] = d.date.slice(5).split("-");
-      return {
-        date: `${day}/${m}`,
-        "Faturamento Bruto": Math.round(d.gmv),
-        "Faturamento Realizado": Math.round(d.tgmv),
-      };
-    });
-  }, [allDates]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
