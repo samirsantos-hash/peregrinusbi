@@ -5,6 +5,7 @@ import { ArrowLeft, Loader2, Folder, TrendingUp, AlertTriangle, DollarSign, BarC
 import { usePortfolioData, type Portfolio } from "@/hooks/usePortfolios";
 import { usePortfolioTrends } from "@/hooks/usePortfolioTrends";
 import { useSellerGrants, type GrantLevel } from "@/hooks/useSellerGrants";
+import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 import TrophyCards from "./TrophyCards";
 import AlertMatrix from "./AlertMatrix";
 import RaioXTable from "./RaioXTable";
