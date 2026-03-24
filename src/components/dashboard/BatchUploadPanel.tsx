@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Upload, CheckCircle, Loader2, FileText, X, BarChart3,
-  CalendarDays, Package, Gift, AlertCircle, PartyPopper, ShieldCheck,
+  CalendarDays, Package, Gift, AlertCircle, PartyPopper, ShieldCheck, Megaphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 
-type UploadSlotKey = "cpp_mensal" | "cpp_diarizada" | "live_listings" | "elegibilidade" | "grants";
+type UploadSlotKey = "cpp_mensal" | "cpp_diarizada" | "live_listings" | "elegibilidade" | "grants" | "meli_campaigns";
 
 interface SlotConfig {
   key: UploadSlotKey;
@@ -67,6 +67,15 @@ const SLOTS: SlotConfig[] = [
     colorClass: "text-cyan-400",
     functionName: "import-grants",
     sftpPattern: /grant/i,
+  },
+  {
+    key: "meli_campaigns",
+    title: "Campanhas (Vertical)",
+    description: "Efetividade, conversão e vertical principal (melicampaigns_detail).",
+    icon: Megaphone,
+    colorClass: "text-violet-400",
+    functionName: "import-meli-campaigns",
+    sftpPattern: /campaign|melicampaign/i,
   },
 ];
 
@@ -130,11 +139,12 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
     live_listings: emptySlot(),
     elegibilidade: emptySlot(),
     grants: emptySlot(),
+    meli_campaigns: emptySlot(),
   });
   const [batchStatus, setBatchStatus] = useState<"idle" | "processing" | "done">("idle");
   const [currentIdx, setCurrentIdx] = useState(-1);
   const inputRefs = useRef<Record<UploadSlotKey, HTMLInputElement | null>>({
-    cpp_mensal: null, cpp_diarizada: null, live_listings: null, elegibilidade: null, grants: null,
+    cpp_mensal: null, cpp_diarizada: null, live_listings: null, elegibilidade: null, grants: null, meli_campaigns: null,
   });
 
   const updateSlot = (key: UploadSlotKey, patch: Partial<SlotState>) => {
@@ -187,6 +197,8 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
         if (data.kpis != null) parts.push(`${data.kpis} KPIs`);
         if (data.listings != null) parts.push(`${data.listings} listings`);
         if (data.eligibility != null) parts.push(`${data.eligibility} itens`);
+        if (data.grants != null) parts.push(`${data.grants} grants`);
+        if (data.campaigns != null) parts.push(`${data.campaigns} campanhas`);
         updateSlot(slot.key, { status: "success", result: parts.join(" · ") || "OK" });
       } catch (err) {
         updateSlot(slot.key, {
@@ -204,7 +216,7 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
   const handleReset = () => {
     setSlots({
       cpp_mensal: emptySlot(), cpp_diarizada: emptySlot(),
-      live_listings: emptySlot(), elegibilidade: emptySlot(), grants: emptySlot(),
+      live_listings: emptySlot(), elegibilidade: emptySlot(), grants: emptySlot(), meli_campaigns: emptySlot(),
     });
     setBatchStatus("idle");
     setCurrentIdx(-1);
