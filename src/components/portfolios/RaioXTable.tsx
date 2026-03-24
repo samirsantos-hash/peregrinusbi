@@ -9,6 +9,8 @@ import type { SellerWithKpi } from "@/hooks/usePortfolios";
 import type { SellerTrend } from "@/hooks/usePortfolioTrends";
 import type { SellerGrant, GrantLevel } from "@/hooks/useSellerGrants";
 import { getGrantLevel, getGrantBadge } from "@/hooks/useSellerGrants";
+import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
+import { getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { toast } from "sonner";
 
 function safePct(num: number, den: number): number {
