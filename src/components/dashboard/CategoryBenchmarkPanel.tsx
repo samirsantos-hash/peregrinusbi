@@ -136,6 +136,23 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
     }));
   }, [verticals, sellerVertical]);
 
+  if (loading) {
+    return (
+      <div className="glass-card p-8 flex items-center justify-center gap-2 text-muted-foreground">
+        <Loader2 className="h-5 w-5 animate-spin" />
+        <span className="text-sm">Carregando benchmark da carteira…</span>
+      </div>
+    );
+  }
+
+  if (verticals.length === 0) {
+    return (
+      <div className="glass-card p-6 text-center text-muted-foreground text-sm">
+        Nenhum dado de vertical disponível. Faça upload do CSV de Campanhas no Admin.
+      </div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       {/* Header */}
