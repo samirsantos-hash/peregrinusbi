@@ -138,6 +138,7 @@ const DashboardHeader = ({
   const handleQuickRange = (qr: typeof quickRanges[0]) => {
     playClick();
     setActivePeriod(qr.key);
+    onPeriodChange?.(qr.key);
     if (qr.days) {
       const from = subLocalDays(anchorDate, qr.days);
       onDateRangeChange({ from, to: anchorDate });
