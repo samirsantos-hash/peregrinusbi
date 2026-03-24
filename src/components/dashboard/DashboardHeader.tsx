@@ -70,7 +70,7 @@ const DashboardHeader = ({
 }: DashboardHeaderProps) => {
   const [calOpen, setCalOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
-  const [activePeriod, setActivePeriod] = useState<string>("all");
+  const [activePeriod, setActivePeriod] = useState<string>("q1");
   const { playClick } = useSoundFeedback();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
