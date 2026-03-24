@@ -262,8 +262,53 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             hide={hidden.has("ads")}
           />
 
-          {/* TSI line */}
+          {/* MA7 Faturamento */}
           <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="ma7tgmv"
+            name="MM7 Faturamento"
+            stroke="hsl(199, 70%, 70%)"
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 1 }}
+            animationDuration={800}
+            hide={hidden.has("ma7tgmv")}
+            connectNulls
+          />
+
+          {/* MA7 Ads */}
+          <Line
+            yAxisId="right"
+            type="monotone"
+            dataKey="ma7ads"
+            name="MM7 Ads"
+            stroke="hsl(var(--warning) / 0.6)"
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 1 }}
+            animationDuration={800}
+            hide={hidden.has("ma7ads")}
+            connectNulls
+          />
+
+          {/* MA7 TSI */}
+          <Line
+            yAxisId="left"
+            type="monotone"
+            dataKey="ma7tsi"
+            name="MM7 Unidades"
+            stroke="hsl(160, 60%, 60%)"
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 1 }}
+            animationDuration={800}
+            hide={hidden.has("ma7tsi")}
+            connectNulls
+          />
             yAxisId="left"
             type="monotone"
             dataKey="tsi"
