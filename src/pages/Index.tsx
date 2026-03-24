@@ -252,15 +252,19 @@ const Index = () => {
   }, [queryClient, selectedSeller]);
 
   const tabs = [
+    // Saúde (topo)
+    { id: "grants", label: "Grants", icon: KeyRound },
+    { id: "reputation", label: "Reputação", icon: HeartPulse },
+    // Performance
     { id: "executive", label: "Faturamento", icon: LayoutDashboard },
-    { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
-    { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
     { id: "logistics", label: "Logística", icon: Truck },
+    // Qualidade & Conteúdo
     { id: "quality", label: "Qualidade", icon: Shield },
     { id: "clips", label: "Clips & Audiência", icon: Video },
+    // Eficiência (base)
+    { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
+    { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
     { id: "opportunities", label: "Oportunidades", icon: Gift },
-    { id: "reputation", label: "Reputação", icon: HeartPulse },
-    { id: "grants", label: "Grants", icon: KeyRound },
   ];
 
   // Map seller UUID -> custId for external links
