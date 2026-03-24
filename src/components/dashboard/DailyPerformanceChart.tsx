@@ -183,7 +183,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
           <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar séries." />
         </div>
         <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
-          {chartData.length} dias
+          {isConsolidated ? `${chartData.length} períodos` : `${chartData.length} dias`}
         </span>
       </div>
 
