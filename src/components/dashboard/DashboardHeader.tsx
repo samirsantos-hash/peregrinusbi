@@ -129,10 +129,10 @@ const DashboardHeader = ({
   ];
 
   const quickRanges = [
-    { label: "7D", key: "7", days: 7 },
-    { label: "15D", key: "15", days: 15 },
-    { label: "30D", key: "30", days: 30 },
-    { label: "Todo Período", key: "all", days: null },
+    { label: "Q1", key: "q1", months: [1, 2, 3] },
+    { label: "Q2", key: "q2", months: [4, 5, 6] },
+    { label: "Q3", key: "q3", months: [7, 8, 9] },
+    { label: "Q4", key: "q4", months: [10, 11, 12] },
   ];
 
   const handleQuickRange = (qr: typeof quickRanges[0]) => {
