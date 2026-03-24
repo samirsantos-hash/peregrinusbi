@@ -264,6 +264,37 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             </BarChart>
           </ResponsiveContainer>
         </div>
+
+        {/* TACOS by Vertical */}
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              TACOS por Vertical
+            </h3>
+            <TooltipInfo text="Total Advertising Cost of Sale (INV_PADS / TGMV_LC × 100) por categoria. Acima de 10% é crítico." />
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={verticalTacosData} layout="vertical" margin={{ left: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" horizontal={false} />
+              <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} tickFormatter={(v) => `${v}%`} />
+              <YAxis type="category" dataKey="vertical" width={120} tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+              <Tooltip content={<CustomTooltip />} />
+              <Bar dataKey="TACOS (%)" radius={[0, 4, 4, 0]} maxBarSize={28}>
+                {verticalTacosData.map((entry, i) => (
+                  <Cell
+                    key={i}
+                    fill={entry.isCurrentSeller
+                      ? "hsl(199, 100%, 50%)"
+                      : (entry["TACOS (%)"] > 10 ? "hsl(0, 84%, 60%)" : "hsl(160, 84%, 39%)")}
+                    fillOpacity={entry.isCurrentSeller ? 1 : 0.6}
+                    stroke={entry.isCurrentSeller ? "hsl(199, 100%, 70%)" : "none"}
+                    strokeWidth={entry.isCurrentSeller ? 2 : 0}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* ROAS + ACOS by Vertical */}
