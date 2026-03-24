@@ -83,9 +83,31 @@ function QuarterTooltip({ active, payload }: any) {
   );
 }
 
+const PERIOD_OPTIONS = [
+  { key: "all", label: "Todo Período" },
+  { key: "q1", label: "Q1" },
+  { key: "q2", label: "Q2" },
+  { key: "q3", label: "Q3" },
+  { key: "q4", label: "Q4" },
+];
+
 const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => {
-  const chartData = useMemo(() => aggregateByQuarter(kpis), [kpis]);
+  const [selectedPeriod, setSelectedPeriod] = useState("all");
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+
+  const filteredKpis = useMemo(() => {
+    if (selectedPeriod === "all") return kpis;
+    const qNum = parseInt(selectedPeriod.replace("q", ""), 10);
+    const startMonth = (qNum - 1) * 3 + 1;
+    const endMonth = qNum * 3;
+    return kpis.filter((k) => {
+      if (!k.date) return false;
+      const m = parseInt(k.date.split("-")[1], 10);
+      return m >= startMonth && m <= endMonth;
+    });
+  }, [kpis, selectedPeriod]);
+
+  const chartData = useMemo(() => aggregateByQuarter(filteredKpis), [filteredKpis]);
 
   const yDomain = useMemo(() => {
     if (chartData.length === 0) return [0, 100];
@@ -120,16 +142,33 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
 
   return (
     <div className="glass-card p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Evolução por Trimestre
+            Evolução de Faturamento
           </h3>
           <TooltipInfo text="Dados agrupados por trimestre (Q1-Q4). Barras = Faturamento, Linha = Ads e Unidades. Clique na legenda para mostrar/ocultar séries." />
         </div>
-        <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
-          {chartData.length} trimestres
-        </span>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5 border border-border/50">
+            {PERIOD_OPTIONS.map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => setSelectedPeriod(opt.key)}
+                className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
+                  selectedPeriod === opt.key
+                    ? "bg-primary/15 text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+          <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
+            {chartData.length} trimestres
+          </span>
+        </div>
       </div>
 
       <ResponsiveContainer width="100%" height={340}>

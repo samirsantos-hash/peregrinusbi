@@ -20,6 +20,7 @@ interface KpiLike {
 
 interface ExecutivePanelProps {
   kpis: KpiLike[];
+  allKpis?: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
 }
 
@@ -36,7 +37,7 @@ function getUpliftDisplay(uplift: number): { label: string; color: string; icon:
   return { label: "Potencial de Recuperação", color: "critical-text", icon: TrendingDown };
 }
 
-const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePanelProps) => {
+const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: ExecutivePanelProps) => {
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
   const totalTgmv = kpis.reduce((s, k) => s + k.tgmv, 0);
   const totalTsi = kpis.reduce((s, k) => s + k.tsi, 0);
@@ -139,7 +140,7 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
       {dataGranularity === "daily" ? (
         <DailyPerformanceChart kpis={kpis} granularity="daily" />
       ) : (
-        <QuarterlyPerformanceChart kpis={kpis} />
+        <QuarterlyPerformanceChart kpis={allKpis || kpis} />
       )}
     </motion.div>
   );
