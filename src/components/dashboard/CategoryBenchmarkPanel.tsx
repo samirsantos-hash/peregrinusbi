@@ -125,12 +125,23 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
     }));
   }, [verticals, sellerVertical]);
 
-  // GMV by vertical (treemap-like bar)
+  // GMV by vertical
   const verticalGmvData = useMemo(() => {
     return verticals.map((v) => ({
       vertical: v.vertical.length > 18 ? v.vertical.slice(0, 16) + "…" : v.vertical,
       fullName: v.vertical,
       "Faturamento Total": Math.round(v.totalTgmv),
+      sellers: v.sellersCount,
+      isCurrentSeller: v.vertical === sellerVertical,
+    }));
+  }, [verticals, sellerVertical]);
+
+  // TACOS by vertical
+  const verticalTacosData = useMemo(() => {
+    return verticals.map((v) => ({
+      vertical: v.vertical.length > 18 ? v.vertical.slice(0, 16) + "…" : v.vertical,
+      fullName: v.vertical,
+      "TACOS (%)": Math.round(v.avgTacos * 100) / 100,
       sellers: v.sellersCount,
       isCurrentSeller: v.vertical === sellerVertical,
     }));
