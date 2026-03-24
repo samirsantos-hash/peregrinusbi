@@ -1,9 +1,11 @@
-import { useMemo } from "react";
-import { ExternalLink, ShieldAlert, AlertTriangle, Clock, CheckCircle, KeyRound, Wifi, WifiOff } from "lucide-react";
+import { useState, useMemo } from "react";
+import { ExternalLink, Skull, AlertTriangle, Clock, CheckCircle, KeyRound, Wifi, WifiOff, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useSellerGrants, getGrantLevel, getGrantBadge } from "@/hooks/useSellerGrants";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+type GrantFilter = "blacklist" | "critical" | "warning" | "ok" | null;
 
 interface GrantsPanelProps {
   sellers: { id: string; nickname: string; custId: string }[];
@@ -12,8 +14,8 @@ interface GrantsPanelProps {
 export default function GrantsPanel({ sellers }: GrantsPanelProps) {
   const sellerIds = useMemo(() => sellers.map((s) => s.id), [sellers]);
   const { grants, loading } = useSellerGrants(sellerIds);
+  const [activeFilter, setActiveFilter] = useState<GrantFilter>(null);
 
-  // Sort strictly by days_to_expire ASC (most negative/expired first)
   const rows = useMemo(() => {
     return sellers
       .map((s) => {
@@ -31,6 +33,15 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
     rows.forEach((r) => { if (r.level) c[r.level]++; });
     return c;
   }, [rows]);
+
+  const filteredRows = useMemo(() => {
+    if (!activeFilter) return rows;
+    return rows.filter((r) => r.level === activeFilter);
+  }, [rows, activeFilter]);
+
+  const handleFilterClick = (filter: GrantFilter) => {
+    setActiveFilter((prev) => (prev === filter ? null : filter));
+  };
 
   if (loading) {
     return (
@@ -55,12 +66,44 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
 
   return (
     <div className="space-y-5">
-      {/* Summary cards */}
+      {/* Interactive filter cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <SummaryCard emoji="⚫" label="Expirado / Urgente" count={counts.blacklist} variant="blacklist" />
-        <SummaryCard emoji="🔴" label="Crítico (6-10d)" count={counts.critical} variant="critical" />
-        <SummaryCard emoji="🟡" label="Atenção (11-15d)" count={counts.warning} variant="warning" />
-        <SummaryCard emoji="🟢" label="OK (>15d)" count={counts.ok} variant="ok" />
+        <FilterCard
+          icon={<Skull className="w-4 h-4" />}
+          label="Expirado / Urgente"
+          sublabel="≤ 5 dias"
+          count={counts.blacklist}
+          variant="blacklist"
+          active={activeFilter === "blacklist"}
+          onClick={() => handleFilterClick("blacklist")}
+        />
+        <FilterCard
+          icon={<AlertTriangle className="w-4 h-4" />}
+          label="Crítico"
+          sublabel="6-10 dias"
+          count={counts.critical}
+          variant="critical"
+          active={activeFilter === "critical"}
+          onClick={() => handleFilterClick("critical")}
+        />
+        <FilterCard
+          icon={<Clock className="w-4 h-4" />}
+          label="Atenção"
+          sublabel="11-15 dias"
+          count={counts.warning}
+          variant="warning"
+          active={activeFilter === "warning"}
+          onClick={() => handleFilterClick("warning")}
+        />
+        <FilterCard
+          icon={<CheckCircle className="w-4 h-4" />}
+          label="OK"
+          sublabel="> 15 dias"
+          count={counts.ok}
+          variant="ok"
+          active={activeFilter === "ok"}
+          onClick={() => handleFilterClick("ok")}
+        />
         <div className="rounded-lg border border-border/30 bg-card/50 p-3 text-center">
           <p className="text-2xl font-bold text-foreground">{total}</p>
           <p className="text-xs mt-1 text-muted-foreground">Total monitorados</p>
@@ -70,6 +113,22 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
         </div>
       </div>
 
+      {/* Active filter indicator */}
+      {activeFilter && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-muted-foreground">
+            Filtro ativo: <span className="font-semibold text-foreground">{filterLabels[activeFilter]}</span> — {filteredRows.length} seller(s)
+          </span>
+          <button
+            onClick={() => setActiveFilter(null)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="w-3 h-3" />
+            Limpar
+          </button>
+        </div>
+      )}
+
       {/* Connection List */}
       <div className="glass-card overflow-hidden">
         <div className="flex items-center gap-2 p-3 border-b border-border/30">
@@ -78,13 +137,13 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
             Central de Monitoramento de Conexões
           </span>
           <span className="text-[10px] text-muted-foreground/60 ml-auto">
-            Ordenado por criticidade (mais urgente primeiro)
+            {activeFilter ? `${filteredRows.length} de ${total}` : `${total} sellers`} · Ordenado por criticidade
           </span>
         </div>
 
         <ScrollArea className="max-h-[500px]">
           <div className="divide-y divide-border/20">
-            {rows.map((row, idx) => {
+            {filteredRows.map((row, idx) => {
               const badge = getGrantBadge(row.level!);
               const days = row.days!;
               const isExpired = days <= 0;
@@ -102,13 +161,11 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
                     row.level === "blacklist" ? "bg-destructive/5" : ""
                   }`}
                 >
-                  {/* Left: Seller info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{row.seller.nickname}</p>
                     <p className="text-xs text-muted-foreground font-mono">ID: {row.seller.custId}</p>
                   </div>
 
-                  {/* Center: Days counter + badge */}
                   <div className="flex items-center gap-3 shrink-0">
                     <div className="text-center min-w-[100px]">
                       <span className={`text-lg font-bold font-mono ${getDaysColor(days)}`}>
@@ -121,12 +178,10 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
                     </Badge>
                   </div>
 
-                  {/* Date */}
                   <div className="text-center shrink-0 hidden sm:block">
                     <p className="text-xs text-muted-foreground">{formatDate(row.grant!.expirationDate)}</p>
                   </div>
 
-                  {/* Right: Action button */}
                   <div className="shrink-0">
                     {row.grant!.salesforceUrl ? (
                       <a
@@ -145,12 +200,24 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
                 </motion.div>
               );
             })}
+            {filteredRows.length === 0 && (
+              <div className="py-8 text-center text-sm text-muted-foreground">
+                Nenhum seller nesta categoria.
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>
     </div>
   );
 }
+
+const filterLabels: Record<string, string> = {
+  blacklist: "Expirado / Urgente (≤5d)",
+  critical: "Crítico (6-10d)",
+  warning: "Atenção (11-15d)",
+  ok: "OK (>15d)",
+};
 
 function getDaysColor(days: number): string {
   if (days <= 5) return "text-destructive";
@@ -166,17 +233,41 @@ function formatDate(dateStr: string): string {
   return dateStr;
 }
 
-function SummaryCard({ emoji, label, count, variant }: { emoji: string; label: string; count: number; variant: string }) {
-  const styles: Record<string, string> = {
+interface FilterCardProps {
+  icon: React.ReactNode;
+  label: string;
+  sublabel: string;
+  count: number;
+  variant: string;
+  active: boolean;
+  onClick: () => void;
+}
+
+function FilterCard({ icon, label, sublabel, count, variant, active, onClick }: FilterCardProps) {
+  const base: Record<string, string> = {
     blacklist: "border-destructive/60 bg-destructive/10 text-destructive",
     critical: "border-red-500/40 bg-red-500/10 text-red-400",
     warning: "border-warning/40 bg-warning/5 text-warning",
     ok: "border-emerald-500/30 bg-emerald-500/5 text-emerald-400",
   };
+  const activeRing: Record<string, string> = {
+    blacklist: "ring-2 ring-destructive shadow-lg shadow-destructive/20",
+    critical: "ring-2 ring-red-500 shadow-lg shadow-red-500/20",
+    warning: "ring-2 ring-warning shadow-lg shadow-warning/20",
+    ok: "ring-2 ring-emerald-500 shadow-lg shadow-emerald-500/20",
+  };
+
   return (
-    <div className={`rounded-lg border p-3 text-center ${styles[variant] || "border-border/30"}`}>
-      <p className="text-2xl font-bold">{count}</p>
-      <p className="text-[10px] mt-1 leading-tight">{emoji} {label}</p>
-    </div>
+    <button
+      onClick={onClick}
+      className={`rounded-lg border p-3 text-center transition-all cursor-pointer hover:scale-[1.03] ${base[variant] || "border-border/30"} ${active ? activeRing[variant] : "hover:opacity-80"}`}
+    >
+      <div className="flex items-center justify-center gap-1.5 mb-1">
+        {icon}
+        <span className="text-2xl font-bold">{count}</span>
+      </div>
+      <p className="text-[10px] leading-tight font-semibold">{label}</p>
+      <p className="text-[9px] leading-tight opacity-60">{sublabel}</p>
+    </button>
   );
 }
