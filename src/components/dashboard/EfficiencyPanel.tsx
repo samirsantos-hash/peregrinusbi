@@ -376,7 +376,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
                   {benchmarkInvestmentData.map((_, i) => (
-                    <rect key={i} fill={i === 0 ? "hsl(199, 100%, 50%)" : "hsl(174, 60%, 50%)"} />
+                    <Cell key={i} fill={i === 0 ? "hsl(199, 100%, 50%)" : "hsl(174, 60%, 50%)"} />
                   ))}
                 </Bar>
               </BarChart>
