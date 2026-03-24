@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock, Crown, Target, BarChart3 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import DailyPerformanceChart from "./DailyPerformanceChart";
