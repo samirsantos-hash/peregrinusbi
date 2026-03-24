@@ -5,6 +5,7 @@ import { ArrowLeft, Loader2, Folder, TrendingUp, AlertTriangle, DollarSign, BarC
 import { usePortfolioData, type Portfolio } from "@/hooks/usePortfolios";
 import { usePortfolioTrends } from "@/hooks/usePortfolioTrends";
 import { useSellerGrants, type GrantLevel } from "@/hooks/useSellerGrants";
+import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 import TrophyCards from "./TrophyCards";
 import AlertMatrix from "./AlertMatrix";
 import RaioXTable from "./RaioXTable";
@@ -33,6 +34,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const sellerIds = useMemo(() => sellers.map((s) => s.sellerId), [sellers]);
   const { trends } = usePortfolioTrends(sellerIds);
   const { grants } = useSellerGrants(sellerIds);
+  const { campaigns } = useMeliCampaigns(sellerIds);
 
   const filteredSellers = useMemo(() => {
     if (selectedMedals.length === 0) return sellers;
@@ -226,7 +228,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
               <AlertTriangle className="w-4 h-4 text-amber-400" />
               Radar de Oportunidades
             </h3>
-            <AlertMatrix sellers={filteredSellers} trends={trends} />
+            <AlertMatrix sellers={filteredSellers} trends={trends} campaigns={campaigns} />
           </div>
         </div>
 
@@ -238,6 +240,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
             grants={grants}
             grantFilter={grantFilter}
             portfolioName={portfolio.name}
+            campaigns={campaigns}
           />
         </div>
       </div>

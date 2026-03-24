@@ -9,6 +9,8 @@ import type { SellerWithKpi } from "@/hooks/usePortfolios";
 import type { SellerTrend } from "@/hooks/usePortfolioTrends";
 import type { SellerGrant, GrantLevel } from "@/hooks/useSellerGrants";
 import { getGrantLevel, getGrantBadge } from "@/hooks/useSellerGrants";
+import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
+import { getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { toast } from "sonner";
 
 function safePct(num: number, den: number): number {
@@ -45,6 +47,7 @@ interface Props {
   grants?: Record<string, SellerGrant>;
   grantFilter?: GrantLevel | null;
   portfolioName?: string;
+  campaigns?: Record<string, SellerCampaign>;
 }
 
 function TrendArrow({ value }: { value: number | undefined }) {
@@ -104,7 +107,7 @@ function getExportRows(data: EnrichedSeller[], trends?: Record<string, SellerTre
   });
 }
 
-export default function RaioXTable({ sellers, trends, grants, grantFilter, portfolioName = "Carteira" }: Props) {
+export default function RaioXTable({ sellers, trends, grants, grantFilter, portfolioName = "Carteira", campaigns }: Props) {
   const [filter, setFilter] = useState<FilterPill>("all");
   const [sortKey, setSortKey] = useState<SortKey>("tgmvLc");
   const [sortAsc, setSortAsc] = useState(false);
@@ -267,13 +270,14 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                 <SortHeader label="% Ads" k="pctAds" />
                 <SortHeader label="Saúde" k="scoreQualidadeFinal" />
                 <SortHeader label="Grant" k="grantDays" />
+                <TableHead className="whitespace-nowrap">Vertical</TableHead>
                 <TableHead className="whitespace-nowrap">Alertas</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sorted.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
                     Nenhum seller encontrado com esse filtro.
                   </TableCell>
                 </TableRow>
@@ -353,6 +357,27 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                                 </a>
                               )}
                             </div>
+                          );
+                        })()}
+                       </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const campaign = campaigns?.[s.sellerId];
+                          if (!campaign) return <span className="text-xs text-muted-foreground">—</span>;
+                          const badge = getEffectivenessBadge(campaign.efectRtaVertical);
+                          return (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Badge variant="outline" className={`text-[10px] border ${badge.className}`}>
+                                  {badge.label}
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-[220px] text-xs">
+                                <p className="font-semibold">{campaign.verticalPrincipal || "N/A"}</p>
+                                <p>Efetividade: {campaign.efectRtaVertical.toFixed(0)}%</p>
+                                <p>Conv. Vertical: {campaign.taxaConversaoVertical.toFixed(2)}%</p>
+                              </TooltipContent>
+                            </Tooltip>
                           );
                         })()}
                       </TableCell>
