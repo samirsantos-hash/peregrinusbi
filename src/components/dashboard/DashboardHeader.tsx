@@ -52,6 +52,8 @@ interface DashboardHeaderProps {
   filteredKpis: KpiLike[];
   onRefresh?: () => void;
   isRefreshing?: boolean;
+  /** Notify parent of period key changes (7, 15, 30, all, custom) */
+  onPeriodChange?: (period: string) => void;
 }
 
 const DashboardHeader = ({
