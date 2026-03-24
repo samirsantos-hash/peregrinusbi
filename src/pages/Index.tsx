@@ -390,7 +390,7 @@ const Index = () => {
                   transition={{ duration: 0.25 }}
                   className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
-                    <ExecutivePanel kpis={displayKpis} dataGranularity={granularity} />
+                    <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
                     <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} />
                     <TrendAnalysisPanel kpis={displayKpis} dataGranularity={granularity} />
                     <SynergyAnalysisPanel kpis={displayKpis} />

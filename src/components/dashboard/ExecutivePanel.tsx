@@ -140,7 +140,7 @@ const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: Exe
       {dataGranularity === "daily" ? (
         <DailyPerformanceChart kpis={kpis} granularity="daily" />
       ) : (
-        <QuarterlyPerformanceChart kpis={kpis} />
+        <QuarterlyPerformanceChart kpis={allKpis || kpis} />
       )}
     </motion.div>
   );
