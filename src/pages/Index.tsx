@@ -251,17 +251,15 @@ const Index = () => {
     return filtered;
   }, [allKpis, dateRange]);
 
-  // Apply aggregation: quarter filters show monthly data, "all" aggregates by quarter
+  // Apply aggregation: quarter filters show monthly data, "all" passes raw monthly data
+  // (QuarterlyPerformanceChart handles its own quarterly aggregation internally)
   const displayKpis: any[] = useMemo(() => {
     if (isDailyPeriod) {
       return filteredKpis; // raw daily rows
     }
-    if (activePeriod === "all") {
-      return aggregateKpisByQuarter(filteredKpis);
-    }
-    // Q1-Q4 filters: show individual monthly rows (no aggregation)
+    // Q1-Q4 and "all": pass monthly rows as-is (no pre-aggregation)
     return filteredKpis;
-  }, [filteredKpis, isDailyPeriod, activePeriod]);
+  }, [filteredKpis, isDailyPeriod]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
