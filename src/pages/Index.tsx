@@ -382,6 +382,7 @@ const Index = () => {
                     <LogisticsPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
+                    <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
                     <QualityKpiCards
                       scoreCaracteristica={(() => {
                         const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
