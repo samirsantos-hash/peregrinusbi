@@ -68,6 +68,15 @@ const SLOTS: SlotConfig[] = [
     functionName: "import-grants",
     sftpPattern: /grant/i,
   },
+  {
+    key: "meli_campaigns",
+    title: "Campanhas (Vertical)",
+    description: "Efetividade, conversão e vertical principal (melicampaigns_detail).",
+    icon: Megaphone,
+    colorClass: "text-violet-400",
+    functionName: "import-meli-campaigns",
+    sftpPattern: /campaign|melicampaign/i,
+  },
 ];
 
 type SlotStatus = "empty" | "staged" | "uploading" | "success" | "error";
