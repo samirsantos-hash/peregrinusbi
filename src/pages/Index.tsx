@@ -167,6 +167,9 @@ const Index = () => {
   const { campaigns: sellerCampaigns } = useMeliCampaigns(sellerIdsForGrant);
   const currentCampaign = sellerCampaigns[selectedSeller] || null;
 
+  // Vertical benchmark for Ads panel
+  const { benchmark: verticalBenchmark } = useVerticalBenchmark(currentCampaign);
+
   // ALL kpis (unfiltered) — monthly source for consolidated view
   const allKpisMonthly: any[] = useMemo(() => {
     if (hasRealData) return dbKpis || [];
