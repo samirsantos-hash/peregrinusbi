@@ -74,7 +74,7 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
       <div className="glass-card p-6">
         <div className="flex items-center justify-center gap-2 mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Mix de Envio
+            Mix Logístico
           </h3>
           <TooltipInfo text="Distribuição percentual dos métodos de envio. Maior proporção de Full e Flex melhora o desempenho no marketplace." />
         </div>
