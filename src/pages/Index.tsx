@@ -359,6 +359,7 @@ const Index = () => {
               filteredKpis={filteredKpis}
               onRefresh={handleRefresh}
               isRefreshing={isRefreshing}
+              onPeriodChange={handlePeriodChange}
             />
 
             {/* Granularity Toggle — desativado para v2.0 */}
