@@ -67,7 +67,6 @@ const DashboardHeader = ({
   isRefreshing,
   onPeriodChange,
 }: DashboardHeaderProps) => {
-  const [calOpen, setCalOpen] = useState(false);
   const [storeOpen, setStoreOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("q1");
   const { playClick } = useSoundFeedback();
