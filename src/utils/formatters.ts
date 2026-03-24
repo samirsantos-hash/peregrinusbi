@@ -56,8 +56,7 @@ export const formatChartDate = (dateStr: string, granularity: "consolidated" | "
   const [y, m, d] = dateStr.split("-");
   if (granularity === "consolidated") {
     const mNum = parseInt(m, 10);
-    const q = Math.ceil(mNum / 3);
-    return `Q${q} ${y}`;
+    return `${MONTH_NAMES[mNum - 1]} ${y}`;
   }
   return `${d}/${m}`;
 };
