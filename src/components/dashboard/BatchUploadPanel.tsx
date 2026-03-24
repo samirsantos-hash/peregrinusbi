@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 
-type UploadSlotKey = "cpp_mensal" | "cpp_diarizada" | "live_listings" | "elegibilidade" | "grants";
+type UploadSlotKey = "cpp_mensal" | "cpp_diarizada" | "live_listings" | "elegibilidade" | "grants" | "meli_campaigns";
 
 interface SlotConfig {
   key: UploadSlotKey;
