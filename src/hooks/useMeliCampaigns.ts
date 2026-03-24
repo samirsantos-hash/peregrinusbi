@@ -37,11 +37,16 @@ export function useMeliCampaigns(sellerIds: string[]) {
       const map: Record<string, SellerCampaign> = {};
       for (const row of (data as any[]) || []) {
         if (!map[row.seller_id]) {
+          let efect = Number(row.efect_rta_vertical) || 0;
+          let txConv = Number(row.taxa_conversao_vertical) || 0;
+          // Normalize: if stored as decimal (e.g. 1.099 means 109.9%), convert to percentage
+          if (efect > 0 && efect < 10) efect = efect * 100;
+          if (txConv > 0 && txConv < 1) txConv = txConv * 100;
           map[row.seller_id] = {
             sellerId: row.seller_id,
             verticalPrincipal: row.vertical_principal || null,
-            efectRtaVertical: Number(row.efect_rta_vertical) || 0,
-            taxaConversaoVertical: Number(row.taxa_conversao_vertical) || 0,
+            efectRtaVertical: efect,
+            taxaConversaoVertical: txConv,
           };
         }
       }

@@ -8,7 +8,10 @@ const corsHeaders = {
 
 function parseNum(val: string): number {
   if (!val || val.trim() === "") return 0;
-  return parseFloat(val.replace(",", ".")) || 0;
+  // Handle Brazilian number format: remove thousand-separator dots, replace decimal comma with dot
+  const cleaned = val.trim().replace(/\./g, "").replace(",", ".");
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? 0 : num;
 }
 
 Deno.serve(async (req) => {

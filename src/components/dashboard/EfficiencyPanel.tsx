@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
-  AreaChart, Area, LineChart, Line, BarChart, Bar,
+  AreaChart, Area, LineChart, Line, BarChart, Bar, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
@@ -181,15 +181,18 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     return alerts;
   }, [campaign, benchmark, avgAcos, avgTacos, totalGmv, totalAds, totalVisits, kpis]);
 
-  // Benchmark comparison bar chart data
-  const benchmarkChartData = useMemo(() => {
+  // Benchmark comparison — separate charts for different scales
+  const benchmarkInvestmentData = useMemo(() => {
     if (!benchmark) return [];
     return [
-      {
-        metric: "Investimento Mensal",
-        "Seu Desempenho": Math.round(totalAds),
-        "Média da Categoria": Math.round(benchmark.avgInvestment),
-      },
+      { name: "Seu Investimento", value: Math.round(totalAds) },
+      { name: "Média da Categoria", value: Math.round(benchmark.avgInvestment) },
+    ];
+  }, [benchmark, totalAds]);
+
+  const benchmarkRatioData = useMemo(() => {
+    if (!benchmark) return [];
+    return [
       {
         metric: "ROAS (x)",
         "Seu Desempenho": Math.round(avgRoas * 100) / 100,
@@ -200,8 +203,13 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         "Seu Desempenho": Math.round(avgAcos * 100) / 100,
         "Média da Categoria": Math.round(benchmark.avgAcos * 100) / 100,
       },
+      {
+        metric: "TACOS (%)",
+        "Seu Desempenho": Math.round(avgTacos * 100) / 100,
+        "Média da Categoria": Math.round(benchmark.avgTacos * 100) / 100,
+      },
     ];
-  }, [benchmark, totalAds, avgRoas, avgAcos]);
+  }, [benchmark, avgRoas, avgAcos, avgTacos]);
 
   const verticalName = campaign?.verticalPrincipal || "—";
 
@@ -349,40 +357,52 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         <BestInvestmentPeriod kpis={kpis} />
       </div>
 
-      {/* Benchmark Grouped Bar Chart */}
-      {benchmark && benchmarkChartData.length > 0 && (
-        <div className="glass-card p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
+      {/* Benchmark: Investimento (escala monetária) + Ratios (escala %) */}
+      {benchmark && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Investment comparison */}
+          <div className="glass-card p-5">
+            <div className="flex items-center gap-2 mb-4">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                Seu Desempenho vs. Média de Mercado
+                Investimento vs. Mercado
               </h3>
-              <Badge variant="outline" className="text-[10px]">Vertical: {verticalName}</Badge>
-              <TooltipInfo text={`Comparativo entre suas métricas e a média de ${benchmark.sellersCount} sellers da mesma vertical (${verticalName}).`} />
+              <Badge variant="outline" className="text-[10px]">{verticalName}</Badge>
             </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={benchmarkInvestmentData} barCategoryGap="30%">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+                <XAxis dataKey="name" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                  {benchmarkInvestmentData.map((_, i) => (
+                    <Cell key={i} fill={i === 0 ? "hsl(199, 100%, 50%)" : "hsl(174, 60%, 50%)"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={benchmarkChartData} barGap={4} barCategoryGap="25%">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-              <XAxis
-                dataKey="metric"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                axisLine={false}
-              />
-              <YAxis
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                axisLine={false}
-                tickFormatter={(v) => {
-                  if (Math.abs(v) >= 1000) return `${(v / 1000).toFixed(0)}K`;
-                  return String(v);
-                }}
-              />
-              <Tooltip content={<BenchmarkBarTooltip />} />
-              <Bar dataKey="Seu Desempenho" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
-              <Bar dataKey="Média da Categoria" fill="hsl(174, 60%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
-              <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
-            </BarChart>
-          </ResponsiveContainer>
+
+          {/* ROAS / ACOS / TACOS comparison */}
+          <div className="glass-card p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                Desempenho vs. Média de Mercado
+              </h3>
+              <TooltipInfo text={`Comparativo com ${benchmark.sellersCount} sellers da vertical ${verticalName}.`} />
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={benchmarkRatioData} barGap={4} barCategoryGap="25%">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+                <XAxis dataKey="metric" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+                <Tooltip content={<BenchmarkBarTooltip />} />
+                <Bar dataKey="Seu Desempenho" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Bar dataKey="Média da Categoria" fill="hsl(174, 60%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       )}
 
