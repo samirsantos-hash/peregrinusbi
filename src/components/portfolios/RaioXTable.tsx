@@ -271,13 +271,14 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                 <SortHeader label="Saúde" k="scoreQualidadeFinal" />
                 <SortHeader label="Grant" k="grantDays" />
                 <TableHead className="whitespace-nowrap">Vertical</TableHead>
+                <TableHead className="whitespace-nowrap">Pub. Quality</TableHead>
                 <TableHead className="whitespace-nowrap">Alertas</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {sorted.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={12} className="text-center text-muted-foreground py-8">
                     Nenhum seller encontrado com esse filtro.
                   </TableCell>
                 </TableRow>
@@ -378,6 +379,30 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                                 <p>Conv. Vertical: {campaign.taxaConversaoVertical.toFixed(2)}%</p>
                               </TooltipContent>
                             </Tooltip>
+                          );
+                        })()}
+                      </TableCell>
+                      <TableCell>
+                        {(() => {
+                          // Compute a simplified quality index per seller
+                          const potFull = safePct(s.fTsi, s.tsi);
+                          const logScore = potFull >= 70 ? 25 : Math.round((potFull / 70) * 25);
+                          let seoScore = 25;
+                          if (s.scoreQualidadeFinal < 50) seoScore -= 10;
+                          if (s.scoreQualidadeFinal < 30) seoScore -= 10;
+                          seoScore = Math.max(0, seoScore);
+                          const hasPromo = s.scoreOfertaFinal >= 30;
+                          const promoScore = hasPromo ? 25 : Math.round((s.scoreOfertaFinal / 30) * 25);
+                          const convScore = 15; // default without vertical data
+                          const qi = Math.min(100, logScore + seoScore + promoScore + convScore);
+                          const barColor = qi >= 80 ? "bg-emerald" : qi >= 50 ? "bg-warning" : "bg-destructive";
+                          return (
+                            <div className="flex items-center gap-2">
+                              <div className="w-14 h-2 rounded-full bg-muted overflow-hidden">
+                                <div className={`h-full rounded-full ${barColor}`} style={{ width: `${qi}%` }} />
+                              </div>
+                              <span className="text-xs font-mono">{qi}</span>
+                            </div>
                           );
                         })()}
                       </TableCell>

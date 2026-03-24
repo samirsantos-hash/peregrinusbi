@@ -38,6 +38,8 @@ import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
 import GrantAlert from "@/components/dashboard/GrantAlert";
 import { useSellerGrants } from "@/hooks/useSellerGrants";
 import GrantsPanel from "@/components/dashboard/GrantsPanel";
+import QualityIndexPanel from "@/components/dashboard/QualityIndexPanel";
+import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -159,6 +161,10 @@ const Index = () => {
   const sellerIdsForGrant = useMemo(() => selectedSeller ? [selectedSeller] : [], [selectedSeller]);
   const { grants: sellerGrants } = useSellerGrants(sellerIdsForGrant);
   const currentGrant = sellerGrants[selectedSeller] || null;
+
+  // Fetch campaign data for selected seller
+  const { campaigns: sellerCampaigns } = useMeliCampaigns(sellerIdsForGrant);
+  const currentCampaign = sellerCampaigns[selectedSeller] || null;
 
   // ALL kpis (unfiltered) — monthly source for consolidated view
   const allKpisMonthly: any[] = useMemo(() => {
@@ -376,6 +382,7 @@ const Index = () => {
                     <LogisticsPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
+                    <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
                     <QualityKpiCards
                       scoreCaracteristica={(() => {
                         const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
