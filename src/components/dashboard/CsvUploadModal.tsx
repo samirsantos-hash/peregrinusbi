@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Upload, CheckCircle, Loader2, FileWarning, FileText, X } from "lucide-react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
