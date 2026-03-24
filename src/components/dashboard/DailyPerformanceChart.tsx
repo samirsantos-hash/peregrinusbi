@@ -15,6 +15,7 @@ interface DailyKpi {
 
 interface DailyPerformanceChartProps {
   kpis: DailyKpi[];
+  granularity?: "consolidated" | "daily";
 }
 
 function parseFlexDate(raw: string): string {
