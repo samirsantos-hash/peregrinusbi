@@ -109,6 +109,7 @@ function transformKpi(row: any, sellerNickname: string): SellerKPI {
     gmv,
     tsi: Number(row.tsi) || 0,
     tgmv,
+    tgmvPads,
     revenue: gmv,
     adsInvestment: invPads,
     roas: Math.round(roas * 100) / 100,
