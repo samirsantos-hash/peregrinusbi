@@ -28,7 +28,7 @@ interface Alert {
   priority: number; // lower = higher priority
 }
 
-export default function AlertMatrix({ sellers, trends }: Props) {
+export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
   if (!sellers.length) return null;
 
   const alerts: Alert[] = [];
