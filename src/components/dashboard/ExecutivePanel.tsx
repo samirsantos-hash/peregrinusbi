@@ -135,8 +135,12 @@ const ExecutivePanel = ({ kpis, dataGranularity = "consolidated" }: ExecutivePan
         ))}
       </div>
 
-      {/* Chart — unified component for both daily and consolidated */}
-      <DailyPerformanceChart kpis={kpis} granularity={dataGranularity} />
+      {/* Daily chart for 7D/15D/30D, Quarterly bar chart for consolidated */}
+      {dataGranularity === "daily" ? (
+        <DailyPerformanceChart kpis={kpis} granularity="daily" />
+      ) : (
+        <QuarterlyPerformanceChart kpis={kpis} />
+      )}
     </motion.div>
   );
 };
