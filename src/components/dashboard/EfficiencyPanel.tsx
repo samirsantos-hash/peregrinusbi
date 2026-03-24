@@ -21,6 +21,7 @@ interface KpiLike {
   adsInvestment: number;
   gmv: number;
   tgmv: number;
+  tgmvPads: number;
   roas: number;
   acos: number;
   tacos: number;
