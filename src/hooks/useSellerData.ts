@@ -94,9 +94,11 @@ function transformKpi(row: any, sellerNickname: string): SellerKPI {
   const tacos = gmv > 0 ? (invPads / gmv) * 100 : 0;
   const cpa = tsiPads > 0 ? invPads / tsiPads : 0;
 
-  const totalLogistics = tgmvFull + tgmvFlex;
-  const pctFull = tgmv > 0 ? (tgmvFull / tgmv) * 100 : 0;
-  const pctFlex = tgmv > 0 ? (tgmvFlex / tgmv) * 100 : 0;
+  const tsiTotal = Number(row.tsi) || 0;
+  const tsiFull = Number(row.f_tsi) || 0;
+  const tsiFlexVal = Number(row.tsi_flex) || 0;
+  const pctFull = tsiTotal > 0 ? (tsiFull / tsiTotal) * 100 : 0;
+  const pctFlex = tsiTotal > 0 ? (tsiFlexVal / tsiTotal) * 100 : 0;
   const pctPostagem = Math.max(0, 100 - pctFull - pctFlex);
 
   return {

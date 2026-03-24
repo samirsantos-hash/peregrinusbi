@@ -60,6 +60,12 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
       return s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
     }).length;
 
+    // Sellers em queda (trend negativo)
+    const sellersEmQueda = filteredSellers.filter((s) => {
+      const t = trends?.[s.sellerId];
+      return t && (t.tgmvTrend < 0 || t.visitsTrend < 0);
+    }).length;
+
     const totalTgmvPads = filteredSellers.reduce((s, x) => s + (x.tgmvLcPads || 0), 0);
     const totalInvPads = filteredSellers.reduce((s, x) => s + x.invPads, 0);
     const roas = totalInvPads > 0 ? totalTgmvPads / totalInvPads : 0;
@@ -71,8 +77,8 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
     const pctFull = safePct(totalTsiFull, totalTsi);
     const pctFlex = safePct(totalTsiFlex, totalTsi);
 
-    return { totalRevenue, topSeller: topSeller.nickname, subInvestCount, lowFullCount, roas, adsRatio, totalInvPads, pctFull, pctFlex };
-  }, [filteredSellers]);
+    return { totalRevenue, topSeller: topSeller.nickname, subInvestCount, lowFullCount, sellersEmQueda, roas, adsRatio, totalInvPads, pctFull, pctFlex };
+  }, [filteredSellers, trends]);
 
   if (loading) {
     return (
@@ -110,15 +116,19 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
               Resumo Inteligente da Carteira
             </h3>
             <p className="text-sm leading-relaxed text-foreground">
-              Esta carteira gerou <strong>{fmtBRL(summary.totalRevenue)}</strong> no período.
-              O maior destaque foi <strong>{summary.topSeller}</strong>.
+              Total faturado: <strong>{fmtBRL(summary.totalRevenue)}</strong>.
+              {summary.sellersEmQueda > 0 && (
+                <> <strong>{summary.sellersEmQueda}</strong> seller(s) em queda.</>
+              )}
               {summary.subInvestCount > 0 && (
-                <> Atenção: <strong>{summary.subInvestCount}</strong> seller(s) apresentam subinvestimento em Ads</>
+                <> <strong>{summary.subInvestCount}</strong> seller(s) com subpenetração de Ads.</>
               )}
               {summary.lowFullCount > 0 && (
-                <> e <strong>{summary.lowFullCount}</strong> possuem alto volume sem adoção de Full</>
+                <> <strong>{summary.lowFullCount}</strong> sem adoção de Full.</>
               )}
-              .
+              {summary.sellersEmQueda === 0 && summary.subInvestCount === 0 && summary.lowFullCount === 0 && (
+                <> Todos os indicadores estão saudáveis.</>
+              )}
             </p>
           </CardContent>
         </Card>
@@ -170,7 +180,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
               </div>
               <p className="text-xl font-bold">{summary.pctFull.toFixed(1)}% Potência Full</p>
               <p className="text-xs text-muted-foreground">
-                Flex: {summary.pctFlex.toFixed(1)}% · Baseado em TSI_FULL
+                Flex: {summary.pctFlex.toFixed(1)}% · Baseado em TSI_FULL / TSI
               </p>
             </CardContent>
           </Card>

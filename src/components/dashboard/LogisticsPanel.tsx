@@ -38,15 +38,15 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
   const avgPostagem = products.length > 0 ? products.reduce((s, p) => s + p.pctPostagem, 0) / products.length : 0;
 
   const donutData = [
-    { name: "Full", value: Math.round(avgFull * 10) / 10 },
+    { name: "Potência no Full", value: Math.round(avgFull * 10) / 10 },
     { name: "Flex", value: Math.round(avgFlex * 10) / 10 },
-    { name: "Postagem", value: Math.round(avgPostagem * 10) / 10 },
+    { name: "Agência / Cross", value: Math.round(avgPostagem * 10) / 10 },
   ];
 
   const logIcons = [
-    { label: "Full", value: `${avgFull.toFixed(1)}%`, icon: Package, color: "neon-text", desc: "Mercado Envios Full", tooltip: "Percentual de vendas enviadas pelo Full (estoque no CD do Mercado Livre). Maior penetração melhora ranking." },
-    { label: "Flex", value: `${avgFlex.toFixed(1)}%`, icon: Truck, color: "emerald-text", desc: "Mercado Envios Flex", tooltip: "Percentual de vendas via Flex (coleta no vendedor). Boa alternativa para itens grandes." },
-    { label: "Postagem", value: `${avgPostagem.toFixed(1)}%`, icon: Mail, color: "text-purple-400", desc: "Correios / Postagem", tooltip: "Percentual de vendas via Correios. Menor priorização no algoritmo de busca." },
+    { label: "Potência no Full", value: `${avgFull.toFixed(1)}%`, icon: Package, color: "neon-text", desc: "Fulfillment (TSI_FULL / TSI)", tooltip: "Mede o aproveitamento do potencial de escala do seller utilizando o ecossistema Fulfillment. Sellers com alta potência no Full possuem maior conversão e relevância no algoritmo." },
+    { label: "Flex", value: `${avgFlex.toFixed(1)}%`, icon: Truck, color: "emerald-text", desc: "Mercado Envios Flex", tooltip: "Percentual de pedidos via Flex (coleta no vendedor). Boa alternativa para itens grandes." },
+    { label: "Agência / Cross", value: `${avgPostagem.toFixed(1)}%`, icon: Mail, color: "text-purple-400", desc: "Agência / Drop-off / Cross-Docking", tooltip: "Percentual de pedidos via Agência ou Cross-Docking. Menor priorização no algoritmo de busca." },
   ];
 
   return (
@@ -74,9 +74,9 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
       <div className="glass-card p-6">
         <div className="flex items-center justify-center gap-2 mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Mix de Envio
+            Mix Logístico
           </h3>
-          <TooltipInfo text="Distribuição percentual dos métodos de envio. Maior proporção de Full e Flex melhora o desempenho no marketplace." />
+          <TooltipInfo text="Distribuição percentual dos modais de envio baseada em unidades vendidas (TSI). Maior proporção de Full e Flex melhora o desempenho no marketplace." />
         </div>
         <ResponsiveContainer width="100%" height={320}>
           <PieChart>

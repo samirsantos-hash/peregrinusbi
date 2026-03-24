@@ -47,21 +47,21 @@ export default function AlertMatrix({ sellers, trends }: Props) {
       });
     }
 
-    // Subinvestimento em Ads
+    // Subinvestimento em Ads (ratio < 1.5% em sellers de alto faturamento)
     if (s.tgmvLc >= top20Threshold && adsRatio < 1.5) {
       alerts.push({
         icon: TrendingUp,
         color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-        message: `Oportunidade: ${s.nickname} escalando organicamente (Ads ${adsRatio.toFixed(1)}%). Aumentar budget para 3% pode dominar a categoria.`,
+        message: `Subpenetração de Ads: ${s.nickname} com Ads em apenas ${adsRatio.toFixed(1)}% do faturamento. Aumentar budget para 3% pode dominar a categoria.`,
       });
     }
 
-    // Vazamento de Margem
+    // Vazamento de Margem (ratio > 5%)
     if (adsRatio > 5) {
       alerts.push({
         icon: AlertTriangle,
         color: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-        message: `Atenção: ${s.nickname} com custo de aquisição alto (Ads ${adsRatio.toFixed(1)}%). Revisar campanhas.`,
+        message: `Vazamento de Margem: ${s.nickname} com custo de aquisição alto (Ads ${adsRatio.toFixed(1)}%). Revisar campanhas.`,
       });
     }
 
