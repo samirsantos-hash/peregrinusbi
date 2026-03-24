@@ -115,6 +115,13 @@ function ChartTooltipContent({ active, payload }: any) {
       <p className="text-neon-blue font-medium">💰 Faturamento: {fmtBRL(row.tgmv)}</p>
       <p className="text-warning font-medium">📣 Ads: {fmtBRL(row.ads)}</p>
       <p className="text-emerald-400 font-medium">📦 Unidades Vendidas: {row.tsi.toLocaleString("pt-BR")}</p>
+      {row.ma7tgmv != null && (
+        <div className="border-t border-border/30 pt-1.5 mt-1.5 space-y-1">
+          <p className="text-muted-foreground font-medium">📈 MM7 Faturamento: {fmtBRL(row.ma7tgmv)}</p>
+          <p className="text-muted-foreground font-medium">📈 MM7 Ads: {fmtBRL(row.ma7ads)}</p>
+          <p className="text-muted-foreground font-medium">📈 MM7 Unidades: {(row.ma7tsi ?? 0).toLocaleString("pt-BR")}</p>
+        </div>
+      )}
     </div>
   );
 }
