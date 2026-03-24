@@ -135,16 +135,24 @@ const DashboardHeader = ({
     { label: "Q4", key: "q4", months: [10, 11, 12] },
   ];
 
+  // Determine the latest year from data for quarter filtering
+  const latestYear = useMemo(() => {
+    const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
+    if (dates.length === 0) return 2026;
+    const maxDate = dates[dates.length - 1] as string;
+    return parseInt(maxDate.split("-")[0], 10);
+  }, [allKpis]);
+
   const handleQuickRange = (qr: typeof quickRanges[0]) => {
     playClick();
     setActivePeriod(qr.key);
     onPeriodChange?.(qr.key);
-    if (qr.days) {
-      const from = subLocalDays(anchorDate, qr.days);
-      onDateRangeChange({ from, to: anchorDate });
-    } else {
-      onDateRangeChange({ from: minDate, to: anchorDate });
-    }
+    const year = latestYear;
+    const fromMonth = qr.months[0];
+    const toMonth = qr.months[qr.months.length - 1];
+    const from = new Date(year, fromMonth - 1, 1);
+    const to = new Date(year, toMonth, 0); // last day of the quarter's last month
+    onDateRangeChange({ from, to });
     setCalOpen(false);
   };
 
