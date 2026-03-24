@@ -359,6 +359,27 @@ export default function RaioXTable({ sellers, trends, grants, grantFilter, portf
                             </div>
                           );
                         })()}
+                       </TableCell>
+                      <TableCell>
+                        {(() => {
+                          const campaign = campaigns?.[s.sellerId];
+                          if (!campaign) return <span className="text-xs text-muted-foreground">—</span>;
+                          const badge = getEffectivenessBadge(campaign.efectRtaVertical);
+                          return (
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Badge variant="outline" className={`text-[10px] border ${badge.className}`}>
+                                  {badge.label}
+                                </Badge>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-[220px] text-xs">
+                                <p className="font-semibold">{campaign.verticalPrincipal || "N/A"}</p>
+                                <p>Efetividade: {campaign.efectRtaVertical.toFixed(0)}%</p>
+                                <p>Conv. Vertical: {campaign.taxaConversaoVertical.toFixed(2)}%</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
