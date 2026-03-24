@@ -97,10 +97,18 @@ const Index = () => {
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
   const [activePeriod, setActivePeriod] = useState<string>("all");
 
+  // Handle period changes from DashboardHeader
+  const handlePeriodChange = useCallback((period: string) => {
+    setActivePeriod(period);
+    const isDaily = ["7", "15", "30"].includes(period);
+    setGranularity(isDaily ? "daily" : "consolidated");
+    setDateRange(undefined); // Force re-anchor to new dataset
+  }, []);
+
   // Clear date range and cache when granularity changes
   const handleGranularityChange = useCallback((val: Granularity) => {
     setGranularity(val);
-    setDateRange(undefined); // Force re-anchor to new dataset
+    setDateRange(undefined);
   }, []);
 
   const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
