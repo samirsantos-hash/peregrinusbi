@@ -251,14 +251,17 @@ const Index = () => {
     return filtered;
   }, [allKpis, dateRange]);
 
-  // Apply aggregation: daily periods = raw data, "all" = quarter aggregation, consolidated = month
+  // Apply aggregation: quarter filters show monthly data, "all" aggregates by quarter
   const displayKpis: any[] = useMemo(() => {
     if (isDailyPeriod) {
       return filteredKpis; // raw daily rows
     }
-    // "all" or custom → aggregate by quarters
-    return aggregateKpisByQuarter(filteredKpis);
-  }, [filteredKpis, isDailyPeriod]);
+    if (activePeriod === "all") {
+      return aggregateKpisByQuarter(filteredKpis);
+    }
+    // Q1-Q4 filters: show individual monthly rows (no aggregation)
+    return filteredKpis;
+  }, [filteredKpis, isDailyPeriod, activePeriod]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
