@@ -4,6 +4,7 @@ import {
   Upload, CheckCircle, Loader2, FileText, X, BarChart3,
   CalendarDays, Package, Gift, AlertCircle, PartyPopper, ShieldCheck, Megaphone,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
