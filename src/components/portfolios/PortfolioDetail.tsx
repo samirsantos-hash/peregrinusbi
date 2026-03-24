@@ -34,6 +34,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const sellerIds = useMemo(() => sellers.map((s) => s.sellerId), [sellers]);
   const { trends } = usePortfolioTrends(sellerIds);
   const { grants } = useSellerGrants(sellerIds);
+  const { campaigns } = useMeliCampaigns(sellerIds);
 
   const filteredSellers = useMemo(() => {
     if (selectedMedals.length === 0) return sellers;
