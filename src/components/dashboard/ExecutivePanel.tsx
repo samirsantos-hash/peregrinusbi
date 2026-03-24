@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock, Crown, Target, BarChart3 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import DailyPerformanceChart from "./DailyPerformanceChart";
+import QuarterlyPerformanceChart from "./QuarterlyPerformanceChart";
 
 interface KpiLike {
   date: string;
