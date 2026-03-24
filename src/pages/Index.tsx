@@ -38,6 +38,8 @@ import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
 import GrantAlert from "@/components/dashboard/GrantAlert";
 import { useSellerGrants } from "@/hooks/useSellerGrants";
 import GrantsPanel from "@/components/dashboard/GrantsPanel";
+import QualityIndexPanel from "@/components/dashboard/QualityIndexPanel";
+import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
