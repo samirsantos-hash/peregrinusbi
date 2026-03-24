@@ -309,7 +309,9 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             hide={hidden.has("ma7tsi")}
             connectNulls
           />
-            yAxisId="left"
+
+          {/* TSI line */}
+          <Line
             type="monotone"
             dataKey="tsi"
             name="Unidades Vendidas"
