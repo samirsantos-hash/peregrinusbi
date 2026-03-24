@@ -12,6 +12,8 @@ import { fmtBRLCompact, fmtBRL, fmtNum, formatChartDate } from "@/utils/formatte
 import { type SellerCampaign, getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { Badge } from "@/components/ui/badge";
+import CategoryBenchmarkPanel from "./CategoryBenchmarkPanel";
+import { usePortfolioBenchmark } from "@/hooks/usePortfolioBenchmark";
 
 interface KpiLike {
   date: string;
