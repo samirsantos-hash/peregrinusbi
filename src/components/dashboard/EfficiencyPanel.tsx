@@ -483,6 +483,15 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         </ResponsiveContainer>
       </div>
 
+      {/* Category Benchmark — Full Portfolio */}
+      <CategoryBenchmarkPanel
+        portfolioBenchmark={portfolioBenchmark}
+        loading={portfolioLoading}
+        campaign={campaign || null}
+        sellerBenchmark={benchmark || null}
+        sellerMetrics={{ totalGmv, totalAds, avgRoas, avgAcos, avgTacos }}
+      />
+
       {/* Heatmap */}
       <TrafficHeatmap kpis={kpis} />
     </motion.div>
