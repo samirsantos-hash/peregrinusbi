@@ -95,6 +95,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("executive");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
+  const [activePeriod, setActivePeriod] = useState<string>("all");
 
   // Clear date range and cache when granularity changes
   const handleGranularityChange = useCallback((val: Granularity) => {
