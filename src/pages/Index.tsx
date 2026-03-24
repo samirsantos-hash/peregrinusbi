@@ -40,6 +40,7 @@ import { useSellerGrants } from "@/hooks/useSellerGrants";
 import GrantsPanel from "@/components/dashboard/GrantsPanel";
 import QualityIndexPanel from "@/components/dashboard/QualityIndexPanel";
 import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
+import { useVerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
