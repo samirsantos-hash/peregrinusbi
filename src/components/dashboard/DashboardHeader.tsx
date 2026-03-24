@@ -90,14 +90,22 @@ const DashboardHeader = ({
 
   // Warning when selected period exceeds available data
   const periodWarning = useMemo(() => {
-    if (activePeriod === "all" || activePeriod === "custom") return null;
-    const requestedDays = parseInt(activePeriod);
-    if (isNaN(requestedDays)) return null;
-    if (availableDays < requestedDays && availableDays > 0) {
-      return `Exibindo histórico disponível (${availableDays} dias)`;
+    if (activePeriod === "custom") return null;
+    // For quarter filters, check if data exists in that quarter
+    const qMatch = activePeriod.match(/^q(\d)$/);
+    if (qMatch) {
+      const qNum = parseInt(qMatch[1], 10);
+      const startMonth = (qNum - 1) * 3 + 1;
+      const endMonth = qNum * 3;
+      const hasData = allKpis.some((k: any) => {
+        if (!k.date) return false;
+        const m = parseInt(k.date.split("-")[1], 10);
+        return m >= startMonth && m <= endMonth;
+      });
+      if (!hasData) return `Sem dados disponíveis para ${activePeriod.toUpperCase()}`;
     }
     return null;
-  }, [activePeriod, availableDays]);
+  }, [activePeriod, allKpis]);
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
