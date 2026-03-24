@@ -60,6 +60,12 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
       return s.tgmvLc > 0 && s.tsi > 0 && s.fTsi === 0;
     }).length;
 
+    // Sellers em queda (trend negativo)
+    const sellersEmQueda = filteredSellers.filter((s) => {
+      const t = trends?.[s.sellerId];
+      return t && (t.tgmvTrend < 0 || t.visitsTrend < 0);
+    }).length;
+
     const totalTgmvPads = filteredSellers.reduce((s, x) => s + (x.tgmvLcPads || 0), 0);
     const totalInvPads = filteredSellers.reduce((s, x) => s + x.invPads, 0);
     const roas = totalInvPads > 0 ? totalTgmvPads / totalInvPads : 0;
@@ -71,8 +77,8 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
     const pctFull = safePct(totalTsiFull, totalTsi);
     const pctFlex = safePct(totalTsiFlex, totalTsi);
 
-    return { totalRevenue, topSeller: topSeller.nickname, subInvestCount, lowFullCount, roas, adsRatio, totalInvPads, pctFull, pctFlex };
-  }, [filteredSellers]);
+    return { totalRevenue, topSeller: topSeller.nickname, subInvestCount, lowFullCount, sellersEmQueda, roas, adsRatio, totalInvPads, pctFull, pctFlex };
+  }, [filteredSellers, trends]);
 
   if (loading) {
     return (
