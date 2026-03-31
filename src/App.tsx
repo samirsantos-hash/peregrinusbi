@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import Setup from "./pages/Setup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
+import CppDashboard from "./pages/CppDashboard";
 
 const queryClient = new QueryClient();
 
