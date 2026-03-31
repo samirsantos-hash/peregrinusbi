@@ -229,7 +229,7 @@ export default function CppDashboard() {
   };
 
   const roasColor = (v: unknown) => {
-    if (v === null || v === undefined) return "";
+    if (v === null || v === undefined) return "text-muted-foreground";
     const n = Number(v);
     if (n < 2) return "text-destructive font-semibold";
     if (n > 10) return "text-emerald-400 font-semibold";
