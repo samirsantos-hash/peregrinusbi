@@ -419,6 +419,22 @@ const Index = () => {
                         const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
                         return latest ? (latest as any).scoreOferta || 0 : 0;
                       })()}
+                      scoreFull={(() => {
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).scoreFull || 0 : 0;
+                      })()}
+                      scorePads={(() => {
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).scorePads || 0 : 0;
+                      })()}
+                      scoreCdp={(() => {
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).cdpTgmv > 0 ? 36 : 0 : 0;
+                      })()}
+                      pontuacaoIpi={(() => {
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).pontuacaoIpi || 0 : 0;
+                      })()}
                       totalLiveListings={liveListingsCount || 0}
                     />
                     <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
