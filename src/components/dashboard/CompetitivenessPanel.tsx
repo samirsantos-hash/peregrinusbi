@@ -28,6 +28,7 @@ interface KpiLike {
   productId: string;
   repCancellationsRate?: number;
   upliftGmvM1?: number;
+  bpc?: number | null;
 }
 
 interface SellerInfo {
@@ -37,6 +38,7 @@ interface SellerInfo {
 
 interface CompetitivenessPanelProps {
   kpis: KpiLike[];
+  monthlyKpis?: KpiLike[];
   sellers?: SellerInfo[];
   sellerCustIdMap?: Record<string, string>;
   listingsQuality?: ListingQuality[];
