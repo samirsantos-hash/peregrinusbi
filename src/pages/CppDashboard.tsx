@@ -13,6 +13,8 @@ import CppActionCards from "@/components/dashboard/CppActionCards";
 import CppReputationAlert from "@/components/dashboard/CppReputationAlert";
 import CppRoasChart from "@/components/dashboard/CppRoasChart";
 import CppClusterPills from "@/components/dashboard/CppClusterPills";
+import CppSellerDetail from "@/components/dashboard/CppSellerDetail";
+import CppVerticalAnalysis from "@/components/dashboard/CppVerticalAnalysis";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
@@ -86,6 +88,8 @@ const INICIATIVA_OPTIONS = ["Todas", "CONSULTORIA", "HUNTING"];
 export default function CppDashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState<ConsolidatedSeller[]>([]);
+  const [rawRows, setRawRows] = useState<CppRow[]>([]);
+  const [dateRange, setDateRange] = useState<{ min: string; max: string }>({ min: "", max: "" });
   const [dailyRoas, setDailyRoas] = useState<DailyRoasPoint[]>([]);
   const [dowBenchmark, setDowBenchmark] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(false);
@@ -95,6 +99,9 @@ export default function CppDashboard() {
   const [iniciativa, setIniciativa] = useState("Todas");
   const [activeGroup, setActiveGroup] = useState<string | null>(null);
   const [sort, setSort] = useState<SortState>({ col: "SCORE_PRIORIDADE", dir: "desc" });
+  const [selectedSeller, setSelectedSeller] = useState<ConsolidatedSeller | null>(null);
+  const [detailStartDate, setDetailStartDate] = useState<Date>(new Date("2026-03-16T12:00:00"));
+  const [detailEndDate, setDetailEndDate] = useState<Date>(new Date("2026-03-22T12:00:00"));
 
   const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,10 +114,22 @@ export default function CppDashboard() {
       header: true,
       skipEmptyLines: true,
       complete(results) {
-        const result = aggregateSellers(results.data as CppRow[]);
+        const rows = results.data as CppRow[];
+        const result = aggregateSellers(rows);
         setData(result.sellers);
+        setRawRows(result.rawRows);
+        setDateRange(result.dateRange);
         setDailyRoas(result.dailyRoas);
         setDowBenchmark(result.dowBenchmark);
+        // Set default date range to last 7 days of data
+        if (result.dateRange.max) {
+          const maxD = new Date(result.dateRange.max + "T12:00:00");
+          const start7 = new Date(maxD.getTime() - 6 * 86400000);
+          const minD = new Date(result.dateRange.min + "T12:00:00");
+          setDetailEndDate(maxD);
+          setDetailStartDate(start7 < minD ? minD : start7);
+        }
+        setSelectedSeller(null);
         setLoading(false);
       },
       error() { setLoading(false); },
@@ -188,19 +207,23 @@ export default function CppDashboard() {
     <div className="min-h-screen bg-background text-foreground p-4 md:p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center gap-4 flex-wrap">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="shrink-0">
+        <Button variant="ghost" size="icon" onClick={() => { if (selectedSeller) setSelectedSeller(null); else navigate("/"); }} className="shrink-0">
           <ArrowLeft className="w-5 h-5" />
         </Button>
-        <h1 className="text-2xl font-bold tracking-tight">CPP Consolidado por Seller</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {selectedSeller ? "Detalhe do Seller" : "CPP Consolidado por Seller"}
+        </h1>
         <div className="ml-auto flex items-center gap-2">
-          <label className="cursor-pointer">
-            <input type="file" accept=".csv" className="hidden" onChange={handleFile} />
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
-              <Upload className="w-4 h-4" />
-              {fileName || "Carregar CSV"}
-            </div>
-          </label>
-          {data.length > 0 && (
+          {!selectedSeller && (
+            <label className="cursor-pointer">
+              <input type="file" accept=".csv" className="hidden" onChange={handleFile} />
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors">
+                <Upload className="w-4 h-4" />
+                {fileName || "Carregar CSV"}
+              </div>
+            </label>
+          )}
+          {data.length > 0 && !selectedSeller && (
             <Button variant="outline" size="sm" onClick={exportCsv}>
               <Download className="w-4 h-4 mr-1" /> Exportar CSV
             </Button>
@@ -214,12 +237,35 @@ export default function CppDashboard() {
         </div>
       )}
 
-      {data.length > 0 && !loading && (
+      {/* Seller Detail View */}
+      {selectedSeller && !loading && (
         <>
-          {/* Reputation Alert [1.3] */}
+          <CppSellerDetail
+            seller={selectedSeller}
+            rawRows={rawRows}
+            dateRange={dateRange}
+            startDate={detailStartDate}
+            endDate={detailEndDate}
+            onStartChange={setDetailStartDate}
+            onEndChange={setDetailEndDate}
+            onClose={() => setSelectedSeller(null)}
+          />
+          <CppVerticalAnalysis
+            seller={selectedSeller}
+            rawRows={rawRows}
+            startDate={detailStartDate}
+            endDate={detailEndDate}
+          />
+        </>
+      )}
+
+      {/* Main Dashboard View */}
+      {data.length > 0 && !loading && !selectedSeller && (
+        <>
+          {/* Reputation Alert */}
           <CppReputationAlert data={data} />
 
-          {/* Action Cards [1.2] */}
+          {/* Action Cards */}
           <CppActionCards data={data} activeGroup={activeGroup} onToggle={setActiveGroup} />
 
           {/* KPI Cards */}
@@ -258,10 +304,10 @@ export default function CppDashboard() {
             </Card>
           </div>
 
-          {/* ROAS Chart [1.1] */}
+          {/* ROAS Chart */}
           <CppRoasChart dailyRoas={dailyRoas} dowBenchmark={dowBenchmark} />
 
-          {/* Sub-cluster pills [2.3] + Filters */}
+          {/* Sub-cluster pills + Filters */}
           <div className="space-y-3">
             <CppClusterPills value={cluster} onChange={setCluster} />
             <div className="flex flex-wrap items-center gap-3">
@@ -305,7 +351,11 @@ export default function CppDashboard() {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((row, i) => (
-                    <TableRow key={row.CUS_CUST_ID_SEL || i} className="hover:bg-muted/30">
+                    <TableRow
+                      key={row.CUS_CUST_ID_SEL || i}
+                      className="hover:bg-muted/30 cursor-pointer"
+                      onClick={() => setSelectedSeller(row)}
+                    >
                       {TABLE_COLS.map(col => (
                         <TableCell
                           key={col.key}
@@ -314,14 +364,7 @@ export default function CppDashboard() {
                           {col.key === "SCORE_PRIORIDADE" ? (
                             priorityBadge(row[col.key] as number | null)
                           ) : col.key === "CUS_NICKNAME" ? (
-                            <a
-                              href={`https://lista.mercadolivre.com.br/_CustId_${row.CUS_CUST_ID_SEL}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline"
-                            >
-                              {String(row[col.key] || "")}
-                            </a>
+                            <span className="text-primary hover:underline">{String(row[col.key] || "")}</span>
                           ) : (
                             col.fmt(row[col.key])
                           )}
