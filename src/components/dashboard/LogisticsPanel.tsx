@@ -3,6 +3,15 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recha
 import { Package, Truck, Mail } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="glass-card p-3 !bg-card/95 text-xs">
+      <p className="font-medium" style={{ color: payload[0].payload.fill }}>{payload[0].name}: {payload[0].value.toFixed(1)}%</p>
+    </div>
+  );
+};
+
 interface KpiLike {
   date: string;
   pctFull: number;
