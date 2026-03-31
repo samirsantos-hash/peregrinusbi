@@ -282,6 +282,12 @@ export default function CppDashboard() {
             middleContent={
               <>
                 <CppReputationAlert data={data} selectedSeller={selectedSeller} />
+                <CppCategoryChart
+                  seller={selectedSeller}
+                  rawRows={rawRows}
+                  startDate={format(detailStartDate, "yyyy-MM-dd")}
+                  endDate={format(detailEndDate, "yyyy-MM-dd")}
+                />
                 <CppVerticalAnalysis
                   seller={selectedSeller}
                   rawRows={rawRows}
