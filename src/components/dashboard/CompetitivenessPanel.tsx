@@ -416,7 +416,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Evolução da Competitividade de Preço (%)
           </h3>
-          <TooltipInfo text="Evolução percentual das faixas de preço ao longo do tempo. Mostra como a distribuição de visitas por competitividade muda mês a mês." />
+          <TooltipInfo text="Evolução percentual das faixas de preço ao longo do tempo. Dias sem dado de preço são omitidos do gráfico. Para valores absolutos de %, use os cards acima (fonte mensal)." />
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={priceEvolutionData}>
