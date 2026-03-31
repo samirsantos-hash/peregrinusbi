@@ -1,0 +1,1 @@
+ALTER TABLE public.sellers_kpi ADD COLUMN IF NOT EXISTS bpc numeric DEFAULT NULL;

@@ -365,6 +365,7 @@ export type Database = {
       }
       sellers_kpi: {
         Row: {
+          bpc: number | null
           cdp_tgmv_lc: number | null
           cdp_tsi: number | null
           created_at: string
@@ -418,6 +419,7 @@ export type Database = {
           visits_match: number | null
         }
         Insert: {
+          bpc?: number | null
           cdp_tgmv_lc?: number | null
           cdp_tsi?: number | null
           created_at?: string
@@ -471,6 +473,7 @@ export type Database = {
           visits_match?: number | null
         }
         Update: {
+          bpc?: number | null
           cdp_tgmv_lc?: number | null
           cdp_tsi?: number | null
           created_at?: string

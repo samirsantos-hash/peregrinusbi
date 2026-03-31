@@ -28,6 +28,7 @@ interface KpiLike {
   productId: string;
   repCancellationsRate?: number;
   upliftGmvM1?: number;
+  bpc?: number | null;
 }
 
 interface SellerInfo {
@@ -37,6 +38,7 @@ interface SellerInfo {
 
 interface CompetitivenessPanelProps {
   kpis: KpiLike[];
+  monthlyKpis?: KpiLike[];
   sellers?: SellerInfo[];
   sellerCustIdMap?: Record<string, string>;
   listingsQuality?: ListingQuality[];
@@ -89,18 +91,86 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listingsQuality = [], dataGranularity = "daily" }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCustIdMap = {}, listingsQuality = [], dataGranularity = "daily" }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
-  /* ── Aggregate totals across all dates ── */
-  // NOTE: visitsExpensive, visitsMatch, visitsCheaper are MONETARY values (R$), not counts
+  /* ── CORREÇÃO 1: Use MONTHLY KPIs for competitiveness % ── */
+  // Find the latest month in monthly data
+  const latestMonthlyKpis = useMemo(() => {
+    if (monthlyKpis.length === 0) return [];
+    const dates = [...new Set(monthlyKpis.map(k => k.date))].sort();
+    const latestDate = dates[dates.length - 1];
+    return monthlyKpis.filter(k => k.date === latestDate);
+  }, [monthlyKpis]);
+
+  // Competitiveness % from MONTHLY data (correct source)
+  const monthlyTotals = useMemo(() => {
+    const src = latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis;
+    const totalExpensive = src.reduce((s, k) => s + k.visitsExpensive, 0);
+    const totalMatch = src.reduce((s, k) => s + k.visitsMatch, 0);
+    const totalCheaper = src.reduce((s, k) => s + k.visitsCheaper, 0);
+    const totalPriceBands = totalExpensive + totalMatch + totalCheaper;
+    return {
+      totalExpensive, totalMatch, totalCheaper, totalPriceBands,
+      pctExpensive: totalPriceBands > 0 ? (totalExpensive / totalPriceBands) * 100 : 0,
+      pctMatch: totalPriceBands > 0 ? (totalMatch / totalPriceBands) * 100 : 0,
+      pctCheaper: totalPriceBands > 0 ? (totalCheaper / totalPriceBands) * 100 : 0,
+    };
+  }, [latestMonthlyKpis, kpis]);
+
+  /* ── BPC from monthly data ── */
+  const bpcData = useMemo(() => {
+    const src = latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis;
+    const bpcValues = src.filter(k => k.bpc != null && k.bpc !== undefined).map(k => k.bpc as number);
+    if (bpcValues.length === 0) return null;
+    const sorted = [...bpcValues].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    const avg = bpcValues.reduce((s, v) => s + v, 0) / bpcValues.length;
+    return { median, avg, count: bpcValues.length, total: src.length };
+  }, [latestMonthlyKpis, kpis]);
+
+  /* ── MIN_PRICE_RIVAL from monthly data ── */
+  const minPriceRivalData = useMemo(() => {
+    const src = latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis;
+    const rivalValues = src.filter(k => k.minPriceRival > 0).map(k => k.minPriceRival);
+    if (rivalValues.length === 0) return null;
+    const sorted = [...rivalValues].sort((a, b) => a - b);
+    const median = sorted[Math.floor(sorted.length / 2)];
+    return { median, count: rivalValues.length };
+  }, [latestMonthlyKpis, kpis]);
+
+  /* ── CORREÇÃO 3: Small sample detection ── */
+  const sampleWarning = useMemo(() => {
+    const total = monthlyTotals.totalPriceBands;
+    if (total < 10000) return "Amostra pequena";
+    const pctCheaper = monthlyTotals.pctCheaper;
+    const pctExpensive = monthlyTotals.pctExpensive;
+    if ((Math.abs(pctCheaper - 50) < 0.1 && pctExpensive < 0.1) ||
+        (Math.abs(pctExpensive - 50) < 0.1 && pctCheaper < 0.1)) {
+      return "Dado insuficiente — apenas 1 rival comparado";
+    }
+    return null;
+  }, [monthlyTotals]);
+
+  /* ── Cluster coverage warning ── */
+  const clusterCoverageWarning = useMemo(() => {
+    const src = latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis;
+    const totalSellers = src.length;
+    const withPriceData = src.filter(k => (k.visitsMatch + k.visitsCheaper + k.visitsExpensive) > 0).length;
+    if (totalSellers === 0) return null;
+    const coverage = (withPriceData / totalSellers) * 100;
+    if (coverage < 20) {
+      return `Dado de competitividade de preço disponível para menos de 20% dos sellers deste cluster. Resultado pode não ser representativo.`;
+    }
+    if (coverage < 60) {
+      return `Cobertura parcial: ${Math.round(coverage)}% dos sellers possuem dado de competitividade de preço.`;
+    }
+    return null;
+  }, [latestMonthlyKpis, kpis]);
+
+  /* ── Totals from display kpis (for visits/GMV — these can use daily) ── */
   const totalVisits = kpis.reduce((s, k) => s + k.visits, 0);
-  const totalExpensive = kpis.reduce((s, k) => s + k.visitsExpensive, 0);
-  const totalMatch = kpis.reduce((s, k) => s + k.visitsMatch, 0);
-  const totalCheaper = kpis.reduce((s, k) => s + k.visitsCheaper, 0);
-  const totalPriceBands = totalExpensive + totalMatch + totalCheaper;
-  const pctExpensive = totalPriceBands > 0 ? (totalExpensive / totalPriceBands) * 100 : 0;
   const totalGmv = kpis.reduce((s, k) => s + k.gmv, 0);
 
   // Average min price rival (non-zero entries)
@@ -109,7 +179,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
     ? rivalEntries.reduce((s, k) => s + k.minPriceRival, 0) / rivalEntries.length
     : 0;
 
-  /* ── Time series data by date ── */
+  /* ── Time series data by date (for charts — uses daily kpis) ── */
   const byDate = useMemo(() => {
     const map: Record<string, { date: string; visits: number; expensive: number; match: number; cheaper: number; gmv: number; minPriceRival: number; rivalCount: number }> = {};
     for (const k of kpis) {
@@ -143,21 +213,26 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
     return { date: d.date, visits: d.visits, expensive: d.expensive, match: d.match, cheaper: d.cheaper, pctExp, pctMatch, pctCheap, avgRival, gmv: d.gmv };
   });
 
-  /* ── Price evolution line chart ── */
-  const priceEvolutionData = byDate.map((d) => {
-    const totalBands = d.expensive + d.match + d.cheaper;
-    const pctExp = totalBands > 0 ? (d.expensive / totalBands) * 100 : 0;
-    const pctMatch = totalBands > 0 ? (d.match / totalBands) * 100 : 0;
-    const pctCheap = totalBands > 0 ? (d.cheaper / totalBands) * 100 : 0;
-    const avgRival = d.rivalCount > 0 ? d.minPriceRival / d.rivalCount : 0;
-    return {
-      date: formatChartDate(d.date, dataGranularity),
-      "% Preço Alto": Math.round(pctExp * 10) / 10,
-      "% Equivalente": Math.round(pctMatch * 10) / 10,
-      "% Mais Barato": Math.round(pctCheap * 10) / 10,
-      "Rival Mínimo (R$)": Math.round(avgRival * 100) / 100,
-    };
-  });
+  /* ── CORREÇÃO 2: Price evolution line chart — filter null visit points ── */
+  const priceEvolutionData = byDate
+    .filter((d) => {
+      const totalBands = d.expensive + d.match + d.cheaper;
+      return totalBands > 0; // Skip days with no price data
+    })
+    .map((d) => {
+      const totalBands = d.expensive + d.match + d.cheaper;
+      const pctExp = (d.expensive / totalBands) * 100;
+      const pctMatch = (d.match / totalBands) * 100;
+      const pctCheap = (d.cheaper / totalBands) * 100;
+      const avgRival = d.rivalCount > 0 ? d.minPriceRival / d.rivalCount : 0;
+      return {
+        date: formatChartDate(d.date, dataGranularity),
+        "% Preço Alto": Math.round(pctExp * 10) / 10,
+        "% Equivalente": Math.round(pctMatch * 10) / 10,
+        "% Mais Barato": Math.round(pctCheap * 10) / 10,
+        "Rival Mínimo (R$)": Math.round(avgRival * 100) / 100,
+      };
+    });
 
   /* ── Scatter data (McKinsey Adapted) ── */
   const { scatterData, medianX, medianY } = useMemo(() => {
@@ -240,13 +315,23 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      {/* Summary Cards */}
+      {/* Cluster coverage warning */}
+      {clusterCoverageWarning && (
+        <div className="glass-card p-4 border-warning/30 bg-warning/5">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
+            <p className="text-xs text-warning">{clusterCoverageWarning}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Summary Cards — uses MONTHLY % */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: "Total Visitas", value: fmtNumCompact(totalVisits), icon: TrendingUp, color: "neon-text", tooltip: "Total de visitas nos anúncios do seller no período selecionado." },
-          { label: "Receita c/ Preço Alto", value: fmtBRLCompact(totalExpensive), icon: AlertTriangle, color: "text-destructive", tooltip: "Receita (R$) em visitas onde seu preço era maior que o concorrente." },
-          { label: "% Não Competitivo", value: `${fmtNum(pctExpensive, 1)}%`, icon: TrendingDown, color: pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: "Proporção de visitas onde seu preço era mais caro. Acima de 30% é crítico." },
-          { label: "Preço Rival Médio", value: fmtBRL(avgMinPriceRival), icon: DollarSign, color: "neon-text", tooltip: "Média do menor preço encontrado entre concorrentes no período." },
+          { label: "% Mais Barato", value: `${fmtNum(monthlyTotals.pctCheaper, 1)}%`, icon: TrendingUp, color: "emerald-text", tooltip: `Proporção de visitas onde seu preço era menor que o concorrente (fonte: mensal). Benchmark carteira: mediana 17,2%.` },
+          { label: "% Equivalente", value: `${fmtNum(monthlyTotals.pctMatch, 1)}%`, icon: DollarSign, color: "neon-text", tooltip: `Proporção de visitas com preço equivalente (fonte: mensal). Benchmark carteira: mediana 50,3%.` },
+          { label: "% Não Competitivo", value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`, icon: TrendingDown, color: monthlyTotals.pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: `Proporção de visitas onde seu preço era mais caro (fonte: mensal). Benchmark carteira: mediana 29,4%. Acima de 30% é crítico.` },
+          { label: "Menor Preço Rival", value: minPriceRivalData ? fmtBRL(minPriceRivalData.median) : "—", icon: DollarSign, color: "neon-text", tooltip: minPriceRivalData ? `Mediana do menor preço rival: ${fmtBRL(minPriceRivalData.median)}. Seu preço mínimo precisa ser ≤ este valor para liderar na categoria.` : "Sem rival identificado" },
           { label: "GMV Total", value: fmtBRLCompact(totalGmv), icon: TrendingUp, color: "neon-text", tooltip: "Faturamento total no período analisado." },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
@@ -255,13 +340,72 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
               <p className="metric-label">{m.label}</p>
               <TooltipInfo text={m.tooltip} />
             </div>
-            <p className={`metric-value ${m.color}`}>{m.value}</p>
+            <div className="flex items-center gap-2">
+              <p className={`metric-value ${m.color}`}>{m.value}</p>
+              {sampleWarning && m.label === "% Não Competitivo" && (
+                <span className="status-badge text-[10px] bg-muted/40 text-muted-foreground border-border/40">
+                  {sampleWarning}
+                </span>
+              )}
+            </div>
           </motion.div>
         ))}
       </div>
 
+      {/* ── BPC Indicator ── */}
+      {bpcData && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              BPC — Best Price Competitiveness
+            </h3>
+            <TooltipInfo text="Índice de competitividade de preço do MercadoLivre. Escala 0,5 (menos competitivo) a 1,0 (mais competitivo). Sellers com BPC entre 0,7 e 0,8 têm o maior GMV mediano da carteira (R$183k) e conversão de 5,0%." />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* BPC Value */}
+            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/20">
+              <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A' }}>
+                {bpcData.median.toFixed(3)}
+              </p>
+              <p className="text-xs text-muted-foreground">Mediana BPC</p>
+              <span className="status-badge text-[11px]" style={{
+                backgroundColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.1)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.08)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.1)' : 'rgba(226,75,74,0.1)',
+                color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A',
+                borderColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.3)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.2)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.3)' : 'rgba(226,75,74,0.3)',
+              }}>
+                {bpcData.median >= 0.9 ? 'Altamente competitivo' : bpcData.median >= 0.7 ? 'Competitivo' : bpcData.median >= 0.6 ? 'Moderado' : 'Pouco competitivo'}
+              </span>
+            </div>
+            {/* MIN_PRICE_RIVAL */}
+            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/20">
+              <p className="text-3xl font-bold font-mono text-foreground">
+                {minPriceRivalData ? fmtBRL(minPriceRivalData.median) : "—"}
+              </p>
+              <p className="text-xs text-muted-foreground">Menor Preço Rival (mediana)</p>
+              {minPriceRivalData ? (
+                <p className="text-[11px] text-muted-foreground text-center">
+                  Seu preço mínimo precisa ser ≤ {fmtBRL(minPriceRivalData.median)} para liderar nessa categoria
+                </p>
+              ) : (
+                <span className="status-badge text-[11px] bg-muted/40 text-muted-foreground border-border/40">Sem rival identificado</span>
+              )}
+            </div>
+            {/* Coverage */}
+            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/20">
+              <p className="text-3xl font-bold font-mono text-foreground">
+                {bpcData.count}/{bpcData.total}
+              </p>
+              <p className="text-xs text-muted-foreground">Sellers com dado BPC</p>
+              <p className="text-[11px] text-muted-foreground">
+                Cobertura: {Math.round((bpcData.count / bpcData.total) * 100)}%
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Insights Estratégicos ── */}
-      <CompetitivenessInsights kpis={kpis} />
+      <CompetitivenessInsights kpis={latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis} />
 
       {/* ── Auditoria de Preço ── */}
       <PriceAuditTable kpis={kpis} sellerCustIdMap={sellerCustIdMap} />
@@ -272,7 +416,7 @@ const CompetitivenessPanel = ({ kpis, sellers = [], sellerCustIdMap = {}, listin
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Evolução da Competitividade de Preço (%)
           </h3>
-          <TooltipInfo text="Evolução percentual das faixas de preço ao longo do tempo. Mostra como a distribuição de visitas por competitividade muda mês a mês." />
+          <TooltipInfo text="Evolução percentual das faixas de preço ao longo do tempo. Dias sem dado de preço são omitidos do gráfico. Para valores absolutos de %, use os cards acima (fonte mensal)." />
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={priceEvolutionData}>
