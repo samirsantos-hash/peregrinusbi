@@ -97,30 +97,38 @@ const QualityKpiCards = ({
   const normalizedGtin = normalizeScore(pontuacaoLlGtin);
   const normalizedOferta = normalizeScore(scoreOfertaFinal);
 
+  // ERRO 3: If scoreFull = 0, seller has no fulfillment — show message instead of bar
+  const hasFullActive = scoreFull > 0;
+  const normalizedFull = normalizeScore(scoreFull);
+
   const scoreCards = [
     {
       label: "Score PADS",
       value: normalizeScore(scorePads),
       refKey: "SCORE_FINAL_PADS",
       icon: Shield,
+      noFullMessage: null as string | null,
     },
     {
       label: "Score Full",
-      value: normalizeScore(scoreFull),
+      value: hasFullActive ? normalizedFull : 0,
       refKey: "SCORE_FINAL_FULL",
       icon: Package,
+      noFullMessage: !hasFullActive ? "Seller sem itens no fulfillment ativo" : null,
     },
     {
       label: "Score CDP",
       value: normalizeScore(scoreCdp),
       refKey: "SCORE_FINAL_CDP",
       icon: Sparkles,
+      noFullMessage: null as string | null,
     },
     ...(pontuacaoIpi > 0 ? [{
       label: "Pontuação IPI",
       value: normalizeScore(pontuacaoIpi),
       refKey: "PONTUACAO_IPI",
       icon: Shield,
+      noFullMessage: null as string | null,
     }] : []),
   ];
 
