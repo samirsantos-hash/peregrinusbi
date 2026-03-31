@@ -7,34 +7,33 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Upload, Download, Search, ArrowUpDown, ArrowUp, ArrowDown, DollarSign, TrendingUp, Users, BarChart3, ArrowLeft } from "lucide-react";
-import { aggregateSellers, type ConsolidatedSeller, type CppRow } from "@/utils/cppAggregation";
+import { aggregateSellers, type ConsolidatedSeller, type CppRow, type DailyRoasPoint } from "@/utils/cppAggregation";
 import { useNavigate } from "react-router-dom";
+import CppActionCards from "@/components/dashboard/CppActionCards";
+import CppReputationAlert from "@/components/dashboard/CppReputationAlert";
+import CppRoasChart from "@/components/dashboard/CppRoasChart";
+import CppClusterPills from "@/components/dashboard/CppClusterPills";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
-
 function fmtCurrencyFull(v: number | null): string {
   if (v === null || v === undefined) return "—";
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-
 function fmtPct(v: number | null, decimals = 1): string {
   if (v === null || v === undefined) return "—";
   return `${v.toFixed(decimals)}%`;
 }
-
 function fmtRoas(v: number | null): string {
   if (v === null || v === undefined) return "—";
   return v.toFixed(2);
 }
-
 function fmtNum(v: number | null): string {
   if (v === null || v === undefined) return "—";
   return Math.round(v).toLocaleString("pt-BR");
 }
-
 function fmtCompact(v: number | null): string {
   if (v === null || v === undefined) return "—";
   if (Math.abs(v) >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
@@ -42,11 +41,21 @@ function fmtCompact(v: number | null): string {
   return fmtCurrency(v);
 }
 
+function priorityBadge(score: number | null) {
+  if (score === null || score === undefined) return <Badge variant="outline" className="text-[10px]">—</Badge>;
+  const n = Number(score);
+  if (n <= 33) return <Badge className="bg-destructive/20 text-destructive border-destructive/30 text-[10px]">{n}</Badge>;
+  if (n <= 66) return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">{n}</Badge>;
+  return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{n}</Badge>;
+}
+
 type SortDir = "asc" | "desc" | null;
 interface SortState { col: string; dir: SortDir }
 
-const TABLE_COLS: { key: string; label: string; fmt: (v: any) => string; align?: string }[] = [
+const TABLE_COLS: { key: string; label: string; fmt: (v: any) => string; align?: string; custom?: boolean }[] = [
+  { key: "SCORE_PRIORIDADE", label: "Score", fmt: fmtNum, align: "center", custom: true },
   { key: "CUS_NICKNAME", label: "Seller", fmt: String },
+  { key: "GRUPO_ACAO", label: "Grupo", fmt: String },
   { key: "SUB_CLUSTER_SELLER", label: "Cluster", fmt: String },
   { key: "INICIATIVA", label: "Iniciativa", fmt: String },
   { key: "PARCEIRO", label: "Parceiro", fmt: String },
@@ -72,18 +81,20 @@ const TABLE_COLS: { key: string; label: string; fmt: (v: any) => string; align?:
   { key: "MESES_NO_PROGRAMA", label: "Meses Prog.", fmt: fmtNum, align: "right" },
 ];
 
-const CLUSTER_OPTIONS = ["Todos", "Mature", "Emerging", "In professionalization", "Seasonal", "Starter", "Churn"];
 const INICIATIVA_OPTIONS = ["Todas", "CONSULTORIA", "HUNTING"];
 
 export default function CppDashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState<ConsolidatedSeller[]>([]);
+  const [dailyRoas, setDailyRoas] = useState<DailyRoasPoint[]>([]);
+  const [dowBenchmark, setDowBenchmark] = useState<Record<number, number>>({});
   const [loading, setLoading] = useState(false);
   const [fileName, setFileName] = useState("");
   const [search, setSearch] = useState("");
   const [cluster, setCluster] = useState("Todos");
   const [iniciativa, setIniciativa] = useState("Todas");
-  const [sort, setSort] = useState<SortState>({ col: "TGMV_LC", dir: "desc" });
+  const [activeGroup, setActiveGroup] = useState<string | null>(null);
+  const [sort, setSort] = useState<SortState>({ col: "SCORE_PRIORIDADE", dir: "desc" });
 
   const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -96,13 +107,13 @@ export default function CppDashboard() {
       header: true,
       skipEmptyLines: true,
       complete(results) {
-        const consolidated = aggregateSellers(results.data as CppRow[]);
-        setData(consolidated);
+        const result = aggregateSellers(results.data as CppRow[]);
+        setData(result.sellers);
+        setDailyRoas(result.dailyRoas);
+        setDowBenchmark(result.dowBenchmark);
         setLoading(false);
       },
-      error() {
-        setLoading(false);
-      },
+      error() { setLoading(false); },
     });
   }, []);
 
@@ -110,6 +121,7 @@ export default function CppDashboard() {
     let rows = data;
     if (cluster !== "Todos") rows = rows.filter(r => String(r.SUB_CLUSTER_SELLER || "").toLowerCase() === cluster.toLowerCase());
     if (iniciativa !== "Todas") rows = rows.filter(r => String(r.INICIATIVA || "").toUpperCase() === iniciativa);
+    if (activeGroup) rows = rows.filter(r => String(r.GRUPO_ACAO || "").toUpperCase().includes(activeGroup));
     if (search.trim()) {
       const q = search.toLowerCase();
       rows = rows.filter(r => String(r.CUS_NICKNAME || "").toLowerCase().includes(q) || String(r.CUS_CUST_ID_SEL || "").includes(q));
@@ -123,15 +135,16 @@ export default function CppDashboard() {
       });
     }
     return rows;
-  }, [data, cluster, iniciativa, search, sort]);
+  }, [data, cluster, iniciativa, search, sort, activeGroup]);
 
   const totals = useMemo(() => {
-    const gmv = data.reduce((s, r) => s + (Number(r.TGMV_LC) || 0), 0);
-    const inv = data.reduce((s, r) => s + (Number(r.INV_PADS) || 0), 0);
-    const tgmvPads = data.reduce((s, r) => s + (Number(r.TGMV_LC_PADS) || 0), 0);
+    const src = cluster !== "Todos" || activeGroup ? filtered : data;
+    const gmv = src.reduce((s, r) => s + (Number(r.TGMV_LC) || 0), 0);
+    const inv = src.reduce((s, r) => s + (Number(r.INV_PADS) || 0), 0);
+    const tgmvPads = src.reduce((s, r) => s + (Number(r.TGMV_LC_PADS) || 0), 0);
     const roas = inv > 0 ? tgmvPads / inv : null;
-    return { gmv, inv, roas, sellers: data.length };
-  }, [data]);
+    return { gmv, inv, roas, sellers: src.length };
+  }, [data, filtered, cluster, activeGroup]);
 
   const toggleSort = (col: string) => {
     setSort(prev => {
@@ -172,7 +185,7 @@ export default function CppDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-4 md:p-6 space-y-6">
+    <div className="min-h-screen bg-background text-foreground p-4 md:p-6 space-y-5">
       {/* Header */}
       <div className="flex items-center gap-4 flex-wrap">
         <Button variant="ghost" size="icon" onClick={() => navigate("/")} className="shrink-0">
@@ -203,6 +216,12 @@ export default function CppDashboard() {
 
       {data.length > 0 && !loading && (
         <>
+          {/* Reputation Alert [1.3] */}
+          <CppReputationAlert data={data} />
+
+          {/* Action Cards [1.2] */}
+          <CppActionCards data={data} activeGroup={activeGroup} onToggle={setActiveGroup} />
+
           {/* KPI Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card className="bg-card border-border">
@@ -211,9 +230,7 @@ export default function CppDashboard() {
                   <DollarSign className="w-4 h-4 text-primary" /> GMV Total
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold font-mono">{fmtCompact(totals.gmv)}</p>
-              </CardContent>
+              <CardContent><p className="text-2xl font-bold font-mono">{fmtCompact(totals.gmv)}</p></CardContent>
             </Card>
             <Card className="bg-card border-border">
               <CardHeader className="pb-2">
@@ -221,9 +238,7 @@ export default function CppDashboard() {
                   <BarChart3 className="w-4 h-4 text-chart-4" /> Investimento Ads
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold font-mono">{fmtCompact(totals.inv)}</p>
-              </CardContent>
+              <CardContent><p className="text-2xl font-bold font-mono">{fmtCompact(totals.inv)}</p></CardContent>
             </Card>
             <Card className="bg-card border-border">
               <CardHeader className="pb-2">
@@ -231,9 +246,7 @@ export default function CppDashboard() {
                   <TrendingUp className="w-4 h-4 text-secondary" /> ROAS Médio
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold font-mono">{fmtRoas(totals.roas)}</p>
-              </CardContent>
+              <CardContent><p className="text-2xl font-bold font-mono">{fmtRoas(totals.roas)}</p></CardContent>
             </Card>
             <Card className="bg-card border-border">
               <CardHeader className="pb-2">
@@ -241,44 +254,29 @@ export default function CppDashboard() {
                   <Users className="w-4 h-4 text-chart-3" /> Sellers Ativos
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold font-mono">{totals.sellers}</p>
-              </CardContent>
+              <CardContent><p className="text-2xl font-bold font-mono">{totals.sellers}</p></CardContent>
             </Card>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[200px] max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar seller..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-9"
-              />
+          {/* ROAS Chart [1.1] */}
+          <CppRoasChart dailyRoas={dailyRoas} dowBenchmark={dowBenchmark} />
+
+          {/* Sub-cluster pills [2.3] + Filters */}
+          <div className="space-y-3">
+            <CppClusterPills value={cluster} onChange={setCluster} />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative flex-1 min-w-[200px] max-w-xs">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input placeholder="Buscar seller..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+              </div>
+              <Select value={iniciativa} onValueChange={setIniciativa}>
+                <SelectTrigger className="w-[180px]"><SelectValue placeholder="Iniciativa" /></SelectTrigger>
+                <SelectContent>
+                  {INICIATIVA_OPTIONS.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Badge variant="secondary" className="text-xs">{filtered.length} sellers</Badge>
             </div>
-            <Select value={cluster} onValueChange={setCluster}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="Cluster" />
-              </SelectTrigger>
-              <SelectContent>
-                {CLUSTER_OPTIONS.map(o => (
-                  <SelectItem key={o} value={o}>{o}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={iniciativa} onValueChange={setIniciativa}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Iniciativa" />
-              </SelectTrigger>
-              <SelectContent>
-                {INICIATIVA_OPTIONS.map(o => (
-                  <SelectItem key={o} value={o}>{o}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Badge variant="secondary" className="text-xs">{filtered.length} sellers</Badge>
           </div>
 
           {/* Table */}
@@ -290,7 +288,7 @@ export default function CppDashboard() {
                     {TABLE_COLS.map(col => (
                       <TableHead
                         key={col.key}
-                        className={`cursor-pointer select-none whitespace-nowrap hover:text-primary transition-colors ${col.align === "right" ? "text-right" : ""}`}
+                        className={`cursor-pointer select-none whitespace-nowrap hover:text-primary transition-colors ${col.align === "right" || col.align === "center" ? "text-" + col.align : ""}`}
                         onClick={() => toggleSort(col.key)}
                       >
                         <span className="inline-flex items-center gap-1">
@@ -311,9 +309,11 @@ export default function CppDashboard() {
                       {TABLE_COLS.map(col => (
                         <TableCell
                           key={col.key}
-                          className={`whitespace-nowrap font-mono text-xs ${col.align === "right" ? "text-right" : ""} ${col.key === "ROAS" ? roasColor(row[col.key]) : ""}`}
+                          className={`whitespace-nowrap font-mono text-xs ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""} ${col.key === "ROAS" ? roasColor(row[col.key]) : ""}`}
                         >
-                          {col.key === "CUS_NICKNAME" ? (
+                          {col.key === "SCORE_PRIORIDADE" ? (
+                            priorityBadge(row[col.key] as number | null)
+                          ) : col.key === "CUS_NICKNAME" ? (
                             <a
                               href={`https://lista.mercadolivre.com.br/_CustId_${row.CUS_CUST_ID_SEL}`}
                               target="_blank"
