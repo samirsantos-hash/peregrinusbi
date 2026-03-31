@@ -369,13 +369,13 @@ const Index = () => {
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto flex-wrap">
+              <TabsList className="glass-card w-full justify-start gap-0.5 p-1 bg-card/60 h-auto overflow-x-auto flex-nowrap">
                 {tabs.map((tab) =>
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
-                    className="flex items-center gap-1.5 px-3 py-2 text-xs data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
-                    <tab.icon className="w-4 h-4" />
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] whitespace-nowrap data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
+                    <tab.icon className="w-3.5 h-3.5 shrink-0" />
                     {tab.label}
                   </TabsTrigger>
                 )}
