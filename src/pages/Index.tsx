@@ -279,8 +279,8 @@ const Index = () => {
     // Qualidade & Conteúdo
     { id: "quality", label: "Qualidade", icon: Shield },
     { id: "clips", label: "Clips & Audiência", icon: Video },
-    // Eficiência (base)
-    { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
+    // Resumo (ao lado de Grants)
+    { id: "efficiency", label: "Resumo", icon: DollarSign },
     { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
     { id: "opportunities", label: "Oportunidades", icon: Gift },
   ];
