@@ -20,6 +20,8 @@ import CppRoasChart from "@/components/dashboard/CppRoasChart";
 import CppClusterPills from "@/components/dashboard/CppClusterPills";
 import CppSellerDetail from "@/components/dashboard/CppSellerDetail";
 import CppVerticalAnalysis from "@/components/dashboard/CppVerticalAnalysis";
+import CppCdpPanel from "@/components/dashboard/CppCdpPanel";
+import CppCdpSellerBreakdown from "@/components/dashboard/CppCdpSellerBreakdown";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
