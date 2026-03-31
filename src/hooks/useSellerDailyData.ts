@@ -83,6 +83,7 @@ function transformDailyKpi(row: any, sellerNickname: string): SellerKPI {
     repDelayedRate: Number(row.rep_delayed_ht_rate) || 0,
     pontuacaoLlGtin: Number(row.pontuacao_ll_gtin) || 0,
     pontuacaoIpi: Number(row.pontuacao_ipi) || 0,
+    bpc: null, // BPC only available in monthly data
     productName: sellerNickname,
     productId: row.seller_id,
   };
