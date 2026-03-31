@@ -38,7 +38,7 @@ function fmtPct(v: number | null, decimals = 1): string {
   return `${v.toFixed(decimals)}%`;
 }
 function fmtRoas(v: number | null): string {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "N/A";
   return v.toFixed(2);
 }
 function fmtNum(v: number | null): string {
@@ -186,10 +186,13 @@ export default function CppDashboard() {
     }
     const src = cluster !== "Todos" || activeGroup ? filtered : data;
     const gmv = src.reduce((s, r) => s + (Number(r.TGMV_LC) || 0), 0);
-    const inv = src.reduce((s, r) => s + (Number(r.INV_PADS) || 0), 0);
-    const tgmvPads = src.reduce((s, r) => s + (Number(r.TGMV_LC_PADS) || 0), 0);
+    // ERRO 5: Only include sellers with INV_PADS > 0 in ROAS calculation
+    const sellersWithAds = src.filter(r => (Number(r.INV_PADS) || 0) > 0);
+    const inv = sellersWithAds.reduce((s, r) => s + (Number(r.INV_PADS) || 0), 0);
+    const tgmvPads = sellersWithAds.reduce((s, r) => s + (Number(r.TGMV_LC_PADS) || 0), 0);
     const tsi = src.reduce((s, r) => s + (Number(r.TSI) || 0), 0);
     const visitas = src.reduce((s, r) => s + (Number(r.VISITAS) || 0), 0);
+    // ERRO 1: ROAS = TGMV_LC_PADS / INV_PADS
     const roas = inv > 0 ? tgmvPads / inv : null;
     const txConversao = visitas > 0 ? (tsi / visitas) * 100 : null;
     return { gmv, inv, tgmvPads, roas, tsi, visitas, txConversao, sellers: src.length, deltas: {} as Record<string, number | null> };
@@ -226,7 +229,7 @@ export default function CppDashboard() {
   };
 
   const roasColor = (v: unknown) => {
-    if (v === null || v === undefined) return "";
+    if (v === null || v === undefined) return "text-muted-foreground";
     const n = Number(v);
     if (n < 2) return "text-destructive font-semibold";
     if (n > 10) return "text-emerald-400 font-semibold";

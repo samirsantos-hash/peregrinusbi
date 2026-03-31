@@ -119,7 +119,9 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
 
     // Seller daily GMV
     const sellerDaily = new Map<string, number>();
-    const peerDaily = new Map<string, number[]>();
+
+    // Aggregate per peer per day, then median
+    const peerDayAgg = new Map<string, Map<string, number>>(); // date -> peer -> tgmv
 
     for (const r of rawRows) {
       const d = String(r["TIM_DAY"] || r["DATA"] || "").trim();
@@ -130,42 +132,34 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
       if (id === custId) {
         sellerDaily.set(d, (sellerDaily.get(d) || 0) + tgmv);
       } else if (peerCustIds.has(id)) {
-        if (!peerDaily.has(d)) peerDaily.set(d, []);
-        // Accumulate per peer per day
-        const peerDayMap = new Map<string, number>();
-        // Actually we need to aggregate per peer first then median
-        // This simplified approach: accumulate all peer tgmv values per day
+        if (!peerDayAgg.has(d)) peerDayAgg.set(d, new Map());
+        const dayMap = peerDayAgg.get(d)!;
+        dayMap.set(id, (dayMap.get(id) || 0) + tgmv);
       }
-    }
-
-    // Better approach: aggregate per peer per day, then median
-    const peerDayAgg = new Map<string, Map<string, number>>(); // date -> peer -> tgmv
-    for (const r of rawRows) {
-      const d = String(r["TIM_DAY"] || r["DATA"] || "").trim();
-      if (!d || d < startDate || d > endDate) continue;
-      const id = cleanCustId(r["CUS_CUST_ID_SEL"]);
-      if (!peerCustIds.has(id)) continue;
-      const tgmv = parseBrNumber(r["TGMV_LC"]);
-      if (!peerDayAgg.has(d)) peerDayAgg.set(d, new Map());
-      const dayMap = peerDayAgg.get(d)!;
-      dayMap.set(id, (dayMap.get(id) || 0) + tgmv);
     }
 
     // Collect all dates
     const allDates = new Set([...sellerDaily.keys(), ...peerDayAgg.keys()]);
     const sortedDates = Array.from(allDates).sort();
 
-    return sortedDates.map(d => {
-      const sellerGmv = sellerDaily.get(d) || 0;
-      const peerValues = peerDayAgg.has(d) ? Array.from(peerDayAgg.get(d)!.values()) : [];
-      const medianGmv = median(peerValues);
-      return {
-        date: `${d.slice(8, 10)}/${d.slice(5, 7)}`,
-        rawDate: d,
-        sellerGmv,
-        medianGmv,
-      };
-    });
+    // ERRO 7: Filter out days where seller has zero data (incomplete days)
+    return sortedDates
+      .filter(d => {
+        const sellerGmv = sellerDaily.get(d) || 0;
+        const hasPeers = peerDayAgg.has(d);
+        return sellerGmv > 0 || hasPeers;
+      })
+      .map(d => {
+        const sellerGmv = sellerDaily.get(d) || 0;
+        const peerValues = peerDayAgg.has(d) ? Array.from(peerDayAgg.get(d)!.values()) : [];
+        const medianGmv = median(peerValues);
+        return {
+          date: `${d.slice(8, 10)}/${d.slice(5, 7)}`,
+          rawDate: d,
+          sellerGmv,
+          medianGmv,
+        };
+      });
   }, [rawRows, activeCat, custId, peerCustIds, startDate, endDate]);
 
   // Aggregated comparison metrics (using monthly-like sum for the period)

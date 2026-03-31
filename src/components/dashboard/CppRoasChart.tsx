@@ -15,12 +15,15 @@ interface Props {
 
 export default function CppRoasChart({ dailyRoas, dowBenchmark }: Props) {
   const chartData = useMemo(() => {
-    return dailyRoas.map(d => ({
-      date: d.date,
-      roas: d.roas !== null ? Math.round(d.roas * 100) / 100 : null,
-      benchmark: Math.round((dowBenchmark[d.dow] || 0) * 100) / 100,
-      dowLabel: DOW_NAMES[d.dow],
-    }));
+    // ERRO 7: Filter out days where INV_PADS = 0 (no ads data)
+    return dailyRoas
+      .filter(d => d.invPads > 0)
+      .map(d => ({
+        date: d.date,
+        roas: d.roas !== null ? Math.round(d.roas * 100) / 100 : null,
+        benchmark: Math.round((dowBenchmark[d.dow] || 0) * 100) / 100,
+        dowLabel: DOW_NAMES[d.dow],
+      }));
   }, [dailyRoas, dowBenchmark]);
 
   if (chartData.length < 2) return null;

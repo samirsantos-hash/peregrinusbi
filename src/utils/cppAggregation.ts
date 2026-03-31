@@ -112,6 +112,7 @@ function sumMetrics(rows: CppRow[]): PeriodMetrics {
   }
   return {
     tgmv, tsi, visitas, invPads, tgmvPads,
+    // ERRO 1: ROAS = TGMV_LC_PADS / INV_PADS (correct)
     roas: invPads > 0 ? tgmvPads / invPads : null,
     txConversao: visitas > 0 ? (tsi / visitas) * 100 : null,
     precoMedio: tsi > 0 ? tgmv / tsi : null,
@@ -341,6 +342,7 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     };
 
     const tgmv = entry.sums["TGMV_LC"] || 0;
+    const gmvLc = entry.sums["GMV_LC"] || 0;
     const invPads = entry.sums["INV_PADS"] || 0;
     const tgmvPads = entry.sums["TGMV_LC_PADS"] || 0;
     const visitas = entry.sums["VISITAS"] || 0;
@@ -350,9 +352,13 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     const listings = entry.sums["TOTAL_LIVELISTINGS"] || 0;
     const tsi = entry.sums["TSI"] || 0;
 
+    // ERRO 1: ROAS = TGMV_LC_PADS / INV_PADS (not TGMV_LC / INV_PADS)
+    // ERRO 5: sellers sem investimento → ROAS = null (N/A)
     seller["ROAS"] = invPads > 0 ? tgmvPads / invPads : null;
     seller["TX_CONVERSAO"] = visitas > 0 && tgmv > 0 ? tsi / visitas : null;
-    seller["SHARE_FULL"] = tgmv > 0 ? (fTgmv / tgmv) * 100 : null;
+    // ERRO 2: SHARE_FULL uses TGMV_LC consistently, capped at 100%
+    const rawShareFull = tgmv > 0 ? (fTgmv / tgmv) * 100 : null;
+    seller["SHARE_FULL"] = rawShareFull !== null ? Math.min(rawShareFull, 100) : null;
     seller["GMV_POR_VISITA"] = visitas > 0 ? tgmv / visitas : null;
     seller["SHARE_CDP"] = tgmv > 0 ? (cdpTgmv / tgmv) * 100 : null;
     seller["INVESTIMENTO_PERC_GMV"] = tgmv > 0 ? (invPads / tgmv) * 100 : null;

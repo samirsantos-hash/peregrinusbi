@@ -15,15 +15,16 @@ interface QualityKpiCardsProps {
 }
 
 /* ── Benchmarks da carteira (mediana Mar/2026) ── */
+/* ERRO 3: SCORE_FINAL_FULL benchmark uses only sellers WITH full active (46.8) */
 const SCORE_REFS: Record<string, number> = {
-  SCORE_FINAL_FULL: 20.7,
+  SCORE_FINAL_FULL: 46.8,  // Mediana dos 136 sellers com Full ativo (não 20.7 que inclui zeros)
   SCORE_FINAL_CDP: 36.1,
   SCORE_FINAL_PADS: 45.3,
   PONTUACAO_IPI: 56.4,
 };
 
 const DISTRIBUTION: Record<string, { critico: number; dev: number; saudavel: number }> = {
-  SCORE_FINAL_FULL: { critico: 68, dev: 22, saudavel: 10 },
+  SCORE_FINAL_FULL: { critico: 25, dev: 40, saudavel: 35 },  // Distribution only among sellers WITH full
   SCORE_FINAL_CDP: { critico: 41, dev: 45, saudavel: 14 },
   SCORE_FINAL_PADS: { critico: 35, dev: 30, saudavel: 34 },
 };
@@ -96,30 +97,38 @@ const QualityKpiCards = ({
   const normalizedGtin = normalizeScore(pontuacaoLlGtin);
   const normalizedOferta = normalizeScore(scoreOfertaFinal);
 
+  // ERRO 3: If scoreFull = 0, seller has no fulfillment — show message instead of bar
+  const hasFullActive = scoreFull > 0;
+  const normalizedFull = normalizeScore(scoreFull);
+
   const scoreCards = [
     {
       label: "Score PADS",
       value: normalizeScore(scorePads),
       refKey: "SCORE_FINAL_PADS",
       icon: Shield,
+      noFullMessage: null as string | null,
     },
     {
       label: "Score Full",
-      value: normalizeScore(scoreFull),
+      value: hasFullActive ? normalizedFull : 0,
       refKey: "SCORE_FINAL_FULL",
       icon: Package,
+      noFullMessage: !hasFullActive ? "Seller sem itens no fulfillment ativo" : null,
     },
     {
       label: "Score CDP",
       value: normalizeScore(scoreCdp),
       refKey: "SCORE_FINAL_CDP",
       icon: Sparkles,
+      noFullMessage: null as string | null,
     },
     ...(pontuacaoIpi > 0 ? [{
       label: "Pontuação IPI",
       value: normalizeScore(pontuacaoIpi),
       refKey: "PONTUACAO_IPI",
       icon: Shield,
+      noFullMessage: null as string | null,
     }] : []),
   ];
 
@@ -177,12 +186,21 @@ const QualityKpiCards = ({
                 <card.icon className="w-3.5 h-3.5 text-neon-blue" />
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{card.label}</span>
               </div>
-              <div className="flex items-center gap-1">
-                <span className={cn("text-2xl font-bold font-mono", sem.textClass)}>{card.value}</span>
-                <span className="text-xs text-muted-foreground">pts</span>
-                <CorrectionBadge value={card.value} refKey={card.refKey} />
-              </div>
-              <SemaphoreBar score={card.value} refKey={card.refKey} />
+              {card.noFullMessage ? (
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground italic">{card.noFullMessage}</span>
+                  <p className="text-[10px] text-amber-400">Ação: ativar itens no Mercado Envios Full</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-1">
+                    <span className={cn("text-2xl font-bold font-mono", sem.textClass)}>{card.value}</span>
+                    <span className="text-xs text-muted-foreground">pts</span>
+                    <CorrectionBadge value={card.value} refKey={card.refKey} />
+                  </div>
+                  <SemaphoreBar score={card.value} refKey={card.refKey} />
+                </>
+              )}
             </motion.div>
           );
         })}
