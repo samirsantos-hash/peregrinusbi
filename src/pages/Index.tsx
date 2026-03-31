@@ -272,6 +272,7 @@ const Index = () => {
   const tabs = [
     // Saúde (topo)
     { id: "grants", label: "Grants", icon: KeyRound },
+    { id: "efficiency", label: "Resumo", icon: DollarSign },
     { id: "reputation", label: "Reputação", icon: HeartPulse },
     // Performance
     { id: "executive", label: "Faturamento", icon: LayoutDashboard },
@@ -279,8 +280,7 @@ const Index = () => {
     // Qualidade & Conteúdo
     { id: "quality", label: "Qualidade", icon: Shield },
     { id: "clips", label: "Clips & Audiência", icon: Video },
-    // Resumo (ao lado de Grants)
-    { id: "efficiency", label: "Resumo", icon: DollarSign },
+    // Base
     { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
     { id: "opportunities", label: "Oportunidades", icon: Gift },
   ];
