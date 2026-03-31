@@ -60,9 +60,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerBenchmark, sellerMetrics }: Props) => {
+const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerBenchmark, sellerMetrics, clusterBenchmark }: Props) => {
   const verticals = portfolioBenchmark?.verticals || [];
   const portfolio = portfolioBenchmark?.portfolio || { totalSellers: 0, avgInv: 0, avgRoas: 0, avgAcos: 0, avgTacos: 0 };
+  const sellerVertical = campaign?.verticalPrincipal || null;
+  const cb = clusterBenchmark;
   const sellerVertical = campaign?.verticalPrincipal || null;
 
   // Radar chart: seller vs their vertical vs portfolio
