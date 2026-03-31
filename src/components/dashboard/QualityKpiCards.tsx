@@ -15,15 +15,16 @@ interface QualityKpiCardsProps {
 }
 
 /* ── Benchmarks da carteira (mediana Mar/2026) ── */
+/* ERRO 3: SCORE_FINAL_FULL benchmark uses only sellers WITH full active (46.8) */
 const SCORE_REFS: Record<string, number> = {
-  SCORE_FINAL_FULL: 20.7,
+  SCORE_FINAL_FULL: 46.8,  // Mediana dos 136 sellers com Full ativo (não 20.7 que inclui zeros)
   SCORE_FINAL_CDP: 36.1,
   SCORE_FINAL_PADS: 45.3,
   PONTUACAO_IPI: 56.4,
 };
 
 const DISTRIBUTION: Record<string, { critico: number; dev: number; saudavel: number }> = {
-  SCORE_FINAL_FULL: { critico: 68, dev: 22, saudavel: 10 },
+  SCORE_FINAL_FULL: { critico: 25, dev: 40, saudavel: 35 },  // Distribution only among sellers WITH full
   SCORE_FINAL_CDP: { critico: 41, dev: 45, saudavel: 14 },
   SCORE_FINAL_PADS: { critico: 35, dev: 30, saudavel: 34 },
 };
