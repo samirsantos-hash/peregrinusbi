@@ -11,7 +11,8 @@ import { fmtBRLCompact, fmtNum } from "@/utils/formatters";
 import { type PortfolioBenchmark, type VerticalStats } from "@/hooks/usePortfolioBenchmark";
 import { type SellerCampaign } from "@/hooks/useMeliCampaigns";
 import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
-import { Loader2, TrendingUp, Users, Target, BarChart3 } from "lucide-react";
+import { type ClusterBenchmarkResult, getPercentileBadge } from "@/hooks/useClusterBenchmark";
+import { Loader2, TrendingUp, Users, Target, BarChart3, Award } from "lucide-react";
 
 interface Props {
   portfolioBenchmark: PortfolioBenchmark | null;
@@ -25,6 +26,7 @@ interface Props {
     avgAcos: number;
     avgTacos: number;
   };
+  clusterBenchmark?: ClusterBenchmarkResult | null;
 }
 
 const COLORS = [
