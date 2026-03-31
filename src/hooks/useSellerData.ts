@@ -75,6 +75,8 @@ export interface SellerKPI {
   // GTIN
   pontuacaoLlGtin: number;
   pontuacaoIpi: number;
+  // BPC
+  bpc: number | null;
   // For compatibility with product-based panels
   productName: string;
   productId: string;
