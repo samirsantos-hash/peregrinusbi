@@ -160,14 +160,35 @@ export default function CppDashboard() {
     return rows;
   }, [data, cluster, iniciativa, search, sort, activeGroup]);
 
+  const portfolioStartStr = useMemo(() => format(detailStartDate, "yyyy-MM-dd"), [detailStartDate]);
+  const portfolioEndStr = useMemo(() => format(detailEndDate, "yyyy-MM-dd"), [detailEndDate]);
+
+  const portfolioMetrics = useMemo(() => {
+    if (!rawRows.length) return null;
+    return computePeriodComparison(rawRows, null, portfolioStartStr, portfolioEndStr);
+  }, [rawRows, portfolioStartStr, portfolioEndStr]);
+
   const totals = useMemo(() => {
+    if (portfolioMetrics) {
+      const c = portfolioMetrics.current;
+      return {
+        gmv: c.tgmv, tsi: c.tsi, visitas: c.visitas,
+        inv: c.invPads, tgmvPads: c.tgmvPads,
+        roas: c.roas, txConversao: c.txConversao,
+        sellers: (cluster !== "Todos" || activeGroup ? filtered : data).length,
+        deltas: portfolioMetrics.deltas,
+      };
+    }
     const src = cluster !== "Todos" || activeGroup ? filtered : data;
     const gmv = src.reduce((s, r) => s + (Number(r.TGMV_LC) || 0), 0);
     const inv = src.reduce((s, r) => s + (Number(r.INV_PADS) || 0), 0);
     const tgmvPads = src.reduce((s, r) => s + (Number(r.TGMV_LC_PADS) || 0), 0);
+    const tsi = src.reduce((s, r) => s + (Number(r.TSI) || 0), 0);
+    const visitas = src.reduce((s, r) => s + (Number(r.VISITAS) || 0), 0);
     const roas = inv > 0 ? tgmvPads / inv : null;
-    return { gmv, inv, roas, sellers: src.length };
-  }, [data, filtered, cluster, activeGroup]);
+    const txConversao = visitas > 0 ? (tsi / visitas) * 100 : null;
+    return { gmv, inv, tgmvPads, roas, tsi, visitas, txConversao, sellers: src.length, deltas: {} as Record<string, number | null> };
+  }, [data, filtered, cluster, activeGroup, portfolioMetrics]);
 
   const toggleSort = (col: string) => {
     setSort(prev => {
