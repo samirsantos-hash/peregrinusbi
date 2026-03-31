@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -19,6 +20,8 @@ import CppRoasChart from "@/components/dashboard/CppRoasChart";
 import CppClusterPills from "@/components/dashboard/CppClusterPills";
 import CppSellerDetail from "@/components/dashboard/CppSellerDetail";
 import CppVerticalAnalysis from "@/components/dashboard/CppVerticalAnalysis";
+import CppCdpPanel from "@/components/dashboard/CppCdpPanel";
+import CppCdpSellerBreakdown from "@/components/dashboard/CppCdpSellerBreakdown";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
@@ -281,6 +284,12 @@ export default function CppDashboard() {
             startDate={detailStartDate}
             endDate={detailEndDate}
           />
+          <CppCdpSellerBreakdown
+            custId={selectedSeller.CUS_CUST_ID_SEL}
+            rawRows={rawRows}
+            startDate={detailStartDate}
+            endDate={detailEndDate}
+          />
         </>
       )}
 
@@ -444,57 +453,69 @@ export default function CppDashboard() {
             </div>
           </div>
 
-          {/* Table */}
-          <Card className="bg-card border-border overflow-hidden">
-            <div className="overflow-auto max-h-[65vh]">
-              <Table>
-                <TableHeader className="sticky top-0 z-10 bg-card">
-                  <TableRow>
-                    {TABLE_COLS.map(col => (
-                      <TableHead
-                        key={col.key}
-                        className={`cursor-pointer select-none whitespace-nowrap hover:text-primary transition-colors ${col.align === "right" || col.align === "center" ? "text-" + col.align : ""}`}
-                        onClick={() => toggleSort(col.key)}
-                      >
-                        <span className="inline-flex items-center gap-1">
-                          {col.label}
-                          {sort.col === col.key ? (
-                            sort.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />
-                          ) : (
-                            <ArrowUpDown className="w-3 h-3 opacity-30" />
-                          )}
-                        </span>
-                      </TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((row, i) => (
-                    <TableRow
-                      key={row.CUS_CUST_ID_SEL || i}
-                      className="hover:bg-muted/30 cursor-pointer"
-                      onClick={() => setSelectedSeller(row)}
-                    >
-                      {TABLE_COLS.map(col => (
-                        <TableCell
-                          key={col.key}
-                          className={`whitespace-nowrap font-mono text-xs ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""} ${col.key === "ROAS" ? roasColor(row[col.key]) : ""}`}
+          <Tabs defaultValue="sellers" className="space-y-3">
+            <TabsList>
+              <TabsTrigger value="sellers">Sellers</TabsTrigger>
+              <TabsTrigger value="cdp">Ação CDP</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="sellers">
+              <Card className="bg-card border-border overflow-hidden">
+                <div className="overflow-auto max-h-[65vh]">
+                  <Table>
+                    <TableHeader className="sticky top-0 z-10 bg-card">
+                      <TableRow>
+                        {TABLE_COLS.map(col => (
+                          <TableHead
+                            key={col.key}
+                            className={`cursor-pointer select-none whitespace-nowrap hover:text-primary transition-colors ${col.align === "right" || col.align === "center" ? "text-" + col.align : ""}`}
+                            onClick={() => toggleSort(col.key)}
+                          >
+                            <span className="inline-flex items-center gap-1">
+                              {col.label}
+                              {sort.col === col.key ? (
+                                sort.dir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />
+                              ) : (
+                                <ArrowUpDown className="w-3 h-3 opacity-30" />
+                              )}
+                            </span>
+                          </TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filtered.map((row, i) => (
+                        <TableRow
+                          key={row.CUS_CUST_ID_SEL || i}
+                          className="hover:bg-muted/30 cursor-pointer"
+                          onClick={() => setSelectedSeller(row)}
                         >
-                          {col.key === "SCORE_PRIORIDADE" ? (
-                            priorityBadge(row[col.key] as number | null)
-                          ) : col.key === "CUS_NICKNAME" ? (
-                            <span className="text-primary hover:underline">{String(row[col.key] || "")}</span>
-                          ) : (
-                            col.fmt(row[col.key])
-                          )}
-                        </TableCell>
+                          {TABLE_COLS.map(col => (
+                            <TableCell
+                              key={col.key}
+                              className={`whitespace-nowrap font-mono text-xs ${col.align === "right" ? "text-right" : col.align === "center" ? "text-center" : ""} ${col.key === "ROAS" ? roasColor(row[col.key]) : ""}`}
+                            >
+                              {col.key === "SCORE_PRIORIDADE" ? (
+                                priorityBadge(row[col.key] as number | null)
+                              ) : col.key === "CUS_NICKNAME" ? (
+                                <span className="text-primary hover:underline">{String(row[col.key] || "")}</span>
+                              ) : (
+                                col.fmt(row[col.key])
+                              )}
+                            </TableCell>
+                          ))}
+                        </TableRow>
                       ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </Card>
+                    </TableBody>
+                  </Table>
+                </div>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="cdp">
+              <CppCdpPanel data={filtered} onSelectSeller={setSelectedSeller} />
+            </TabsContent>
+          </Tabs>
         </>
       )}
 
