@@ -74,6 +74,7 @@ export interface SellerKPI {
   repDelayedRate: number;
   // GTIN
   pontuacaoLlGtin: number;
+  pontuacaoIpi: number;
   // For compatibility with product-based panels
   productName: string;
   productId: string;
