@@ -22,6 +22,7 @@ import CppSellerDetail from "@/components/dashboard/CppSellerDetail";
 import CppVerticalAnalysis from "@/components/dashboard/CppVerticalAnalysis";
 import CppCdpPanel from "@/components/dashboard/CppCdpPanel";
 import CppCdpSellerBreakdown from "@/components/dashboard/CppCdpSellerBreakdown";
+import CppVerticalTab from "@/components/dashboard/CppVerticalTab";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
