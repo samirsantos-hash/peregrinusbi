@@ -293,44 +293,135 @@ export default function CppDashboard() {
           {/* Action Cards */}
           <CppActionCards data={data} activeGroup={activeGroup} onToggle={setActiveGroup} />
 
-          {/* KPI Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <DollarSign className="w-4 h-4 text-primary" /> GMV Total
-                </CardTitle>
-              </CardHeader>
-              <CardContent><p className="text-2xl font-bold font-mono">{fmtCompact(totals.gmv)}</p></CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-chart-4" /> Investimento Ads
-                </CardTitle>
-              </CardHeader>
-              <CardContent><p className="text-2xl font-bold font-mono">{fmtCompact(totals.inv)}</p></CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <TrendingUp className="w-4 h-4 text-secondary" /> ROAS Médio
-                </CardTitle>
-              </CardHeader>
-              <CardContent><p className="text-2xl font-bold font-mono">{fmtRoas(totals.roas)}</p></CardContent>
-            </Card>
-            <Card className="bg-card border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-chart-3" /> Sellers Ativos
-                </CardTitle>
-              </CardHeader>
-              <CardContent><p className="text-2xl font-bold font-mono">{totals.sellers}</p></CardContent>
-            </Card>
+          {/* Period Selector */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Período:</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+                  <CalendarIcon className="w-3 h-3" />
+                  {format(detailStartDate, "dd/MM/yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={detailStartDate}
+                  onSelect={(d) => d && setDetailStartDate(d)}
+                  disabled={(d) => dateRange.min ? (d < new Date(dateRange.min + "T12:00:00") || d > new Date(dateRange.max + "T12:00:00")) : false}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <span className="text-muted-foreground text-xs">a</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+                  <CalendarIcon className="w-3 h-3" />
+                  {format(detailEndDate, "dd/MM/yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={detailEndDate}
+                  onSelect={(d) => d && setDetailEndDate(d)}
+                  disabled={(d) => dateRange.min ? (d < new Date(dateRange.min + "T12:00:00") || d > new Date(dateRange.max + "T12:00:00")) : false}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {portfolioMetrics && (
+              <span className="text-[10px] text-muted-foreground ml-2">
+                Δ vs período anterior ({format(new Date(new Date(detailStartDate).getTime() - (Math.round((detailEndDate.getTime() - detailStartDate.getTime()) / 86400000) + 1) * 86400000), "dd/MM")} a {format(new Date(detailStartDate.getTime() - 86400000), "dd/MM")})
+              </span>
+            )}
           </div>
 
-          {/* ROAS Chart */}
-          <CppRoasChart dailyRoas={dailyRoas} dowBenchmark={dowBenchmark} />
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <DollarSign className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">GMV Total</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{fmtCompact(totals.gmv)}</p>
+                {totals.deltas?.tgmv != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.tgmv >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.tgmv >= 0 ? "+" : ""}{totals.deltas.tgmv.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <ShoppingCart className="w-3.5 h-3.5 text-chart-3" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Unidades (TSI)</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{fmtNum(totals.tsi)}</p>
+                {totals.deltas?.tsi != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.tsi >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.tsi >= 0 ? "+" : ""}{totals.deltas.tsi.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Eye className="w-3.5 h-3.5 text-chart-4" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Visitas</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{fmtNum(totals.visitas)}</p>
+                {totals.deltas?.visitas != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.visitas >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.visitas >= 0 ? "+" : ""}{totals.deltas.visitas.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <TrendingUp className="w-3.5 h-3.5 text-secondary" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">ROAS</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{totals.roas != null ? `${totals.roas.toFixed(1)}x` : "—"}</p>
+                {totals.deltas?.roas != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.roas >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.roas >= 0 ? "+" : ""}{totals.deltas.roas.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Percent className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Conversão</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{totals.txConversao != null ? `${totals.txConversao.toFixed(2)}%` : "—"}</p>
+                {totals.deltas?.txConversao != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.txConversao >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.txConversao >= 0 ? "+" : ""}{totals.deltas.txConversao.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Users className="w-3.5 h-3.5 text-chart-3" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Sellers Ativos</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{totals.sellers}</p>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Sub-cluster pills + Filters */}
           <div className="space-y-3">
