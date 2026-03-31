@@ -111,7 +111,7 @@ const Admin = () => {
           cnpj: u.cnpj,
           allowed_cust_ids: u.allowed_cust_ids || [],
           must_change_password: u.must_change_password,
-          temp_password: u.temp_password,
+          
           created_at: u.created_at,
           role: rolesMap[u.user_id] || "user",
         }))
