@@ -734,7 +734,6 @@ export type Database = {
           created_at: string
           id: string
           must_change_password: boolean
-          temp_password: string | null
           temp_password_expires_at: string | null
           updated_at: string
           user_email: string
@@ -746,7 +745,6 @@ export type Database = {
           created_at?: string
           id?: string
           must_change_password?: boolean
-          temp_password?: string | null
           temp_password_expires_at?: string | null
           updated_at?: string
           user_email: string
@@ -758,7 +756,6 @@ export type Database = {
           created_at?: string
           id?: string
           must_change_password?: boolean
-          temp_password?: string | null
           temp_password_expires_at?: string | null
           updated_at?: string
           user_email?: string

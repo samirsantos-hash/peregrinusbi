@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
 
       const { error: updateAccessError } = await adminClient
         .from("user_access_control")
-        .update({ must_change_password: false, temp_password: null, temp_password_expires_at: null })
+        .update({ must_change_password: false, temp_password_expires_at: null })
         .eq("user_id", userId);
 
       if (updateAccessError) {
@@ -155,7 +155,6 @@ Deno.serve(async (req) => {
         allowed_cust_ids: allowedCustIds,
         temp_password_expires_at: expiresAt,
         must_change_password: true,
-        temp_password: tempPassword,
       });
 
       console.log(`User ${email} setup complete. Password stored in DB matches Auth.`);
@@ -189,7 +188,6 @@ Deno.serve(async (req) => {
         .from("user_access_control")
         .update({
           must_change_password: true,
-          temp_password: newTempPassword,
           temp_password_expires_at: expiresAt,
         })
         .eq("user_id", targetUserId);
