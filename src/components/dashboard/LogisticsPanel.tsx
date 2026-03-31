@@ -8,6 +8,9 @@ interface KpiLike {
   pctFull: number;
   pctFlex: number;
   pctPostagem: number;
+  tgmvFull: number;
+  tgmvFlex: number;
+  tgmv: number;
   productId: string;
 }
 
@@ -15,16 +18,7 @@ interface LogisticsPanelProps {
   kpis: KpiLike[];
 }
 
-const COLORS = ["hsl(199, 100%, 50%)", "hsl(160, 84%, 39%)", "hsl(280, 80%, 60%)"];
-
-const CustomTooltip = ({ active, payload }: any) => {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="glass-card p-3 !bg-card/95 text-xs">
-      <p className="font-medium" style={{ color: payload[0].payload.fill }}>{payload[0].name}: {payload[0].value.toFixed(1)}%</p>
-    </div>
-  );
-};
+const COLORS = ["hsl(199, 100%, 50%)", "hsl(160, 84%, 39%)", "hsl(280, 80%, 60%)", "hsl(45, 80%, 55%)"];
 
 const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
@@ -33,20 +27,62 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
   }, {});
 
   const products = Object.values(latestByProduct);
+
+  // GMV-based share calculation (correct source: CPP_MENSAL fields)
+  const totalTgmvFull = products.reduce((s, p) => s + (p.tgmvFull || 0), 0);
+  const totalTgmvFlex = products.reduce((s, p) => s + (p.tgmvFlex || 0), 0);
+  const totalTgmv = products.reduce((s, p) => s + (p.tgmv || 0), 0);
+  const totalTgmvAgencia = Math.max(0, totalTgmv - totalTgmvFull - totalTgmvFlex);
+
+  const shareFullGmv = totalTgmv > 0 ? (totalTgmvFull / totalTgmv) * 100 : 0;
+  const shareFlexGmv = totalTgmv > 0 ? (totalTgmvFlex / totalTgmv) * 100 : 0;
+  const shareAgenciaGmv = totalTgmv > 0 ? (totalTgmvAgencia / totalTgmv) * 100 : 0;
+
+  // TSI-based (unit share) for reference
   const avgFull = products.length > 0 ? products.reduce((s, p) => s + p.pctFull, 0) / products.length : 0;
   const avgFlex = products.length > 0 ? products.reduce((s, p) => s + p.pctFlex, 0) / products.length : 0;
   const avgPostagem = products.length > 0 ? products.reduce((s, p) => s + p.pctPostagem, 0) / products.length : 0;
 
+  const fmtGmv = (v: number) => {
+    if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
+    if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}K`;
+    return `R$ ${Math.round(v).toLocaleString("pt-BR")}`;
+  };
+
   const donutData = [
-    { name: "Potência no Full", value: Math.round(avgFull * 10) / 10 },
-    { name: "Flex", value: Math.round(avgFlex * 10) / 10 },
-    { name: "Agência / Cross", value: Math.round(avgPostagem * 10) / 10 },
+    { name: "Mercado Envios Full", value: Math.round(shareFullGmv * 10) / 10 },
+    { name: "Flex", value: Math.round(shareFlexGmv * 10) / 10 },
+    { name: "Agência / Coletas", value: Math.round(shareAgenciaGmv * 10) / 10 },
   ];
 
   const logIcons = [
-    { label: "Potência no Full", value: `${avgFull.toFixed(1)}%`, icon: Package, color: "neon-text", desc: "Fulfillment (TSI_FULL / TSI)", tooltip: "Mede o aproveitamento do potencial de escala do seller utilizando o ecossistema Fulfillment. Sellers com alta potência no Full possuem maior conversão e relevância no algoritmo." },
-    { label: "Flex", value: `${avgFlex.toFixed(1)}%`, icon: Truck, color: "emerald-text", desc: "Mercado Envios Flex", tooltip: "Percentual de pedidos via Flex (coleta no vendedor). Boa alternativa para itens grandes." },
-    { label: "Agência / Cross", value: `${avgPostagem.toFixed(1)}%`, icon: Mail, color: "text-purple-400", desc: "Agência / Drop-off / Cross-Docking", tooltip: "Percentual de pedidos via Agência ou Cross-Docking. Menor priorização no algoritmo de busca." },
+    {
+      label: "Mercado Envios Full",
+      value: `${shareFullGmv.toFixed(1)}%`,
+      icon: Package,
+      color: "neon-text",
+      desc: `GMV: ${fmtGmv(totalTgmvFull)}`,
+      tooltip: "Share de GMV via Fulfillment (F_TGMV_LC_FULL). Fonte: CPP_MENSAL. Sellers com Full possuem maior conversão e relevância.",
+      isEmpty: totalTgmvFull === 0,
+    },
+    {
+      label: "Flex",
+      value: `${shareFlexGmv.toFixed(1)}%`,
+      icon: Truck,
+      color: "emerald-text",
+      desc: `GMV: ${fmtGmv(totalTgmvFlex)}`,
+      tooltip: "Share de GMV via Flex (F_TGMV_LC_FLEX). Fonte: CPP_MENSAL.",
+      isEmpty: totalTgmvFlex === 0,
+    },
+    {
+      label: "Agência / Coletas",
+      value: `${shareAgenciaGmv.toFixed(1)}%`,
+      icon: Mail,
+      color: "text-purple-400",
+      desc: `GMV: ${fmtGmv(totalTgmvAgencia)}`,
+      tooltip: "Share de GMV via Agência / Coletas (F_TGMV_LC_COLETAS). Menor priorização no algoritmo.",
+      isEmpty: totalTgmvAgencia === 0,
+    },
   ];
 
   return (
