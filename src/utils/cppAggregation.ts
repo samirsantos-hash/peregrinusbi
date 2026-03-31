@@ -33,7 +33,7 @@ export type CppRow = Record<string, string | number | null>;
 
 export interface DailyRoasPoint {
   date: string;
-  dow: number; // 0=Sun, 6=Sat
+  dow: number;
   roas: number | null;
   tgmvPads: number;
   invPads: number;
@@ -47,14 +47,191 @@ export interface ConsolidatedSeller extends Record<string, string | number | nul
 export interface CppAggregationResult {
   sellers: ConsolidatedSeller[];
   dailyRoas: DailyRoasPoint[];
-  dowBenchmark: Record<number, number>; // dow → avg ROAS
+  dowBenchmark: Record<number, number>;
+  rawRows: CppRow[];
+  dateRange: { min: string; max: string };
 }
 
-function parseBrNumber(val: unknown): number {
+export interface PeriodMetrics {
+  tgmv: number;
+  tsi: number;
+  visitas: number;
+  invPads: number;
+  tgmvPads: number;
+  roas: number | null;
+  txConversao: number | null;
+  precoMedio: number | null;
+  visitsCheaper: number;
+  visitsMatch: number;
+  visitsExpensive: number;
+}
+
+export interface PeriodComparison {
+  current: PeriodMetrics;
+  previous: PeriodMetrics;
+  deltas: Record<string, number | null>;
+}
+
+export interface DowMetrics {
+  dow: number;
+  label: string;
+  tsi: number;
+  tgmv: number;
+  roas: number | null;
+}
+
+export function parseBrNumber(val: unknown): number {
   if (val === null || val === undefined || val === "") return 0;
   const s = String(val).trim().replace(/\./g, "").replace(",", ".");
   const n = parseFloat(s);
   return isNaN(n) ? 0 : n;
+}
+
+export function cleanCustId(raw: unknown): string {
+  return String(raw || "").trim().replace(/[.,]0$/, "");
+}
+
+function getRowDate(row: CppRow): string {
+  return String(row["TIM_DAY"] || row["DATA"] || row["data"] || "").trim();
+}
+
+/** Sum metrics from filtered raw rows */
+function sumMetrics(rows: CppRow[]): PeriodMetrics {
+  let tgmv = 0, tsi = 0, visitas = 0, invPads = 0, tgmvPads = 0;
+  let visitsCheaper = 0, visitsMatch = 0, visitsExpensive = 0;
+  for (const r of rows) {
+    tgmv += parseBrNumber(r["TGMV_LC"]);
+    tsi += parseBrNumber(r["TSI"]);
+    visitas += parseBrNumber(r["VISITAS"]);
+    invPads += parseBrNumber(r["INV_PADS"]);
+    tgmvPads += parseBrNumber(r["TGMV_LC_PADS"]);
+    visitsCheaper += parseBrNumber(r["VISITS_CHEAPER"]);
+    visitsMatch += parseBrNumber(r["VISITS_MATCH"]);
+    visitsExpensive += parseBrNumber(r["VISITS_EXPENSIVE"]);
+  }
+  return {
+    tgmv, tsi, visitas, invPads, tgmvPads,
+    roas: invPads > 0 ? tgmvPads / invPads : null,
+    txConversao: visitas > 0 ? (tsi / visitas) * 100 : null,
+    precoMedio: tsi > 0 ? tgmv / tsi : null,
+    visitsCheaper, visitsMatch, visitsExpensive,
+  };
+}
+
+function calcDelta(cur: number, prev: number): number | null {
+  if (prev === 0) return cur > 0 ? 100 : null;
+  return ((cur - prev) / prev) * 100;
+}
+
+/** Compute metrics for a date range with previous period comparison */
+export function computePeriodComparison(
+  rows: CppRow[],
+  sellerId: string | null,
+  startDate: string,
+  endDate: string
+): PeriodComparison {
+  let filtered = rows;
+  if (sellerId) {
+    filtered = filtered.filter(r => cleanCustId(r["CUS_CUST_ID_SEL"]) === sellerId);
+  }
+
+  const currentRows = filtered.filter(r => {
+    const d = getRowDate(r);
+    return d >= startDate && d <= endDate;
+  });
+
+  // Previous period of same length
+  const start = new Date(startDate + "T12:00:00");
+  const end = new Date(endDate + "T12:00:00");
+  const days = Math.round((end.getTime() - start.getTime()) / 86400000) + 1;
+  const prevEnd = new Date(start.getTime() - 86400000);
+  const prevStart = new Date(prevEnd.getTime() - (days - 1) * 86400000);
+  const prevStartStr = prevStart.toISOString().slice(0, 10);
+  const prevEndStr = prevEnd.toISOString().slice(0, 10);
+
+  const prevRows = filtered.filter(r => {
+    const d = getRowDate(r);
+    return d >= prevStartStr && d <= prevEndStr;
+  });
+
+  const current = sumMetrics(currentRows);
+  const previous = sumMetrics(prevRows);
+
+  return {
+    current,
+    previous,
+    deltas: {
+      tgmv: calcDelta(current.tgmv, previous.tgmv),
+      tsi: calcDelta(current.tsi, previous.tsi),
+      visitas: calcDelta(current.visitas, previous.visitas),
+      invPads: calcDelta(current.invPads, previous.invPads),
+      roas: current.roas !== null && previous.roas !== null && previous.roas > 0
+        ? calcDelta(current.roas, previous.roas) : null,
+      txConversao: current.txConversao !== null && previous.txConversao !== null && previous.txConversao > 0
+        ? calcDelta(current.txConversao, previous.txConversao) : null,
+      precoMedio: current.precoMedio !== null && previous.precoMedio !== null && previous.precoMedio > 0
+        ? calcDelta(current.precoMedio, previous.precoMedio) : null,
+    },
+  };
+}
+
+/** Compute DOW breakdown for a seller in a date range */
+export function computeDowBreakdown(
+  rows: CppRow[],
+  sellerId: string | null,
+  startDate: string,
+  endDate: string
+): DowMetrics[] {
+  const DOW_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+  let filtered = rows;
+  if (sellerId) {
+    filtered = filtered.filter(r => cleanCustId(r["CUS_CUST_ID_SEL"]) === sellerId);
+  }
+  filtered = filtered.filter(r => {
+    const d = getRowDate(r);
+    return d >= startDate && d <= endDate;
+  });
+
+  const dowData: Record<number, { tsi: number; tgmv: number; invPads: number; tgmvPads: number }> = {};
+  for (let i = 0; i < 7; i++) dowData[i] = { tsi: 0, tgmv: 0, invPads: 0, tgmvPads: 0 };
+
+  for (const r of filtered) {
+    const dateStr = getRowDate(r);
+    const parsed = new Date(dateStr + "T12:00:00");
+    if (isNaN(parsed.getTime())) continue;
+    const dow = parsed.getDay();
+    dowData[dow].tsi += parseBrNumber(r["TSI"]);
+    dowData[dow].tgmv += parseBrNumber(r["TGMV_LC"]);
+    dowData[dow].invPads += parseBrNumber(r["INV_PADS"]);
+    dowData[dow].tgmvPads += parseBrNumber(r["TGMV_LC_PADS"]);
+  }
+
+  return Array.from({ length: 7 }, (_, i) => ({
+    dow: i,
+    label: DOW_LABELS[i],
+    tsi: dowData[i].tsi,
+    tgmv: dowData[i].tgmv,
+    roas: dowData[i].invPads > 0 ? dowData[i].tgmvPads / dowData[i].invPads : null,
+  }));
+}
+
+/** Get daily GMV for a seller */
+export function getDailyGmv(
+  rows: CppRow[],
+  sellerId: string,
+  startDate: string,
+  endDate: string
+): { date: string; tgmv: number }[] {
+  const map = new Map<string, number>();
+  for (const r of rows) {
+    if (cleanCustId(r["CUS_CUST_ID_SEL"]) !== sellerId) continue;
+    const d = getRowDate(r);
+    if (d < startDate || d > endDate) continue;
+    map.set(d, (map.get(d) || 0) + parseBrNumber(r["TGMV_LC"]));
+  }
+  return Array.from(map.entries())
+    .map(([date, tgmv]) => ({ date, tgmv }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
@@ -65,12 +242,20 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     maxMeses: number;
   }>();
 
-  // Daily aggregation for ROAS chart
   const dailyMap = new Map<string, { tgmvPads: number; invPads: number }>();
+  let minDate = "9999-99-99";
+  let maxDate = "0000-00-00";
 
   for (const row of rows) {
-    const custId = String(row["CUS_CUST_ID_SEL"] || "").trim().replace(/[.,]0$/, "");
+    const custId = cleanCustId(row["CUS_CUST_ID_SEL"]);
     if (!custId) continue;
+
+    // Track date range
+    const dateVal = getRowDate(row);
+    if (dateVal.length >= 8) {
+      if (dateVal < minDate) minDate = dateVal;
+      if (dateVal > maxDate) maxDate = dateVal;
+    }
 
     if (!map.has(custId)) {
       map.set(custId, {
@@ -84,7 +269,6 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
 
     const entry = map.get(custId)!;
 
-    // Identity: overwrite with last non-null
     for (const col of IDENTITY_COLS) {
       const v = row[col];
       if (v !== null && v !== undefined && String(v).trim() !== "") {
@@ -92,7 +276,6 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
       }
     }
 
-    // Last value cols (reputation, scores)
     for (const col of LAST_VALUE_COLS) {
       const v = row[col];
       if (v !== null && v !== undefined && String(v).trim() !== "") {
@@ -100,17 +283,13 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
       }
     }
 
-    // Sums
     for (const col of SUM_COLS) {
       entry.sums[col] += parseBrNumber(row[col]);
     }
 
-    // Max MESES_NO_PROGRAMA
     const meses = parseBrNumber(row["MESES_NO_PROGRAMA"]);
     if (meses > entry.maxMeses) entry.maxMeses = meses;
 
-    // Daily ROAS aggregation (try TIM_DAY, DATA, or data columns)
-    const dateVal = String(row["TIM_DAY"] || row["DATA"] || row["data"] || "").trim();
     if (dateVal && dateVal.length >= 8) {
       if (!dailyMap.has(dateVal)) {
         dailyMap.set(dateVal, { tgmvPads: 0, invPads: 0 });
@@ -121,7 +300,6 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     }
   }
 
-  // Build daily ROAS array
   const dailyRoas: DailyRoasPoint[] = [];
   for (const [dateStr, vals] of dailyMap) {
     const parsed = new Date(dateStr + "T12:00:00");
@@ -136,7 +314,6 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
   }
   dailyRoas.sort((a, b) => a.date.localeCompare(b.date));
 
-  // DOW benchmark: average ROAS per day of week
   const dowSums: Record<number, { total: number; count: number }> = {};
   for (let i = 0; i < 7; i++) dowSums[i] = { total: 0, count: 0 };
   for (const d of dailyRoas) {
@@ -150,7 +327,6 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     dowBenchmark[i] = dowSums[i].count > 0 ? dowSums[i].total / dowSums[i].count : 0;
   }
 
-  // Build consolidated sellers
   const results: ConsolidatedSeller[] = [];
 
   for (const [custId, entry] of map) {
@@ -163,7 +339,6 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
       MESES_NO_PROGRAMA: entry.maxMeses,
     };
 
-    // Derived KPIs
     const tgmv = entry.sums["TGMV_LC"] || 0;
     const invPads = entry.sums["INV_PADS"] || 0;
     const tgmvPads = entry.sums["TGMV_LC_PADS"] || 0;
@@ -183,7 +358,6 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     seller["GMV_POR_LISTING"] = listings > 0 ? tgmv / listings : null;
     seller["ROAS_CDP"] = cdpInv > 0 ? cdpTgmv / cdpInv : null;
 
-    // Priority Score [3.1]
     const scoreCdp = Number(entry.lastValues["SCORE_FINAL_CDP"]) || 0;
     const scorePads = Number(entry.lastValues["SCORE_FINAL_PADS"]) || 0;
     const scoreFull = Number(entry.lastValues["SCORE_FINAL_FULL"]) || 0;
@@ -197,5 +371,11 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     results.push(seller);
   }
 
-  return { sellers: results, dailyRoas, dowBenchmark };
+  return {
+    sellers: results,
+    dailyRoas,
+    dowBenchmark,
+    rawRows: rows,
+    dateRange: { min: minDate === "9999-99-99" ? "" : minDate, max: maxDate === "0000-00-00" ? "" : maxDate },
+  };
 }
