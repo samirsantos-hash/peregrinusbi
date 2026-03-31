@@ -145,9 +145,11 @@ export type Database = {
         Row: {
           acao_recomendada: string | null
           campaign_id_best: string | null
+          campaign_type: string | null
           created_at: string
           data: string
           discount_best: number | null
+          discount_seller_percentage: number | null
           discount_total: number | null
           dom_domain_agg1: string | null
           estoque_medio_7d: number | null
@@ -157,6 +159,7 @@ export type Database = {
           id: string
           item_id: string
           item_name: string
+          media_tsi_diario_7d: number | null
           pedidos_7d: number | null
           seller_id: string
           vertical_item: string | null
@@ -164,9 +167,11 @@ export type Database = {
         Insert: {
           acao_recomendada?: string | null
           campaign_id_best?: string | null
+          campaign_type?: string | null
           created_at?: string
           data: string
           discount_best?: number | null
+          discount_seller_percentage?: number | null
           discount_total?: number | null
           dom_domain_agg1?: string | null
           estoque_medio_7d?: number | null
@@ -176,6 +181,7 @@ export type Database = {
           id?: string
           item_id: string
           item_name?: string
+          media_tsi_diario_7d?: number | null
           pedidos_7d?: number | null
           seller_id: string
           vertical_item?: string | null
@@ -183,9 +189,11 @@ export type Database = {
         Update: {
           acao_recomendada?: string | null
           campaign_id_best?: string | null
+          campaign_type?: string | null
           created_at?: string
           data?: string
           discount_best?: number | null
+          discount_seller_percentage?: number | null
           discount_total?: number | null
           dom_domain_agg1?: string | null
           estoque_medio_7d?: number | null
@@ -195,6 +203,7 @@ export type Database = {
           id?: string
           item_id?: string
           item_name?: string
+          media_tsi_diario_7d?: number | null
           pedidos_7d?: number | null
           seller_id?: string
           vertical_item?: string | null
