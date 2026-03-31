@@ -8,12 +8,15 @@ export interface EligibilityItem {
   itemName: string;
   discountBest: number;
   discountTotal: number;
+  discountSellerPercentage: number;
   flagItemSOptin: boolean;
   flagBestPromo: boolean;
   acaoRecomendada: string;
   estoqueMedio7d: number;
   estoqueMedioFull7d: number;
   pedidos7d: number;
+  mediaTsiDiario7d: number;
+  campaignType: string;
   verticalItem: string;
   domDomainAgg1: string;
   campaignIdBest: string;
