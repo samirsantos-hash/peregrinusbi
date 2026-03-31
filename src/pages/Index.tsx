@@ -396,7 +396,7 @@ const Index = () => {
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0">
-                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} />
+                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0">
                     <CompetitivenessPanel kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />

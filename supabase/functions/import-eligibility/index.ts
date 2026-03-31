@@ -97,6 +97,9 @@ Deno.serve(async (req) => {
     const iDomain = colIdx("DOM_DOMAIN_AGG1");
     const iCampaignBest = colIdx("CAMPAIGN_ID_BEST");
     const iData = colIdx("DATA");
+    const iDiscountSellerPct = colIdx("DISCOUNT_SELLER_PERCENTAGE");
+    const iCampaignType = colIdx("CAMPAIGN_TYPE");
+    const iMediaTsi7d = colIdx("MEDIA_TSI_DIARIO_7D");
 
     if (iCustId < 0 || iItemId < 0) {
       return new Response(JSON.stringify({ error: "Colunas obrigatórias não encontradas: CUS_CUST_ID_SEL, ITEM_ID" }), {
@@ -163,12 +166,15 @@ Deno.serve(async (req) => {
         item_name: iItemName >= 0 ? cols[iItemName]?.trim() || "" : "",
         discount_best: iDiscountBest >= 0 ? parseBrNumber(cols[iDiscountBest] || "0") : 0,
         discount_total: iDiscountTotal >= 0 ? parseBrNumber(cols[iDiscountTotal] || "0") : 0,
+        discount_seller_percentage: iDiscountSellerPct >= 0 ? parseBrNumber(cols[iDiscountSellerPct] || "0") : 0,
         flag_item_s_optin: iFlagOptin >= 0 ? parseBool(cols[iFlagOptin] || "") : false,
         flag_best_promo: iFlagBestPromo >= 0 ? parseBool(cols[iFlagBestPromo] || "") : false,
         acao_recomendada: iAcao >= 0 ? cols[iAcao]?.trim() || "" : "",
         estoque_medio_7d: iEstoque7d >= 0 ? parseBrNumber(cols[iEstoque7d] || "0") : 0,
         estoque_medio_full_7d: iEstoqueFull7d >= 0 ? parseBrNumber(cols[iEstoqueFull7d] || "0") : 0,
         pedidos_7d: iPedidos7d >= 0 ? parseBrNumber(cols[iPedidos7d] || "0") : 0,
+        media_tsi_diario_7d: iMediaTsi7d >= 0 ? parseBrNumber(cols[iMediaTsi7d] || "0") : 0,
+        campaign_type: iCampaignType >= 0 ? cols[iCampaignType]?.trim() || "" : "",
         vertical_item: iVertical >= 0 ? cols[iVertical]?.trim() || "" : "",
         dom_domain_agg1: iDomain >= 0 ? cols[iDomain]?.trim() || "" : "",
         campaign_id_best: iCampaignBest >= 0 ? (cols[iCampaignBest]?.trim() || "").replace(/[.,]0$/, "") : "",

@@ -23,6 +23,7 @@ import CppVerticalAnalysis from "@/components/dashboard/CppVerticalAnalysis";
 import CppCdpPanel from "@/components/dashboard/CppCdpPanel";
 import CppCdpSellerBreakdown from "@/components/dashboard/CppCdpSellerBreakdown";
 import CppVerticalTab from "@/components/dashboard/CppVerticalTab";
+import CppCategoryChart from "@/components/dashboard/CppCategoryChart";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
@@ -281,6 +282,12 @@ export default function CppDashboard() {
             middleContent={
               <>
                 <CppReputationAlert data={data} selectedSeller={selectedSeller} />
+                <CppCategoryChart
+                  seller={selectedSeller}
+                  rawRows={rawRows}
+                  startDate={format(detailStartDate, "yyyy-MM-dd")}
+                  endDate={format(detailEndDate, "yyyy-MM-dd")}
+                />
                 <CppVerticalAnalysis
                   seller={selectedSeller}
                   rawRows={rawRows}

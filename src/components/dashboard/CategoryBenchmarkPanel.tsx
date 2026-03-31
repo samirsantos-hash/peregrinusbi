@@ -11,7 +11,8 @@ import { fmtBRLCompact, fmtNum } from "@/utils/formatters";
 import { type PortfolioBenchmark, type VerticalStats } from "@/hooks/usePortfolioBenchmark";
 import { type SellerCampaign } from "@/hooks/useMeliCampaigns";
 import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
-import { Loader2, TrendingUp, Users, Target, BarChart3 } from "lucide-react";
+import { type ClusterBenchmarkResult, getPercentileBadge } from "@/hooks/useClusterBenchmark";
+import { Loader2, TrendingUp, Users, Target, BarChart3, Award } from "lucide-react";
 
 interface Props {
   portfolioBenchmark: PortfolioBenchmark | null;
@@ -25,6 +26,7 @@ interface Props {
     avgAcos: number;
     avgTacos: number;
   };
+  clusterBenchmark?: ClusterBenchmarkResult | null;
 }
 
 const COLORS = [
@@ -58,10 +60,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerBenchmark, sellerMetrics }: Props) => {
+const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerBenchmark, sellerMetrics, clusterBenchmark }: Props) => {
   const verticals = portfolioBenchmark?.verticals || [];
   const portfolio = portfolioBenchmark?.portfolio || { totalSellers: 0, avgInv: 0, avgRoas: 0, avgAcos: 0, avgTacos: 0 };
   const sellerVertical = campaign?.verticalPrincipal || null;
+  const cb = clusterBenchmark;
 
   // Radar chart: seller vs their vertical vs portfolio
   const radarData = useMemo(() => {
@@ -166,6 +169,59 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+      {/* Cluster Benchmark — Percentile Display */}
+      {cb?.cluster && (
+        <div className="glass-card p-5 space-y-4">
+          <div className="flex items-center gap-3">
+            <Award className="h-5 w-5 text-primary" />
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Posicionamento no Cluster — {cb.cluster.cluster}
+            </h2>
+            <TooltipInfo text="Percentil calculado comparando com a mediana dos sellers do mesmo cluster. Nunca mistura clusters diferentes." />
+            <Badge variant="outline" className="text-[10px]">
+              {cb.cluster.peerCount} peers
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              { label: "GMV", pct: cb.cluster.percentileGmv, seller: fmtBRLCompact(cb.cluster.sellerGmv), median: fmtBRLCompact(cb.cluster.medianGmv), kpi: "GMV" },
+              { label: "ROAS", pct: cb.cluster.percentileRoas, seller: `${cb.cluster.sellerRoas.toFixed(1)}x`, median: `${cb.cluster.medianRoas.toFixed(1)}x`, kpi: "ROAS" },
+              { label: "Conversão", pct: cb.cluster.percentileConv, seller: `${cb.cluster.sellerConv.toFixed(1)}%`, median: `${cb.cluster.medianConv.toFixed(1)}%`, kpi: "conversão" },
+            ].map((m) => {
+              const badge = getPercentileBadge(m.pct);
+              return (
+                <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-lg border border-border/50 bg-card/60 p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{m.label}</p>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold border ${badge.className}`}>
+                      {m.pct >= 80 ? `Top ${100 - m.pct}%` : badge.label}
+                    </span>
+                  </div>
+                  <p className="text-lg font-bold font-mono text-foreground">{m.seller}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    Mediana {cb!.cluster!.cluster}: {m.median}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          {/* Category position */}
+          {cb.category && (
+            <div className="flex items-center gap-2 px-1 text-xs text-muted-foreground">
+              <Target className="w-3.5 h-3.5" />
+              <span>
+                <span className="font-semibold text-foreground">{cb.category.position}º</span> de {cb.category.totalPeers} sellers em <span className="font-medium text-foreground">{cb.category.category}</span>
+              </span>
+              <span className={`ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold border ${getPercentileBadge(cb.category.percentileGmv).className}`}>
+                {getPercentileBadge(cb.category.percentileGmv).label}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Header */}
       <div className="glass-card p-4 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
@@ -187,7 +243,7 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
       {/* Summary cards — Portfolio totals */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { label: "ROAS Médio Carteira", value: `${fmtNum(portfolio.avgRoas, 2)}x`, icon: TrendingUp, color: "text-neon-blue" },
+          { label: "ROAS Mediano Carteira", value: `${fmtNum(portfolio.avgRoas, 2)}x`, icon: TrendingUp, color: "text-neon-blue" },
           { label: "ACOS Médio Carteira", value: `${fmtNum(portfolio.avgAcos, 2)}%`, icon: Target, color: portfolio.avgAcos <= 15 ? "text-emerald" : "text-destructive" },
           { label: "TACOS Médio Carteira", value: `${fmtNum(portfolio.avgTacos, 2)}%`, icon: Target, color: portfolio.avgTacos <= 10 ? "text-emerald" : "text-destructive" },
           { label: "Sellers na Carteira", value: String(portfolio.totalSellers), icon: Users, color: "text-muted-foreground" },

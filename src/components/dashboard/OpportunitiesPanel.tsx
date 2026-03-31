@@ -2,76 +2,154 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Tag, AlertTriangle, TrendingUp, Package, Filter, Download,
-  ExternalLink, Copy, CheckCircle,
+  ExternalLink, Copy, CheckCircle, Search, Star, ArrowUpDown,
+  ArrowDown, ArrowUp, ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TooltipInfo from "./TooltipInfo";
-import { fmtNum } from "@/utils/formatters";
 import { type EligibilityItem } from "@/hooks/useEligibility";
 
 interface OpportunitiesPanelProps {
   items: EligibilityItem[];
 }
 
+// Campaign type abbreviation map
+const CAMPAIGN_TYPE_MAP: Record<string, string> = {
+  "SMART_COFINANCED": "Smart",
+  "TIER_2": "Tier 2",
+  "LIGHTNING": "Lightning",
+  "DOD": "DOD",
+  "COMMERCIAL": "Comercial",
+};
+
+function fmtCampaignType(raw: string): string {
+  if (!raw) return "—";
+  return CAMPAIGN_TYPE_MAP[raw.toUpperCase()] || raw;
+}
+
+// Compute priority score for each item
+interface ScoredItem extends EligibilityItem {
+  gapDesconto: number;
+  score: number;
+  campaignType: string;
+  discountSellerPct: number;
+  mediaTsiDiario7d: number;
+}
+
+function computeScoredItems(items: EligibilityItem[]): ScoredItem[] {
+  return items.map(item => {
+    const discountSellerPct = (item as any).discountSellerPercentage ?? item.discountTotal;
+    const mediaTsi = (item as any).mediaTsiDiario7d ?? 0;
+    const campaignType = (item as any).campaignType ?? "";
+    const pedidos = item.pedidos7d || 0;
+    const gapDesconto = item.discountTotal - discountSellerPct;
+    const score = (pedidos * 0.5) + (gapDesconto * 2) + (mediaTsi * 10);
+
+    return {
+      ...item,
+      gapDesconto: Math.round(gapDesconto * 100) / 100,
+      score: Math.round(score * 100) / 100,
+      campaignType,
+      discountSellerPct,
+      mediaTsiDiario7d: mediaTsi,
+    };
+  });
+}
+
 const getActionBadge = (action: string) => {
   const lower = action.toLowerCase();
   if (lower.includes("optin") || lower.includes("s/ optin"))
-    return { className: "bg-warning/15 text-warning border-warning/30", label: action || "Item s/ Optin" };
+    return { className: "bg-destructive/15 text-destructive border-destructive/30", label: "Item s/ Optin" };
   if (lower.includes("desconto") || lower.includes("atrativo"))
-    return { className: "bg-neon-blue/15 text-neon-blue border-neon-blue/30", label: action };
+    return { className: "bg-amber-500/15 text-amber-400 border-amber-500/30", label: "Melhorar desconto" };
   if (lower.includes("campanha"))
     return { className: "bg-purple-500/15 text-purple-400 border-purple-500/30", label: action };
   return { className: "bg-muted/30 text-muted-foreground border-border", label: action || "—" };
 };
 
+type SortKey = "score" | "pedidos7d" | "gapDesconto";
+
 const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
-  const [bestPromoOnly, setBestPromoOnly] = useState(false);
-  const [verticalFilter, setVerticalFilter] = useState("all");
+  const [catFilter, setCatFilter] = useState("all");
+  const [actionFilter, setActionFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<SortKey>("score");
+  const [showAll, setShowAll] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(false);
 
-  const verticals = useMemo(() => {
-    const set = new Set(items.map((i) => i.verticalItem).filter(Boolean));
+  const scored = useMemo(() => computeScoredItems(items), [items]);
+
+  const categories = useMemo(() => {
+    const set = new Set(scored.map(i => i.domDomainAgg1).filter(Boolean));
     return Array.from(set).sort();
-  }, [items]);
+  }, [scored]);
 
   const filtered = useMemo(() => {
-    let result = items;
-    if (bestPromoOnly) result = result.filter((i) => i.flagBestPromo);
-    if (verticalFilter !== "all") result = result.filter((i) => i.verticalItem === verticalFilter);
+    let result = scored;
+    if (catFilter !== "all") result = result.filter(i => i.domDomainAgg1 === catFilter);
+    if (actionFilter === "sem_optin") result = result.filter(i => i.flagItemSOptin);
+    else if (actionFilter === "melhorar_desconto") result = result.filter(i =>
+      i.acaoRecomendada.toLowerCase().includes("atrativo") || i.acaoRecomendada.toLowerCase().includes("desconto")
+    );
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(i => (i.itemName || "").toLowerCase().includes(q) || i.itemId.toLowerCase().includes(q));
+    }
+    // Sort
+    result = [...result].sort((a, b) => {
+      if (sortBy === "score") return b.score - a.score;
+      if (sortBy === "pedidos7d") return b.pedidos7d - a.pedidos7d;
+      return b.gapDesconto - a.gapDesconto;
+    });
     return result;
-  }, [items, bestPromoOnly, verticalFilter]);
+  }, [scored, catFilter, actionFilter, searchQuery, sortBy]);
 
-  // Summary metrics
-  const totalEligible = items.length;
-  const bestDiscount = items.length > 0 ? Math.max(...items.map((i) => i.discountBest)) : 0;
-  const itemsSemOptin = items.filter((i) => i.flagItemSOptin).length;
-  const bestPromoCount = items.filter((i) => i.flagBestPromo).length;
+  const displayed = showAll ? filtered : filtered.slice(0, 20);
+
+  // BLOCO 3: Profile cards
+  const profileCards = useMemo(() => {
+    if (scored.length === 0) return null;
+    const medianPedidos = (() => {
+      const vals = scored.map(i => i.pedidos7d).filter(v => v > 0).sort((a, b) => a - b);
+      if (vals.length === 0) return 0;
+      const mid = Math.floor(vals.length / 2);
+      return vals.length % 2 !== 0 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2;
+    })();
+
+    const highDemandItems = scored.filter(i => i.pedidos7d > medianPedidos);
+
+    const card1Count = highDemandItems.filter(i => i.flagItemSOptin).length;
+    const card2Count = highDemandItems.filter(i =>
+      (i.acaoRecomendada.toLowerCase().includes("atrativo") || i.acaoRecomendada.toLowerCase().includes("desconto"))
+      && i.gapDesconto > 2
+    ).length;
+    const bestProduct = scored.length > 0 ? scored.reduce((best, i) => i.score > best.score ? i : best, scored[0]) : null;
+
+    return { card1Count, card2Count, bestProduct, medianPedidos };
+  }, [scored]);
 
   const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
+    setSelectedIds(prev => {
       const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
+      if (next.has(id)) next.delete(id); else next.add(id);
       return next;
     });
   };
 
   const selectAll = () => {
-    if (selectedIds.size === filtered.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filtered.map((i) => i.id)));
-    }
+    if (selectedIds.size === displayed.length) setSelectedIds(new Set());
+    else setSelectedIds(new Set(displayed.map(i => i.id)));
   };
 
   const exportSelected = () => {
-    const selectedItems = filtered.filter((i) => selectedIds.has(i.id));
+    const sel = displayed.filter(i => selectedIds.has(i.id));
     const csvLines = ["CAMPAIGN_ID_BEST;ITEM_ID"];
-    selectedItems.forEach((i) => csvLines.push(`${i.campaignIdBest};${i.itemId}`));
+    sel.forEach(i => csvLines.push(`${i.campaignIdBest};${i.itemId}`));
     const blob = new Blob([csvLines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -82,7 +160,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
   };
 
   const copyItemIds = () => {
-    const ids = filtered.map((i) => i.itemId).join(", ");
+    const ids = filtered.map(i => i.itemId).join(", ");
     navigator.clipboard.writeText(ids);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -92,9 +170,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card p-8 text-center">
         <Package className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
-        <p className="text-sm text-muted-foreground">
-          Nenhum dado de elegibilidade encontrado para este seller.
-        </p>
+        <p className="text-sm text-muted-foreground">Nenhum dado de elegibilidade encontrado para este seller.</p>
         <p className="text-xs text-muted-foreground mt-1">
           Importe o arquivo <code className="bg-muted px-1 py-0.5 rounded text-[10px]">SFTP_ECOMCONSULT_ELEGIBILIDADE</code> na área Admin.
         </p>
@@ -104,57 +180,104 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {[
-          { label: "Total Itens Elegíveis", value: totalEligible.toLocaleString("pt-BR"), icon: Package, color: "neon-text", tooltip: "Contagem total de itens elegíveis para ofertas." },
-          { label: "Melhor Desconto", value: `${fmtNum(bestDiscount / 10, 1)}%`, icon: Tag, color: "text-emerald", tooltip: "Maior desconto disponível (DISCOUNT_BEST)." },
-          { label: "Itens sem Optin", value: itemsSemOptin.toLocaleString("pt-BR"), icon: AlertTriangle, color: "text-warning", tooltip: "Itens onde FLAG_ITEM_S_OPTIN é True — oportunidade de ativação." },
-          { label: "Quick Wins (Best Promo)", value: bestPromoCount.toLocaleString("pt-BR"), icon: TrendingUp, color: "text-neon-blue", tooltip: "Itens com FLAG_BEST_PROMO = True. Quick wins para sugerir ao seller." },
-        ].map((m, i) => (
-          <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
-            <div className="flex items-center gap-1.5 mb-1">
-              <m.icon className="w-3.5 h-3.5 text-muted-foreground" />
-              <p className="metric-label">{m.label}</p>
-              <TooltipInfo text={m.tooltip} />
+      {/* BLOCO 3: Profile Cards */}
+      {profileCards && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-4 border-l-4 border-l-destructive">
+            <div className="flex items-center gap-2 mb-1">
+              <AlertTriangle className="w-4 h-4 text-destructive" />
+              <p className="text-xs font-semibold text-destructive uppercase tracking-wider">Alta demanda sem optin</p>
             </div>
-            <p className={`metric-value ${m.color}`}>{m.value}</p>
+            <p className="text-2xl font-bold font-mono text-foreground">{profileCards.card1Count}</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Itens com boa demanda aguardando ativação CDP</p>
           </motion.div>
-        ))}
-      </div>
 
-      {/* Filters & Actions */}
-      <div className="glass-card p-4">
-        <div className="flex flex-wrap items-center gap-4">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }} className="glass-card p-4 border-l-4 border-l-amber-500">
+            <div className="flex items-center gap-2 mb-1">
+              <Tag className="w-4 h-4 text-amber-400" />
+              <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Melhorar desconto</p>
+            </div>
+            <p className="text-2xl font-bold font-mono text-foreground">{profileCards.card2Count}</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Itens com desconto abaixo do potencial</p>
+          </motion.div>
+
+          {profileCards.bestProduct && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-card p-4 border-l-4 border-l-emerald-500">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Produto prioritário</p>
+              </div>
+              <p className="text-sm font-medium text-foreground truncate">{profileCards.bestProduct.itemName || profileCards.bestProduct.itemId}</p>
+              <div className="flex gap-3 mt-1 text-[10px] text-muted-foreground">
+                <span>{profileCards.bestProduct.pedidos7d} pedidos</span>
+                <span>Gap: {profileCards.bestProduct.gapDesconto > 0 ? `+${profileCards.bestProduct.gapDesconto.toFixed(1)}%` : "—"}</span>
+                <span>Score: {profileCards.bestProduct.score.toFixed(0)}</span>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="glass-card p-4 space-y-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
             <Filter className="w-4 h-4 text-muted-foreground" />
             <span className="text-xs text-muted-foreground uppercase tracking-wider font-medium">Filtros</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Switch checked={bestPromoOnly} onCheckedChange={setBestPromoOnly} />
-            <span className="text-xs text-muted-foreground">Apenas Best Promo</span>
+          {/* Category pills */}
+          <ToggleGroup type="single" value={catFilter} onValueChange={v => { if (v) setCatFilter(v); }} className="flex flex-wrap gap-1">
+            <ToggleGroupItem value="all" className="text-[10px] px-2 py-0.5 h-6 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+              Todas
+            </ToggleGroupItem>
+            {categories.map(c => (
+              <ToggleGroupItem key={c} value={c} className="text-[10px] px-2 py-0.5 h-6 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                {c.length > 18 ? c.slice(0, 16) + "…" : c}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Action filter */}
+          <ToggleGroup type="single" value={actionFilter} onValueChange={v => { if (v) setActionFilter(v); }} className="flex gap-1">
+            <ToggleGroupItem value="all" className="text-[10px] px-2 py-0.5 h-6 rounded-full data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+              Todos
+            </ToggleGroupItem>
+            <ToggleGroupItem value="sem_optin" className="text-[10px] px-2 py-0.5 h-6 rounded-full data-[state=on]:bg-destructive/20 data-[state=on]:text-destructive">
+              Sem optin
+            </ToggleGroupItem>
+            <ToggleGroupItem value="melhorar_desconto" className="text-[10px] px-2 py-0.5 h-6 rounded-full data-[state=on]:bg-amber-500/20 data-[state=on]:text-amber-400">
+              Melhorar desconto
+            </ToggleGroupItem>
+          </ToggleGroup>
+
+          {/* Search */}
+          <div className="relative flex-1 min-w-[160px] max-w-xs">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input placeholder="Buscar produto..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-8 h-7 text-xs" />
           </div>
 
-          <Select value={verticalFilter} onValueChange={setVerticalFilter}>
-            <SelectTrigger className="w-[180px] h-8 text-xs bg-card/60 border-border">
-              <SelectValue placeholder="Todas Verticais" />
+          {/* Sort */}
+          <Select value={sortBy} onValueChange={v => setSortBy(v as SortKey)}>
+            <SelectTrigger className="w-[140px] h-7 text-xs bg-card/60 border-border">
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todas Verticais</SelectItem>
-              {verticals.map((v) => (
-                <SelectItem key={v} value={v}>{v}</SelectItem>
-              ))}
+              <SelectItem value="score">Por Score</SelectItem>
+              <SelectItem value="pedidos7d">Por Pedidos</SelectItem>
+              <SelectItem value="gapDesconto">Por Gap</SelectItem>
             </SelectContent>
           </Select>
 
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={copyItemIds} className="gap-1.5 text-xs">
-              {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald" /> : <Copy className="w-3.5 h-3.5" />}
+            <Button variant="outline" size="sm" onClick={copyItemIds} className="gap-1.5 text-xs h-7">
+              {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? "Copiado!" : "Copiar IDs"}
             </Button>
             {selectedIds.size > 0 && (
-              <Button variant="outline" size="sm" onClick={exportSelected} className="gap-1.5 text-xs bg-neon-blue/10 text-neon-blue border-neon-blue/30 hover:bg-neon-blue/20">
+              <Button variant="outline" size="sm" onClick={exportSelected} className="gap-1.5 text-xs h-7 bg-neon-blue/10 text-neon-blue border-neon-blue/30 hover:bg-neon-blue/20">
                 <Download className="w-3.5 h-3.5" />
                 Exportar Optin ({selectedIds.size})
               </Button>
@@ -163,132 +286,105 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
         </div>
       </div>
 
-      {/* Items Table */}
+      {/* Products Table */}
       <div className="glass-card p-5">
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Tabela Dinâmica de Itens Elegíveis
+            Tabela de Produtos
           </h3>
-          <TooltipInfo text="Lista de produtos com oportunidades de oferta. Selecione itens para exportar e realizar Optin em massa." />
+          <TooltipInfo text="Produtos ordenados por Score de Prioridade. Score = (Pedidos×0.5) + (Gap desconto×2) + (TSI diário×10)." />
           <span className="text-xs text-muted-foreground ml-auto">{filtered.length} itens</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="py-2 px-2 text-left">
-                  <input
-                    type="checkbox"
-                    checked={selectedIds.size === filtered.length && filtered.length > 0}
-                    onChange={selectAll}
-                    className="rounded border-border"
-                  />
+                <th className="py-2 px-1.5 text-left w-8">
+                  <input type="checkbox" checked={selectedIds.size === displayed.length && displayed.length > 0} onChange={selectAll} className="rounded border-border" />
                 </th>
-                <th className="text-left py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Produto</th>
-                <th className="text-center py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Ação Recomendada</th>
-                <th className="text-right py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Estoque 7D</th>
-                <th className="text-right py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Full 7D</th>
-                <th className="text-right py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Vendas 7D</th>
-                <th className="text-right py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Desc. Total</th>
-                <th className="text-right py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Desc. Best</th>
-                <th className="text-right py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Ganho</th>
-                <th className="text-center py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Vertical</th>
-                <th className="text-center py-2 px-2 text-xs uppercase tracking-wider text-muted-foreground font-medium">Alerta</th>
+                <th className="text-left py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Produto</th>
+                <th className="text-left py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Categoria</th>
+                <th className="text-center py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Ação</th>
+                <th className="text-center py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Tipo</th>
+                <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Desc. Seller</th>
+                <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Desc. Sugerido</th>
+                <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Gap</th>
+                <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Pedidos 7d</th>
+                <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">TSI diário</th>
+                <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Estoque</th>
+                <th className="text-center py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Best</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.map((item, idx) => {
+              {displayed.map((item, idx) => {
                 const badge = getActionBadge(item.acaoRecomendada);
-                const noFull = item.estoqueMedioFull7d === 0 || !item.estoqueMedioFull7d;
+                const cleanItemId = String(item.itemId).replace(/\D/g, "");
+                const mlbLink = cleanItemId ? `https://produto.mercadolivre.com.br/MLB-${cleanItemId}` : "";
                 return (
                   <motion.tr
                     key={item.id}
                     initial={{ opacity: 0, x: -5 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: Math.min(idx * 0.02, 0.5) }}
+                    transition={{ delay: Math.min(idx * 0.015, 0.3) }}
                     className="border-b border-border/50 hover:bg-muted/20 transition-colors"
                   >
-                    <td className="py-2 px-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(item.id)}
-                        onChange={() => toggleSelect(item.id)}
-                        className="rounded border-border"
-                      />
+                    <td className="py-1.5 px-1.5">
+                      <input type="checkbox" checked={selectedIds.has(item.id)} onChange={() => toggleSelect(item.id)} className="rounded border-border" />
                     </td>
-                    <td className="py-2 px-2 max-w-[220px]">
-                      <div className="flex items-center gap-1.5">
-                        {item.mlbLink ? (
-                          <a
-                            href={item.mlbLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#4DD0E1] hover:underline truncate font-medium text-xs flex items-center gap-1"
-                          >
-                            {item.itemName || item.itemId}
-                            <ExternalLink className="w-3 h-3 flex-shrink-0" />
+                    <td className="py-1.5 px-1.5 max-w-[200px]">
+                      <div className="flex items-center gap-1">
+                        {mlbLink ? (
+                          <a href={mlbLink} target="_blank" rel="noopener noreferrer" className="text-[#4DD0E1] hover:underline truncate font-medium text-[11px] flex items-center gap-0.5">
+                            {(item.itemName || item.itemId).slice(0, 40)}
+                            <ExternalLink className="w-2.5 h-2.5 flex-shrink-0" />
                           </a>
                         ) : (
-                          <span className="truncate text-xs">{item.itemName || item.itemId}</span>
-                        )}
-                        {item.flagBestPromo && (
-                          <Badge variant="outline" className="text-[9px] px-1 py-0 bg-emerald/10 text-emerald border-emerald/30 flex-shrink-0">
-                            BEST
-                          </Badge>
+                          <span className="truncate text-[11px]">{(item.itemName || item.itemId).slice(0, 40)}</span>
                         )}
                       </div>
                     </td>
-                    <td className="py-2 px-2 text-center">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ${badge.className}`}>
+                    <td className="py-1.5 px-1.5 text-[10px] text-muted-foreground">{item.domDomainAgg1 || "—"}</td>
+                    <td className="py-1.5 px-1.5 text-center">
+                      <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-medium border ${badge.className}`}>
                         {badge.label}
                       </span>
                     </td>
-                    <td className="text-right py-2 px-2 font-mono text-xs">
-                      {item.estoqueMedio7d.toLocaleString("pt-BR")}
+                    <td className="py-1.5 px-1.5 text-center text-[10px] text-muted-foreground">
+                      {fmtCampaignType(item.campaignType)}
                     </td>
-                    <td className="text-right py-2 px-2 font-mono text-xs">
-                      {noFull ? (
-                        <span className="text-warning text-[10px]">⚡ Enviar Full</span>
-                      ) : (
-                        item.estoqueMedioFull7d.toLocaleString("pt-BR")
-                      )}
+                    <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
+                      {item.discountSellerPct > 0 ? `${(item.discountSellerPct / 10).toFixed(1)}%` : "—"}
                     </td>
-                    <td className="text-right py-2 px-2 font-mono text-xs font-medium">
-                      {item.pedidos7d.toLocaleString("pt-BR")}
+                    <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
+                      {item.discountTotal > 0 ? `${(item.discountTotal / 10).toFixed(1)}%` : "—"}
                     </td>
-                    <td className="text-right py-2 px-2 font-mono text-xs">
-                      {fmtNum(item.discountTotal / 10, 1)}%
-                    </td>
-                    <td className="text-right py-2 px-2 font-mono text-xs text-emerald">
-                      {fmtNum(item.discountBest / 10, 1)}%
-                    </td>
-                    <td className="text-right py-2 px-2 font-mono text-xs">
-                      {item.gainAttractiveness > 0 ? (
-                        <span className="text-emerald">+{fmtNum(item.gainAttractiveness / 10, 1)}pp</span>
-                      ) : item.gainAttractiveness < 0 ? (
-                        <span className="text-destructive">{fmtNum(item.gainAttractiveness / 10, 1)}pp</span>
-                      ) : (
+                    <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
+                      {item.gapDesconto > 0 ? (
+                        <span className="text-emerald-400">+{(item.gapDesconto / 10).toFixed(1)}%</span>
+                      ) : item.gapDesconto === 0 ? (
                         <span className="text-muted-foreground">—</span>
-                      )}
-                    </td>
-                    <td className="text-center py-2 px-2 text-xs text-muted-foreground">
-                      {item.verticalItem || "—"}
-                    </td>
-                    <td className="text-center py-2 px-2 text-xs">
-                      {item.alert ? (
-                        <span className={`text-[10px] ${item.alert.includes("Ruptura") ? "text-destructive" : "text-warning"}`}>
-                          {item.alert}
-                        </span>
                       ) : (
-                        <span className="text-muted-foreground">—</span>
+                        <span className="text-destructive">{(item.gapDesconto / 10).toFixed(1)}%</span>
                       )}
+                    </td>
+                    <td className="text-right py-1.5 px-1.5 font-mono text-[11px] font-medium">
+                      {item.pedidos7d > 0 ? item.pedidos7d.toLocaleString("pt-BR") : "—"}
+                    </td>
+                    <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
+                      {item.mediaTsiDiario7d > 0 ? item.mediaTsiDiario7d.toFixed(1) : "—"}
+                    </td>
+                    <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
+                      {item.estoqueMedio7d > 0 ? item.estoqueMedio7d.toLocaleString("pt-BR") : "—"}
+                    </td>
+                    <td className="text-center py-1.5 px-1.5">
+                      {item.flagBestPromo ? <Star className="w-3.5 h-3.5 text-amber-400 mx-auto" fill="currentColor" /> : <span className="text-muted-foreground text-[10px]">—</span>}
                     </td>
                   </motion.tr>
                 );
               })}
-              {filtered.length === 0 && (
+              {displayed.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="text-center py-8 text-muted-foreground text-sm">
+                  <td colSpan={12} className="text-center py-8 text-muted-foreground text-sm">
                     Nenhum item encontrado com os filtros aplicados.
                   </td>
                 </tr>
@@ -296,6 +392,14 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
             </tbody>
           </table>
         </div>
+        {!showAll && filtered.length > 20 && (
+          <div className="flex justify-center mt-4">
+            <Button variant="outline" size="sm" onClick={() => setShowAll(true)} className="gap-1.5 text-xs">
+              <ChevronDown className="w-3.5 h-3.5" />
+              Ver mais ({filtered.length - 20} restantes)
+            </Button>
+          </div>
+        )}
       </div>
     </motion.div>
   );
