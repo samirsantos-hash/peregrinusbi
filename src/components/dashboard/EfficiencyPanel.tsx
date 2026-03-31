@@ -499,6 +499,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         campaign={campaign || null}
         sellerBenchmark={benchmark || null}
         sellerMetrics={{ totalGmv, totalAds, avgRoas, avgAcos, avgTacos }}
+        clusterBenchmark={clusterBenchmarkData}
       />
 
       {/* Heatmap */}
