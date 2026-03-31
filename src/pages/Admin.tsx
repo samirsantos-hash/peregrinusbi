@@ -36,7 +36,7 @@ interface ManagedUser {
   cnpj: string | null;
   allowed_cust_ids: string[];
   must_change_password: boolean;
-  temp_password: string | null;
+  
   created_at: string;
   role: AppRole;
 }
