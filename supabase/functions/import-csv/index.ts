@@ -148,6 +148,8 @@ Deno.serve(async (req) => {
     const iTgmvClips = colIdx("TGMV_LC_CLIPS");
     // Item ID (MLB)
     const iItemId = colIdx("ITE_ITEM_ID");
+    // BPC
+    const iBpc = colIdx("BPC");
 
     // Process rows - collect unique sellers first
     const sellerMap = new Map<string, { nickname: string; cluster: string; subCluster: string; state: string }>();
