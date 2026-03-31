@@ -315,13 +315,23 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      {/* Summary Cards */}
+      {/* Cluster coverage warning */}
+      {clusterCoverageWarning && (
+        <div className="glass-card p-4 border-warning/30 bg-warning/5">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-warning flex-shrink-0" />
+            <p className="text-xs text-warning">{clusterCoverageWarning}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Summary Cards — uses MONTHLY % */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: "Total Visitas", value: fmtNumCompact(totalVisits), icon: TrendingUp, color: "neon-text", tooltip: "Total de visitas nos anúncios do seller no período selecionado." },
-          { label: "Receita c/ Preço Alto", value: fmtBRLCompact(totalExpensive), icon: AlertTriangle, color: "text-destructive", tooltip: "Receita (R$) em visitas onde seu preço era maior que o concorrente." },
-          { label: "% Não Competitivo", value: `${fmtNum(pctExpensive, 1)}%`, icon: TrendingDown, color: pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: "Proporção de visitas onde seu preço era mais caro. Acima de 30% é crítico." },
-          { label: "Preço Rival Médio", value: fmtBRL(avgMinPriceRival), icon: DollarSign, color: "neon-text", tooltip: "Média do menor preço encontrado entre concorrentes no período." },
+          { label: "% Mais Barato", value: `${fmtNum(monthlyTotals.pctCheaper, 1)}%`, icon: TrendingUp, color: "emerald-text", tooltip: `Proporção de visitas onde seu preço era menor que o concorrente (fonte: mensal). Benchmark carteira: mediana 17,2%.` },
+          { label: "% Equivalente", value: `${fmtNum(monthlyTotals.pctMatch, 1)}%`, icon: DollarSign, color: "neon-text", tooltip: `Proporção de visitas com preço equivalente (fonte: mensal). Benchmark carteira: mediana 50,3%.` },
+          { label: "% Não Competitivo", value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`, icon: TrendingDown, color: monthlyTotals.pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: `Proporção de visitas onde seu preço era mais caro (fonte: mensal). Benchmark carteira: mediana 29,4%. Acima de 30% é crítico.` },
+          { label: "Menor Preço Rival", value: minPriceRivalData ? fmtBRL(minPriceRivalData.median) : "—", icon: DollarSign, color: "neon-text", tooltip: minPriceRivalData ? `Mediana do menor preço rival: ${fmtBRL(minPriceRivalData.median)}. Seu preço mínimo precisa ser ≤ este valor para liderar na categoria.` : "Sem rival identificado" },
           { label: "GMV Total", value: fmtBRLCompact(totalGmv), icon: TrendingUp, color: "neon-text", tooltip: "Faturamento total no período analisado." },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
@@ -330,7 +340,14 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <p className="metric-label">{m.label}</p>
               <TooltipInfo text={m.tooltip} />
             </div>
-            <p className={`metric-value ${m.color}`}>{m.value}</p>
+            <div className="flex items-center gap-2">
+              <p className={`metric-value ${m.color}`}>{m.value}</p>
+              {sampleWarning && m.label === "% Não Competitivo" && (
+                <span className="status-badge text-[10px] bg-muted/40 text-muted-foreground border-border/40">
+                  {sampleWarning}
+                </span>
+              )}
+            </div>
           </motion.div>
         ))}
       </div>
