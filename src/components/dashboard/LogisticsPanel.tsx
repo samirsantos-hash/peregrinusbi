@@ -110,9 +110,9 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
       <div className="glass-card p-6">
         <div className="flex items-center justify-center gap-2 mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Mix Logístico
+            Mix Logístico (Share GMV)
           </h3>
-          <TooltipInfo text="Distribuição percentual dos modais de envio baseada em unidades vendidas (TSI). Maior proporção de Full e Flex melhora o desempenho no marketplace." />
+          <TooltipInfo text="Distribuição por GMV dos canais de fulfillment (Fonte: CPP_MENSAL). Maior proporção de Full melhora o desempenho no marketplace." />
         </div>
         <ResponsiveContainer width="100%" height={320}>
           <PieChart>
