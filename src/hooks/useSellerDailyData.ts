@@ -82,6 +82,7 @@ function transformDailyKpi(row: any, sellerNickname: string): SellerKPI {
     repClaimsRate: Number(row.rep_claims_rate) || 0,
     repDelayedRate: Number(row.rep_delayed_ht_rate) || 0,
     pontuacaoLlGtin: Number(row.pontuacao_ll_gtin) || 0,
+    pontuacaoIpi: Number(row.pontuacao_ipi) || 0,
     productName: sellerNickname,
     productId: row.seller_id,
   };
