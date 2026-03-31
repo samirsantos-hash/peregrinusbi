@@ -75,7 +75,7 @@ Deno.serve(async (req) => {
 
       const { error: updateAccessError } = await adminClient
         .from("user_access_control")
-        .update({ must_change_password: false, temp_password: null, temp_password_expires_at: null })
+        .update({ must_change_password: false, temp_password_expires_at: null })
         .eq("user_id", userId);
 
       if (updateAccessError) {
