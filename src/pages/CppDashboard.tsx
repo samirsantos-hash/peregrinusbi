@@ -518,6 +518,10 @@ export default function CppDashboard() {
               </Card>
             </TabsContent>
 
+            <TabsContent value="vertical">
+              <CppVerticalTab data={data} rawRows={rawRows} dateRange={dateRange} />
+            </TabsContent>
+
             <TabsContent value="cdp">
               <CppCdpPanel data={filtered} onSelectSeller={setSelectedSeller} />
             </TabsContent>
