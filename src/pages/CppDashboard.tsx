@@ -510,6 +510,8 @@ export default function CppDashboard() {
               <CppCdpPanel data={filtered} onSelectSeller={setSelectedSeller} />
             </TabsContent>
           </Tabs>
+        </>
+      )}
 
       {!data.length && !loading && (
         <div className="flex flex-col items-center justify-center py-32 text-muted-foreground gap-4">
