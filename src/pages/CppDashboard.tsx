@@ -284,6 +284,12 @@ export default function CppDashboard() {
             startDate={detailStartDate}
             endDate={detailEndDate}
           />
+          <CppCdpSellerBreakdown
+            custId={selectedSeller.CUS_CUST_ID_SEL}
+            rawRows={rawRows}
+            startDate={detailStartDate}
+            endDate={detailEndDate}
+          />
         </>
       )}
 
