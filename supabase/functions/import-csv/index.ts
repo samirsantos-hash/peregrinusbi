@@ -264,6 +264,7 @@ Deno.serve(async (req) => {
         si_clips: iSiClips >= 0 ? safeClipsValue(cols[iSiClips] || "0") : 0,
         orders_clips: iOrdersClips >= 0 ? safeClipsValue(cols[iOrdersClips] || "0") : 0,
         tgmv_lc_clips: iTgmvClips >= 0 ? parseBrNumber(cols[iTgmvClips] || "0") : 0,
+        bpc: iBpc >= 0 && cols[iBpc]?.trim() ? parseBrNumber(cols[iBpc]) : null,
       };
     }).filter(Boolean);
 
