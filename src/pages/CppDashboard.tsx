@@ -38,7 +38,7 @@ function fmtPct(v: number | null, decimals = 1): string {
   return `${v.toFixed(decimals)}%`;
 }
 function fmtRoas(v: number | null): string {
-  if (v === null || v === undefined) return "—";
+  if (v === null || v === undefined) return "N/A";
   return v.toFixed(2);
 }
 function fmtNum(v: number | null): string {
