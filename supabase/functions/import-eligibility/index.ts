@@ -97,6 +97,9 @@ Deno.serve(async (req) => {
     const iDomain = colIdx("DOM_DOMAIN_AGG1");
     const iCampaignBest = colIdx("CAMPAIGN_ID_BEST");
     const iData = colIdx("DATA");
+    const iDiscountSellerPct = colIdx("DISCOUNT_SELLER_PERCENTAGE");
+    const iCampaignType = colIdx("CAMPAIGN_TYPE");
+    const iMediaTsi7d = colIdx("MEDIA_TSI_DIARIO_7D");
 
     if (iCustId < 0 || iItemId < 0) {
       return new Response(JSON.stringify({ error: "Colunas obrigatórias não encontradas: CUS_CUST_ID_SEL, ITEM_ID" }), {
