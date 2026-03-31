@@ -22,6 +22,7 @@ import CppSellerDetail from "@/components/dashboard/CppSellerDetail";
 import CppVerticalAnalysis from "@/components/dashboard/CppVerticalAnalysis";
 import CppCdpPanel from "@/components/dashboard/CppCdpPanel";
 import CppCdpSellerBreakdown from "@/components/dashboard/CppCdpSellerBreakdown";
+import CppVerticalTab from "@/components/dashboard/CppVerticalTab";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
@@ -460,6 +461,7 @@ export default function CppDashboard() {
           <Tabs defaultValue="sellers" className="space-y-3">
             <TabsList>
               <TabsTrigger value="sellers">Sellers</TabsTrigger>
+              <TabsTrigger value="vertical">Vertical & Concorrência</TabsTrigger>
               <TabsTrigger value="cdp">Ação CDP</TabsTrigger>
             </TabsList>
 
@@ -514,6 +516,10 @@ export default function CppDashboard() {
                   </Table>
                 </div>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="vertical">
+              <CppVerticalTab data={data} rawRows={rawRows} dateRange={dateRange} />
             </TabsContent>
 
             <TabsContent value="cdp">
