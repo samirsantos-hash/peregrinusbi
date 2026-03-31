@@ -188,7 +188,6 @@ Deno.serve(async (req) => {
         .from("user_access_control")
         .update({
           must_change_password: true,
-          temp_password: newTempPassword,
           temp_password_expires_at: expiresAt,
         })
         .eq("user_id", targetUserId);

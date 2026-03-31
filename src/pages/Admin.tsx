@@ -408,20 +408,6 @@ const Admin = () => {
                             CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
                             {u.must_change_password && <span className="ml-2 text-warning">● Senha temporária</span>}
                           </p>
-                          {u.temp_password && u.must_change_password && (
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs text-muted-foreground">Senha:</span>
-                              <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded">
-                                {visiblePasswords.has(u.id) ? u.temp_password : "••••••••••"}
-                              </code>
-                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => togglePasswordVisibility(u.id)}>
-                                {visiblePasswords.has(u.id) ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                              </Button>
-                              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => copyToClipboard(u.temp_password!)}>
-                                <Copy className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          )}
                         </div>
                         <div className="flex items-center gap-1">
                           <Button variant="ghost" size="icon" title="Editar carteira de lojas" onClick={() => setWalletUser(u)}>
