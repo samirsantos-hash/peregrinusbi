@@ -94,7 +94,7 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="glass-card p-4 text-center"
+            className={`glass-card p-4 text-center ${item.isEmpty ? "opacity-40" : ""}`}
           >
             <item.icon className={`w-6 h-6 mx-auto mb-2 ${item.color === "neon-text" ? "text-neon-blue" : item.color === "emerald-text" ? "text-emerald" : "text-purple-400"}`} />
             <p className={`metric-value ${item.color}`}>{item.value}</p>
