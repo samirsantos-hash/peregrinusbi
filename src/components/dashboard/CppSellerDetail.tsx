@@ -1,8 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,17 @@ import {
   computePeriodComparison, computeDowBreakdown, cleanCustId, parseBrNumber,
 } from "@/utils/cppAggregation";
 
+// DOW benchmarks (whole portfolio)
+const DOW_BENCHMARKS: Record<number, { roas: number; gmvMedio: number }> = {
+  0: { roas: 74.6, gmvMedio: 4_300_000 }, // Domingo
+  1: { roas: 71.7, gmvMedio: 4_800_000 }, // Segunda
+  2: { roas: 84.1, gmvMedio: 5_300_000 }, // Terça (melhor)
+  3: { roas: 75.9, gmvMedio: 4_600_000 }, // Quarta
+  4: { roas: 78.1, gmvMedio: 4_600_000 }, // Quinta
+  5: { roas: 77.3, gmvMedio: 5_400_000 }, // Sexta
+  6: { roas: 61.8, gmvMedio: 4_000_000 }, // Sábado (pior)
+};
+
 interface Props {
   seller: ConsolidatedSeller;
   rawRows: CppRow[];
@@ -27,6 +37,8 @@ interface Props {
   onStartChange: (d: Date) => void;
   onEndChange: (d: Date) => void;
   onClose: () => void;
+  /** Content rendered between the DOW heatmap and the listings table */
+  middleContent?: ReactNode;
 }
 
 function fmtCurrency(v: number): string {
@@ -57,8 +69,8 @@ function DeltaBadge({ value }: { value: number | null }) {
   );
 }
 
-function DatePicker({ date, onChange, minDate, maxDate, label }: {
-  date: Date; onChange: (d: Date) => void; minDate: Date; maxDate: Date; label: string;
+function DatePicker({ date, onChange, minDate, maxDate }: {
+  date: Date; onChange: (d: Date) => void; minDate: Date; maxDate: Date;
 }) {
   return (
     <Popover>
@@ -82,7 +94,28 @@ function DatePicker({ date, onChange, minDate, maxDate, label }: {
   );
 }
 
-export default function CppSellerDetail({ seller, rawRows, dateRange, startDate, endDate, onStartChange, onEndChange, onClose }: Props) {
+function CustomDowTooltip({ active, payload, label }: any) {
+  if (!active || !payload?.length) return null;
+  const entry = payload[0]?.payload;
+  if (!entry) return null;
+  const bench = DOW_BENCHMARKS[entry.dow];
+  return (
+    <div className="rounded-lg border border-border bg-card p-2 text-xs space-y-1 shadow-lg">
+      <p className="font-semibold text-foreground">{label}</p>
+      <p className="text-foreground">Unidades: {fmtNum(entry.tsi)}</p>
+      <p className="text-foreground">GMV: {fmtCompact(entry.tgmv)}</p>
+      <p className="text-foreground">ROAS: {entry.roas !== null ? `${entry.roas.toFixed(1)}x` : "—"}</p>
+      {bench && (
+        <div className="border-t border-border pt-1 mt-1 text-muted-foreground">
+          <p>Bench ROAS: {bench.roas.toFixed(1)}x</p>
+          <p>Bench GMV médio/dia: {fmtCompact(bench.gmvMedio)}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default function CppSellerDetail({ seller, rawRows, dateRange, startDate, endDate, onStartChange, onEndChange, onClose, middleContent }: Props) {
   const custId = seller.CUS_CUST_ID_SEL;
   const startStr = format(startDate, "yyyy-MM-dd");
   const endStr = format(endDate, "yyyy-MM-dd");
@@ -143,9 +176,9 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
           <p className="text-xs text-muted-foreground">ID: {custId} · {String(seller.SUB_CLUSTER_SELLER || "")}</p>
         </div>
         <div className="flex items-center gap-2">
-          <DatePicker date={startDate} onChange={onStartChange} minDate={minD} maxDate={maxD} label="Início" />
+          <DatePicker date={startDate} onChange={onStartChange} minDate={minD} maxDate={maxD} />
           <span className="text-muted-foreground text-xs">a</span>
-          <DatePicker date={endDate} onChange={onEndChange} minDate={minD} maxDate={maxD} label="Fim" />
+          <DatePicker date={endDate} onChange={onEndChange} minDate={minD} maxDate={maxD} />
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
             <X className="w-4 h-4" />
           </Button>
@@ -182,22 +215,11 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
                 <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
                 <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
-                  formatter={(value: number, name: string) => {
-                    if (name === "tsi") return [fmtNum(value), "Unidades"];
-                    return [value, name];
-                  }}
-                />
+                <Tooltip content={<CustomDowTooltip />} />
                 <Bar dataKey="tsi" radius={[4, 4, 0, 0]}>
                   {dowData.map((entry) => {
                     const intensity = entry.tsi / maxTsi;
-                    const hue = 160; // emerald
+                    const hue = 160;
                     const lightness = 30 + (1 - intensity) * 30;
                     return <Cell key={entry.dow} fill={`hsl(${hue}, 60%, ${lightness}%)`} />;
                   })}
@@ -205,15 +227,21 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground justify-center">
+          <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground justify-center flex-wrap">
             {dowData.filter(d => d.tsi > 0).map(d => (
               <span key={d.dow}>
-                {d.label}: {fmtNum(d.tsi)} un · {d.roas !== null ? `${d.roas.toFixed(1)}x` : "—"}
+                {d.label}: {fmtNum(d.tsi)} un · ROAS {d.roas !== null ? `${d.roas.toFixed(1)}x` : "—"}
+                {DOW_BENCHMARKS[d.dow] && (
+                  <span className="opacity-60"> (bench {DOW_BENCHMARKS[d.dow].roas.toFixed(0)}x)</span>
+                )}
               </span>
             ))}
           </div>
         </CardContent>
       </Card>
+
+      {/* Middle content slot (Vertical Analysis goes here) */}
+      {middleContent}
 
       {/* Listings Table */}
       {listings.length > 0 && (

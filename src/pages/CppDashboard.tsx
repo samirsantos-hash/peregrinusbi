@@ -277,18 +277,22 @@ export default function CppDashboard() {
             onStartChange={setDetailStartDate}
             onEndChange={setDetailEndDate}
             onClose={() => setSelectedSeller(null)}
-          />
-          <CppVerticalAnalysis
-            seller={selectedSeller}
-            rawRows={rawRows}
-            startDate={detailStartDate}
-            endDate={detailEndDate}
-          />
-          <CppCdpSellerBreakdown
-            custId={selectedSeller.CUS_CUST_ID_SEL}
-            rawRows={rawRows}
-            startDate={detailStartDate}
-            endDate={detailEndDate}
+            middleContent={
+              <>
+                <CppVerticalAnalysis
+                  seller={selectedSeller}
+                  rawRows={rawRows}
+                  startDate={detailStartDate}
+                  endDate={detailEndDate}
+                />
+                <CppCdpSellerBreakdown
+                  custId={selectedSeller.CUS_CUST_ID_SEL}
+                  rawRows={rawRows}
+                  startDate={detailStartDate}
+                  endDate={detailEndDate}
+                />
+              </>
+            }
           />
         </>
       )}
