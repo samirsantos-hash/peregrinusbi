@@ -24,12 +24,20 @@ function computeQualityIndex(
   const logScore = potenciaFull >= 70 ? 25 : Math.round((potenciaFull / 70) * 25);
 
   // Pilar SEO & Catálogo (25 pts)
+  // Note: PONTUACAO_LL_* fields have 0% coverage — only use if > 0
   let seoScore = 25;
   const seoIssues: string[] = [];
-  if (latest.llPicturesScore > 0 && latest.llPicturesScore < 70) { seoScore -= 5; seoIssues.push("Fotos"); }
-  if (latest.llTitleScore > 0 && latest.llTitleScore < 70) { seoScore -= 5; seoIssues.push("Título"); }
-  if (latest.llTechSpecsScore > 0 && latest.llTechSpecsScore < 70) { seoScore -= 5; seoIssues.push("Ficha Técnica"); }
-  if (latest.llDescriptionScore > 0 && latest.llDescriptionScore < 70) { seoScore -= 5; seoIssues.push("Descrição"); }
+  const hasLlData = latest.llPicturesScore > 0 || latest.llTitleScore > 0 || latest.llTechSpecsScore > 0 || latest.llDescriptionScore > 0;
+  if (!hasLlData) {
+    // No LL data available — use score_photo and score_title as proxy
+    if (latest.scorePhoto > 0 && latest.scorePhoto < 70) { seoScore -= 7; seoIssues.push("Fotos"); }
+    if (latest.scoreTitle > 0 && latest.scoreTitle < 70) { seoScore -= 7; seoIssues.push("Título"); }
+  } else {
+    if (latest.llPicturesScore > 0 && latest.llPicturesScore < 70) { seoScore -= 5; seoIssues.push("Fotos"); }
+    if (latest.llTitleScore > 0 && latest.llTitleScore < 70) { seoScore -= 5; seoIssues.push("Título"); }
+    if (latest.llTechSpecsScore > 0 && latest.llTechSpecsScore < 70) { seoScore -= 5; seoIssues.push("Ficha Técnica"); }
+    if (latest.llDescriptionScore > 0 && latest.llDescriptionScore < 70) { seoScore -= 5; seoIssues.push("Descrição"); }
+  }
   if (latest.pontuacaoLlGtin === 0) { seoScore -= 5; seoIssues.push("EAN/GTIN"); }
   seoScore = Math.max(0, seoScore);
 
