@@ -461,6 +461,7 @@ export default function CppDashboard() {
           <Tabs defaultValue="sellers" className="space-y-3">
             <TabsList>
               <TabsTrigger value="sellers">Sellers</TabsTrigger>
+              <TabsTrigger value="vertical">Vertical & Concorrência</TabsTrigger>
               <TabsTrigger value="cdp">Ação CDP</TabsTrigger>
             </TabsList>
 
