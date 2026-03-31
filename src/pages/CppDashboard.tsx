@@ -423,6 +423,9 @@ export default function CppDashboard() {
             </Card>
           </div>
 
+          {/* ROAS Chart */}
+          <CppRoasChart dailyRoas={dailyRoas} dowBenchmark={dowBenchmark} />
+
           {/* Sub-cluster pills + Filters */}
           <div className="space-y-3">
             <CppClusterPills value={cluster} onChange={setCluster} />
