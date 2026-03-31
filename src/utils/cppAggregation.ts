@@ -112,6 +112,7 @@ function sumMetrics(rows: CppRow[]): PeriodMetrics {
   }
   return {
     tgmv, tsi, visitas, invPads, tgmvPads,
+    // ERRO 1: ROAS = TGMV_LC_PADS / INV_PADS (correct)
     roas: invPads > 0 ? tgmvPads / invPads : null,
     txConversao: visitas > 0 ? (tsi / visitas) * 100 : null,
     precoMedio: tsi > 0 ? tgmv / tsi : null,

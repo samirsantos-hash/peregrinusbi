@@ -186,12 +186,21 @@ const QualityKpiCards = ({
                 <card.icon className="w-3.5 h-3.5 text-neon-blue" />
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{card.label}</span>
               </div>
-              <div className="flex items-center gap-1">
-                <span className={cn("text-2xl font-bold font-mono", sem.textClass)}>{card.value}</span>
-                <span className="text-xs text-muted-foreground">pts</span>
-                <CorrectionBadge value={card.value} refKey={card.refKey} />
-              </div>
-              <SemaphoreBar score={card.value} refKey={card.refKey} />
+              {card.noFullMessage ? (
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground italic">{card.noFullMessage}</span>
+                  <p className="text-[10px] text-amber-400">Ação: ativar itens no Mercado Envios Full</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-1">
+                    <span className={cn("text-2xl font-bold font-mono", sem.textClass)}>{card.value}</span>
+                    <span className="text-xs text-muted-foreground">pts</span>
+                    <CorrectionBadge value={card.value} refKey={card.refKey} />
+                  </div>
+                  <SemaphoreBar score={card.value} refKey={card.refKey} />
+                </>
+              )}
             </motion.div>
           );
         })}

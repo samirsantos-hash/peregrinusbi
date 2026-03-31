@@ -186,10 +186,13 @@ export default function CppDashboard() {
     }
     const src = cluster !== "Todos" || activeGroup ? filtered : data;
     const gmv = src.reduce((s, r) => s + (Number(r.TGMV_LC) || 0), 0);
-    const inv = src.reduce((s, r) => s + (Number(r.INV_PADS) || 0), 0);
-    const tgmvPads = src.reduce((s, r) => s + (Number(r.TGMV_LC_PADS) || 0), 0);
+    // ERRO 5: Only include sellers with INV_PADS > 0 in ROAS calculation
+    const sellersWithAds = src.filter(r => (Number(r.INV_PADS) || 0) > 0);
+    const inv = sellersWithAds.reduce((s, r) => s + (Number(r.INV_PADS) || 0), 0);
+    const tgmvPads = sellersWithAds.reduce((s, r) => s + (Number(r.TGMV_LC_PADS) || 0), 0);
     const tsi = src.reduce((s, r) => s + (Number(r.TSI) || 0), 0);
     const visitas = src.reduce((s, r) => s + (Number(r.VISITAS) || 0), 0);
+    // ERRO 1: ROAS = TGMV_LC_PADS / INV_PADS
     const roas = inv > 0 ? tgmvPads / inv : null;
     const txConversao = visitas > 0 ? (tsi / visitas) * 100 : null;
     return { gmv, inv, tgmvPads, roas, tsi, visitas, txConversao, sellers: src.length, deltas: {} as Record<string, number | null> };
