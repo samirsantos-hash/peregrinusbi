@@ -65,7 +65,6 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
   const portfolio = portfolioBenchmark?.portfolio || { totalSellers: 0, avgInv: 0, avgRoas: 0, avgAcos: 0, avgTacos: 0 };
   const sellerVertical = campaign?.verticalPrincipal || null;
   const cb = clusterBenchmark;
-  const sellerVertical = campaign?.verticalPrincipal || null;
 
   // Radar chart: seller vs their vertical vs portfolio
   const radarData = useMemo(() => {

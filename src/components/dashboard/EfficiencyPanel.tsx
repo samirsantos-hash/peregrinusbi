@@ -39,6 +39,8 @@ interface EfficiencyPanelProps {
   dataGranularity?: "consolidated" | "daily";
   campaign?: SellerCampaign | null;
   benchmark?: VerticalBenchmark | null;
+  sellerId?: string;
+  sellerCluster?: string;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
