@@ -171,7 +171,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
             <CardContent className="p-4 space-y-1">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <BarChart3 className="w-4 h-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Eficiência & Ads</span>
+                <span className="text-xs font-semibold uppercase tracking-wider">Resumo</span>
               </div>
               <p className="text-xl font-bold">ROAS {summary.roas.toFixed(1)}x</p>
               <p className="text-xs text-muted-foreground">

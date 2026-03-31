@@ -74,6 +74,7 @@ export interface SellerKPI {
   repDelayedRate: number;
   // GTIN
   pontuacaoLlGtin: number;
+  pontuacaoIpi: number;
   // For compatibility with product-based panels
   productName: string;
   productId: string;
@@ -164,6 +165,7 @@ function transformKpi(row: any, sellerNickname: string): SellerKPI {
     repClaimsRate: Number(row.rep_claims_rate) || 0,
     repDelayedRate: Number(row.rep_delayed_ht_rate) || 0,
     pontuacaoLlGtin: Number(row.pontuacao_ll_gtin) || 0,
+    pontuacaoIpi: Number(row.pontuacao_ipi) || 0,
     // Use seller nickname + date as "product" since real data is per-seller
     productName: sellerNickname,
     productId: row.seller_id,

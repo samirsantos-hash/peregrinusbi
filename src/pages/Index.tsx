@@ -272,6 +272,7 @@ const Index = () => {
   const tabs = [
     // Saúde (topo)
     { id: "grants", label: "Grants", icon: KeyRound },
+    { id: "efficiency", label: "Resumo", icon: DollarSign },
     { id: "reputation", label: "Reputação", icon: HeartPulse },
     // Performance
     { id: "executive", label: "Faturamento", icon: LayoutDashboard },
@@ -279,8 +280,7 @@ const Index = () => {
     // Qualidade & Conteúdo
     { id: "quality", label: "Qualidade", icon: Shield },
     { id: "clips", label: "Clips & Audiência", icon: Video },
-    // Eficiência (base)
-    { id: "efficiency", label: "Eficiência & Ads", icon: DollarSign },
+    // Base
     { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
     { id: "opportunities", label: "Oportunidades", icon: Gift },
   ];
@@ -418,6 +418,22 @@ const Index = () => {
                       scoreOfertaFinal={(() => {
                         const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
                         return latest ? (latest as any).scoreOferta || 0 : 0;
+                      })()}
+                      scoreFull={(() => {
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).scoreFull || 0 : 0;
+                      })()}
+                      scorePads={(() => {
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).scorePads || 0 : 0;
+                      })()}
+                      scoreCdp={(() => {
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).cdpTgmv > 0 ? 36 : 0 : 0;
+                      })()}
+                      pontuacaoIpi={(() => {
+                        const latest = [...displayKpis].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
+                        return latest ? (latest as any).pontuacaoIpi || 0 : 0;
                       })()}
                       totalLiveListings={liveListingsCount || 0}
                     />
