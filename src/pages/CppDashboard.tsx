@@ -280,6 +280,7 @@ export default function CppDashboard() {
             onClose={() => setSelectedSeller(null)}
             middleContent={
               <>
+                <CppReputationAlert data={data} selectedSeller={selectedSeller} />
                 <CppVerticalAnalysis
                   seller={selectedSeller}
                   rawRows={rawRows}
