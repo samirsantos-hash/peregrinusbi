@@ -98,9 +98,10 @@ const BenchmarkBarTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark }: EfficiencyPanelProps) => {
+const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark, sellerId, sellerCluster }: EfficiencyPanelProps) => {
 
   const { data: portfolioBenchmark, loading: portfolioLoading } = usePortfolioBenchmark();
+  const { data: clusterBenchmarkData } = useClusterBenchmark(sellerId, sellerCluster);
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
