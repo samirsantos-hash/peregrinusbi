@@ -155,7 +155,6 @@ Deno.serve(async (req) => {
         allowed_cust_ids: allowedCustIds,
         temp_password_expires_at: expiresAt,
         must_change_password: true,
-        temp_password: tempPassword,
       });
 
       console.log(`User ${email} setup complete. Password stored in DB matches Auth.`);
