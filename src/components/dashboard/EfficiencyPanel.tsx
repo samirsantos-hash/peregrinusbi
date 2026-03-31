@@ -14,6 +14,7 @@ import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { Badge } from "@/components/ui/badge";
 import CategoryBenchmarkPanel from "./CategoryBenchmarkPanel";
 import { usePortfolioBenchmark } from "@/hooks/usePortfolioBenchmark";
+import { useClusterBenchmark } from "@/hooks/useClusterBenchmark";
 
 interface KpiLike {
   date: string;
