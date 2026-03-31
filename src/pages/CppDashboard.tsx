@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
+import { format } from "date-fns";
 import Papa from "papaparse";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Upload, Download, Search, ArrowUpDown, ArrowUp, ArrowDown, DollarSign, TrendingUp, Users, BarChart3, ArrowLeft } from "lucide-react";
-import { aggregateSellers, type ConsolidatedSeller, type CppRow, type DailyRoasPoint } from "@/utils/cppAggregation";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Upload, Download, Search, ArrowUpDown, ArrowUp, ArrowDown, DollarSign, TrendingUp, Users, BarChart3, ArrowLeft, CalendarIcon, ShoppingCart, Eye, Percent } from "lucide-react";
+import { aggregateSellers, computePeriodComparison, type ConsolidatedSeller, type CppRow, type DailyRoasPoint } from "@/utils/cppAggregation";
 import { useNavigate } from "react-router-dom";
 import CppActionCards from "@/components/dashboard/CppActionCards";
 import CppReputationAlert from "@/components/dashboard/CppReputationAlert";
@@ -156,14 +160,35 @@ export default function CppDashboard() {
     return rows;
   }, [data, cluster, iniciativa, search, sort, activeGroup]);
 
+  const portfolioStartStr = useMemo(() => format(detailStartDate, "yyyy-MM-dd"), [detailStartDate]);
+  const portfolioEndStr = useMemo(() => format(detailEndDate, "yyyy-MM-dd"), [detailEndDate]);
+
+  const portfolioMetrics = useMemo(() => {
+    if (!rawRows.length) return null;
+    return computePeriodComparison(rawRows, null, portfolioStartStr, portfolioEndStr);
+  }, [rawRows, portfolioStartStr, portfolioEndStr]);
+
   const totals = useMemo(() => {
+    if (portfolioMetrics) {
+      const c = portfolioMetrics.current;
+      return {
+        gmv: c.tgmv, tsi: c.tsi, visitas: c.visitas,
+        inv: c.invPads, tgmvPads: c.tgmvPads,
+        roas: c.roas, txConversao: c.txConversao,
+        sellers: (cluster !== "Todos" || activeGroup ? filtered : data).length,
+        deltas: portfolioMetrics.deltas,
+      };
+    }
     const src = cluster !== "Todos" || activeGroup ? filtered : data;
     const gmv = src.reduce((s, r) => s + (Number(r.TGMV_LC) || 0), 0);
     const inv = src.reduce((s, r) => s + (Number(r.INV_PADS) || 0), 0);
     const tgmvPads = src.reduce((s, r) => s + (Number(r.TGMV_LC_PADS) || 0), 0);
+    const tsi = src.reduce((s, r) => s + (Number(r.TSI) || 0), 0);
+    const visitas = src.reduce((s, r) => s + (Number(r.VISITAS) || 0), 0);
     const roas = inv > 0 ? tgmvPads / inv : null;
-    return { gmv, inv, roas, sellers: src.length };
-  }, [data, filtered, cluster, activeGroup]);
+    const txConversao = visitas > 0 ? (tsi / visitas) * 100 : null;
+    return { gmv, inv, tgmvPads, roas, tsi, visitas, txConversao, sellers: src.length, deltas: {} as Record<string, number | null> };
+  }, [data, filtered, cluster, activeGroup, portfolioMetrics]);
 
   const toggleSort = (col: string) => {
     setSort(prev => {
@@ -268,39 +293,133 @@ export default function CppDashboard() {
           {/* Action Cards */}
           <CppActionCards data={data} activeGroup={activeGroup} onToggle={setActiveGroup} />
 
+          {/* Period Selector */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Período:</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+                  <CalendarIcon className="w-3 h-3" />
+                  {format(detailStartDate, "dd/MM/yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={detailStartDate}
+                  onSelect={(d) => d && setDetailStartDate(d)}
+                  disabled={(d) => dateRange.min ? (d < new Date(dateRange.min + "T12:00:00") || d > new Date(dateRange.max + "T12:00:00")) : false}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            <span className="text-muted-foreground text-xs">a</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5">
+                  <CalendarIcon className="w-3 h-3" />
+                  {format(detailEndDate, "dd/MM/yyyy")}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={detailEndDate}
+                  onSelect={(d) => d && setDetailEndDate(d)}
+                  disabled={(d) => dateRange.min ? (d < new Date(dateRange.min + "T12:00:00") || d > new Date(dateRange.max + "T12:00:00")) : false}
+                  initialFocus
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
+            {portfolioMetrics && (
+              <span className="text-[10px] text-muted-foreground ml-2">
+                Δ vs período anterior ({format(new Date(new Date(detailStartDate).getTime() - (Math.round((detailEndDate.getTime() - detailStartDate.getTime()) / 86400000) + 1) * 86400000), "dd/MM")} a {format(new Date(detailStartDate.getTime() - 86400000), "dd/MM")})
+              </span>
+            )}
+          </div>
+
           {/* KPI Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             <Card className="bg-card border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <DollarSign className="w-4 h-4 text-primary" /> GMV Total
-                </CardTitle>
-              </CardHeader>
-              <CardContent><p className="text-2xl font-bold font-mono">{fmtCompact(totals.gmv)}</p></CardContent>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <DollarSign className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">GMV Total</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{fmtCompact(totals.gmv)}</p>
+                {totals.deltas?.tgmv != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.tgmv >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.tgmv >= 0 ? "+" : ""}{totals.deltas.tgmv.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
             </Card>
             <Card className="bg-card border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-chart-4" /> Investimento Ads
-                </CardTitle>
-              </CardHeader>
-              <CardContent><p className="text-2xl font-bold font-mono">{fmtCompact(totals.inv)}</p></CardContent>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <ShoppingCart className="w-3.5 h-3.5 text-chart-3" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Unidades (TSI)</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{fmtNum(totals.tsi)}</p>
+                {totals.deltas?.tsi != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.tsi >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.tsi >= 0 ? "+" : ""}{totals.deltas.tsi.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
             </Card>
             <Card className="bg-card border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <TrendingUp className="w-4 h-4 text-secondary" /> ROAS Médio
-                </CardTitle>
-              </CardHeader>
-              <CardContent><p className="text-2xl font-bold font-mono">{fmtRoas(totals.roas)}</p></CardContent>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Eye className="w-3.5 h-3.5 text-chart-4" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Visitas</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{fmtNum(totals.visitas)}</p>
+                {totals.deltas?.visitas != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.visitas >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.visitas >= 0 ? "+" : ""}{totals.deltas.visitas.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
             </Card>
             <Card className="bg-card border-border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-chart-3" /> Sellers Ativos
-                </CardTitle>
-              </CardHeader>
-              <CardContent><p className="text-2xl font-bold font-mono">{totals.sellers}</p></CardContent>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <TrendingUp className="w-3.5 h-3.5 text-secondary" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">ROAS</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{totals.roas != null ? `${totals.roas.toFixed(1)}x` : "—"}</p>
+                {totals.deltas?.roas != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.roas >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.roas >= 0 ? "+" : ""}{totals.deltas.roas.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Percent className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Conversão</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{totals.txConversao != null ? `${totals.txConversao.toFixed(2)}%` : "—"}</p>
+                {totals.deltas?.txConversao != null && (
+                  <span className={cn("text-[10px] font-semibold", totals.deltas.txConversao >= 0 ? "text-emerald-400" : "text-destructive")}>
+                    {totals.deltas.txConversao >= 0 ? "+" : ""}{totals.deltas.txConversao.toFixed(1)}%
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+            <Card className="bg-card border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Users className="w-3.5 h-3.5 text-chart-3" />
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Sellers Ativos</span>
+                </div>
+                <p className="text-xl font-bold font-mono text-foreground">{totals.sellers}</p>
+              </CardContent>
             </Card>
           </div>
 
