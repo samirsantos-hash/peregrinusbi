@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { type SellerCampaign } from "@/hooks/useMeliCampaigns";
 
@@ -12,6 +12,13 @@ export interface VerticalBenchmark {
   totalInvestment: number;
   totalTgmvPads: number;
   totalTgmv: number;
+}
+
+function median(values: number[]): number {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 export function useVerticalBenchmark(campaign: SellerCampaign | null) {
@@ -43,8 +50,16 @@ export function useVerticalBenchmark(campaign: SellerCampaign | null) {
 
         const sellerIds = [...new Set(campaignRows.map((r) => r.seller_id))];
 
-        // 2. Fetch latest monthly KPIs for these sellers (aggregate)
-        // Use paginated fetch to avoid URL limits
+        // 2. Find the latest month available
+        const { data: latestRow } = await supabase
+          .from("sellers_kpi")
+          .select("data")
+          .order("data", { ascending: false })
+          .limit(1);
+
+        const latestMonth = latestRow?.[0]?.data || "2026-03-01";
+
+        // 3. Fetch KPIs for the latest month only
         const PAGE = 500;
         let allKpis: any[] = [];
         for (let i = 0; i < sellerIds.length; i += PAGE) {
@@ -52,41 +67,44 @@ export function useVerticalBenchmark(campaign: SellerCampaign | null) {
           const { data } = await supabase
             .from("sellers_kpi")
             .select("seller_id, inv_pads, tgmv_lc_pads, tgmv_lc")
-            .in("seller_id", batch);
+            .in("seller_id", batch)
+            .eq("data", latestMonth);
           if (data) allKpis = allKpis.concat(data);
         }
 
-        // 3. Aggregate per seller (sum across all months)
-        const sellerAgg: Record<string, { inv: number; tgmvPads: number; tgmv: number }> = {};
+        // 4. One row per seller for the latest month
+        const sellerData: { inv: number; tgmvPads: number; tgmv: number }[] = [];
         for (const row of allKpis) {
           const inv = Number(row.inv_pads) || 0;
           const tgmvPads = Number(row.tgmv_lc_pads) || 0;
           const tgmv = Number(row.tgmv_lc) || 0;
           if (inv === 0 && tgmvPads === 0 && tgmv === 0) continue;
-          if (!sellerAgg[row.seller_id]) sellerAgg[row.seller_id] = { inv: 0, tgmvPads: 0, tgmv: 0 };
-          sellerAgg[row.seller_id].inv += inv;
-          sellerAgg[row.seller_id].tgmvPads += tgmvPads;
-          sellerAgg[row.seller_id].tgmv += tgmv;
+          sellerData.push({ inv, tgmvPads, tgmv });
         }
 
-        const entries = Object.values(sellerAgg).filter((e) => e.inv > 0 || e.tgmvPads > 0);
-        if (entries.length === 0) {
+        if (sellerData.length === 0) {
           setBenchmark(null);
           setLoading(false);
           return;
         }
 
-        const totalInv = entries.reduce((s, e) => s + e.inv, 0);
-        const totalTgmvPads = entries.reduce((s, e) => s + e.tgmvPads, 0);
-        const totalTgmv = entries.reduce((s, e) => s + e.tgmv, 0);
+        const totalInv = sellerData.reduce((s, e) => s + e.inv, 0);
+        const totalTgmvPads = sellerData.reduce((s, e) => s + e.tgmvPads, 0);
+        const totalTgmv = sellerData.reduce((s, e) => s + e.tgmv, 0);
+
+        // Use median for per-seller metrics
+        const invValues = sellerData.map(e => e.inv);
+        const roasValues = sellerData.filter(e => e.inv > 0).map(e => e.tgmvPads / e.inv);
+        const acosValues = sellerData.filter(e => e.tgmvPads > 0).map(e => (e.inv / e.tgmvPads) * 100);
+        const tacosValues = sellerData.filter(e => e.tgmv > 0).map(e => (e.inv / e.tgmv) * 100);
 
         setBenchmark({
           vertical,
-          sellersCount: entries.length,
-          avgInvestment: totalInv / entries.length,
-          avgRoas: totalInv > 0 ? totalTgmvPads / totalInv : 0,
-          avgAcos: totalTgmvPads > 0 ? (totalInv / totalTgmvPads) * 100 : 0,
-          avgTacos: totalTgmv > 0 ? (totalInv / totalTgmv) * 100 : 0,
+          sellersCount: sellerData.length,
+          avgInvestment: median(invValues),
+          avgRoas: median(roasValues),
+          avgAcos: median(acosValues),
+          avgTacos: median(tacosValues),
           totalInvestment: totalInv,
           totalTgmvPads,
           totalTgmv,
