@@ -95,7 +95,7 @@ function transformKpi(row: any, sellerNickname: string): SellerKPI {
 
   const roas = invPads > 0 ? tgmvPads / invPads : 0;
   const acos = tgmvPads > 0 ? (invPads / tgmvPads) * 100 : 0;
-  const tacos = gmv > 0 ? (invPads / gmv) * 100 : 0;
+  const tacos = tgmv > 0 ? (invPads / tgmv) * 100 : 0;
   const cpa = tsiPads > 0 ? invPads / tsiPads : 0;
 
   const tsiTotal = Number(row.tsi) || 0;
@@ -113,7 +113,7 @@ function transformKpi(row: any, sellerNickname: string): SellerKPI {
     tsi: Number(row.tsi) || 0,
     tgmv,
     tgmvPads,
-    revenue: gmv,
+    revenue: tgmv,
     adsInvestment: invPads,
     roas: Math.round(roas * 100) / 100,
     acos: Math.round(acos * 100) / 100,
