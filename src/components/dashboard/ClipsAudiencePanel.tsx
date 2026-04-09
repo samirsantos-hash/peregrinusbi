@@ -11,7 +11,7 @@ import {
   Ban, Filter, PieChart as PieChartIcon,
 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
-import { formatChartDate } from "@/utils/formatters";
+import { formatChartDate, fmtBRLCompact, fmtNumCompact } from "@/utils/formatters";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { SellerKPI } from "@/hooks/useSellerData";
@@ -28,12 +28,9 @@ interface ClipsAudiencePanelProps {
 }
 
 /* ── Helpers ── */
-const fmt = (v: number) =>
-  v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M`
-    : v >= 1_000 ? `${(v / 1_000).toFixed(1)}K`
-    : v.toLocaleString("pt-BR");
+const fmt = (v: number) => fmtNumCompact(v);
 
-const fmtBRL = (v: number) => `R$ ${fmt(v)}`;
+const fmtBRL = (v: number) => fmtBRLCompact(v);
 
 const pct = (a: number, b: number) => (b > 0 ? (a / b) * 100 : 0);
 

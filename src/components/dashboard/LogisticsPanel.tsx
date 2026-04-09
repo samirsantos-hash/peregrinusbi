@@ -1,13 +1,29 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
 import { Package, Truck, Mail } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
+import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="glass-card p-3 !bg-card/95 text-xs">
       <p className="font-medium" style={{ color: payload[0].payload.fill }}>{payload[0].name}: {payload[0].value.toFixed(1)}%</p>
+    </div>
+  );
+};
+
+const EvolutionTooltip = ({ active, payload, label }: any) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1">
+      <p className="font-mono text-muted-foreground">{label}</p>
+      {payload.map((p: any, i: number) => (
+        <p key={i} style={{ color: p.color }} className="font-medium">
+          {p.name}: {p.value.toFixed(1)}%
+        </p>
+      ))}
     </div>
   );
 };
@@ -25,11 +41,12 @@ interface KpiLike {
 
 interface LogisticsPanelProps {
   kpis: KpiLike[];
+  dataGranularity?: "consolidated" | "daily";
 }
 
 const COLORS = ["hsl(199, 100%, 50%)", "hsl(160, 84%, 39%)", "hsl(280, 80%, 60%)", "hsl(45, 80%, 55%)"];
 
-const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
+const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps) => {
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
     if (!acc[k.productId] || k.date > acc[k.productId].date) acc[k.productId] = k;
     return acc;
@@ -47,16 +64,28 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
   const shareFlexGmv = totalTgmv > 0 ? (totalTgmvFlex / totalTgmv) * 100 : 0;
   const shareAgenciaGmv = totalTgmv > 0 ? (totalTgmvAgencia / totalTgmv) * 100 : 0;
 
-  // TSI-based (unit share) for reference
-  const avgFull = products.length > 0 ? products.reduce((s, p) => s + p.pctFull, 0) / products.length : 0;
-  const avgFlex = products.length > 0 ? products.reduce((s, p) => s + p.pctFlex, 0) / products.length : 0;
-  const avgPostagem = products.length > 0 ? products.reduce((s, p) => s + p.pctPostagem, 0) / products.length : 0;
-
-  const fmtGmv = (v: number) => {
-    if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
-    if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}K`;
-    return `R$ ${Math.round(v).toLocaleString("pt-BR")}`;
-  };
+  // Time series for evolution chart
+  const evolutionData = useMemo(() => {
+    const byDate: Record<string, { date: string; tgmvFull: number; tgmvFlex: number; tgmv: number }> = {};
+    for (const k of kpis) {
+      if (!byDate[k.date]) byDate[k.date] = { date: k.date, tgmvFull: 0, tgmvFlex: 0, tgmv: 0 };
+      byDate[k.date].tgmvFull += k.tgmvFull || 0;
+      byDate[k.date].tgmvFlex += k.tgmvFlex || 0;
+      byDate[k.date].tgmv += k.tgmv || 0;
+    }
+    return Object.values(byDate)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((d) => {
+        const total = d.tgmv || 1;
+        const agencia = Math.max(0, d.tgmv - d.tgmvFull - d.tgmvFlex);
+        return {
+          date: formatChartDate(d.date, dataGranularity),
+          "% Full": Math.round((d.tgmvFull / total) * 1000) / 10,
+          "% Flex": Math.round((d.tgmvFlex / total) * 1000) / 10,
+          "% Agência": Math.round((agencia / total) * 1000) / 10,
+        };
+      });
+  }, [kpis, dataGranularity]);
 
   const donutData = [
     { name: "Mercado Envios Full", value: Math.round(shareFullGmv * 10) / 10 },
@@ -70,7 +99,7 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
       value: `${shareFullGmv.toFixed(1)}%`,
       icon: Package,
       color: "neon-text",
-      desc: `GMV: ${fmtGmv(totalTgmvFull)}`,
+      desc: `GMV: ${fmtBRLCompact(totalTgmvFull)}`,
       tooltip: "Share de GMV via Fulfillment (F_TGMV_LC_FULL). Fonte: CPP_MENSAL. Sellers com Full possuem maior conversão e relevância.",
       isEmpty: totalTgmvFull === 0,
     },
@@ -79,7 +108,7 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
       value: `${shareFlexGmv.toFixed(1)}%`,
       icon: Truck,
       color: "emerald-text",
-      desc: `GMV: ${fmtGmv(totalTgmvFlex)}`,
+      desc: `GMV: ${fmtBRLCompact(totalTgmvFlex)}`,
       tooltip: "Share de GMV via Flex (F_TGMV_LC_FLEX). Fonte: CPP_MENSAL.",
       isEmpty: totalTgmvFlex === 0,
     },
@@ -88,7 +117,7 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
       value: `${shareAgenciaGmv.toFixed(1)}%`,
       icon: Mail,
       color: "text-purple-400",
-      desc: `GMV: ${fmtGmv(totalTgmvAgencia)}`,
+      desc: `GMV: ${fmtBRLCompact(totalTgmvAgencia)}`,
       tooltip: "Share de GMV via Agência / Coletas (F_TGMV_LC_COLETAS). Menor priorização no algoritmo.",
       isEmpty: totalTgmvAgencia === 0,
     },
@@ -116,6 +145,7 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
         ))}
       </div>
 
+      {/* Donut Chart — Summary */}
       <div className="glass-card p-6">
         <div className="flex items-center justify-center gap-2 mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
@@ -150,6 +180,57 @@ const LogisticsPanel = ({ kpis }: LogisticsPanelProps) => {
           </PieChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Evolution Chart — Time Series */}
+      {evolutionData.length > 1 && (
+        <div className="glass-card p-6">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Evolução do Mix Logístico
+            </h3>
+            <TooltipInfo text="Evolução temporal do share de GMV por canal logístico. Acompanhe a migração para Full ao longo do tempo." />
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
+            <AreaChart data={evolutionData}>
+              <defs>
+                <linearGradient id="gradFullLog" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="gradFlexLog" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+                </linearGradient>
+                <linearGradient id="gradAgLog" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="hsl(280, 80%, 60%)" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(280, 80%, 60%)" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis
+                dataKey="date"
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={false}
+                interval="preserveStartEnd"
+                angle={evolutionData.length > 8 ? -45 : 0}
+                textAnchor={evolutionData.length > 8 ? "end" : "middle"}
+                height={evolutionData.length > 8 ? 50 : 30}
+              />
+              <YAxis
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={false}
+                tickFormatter={(v) => `${v}%`}
+                domain={[0, 100]}
+              />
+              <Tooltip content={<EvolutionTooltip />} />
+              <Area type="monotone" dataKey="% Full" stroke="hsl(199, 100%, 50%)" fill="url(#gradFullLog)" strokeWidth={2} />
+              <Area type="monotone" dataKey="% Flex" stroke="hsl(160, 84%, 39%)" fill="url(#gradFlexLog)" strokeWidth={2} />
+              <Area type="monotone" dataKey="% Agência" stroke="hsl(280, 80%, 60%)" fill="url(#gradAgLog)" strokeWidth={2} />
+              <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </motion.div>
   );
 };
