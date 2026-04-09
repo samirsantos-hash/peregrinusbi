@@ -217,23 +217,68 @@ export function computeDowBreakdown(
   }));
 }
 
-/** Get daily GMV for a seller */
-export function getDailyGmv(
+export interface DailySeriesPoint {
+  date: string;
+  gmv: number;
+  tsi: number;
+  invPads: number;
+  tgmvPads: number;
+  visitas: number;
+  roas: number | null;
+  gmvMM7: number | null;
+  roasMM7: number | null;
+}
+
+/** Get daily multi-metric series for a seller (or all sellers if sellerId is null) */
+export function getDailySeries(
   rows: CppRow[],
-  sellerId: string,
+  sellerId: string | null,
   startDate: string,
   endDate: string
-): { date: string; tgmv: number }[] {
-  const map = new Map<string, number>();
+): DailySeriesPoint[] {
+  const map = new Map<string, { gmv: number; tsi: number; invPads: number; tgmvPads: number; visitas: number }>();
   for (const r of rows) {
-    if (cleanCustId(r["CUS_CUST_ID_SEL"]) !== sellerId) continue;
+    if (sellerId && cleanCustId(r["CUS_CUST_ID_SEL"]) !== sellerId) continue;
     const d = getRowDate(r);
     if (d < startDate || d > endDate) continue;
-    map.set(d, (map.get(d) || 0) + parseBrNumber(r["TGMV_LC"]));
+    if (!map.has(d)) map.set(d, { gmv: 0, tsi: 0, invPads: 0, tgmvPads: 0, visitas: 0 });
+    const entry = map.get(d)!;
+    entry.gmv += parseBrNumber(r["TGMV_LC"]);
+    entry.tsi += parseBrNumber(r["TSI"]);
+    entry.invPads += parseBrNumber(r["INV_PADS"]);
+    entry.tgmvPads += parseBrNumber(r["TGMV_LC_PADS"]);
+    entry.visitas += parseBrNumber(r["VISITAS"]);
   }
-  return Array.from(map.entries())
-    .map(([date, tgmv]) => ({ date, tgmv }))
+
+  const sorted = Array.from(map.entries())
+    .map(([date, v]) => ({
+      date,
+      gmv: v.gmv,
+      tsi: v.tsi,
+      invPads: v.invPads,
+      tgmvPads: v.tgmvPads,
+      visitas: v.visitas,
+      roas: v.invPads > 0 ? v.tgmvPads / v.invPads : null,
+      gmvMM7: null as number | null,
+      roasMM7: null as number | null,
+    }))
     .sort((a, b) => a.date.localeCompare(b.date));
+
+  // Compute MM7
+  for (let i = 0; i < sorted.length; i++) {
+    if (i >= 6) {
+      let sumGmv = 0, sumTgmvPads = 0, sumInvPads = 0;
+      for (let j = i - 6; j <= i; j++) {
+        sumGmv += sorted[j].gmv;
+        sumTgmvPads += sorted[j].tgmvPads;
+        sumInvPads += sorted[j].invPads;
+      }
+      sorted[i].gmvMM7 = sumGmv / 7;
+      sorted[i].roasMM7 = sumInvPads > 0 ? sumTgmvPads / sumInvPads : null;
+    }
+  }
+
+  return sorted;
 }
 
 export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
