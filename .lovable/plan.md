@@ -1,89 +1,69 @@
 
 
-# Plano: Métricas Diarizadas e Ajuste Visual para Analista E-commerce
+# Plano: Gráfico de Vendas Diarizadas no CPP
 
-## Contexto
+## Situação Atual
 
-O dashboard atual possui duas fontes de dados (mensal `sellers_kpi` e diária `sellers_kpi_daily`), mas a maioria dos painéis ignora a granularidade e plota dados diários como se fossem mensais, sem adaptação visual. Além disso, vários painéis apresentam inconsistências visuais que não seguem a lógica esperada por um analista de e-commerce.
+O dashboard CPP ja possui dados diarios brutos (rawRows) com granularidade por dia (`TIM_DAY`/`DATA`). A funcao `getDailyGmv()` em `cppAggregation.ts` ja extrai a serie temporal diaria de GMV por seller. Porem, nenhum grafico de linha dia-a-dia e renderizado -- o `CppSellerDetail` mostra apenas:
+- KPI cards consolidados
+- Heatmap por dia da semana (DOW)
+- Tabela de categorias
 
-## Problemas Identificados
+Falta o grafico principal que um analista espera: **evolucao diaria de vendas (GMV), unidades (TSI), investimento (Ads) e ROAS**.
 
-1. **Faturamento diário não plotado corretamente em todas as abas** -- O `DailyPerformanceChart` já funciona na aba Faturamento, mas os gráficos de Resumo (EfficiencyPanel), Reputação, Competitividade, Clips e Crescimento não adaptam sua visualização para dados diários.
+## O Que Sera Feito
 
-2. **ROAS calculado como média simples no EfficiencyPanel** -- Na linha 131, `ROAS: Math.round((d.roas / d.count) * 100) / 100` usa média aritmética simples em vez de média ponderada (TGMV_PADS / INV_PADS).
+### 1. Expandir `getDailyGmv` para serie completa multi-metrica
 
-3. **Gráficos de Ads no EfficiencyPanel** -- Plotam `Faturamento Bruto` vs `Investimento em Marketing` por data sem adaptação de eixo ou label para granularidade diária vs consolidada.
+Renomear/expandir a funcao existente `getDailyGmv` em `cppAggregation.ts` para retornar tambem TSI, INV_PADS, TGMV_PADS, VISITAS por dia, alem de calcular ROAS diario e MM7 (media movel 7 dias) para GMV e ROAS.
 
-4. **LogisticsPanel** -- Usa apenas `latestByProduct` (último registro), ignorando a série temporal. Não mostra evolução do mix logístico ao longo do tempo.
+**Arquivo:** `src/utils/cppAggregation.ts`
 
-5. **GranularityToggle desativado** -- O componente existe mas está comentado no Index.tsx ("desativado para v2.0"), tornando a seleção de granularidade dependente apenas do período.
+### 2. Criar componente `CppDailyChart`
 
-6. **Formatação de datas nos eixos X** -- Alguns gráficos usam `formatChartDate` corretamente, mas outros formatam manualmente sem considerar a granularidade.
+Novo componente com AreaChart (Recharts) mostrando:
+- Eixo X: datas dia-a-dia (DD/MM)
+- Serie primaria: GMV diario (area com gradiente)
+- Serie secundaria: Investimento Ads (linha)
+- Linha tracejada: MM7 do GMV
+- Tooltip com todas as metricas do dia (GMV, TSI, Visitas, ROAS, Ads)
+- Toggle para alternar entre GMV, TSI e ROAS como metrica principal
 
-7. **TrendAnalysisPanel** -- Tem seu próprio `PeriodSelector` interno (7D/15D/30D/Tudo) que conflita com o seletor global do DashboardHeader.
+**Arquivo novo:** `src/components/dashboard/CppDailyChart.tsx`
 
-## Plano de Implementação
+### 3. Inserir o grafico no `CppSellerDetail`
 
-### Etapa 1: Normalizar propagação de granularidade
+Posicionar o grafico diario entre os KPI cards e o heatmap DOW, que e a posicao natural para analise de tendencia antes do agrupamento por dia da semana.
 
-- Garantir que `dataGranularity` seja passado para TODOS os painéis que recebem KPIs no `Index.tsx`
-- Painéis afetados: `LogisticsPanel`, `CompetitivenessPanel` (já recebe), `ClipsAudiencePanel` (já recebe), `QualityIndexPanel`
+**Arquivo:** `src/components/dashboard/CppSellerDetail.tsx`
 
-### Etapa 2: Adaptar gráficos de Ads/ROAS no EfficiencyPanel
+### 4. Adicionar serie diaria no dashboard principal (portfolio)
 
-- Corrigir cálculo de ROAS por data para usar média ponderada: `sum(tgmvPads) / sum(invPads)` ao invés de média simples
-- Adaptar labels dos eixos X usando `formatChartDate(date, dataGranularity)`
-- Adicionar MM7 (média móvel 7 dias) para ROAS quando `dataGranularity === "daily"` e série > 14 pontos
+No nivel de portfolio (visao geral sem seller selecionado), plotar a evolucao diaria agregada de todos os sellers filtrados, usando o mesmo componente `CppDailyChart`.
 
-### Etapa 3: Adicionar gráfico de evolução diária no LogisticsPanel
+**Arquivo:** `src/pages/CppDashboard.tsx`
 
-- Quando `dataGranularity === "daily"`, mostrar um `AreaChart` com a evolução temporal de `pctFull`, `pctFlex`, `pctPostagem`
-- Manter o PieChart atual como visão resumo, adicionando a série temporal abaixo
-
-### Etapa 4: Ajustar TrendAnalysisPanel
-
-- Remover o `PeriodSelector` interno redundante -- o painel deve respeitar o filtro global
-- Manter apenas o toggle `day`/`week` para agrupamento interno quando em modo diário
-
-### Etapa 5: Adaptar CompetitivenessPanel para dados diários
-
-- Gráficos de evolução de preço (`visits_expensive`, `visits_match`, `visits_cheaper`) devem usar `formatChartDate` com granularidade
-- Filtrar pontos onde `visits === 0` para evitar quedas artificiais (consistente com regra de integridade existente)
-
-### Etapa 6: Adaptar ClipsAudiencePanel
-
-- Gráfico de evolução de métricas de Clips deve usar `formatChartDate` com granularidade
-- Quando diário, adicionar MM7 para `visitas_clips` e `tgmv_lc_clips`
-
-### Etapa 7: Adaptar ReputationPanel
-
-- Gráfico de evolução de taxas (claims, delayed, cancellations) já usa `formatChartDate` com granularidade
-- Verificar e garantir que o eixo Y tem escala adequada (0-100% para taxas percentuais)
-
-### Etapa 8: Limpeza de inconsistências visuais
-
-- Padronizar todos os tooltips para exibir data completa (DD/MM/YYYY) em modo diário
-- Garantir que todos os gráficos usem `fmtBRL`/`fmtBRLCompact` do `utils/formatters.ts` (EfficiencyPanel e ClipsAudiencePanel têm formatadores locais duplicados)
-- Remover formatadores `fmtBRL`/`fmtBRLCompact` duplicados locais no `ExecutivePanel` (linhas 74-86) e `ClipsAudiencePanel` (linhas 31-36)
-
-## Detalhes Técnicos
+## Detalhes Tecnicos
 
 ```text
-Index.tsx
-  └─ displayKpis (daily ou monthly conforme período)
-     ├─ ExecutivePanel ✅ (já adapta: DailyPerformanceChart vs QuarterlyPerformanceChart)
-     ├─ EfficiencyPanel ⚠️ (gráficos não adaptam formato de data, ROAS simples)
-     ├─ CompetitivenessPanel ⚠️ (formatChartDate parcial)
-     ├─ LogisticsPanel ❌ (sem série temporal)
-     ├─ QualityIndexPanel ⚠️ (verificar)
-     ├─ ClipsAudiencePanel ⚠️ (formatadores duplicados)
-     ├─ ReputationPanel ✅ (já usa formatChartDate + granularity)
-     └─ TrendAnalysisPanel ⚠️ (PeriodSelector redundante)
+cppAggregation.ts
+  └─ getDailySeries(rows, sellerId|null, start, end)
+       → [{ date, gmv, tsi, invPads, tgmvPads, visitas, roas, gmvMM7, roasMM7 }]
+
+CppDailyChart.tsx (novo)
+  └─ Props: { data: DailySeriesPoint[], metrica: "gmv"|"tsi"|"roas" }
+  └─ AreaChart + Line (MM7) + Tooltip multi-metrica
+
+CppSellerDetail.tsx
+  └─ KPI Cards → [CppDailyChart] → DOW Heatmap → middleContent
+
+CppDashboard.tsx
+  └─ Portfolio view: [CppDailyChart] abaixo dos KPI cards gerais
 ```
 
 ## Estimativa
 
-- 8 arquivos a serem modificados
-- Nenhuma alteração de banco de dados necessária
-- Nenhuma nova dependência
+- 1 arquivo novo, 3 arquivos modificados
+- Sem alteracoes de banco de dados
+- Sem novas dependencias
 
