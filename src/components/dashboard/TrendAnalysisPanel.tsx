@@ -254,7 +254,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
             </div> :
 
           <ResponsiveContainer width="100%" height={340}>
-              <ComposedChart data={chartData} key={`${period}-${granularity}`}>
+              <ComposedChart data={chartData} key={`trend-${granularity}`}>
                 <defs>
                   <linearGradient id="gradGmvBar" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="hsl(199, 100%, 55%)" stopOpacity={0.9} />
