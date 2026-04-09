@@ -174,6 +174,11 @@ export default function CppDashboard() {
     return computePeriodComparison(rawRows, null, portfolioStartStr, portfolioEndStr);
   }, [rawRows, portfolioStartStr, portfolioEndStr]);
 
+  const portfolioDailySeries = useMemo(
+    () => rawRows.length ? getDailySeries(rawRows, null, portfolioStartStr, portfolioEndStr) : [],
+    [rawRows, portfolioStartStr, portfolioEndStr]
+  );
+
   const totals = useMemo(() => {
     if (portfolioMetrics) {
       const c = portfolioMetrics.current;
@@ -448,6 +453,11 @@ export default function CppDashboard() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Portfolio Daily Evolution */}
+          {portfolioDailySeries.length > 0 && (
+            <CppDailyChart data={portfolioDailySeries} title="Evolução Diária do Portfólio" />
+          )}
 
           {/* ROAS Chart */}
           <CppRoasChart dailyRoas={dailyRoas} dowBenchmark={dowBenchmark} />
