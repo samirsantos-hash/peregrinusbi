@@ -9,7 +9,7 @@ import { TrendingUp, TrendingDown, Minus, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   type CppRow, type ConsolidatedSeller,
-  computePeriodComparison, getDailyGmv, cleanCustId, parseBrNumber,
+  computePeriodComparison, getDailySeries, cleanCustId, parseBrNumber,
 } from "@/utils/cppAggregation";
 import { format } from "date-fns";
 
@@ -112,11 +112,11 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
 
   // Daily GMV chart
   const dailyChart = useMemo(() => {
-    const sellerDaily = getDailyGmv(rawRows, custId, startStr, endStr);
+    const sellerDaily = getDailySeries(rawRows, custId, startStr, endStr);
     const verticalDailyAvg = benchmark ? benchmark.gmv / 30 : 0;
     return sellerDaily.map(d => ({
       date: d.date,
-      seller: Math.round(d.tgmv),
+      seller: Math.round(d.gmv),
       vertical: Math.round(verticalDailyAvg),
     }));
   }, [rawRows, custId, startStr, endStr, benchmark]);

@@ -12,7 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Upload, Download, Search, ArrowUpDown, ArrowUp, ArrowDown, DollarSign, TrendingUp, Users, BarChart3, ArrowLeft, CalendarIcon, ShoppingCart, Eye, Percent } from "lucide-react";
-import { aggregateSellers, computePeriodComparison, type ConsolidatedSeller, type CppRow, type DailyRoasPoint } from "@/utils/cppAggregation";
+import { aggregateSellers, computePeriodComparison, getDailySeries, type ConsolidatedSeller, type CppRow, type DailyRoasPoint } from "@/utils/cppAggregation";
 import { useNavigate } from "react-router-dom";
 import CppActionCards from "@/components/dashboard/CppActionCards";
 import CppReputationAlert from "@/components/dashboard/CppReputationAlert";
@@ -24,6 +24,7 @@ import CppCdpPanel from "@/components/dashboard/CppCdpPanel";
 import CppCdpSellerBreakdown from "@/components/dashboard/CppCdpSellerBreakdown";
 import CppVerticalTab from "@/components/dashboard/CppVerticalTab";
 import CppCategoryChart from "@/components/dashboard/CppCategoryChart";
+import CppDailyChart from "@/components/dashboard/CppDailyChart";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
