@@ -14,8 +14,9 @@ import {
 } from "recharts";
 import {
   type CppRow, type ConsolidatedSeller,
-  computePeriodComparison, computeDowBreakdown, cleanCustId, parseBrNumber,
+  computePeriodComparison, computeDowBreakdown, cleanCustId, parseBrNumber, getDailySeries,
 } from "@/utils/cppAggregation";
+import CppDailyChart from "@/components/dashboard/CppDailyChart";
 
 // DOW benchmarks (whole portfolio)
 const DOW_BENCHMARKS: Record<number, { roas: number; gmvMedio: number }> = {
@@ -132,6 +133,11 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
     [rawRows, custId, startStr, endStr]
   );
 
+  const dailySeries = useMemo(
+    () => getDailySeries(rawRows, custId, startStr, endStr),
+    [rawRows, custId, startStr, endStr]
+  );
+
   // Listings from raw data (aggregate TOTAL_LIVELISTINGS by vertical/category)
   const listings = useMemo(() => {
     const sellerRows = rawRows.filter(r => cleanCustId(r["CUS_CUST_ID_SEL"]) === custId);
@@ -200,6 +206,11 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
           </Card>
         ))}
       </div>
+
+      {/* Daily Evolution Chart */}
+      {dailySeries.length > 0 && (
+        <CppDailyChart data={dailySeries} title="Evolução Diária do Seller" />
+      )}
 
       {/* DOW Heatmap */}
       <Card className="bg-card border-border">
