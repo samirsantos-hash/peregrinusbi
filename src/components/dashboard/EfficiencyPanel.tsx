@@ -103,14 +103,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
   const { data: portfolioBenchmark, loading: portfolioLoading } = usePortfolioBenchmark();
   const { data: clusterBenchmarkData } = useClusterBenchmark(sellerId, sellerCluster);
 
-  const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; roas: number; acos: number; tacos: number; cpa: number; count: number }>>((acc, k) => {
-    if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, roas: 0, acos: 0, tacos: 0, cpa: 0, count: 0 };
+  const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; tgmvPads: number; tgmv: number; count: number }>>((acc, k) => {
+    if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, tgmvPads: 0, tgmv: 0, count: 0 };
     acc[k.date].gmv += k.revenue;
     acc[k.date].adsInvestment += k.adsInvestment;
-    acc[k.date].roas += k.roas;
-    acc[k.date].acos += k.acos;
-    acc[k.date].tacos += k.tacos;
-    acc[k.date].cpa += k.cpa;
+    acc[k.date].tgmvPads += k.tgmvPads || 0;
+    acc[k.date].tgmv += k.tgmv || 0;
     acc[k.date].count++;
     return acc;
   }, {});
@@ -125,14 +123,15 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     }));
   }, [allDates, dataGranularity]);
 
+  // Weighted ROAS/ACOS/TACOS per date (not simple average)
   const roasData = useMemo(() => {
     return allDates.map((d) => ({
       date: formatChartDate(d.date, dataGranularity),
-      ROAS: Math.round((d.roas / d.count) * 100) / 100,
-      ACOS: Math.round((d.acos / d.count) * 100) / 100,
-      TACOS: Math.round((d.tacos / d.count) * 100) / 100,
+      ROAS: d.adsInvestment > 0 ? Math.round((d.tgmvPads / d.adsInvestment) * 100) / 100 : 0,
+      ACOS: d.tgmvPads > 0 ? Math.round((d.adsInvestment / d.tgmvPads) * 10000) / 100 : 0,
+      TACOS: d.gmv > 0 ? Math.round((d.adsInvestment / d.gmv) * 10000) / 100 : 0,
     }));
-  }, [allDates]);
+  }, [allDates, dataGranularity]);
 
   const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);

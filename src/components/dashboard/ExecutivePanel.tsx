@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock, Crown, Target, BarChart3 } from "lucide-react";
+import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 import TooltipInfo from "./TooltipInfo";
 import DailyPerformanceChart from "./DailyPerformanceChart";
 import QuarterlyPerformanceChart from "./QuarterlyPerformanceChart";
@@ -71,19 +72,7 @@ const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: Exe
     return `${uniqueMonths.size} ${uniqueMonths.size === 1 ? "mês" : "meses"}`;
   }, [kpis, dataGranularity]);
 
-  const fmtBRL = (value: number) => {
-    return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  };
-
-  const fmtBRLCompact = (value: number) => {
-    if (value >= 1_000_000) {
-      return `R$ ${(value / 1_000_000).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`;
-    }
-    if (value >= 1_000) {
-      return `R$ ${(value / 1_000).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}K`;
-    }
-    return fmtBRL(value);
-  };
+  // Using shared formatters from utils/formatters.ts
 
   // Uplift value: always show absolute value with strategic label
   const upliftPctAbs = Math.abs(avgUplift * 100);

@@ -7,7 +7,6 @@ import {
 import { TrendingUp, TrendingDown, Zap, BarChart3, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import TooltipInfo from "./TooltipInfo";
-import PeriodSelector from "./PeriodSelector";
 import { startOfWeek, format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { fmtBRL, fmtBRLCompact, fmtNum, formatChartDate } from "@/utils/formatters";
@@ -89,7 +88,6 @@ function computeCorrelation(xs: number[], ys: number[]): number {
 }
 
 const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPanelProps) => {
-  const [period, setPeriod] = useState("30");
   const [granularity, setGranularity] = useState<Granularity>("day");
 
   const axisLabel = dataGranularity === "consolidated" ? "Meses" : "Dias";
@@ -109,19 +107,8 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
     return Object.values(map).sort((a, b) => a.date.localeCompare(b.date));
   }, [kpis]);
 
-  // Filter by period — relative to the latest date in the dataset (not today)
-  const filteredData = useMemo(() => {
-    if (period === "all" || isNaN(parseInt(period)) || byDate.length === 0) {
-      return byDate;
-    }
-    const days = parseInt(period);
-    const latestDateStr = byDate[byDate.length - 1].date; // already sorted asc
-    const [ly, lm, ld] = latestDateStr.split("-").map(Number);
-    const latestDate = new Date(ly, lm - 1, ld);
-    const cutoffDate = new Date(ly, lm - 1, ld - days);
-    const cutoffStr = `${cutoffDate.getFullYear()}-${String(cutoffDate.getMonth() + 1).padStart(2, "0")}-${String(cutoffDate.getDate()).padStart(2, "0")}`;
-    return byDate.filter((d) => d.date >= cutoffStr);
-  }, [byDate, period]);
+  // Use all data — period filtering is now handled globally by DashboardHeader
+  const filteredData = byDate;
 
   const chartData = useMemo(() => {
     if (granularity === "day") {
@@ -257,7 +244,6 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
                   Semana
                 </button>
               </div>
-              <PeriodSelector value={period} onChange={setPeriod} />
             </div>
           </div>
 
@@ -267,7 +253,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
             </div> :
 
           <ResponsiveContainer width="100%" height={340}>
-              <ComposedChart data={chartData} key={`${period}-${granularity}`}>
+              <ComposedChart data={chartData} key={`trend-${granularity}`}>
                 <defs>
                   <linearGradient id="gradGmvBar" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="hsl(199, 100%, 55%)" stopOpacity={0.9} />
