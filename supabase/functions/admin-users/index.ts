@@ -15,6 +15,14 @@ function generateTempPassword(): string {
   return pass;
 }
 
+function mapAdminErrorMessage(message: string): string {
+  if (message.includes("already been registered")) {
+    return "Já existe um usuário com este e-mail.";
+  }
+
+  return message;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -124,7 +132,7 @@ Deno.serve(async (req) => {
 
       if (createErr) {
         console.error("Create user error:", createErr.message);
-        return new Response(JSON.stringify({ error: createErr.message }), {
+        return new Response(JSON.stringify({ error: mapAdminErrorMessage(createErr.message) }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

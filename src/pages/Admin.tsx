@@ -17,7 +17,7 @@ import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import PortfolioManager from "@/components/portfolios/PortfolioManager";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
+import { cn, getEdgeFunctionErrorMessage } from "@/lib/utils";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -146,7 +146,7 @@ const Admin = () => {
         },
       });
 
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(await getEdgeFunctionErrorMessage(error, "Falha ao criar usuário"));
       if (data?.error) throw new Error(data.error);
 
       setCreatedPasswordDialog({ email: newEmail, password: data.tempPassword });
@@ -168,7 +168,7 @@ const Admin = () => {
       const { data, error } = await supabase.functions.invoke("admin-users", {
         body: { action: "delete_user", targetUserId: userId },
       });
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(await getEdgeFunctionErrorMessage(error, "Falha ao remover usuário"));
       if (data?.error) throw new Error(data.error);
       toast({ title: "Usuário removido" });
       loadData();
@@ -183,7 +183,7 @@ const Admin = () => {
       const { data, error } = await supabase.functions.invoke("admin-users", {
         body: { action: "reset_password", targetUserId: userId },
       });
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(await getEdgeFunctionErrorMessage(error, "Falha ao redefinir senha"));
       if (data?.error) throw new Error(data.error);
       setCreatedPasswordDialog({ email, password: data.tempPassword });
       toast({ title: "Nova senha gerada!" });
