@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store, Folder } from "lucide-react";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store, Folder, KeyRound } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import PortfolioManager from "@/components/portfolios/PortfolioManager";
+import TokensDeAcessoTab from "@/components/admin/TokensDeAcessoTab";
 import { format } from "date-fns";
 import { cn, getEdgeFunctionErrorMessage } from "@/lib/utils";
 
@@ -259,6 +260,12 @@ const Admin = () => {
               <Folder className="w-4 h-4" />
               Gestão de Carteiras
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="tokens" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+                <KeyRound className="w-4 h-4" />
+                Tokens de Acesso
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="users" className="mt-5 space-y-6">
@@ -482,6 +489,12 @@ const Admin = () => {
           <TabsContent value="portfolios" className="mt-5">
             <PortfolioManager />
           </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="tokens" className="mt-5">
+              <TokensDeAcessoTab />
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Password Dialog */}
