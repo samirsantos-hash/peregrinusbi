@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import { useSessionTracker } from "@/hooks/useSessionTracker";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
@@ -21,6 +22,7 @@ const queryClient = new QueryClient();
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { user, loading, isAdmin, isGerente, mustChangePassword } = useAuth();
+  useSessionTracker(user);
 
   if (loading) {
     return (
