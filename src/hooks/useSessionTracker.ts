@@ -13,11 +13,17 @@ function generateUUID(): string {
 export function useSessionTracker(user: User | null) {
   const sessionIdRef = useRef<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const tokenRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
 
     const token = generateUUID();
+
+    // Store access token for sync use in beforeunload
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      tokenRef.current = session?.access_token ?? null;
+    });
 
     // Insert session
     supabase
@@ -62,12 +68,14 @@ export function useSessionTracker(user: User | null) {
       });
       // Use sendBeacon for reliability on tab close
       const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/user_sessions?id=eq.${sessionIdRef.current}`;
-      const headers = {
+      const headers: Record<string, string> = {
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        Authorization: `Bearer ${supabase.auth.session?.()?.access_token ?? ""}`,
         "Content-Type": "application/json",
         Prefer: "return=minimal",
       };
+      if (tokenRef.current) {
+        headers.Authorization = `Bearer ${tokenRef.current}`;
+      }
       // sendBeacon doesn't support custom headers, fall back to fetch keepalive
       try {
         fetch(url, {
