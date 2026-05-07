@@ -236,12 +236,12 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
               <UserCog className="w-4 h-4" />
               Designar Administrador
             </Label>
-            <Select value={assignedTo} onValueChange={setAssignedTo}>
+            <Select value={assignedTo} onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um responsável (opcional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhum</SelectItem>
+                <SelectItem value="__none__">Nenhum</SelectItem>
                 {users.map((u) => (
                   <SelectItem key={u.userId} value={u.userId}>{u.email}</SelectItem>
                 ))}
