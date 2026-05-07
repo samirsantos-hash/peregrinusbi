@@ -732,7 +732,13 @@ export default function GestaoCarteira() {
         </Card>
 
         {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <motion.div
+          key={`charts-${selectedCluster}-${selectedNivel}-${selectedHL}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4"
+        >
           {/* Chart A — Top 20 TGMV */}
           <Card>
             <CardHeader className="pb-2">
