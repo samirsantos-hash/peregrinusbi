@@ -177,7 +177,7 @@ export async function ingestAllFiles(
 
   // Log ingestion
   for (const r of results) {
-    await supabase.from("ingest_log").insert({
+    await (supabase.from("ingest_log") as any).insert({
       file: r.file,
       rows_in: r.rowsIn,
       rows_upserted: r.rowsUpserted,
