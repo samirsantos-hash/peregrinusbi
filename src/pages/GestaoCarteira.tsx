@@ -32,7 +32,7 @@ import {
 import { classificarSeller, loadAlertConfig, saveAlertConfig, type AlertConfig, type SellerAlert, type SellerData } from "@/lib/alerts";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import { ingestAllFiles } from "@/lib/carteira-ingest";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import { useNavigate } from "react-router-dom";
 
 // ── Types ──
 interface CppMensalRow {
@@ -437,7 +437,13 @@ export default function GestaoCarteira() {
 
   return (
     <div className="min-h-screen bg-background">
-      <DashboardHeader />
+      {/* Simple nav bar */}
+      <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => window.location.href = "/"}>← Dashboard</Button>
+          <Button variant="ghost" size="sm" onClick={() => window.location.href = "/cpp"}>CPP</Button>
+        </div>
+      </div>
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Title + Actions */}
         <div className="flex items-center justify-between">
