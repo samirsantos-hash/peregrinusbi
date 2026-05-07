@@ -485,6 +485,7 @@ export type Database = {
       }
       portfolios: {
         Row: {
+          assigned_to: string | null
           created_at: string
           created_by: string
           cust_ids: string[]
@@ -492,6 +493,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           created_by: string
           cust_ids?: string[]
@@ -499,6 +501,7 @@ export type Database = {
           name: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           created_by?: string
           cust_ids?: string[]
