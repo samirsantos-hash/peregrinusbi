@@ -793,9 +793,55 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          ip_address: string | null
+          last_seen_at: string
+          login_at: string
+          logout_at: string | null
+          session_token: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          login_at?: string
+          logout_at?: string | null
+          session_token: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          last_seen_at?: string
+          login_at?: string
+          logout_at?: string | null
+          session_token?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      vw_usuarios_sessoes: {
+        Row: {
+          email: string | null
+          segundos_online: number | null
+          sessoes_ativas: number | null
+          total_sessoes: number | null
+          ultimo_acesso: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_allowed_cust_ids: { Args: never; Returns: string[] }
