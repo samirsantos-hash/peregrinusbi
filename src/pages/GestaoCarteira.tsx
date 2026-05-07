@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Briefcase, ExternalLink, AlertTriangle, TrendingUp, TrendingDown,
-  Upload, Settings, Download, Search, ChevronRight,
+  Upload, Settings, Download, Search, ChevronRight, FolderPlus,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,8 @@ import { ingestAllFiles } from "@/lib/carteira-ingest";
 import KpiCard, { type KpiId } from "@/components/carteira/KpiCard";
 import KpiDetailPanel from "@/components/carteira/KpiDetailPanel";
 import GraficoReputacao from "@/components/carteira/GraficoReputacao";
+import CreatePortfolioModal from "@/components/portfolios/CreatePortfolioModal";
+import { usePortfolios } from "@/hooks/usePortfolios";
 
 // ── Types ──
 interface CppMensalRow {
@@ -178,6 +180,7 @@ function useGmLiveListings() {
 // ── Page ──
 export default function GestaoCarteira() {
   const { user, isAdmin } = useAuth();
+  const { create: createPortfolio, reload: reloadPortfolios } = usePortfolios();
   const { data: cppData = [], isLoading: loadingCpp } = useCppMensal();
   const { data: pmData = [], isLoading: loadingPm } = useSellersPm();
   const { data: cdpData = [] } = useCdpMensal();
@@ -196,6 +199,7 @@ export default function GestaoCarteira() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [ingesting, setIngesting] = useState(false);
   const [kpiSelecionado, setKpiSelecionado] = useState<KpiId | null>("tgmv");
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Derive available months
   const months = useMemo(() => {
@@ -336,6 +340,18 @@ export default function GestaoCarteira() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
+
+  // Sellers list for portfolio modal
+  const sellerOptions = useMemo(() => {
+    const map = new Map<string, { id: string; nickname: string; custId: string }>();
+    for (const r of cppData) {
+      const cid = String(r.cus_cust_id_sel);
+      if (!map.has(cid)) {
+        map.set(cid, { id: cid, nickname: r.cus_nickname || cid, custId: cid });
+      }
+    }
+    return Array.from(map.values());
+  }, [cppData]);
 
   // Alert lists
   const alertLists = useMemo(() => {
@@ -518,6 +534,14 @@ export default function GestaoCarteira() {
                 </Button>
               </>
             )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <FolderPlus className="w-4 h-4 mr-1" />
+              Criar Carteira
+            </Button>
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
@@ -1239,6 +1263,14 @@ export default function GestaoCarteira() {
           )}
         </DrawerContent>
       </Drawer>
+
+      <CreatePortfolioModal
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+        onCreated={reloadPortfolios}
+        sellers={sellerOptions}
+        createPortfolio={createPortfolio}
+      />
     </div>
   );
 }
