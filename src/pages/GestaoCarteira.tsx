@@ -32,7 +32,6 @@ import {
 import { classificarSeller, loadAlertConfig, saveAlertConfig, type AlertConfig, type SellerAlert, type SellerData } from "@/lib/alerts";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import { ingestAllFiles } from "@/lib/carteira-ingest";
-import { useNavigate } from "react-router-dom";
 
 // ── Types ──
 interface CppMensalRow {
