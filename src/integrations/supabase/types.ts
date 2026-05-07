@@ -14,6 +14,393 @@ export type Database = {
   }
   public: {
     Tables: {
+      cdp_mensal: {
+        Row: {
+          cp_investiments_seller_lc: number | null
+          cp_investments_lc: number | null
+          created_at: string
+          cus_cust_id_sel: number
+          dt_atualizacao: string | null
+          f_tgmv_lc: number | null
+          f_tgmv_lc_automatic: number | null
+          f_tgmv_lc_cdp: number | null
+          f_tgmv_lc_cupom: number | null
+          f_tgmv_lc_custom_seller: number | null
+          f_tgmv_lc_dod: number | null
+          f_tgmv_lc_dxb: number | null
+          f_tgmv_lc_lightning: number | null
+          f_tgmv_lc_pre_acordo: number | null
+          f_tgmv_lc_regular: number | null
+          f_tgmv_lc_tiers: number | null
+          meses_no_programa: number | null
+          nombre_solucion: string | null
+          programa: string
+          safra: string | null
+          tim_month_id: number
+          total_investiments_lc: number | null
+          total_rebates_lc: number | null
+        }
+        Insert: {
+          cp_investiments_seller_lc?: number | null
+          cp_investments_lc?: number | null
+          created_at?: string
+          cus_cust_id_sel: number
+          dt_atualizacao?: string | null
+          f_tgmv_lc?: number | null
+          f_tgmv_lc_automatic?: number | null
+          f_tgmv_lc_cdp?: number | null
+          f_tgmv_lc_cupom?: number | null
+          f_tgmv_lc_custom_seller?: number | null
+          f_tgmv_lc_dod?: number | null
+          f_tgmv_lc_dxb?: number | null
+          f_tgmv_lc_lightning?: number | null
+          f_tgmv_lc_pre_acordo?: number | null
+          f_tgmv_lc_regular?: number | null
+          f_tgmv_lc_tiers?: number | null
+          meses_no_programa?: number | null
+          nombre_solucion?: string | null
+          programa?: string
+          safra?: string | null
+          tim_month_id: number
+          total_investiments_lc?: number | null
+          total_rebates_lc?: number | null
+        }
+        Update: {
+          cp_investiments_seller_lc?: number | null
+          cp_investments_lc?: number | null
+          created_at?: string
+          cus_cust_id_sel?: number
+          dt_atualizacao?: string | null
+          f_tgmv_lc?: number | null
+          f_tgmv_lc_automatic?: number | null
+          f_tgmv_lc_cdp?: number | null
+          f_tgmv_lc_cupom?: number | null
+          f_tgmv_lc_custom_seller?: number | null
+          f_tgmv_lc_dod?: number | null
+          f_tgmv_lc_dxb?: number | null
+          f_tgmv_lc_lightning?: number | null
+          f_tgmv_lc_pre_acordo?: number | null
+          f_tgmv_lc_regular?: number | null
+          f_tgmv_lc_tiers?: number | null
+          meses_no_programa?: number | null
+          nombre_solucion?: string | null
+          programa?: string
+          safra?: string | null
+          tim_month_id?: number
+          total_investiments_lc?: number | null
+          total_rebates_lc?: number | null
+        }
+        Relationships: []
+      }
+      cpp_mensal: {
+        Row: {
+          cdp_tgmv_lc: number | null
+          cdp_tsi: number | null
+          cluster_seller: string | null
+          comparativo: string | null
+          created_at: string
+          cus_cust_id_sel: number
+          cus_nickname: string | null
+          cus_state: string | null
+          f_tgmv_lc: number | null
+          f_tsi: number | null
+          fecha_in: string | null
+          fecha_out: string | null
+          h_l: string | null
+          iniciativa: string | null
+          inv_pads: number | null
+          mes_ref: string | null
+          meses_no_programa: number | null
+          nivel_solucion: string | null
+          nombre_solucion: string | null
+          pontuacao_hi: number | null
+          pontuacao_ipi: number | null
+          pontuacao_sow: number | null
+          programa: string | null
+          rep_claims_rate: number | null
+          rep_current_level: string | null
+          score_final_bbf: number | null
+          score_final_cdp: number | null
+          score_final_full: number | null
+          score_final_pads: number | null
+          score_final_servicos: number | null
+          sub_cluster_seller: string | null
+          tgmv_lc: number | null
+          tgmv_lc_fbm: number | null
+          tgmv_lc_me2: number | null
+          tgmv_lc_pads: number | null
+          tim_month_id: number
+          total_livelistings: number | null
+          tsi: number | null
+          visitas: number | null
+        }
+        Insert: {
+          cdp_tgmv_lc?: number | null
+          cdp_tsi?: number | null
+          cluster_seller?: string | null
+          comparativo?: string | null
+          created_at?: string
+          cus_cust_id_sel: number
+          cus_nickname?: string | null
+          cus_state?: string | null
+          f_tgmv_lc?: number | null
+          f_tsi?: number | null
+          fecha_in?: string | null
+          fecha_out?: string | null
+          h_l?: string | null
+          iniciativa?: string | null
+          inv_pads?: number | null
+          mes_ref?: string | null
+          meses_no_programa?: number | null
+          nivel_solucion?: string | null
+          nombre_solucion?: string | null
+          pontuacao_hi?: number | null
+          pontuacao_ipi?: number | null
+          pontuacao_sow?: number | null
+          programa?: string | null
+          rep_claims_rate?: number | null
+          rep_current_level?: string | null
+          score_final_bbf?: number | null
+          score_final_cdp?: number | null
+          score_final_full?: number | null
+          score_final_pads?: number | null
+          score_final_servicos?: number | null
+          sub_cluster_seller?: string | null
+          tgmv_lc?: number | null
+          tgmv_lc_fbm?: number | null
+          tgmv_lc_me2?: number | null
+          tgmv_lc_pads?: number | null
+          tim_month_id: number
+          total_livelistings?: number | null
+          tsi?: number | null
+          visitas?: number | null
+        }
+        Update: {
+          cdp_tgmv_lc?: number | null
+          cdp_tsi?: number | null
+          cluster_seller?: string | null
+          comparativo?: string | null
+          created_at?: string
+          cus_cust_id_sel?: number
+          cus_nickname?: string | null
+          cus_state?: string | null
+          f_tgmv_lc?: number | null
+          f_tsi?: number | null
+          fecha_in?: string | null
+          fecha_out?: string | null
+          h_l?: string | null
+          iniciativa?: string | null
+          inv_pads?: number | null
+          mes_ref?: string | null
+          meses_no_programa?: number | null
+          nivel_solucion?: string | null
+          nombre_solucion?: string | null
+          pontuacao_hi?: number | null
+          pontuacao_ipi?: number | null
+          pontuacao_sow?: number | null
+          programa?: string | null
+          rep_claims_rate?: number | null
+          rep_current_level?: string | null
+          score_final_bbf?: number | null
+          score_final_cdp?: number | null
+          score_final_full?: number | null
+          score_final_pads?: number | null
+          score_final_servicos?: number | null
+          sub_cluster_seller?: string | null
+          tgmv_lc?: number | null
+          tgmv_lc_fbm?: number | null
+          tgmv_lc_me2?: number | null
+          tgmv_lc_pads?: number | null
+          tim_month_id?: number
+          total_livelistings?: number | null
+          tsi?: number | null
+          visitas?: number | null
+        }
+        Relationships: []
+      }
+      gm_elegibilidade: {
+        Row: {
+          acao_recomendada: string | null
+          campaign_created_dt: string | null
+          campaign_finished_dt: string | null
+          campaign_id: string | null
+          campaign_type: string | null
+          created_at: string
+          cus_cust_id_sel: number | null
+          cus_nickname: string | null
+          data_atualizacao: string | null
+          discount_seller_percentage: number | null
+          discount_total: number | null
+          estoque_medio_7d: number | null
+          estoque_medio_full_7d: number | null
+          flag_best_promo: boolean | null
+          flag_item_optin: boolean | null
+          flag_seller_optin: boolean | null
+          id: string
+          item_id: number | null
+          item_name: string | null
+          media_tsi_diario_7d: number | null
+          meses_no_programa: number | null
+          nombre_solucion: string | null
+          pedidos_7d: number | null
+          programa: string | null
+          safra: string | null
+          vertical_item: string | null
+        }
+        Insert: {
+          acao_recomendada?: string | null
+          campaign_created_dt?: string | null
+          campaign_finished_dt?: string | null
+          campaign_id?: string | null
+          campaign_type?: string | null
+          created_at?: string
+          cus_cust_id_sel?: number | null
+          cus_nickname?: string | null
+          data_atualizacao?: string | null
+          discount_seller_percentage?: number | null
+          discount_total?: number | null
+          estoque_medio_7d?: number | null
+          estoque_medio_full_7d?: number | null
+          flag_best_promo?: boolean | null
+          flag_item_optin?: boolean | null
+          flag_seller_optin?: boolean | null
+          id?: string
+          item_id?: number | null
+          item_name?: string | null
+          media_tsi_diario_7d?: number | null
+          meses_no_programa?: number | null
+          nombre_solucion?: string | null
+          pedidos_7d?: number | null
+          programa?: string | null
+          safra?: string | null
+          vertical_item?: string | null
+        }
+        Update: {
+          acao_recomendada?: string | null
+          campaign_created_dt?: string | null
+          campaign_finished_dt?: string | null
+          campaign_id?: string | null
+          campaign_type?: string | null
+          created_at?: string
+          cus_cust_id_sel?: number | null
+          cus_nickname?: string | null
+          data_atualizacao?: string | null
+          discount_seller_percentage?: number | null
+          discount_total?: number | null
+          estoque_medio_7d?: number | null
+          estoque_medio_full_7d?: number | null
+          flag_best_promo?: boolean | null
+          flag_item_optin?: boolean | null
+          flag_seller_optin?: boolean | null
+          id?: string
+          item_id?: number | null
+          item_name?: string | null
+          media_tsi_diario_7d?: number | null
+          meses_no_programa?: number | null
+          nombre_solucion?: string | null
+          pedidos_7d?: number | null
+          programa?: string | null
+          safra?: string | null
+          vertical_item?: string | null
+        }
+        Relationships: []
+      }
+      gm_live_listings: {
+        Row: {
+          categoria: string | null
+          cluster_seller: string | null
+          created_at: string
+          cus_cust_id_sel: number | null
+          cus_nickname: string | null
+          cus_state: string | null
+          data: string | null
+          dom_domain_agg1: string | null
+          dom_domain_agg2: string | null
+          dom_domain_agg3: string | null
+          h_l: string | null
+          id: string
+          iniciativa: string | null
+          itens: number | null
+          nivel_solucion: string | null
+          programa: string | null
+          sub_cluster_seller: string | null
+          tim_month_id: number | null
+          vertical: string | null
+        }
+        Insert: {
+          categoria?: string | null
+          cluster_seller?: string | null
+          created_at?: string
+          cus_cust_id_sel?: number | null
+          cus_nickname?: string | null
+          cus_state?: string | null
+          data?: string | null
+          dom_domain_agg1?: string | null
+          dom_domain_agg2?: string | null
+          dom_domain_agg3?: string | null
+          h_l?: string | null
+          id?: string
+          iniciativa?: string | null
+          itens?: number | null
+          nivel_solucion?: string | null
+          programa?: string | null
+          sub_cluster_seller?: string | null
+          tim_month_id?: number | null
+          vertical?: string | null
+        }
+        Update: {
+          categoria?: string | null
+          cluster_seller?: string | null
+          created_at?: string
+          cus_cust_id_sel?: number | null
+          cus_nickname?: string | null
+          cus_state?: string | null
+          data?: string | null
+          dom_domain_agg1?: string | null
+          dom_domain_agg2?: string | null
+          dom_domain_agg3?: string | null
+          h_l?: string | null
+          id?: string
+          iniciativa?: string | null
+          itens?: number | null
+          nivel_solucion?: string | null
+          programa?: string | null
+          sub_cluster_seller?: string | null
+          tim_month_id?: number | null
+          vertical?: string | null
+        }
+        Relationships: []
+      }
+      ingest_log: {
+        Row: {
+          errors_json: Json | null
+          file: string
+          id: string
+          rows_in: number | null
+          rows_upserted: number | null
+          run_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          errors_json?: Json | null
+          file: string
+          id?: string
+          rows_in?: number | null
+          rows_upserted?: number | null
+          run_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          errors_json?: Json | null
+          file?: string
+          id?: string
+          rows_in?: number | null
+          rows_upserted?: number | null
+          run_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       live_listings: {
         Row: {
           categoria: string | null
@@ -711,6 +1098,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sellers_pm: {
+        Row: {
+          created_at: string
+          cust_id: number
+          data_expiracao_concessao: string | null
+          data_ultima_concessao: string | null
+          dias_expiracao: number | null
+          nmv_lc: number | null
+          nmv_lc_1: number | null
+          nmv_lc_2: number | null
+          nmv_usd: number | null
+          penetracao_3pgm_pct: number | null
+          sb: number | null
+          seller_url: string | null
+          snapshot_date: string
+          vs_pm_3pgm_pct: number | null
+          vs_pm_pct: number | null
+          vs_pm_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          cust_id: number
+          data_expiracao_concessao?: string | null
+          data_ultima_concessao?: string | null
+          dias_expiracao?: number | null
+          nmv_lc?: number | null
+          nmv_lc_1?: number | null
+          nmv_lc_2?: number | null
+          nmv_usd?: number | null
+          penetracao_3pgm_pct?: number | null
+          sb?: number | null
+          seller_url?: string | null
+          snapshot_date: string
+          vs_pm_3pgm_pct?: number | null
+          vs_pm_pct?: number | null
+          vs_pm_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          cust_id?: number
+          data_expiracao_concessao?: string | null
+          data_ultima_concessao?: string | null
+          dias_expiracao?: number | null
+          nmv_lc?: number | null
+          nmv_lc_1?: number | null
+          nmv_lc_2?: number | null
+          nmv_usd?: number | null
+          penetracao_3pgm_pct?: number | null
+          sb?: number | null
+          seller_url?: string | null
+          snapshot_date?: string
+          vs_pm_3pgm_pct?: number | null
+          vs_pm_pct?: number | null
+          vs_pm_status?: string | null
+        }
+        Relationships: []
       }
       upload_logs: {
         Row: {
