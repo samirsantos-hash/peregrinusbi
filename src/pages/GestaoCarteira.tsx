@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef, createContext, useContext } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,6 +33,8 @@ import {
 import { classificarSeller, loadAlertConfig, saveAlertConfig, type AlertConfig, type SellerAlert, type SellerData } from "@/lib/alerts";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import { ingestAllFiles } from "@/lib/carteira-ingest";
+import KpiCard, { type KpiId } from "@/components/carteira/KpiCard";
+import KpiDetailPanel from "@/components/carteira/KpiDetailPanel";
 
 // ── Types ──
 interface CppMensalRow {
@@ -47,6 +49,7 @@ interface CppMensalRow {
   nivel_solucion: string;
   tgmv_lc: number;
   tsi: number;
+  fecha_in?: string;
   inv_pads: number;
   meses_no_programa: number;
   score_final_full: number;
@@ -191,6 +194,7 @@ export default function GestaoCarteira() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [ingesting, setIngesting] = useState(false);
+  const [kpiSelecionado, setKpiSelecionado] = useState<KpiId | null>("tgmv");
 
   // Derive available months
   const months = useMemo(() => {
@@ -291,6 +295,46 @@ export default function GestaoCarteira() {
 
     return { totalTgmv, activeCount, emQueda, emCrescimento, riscoVenc, ticket, deltaPct };
   }, [filteredSellers, cppData, prevMonth]);
+
+  // Sparkline builders
+  const sparkData = useMemo(() => {
+    const last12 = months.slice(0, 12).reverse();
+    const byMonth = last12.map((m) => {
+      const rows = cppData.filter((r) => r.tim_month_id === m);
+      const ativos = rows.filter((r) => (r.tgmv_lc ?? 0) > 0);
+      const total = ativos.reduce((s, r) => s + (r.tgmv_lc ?? 0), 0);
+      return { tgmv: total, ativos: ativos.length, ticket: ativos.length > 0 ? total / ativos.length : 0 };
+    });
+    return {
+      tgmv: byMonth.map((m) => m.tgmv),
+      sellers_ativos: byMonth.map((m) => m.ativos),
+      ticket_medio: byMonth.map((m) => m.ticket),
+      queda: [kpis.emQueda],
+      crescimento: [kpis.emCrescimento],
+      vencimento: [kpis.riscoVenc],
+    };
+  }, [months, cppData, kpis]);
+
+  const severidades = useMemo(() => ({
+    tgmv: kpis.deltaPct > 0 ? "positivo" as const : kpis.deltaPct < -15 ? "critico" as const : kpis.deltaPct < -5 ? "atencao" as const : "neutro" as const,
+    sellers_ativos: "neutro" as const,
+    ticket_medio: "neutro" as const,
+    queda: kpis.emQueda > 0 ? "atencao" as const : "positivo" as const,
+    crescimento: kpis.emCrescimento > 0 ? "positivo" as const : "neutro" as const,
+    vencimento: filteredSellers.some((s) => s.dias_expiracao < 0) ? "critico" as const : kpis.riscoVenc > 0 ? "atencao" as const : "neutro" as const,
+  }), [kpis, filteredSellers]);
+
+  // Keyboard shortcuts 1-6
+  useEffect(() => {
+    const KPI_ORDER: KpiId[] = ["tgmv", "sellers_ativos", "ticket_medio", "queda", "crescimento", "vencimento"];
+    const handler = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const idx = parseInt(e.key) - 1;
+      if (idx >= 0 && idx < 6) setKpiSelecionado(KPI_ORDER[idx]);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   // Alert lists
   const alertLists = useMemo(() => {
@@ -568,59 +612,41 @@ export default function GestaoCarteira() {
         </div>
 
         {/* KPI Cards — animate on filter change */}
-        <motion.div
-          key={`kpis-${selectedCluster}-${selectedNivel}-${selectedHL}-${search.slice(0, 5)}`}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"
-        >
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">TGMV Total</p>
-              <p className="text-lg font-bold tabular-nums">{fmtBRL(kpis.totalTgmv)}</p>
-              <p className={`text-xs font-medium ${kpis.deltaPct >= 0 ? "text-green-400" : "text-red-400"}`}>
-                {fmtPct(kpis.deltaPct)} vs anterior
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Sellers Ativos</p>
-              <p className="text-lg font-bold tabular-nums">{kpis.activeCount}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">Ticket Médio</p>
-              <p className="text-lg font-bold tabular-nums">{fmtBRL(kpis.ticket)}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <TrendingDown className="w-3 h-3 text-red-400" /> Em queda
-              </p>
-              <p className="text-lg font-bold tabular-nums text-red-400">{kpis.emQueda}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <TrendingUp className="w-3 h-3 text-green-400" /> Em crescimento
-              </p>
-              <p className="text-lg font-bold tabular-nums text-green-400">{kpis.emCrescimento}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3 text-orange-400" /> Risco vencimento
-              </p>
-              <p className="text-lg font-bold tabular-nums text-orange-400">{kpis.riscoVenc}</p>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <KpiCard id="tgmv" titulo="TGMV Total" valor={fmtBRL(kpis.totalTgmv)}
+            delta={{ pct: kpis.deltaPct, direcao: kpis.deltaPct > 0 ? "up" : kpis.deltaPct < 0 ? "down" : "flat" }}
+            sparkline={sparkData.tgmv} severidade={severidades.tgmv}
+            selected={kpiSelecionado === "tgmv"} onExpandir={setKpiSelecionado} />
+          <KpiCard id="sellers_ativos" titulo="Sellers Ativos" valor={String(kpis.activeCount)}
+            sparkline={sparkData.sellers_ativos} severidade={severidades.sellers_ativos}
+            selected={kpiSelecionado === "sellers_ativos"} onExpandir={setKpiSelecionado} />
+          <KpiCard id="ticket_medio" titulo="Ticket Médio" valor={fmtBRL(kpis.ticket)}
+            sparkline={sparkData.ticket_medio} severidade={severidades.ticket_medio}
+            selected={kpiSelecionado === "ticket_medio"} onExpandir={setKpiSelecionado} />
+          <KpiCard id="queda" titulo="Em Queda" valor={String(kpis.emQueda)}
+            sparkline={sparkData.queda} severidade={severidades.queda}
+            selected={kpiSelecionado === "queda"} onExpandir={setKpiSelecionado} />
+          <KpiCard id="crescimento" titulo="Em Crescimento" valor={String(kpis.emCrescimento)}
+            sparkline={sparkData.crescimento} severidade={severidades.crescimento}
+            selected={kpiSelecionado === "crescimento"} onExpandir={setKpiSelecionado} />
+          <KpiCard id="vencimento" titulo="Risco Vencimento" valor={String(kpis.riscoVenc)}
+            sparkline={sparkData.vencimento} severidade={severidades.vencimento}
+            selected={kpiSelecionado === "vencimento"} onExpandir={setKpiSelecionado} />
+        </div>
+
+        {/* KPI Detail Panel */}
+        {kpiSelecionado && (
+          <KpiDetailPanel
+            kpiId={kpiSelecionado}
+            onClose={() => setKpiSelecionado(null)}
+            cppData={cppData as any}
+            pmData={pmData as any}
+            filteredSellers={filteredSellers as any}
+            months={months}
+            activeMonth={activeMonth}
+            setDrawerSeller={setDrawerSeller}
+          />
+        )}
 
         {/* Alert Center */}
         <Card>
