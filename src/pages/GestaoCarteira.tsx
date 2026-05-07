@@ -999,7 +999,7 @@ export default function GestaoCarteira() {
               </p>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Full Table */}
         <Card>
