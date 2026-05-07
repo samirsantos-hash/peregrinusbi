@@ -19,6 +19,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, ReferenceLine, RectangleProps,
 } from "recharts";
+import { monthKey, monthRange, monthLabel } from "@/lib/dates";
 
 // ── Types ──
 type Agg = "pond" | "mediana" | "p90";
@@ -48,13 +49,6 @@ interface ChartPoint {
   coberturaAtrasos: number;
   claimsPrev: number | null;
   atrasosPrev: number | null;
-}
-
-const MONTH_NAMES = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-
-function fmtMonth(iso: string): string {
-  const d = new Date(iso + "T00:00:00");
-  return `${MONTH_NAMES[d.getMonth()]}/${d.getFullYear()}`;
 }
 
 function fmtPct(v: number | null | undefined): string {
@@ -172,24 +166,41 @@ export default function GraficoReputacao() {
     const claimsKey = agg === "pond" ? "claims_pond_tgmv" : agg === "mediana" ? "claims_mediana" : "claims_p90";
     const atrasosKey = agg === "pond" ? "atrasos_pond_tgmv" : agg === "mediana" ? "atrasos_mediana" : "atrasos_p90";
 
-    const points: ChartPoint[] = rows.map((r, idx) => {
-      const prev = idx > 0 ? rows[idx - 1] : null;
+    // Build a map keyed by month
+    const map = new Map<string, RepRow>();
+    for (const r of rows) {
+      const k = monthKey(r.mes_ref);
+      map.set(k, r);
+    }
+
+    // Determine full span from data
+    const allKeys = [...map.keys()].sort();
+    const span = allKeys.length >= 2
+      ? monthRange(allKeys[0], allKeys[allKeys.length - 1])
+      : allKeys;
+
+    const points: ChartPoint[] = span.map((k, idx) => {
+      const r = map.get(k);
+      const prevKey = idx > 0 ? span[idx - 1] : null;
+      const prev = prevKey ? map.get(prevKey) ?? null : null;
       const covClaims = r.n_sellers_total > 0 ? (r.n_sellers_claims / r.n_sellers_total) * 100 : 0;
       const covAtrasos = r.n_sellers_total > 0 ? (r.n_sellers_atrasos / r.n_sellers_total) * 100 : 0;
       return {
-        mes: r.mes_ref,
-        mesLabel: fmtMonth(r.mes_ref),
-        claims: r[claimsKey] != null ? r[claimsKey] : null,
-        atrasos: r[atrasosKey] != null ? r[atrasosKey] : null,
-        nSellersClaims: r.n_sellers_claims,
-        nSellersAtrasos: r.n_sellers_atrasos,
-        nSellersTotal: r.n_sellers_total,
+        mes: k,
+        mesLabel: monthLabel(k),
+        claims: r && r[claimsKey] != null ? r[claimsKey] : null,
+        atrasos: r && r[atrasosKey] != null ? r[atrasosKey] : null,
+        nSellersClaims: r?.n_sellers_claims ?? 0,
+        nSellersAtrasos: r?.n_sellers_atrasos ?? 0,
+        nSellersTotal: r?.n_sellers_total ?? 0,
         coberturaClaims: covClaims,
         coberturaAtrasos: covAtrasos,
         claimsPrev: prev && prev[claimsKey] != null ? prev[claimsKey] : null,
         atrasosPrev: prev && prev[atrasosKey] != null ? prev[atrasosKey] : null,
       };
     });
+      const covClaims = r ? (r.n_sellers_total > 0 ? (r.n_sellers_claims / r.n_sellers_total) * 100 : 0) : 0;
+      const covAtrasos = r ? (r.n_sellers_total > 0 ? (r.n_sellers_atrasos / r.n_sellers_total) * 100 : 0) : 0;
 
     // Detect consecutive null gaps > 2
     const gapRanges: [number, number][] = [];
