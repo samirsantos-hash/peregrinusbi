@@ -1,0 +1,1 @@
+ALTER VIEW public.vw_reputacao_mensal SET (security_invoker = on);
