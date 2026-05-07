@@ -183,8 +183,8 @@ export default function GraficoReputacao() {
       const r = map.get(k);
       const prevKey = idx > 0 ? span[idx - 1] : null;
       const prev = prevKey ? map.get(prevKey) ?? null : null;
-      const covClaims = r.n_sellers_total > 0 ? (r.n_sellers_claims / r.n_sellers_total) * 100 : 0;
-      const covAtrasos = r.n_sellers_total > 0 ? (r.n_sellers_atrasos / r.n_sellers_total) * 100 : 0;
+      const covClaims = r && r.n_sellers_total > 0 ? (r.n_sellers_claims / r.n_sellers_total) * 100 : 0;
+      const covAtrasos = r && r.n_sellers_total > 0 ? (r.n_sellers_atrasos / r.n_sellers_total) * 100 : 0;
       return {
         mes: k,
         mesLabel: monthLabel(k),
@@ -199,8 +199,6 @@ export default function GraficoReputacao() {
         atrasosPrev: prev && prev[atrasosKey] != null ? prev[atrasosKey] : null,
       };
     });
-      const covClaims = r ? (r.n_sellers_total > 0 ? (r.n_sellers_claims / r.n_sellers_total) * 100 : 0) : 0;
-      const covAtrasos = r ? (r.n_sellers_total > 0 ? (r.n_sellers_atrasos / r.n_sellers_total) * 100 : 0) : 0;
 
     // Detect consecutive null gaps > 2
     const gapRanges: [number, number][] = [];
