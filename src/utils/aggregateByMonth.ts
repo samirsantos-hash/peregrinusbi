@@ -2,6 +2,8 @@
  * Aggregates daily KPI records into monthly buckets.
  * Sums additive metrics; averages ratio metrics.
  */
+import { monthKey as getMonthKey } from "@/lib/dates";
+
 export function aggregateKpisByMonth<T extends Record<string, any>>(kpis: T[]): T[] {
   if (kpis.length === 0) return [];
 
@@ -9,8 +11,7 @@ export function aggregateKpisByMonth<T extends Record<string, any>>(kpis: T[]): 
 
   for (const k of kpis) {
     const dateStr: string = k.date || "";
-    // Extract YYYY-MM as month key; use first of month as canonical date
-    const monthKey = dateStr.slice(0, 7); // "2025-03"
+    const monthKey = getMonthKey(dateStr);
     if (!buckets[monthKey]) buckets[monthKey] = { items: [] };
     buckets[monthKey].items.push(k);
   }

@@ -6,6 +6,8 @@ import {
 import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
 import TooltipInfo from "./TooltipInfo";
 
+import { monthKey as getMonthKey } from "@/lib/dates";
+
 interface QuarterlyKpi {
   date: string;
   tgmv: number;
@@ -32,7 +34,7 @@ function aggregateByMonth(kpis: QuarterlyKpi[]) {
   for (const k of kpis) {
     const date = k.date || "";
     if (!date) continue;
-    const monthKey = date.slice(0, 7); // "YYYY-MM"
+    const monthKey = getMonthKey(date);
 
     const prev = buckets.get(monthKey) || { gmv: 0, tgmv: 0, count: 0 };
     const gmv = typeof k.gmv === "number" ? k.gmv : (typeof k.tgmv === "number" ? k.tgmv : 0);
