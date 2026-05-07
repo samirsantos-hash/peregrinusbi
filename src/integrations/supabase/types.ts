@@ -1275,6 +1275,21 @@ export type Database = {
       }
     }
     Views: {
+      vw_reputacao_mensal: {
+        Row: {
+          atrasos_mediana: number | null
+          atrasos_p90: number | null
+          atrasos_pond_tgmv: number | null
+          claims_mediana: number | null
+          claims_p90: number | null
+          claims_pond_tgmv: number | null
+          mes_ref: string | null
+          n_sellers_atrasos: number | null
+          n_sellers_claims: number | null
+          n_sellers_total: number | null
+        }
+        Relationships: []
+      }
       vw_usuarios_sessoes: {
         Row: {
           email: string | null

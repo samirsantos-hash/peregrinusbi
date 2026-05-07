@@ -35,6 +35,7 @@ import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import { ingestAllFiles } from "@/lib/carteira-ingest";
 import KpiCard, { type KpiId } from "@/components/carteira/KpiCard";
 import KpiDetailPanel from "@/components/carteira/KpiDetailPanel";
+import GraficoReputacao from "@/components/carteira/GraficoReputacao";
 
 // ── Types ──
 interface CppMensalRow {
@@ -1026,6 +1027,9 @@ export default function GestaoCarteira() {
             </CardContent>
           </Card>
         </motion.div>
+
+        {/* Reputation Chart */}
+        <GraficoReputacao />
 
         {/* Full Table */}
         <Card>
