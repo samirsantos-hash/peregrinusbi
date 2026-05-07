@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef, createContext, useContext } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -566,8 +567,14 @@ export default function GestaoCarteira() {
           </div>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        {/* KPI Cards — animate on filter change */}
+        <motion.div
+          key={`kpis-${selectedCluster}-${selectedNivel}-${selectedHL}-${search.slice(0, 5)}`}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3"
+        >
           <Card>
             <CardContent className="p-4">
               <p className="text-xs text-muted-foreground">TGMV Total</p>
@@ -613,7 +620,7 @@ export default function GestaoCarteira() {
               <p className="text-lg font-bold tabular-nums text-orange-400">{kpis.riscoVenc}</p>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Alert Center */}
         <Card>
@@ -650,11 +657,22 @@ export default function GestaoCarteira() {
                 return (
                   <TabsContent key={tab} value={tab} className="space-y-2 max-h-[300px] overflow-y-auto">
                     {list.length === 0 && (
-                      <p className="text-sm text-muted-foreground py-4 text-center">Nenhum alerta nesta categoria</p>
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-sm text-muted-foreground py-4 text-center"
+                      >
+                        Nenhum alerta nesta categoria
+                      </motion.p>
                     )}
-                    {list.slice(0, 20).map((s) => (
-                      <div
+                    <AnimatePresence mode="popLayout">
+                    {list.slice(0, 20).map((s, idx) => (
+                      <motion.div
                         key={s.cust_id}
+                        initial={{ opacity: 0, x: -12 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 12 }}
+                        transition={{ duration: 0.25, delay: idx * 0.03 }}
                         className={`flex items-center justify-between border rounded-lg p-3 ${
                           s.alerts.some((a) => a.pulsante) ? "animate-pulse border-red-500/50" : "border-border/50"
                         }`}
@@ -703,8 +721,9 @@ export default function GestaoCarteira() {
                             <ExternalLink className="w-4 h-4 text-primary" />
                           </Button>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
+                    </AnimatePresence>
                   </TabsContent>
                 );
               })}
@@ -1003,10 +1022,15 @@ export default function GestaoCarteira() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pagedSellers.map((s) => (
-                    <TableRow
+                  <AnimatePresence mode="popLayout">
+                  {pagedSellers.map((s, idx) => (
+                    <motion.tr
                       key={s.cust_id}
-                      className="cursor-pointer hover:bg-muted/30"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2, delay: idx * 0.015 }}
+                      className="border-b cursor-pointer hover:bg-muted/30 transition-colors data-[state=selected]:bg-muted"
                       tabIndex={0}
                       onKeyDown={(e) => { if (e.key === "Enter") abrirSellerNoMeli(s.cust_id, s.cus_nickname); }}
                     >
@@ -1063,8 +1087,9 @@ export default function GestaoCarteira() {
                           </Button>
                         </div>
                       </TableCell>
-                    </TableRow>
+                    </motion.tr>
                   ))}
+                  </AnimatePresence>
                 </TableBody>
               </Table>
             </div>
