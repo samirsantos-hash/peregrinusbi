@@ -8,6 +8,7 @@ export interface Portfolio {
   cust_ids: string[];
   created_by: string;
   created_at: string;
+  assigned_to: string | null;
 }
 
 export interface SellerWithKpi {
@@ -53,13 +54,13 @@ export function usePortfolios() {
 
   useEffect(() => { load(); }, [load]);
 
-  const create = async (name: string, custIds: string[]) => {
+  const create = async (name: string, custIds: string[], assignedTo?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Not authenticated" };
 
     const { error } = await supabase
       .from("portfolios" as any)
-      .insert({ name, cust_ids: custIds, created_by: user.id } as any);
+      .insert({ name, cust_ids: custIds, created_by: user.id, assigned_to: assignedTo || null } as any);
 
     if (error) {
       toast({ title: "Erro ao criar carteira", description: error.message, variant: "destructive" });
