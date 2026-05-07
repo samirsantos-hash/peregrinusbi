@@ -26,7 +26,7 @@ async function upsertBatch(
 
   for (let i = 0; i < rows.length; i += batchSize) {
     const batch = rows.slice(i, i + batchSize);
-    const { error, count } = await (supabase.from(table) as any).upsert(batch, {
+    const { error, count } = await (supabase as any).from(table).upsert(batch, {
       onConflict,
       count: "exact",
     });
