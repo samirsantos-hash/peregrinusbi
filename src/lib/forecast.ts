@@ -174,9 +174,7 @@ export function forecastHibrido(serie: SerieMensal, horizonte: number, alpha = 0
     final.push(Math.max(0, v));
   }
 
-  // Residual std for IC95 — use in-sample residual of weighted linreg on full series
-  const fitted = regressaoLinearPonderada(serie.slice(0, n), 0); // empty
-  // simpler: residuals = (last actual - one-step-ahead predicted) over EWMA
+  // Residual std for IC95 — one-step-ahead EWMA residuals
   const ewmaSeries = ewma(serie, alpha);
   const residuals: number[] = [];
   for (let i = 1; i < data.length; i++) residuals.push(data[i].valor - ewmaSeries[i - 1]);
