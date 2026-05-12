@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FolderPlus, Folder, Trash2, Calendar } from "lucide-react";
+import { Loader2, FolderPlus, Folder, Trash2, Calendar, Pencil } from "lucide-react";
 import { usePortfolios, type Portfolio } from "@/hooks/usePortfolios";
 import { supabase } from "@/integrations/supabase/client";
 import CreatePortfolioModal from "./CreatePortfolioModal";
+import EditPortfolioModal from "./EditPortfolioModal";
 import PortfolioDetail from "./PortfolioDetail";
 import { format } from "date-fns";
 
@@ -16,9 +17,10 @@ interface SellerOption {
 }
 
 export default function PortfolioManager() {
-  const { portfolios, loading, reload, create, remove } = usePortfolios();
+  const { portfolios, loading, reload, create, remove, update } = usePortfolios();
   const [sellers, setSellers] = useState<SellerOption[]>([]);
   const [showCreate, setShowCreate] = useState(false);
+  const [editPortfolio, setEditPortfolio] = useState<Portfolio | null>(null);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
 
   useEffect(() => {
@@ -102,6 +104,14 @@ export default function PortfolioManager() {
                     >
                       <Trash2 className="w-3.5 h-3.5 text-destructive" />
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => { e.stopPropagation(); setEditPortfolio(p); }}
+                    >
+                      <Pencil className="w-3.5 h-3.5 text-primary" />
+                    </Button>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Calendar className="w-3 h-3" />
@@ -120,6 +130,15 @@ export default function PortfolioManager() {
         onCreated={reload}
         sellers={sellers}
         createPortfolio={create}
+      />
+
+      <EditPortfolioModal
+        open={!!editPortfolio}
+        onOpenChange={(v) => { if (!v) setEditPortfolio(null); }}
+        portfolio={editPortfolio}
+        sellers={sellers}
+        updatePortfolio={update}
+        onSaved={reload}
       />
     </div>
   );
