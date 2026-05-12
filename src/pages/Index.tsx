@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
+import { Daily7DPanel } from "@/components/dashboard/Daily7DPanel";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
@@ -390,6 +391,10 @@ const Index = () => {
                   transition={{ duration: 0.25 }}
                   className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
+                    <Daily7DPanel
+                      dailyKpis={allKpisDaily}
+                      sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
+                    />
                     <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
                     <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} />
                     <TrendAnalysisPanel kpis={displayKpis} dataGranularity={granularity} />
