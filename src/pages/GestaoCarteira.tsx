@@ -38,6 +38,7 @@ import KpiDetailPanel from "@/components/carteira/KpiDetailPanel";
 import GraficoReputacao from "@/components/carteira/GraficoReputacao";
 import CreatePortfolioModal from "@/components/portfolios/CreatePortfolioModal";
 import { usePortfolios } from "@/hooks/usePortfolios";
+import NewBadge from "@/components/ui/NewBadge";
 
 // ── Types ──
 interface CppMensalRow {
