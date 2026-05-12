@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCrescimentoMensal, type PontoMensal } from "@/hooks/useCrescimentoMensal";
+import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
 import { forecastHibrido, inclinacaoLog, classificarTendencia, type SerieMensal } from "@/lib/forecast";
 import { decompor, type ContribuicaoCrescimento } from "@/lib/decomposicao";
 import { classificarCrescimento } from "@/lib/sustentabilidade";
@@ -122,6 +123,8 @@ function OnboardingButton() {
 /* ---------- Page ---------- */
 export default function ProjecaoCrescimento() {
   const { data, isLoading } = useCrescimentoMensal();
+  const { data: lojas, isLoading: loadingLojas } = useClassificacaoLojas();
+  const [filtroClass, setFiltroClass] = useState<string>("all");
   const [horizonte, setHorizonte] = useState<number>(3);
   const [alpha, setAlpha] = useState<number>(0.4);
   const [showIC, setShowIC] = useState<boolean>(true);
@@ -311,6 +314,94 @@ export default function ProjecaoCrescimento() {
                 <p className="text-xs text-muted-foreground">Projeções e classificações ficam disponíveis a partir de 4 meses de histórico.</p>
               </div>
             </div>
+          </Card>
+        )}
+
+        {/* Classificação por loja (tier + diagnóstico + argumentos) */}
+        {!semDados && (
+          <Card className="p-5 rounded-2xl">
+            <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+              <div>
+                <h3 className="text-sm font-semibold">Classificação por loja</h3>
+                <p className="text-[11px] text-muted-foreground">Tier (cluster), diagnóstico de sustentabilidade e drivers que justificam — últimos 3 meses.</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Filtrar</span>
+                <Select value={filtroClass} onValueChange={setFiltroClass}>
+                  <SelectTrigger className="w-48 h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todas</SelectItem>
+                    {Array.from(new Set((lojas ?? []).map((l) => l.classificacao))).map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {loadingLojas ? (
+              <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-md" />)}</div>
+            ) : !lojas || lojas.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-4 text-center">Nenhuma loja com 4+ meses de histórico para classificar.</p>
+            ) : (
+              <div className="overflow-x-auto -mx-1">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-left text-muted-foreground border-b border-border/50">
+                      <th className="px-2 py-2 font-medium">Loja</th>
+                      <th className="px-2 py-2 font-medium">Tier</th>
+                      <th className="px-2 py-2 font-medium">Classificação</th>
+                      <th className="px-2 py-2 font-medium text-right">Receita 3m</th>
+                      <th className="px-2 py-2 font-medium text-right">Visitas 3m</th>
+                      <th className="px-2 py-2 font-medium text-right">CR 3m</th>
+                      <th className="px-2 py-2 font-medium text-right">AOV 3m</th>
+                      <th className="px-2 py-2 font-medium text-right">Slope 6m</th>
+                      <th className="px-2 py-2 font-medium">Diagnóstico</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(lojas ?? [])
+                      .filter((l) => filtroClass === "all" || l.classificacao === filtroClass)
+                      .slice(0, 80)
+                      .map((l) => {
+                        const a = l.argumentos;
+                        const cellPct = (v: number, isPp = false) => {
+                          const c = v > 1 ? "#16A34A" : v < -1 ? "#DC2626" : "hsl(var(--muted-foreground))";
+                          const suf = isPp ? "pp" : "%";
+                          return <td className="px-2 py-2 text-right tabular-nums" style={{ color: c }}>{v >= 0 ? "+" : ""}{v.toFixed(1)}{suf}</td>;
+                        };
+                        return (
+                          <tr key={l.sellerId} className="border-b border-border/30 hover:bg-muted/30">
+                            <td className="px-2 py-2">
+                              <div className="font-medium text-foreground truncate max-w-[180px]">{l.nickname}</div>
+                              <div className="text-[10px] text-muted-foreground">{l.custId}</div>
+                            </td>
+                            <td className="px-2 py-2">
+                              <Badge variant="outline" className="text-[10px]">{l.cluster}</Badge>
+                              {l.subCluster && l.subCluster !== "—" && (
+                                <div className="text-[10px] text-muted-foreground mt-0.5">{l.subCluster}</div>
+                              )}
+                            </td>
+                            <td className="px-2 py-2">
+                              <Badge variant="outline" className="text-[10px]" style={{ borderColor: l.cor, color: l.cor }}>
+                                {l.classificacao}
+                              </Badge>
+                            </td>
+                            {cellPct(a.receitaPct3m)}
+                            {cellPct(a.visitasPct3m)}
+                            {cellPct(a.crPp3m, true)}
+                            {cellPct(a.aovPct3m)}
+                            {cellPct(a.slope6m * 100)}
+                            <td className="px-2 py-2 text-muted-foreground max-w-[320px]">{l.frase}</td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+                {lojas.length > 80 && (
+                  <p className="text-[10px] text-muted-foreground mt-2 text-center">Mostrando 80 de {lojas.length} lojas — use o filtro para refinar.</p>
+                )}
+              </div>
+            )}
           </Card>
         )}
 
