@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCrescimentoMensal, type PontoMensal } from "@/hooks/useCrescimentoMensal";
 import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
+import TierComparePanel from "@/components/projecao/TierComparePanel";
 import { forecastHibrido, inclinacaoLog, classificarTendencia, type SerieMensal } from "@/lib/forecast";
 import { decompor, type ContribuicaoCrescimento } from "@/lib/decomposicao";
 import { classificarCrescimento } from "@/lib/sustentabilidade";
@@ -469,6 +470,11 @@ export default function ProjecaoCrescimento() {
               </TooltipProvider>
             )}
           </Card>
+        )}
+
+        {/* Comparativo Reputação vs Métricas */}
+        {!semDados && lojas && lojas.length > 0 && (
+          <TierComparePanel lojas={lojas} />
         )}
 
         {/* Glossário de KPIs — minimalista */}
