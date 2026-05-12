@@ -11,6 +11,7 @@ export interface LojaClassificada {
   nickname: string;
   cluster: string;
   subCluster: string;
+  tier: 1 | 2 | 3;
   classificacao: ClassificacaoSust;
   cor: string;
   frase: string;
