@@ -128,6 +128,8 @@ export default function ProjecaoCrescimento() {
   const [compararCom, setCompararCom] = useState<"1m" | "3m" | "12m">("3m");
 
   const pontos = data?.pontos ?? [];
+  const poucosDados = !isLoading && pontos.length < 4;
+  const semDados = !isLoading && pontos.length === 0;
 
   const fc = useMemo(() => data ? forecastHibrido(data.receita, horizonte, alpha) : null, [data, horizonte, alpha]);
   const slope = useMemo(() => data ? inclinacaoLog(data.receita, 6) : 0, [data]);
@@ -274,8 +276,19 @@ export default function ProjecaoCrescimento() {
           </div>
         </div>
 
-        {/* Sustentabilidade banner */}
-        {sust && (
+        {/* Empty state global */}
+        {semDados && (
+          <Card className="p-8 rounded-2xl text-center space-y-2">
+            <AlertCircle className="w-8 h-8 mx-auto text-muted-foreground" />
+            <h3 className="text-sm font-semibold">Sem dados mensais disponíveis</h3>
+            <p className="text-xs text-muted-foreground max-w-md mx-auto">
+              Não encontramos histórico mensal para a carteira atual. Faça o upload de KPIs em Admin → Uploads ou ajuste o filtro de carteira.
+            </p>
+          </Card>
+        )}
+
+        {/* Sustentabilidade banner — só com histórico mínimo de 4 meses */}
+        {sust && !poucosDados && !semDados && (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
             className="rounded-2xl p-5 border-l-4 bg-card shadow-sm"
             style={{ borderLeftColor: sust.cor }}>
@@ -287,6 +300,18 @@ export default function ProjecaoCrescimento() {
               </div>
             </div>
           </motion.div>
+        )}
+
+        {poucosDados && (
+          <Card className="p-4 rounded-2xl border-l-4" style={{ borderLeftColor: "#F59E0B" }}>
+            <div className="flex items-start gap-3">
+              <Info className="w-4 h-4 mt-0.5 text-[#F59E0B]" />
+              <div>
+                <p className="text-sm font-medium">Histórico curto: {pontos.length} {pontos.length === 1 ? "mês" : "meses"}</p>
+                <p className="text-xs text-muted-foreground">Projeções e classificações ficam disponíveis a partir de 4 meses de histórico.</p>
+              </div>
+            </div>
+          </Card>
         )}
 
         {/* KPI cards */}
