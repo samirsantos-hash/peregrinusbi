@@ -3,6 +3,7 @@
  * Sums additive metrics; averages ratio metrics.
  */
 import { monthKey as getMonthKey } from "@/lib/dates";
+import { detectPartialMonths } from "./partialPeriodGuard";
 
 export function aggregateKpisByMonth<T extends Record<string, any>>(kpis: T[]): T[] {
   if (kpis.length === 0) return [];
@@ -74,5 +75,12 @@ export function aggregateKpisByMonth<T extends Record<string, any>>(kpis: T[]): 
     result.push(base as T);
   }
 
+  // Tag partial months (parasitic / incomplete data) so charts can badge them.
+  const partialInfo = detectPartialMonths(result, { gmvField: "gmv", thresholdPct: 0.3 });
+  for (const r of result) {
+    const info = partialInfo.get(String((r as any).date).slice(0, 7));
+    (r as any).__partial = info?.isPartial ?? false;
+    (r as any).__partialShare = info?.gmvShare ?? 1;
+  }
   return result;
 }
