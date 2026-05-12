@@ -6,7 +6,13 @@ export type AlertTipo =
   | "VENCIMENTO_PROXIMO"
   | "VENCIDO"
   | "CRITICO"
-  | "NOVO_SELLER";
+  | "NOVO_SELLER"
+  | "CR_QUEDA_3M"
+  | "CRESCIMENTO_DESACELERANDO"
+  | "CAC_ACIMA_RECEITA"
+  | "TICKET_MEDIO_CAINDO"
+  | "CRESCIMENTO_INSUSTENTAVEL"
+  | "SAZONAL_NEGATIVA_PROXIMA";
 
 export type AlertSeveridade = "critica" | "alta" | "media" | "positiva" | "informativa";
 
