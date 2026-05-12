@@ -1,0 +1,1 @@
+ALTER TABLE public.portfolios ADD COLUMN IF NOT EXISTS seller_aliases jsonb NOT NULL DEFAULT '{}'::jsonb;
