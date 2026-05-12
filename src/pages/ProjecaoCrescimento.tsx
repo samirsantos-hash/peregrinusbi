@@ -411,9 +411,11 @@ export default function ProjecaoCrescimento() {
                               <div className="flex items-center gap-1.5 flex-wrap">
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Badge variant="outline" className="text-[10px] cursor-help" style={{ borderColor: tierColor, color: tierColor }}>
-                                      T{l.tier}
-                                    </Badge>
+                                    <span className="inline-flex cursor-help">
+                                      <Badge variant="outline" className="text-[10px]" style={{ borderColor: tierColor, color: tierColor }}>
+                                        T{l.tier}
+                                      </Badge>
+                                    </span>
                                   </TooltipTrigger>
                                   <TooltipContent side="top" className="max-w-xs text-xs">{tierExpl} Receita último mês: {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(l.receitaUlt)}.</TooltipContent>
                                 </Tooltip>
@@ -426,9 +428,11 @@ export default function ProjecaoCrescimento() {
                             <td className="px-2 py-2">
                               <Tooltip>
                                 <TooltipTrigger asChild>
-                                  <Badge variant="outline" className="text-[10px] cursor-help" style={{ borderColor: l.cor, color: l.cor }}>
-                                    {l.classificacao}
-                                  </Badge>
+                                  <span className="inline-flex cursor-help">
+                                    <Badge variant="outline" className="text-[10px]" style={{ borderColor: l.cor, color: l.cor }}>
+                                      {l.classificacao}
+                                    </Badge>
+                                  </span>
                                 </TooltipTrigger>
                                 <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">{classExpl}</TooltipContent>
                               </Tooltip>
