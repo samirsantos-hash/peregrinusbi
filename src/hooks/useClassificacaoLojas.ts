@@ -13,6 +13,8 @@ export interface LojaClassificada {
   subCluster: string;
   tier: 1 | 2 | 3;
   tierFonte: "reputacao" | "metricas" | "receita";
+  tierByRep: 1 | 2 | 3 | null;
+  tierByMetricas: 1 | 2 | 3 | null;
   repLevel: string | null;
   metricas: {
     sowPadsPct: number;   // inv_pads / tgmv_lc * 100
@@ -173,13 +175,13 @@ export function useClassificacaoLojas() {
 
         // ---- Tier: prioridade Reputação → Métricas → fallback receita ----
         const tFromRep = repLevelToTier(last.repLevel);
+        const tFromMet = (Number.isFinite(oosPct) && Number.isFinite(bsPct))
+          ? tierFromMetricas(sowPadsPct, oosPct as number, bsPct as number)
+          : null;
         let tier: 1 | 2 | 3 = 3;
         let tierFonte: LojaClassificada["tierFonte"] = "receita";
         if (tFromRep) { tier = tFromRep; tierFonte = "reputacao"; }
-        else if (Number.isFinite(oosPct) && Number.isFinite(bsPct)) {
-          tier = tierFromMetricas(sowPadsPct, oosPct, bsPct);
-          tierFonte = "metricas";
-        }
+        else if (tFromMet) { tier = tFromMet; tierFonte = "metricas"; }
 
         const th = TIER_THRESHOLDS[tier];
         const checkRep: "ok" | "fail" | "na" = last.repLevel ? (repLevelToTier(last.repLevel) === tier ? "ok" : "fail") : "na";
@@ -195,6 +197,8 @@ export function useClassificacaoLojas() {
           subCluster: info.subCluster,
           tier,
           tierFonte,
+          tierByRep: tFromRep,
+          tierByMetricas: tFromMet,
           repLevel: last.repLevel,
           metricas: {
             sowPadsPct,
