@@ -344,12 +344,13 @@ export default function ProjecaoCrescimento() {
             ) : !lojas || lojas.length === 0 ? (
               <p className="text-xs text-muted-foreground py-4 text-center">Nenhuma loja com 4+ meses de histórico para classificar.</p>
             ) : (
+              <TooltipProvider delayDuration={150}>
               <div className="overflow-x-auto -mx-1">
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="text-left text-muted-foreground border-b border-border/50">
                       <th className="px-2 py-2 font-medium">Loja</th>
-                      <th className="px-2 py-2 font-medium">Tier</th>
+                      <th className="px-2 py-2 font-medium">Tier / Cluster</th>
                       <th className="px-2 py-2 font-medium">Classificação</th>
                       <th className="px-2 py-2 font-medium text-right">Receita 3m</th>
                       <th className="px-2 py-2 font-medium text-right">Visitas 3m</th>
