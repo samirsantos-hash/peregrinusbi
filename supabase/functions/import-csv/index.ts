@@ -223,14 +223,17 @@ Deno.serve(async (req) => {
     }
 
     // Build KPI rows
+    let skippedNoDate = 0;
     const kpiRows = rows.map((cols) => {
       const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
       const sellerId = sellerIdMap.get(cleanCustId);
       if (!sellerId) return null;
+      const isoDate = parseValidDate(cols[iData] || "");
+      if (!isoDate) { skippedNoDate++; return null; }
 
       return {
         seller_id: sellerId,
-        data: cols[iData]?.trim() || "2026-01-01",
+        data: isoDate,
         tim_month_id: parseBrInt(cols[iTimMonth] || "0"),
         gmv_lc: parseBrNumber(cols[iGmv] || "0"),
         tsi: parseBrInt(cols[iTsi] || "0"),
@@ -310,11 +313,13 @@ Deno.serve(async (req) => {
         const sellerId = sellerIdMap.get(cleanCustId);
         const itemId = cols[iItemId]?.trim().replace(/[.,]0$/, "");
         if (!sellerId || !itemId) return null;
+        const isoDate2 = parseValidDate(cols[iData] || "");
+        if (!isoDate2) return null;
 
         return {
           seller_id: sellerId,
           item_id: itemId,
-          data: cols[iData]?.trim() || "2026-01-01",
+          data: isoDate2,
           ll_pictures_score: iLlPictures >= 0 ? parseBrNumber(cols[iLlPictures] || "0") : 0,
           ll_title_score: iLlTitle >= 0 ? parseBrNumber(cols[iLlTitle] || "0") : 0,
           ll_tech_specs_score: iLlTechSpecs >= 0 ? parseBrNumber(cols[iLlTechSpecs] || "0") : 0,
@@ -369,6 +374,7 @@ Deno.serve(async (req) => {
         success: true,
         sellers: sellersToInsert.length,
         kpis: inserted,
+        rows_skipped_no_date: skippedNoDate,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
