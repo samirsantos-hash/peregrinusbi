@@ -13,6 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCrescimentoMensal, type PontoMensal } from "@/hooks/useCrescimentoMensal";
 import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
 import { forecastHibrido, inclinacaoLog, classificarTendencia, type SerieMensal } from "@/lib/forecast";
