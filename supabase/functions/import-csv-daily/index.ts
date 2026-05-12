@@ -47,13 +47,12 @@ function parseBrInt(val: string): number {
   return Math.round(parseBrNumber(val));
 }
 
-/** Parse DD/MM/YYYY to YYYY-MM-DD */
+/** Parse DD/MM/YYYY (or ISO) to YYYY-MM-DD. Returns "" when invalid (caller MUST drop the row). */
 function parseBrDate(val: string): string {
-  if (!val) return "2026-01-01";
+  if (!val) return "";
   const trimmed = val.trim();
-  // Already ISO
+  if (!trimmed) return "";
   if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) return trimmed.slice(0, 10);
-  // DD/MM/YYYY
   const match = trimmed.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
   if (match) {
     const d = match[1].padStart(2, "0");
@@ -62,7 +61,7 @@ function parseBrDate(val: string): string {
     if (y.length === 2) y = `20${y}`;
     return `${y}-${m}-${d}`;
   }
-  return trimmed;
+  return "";
 }
 
 const MAX_CLIPS_VALUE = 100_000;
@@ -206,6 +205,7 @@ Deno.serve(async (req) => {
     for (const s of sellerRows || []) sellerIdMap.set(s.cust_id, s.id);
 
     // Build daily KPI rows
+    let skippedNoDate = 0;
     const kpiRows = rows.map((cols) => {
       const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
       const sellerId = sellerIdMap.get(cleanCustId);
@@ -213,6 +213,7 @@ Deno.serve(async (req) => {
 
       const rawDate = cols[iData]?.trim() || "";
       const isoDate = parseBrDate(rawDate);
+      if (!isoDate) { skippedNoDate++; return null; }
 
       return {
         seller_id: sellerId,
@@ -298,6 +299,7 @@ Deno.serve(async (req) => {
         success: true,
         sellers: sellersToInsert.length,
         kpis: inserted,
+        rows_skipped_no_date: skippedNoDate,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
