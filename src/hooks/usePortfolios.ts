@@ -9,6 +9,7 @@ export interface Portfolio {
   created_by: string;
   created_at: string;
   assigned_to: string | null;
+  seller_aliases?: Record<string, string>;
 }
 
 export interface SellerWithKpi {
@@ -85,7 +86,24 @@ export function usePortfolios() {
     }
   };
 
-  return { portfolios, loading, reload: load, create, remove };
+  const update = async (
+    id: string,
+    patch: { name?: string; cust_ids?: string[]; assigned_to?: string | null; seller_aliases?: Record<string, string> }
+  ) => {
+    const { error } = await supabase
+      .from("portfolios" as any)
+      .update(patch as any)
+      .eq("id", id);
+    if (error) {
+      toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
+      return { error: error.message };
+    }
+    toast({ title: "Carteira atualizada" });
+    await load();
+    return { error: null };
+  };
+
+  return { portfolios, loading, reload: load, create, remove, update };
 }
 
 export function usePortfolioData(custIds: string[]) {
