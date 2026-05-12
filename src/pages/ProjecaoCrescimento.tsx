@@ -384,11 +384,25 @@ export default function ProjecaoCrescimento() {
                             </td>
                           );
                         };
-                        const tierColor = l.tier === 1 ? "#D4AF37" : l.tier === 2 ? "#9CA3AF" : "#6B7280";
-                        const tierExpl = l.tier === 1
-                          ? "Tier 1 — Top 20% da carteira por receita do último mês."
-                          : l.tier === 2 ? "Tier 2 — Próximos 30% (faixa intermediária)."
-                          : "Tier 3 — 50% inferiores. Maior potencial de aceleração ou risco.";
+                         const tierColor = l.tier === 1 ? "#E5E4E2" : l.tier === 2 ? "#D4AF37" : "#9CA3AF";
+                         const tierName = l.tier === 1 ? "green_platinum" : l.tier === 2 ? "green_gold" : "green_silver";
+                         const fonteLabel =
+                           l.tierFonte === "reputacao" ? "Reputação atual do MeLi"
+                           : l.tierFonte === "metricas" ? "Métricas oficiais (SoW Pads / OOS / BS)"
+                           : "Fallback por receita (sem reputação/métricas no DB)";
+                         const sym = (s: "ok" | "fail" | "na") => s === "ok" ? "✓" : s === "fail" ? "✗" : "—";
+                         const tierExpl = (
+                           <div className="space-y-1.5">
+                             <div className="font-semibold">Tier {l.tier} — {tierName}</div>
+                             <div className="text-[10px] text-muted-foreground">Fonte: {fonteLabel}</div>
+                             <div className="border-t border-border/40 pt-1.5 space-y-0.5">
+                               <div>{sym(l.tierChecks.rep)} Reputação: <b>{l.repLevel ?? "n/d"}</b></div>
+                               <div>{sym(l.tierChecks.sowPads)} %SoW Pads: <b>{l.metricas.sowPadsPct.toFixed(2)}%</b> (alvo ≥ {l.tier === 1 ? "2.5" : l.tier === 2 ? "1.25" : "0.5"}%)</div>
+                               <div>{sym(l.tierChecks.oos)} %OOS: <b>{l.tierChecks.oos === "na" ? "n/d" : `${l.metricas.oosPct.toFixed(1)}%`}</b> (alvo ≤ {l.tier === 1 ? "15" : l.tier === 2 ? "25" : "35"}%)</div>
+                               <div>{sym(l.tierChecks.bs)} %BS: <b>{l.tierChecks.bs === "na" ? "n/d" : `${l.metricas.bsPct.toFixed(2)}%`}</b> (alvo ≤ {l.tier === 1 ? "35" : l.tier === 2 ? "45" : "55"}%)</div>
+                             </div>
+                           </div>
+                         );
                         const classExpl = (() => {
                           const r = a.receitaPct3m, v = a.visitasPct3m, cr = a.crPp3m, ads = a.invAdsPct3m, sl = a.slope6m;
                           if (r <= -15 || sl <= -0.05) return `Risco de retração: receita ${r.toFixed(0)}% (≤ -15%) ou slope ${(sl*100).toFixed(1)}%/m (≤ -5%/m).`;
@@ -417,7 +431,7 @@ export default function ProjecaoCrescimento() {
                                       </Badge>
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="max-w-xs text-xs">{tierExpl} Receita último mês: {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(l.receitaUlt)}.</TooltipContent>
+                                  <TooltipContent side="top" className="max-w-sm text-xs leading-relaxed">{tierExpl}</TooltipContent>
                                 </Tooltip>
                                 <Badge variant="outline" className="text-[10px]">{l.cluster}</Badge>
                               </div>
@@ -454,6 +468,75 @@ export default function ProjecaoCrescimento() {
               </div>
               </TooltipProvider>
             )}
+          </Card>
+        )}
+
+        {/* Glossário de KPIs — minimalista */}
+        {!semDados && (
+          <Card className="p-5 rounded-2xl">
+            <div className="flex items-baseline justify-between mb-3">
+              <div>
+                <h3 className="text-sm font-semibold">Glossário</h3>
+                <p className="text-[11px] text-muted-foreground">Definição curta de cada KPI usado nesta página.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+              {[
+                { grupo: "Tier (Marketplace)", items: [
+                  { k: "Tier 1 — green_platinum", v: "%SoW Pads ≥ 2,5 · %OOS ≤ 15 · %BS ≤ 35 · %3PGM ≥ 60" },
+                  { k: "Tier 2 — green_gold", v: "%SoW Pads ≥ 1,25 · %OOS ≤ 25 · %BS ≤ 45 · %3PGM ≥ 45" },
+                  { k: "Tier 3 — green_silver", v: "%SoW Pads ≥ 0,5 · %OOS ≤ 35 · %BS ≤ 55 · %3PGM ≥ 20" },
+                ]},
+                { grupo: "Métricas oficiais", items: [
+                  { k: "%3PGM", v: "Penetração em 3 Pilares (Garantia, Mensagens, Marca). Origem: cpp_mensal." },
+                  { k: "%SoW Pads", v: "Share of Wallet em Ads = inv_pads ÷ TGMV_LC (proxy do investimento publicitário sobre receita)." },
+                  { k: "%OOS", v: "Out of Stock = 100 − ll_stock_availability_score (rupturas no catálogo ativo)." },
+                  { k: "%BS", v: "Bad Seller — proxy via rep_cancellations_rate (cancelamentos sob responsabilidade do vendedor)." },
+                  { k: "Reputação (rep_current_level)", v: "Nível oficial do MeLi: green_platinum / green_gold / green_silver." },
+                ]},
+                { grupo: "Drivers de receita", items: [
+                  { k: "Receita (TGMV_LC)", v: "GMV transacional do período em moeda local." },
+                  { k: "Visitas", v: "Sessões nos anúncios do vendedor." },
+                  { k: "TSI", v: "Total de itens vendidos (unidades)." },
+                  { k: "CR (Conversão)", v: "TSI ÷ Visitas × 100. Variação medida em pontos percentuais (pp)." },
+                  { k: "AOV (Ticket Médio)", v: "Receita ÷ TSI." },
+                  { k: "INV PADS", v: "Investimento em Product Ads no período." },
+                ]},
+                { grupo: "Crescimento e tendência", items: [
+                  { k: "ΔReceita 3m", v: "Variação % da receita: último mês vs. 3 meses atrás." },
+                  { k: "Slope 6m", v: "Inclinação da regressão log da receita nos últimos 6 meses (%/mês)." },
+                  { k: "CAGR 12m", v: "Taxa composta de crescimento anualizada com base em 12 meses." },
+                  { k: "YoY", v: "Variação contra o mesmo mês do ano anterior." },
+                  { k: "Decomposição (pp)", v: "Δlog Receita ≈ Δlog Visitas + Δlog CR + Δlog AOV — cada driver em pp do total." },
+                ]},
+                { grupo: "Forecast", items: [
+                  { k: "Forecast híbrido", v: "Média ponderada de Regressão linear, EWMA, CAGR e Holt-Winters." },
+                  { k: "α (alpha)", v: "Suavização exponencial do EWMA — maior α dá mais peso ao recente." },
+                  { k: "IC95", v: "Banda de incerteza ±1,96 desvios da projeção." },
+                ]},
+                { grupo: "Sustentabilidade do crescimento", items: [
+                  { k: "Saudável", v: "Visitas, CR e AOV crescendo juntos." },
+                  { k: "Eficiência operacional", v: "CR sobe (>+2pp) sem precisar de mais tráfego." },
+                  { k: "Escalabilidade positiva", v: "Receita +>25% e ads crescendo menos que receita." },
+                  { k: "Dependente de tráfego", v: "Visitas +>10% mas CR cai ≥ 2pp." },
+                  { k: "Conversão em queda", v: "ΔCR ≤ −5pp em 3 meses." },
+                  { k: "Artificial / ads-driven", v: "Ads +>30% e receita ≤ ads (CAC/LTV em alerta)." },
+                  { k: "Risco de retração", v: "Receita ≤ −15% em 3m ou slope ≤ −5%/m." },
+                ]},
+              ].map((bloco) => (
+                <div key={bloco.grupo} className="space-y-1.5">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{bloco.grupo}</p>
+                  <dl className="space-y-1">
+                    {bloco.items.map((it) => (
+                      <div key={it.k} className="text-[11px] leading-relaxed">
+                        <dt className="font-medium text-foreground inline">{it.k} — </dt>
+                        <dd className="text-muted-foreground inline">{it.v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              ))}
+            </div>
           </Card>
         )}
 
