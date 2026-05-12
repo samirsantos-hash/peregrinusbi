@@ -110,14 +110,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
   }, [window7]);
 
   if (sorted.length === 0) {
-    return (
-      <Card className="glass-card border-dashed border-warning/40">
-        <CardContent className="py-6 flex items-center gap-3 text-muted-foreground text-sm">
-          <AlertCircle className="w-4 h-4 text-warning" />
-          Sem dados diários disponíveis para esta loja. Faça upload do CSV diarizado em <span className="text-foreground font-medium">Admin → Uploads</span>.
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (
