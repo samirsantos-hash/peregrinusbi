@@ -352,10 +352,10 @@ export default function ProjecaoCrescimento() {
                       <th className="px-2 py-2 font-medium">Loja</th>
                       <th className="px-2 py-2 font-medium">Tier / Cluster</th>
                       <th className="px-2 py-2 font-medium">Classificação</th>
-                      <th className="px-2 py-2 font-medium text-right">Receita 3m</th>
-                      <th className="px-2 py-2 font-medium text-right">Visitas 3m</th>
-                      <th className="px-2 py-2 font-medium text-right">CR 3m</th>
-                      <th className="px-2 py-2 font-medium text-right">AOV 3m</th>
+                      <th className="px-2 py-2 font-medium text-right">ΔReceita 3m</th>
+                      <th className="px-2 py-2 font-medium text-right">ΔVisitas 3m</th>
+                      <th className="px-2 py-2 font-medium text-right">ΔCR 3m</th>
+                      <th className="px-2 py-2 font-medium text-right">ΔAOV 3m</th>
                       <th className="px-2 py-2 font-medium text-right">Slope 6m</th>
                       <th className="px-2 py-2 font-medium">Diagnóstico</th>
                     </tr>
