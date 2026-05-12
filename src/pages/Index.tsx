@@ -2,8 +2,9 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound, TrendingUp } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import NewBadge from "@/components/ui/NewBadge";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { type DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
@@ -329,6 +330,11 @@ const Index = () => {
           <div className="flex items-center gap-2">
             {/* Sound toggle */}
             <SoundToggleButton />
+            <Button variant="outline" size="sm" onClick={() => navigate("/projecao-crescimento")} className="gap-2 relative">
+              <TrendingUp className="w-4 h-4" />
+              Projeção
+              <NewBadge featureKey="projecao_v1" tooltip="Novo: forecast, decomposição de crescimento e alertas de sustentabilidade" />
+            </Button>
             {(isAdmin || isGerente) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
                 <Settings className="w-4 h-4" />
