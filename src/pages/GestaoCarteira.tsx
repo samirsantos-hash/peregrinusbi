@@ -503,6 +503,10 @@ export default function GestaoCarteira() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => window.location.href = "/"}>← Dashboard</Button>
           <Button variant="ghost" size="sm" onClick={() => window.location.href = "/cpp"}>CPP</Button>
+          <Button variant="ghost" size="sm" onClick={() => window.location.href = "/projecao-crescimento"} className="relative">
+            Projeção de Crescimento
+            <NewBadge featureKey="projecao_v1" tooltip="Novo: forecast, decomposição de crescimento e alertas de sustentabilidade" />
+          </Button>
         </div>
       </div>
       <div className="container mx-auto px-4 py-6 space-y-6">
