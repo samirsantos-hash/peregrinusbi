@@ -57,9 +57,9 @@ export function classificarCrescimento(e: EntradaSust): SustResultado {
   const dAds = pctChange(e.invAds);
   const slope = inclinacaoLog(e.receita, 6);
 
-  // Risco de retração — combinação tóxica
-  if (slope < 0 && dCpp <= -2) {
-    return { classificacao: "Risco de retração", cor: COR.red, frase: `Tendência 6m negativa (slope ${slope.toFixed(3)}) e conversão caiu ${Math.abs(dCpp).toFixed(1)}pp. Combinação tóxica.` };
+  // Risco de retração — receita em queda forte ou tendência muito negativa
+  if (dR <= -15 || slope <= -0.05) {
+    return { classificacao: "Risco de retração", cor: COR.red, frase: `Receita ${dR.toFixed(0)}% em 3m e tendência 6m de ${(slope * 100).toFixed(1)}%/mês. Drivers em deterioração.` };
   }
 
   // Artificial / ads-driven
@@ -94,5 +94,9 @@ export function classificarCrescimento(e: EntradaSust): SustResultado {
     return { classificacao: "Saudável", cor: COR.green, frase: `Visitas, conversão e ticket médio crescendo juntos. Trajetória equilibrada.` };
   }
 
-  return { classificacao: "Saudável", cor: COR.gray, frase: `Crescimento estável sem sinais de alerta nos drivers principais.` };
+  // Fallback: usa o sinal da receita para evitar "Saudável" indevido
+  if (dR < -3) {
+    return { classificacao: "Conversão em queda", cor: COR.amber, frase: `Receita ${dR.toFixed(1)}% em 3m. Drivers misturados — investigar visitas (${dV.toFixed(0)}%), CR (${dCpp.toFixed(1)}pp) e AOV (${dA.toFixed(1)}%).` };
+  }
+  return { classificacao: "Saudável", cor: COR.gray, frase: `Crescimento estável (${dR >= 0 ? "+" : ""}${dR.toFixed(1)}% em 3m) sem sinais fortes de alerta nos drivers.` };
 }
