@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus, Sparkles, Briefcase, ChevronLeft, X } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Sparkles, X, Info, AlertCircle } from "lucide-react";
 import {
   AreaChart, Area, LineChart, Line, BarChart, Bar, ScatterChart, Scatter,
   XAxis, YAxis, CartesianGrid, Tooltip as RTooltip, ResponsiveContainer, Legend, ReferenceLine, ComposedChart, ZAxis,
@@ -71,41 +71,51 @@ function KpiCard({
   );
 }
 
-/* ---------- Onboarding popover ---------- */
-function Onboarding() {
+/* ---------- Onboarding popover (não-bloqueante, ancorado ao botão) ---------- */
+function OnboardingButton() {
   const KEY = "feature_onboarded_projecao_v1";
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  useEffect(() => { if (localStorage.getItem(KEY) !== "1") setOpen(true); }, []);
-  const close = () => { localStorage.setItem(KEY, "1"); setOpen(false); };
-  if (!open) return null;
+  useEffect(() => {
+    if (localStorage.getItem(KEY) !== "1") {
+      // abre automaticamente a primeira vez, mas como popover lateral (não bloqueia)
+      setOpen(true);
+    }
+  }, []);
+  const close = () => { localStorage.setItem(KEY, "1"); setOpen(false); setStep(0); };
   const steps = [
-    { titulo: "Forecast híbrido", texto: "O gráfico de receita combina 4 técnicas (regressão, EWMA, CAGR, Holt-Winters) com pesos automáticos por backtest. A linha pontilhada é a projeção; a banda é o intervalo de confiança 95%." },
-    { titulo: "Decomposição de crescimento", texto: "Toda variação de receita é decomposta em três drivers: visitas, conversão e ticket médio. Mostra de onde vem (ou para onde vai) o crescimento." },
-    { titulo: "Sustentabilidade", texto: "Um classificador analisa visitas, CR, AOV e custo de ads. Diferencia crescimento saudável de crescimento dependente de tráfego ou ads." },
+    { titulo: "Forecast híbrido", texto: "Combina 4 técnicas (regressão, EWMA, CAGR, Holt-Winters) com pesos automáticos por backtest. Linha pontilhada = projeção; banda = IC 95%." },
+    { titulo: "Decomposição", texto: "Toda variação de receita é dividida em 3 drivers: visitas, conversão e ticket médio." },
+    { titulo: "Sustentabilidade", texto: "Classifica o crescimento como saudável, dependente de tráfego, dependente de ads ou em risco." },
   ];
   const s = steps[step];
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4" onClick={close}>
-      <Card className="max-w-md w-full p-6 relative" onClick={(e) => e.stopPropagation()}>
-        <button onClick={close} className="absolute right-3 top-3 text-muted-foreground hover:text-foreground"><X className="w-4 h-4" /></button>
+    <Popover open={open} onOpenChange={(o) => { if (!o) close(); else setOpen(true); }}>
+      <PopoverTrigger asChild>
+        <Button variant="ghost" size="sm" className="gap-1.5 text-xs">
+          <Info className="w-3.5 h-3.5" /> Como funciona
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent align="end" className="w-80 p-4">
         <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="w-4 h-4 text-[#3B82F6]" />
+          <Sparkles className="w-3.5 h-3.5 text-[#3B82F6]" />
           <span className="text-[10px] font-semibold tracking-wider text-muted-foreground">PASSO {step + 1} DE 3</span>
         </div>
-        <h3 className="text-lg font-semibold">{s.titulo}</h3>
-        <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{s.texto}</p>
-        <div className="flex items-center justify-between mt-6">
+        <h3 className="text-sm font-semibold">{s.titulo}</h3>
+        <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">{s.texto}</p>
+        <div className="flex items-center justify-between mt-4">
           <div className="flex gap-1">
-            {[0, 1, 2].map((i) => <span key={i} className={`h-1.5 w-6 rounded-full ${i === step ? "bg-[#3B82F6]" : "bg-muted"}`} />)}
+            {[0, 1, 2].map((i) => <span key={i} className={`h-1 w-5 rounded-full ${i === step ? "bg-[#3B82F6]" : "bg-muted"}`} />)}
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             {step > 0 && <Button variant="ghost" size="sm" onClick={() => setStep(step - 1)}>Voltar</Button>}
-            {step < 2 ? <Button size="sm" onClick={() => setStep(step + 1)}>Próximo</Button> : <Button size="sm" onClick={close}>Concluir</Button>}
+            {step < 2
+              ? <Button size="sm" onClick={() => setStep(step + 1)}>Próximo</Button>
+              : <Button size="sm" onClick={close}>Concluir</Button>}
           </div>
         </div>
-      </Card>
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
