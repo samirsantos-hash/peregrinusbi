@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ReferenceLine } from "recharts";
-import { Activity, TrendingDown, TrendingUp } from "lucide-react";
+import { Activity, TrendingDown, TrendingUp, Info } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
+import { Tooltip as UTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 
 interface Props {
@@ -64,21 +65,43 @@ export default function PerformanceClusterChart({ sellers, aliases = {} }: Props
   return (
     <Card className="border-border">
       <CardContent className="p-5 space-y-4">
-        <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-start justify-between flex-wrap gap-3">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <Activity className="w-4 h-4 text-primary" />
+              <h3 className="text-sm font-bold">Cluster de Desempenho — Curva de Faturamento</h3>
+              <TooltipProvider delayDuration={150}>
+                <UTooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="w-3.5 h-3.5 text-muted-foreground hover:text-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[280px] text-xs leading-relaxed">
+                    Curva de Pareto ordenada do maior para o menor TGMV. Use os controles para ajustar o corte
+                    de Tracionadores (líderes) e Detratores (caudais).
+                  </TooltipContent>
+                </UTooltip>
+              </TooltipProvider>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              {data.length} sellers · ordenados por faturamento (TGMV)
+            </p>
+          </div>
           <div className="flex items-center gap-2">
-            <Activity className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-bold">Cluster de Desempenho — Curva de Faturamento</h3>
-          </div>
-          <div className="flex items-center gap-3 text-xs">
-            <span className="flex items-center gap-1.5 text-primary">
-              <TrendingUp className="w-3.5 h-3.5" />
-              <strong>{tracionadores.length}</strong> Tracionadores · {topShare.toFixed(1)}% do GMV
-            </span>
-            <span className="flex items-center gap-1.5 text-destructive">
-              <TrendingDown className="w-3.5 h-3.5" />
-              <strong>{detratores.length}</strong> Detratores · {botShare.toFixed(1)}% do GMV
-            </span>
-          </div>
+            <div className="rounded-md border border-primary/30 bg-primary/10 px-3 py-1.5 text-xs">
+              <div className="flex items-center gap-1.5 text-primary font-bold">
+                <TrendingUp className="w-3.5 h-3.5" />
+                {tracionadores.length} Tracionadores
+              </div>
+              <div className="text-[11px] text-muted-foreground tabular-nums">{topShare.toFixed(1)}% do GMV</div>
+            </div>
+            <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs">
+              <div className="flex items-center gap-1.5 text-destructive font-bold">
+                <TrendingDown className="w-3.5 h-3.5" />
+                {detratores.length} Detratores
+              </div>
+              <div className="text-[11px] text-muted-foreground tabular-nums">{botShare.toFixed(1)}% do GMV</div>
+            </div>
+        </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-border bg-muted/20 p-3">
@@ -154,7 +177,7 @@ export default function PerformanceClusterChart({ sellers, aliases = {} }: Props
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
           <div className="rounded-md border border-primary/30 bg-primary/5 p-3 space-y-1">
             <p className="font-bold text-primary flex items-center gap-1.5">
-              <TrendingUp className="w-3.5 h-3.5" /> Tracionadores (Top 20%)
+              <TrendingUp className="w-3.5 h-3.5" /> Tracionadores (Top {topPct}%)
             </p>
             <p className="text-muted-foreground">
               {tracionadores.map((d) => d.name).join(", ") || "—"}
@@ -162,7 +185,7 @@ export default function PerformanceClusterChart({ sellers, aliases = {} }: Props
           </div>
           <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 space-y-1">
             <p className="font-bold text-destructive flex items-center gap-1.5">
-              <TrendingDown className="w-3.5 h-3.5" /> Detratores (Bottom 20%)
+              <TrendingDown className="w-3.5 h-3.5" /> Detratores (Bottom {botPct}%)
             </p>
             <p className="text-muted-foreground">
               {detratores.map((d) => d.name).join(", ") || "—"}
