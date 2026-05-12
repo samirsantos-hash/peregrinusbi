@@ -549,12 +549,19 @@ export default function ProjecaoCrescimento() {
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="mes" tick={{ fontSize: 10 }} tickFormatter={(k) => monthLabel(k)} />
                 <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(v)} />
-                <RTooltip formatter={(v: any) => (v == null ? "—" : fmtBRL(Number(v)))} labelFormatter={(k) => monthLabel(String(k))} />
+                <RTooltip
+                  formatter={(v: any, name: any) => {
+                    if (v == null) return ["—", name];
+                    const labels: Record<string, string> = { real: "Real", forecast: "Projeção", upper: "IC95 sup.", lower: "IC95 inf." };
+                    return [fmtBRL(Number(v)), labels[String(name)] ?? name];
+                  }}
+                  labelFormatter={(k) => monthLabel(String(k))}
+                />
                 {showIC && <Area type="monotone" dataKey="upper" stroke="none" fill="#3B82F6" fillOpacity={0.15} />}
                 {showIC && <Area type="monotone" dataKey="lower" stroke="none" fill="hsl(var(--background))" fillOpacity={1} />}
                 <Line type="monotone" dataKey="real" stroke="#1F4E79" strokeWidth={2.5} dot={false} name="Real" connectNulls={false} />
                 <Line type="monotone" dataKey="forecast" stroke="#3B82F6" strokeDasharray="5 4" strokeWidth={2.5} dot={{ r: 3 }} name="Projeção" connectNulls={false} />
-                <ReferenceLine x={pontos[pontos.length - 1]?.mes} stroke="#D4AF37" strokeDasharray="2 2" />
+                <ReferenceLine x={pontos[pontos.length - 1]?.mes} stroke="#D4AF37" strokeDasharray="2 2" label={{ value: "hoje", position: "top", fill: "#D4AF37", fontSize: 10 }} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
@@ -570,7 +577,14 @@ export default function ProjecaoCrescimento() {
                 <XAxis dataKey="mes" tick={{ fontSize: 10 }} tickFormatter={(k) => monthLabel(k)} />
                 <YAxis yAxisId="cr" orientation="left" tick={{ fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
                 <YAxis yAxisId="v" orientation="right" tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(v)} />
-                <RTooltip labelFormatter={(k) => monthLabel(String(k))} />
+                <RTooltip
+                  labelFormatter={(k) => monthLabel(String(k))}
+                  formatter={(v: any, name: any) => {
+                    if (name === "CR (%)") return [`${Number(v).toFixed(2)}%`, name];
+                    if (name === "Visitas") return [fmtNum(Number(v)), name];
+                    return [String(v), name];
+                  }}
+                />
                 <Bar yAxisId="v" dataKey="visitas" fill="hsl(var(--muted))" opacity={0.5} name="Visitas" />
                 <Line yAxisId="cr" type="monotone" dataKey="cr" stroke="#D4AF37" strokeWidth={2.5} dot={{ r: 3 }} name="CR (%)" />
               </ComposedChart>
@@ -639,7 +653,14 @@ export default function ProjecaoCrescimento() {
                 <XAxis dataKey="mes" tick={{ fontSize: 10 }} tickFormatter={(k) => monthLabel(k)} />
                 <YAxis yAxisId="pp" tick={{ fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(0)}pp`} />
                 <YAxis yAxisId="t" orientation="right" tick={{ fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(0)}%`} />
-                <RTooltip labelFormatter={(k) => monthLabel(String(k))} formatter={(v: any) => `${Number(v).toFixed(1)}`} />
+                <RTooltip
+                  labelFormatter={(k) => monthLabel(String(k))}
+                  formatter={(v: any, name: any) => {
+                    const suf = String(name).includes("Total") ? "%" : "pp";
+                    const n = Number(v);
+                    return [`${n >= 0 ? "+" : ""}${n.toFixed(1)}${suf}`, name];
+                  }}
+                />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar yAxisId="pp" dataKey="visitas" stackId="d" fill="#1F4E79" name="Visitas (pp)" />
                 <Bar yAxisId="pp" dataKey="cr" stackId="d" fill="#3B82F6" name="CR (pp)" />
