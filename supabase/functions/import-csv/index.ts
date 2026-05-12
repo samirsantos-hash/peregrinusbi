@@ -47,6 +47,23 @@ function parseBrInt(val: string): number {
   return Math.round(parseBrNumber(val));
 }
 
+/** Parse DD/MM/YYYY (or ISO) to YYYY-MM-DD. Returns "" when invalid. */
+function parseValidDate(val: string): string {
+  if (!val) return "";
+  const trimmed = val.trim();
+  if (!trimmed) return "";
+  if (/^\d{4}-\d{2}-\d{2}/.test(trimmed)) return trimmed.slice(0, 10);
+  const m = trimmed.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+  if (m) {
+    const d = m[1].padStart(2, "0");
+    const mm = m[2].padStart(2, "0");
+    let y = m[3];
+    if (y.length === 2) y = `20${y}`;
+    return `${y}-${mm}-${d}`;
+  }
+  return "";
+}
+
 // Clips fields should never exceed this — values above indicate column misalignment (e.g. CUST_ID leaking in)
 const MAX_CLIPS_VALUE = 100_000;
 
