@@ -7,6 +7,7 @@ import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
 import TooltipInfo from "./TooltipInfo";
 
 import { monthKey as getMonthKey } from "@/lib/dates";
+import { detectPartialMonths } from "@/utils/partialPeriodGuard";
 
 interface QuarterlyKpi {
   date: string;
@@ -53,6 +54,7 @@ function aggregateByMonth(kpis: QuarterlyKpi[]) {
       const [y, m] = key.split("-");
       return {
         key,
+        date: key,
         label: `01/${m}`,
         gmv: vals.gmv,
         tgmv: vals.tgmv,
@@ -79,6 +81,7 @@ function ChartTooltip({ active, payload }: any) {
 const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => {
   const [selectedPeriod, setSelectedPeriod] = useState("all");
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [hidePartial, setHidePartial] = useState(true);
 
   const filteredKpis = useMemo(() => {
     if (selectedPeriod === "all") return kpis;
@@ -92,7 +95,27 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
     });
   }, [kpis, selectedPeriod]);
 
-  const chartData = useMemo(() => aggregateByMonth(filteredKpis), [filteredKpis]);
+  const aggregated = useMemo(() => aggregateByMonth(filteredKpis), [filteredKpis]);
+
+  const partialInfo = useMemo(
+    () => detectPartialMonths(aggregated, { gmvField: "gmv", thresholdPct: 0.3 }),
+    [aggregated],
+  );
+
+  const taggedData = useMemo(
+    () =>
+      aggregated.map((r) => {
+        const info = partialInfo.get(r.key);
+        return { ...r, partial: info?.isPartial ?? false, share: info?.gmvShare ?? 1 };
+      }),
+    [aggregated, partialInfo],
+  );
+
+  const partialCount = taggedData.filter((d) => d.partial).length;
+  const chartData = useMemo(
+    () => (hidePartial ? taggedData.filter((d) => !d.partial) : taggedData),
+    [taggedData, hidePartial],
+  );
 
   const yDomain = useMemo(() => {
     if (chartData.length === 0) return [0, 100];
@@ -140,6 +163,23 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
               </button>
             ))}
           </div>
+          {partialCount > 0 && (
+            <button
+              onClick={() => setHidePartial((v) => !v)}
+              title={
+                hidePartial
+                  ? `Mostrar ${partialCount} mês(es) com dados parciais`
+                  : `Ocultar ${partialCount} mês(es) com dados parciais (<30% da mediana)`
+              }
+              className={`px-2 py-0.5 text-[10px] font-medium rounded border transition-all ${
+                hidePartial
+                  ? "bg-warning/10 text-warning border-warning/30"
+                  : "bg-muted/30 text-muted-foreground border-border/50 hover:text-foreground"
+              }`}
+            >
+              {hidePartial ? `Ocultando ${partialCount} parcial${partialCount > 1 ? "is" : ""}` : `Incluindo parciais`}
+            </button>
+          )}
           <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
             {chartData.length} meses
           </span>
