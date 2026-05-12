@@ -11,6 +11,7 @@ export interface LojaClassificada {
   nickname: string;
   cluster: string;
   subCluster: string;
+  tier: 1 | 2 | 3;
   classificacao: ClassificacaoSust;
   cor: string;
   frase: string;
@@ -122,6 +123,7 @@ export function useClassificacaoLojas() {
           nickname: info.nickname,
           cluster: info.cluster,
           subCluster: info.subCluster,
+          tier: 3,
           classificacao: sust.classificacao,
           cor: sust.cor,
           frase: sust.frase,
@@ -138,7 +140,13 @@ export function useClassificacaoLojas() {
         });
       });
 
-      return result.sort((a, b) => b.receitaUlt - a.receitaUlt);
+      const sorted = result.sort((a, b) => b.receitaUlt - a.receitaUlt);
+      // Tier 1 = top 20% por receita do último mês; Tier 2 = próximos 30%; Tier 3 = demais
+      const n = sorted.length;
+      const t1 = Math.max(1, Math.ceil(n * 0.2));
+      const t2 = t1 + Math.max(1, Math.ceil(n * 0.3));
+      sorted.forEach((l, i) => { l.tier = (i < t1 ? 1 : i < t2 ? 2 : 3); });
+      return sorted;
     },
     staleTime: 60_000,
   });
