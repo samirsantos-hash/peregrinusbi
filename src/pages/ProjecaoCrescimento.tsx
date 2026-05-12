@@ -384,11 +384,25 @@ export default function ProjecaoCrescimento() {
                             </td>
                           );
                         };
-                        const tierColor = l.tier === 1 ? "#D4AF37" : l.tier === 2 ? "#9CA3AF" : "#6B7280";
-                        const tierExpl = l.tier === 1
-                          ? "Tier 1 — Top 20% da carteira por receita do último mês."
-                          : l.tier === 2 ? "Tier 2 — Próximos 30% (faixa intermediária)."
-                          : "Tier 3 — 50% inferiores. Maior potencial de aceleração ou risco.";
+                         const tierColor = l.tier === 1 ? "#E5E4E2" : l.tier === 2 ? "#D4AF37" : "#9CA3AF";
+                         const tierName = l.tier === 1 ? "green_platinum" : l.tier === 2 ? "green_gold" : "green_silver";
+                         const fonteLabel =
+                           l.tierFonte === "reputacao" ? "Reputação atual do MeLi"
+                           : l.tierFonte === "metricas" ? "Métricas oficiais (SoW Pads / OOS / BS)"
+                           : "Fallback por receita (sem reputação/métricas no DB)";
+                         const sym = (s: "ok" | "fail" | "na") => s === "ok" ? "✓" : s === "fail" ? "✗" : "—";
+                         const tierExpl = (
+                           <div className="space-y-1.5">
+                             <div className="font-semibold">Tier {l.tier} — {tierName}</div>
+                             <div className="text-[10px] text-muted-foreground">Fonte: {fonteLabel}</div>
+                             <div className="border-t border-border/40 pt-1.5 space-y-0.5">
+                               <div>{sym(l.tierChecks.rep)} Reputação: <b>{l.repLevel ?? "n/d"}</b></div>
+                               <div>{sym(l.tierChecks.sowPads)} %SoW Pads: <b>{l.metricas.sowPadsPct.toFixed(2)}%</b> (alvo ≥ {l.tier === 1 ? "2.5" : l.tier === 2 ? "1.25" : "0.5"}%)</div>
+                               <div>{sym(l.tierChecks.oos)} %OOS: <b>{l.tierChecks.oos === "na" ? "n/d" : `${l.metricas.oosPct.toFixed(1)}%`}</b> (alvo ≤ {l.tier === 1 ? "15" : l.tier === 2 ? "25" : "35"}%)</div>
+                               <div>{sym(l.tierChecks.bs)} %BS: <b>{l.tierChecks.bs === "na" ? "n/d" : `${l.metricas.bsPct.toFixed(2)}%`}</b> (alvo ≤ {l.tier === 1 ? "35" : l.tier === 2 ? "45" : "55"}%)</div>
+                             </div>
+                           </div>
+                         );
                         const classExpl = (() => {
                           const r = a.receitaPct3m, v = a.visitasPct3m, cr = a.crPp3m, ads = a.invAdsPct3m, sl = a.slope6m;
                           if (r <= -15 || sl <= -0.05) return `Risco de retração: receita ${r.toFixed(0)}% (≤ -15%) ou slope ${(sl*100).toFixed(1)}%/m (≤ -5%/m).`;
@@ -417,7 +431,7 @@ export default function ProjecaoCrescimento() {
                                       </Badge>
                                     </span>
                                   </TooltipTrigger>
-                                  <TooltipContent side="top" className="max-w-xs text-xs">{tierExpl} Receita último mês: {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(l.receitaUlt)}.</TooltipContent>
+                                  <TooltipContent side="top" className="max-w-sm text-xs leading-relaxed">{tierExpl}</TooltipContent>
                                 </Tooltip>
                                 <Badge variant="outline" className="text-[10px]">{l.cluster}</Badge>
                               </div>
