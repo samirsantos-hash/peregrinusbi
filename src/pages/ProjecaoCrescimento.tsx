@@ -365,11 +365,41 @@ export default function ProjecaoCrescimento() {
                       .slice(0, 80)
                       .map((l) => {
                         const a = l.argumentos;
-                        const cellPct = (v: number, isPp = false) => {
+                        const cellPct = (v: number, isPp = false, explica: string) => {
                           const c = v > 1 ? "#16A34A" : v < -1 ? "#DC2626" : "hsl(var(--muted-foreground))";
                           const suf = isPp ? "pp" : "%";
-                          return <td className="px-2 py-2 text-right tabular-nums" style={{ color: c }}>{v >= 0 ? "+" : ""}{v.toFixed(1)}{suf}</td>;
+                          return (
+                            <td className="px-2 py-2 text-right tabular-nums" style={{ color: c }}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="cursor-help underline decoration-dotted decoration-muted-foreground/40 underline-offset-2">
+                                    {v >= 0 ? "+" : ""}{v.toFixed(1)}{suf}
+                                  </span>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">
+                                  {explica}
+                                </TooltipContent>
+                              </Tooltip>
+                            </td>
+                          );
                         };
+                        const tierColor = l.tier === 1 ? "#D4AF37" : l.tier === 2 ? "#9CA3AF" : "#6B7280";
+                        const tierExpl = l.tier === 1
+                          ? "Tier 1 — Top 20% da carteira por receita do último mês."
+                          : l.tier === 2 ? "Tier 2 — Próximos 30% (faixa intermediária)."
+                          : "Tier 3 — 50% inferiores. Maior potencial de aceleração ou risco.";
+                        const classExpl = (() => {
+                          const r = a.receitaPct3m, v = a.visitasPct3m, cr = a.crPp3m, ads = a.invAdsPct3m, sl = a.slope6m;
+                          if (r <= -15 || sl <= -0.05) return `Risco de retração: receita ${r.toFixed(0)}% (≤ -15%) ou slope ${(sl*100).toFixed(1)}%/m (≤ -5%/m).`;
+                          if (ads > 30 && r <= ads) return `Artificial/ads-driven: ads +${ads.toFixed(0)}% > receita ${r.toFixed(0)}%.`;
+                          if (cr <= -5) return `Conversão em queda: ΔCR ${cr.toFixed(1)}pp (≤ -5pp).`;
+                          if (v > 10 && cr <= -2) return `Dependente de tráfego: visitas +${v.toFixed(0)}% mas CR ${cr.toFixed(1)}pp.`;
+                          if (r > 25 && ads < r) return `Escalabilidade positiva: receita +${r.toFixed(0)}% > ads +${ads.toFixed(0)}%.`;
+                          if (Math.abs(v) < 5 && cr > 2) return `Eficiência operacional: CR +${cr.toFixed(1)}pp sem mais tráfego (Δvisitas ${v.toFixed(1)}%).`;
+                          if (v > 0 && cr > 0 && a.aovPct3m >= 0) return "Saudável: visitas, CR e AOV crescendo juntos.";
+                          if (r < -3) return `Drivers misturados (receita ${r.toFixed(1)}%) — investigar visitas, CR e AOV.`;
+                          return "Sem gatilhos críticos — crescimento estável.";
+                        })();
                         return (
                           <tr key={l.sellerId} className="border-b border-border/30 hover:bg-muted/30">
                             <td className="px-2 py-2">
@@ -377,21 +407,36 @@ export default function ProjecaoCrescimento() {
                               <div className="text-[10px] text-muted-foreground">{l.custId}</div>
                             </td>
                             <td className="px-2 py-2">
-                              <Badge variant="outline" className="text-[10px]">{l.cluster}</Badge>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Badge variant="outline" className="text-[10px] cursor-help" style={{ borderColor: tierColor, color: tierColor }}>
+                                      T{l.tier}
+                                    </Badge>
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs text-xs">{tierExpl} Receita último mês: {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(l.receitaUlt)}.</TooltipContent>
+                                </Tooltip>
+                                <Badge variant="outline" className="text-[10px]">{l.cluster}</Badge>
+                              </div>
                               {l.subCluster && l.subCluster !== "—" && (
                                 <div className="text-[10px] text-muted-foreground mt-0.5">{l.subCluster}</div>
                               )}
                             </td>
                             <td className="px-2 py-2">
-                              <Badge variant="outline" className="text-[10px]" style={{ borderColor: l.cor, color: l.cor }}>
-                                {l.classificacao}
-                              </Badge>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Badge variant="outline" className="text-[10px] cursor-help" style={{ borderColor: l.cor, color: l.cor }}>
+                                    {l.classificacao}
+                                  </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="max-w-xs text-xs leading-relaxed">{classExpl}</TooltipContent>
+                              </Tooltip>
                             </td>
-                            {cellPct(a.receitaPct3m)}
-                            {cellPct(a.visitasPct3m)}
-                            {cellPct(a.crPp3m, true)}
-                            {cellPct(a.aovPct3m)}
-                            {cellPct(a.slope6m * 100)}
+                            {cellPct(a.receitaPct3m, false, `Variação % da receita comparando o último mês com 3 meses atrás. Verde > +1%, vermelho < -1%. Drivers: ΔVisitas ${a.visitasPct3m.toFixed(1)}%, ΔCR ${a.crPp3m.toFixed(1)}pp, ΔAOV ${a.aovPct3m.toFixed(1)}%.`)}
+                            {cellPct(a.visitasPct3m, false, `Variação % de visitas em 3m. Se +>10% com CR caindo ≥ 2pp → "Dependente de tráfego".`)}
+                            {cellPct(a.crPp3m, true, `Variação em pontos percentuais da Taxa de Conversão (TSI/Visitas). ≤ -5pp → "Conversão em queda"; ≤ -2pp combinado com slope < 0 → "Risco de retração".`)}
+                            {cellPct(a.aovPct3m, false, `Variação % do Ticket Médio (Receita/TSI). AOV em alta com visitas estáveis sustenta receita sem mais tráfego.`)}
+                            {cellPct(a.slope6m * 100, false, `Inclinação da regressão log da receita nos últimos 6 meses, em %/mês. ≤ -5%/m ou ≥ +5%/m disparam classificações extremas (Risco / Aceleração).`)}
                             <td className="px-2 py-2 text-muted-foreground max-w-[320px]">{l.frase}</td>
                           </tr>
                         );
