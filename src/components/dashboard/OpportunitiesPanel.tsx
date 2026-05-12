@@ -41,7 +41,49 @@ interface ScoredItem extends EligibilityItem {
 }
 
 function computeScoredItems(items: EligibilityItem[]): ScoredItem[] {
-  return items.map(item => {
+  // Deduplica por MLB (itemId): cada anúncio aparece UMA vez.
+  // Para cada MLB, mantém o registro mais recente (por data) como base
+  // e consolida métricas numéricas escolhendo o pico observado no período,
+  // evitando inflar valores ao somar snapshots já agregados (7d).
+  const byMlb = new Map<string, EligibilityItem>();
+  for (const it of items) {
+    const key = String(it.itemId);
+    const prev = byMlb.get(key);
+    if (!prev) {
+      byMlb.set(key, { ...it });
+      continue;
+    }
+    const prevDate = prev.data ? new Date(prev.data).getTime() : 0;
+    const curDate = it.data ? new Date(it.data).getTime() : 0;
+    // Base = registro mais recente (descritivos: nome, categoria, ação, campanha)
+    const base = curDate >= prevDate ? { ...it } : { ...prev };
+    const other = curDate >= prevDate ? prev : it;
+    // Consolida métricas pegando o maior valor observado entre as ocorrências
+    base.pedidos7d = Math.max(prev.pedidos7d || 0, it.pedidos7d || 0);
+    base.mediaTsiDiario7d = Math.max(prev.mediaTsiDiario7d || 0, it.mediaTsiDiario7d || 0);
+    base.estoqueMedio7d = Math.max(prev.estoqueMedio7d || 0, it.estoqueMedio7d || 0);
+    base.estoqueMedioFull7d = Math.max(prev.estoqueMedioFull7d || 0, it.estoqueMedioFull7d || 0);
+    base.discountTotal = Math.max(prev.discountTotal || 0, it.discountTotal || 0);
+    base.discountBest = Math.max(prev.discountBest || 0, it.discountBest || 0);
+    base.discountSellerPercentage = Math.max(
+      prev.discountSellerPercentage || 0,
+      it.discountSellerPercentage || 0,
+    );
+    base.flagBestPromo = prev.flagBestPromo || it.flagBestPromo;
+    // Optin: considera ativo se QUALQUER ocorrência estiver opted-in
+    // (flagItemSOptin = true significa "SEM optin" pelo nome do campo)
+    base.flagItemSOptin = prev.flagItemSOptin && it.flagItemSOptin;
+    // Mantém referências secundárias quando faltarem na base
+    if (!base.itemName && other.itemName) base.itemName = other.itemName;
+    if (!base.domDomainAgg1 && other.domDomainAgg1) base.domDomainAgg1 = other.domDomainAgg1;
+    if (!base.campaignIdBest && other.campaignIdBest) base.campaignIdBest = other.campaignIdBest;
+    if (!base.campaignType && other.campaignType) base.campaignType = other.campaignType;
+    if (!base.acaoRecomendada && other.acaoRecomendada) base.acaoRecomendada = other.acaoRecomendada;
+    byMlb.set(key, base);
+  }
+  const unique = Array.from(byMlb.values());
+
+  return unique.map(item => {
     const discountSellerPct = (item as any).discountSellerPercentage ?? item.discountTotal;
     const mediaTsi = (item as any).mediaTsiDiario7d ?? 0;
     const campaignType = (item as any).campaignType ?? "";
