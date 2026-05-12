@@ -112,6 +112,15 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
   );
 
   const partialCount = taggedData.filter((d) => d.partial).length;
+  const partialRange = useMemo(() => {
+    const keys = taggedData.filter((d) => d.partial).map((d) => d.key).sort();
+    if (keys.length === 0) return null;
+    const fmt = (k: string) => {
+      const [y, m] = k.split("-");
+      return `${m}/${y}`;
+    };
+    return { first: fmt(keys[0]), last: fmt(keys[keys.length - 1]) };
+  }, [taggedData]);
   const chartData = useMemo(
     () => (hidePartial ? taggedData.filter((d) => !d.partial) : taggedData),
     [taggedData, hidePartial],
@@ -168,8 +177,8 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
               onClick={() => setHidePartial((v) => !v)}
               title={
                 hidePartial
-                  ? `Mostrar ${partialCount} mês(es) com dados parciais`
-                  : `Ocultar ${partialCount} mês(es) com dados parciais (<30% da mediana)`
+                  ? `Mostrar dados parciais (${partialRange?.first} – ${partialRange?.last})`
+                  : `Ocultar dados parciais (${partialRange?.first} – ${partialRange?.last}) (<30% da mediana)`
               }
               className={`px-2 py-0.5 text-[10px] font-medium rounded border transition-all ${
                 hidePartial
@@ -177,7 +186,9 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
                   : "bg-muted/30 text-muted-foreground border-border/50 hover:text-foreground"
               }`}
             >
-              {hidePartial ? `Ocultando ${partialCount} parcial${partialCount > 1 ? "is" : ""}` : `Incluindo parciais`}
+              {hidePartial
+                ? `Ocultando parciais ${partialRange?.first} – ${partialRange?.last}`
+                : `Incluindo parciais ${partialRange?.first} – ${partialRange?.last}`}
             </button>
           )}
           <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
