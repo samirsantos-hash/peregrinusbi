@@ -228,8 +228,6 @@ export default function ProjecaoCrescimento() {
         </div>
       </div>
 
-      <Onboarding />
-
       <div className="container mx-auto px-4 py-6 space-y-6">
         {/* Title */}
         <div className="flex items-center justify-between">
@@ -242,6 +240,7 @@ export default function ProjecaoCrescimento() {
           </div>
           {/* Filtros locais */}
           <div className="flex items-center gap-3 flex-wrap">
+            <OnboardingButton />
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">Horizonte</span>
               <Select value={String(horizonte)} onValueChange={(v) => setHorizonte(Number(v))}>
