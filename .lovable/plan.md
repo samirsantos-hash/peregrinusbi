@@ -1,54 +1,98 @@
-## Diagnóstico
+# Projeção de Crescimento e Tendência
 
-**Problema 1 — Gap em 01/01/2026 (`sellers_kpi`)**
-Causa raiz: em `supabase/functions/import-csv/index.ts` linhas 216 e 300:
-```ts
-data: cols[iData]?.trim() || "2026-01-01"
-```
-Qualquer linha do CSV sem `DATA` válido cai como **01/01/2026**, criando uma "pilha" parasita. Hoje há 459 sellers em 2026-01-01 com GMV total de apenas R$ 22M (vs ~R$ 250M dos meses normais) — são linhas órfãs de outros meses + linhas inválidas.
+Novo módulo no menu lateral (rota `/projecao-crescimento`, ícone `TrendingUp`) que responde 3 perguntas ao GM: para onde a carteira vai, por quê, e se o crescimento é sustentável. Tudo baseado em `cpp_mensal` agregado por `mes_ref`, reaproveitando filtros, alertas, drawer e tokens visuais já existentes.
 
-**Problema 2 — `sellers_kpi_daily` continua com 1 linha**
-Em `BatchUploadPanel.tsx` (linhas 33 e 42) os slots **CPP Mensal** e **CPP Diarizada** apontam ambos para `functionName: "import-csv"`. O slot diarizada nunca chama `import-csv-daily` → tabela diária nunca é populada e a função fica órfã.
+## Observação importante sobre os dados
 
-**Problema 3 — Sem slot dedicado para `seller_listings_quality`**
-Quality é populada como subproduto do `import-csv` mensal, mas não há rota independente.
+A tabela `cpp_mensal` **não possui** as colunas `tgmv_orders` nem `mes_ref` confiável em todos os registros — vou usar:
+- **Pedidos** = `tsi` (TSI já é Total Sold Items, proxy de pedidos no projeto)
+- **AOV** = `tgmv_lc / tsi` (consistente com o resto do app)
+- **Mês** = `mes_ref` quando existir, senão derivado de `tim_month_id` via `monthKeyFromTimMonthId()`
 
----
+## Entregas (PRs pequenos)
 
-## Escopo
+### 1. Views SQL (migration)
+- `vw_crescimento_mensal`: agrega `cpp_mensal` por mês com receita, tsi, visitas, inv_pads, CR%, AOV, sellers ativos.
+- `vw_crescimento_seller_mensal`: mesma coisa por seller (drill-down).
+- Filtra `tgmv_lc not null` e exclui meses parciais usando o guard já existente.
 
-### A) Backend / Imports
-1. **Corrigir `import-csv/index.ts`**: remover fallback para `"2026-01-01"`. Linhas sem `DATA` válida (formato `YYYY-MM-DD` ou `DD/MM/YYYY`) são **descartadas** e contadas em `rows_skipped`. Aplicar nas duas pilhas (kpiRows e listingRows).
-2. **Validar `import-csv-daily/index.ts`**: garantir mesma proteção contra DATA inválida; confirmar que grava em `sellers_kpi_daily` com upsert `seller_id,data`.
-3. **Roteamento correto no `BatchUploadPanel`**: slot `cpp_diarizada` → `import-csv-daily`. Adicionar feedback no toast quando rows forem descartadas.
+### 2. Engine de forecast (`src/lib/forecast.ts`)
+- `regressaoLinearPonderada` (pesos exponenciais nos meses recentes)
+- `cagrProjecao` (taxa composta mensal)
+- `ewma` (α configurável, default 0.4)
+- `holtWinters` aditivo (level + trend + sazonalidade m=12; só ativa com 24+ meses)
+- `forecastHibrido`: backtest MAPE nos últimos 3 meses → pesos = 1/MAPE normalizado → soma ponderada + IC95 (±1.96·σ resíduos) + diagnóstico em pt-BR
+- Estado vazio: < 4 meses → "Precisamos de 4+ meses"
+- Dependência: `simple-statistics` (adicionar via bun)
+- Testes vitest cobrindo: pesos somam 1, forecast 3 pontos, IC95 monotônico, fallback < 4m
 
-### B) Limpeza dos dados parasitas existentes
-Migration que **deleta** as linhas de `sellers_kpi` em `data = '2026-01-01'` cujo seller não tinha atividade real em janeiro (heurística: sellers cujo `gmv_lc < 1% do gmv_lc do mesmo seller em dez/2025 OU fev/2026`). Isso remove os ~250 fantasmas e mantém o que realmente teve operação no início de janeiro.
+### 3. Decomposição log-aditiva (`src/lib/decomposicao.ts`)
+- `decompor(atual, anterior)` retorna contribuição % de visitas, CR, AOV e interação
+- Soma ≈ Δlog(Receita) total (erro < 1pp)
 
-Alternativa mais segura se preferir: **deletar tudo de 2026-01-01** e reimportar o CSV de janeiro com a função corrigida.
+### 4. Sustentabilidade (`src/lib/sustentabilidade.ts`)
+- `classificarCrescimento(serie, decomp)` com 7 rótulos: Saudável, Eficiência operacional, Dependente de tráfego, Conversão em queda, Artificial/ads-driven, Risco de retração, Escalabilidade positiva
+- Usado no banner colorido do topo + frase explicativa
 
-### C) Defesa em profundidade (frontend)
-Criar `src/utils/partialPeriodGuard.ts`:
-- `isPartialMonth(date, allRows)` → marca um mês como parcial se `gmvTotal < 30% da mediana dos últimos 6 meses`.
-- Aplicar em `aggregateByMonth.ts` e nas séries do `ExecutivePanel`/`Faturamento`: meses parciais ficam com badge "Parcial" e podem ser opcionalmente excluídos da linha de tendência via toggle.
+### 5. Insights pt-BR (`src/lib/insightsCrescimento.ts`)
+- `insightCrescimento`, `insightConversao`, `insightSazonalidade`, `insightSustentabilidade` — texto factual, sem extrapolar
 
----
+### 6. UI — `src/pages/ProjecaoCrescimento.tsx`
+Banner de sustentabilidade no topo + 5 KpiCards reaproveitando `<KpiCard>`:
+1. Receita Projetada (3m)
+2. Crescimento Projetado (MoM, CAGR 12m, YoY com tooltip se < 24m)
+3. Taxa de Conversão (CR atual + Δ pp + chip de tendência)
+4. Ticket Médio (AOV + variações + contribuição)
+5. Tendência de Crescimento (rótulo classificado pela inclinação log-linear 6m)
 
-## Arquivos afetados
+5 gráficos Recharts (eixo X via `monthKey`):
+- Linha temporal real + forecast pontilhado + banda IC95
+- CR (linha) vs visitas (barras) com eixo Y duplo + reta regressão 6m
+- Heatmap sazonalidade (mês × ano, z-score) — fallback < 24m
+- Scatter visitas×receita (log/log), bolha=CR, cor=sustentabilidade, click→drawer
+- Decomposição empilhada mensal (visitas/CR/AOV/interação) + linha de crescimento %
 
-```text
-supabase/functions/import-csv/index.ts            (corrigir fallback DATA)
-supabase/functions/import-csv-daily/index.ts      (validar/proteger)
-supabase/migrations/<novo>.sql                    (limpar 2026-01-01 fantasma)
-src/components/dashboard/BatchUploadPanel.tsx     (rotear diarizada → import-csv-daily)
-src/utils/partialPeriodGuard.ts                   (novo — detector de mês parcial)
-src/utils/aggregateByMonth.ts                     (usar guard, propagar __partial)
-src/components/dashboard/ExecutivePanel.tsx       (badge "Parcial" + toggle)
-```
+### 7. Filtros adicionais
+Reusa `FiltroContext`. Adiciona local:
+- Horizonte (1/3/6m, default 3m)
+- Suavização α (slider 0.1–0.7)
+- Toggle IC95
+- Comparar com (mês anterior / 3m atrás / média 12m)
 
-## Decisão necessária antes de executar
+### 8. Alertas integrados (`src/lib/alerts.ts`)
+Novos tipos chegando à Central de Alertas existente:
+- `CR_QUEDA_3M` (média)
+- `CRESCIMENTO_DESACELERANDO` (atenção)
+- `CAC_ACIMA_RECEITA` (alta)
+- `TICKET_MEDIO_CAINDO` (atenção)
+- `CRESCIMENTO_INSUSTENTAVEL` (alta)
+- `SAZONAL_NEGATIVA_PROXIMA` (informativa)
 
-Para o passo **B (limpeza)**, prefere:
-- **(B1)** Heurística automática (remove só sellers com GMV < 1% vs meses adjacentes) — preserva sellers que realmente operaram em jan/26.
-- **(B2)** Deletar tudo de 2026-01-01 e te dar um botão para reimportar o CSV de janeiro corrigido.
-- **(B3)** Não mexer no banco ainda; só corrigir o código e mascarar visualmente via guard parcial.
+### 9. Componente `<NewBadge>` + onboarding
+- `src/components/ui/NewBadge.tsx` reaproveitável: pill azul `#3B82F6`, h-4 px-1.5 text-[10px], `animate-pulse` 2s respeitando `prefers-reduced-motion`, tooltip, some no primeiro click via `localStorage` chave `feature_seen_<key>`
+- Badge "NEW" no item de menu da nova rota
+- Popover onboarding 3 passos no primeiro acesso, persiste em `feature_onboarded_projecao_v1`
+
+### 10. Integração ao menu/rotas
+- Rota `/projecao-crescimento` em `src/App.tsx` (protegida)
+- Item no menu lateral logo após "Gestão de Carteira GM" com `<NewBadge featureKey="projecao_v1" />`
+
+## Acabamento
+
+- Tokens semânticos do design system (sem cores hardcoded em componentes)
+- Inter, cards `rounded-2xl shadow-sm p-6`
+- Count-up framer-motion nos KPIs, skeletons durante forecast
+- Mobile: gráficos com scroll horizontal, cards empilhados
+- Sempre `monthKey()` — proibido `getMonth()`/`getFullYear()` em arquivos novos
+- Forecast < 500ms para 12 pontos
+
+## Ordem de execução
+1. Migration das views + checar se `tgmv_orders` existe (caso sim, usar; senão TSI)
+2. `bun add simple-statistics` + engine forecast + testes
+3. Decomposição + sustentabilidade + insights
+4. Página + KPI cards + filtros locais
+5. 5 gráficos
+6. Alertas na Central existente
+7. `NewBadge` + onboarding + entrada no menu/rotas
+
+Confirma para eu começar pelas views SQL?
