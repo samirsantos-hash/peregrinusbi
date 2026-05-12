@@ -329,6 +329,11 @@ const Index = () => {
           <div className="flex items-center gap-2">
             {/* Sound toggle */}
             <SoundToggleButton />
+            <Button variant="outline" size="sm" onClick={() => navigate("/projecao-crescimento")} className="gap-2 relative">
+              <TrendingUp className="w-4 h-4" />
+              Projeção
+              <NewBadge featureKey="projecao_v1" tooltip="Novo: forecast, decomposição de crescimento e alertas de sustentabilidade" />
+            </Button>
             {(isAdmin || isGerente) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
                 <Settings className="w-4 h-4" />
