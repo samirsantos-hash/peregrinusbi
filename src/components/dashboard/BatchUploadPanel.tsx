@@ -39,7 +39,7 @@ const SLOTS: SlotConfig[] = [
     description: "Performance diária para gráficos de oscilação 7/15/30D.",
     icon: CalendarDays,
     colorClass: "text-primary",
-    functionName: "import-csv",
+    functionName: "import-csv-daily",
     sftpPattern: /SFTP_ECOMCONSULT_CPP_DIARI/i,
   },
   {
