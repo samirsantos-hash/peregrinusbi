@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { monthKeyFromTimMonthId } from "@/lib/dates";
+import { monthKey, monthKeyFromTimMonthId } from "@/lib/dates";
 import type { SerieMensal } from "@/lib/forecast";
 
 export interface PontoMensal {
@@ -33,35 +33,73 @@ export function useCrescimentoMensal(custIds?: string[]) {
   return useQuery({
     queryKey: ["crescimento-mensal", custIds?.sort().join(",") || "all"],
     queryFn: async (): Promise<CrescimentoMensalResult> => {
-      let q = supabase
+      // Primary source: cpp_mensal (when populated). Fallback to sellers_kpi (daily) aggregated by month.
+      const byMonth = new Map<string, PontoMensal>();
+      const sellersByMonth = new Map<string, Set<string>>();
+
+      // 1) Try cpp_mensal first
+      let cppQ = supabase
         .from("cpp_mensal")
         .select("tim_month_id, mes_ref, cus_cust_id_sel, tgmv_lc, tsi, visitas, inv_pads")
         .not("tgmv_lc", "is", null);
       if (custIds && custIds.length > 0) {
-        q = q.in("cus_cust_id_sel", custIds.map((c) => Number(c)).filter((n) => Number.isFinite(n)));
+        cppQ = cppQ.in("cus_cust_id_sel", custIds.map((c) => Number(c)).filter((n) => Number.isFinite(n)));
       }
-      const { data, error } = await q;
-      if (error) throw error;
+      const { data: cppRows } = await cppQ;
 
-      const byMonth = new Map<string, PontoMensal>();
-      const sellersByMonth = new Map<string, Set<string>>();
-
-      (data ?? []).forEach((row: any) => {
-        const key = row.mes_ref ? String(row.mes_ref).slice(0, 7) : monthKeyFromTimMonthId(row.tim_month_id);
-        if (!key || key.length !== 7) return;
-        const cur = byMonth.get(key) ?? { mes: key, receita: 0, visitas: 0, tsi: 0, invAds: 0, cr: 0, aov: 0, sellersAtivos: 0 };
-        const r = toNum(row.tgmv_lc);
-        cur.receita += r;
-        cur.visitas += toNum(row.visitas);
-        cur.tsi += toNum(row.tsi);
-        cur.invAds += toNum(row.inv_pads);
-        byMonth.set(key, cur);
-        if (r > 0 && row.cus_cust_id_sel != null) {
-          const set = sellersByMonth.get(key) ?? new Set<string>();
-          set.add(String(row.cus_cust_id_sel));
-          sellersByMonth.set(key, set);
+      if (cppRows && cppRows.length > 0) {
+        cppRows.forEach((row: any) => {
+          const key = row.mes_ref ? String(row.mes_ref).slice(0, 7) : monthKeyFromTimMonthId(row.tim_month_id);
+          if (!key || key.length !== 7) return;
+          const cur = byMonth.get(key) ?? { mes: key, receita: 0, visitas: 0, tsi: 0, invAds: 0, cr: 0, aov: 0, sellersAtivos: 0 };
+          const r = toNum(row.tgmv_lc);
+          cur.receita += r;
+          cur.visitas += toNum(row.visitas);
+          cur.tsi += toNum(row.tsi);
+          cur.invAds += toNum(row.inv_pads);
+          byMonth.set(key, cur);
+          if (r > 0 && row.cus_cust_id_sel != null) {
+            const set = sellersByMonth.get(key) ?? new Set<string>();
+            set.add(String(row.cus_cust_id_sel));
+            sellersByMonth.set(key, set);
+          }
+        });
+      } else {
+        // 2) Fallback: aggregate sellers_kpi (daily) by month
+        // Pull in pages to bypass 1000-row limit
+        const pageSize = 1000;
+        let from = 0;
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+          const { data: kpiRows, error } = await supabase
+            .from("sellers_kpi")
+            .select("seller_id, data, tim_month_id, tgmv_lc, gmv_lc, tsi, visits, inv_pads")
+            .order("data", { ascending: true })
+            .range(from, from + pageSize - 1);
+          if (error) throw error;
+          if (!kpiRows || kpiRows.length === 0) break;
+          kpiRows.forEach((row: any) => {
+            const key = row.tim_month_id
+              ? monthKeyFromTimMonthId(row.tim_month_id)
+              : (row.data ? monthKey(row.data) : "");
+            if (!key || key.length !== 7) return;
+            const cur = byMonth.get(key) ?? { mes: key, receita: 0, visitas: 0, tsi: 0, invAds: 0, cr: 0, aov: 0, sellersAtivos: 0 };
+            const r = toNum(row.tgmv_lc) || toNum(row.gmv_lc);
+            cur.receita += r;
+            cur.visitas += toNum(row.visits);
+            cur.tsi += toNum(row.tsi);
+            cur.invAds += toNum(row.inv_pads);
+            byMonth.set(key, cur);
+            if (r > 0 && row.seller_id) {
+              const set = sellersByMonth.get(key) ?? new Set<string>();
+              set.add(String(row.seller_id));
+              sellersByMonth.set(key, set);
+            }
+          });
+          if (kpiRows.length < pageSize) break;
+          from += pageSize;
         }
-      });
+      }
 
       const pontos = Array.from(byMonth.values())
         .map((p) => ({
