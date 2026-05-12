@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useCrescimentoMensal, type PontoMensal } from "@/hooks/useCrescimentoMensal";
+import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
 import { forecastHibrido, inclinacaoLog, classificarTendencia, type SerieMensal } from "@/lib/forecast";
 import { decompor, type ContribuicaoCrescimento } from "@/lib/decomposicao";
 import { classificarCrescimento } from "@/lib/sustentabilidade";
@@ -122,6 +123,8 @@ function OnboardingButton() {
 /* ---------- Page ---------- */
 export default function ProjecaoCrescimento() {
   const { data, isLoading } = useCrescimentoMensal();
+  const { data: lojas, isLoading: loadingLojas } = useClassificacaoLojas();
+  const [filtroClass, setFiltroClass] = useState<string>("all");
   const [horizonte, setHorizonte] = useState<number>(3);
   const [alpha, setAlpha] = useState<number>(0.4);
   const [showIC, setShowIC] = useState<boolean>(true);
