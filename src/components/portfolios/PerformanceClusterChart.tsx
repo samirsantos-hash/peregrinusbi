@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ReferenceLine } from "recharts";
 import { Activity, TrendingDown, TrendingUp } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import type { SellerWithKpi } from "@/hooks/usePortfolios";
 
 interface Props {
@@ -18,14 +19,18 @@ function fmtBRL(v: number): string {
  * Top 20% = Tracionadores (drivers), Bottom 20% = Detratores (laggards).
  */
 export default function PerformanceClusterChart({ sellers, aliases = {} }: Props) {
-  const { data, total, tracionadores, detratores } = useMemo(() => {
+  const [topPct, setTopPct] = useState(20);
+  const [botPct, setBotPct] = useState(20);
+
+  const { data, tracionadores, detratores } = useMemo(() => {
     const sorted = [...sellers]
       .filter((s) => s.tgmvLc > 0)
       .sort((a, b) => b.tgmvLc - a.tgmvLc);
     const total = sorted.reduce((s, x) => s + x.tgmvLc, 0);
     const n = sorted.length;
-    const topCut = Math.max(1, Math.ceil(n * 0.2));
-    const botCut = Math.max(1, Math.ceil(n * 0.2));
+    const topCut = Math.max(1, Math.ceil(n * (topPct / 100)));
+    const botCutRaw = Math.max(1, Math.ceil(n * (botPct / 100)));
+    const botCut = Math.min(botCutRaw, Math.max(0, n - topCut));
 
     const data = sorted.map((s, i) => {
       const isTop = i < topCut;
@@ -41,11 +46,10 @@ export default function PerformanceClusterChart({ sellers, aliases = {} }: Props
 
     return {
       data,
-      total,
       tracionadores: data.filter((d) => d.cluster === "Tracionador"),
       detratores: data.filter((d) => d.cluster === "Detrator"),
     };
-  }, [sellers, aliases]);
+  }, [sellers, aliases, topPct, botPct]);
 
   if (data.length === 0) return null;
 
@@ -74,6 +78,39 @@ export default function PerformanceClusterChart({ sellers, aliases = {} }: Props
               <TrendingDown className="w-3.5 h-3.5" />
               <strong>{detratores.length}</strong> Detratores · {botShare.toFixed(1)}% do GMV
             </span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 rounded-md border border-border bg-muted/20 p-3">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-primary flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5" /> Tracionadores (Top)
+              </span>
+              <span className="tabular-nums font-bold text-primary">{topPct}%</span>
+            </div>
+            <Slider
+              min={10}
+              max={30}
+              step={1}
+              value={[topPct]}
+              onValueChange={(v) => setTopPct(v[0])}
+            />
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-semibold text-destructive flex items-center gap-1.5">
+                <TrendingDown className="w-3.5 h-3.5" /> Detratores (Bottom)
+              </span>
+              <span className="tabular-nums font-bold text-destructive">{botPct}%</span>
+            </div>
+            <Slider
+              min={10}
+              max={30}
+              step={1}
+              value={[botPct]}
+              onValueChange={(v) => setBotPct(v[0])}
+            />
           </div>
         </div>
 
