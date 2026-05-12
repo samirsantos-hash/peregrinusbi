@@ -448,6 +448,7 @@ export default function ProjecaoCrescimento() {
                   <p className="text-[10px] text-muted-foreground mt-2 text-center">Mostrando 80 de {lojas.length} lojas — use o filtro para refinar.</p>
                 )}
               </div>
+              </TooltipProvider>
             )}
           </Card>
         )}
