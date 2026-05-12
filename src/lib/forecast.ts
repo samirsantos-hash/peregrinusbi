@@ -160,12 +160,12 @@ export function forecastHibrido(serie: SerieMensal, horizonte: number, alpha = 0
   mapes.forEach((m, i) => { weights[m.key] = invs[i] / sumInv; });
 
   // Final forecast
-  const fcMethods = [
-    { key: "reglin" as const, preds: regressaoLinearPonderada(serie, horizonte) },
-    { key: "ewma" as const, preds: ewmaForecast(serie, horizonte, alpha) },
-    { key: "cagr" as const, preds: cagrProjecao(serie, horizonte) },
+  const fcMethods: Array<{ key: "reglin" | "ewma" | "cagr" | "holt_winters"; preds: number[] }> = [
+    { key: "reglin", preds: regressaoLinearPonderada(serie, horizonte) },
+    { key: "ewma", preds: ewmaForecast(serie, horizonte, alpha) },
+    { key: "cagr", preds: cagrProjecao(serie, horizonte) },
   ];
-  if (n >= 24) fcMethods.push({ key: "holt_winters" as const, preds: holtWinters(serie, horizonte, 12) });
+  if (n >= 24) fcMethods.push({ key: "holt_winters", preds: holtWinters(serie, horizonte, 12) });
 
   const final: number[] = [];
   for (let h = 0; h < horizonte; h++) {
