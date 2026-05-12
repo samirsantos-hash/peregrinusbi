@@ -267,6 +267,57 @@ const DonutLabel = ({ viewBox, total, withClip }: any) => {
 const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCustIdMap, selectedSeller, dataGranularity = "daily" }: ClipsAudiencePanelProps) => {
   const [filterNoClips, setFilterNoClips] = useState(false);
 
+  /* ── 0. Deduplica elegibilidade por MLB (itemId) ──
+     Cada anúncio aparece UMA vez. Base = registro mais recente; métricas
+     numéricas consolidadas pelo pico observado (sem inflar somas de snapshots 7d). */
+  const dedupedEligibility = useMemo(() => {
+    const byMlb = new Map<string, EligibilityItem>();
+    for (const it of eligibilityItems) {
+      const key = String(it.itemId);
+      const prev = byMlb.get(key);
+      if (!prev) { byMlb.set(key, { ...it }); continue; }
+      const prevDate = prev.data ? new Date(prev.data).getTime() : 0;
+      const curDate = it.data ? new Date(it.data).getTime() : 0;
+      const base = curDate >= prevDate ? { ...it } : { ...prev };
+      const other = curDate >= prevDate ? prev : it;
+      base.pedidos7d = Math.max(prev.pedidos7d || 0, it.pedidos7d || 0);
+      base.mediaTsiDiario7d = Math.max(prev.mediaTsiDiario7d || 0, it.mediaTsiDiario7d || 0);
+      base.estoqueMedio7d = Math.max(prev.estoqueMedio7d || 0, it.estoqueMedio7d || 0);
+      base.estoqueMedioFull7d = Math.max(prev.estoqueMedioFull7d || 0, it.estoqueMedioFull7d || 0);
+      base.discountTotal = Math.max(prev.discountTotal || 0, it.discountTotal || 0);
+      base.discountBest = Math.max(prev.discountBest || 0, it.discountBest || 0);
+      base.discountSellerPercentage = Math.max(prev.discountSellerPercentage || 0, it.discountSellerPercentage || 0);
+      base.flagBestPromo = prev.flagBestPromo || it.flagBestPromo;
+      base.flagItemSOptin = prev.flagItemSOptin && it.flagItemSOptin;
+      if (!base.itemName && other.itemName) base.itemName = other.itemName;
+      if (!base.domDomainAgg1 && other.domDomainAgg1) base.domDomainAgg1 = other.domDomainAgg1;
+      if (!base.campaignIdBest && other.campaignIdBest) base.campaignIdBest = other.campaignIdBest;
+      if (!base.campaignType && other.campaignType) base.campaignType = other.campaignType;
+      if (!base.acaoRecomendada && other.acaoRecomendada) base.acaoRecomendada = other.acaoRecomendada;
+      byMlb.set(key, base);
+    }
+    return Array.from(byMlb.values());
+  }, [eligibilityItems]);
+
+  /* ── 0b. Deduplica listings_quality por itemId (base = registro mais recente; métricas pelo pico) ── */
+  const dedupedQuality = useMemo(() => {
+    if (!listingsQuality) return undefined;
+    const byMlb = new Map<string, ListingQuality>();
+    for (const lq of listingsQuality) {
+      const key = String(lq.itemId);
+      const prev = byMlb.get(key);
+      if (!prev) { byMlb.set(key, { ...lq }); continue; }
+      const prevDate = (prev as any).data ? new Date((prev as any).data).getTime() : 0;
+      const curDate = (lq as any).data ? new Date((lq as any).data).getTime() : 0;
+      const base = curDate >= prevDate ? { ...lq } : { ...prev };
+      base.visitasClips = Math.max(prev.visitasClips || 0, lq.visitasClips || 0);
+      base.siClips = Math.max(prev.siClips || 0, lq.siClips || 0);
+      base.ordersClips = Math.max(prev.ordersClips || 0, lq.ordersClips || 0);
+      byMlb.set(key, base);
+    }
+    return Array.from(byMlb.values());
+  }, [listingsQuality]);
+
   /* ── 1. Aggregate KPI totals ── */
   const totals = useMemo(() => {
     const t = { visits: 0, visitasClips: 0, tgmvClips: 0, ordersClips: 0, siClips: 0, clipsPubli: 0 };
@@ -290,8 +341,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
   /* ── 2. Per-item clip data map from listings quality ── */
   const itemClipMap = useMemo(() => {
     const map = new Map<string, { visitasClips: number; siClips: number; ordersClips: number; hasClip: boolean }>();
-    if (!listingsQuality) return map;
-    for (const lq of listingsQuality) {
+    if (!dedupedQuality) return map;
+    for (const lq of dedupedQuality) {
       const hc = hasClipData(lq.visitasClips, lq.siClips, lq.ordersClips);
       map.set(lq.itemId, {
         visitasClips: lq.visitasClips,
@@ -301,19 +352,17 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       });
     }
     return map;
-  }, [listingsQuality]);
+  }, [dedupedQuality]);
 
   /* ── 3. Clip coverage: count unique items with/without clip data ── */
   const clipCoverage = useMemo(() => {
     const allItems = new Map<string, boolean>();
-    // From listings quality
-    if (listingsQuality) {
-      for (const lq of listingsQuality) {
+    if (dedupedQuality) {
+      for (const lq of dedupedQuality) {
         allItems.set(lq.itemId, hasClipData(lq.visitasClips, lq.siClips, lq.ordersClips));
       }
     }
-    // From eligibility (items not in quality data count as no clip)
-    for (const ei of eligibilityItems) {
+    for (const ei of dedupedEligibility) {
       if (!allItems.has(ei.itemId)) {
         allItems.set(ei.itemId, false);
       }
@@ -321,7 +370,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     let withClip = 0, withoutClip = 0;
     allItems.forEach((hc) => { if (hc) withClip++; else withoutClip++; });
     return { withClip, withoutClip, total: withClip + withoutClip };
-  }, [listingsQuality, eligibilityItems]);
+  }, [dedupedQuality, dedupedEligibility]);
 
   /* ── 4. Average orders for threshold ── */
   const avgOrdersClips = useMemo(() => {
@@ -340,13 +389,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── 6. Top 5 items by pedidos — deduplicated ── */
   const topContentItems = useMemo(() => {
-    const seen = new Set<string>();
-    const items = eligibilityItems
-      .filter((e) => {
-        if (e.pedidos7d <= 0 || seen.has(e.itemId)) return false;
-        seen.add(e.itemId);
-        return true;
-      })
+    const items = dedupedEligibility
+      .filter((e) => e.pedidos7d > 0)
       .sort((a, b) => b.pedidos7d - a.pedidos7d);
 
     if (filterNoClips) {
@@ -356,20 +400,15 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       }).slice(0, 10);
     }
     return items.slice(0, 5);
-  }, [eligibilityItems, filterNoClips, itemClipMap]);
+  }, [dedupedEligibility, filterNoClips, itemClipMap]);
 
   /* ── 7. Hot items: high pedidos, deduplicated ── */
   const hotItems = useMemo(() => {
-    const seen = new Set<string>();
-    return eligibilityItems
-      .filter((e) => {
-        if (e.pedidos7d <= 5 || seen.has(e.itemId)) return false;
-        seen.add(e.itemId);
-        return true;
-      })
+    return dedupedEligibility
+      .filter((e) => e.pedidos7d > 5)
       .sort((a, b) => b.pedidos7d - a.pedidos7d)
       .slice(0, 8);
-  }, [eligibilityItems]);
+  }, [dedupedEligibility]);
 
   /* ── 8. Conversion rate ── */
   const conversionRate = pct(totals.ordersClips, totals.visitasClips);
@@ -403,8 +442,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     let noReach = 0, lowConversion = 0, champion = 0, noClip = 0;
     const seen = new Set<string>();
 
-    if (listingsQuality) {
-      for (const lq of listingsQuality) {
+    if (dedupedQuality) {
+      for (const lq of dedupedQuality) {
         if (seen.has(lq.itemId)) continue;
         seen.add(lq.itemId);
         const hc = hasClipData(lq.visitasClips, lq.siClips, lq.ordersClips);
@@ -415,14 +454,14 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       }
     }
 
-    for (const ei of eligibilityItems) {
+    for (const ei of dedupedEligibility) {
       if (seen.has(ei.itemId) || ei.pedidos7d <= 0) continue;
       seen.add(ei.itemId);
       noClip++;
     }
 
     return { noReach, lowConversion, champion, noClip };
-  }, [listingsQuality, eligibilityItems, avgOrdersClips]);
+  }, [dedupedQuality, dedupedEligibility, avgOrdersClips]);
 
   /* ── Donut data ── */
   const donutData = useMemo(() => [
