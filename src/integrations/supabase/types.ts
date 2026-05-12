@@ -491,6 +491,7 @@ export type Database = {
           cust_ids: string[]
           id: string
           name: string
+          seller_aliases: Json
         }
         Insert: {
           assigned_to?: string | null
@@ -499,6 +500,7 @@ export type Database = {
           cust_ids?: string[]
           id?: string
           name: string
+          seller_aliases?: Json
         }
         Update: {
           assigned_to?: string | null
@@ -507,6 +509,7 @@ export type Database = {
           cust_ids?: string[]
           id?: string
           name?: string
+          seller_aliases?: Json
         }
         Relationships: []
       }

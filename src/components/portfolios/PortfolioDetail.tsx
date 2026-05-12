@@ -11,6 +11,7 @@ import AlertMatrix from "./AlertMatrix";
 import RaioXTable from "./RaioXTable";
 import MedalFilter from "./MedalFilter";
 import GrantsMonitor from "./GrantsMonitor";
+import PerformanceClusterChart from "./PerformanceClusterChart";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -30,22 +31,27 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const { sellers, loading } = usePortfolioData(portfolio.cust_ids);
   const [selectedMedals, setSelectedMedals] = useState<string[]>([]);
   const [grantFilter, setGrantFilter] = useState<GrantLevel | null>(null);
+  const aliases = portfolio.seller_aliases || {};
+  const sellersWithAliases = useMemo(
+    () => sellers.map((s) => ({ ...s, nickname: aliases[s.custId] || s.nickname })),
+    [sellers, aliases]
+  );
 
-  const sellerIds = useMemo(() => sellers.map((s) => s.sellerId), [sellers]);
+  const sellerIds = useMemo(() => sellersWithAliases.map((s) => s.sellerId), [sellersWithAliases]);
   const { trends } = usePortfolioTrends(sellerIds);
   const { grants } = useSellerGrants(sellerIds);
   const { campaigns } = useMeliCampaigns(sellerIds);
 
   const filteredSellers = useMemo(() => {
-    if (selectedMedals.length === 0) return sellers;
-    return sellers.filter((s) => {
+    if (selectedMedals.length === 0) return sellersWithAliases;
+    return sellersWithAliases.filter((s) => {
       const level = (s.repCurrentLevel || "").toLowerCase();
       return selectedMedals.some((m) => {
         if (m === "sem_medalha") return !level || level === "" || level === "null";
         return level.includes(m.toLowerCase());
       });
     });
-  }, [sellers, selectedMedals]);
+  }, [sellersWithAliases, selectedMedals]);
 
   const summary = useMemo(() => {
     if (!filteredSellers.length) return null;
@@ -152,6 +158,9 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
           </CardContent>
         </Card>
       )}
+
+      {/* Cluster de Desempenho */}
+      <PerformanceClusterChart sellers={filteredSellers} aliases={aliases} />
 
       {/* 4 KPI Cards */}
       {summary && (
