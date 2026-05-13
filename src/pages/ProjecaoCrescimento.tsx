@@ -127,6 +127,8 @@ export default function ProjecaoCrescimento() {
   const { data, isLoading } = useCrescimentoMensal();
   const { data: lojas, isLoading: loadingLojas } = useClassificacaoLojas();
   const [filtroClass, setFiltroClass] = useState<string>("all");
+  const [scatterSeller, setScatterSeller] = useState<string>("all");
+  const [scatterBusca, setScatterBusca] = useState<string>("");
   const [horizonte, setHorizonte] = useState<number>(3);
   const [alpha, setAlpha] = useState<number>(0.4);
   const [showIC, setShowIC] = useState<boolean>(true);
