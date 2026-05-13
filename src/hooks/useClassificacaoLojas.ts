@@ -39,6 +39,8 @@ export interface LojaClassificada {
     slope6m: number;
   };
   receitaUlt: number;
+  visitasUlt: number;
+  crUlt: number;
   meses: number;
 }
 
