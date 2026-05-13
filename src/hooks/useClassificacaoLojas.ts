@@ -39,6 +39,8 @@ export interface LojaClassificada {
     slope6m: number;
   };
   receitaUlt: number;
+  visitasUlt: number;
+  crUlt: number;
   meses: number;
 }
 
@@ -218,6 +220,8 @@ export function useClassificacaoLojas() {
             slope6m: inclinacaoLog(receita, 6),
           },
           receitaUlt: last.receita,
+          visitasUlt: last.visitas,
+          crUlt: last.visitas > 0 ? (last.tsi / last.visitas) * 100 : 0,
           meses: sorted.length,
         });
       });

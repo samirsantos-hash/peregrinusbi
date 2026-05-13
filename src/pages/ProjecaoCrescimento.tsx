@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCrescimentoMensal, type PontoMensal } from "@/hooks/useCrescimentoMensal";
@@ -127,6 +128,8 @@ export default function ProjecaoCrescimento() {
   const { data, isLoading } = useCrescimentoMensal();
   const { data: lojas, isLoading: loadingLojas } = useClassificacaoLojas();
   const [filtroClass, setFiltroClass] = useState<string>("all");
+  const [scatterSeller, setScatterSeller] = useState<string>("all");
+  const [scatterBusca, setScatterBusca] = useState<string>("");
   const [horizonte, setHorizonte] = useState<number>(3);
   const [alpha, setAlpha] = useState<number>(0.4);
   const [showIC, setShowIC] = useState<boolean>(true);
@@ -207,8 +210,31 @@ export default function ProjecaoCrescimento() {
     return byYear;
   }, [pontos]);
 
-  /* Chart 4: scatter — last month per cust (we don't have per-seller here; show one bubble per month) */
-  const scatter = pontos.map((p) => ({ x: Math.max(1, p.visitas), y: Math.max(1, p.receita), z: p.cr, label: monthLabel(p.mes) }));
+  /* Chart 4: scatter — uma bolha por loja (último mês). Z = CR%. */
+  const scatterLojas = useMemo(() => {
+    if (!lojas) return [] as Array<{ x: number; y: number; z: number; label: string; sellerId: string; custId: string; tier: number }>;
+    const base = lojas
+      .filter((l) => Number.isFinite(l.visitasUlt) && Number.isFinite(l.receitaUlt) && l.visitasUlt > 0 && l.receitaUlt > 0)
+      .map((l) => ({
+        x: l.visitasUlt,
+        y: l.receitaUlt,
+        z: Math.max(0.01, l.crUlt || 0.01),
+        label: l.nickname,
+        sellerId: l.sellerId,
+        custId: l.custId,
+        tier: l.tier,
+      }));
+    if (scatterSeller !== "all") return base.filter((b) => b.sellerId === scatterSeller);
+    if (scatterBusca.trim()) {
+      const q = scatterBusca.trim().toLowerCase();
+      return base.filter((b) => b.label.toLowerCase().includes(q) || String(b.custId).includes(q));
+    }
+    return base;
+  }, [lojas, scatterSeller, scatterBusca]);
+  const scatterSellerOptions = useMemo(
+    () => (lojas ?? []).slice().sort((a, b) => a.nickname.localeCompare(b.nickname)),
+    [lojas],
+  );
 
   /* Chart 5: decomposição empilhada por mês */
   const decompMensal = useMemo(() => {
@@ -717,20 +743,70 @@ export default function ProjecaoCrescimento() {
           )}
         </Card>
 
-        {/* Chart 4: scatter visitas x receita */}
+        {/* Chart 4: scatter visitas x receita por loja */}
         <Card className="p-5 rounded-2xl">
-          <h3 className="text-sm font-semibold mb-3">Visitas × Receita (escala log)</h3>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="x" name="Visitas" scale="log" domain={["auto", "auto"]} tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(v)} />
-                <YAxis dataKey="y" name="Receita" scale="log" domain={["auto", "auto"]} tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(v)} />
-                <ZAxis dataKey="z" range={[40, 240]} name="CR%" />
-                <RTooltip formatter={(v: any, n: any) => (n === "Receita" ? fmtBRL(Number(v)) : fmtNum(Number(v)))} />
-                <Scatter data={scatter} fill={sust?.cor ?? "#3B82F6"} />
-              </ScatterChart>
-            </ResponsiveContainer>
+          <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+            <div>
+              <h3 className="text-sm font-semibold">Visitas × Receita por loja (escala log)</h3>
+              <p className="text-[11px] text-muted-foreground">
+                Cada bolha = uma loja no último mês. Tamanho = CR%. Cor = tier. {scatterLojas.length} {scatterLojas.length === 1 ? "loja" : "lojas"} no gráfico.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Input
+                placeholder="Buscar loja ou CUST_ID…"
+                value={scatterBusca}
+                onChange={(e) => { setScatterBusca(e.target.value); if (scatterSeller !== "all") setScatterSeller("all"); }}
+                className="h-8 text-xs w-48"
+              />
+              <Select value={scatterSeller} onValueChange={(v) => { setScatterSeller(v); if (v !== "all") setScatterBusca(""); }}>
+                <SelectTrigger className="w-56 h-8 text-xs"><SelectValue placeholder="Loja específica…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as lojas</SelectItem>
+                  {scatterSellerOptions.slice(0, 300).map((l) => (
+                    <SelectItem key={l.sellerId} value={l.sellerId}>{l.nickname} · {l.custId}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="h-80">
+            {scatterLojas.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-12 text-center">Nenhuma loja com visitas e receita no último mês para o filtro atual.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis type="number" dataKey="x" name="Visitas" scale="log" domain={["auto", "auto"]} tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(Number(v))} />
+                  <YAxis type="number" dataKey="y" name="Receita" scale="log" domain={["auto", "auto"]} tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(Number(v))} />
+                  <ZAxis type="number" dataKey="z" range={[40, 320]} name="CR%" />
+                  <RTooltip
+                    cursor={{ strokeDasharray: "3 3" }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const d: any = payload[0].payload;
+                      return (
+                        <div className="rounded-md border border-border/60 bg-background px-2.5 py-1.5 text-[11px] shadow-md">
+                          <div className="font-semibold">{d.label} <span className="text-muted-foreground">· {d.custId}</span></div>
+                          <div className="text-muted-foreground">Tier T{d.tier}</div>
+                          <div className="tabular-nums">Visitas: <b>{fmtNum(d.x)}</b></div>
+                          <div className="tabular-nums">Receita: <b>{fmtBRL(d.y)}</b></div>
+                          <div className="tabular-nums">CR: <b>{d.z.toFixed(2)}%</b></div>
+                        </div>
+                      );
+                    }}
+                  />
+                  {[1, 2, 3].map((t) => {
+                    const cor = t === 1 ? "#E5E4E2" : t === 2 ? "#D4AF37" : "#9CA3AF";
+                    const nome = t === 1 ? "T1 platinum" : t === 2 ? "T2 gold" : "T3 silver";
+                    const pts = scatterLojas.filter((p) => p.tier === t);
+                    if (!pts.length) return null;
+                    return <Scatter key={t} name={nome} data={pts} fill={cor} fillOpacity={0.75} stroke={cor} />;
+                  })}
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                </ScatterChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </Card>
 
