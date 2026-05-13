@@ -391,16 +391,18 @@ export default function ProjecaoCrescimento() {
                            l.tierFonte === "reputacao" ? "Reputação atual do MeLi"
                            : l.tierFonte === "metricas" ? "Métricas oficiais (SoW Pads / OOS / BS)"
                            : "Fallback por receita (sem reputação/métricas no DB)";
-                         const sym = (s: "ok" | "fail" | "na") => s === "ok" ? "✓" : s === "fail" ? "✗" : "—";
+                         const sym = (s?: "ok" | "fail" | "na") => s === "ok" ? "✓" : s === "fail" ? "✗" : "—";
+                         const checks = l.tierChecks ?? { rep: "na" as const, sowPads: "na" as const, oos: "na" as const, bs: "na" as const };
+                         const met = l.metricas ?? { sowPadsPct: 0, oosPct: 0, bsPct: 0 };
                          const tierExpl = (
                            <div className="space-y-1.5">
                              <div className="font-semibold">Tier {l.tier} — {tierName}</div>
                              <div className="text-[10px] text-muted-foreground">Fonte: {fonteLabel}</div>
                              <div className="border-t border-border/40 pt-1.5 space-y-0.5">
-                               <div>{sym(l.tierChecks.rep)} Reputação: <b>{l.repLevel ?? "n/d"}</b></div>
-                               <div>{sym(l.tierChecks.sowPads)} %SoW Pads: <b>{l.metricas.sowPadsPct.toFixed(2)}%</b> (alvo ≥ {l.tier === 1 ? "2.5" : l.tier === 2 ? "1.25" : "0.5"}%)</div>
-                               <div>{sym(l.tierChecks.oos)} %OOS: <b>{l.tierChecks.oos === "na" ? "n/d" : `${l.metricas.oosPct.toFixed(1)}%`}</b> (alvo ≤ {l.tier === 1 ? "15" : l.tier === 2 ? "25" : "35"}%)</div>
-                               <div>{sym(l.tierChecks.bs)} %BS: <b>{l.tierChecks.bs === "na" ? "n/d" : `${l.metricas.bsPct.toFixed(2)}%`}</b> (alvo ≤ {l.tier === 1 ? "35" : l.tier === 2 ? "45" : "55"}%)</div>
+                               <div>{sym(checks.rep)} Reputação: <b>{l.repLevel ?? "n/d"}</b></div>
+                               <div>{sym(checks.sowPads)} %SoW Pads: <b>{met.sowPadsPct.toFixed(2)}%</b> (alvo ≥ {l.tier === 1 ? "2.5" : l.tier === 2 ? "1.25" : "0.5"}%)</div>
+                               <div>{sym(checks.oos)} %OOS: <b>{checks.oos === "na" ? "n/d" : `${met.oosPct.toFixed(1)}%`}</b> (alvo ≤ {l.tier === 1 ? "15" : l.tier === 2 ? "25" : "35"}%)</div>
+                               <div>{sym(checks.bs)} %BS: <b>{checks.bs === "na" ? "n/d" : `${met.bsPct.toFixed(2)}%`}</b> (alvo ≤ {l.tier === 1 ? "35" : l.tier === 2 ? "45" : "55"}%)</div>
                              </div>
                            </div>
                          );
