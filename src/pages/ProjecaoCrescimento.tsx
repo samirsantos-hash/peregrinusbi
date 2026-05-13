@@ -210,8 +210,31 @@ export default function ProjecaoCrescimento() {
     return byYear;
   }, [pontos]);
 
-  /* Chart 4: scatter — last month per cust (we don't have per-seller here; show one bubble per month) */
-  const scatter = pontos.map((p) => ({ x: Math.max(1, p.visitas), y: Math.max(1, p.receita), z: p.cr, label: monthLabel(p.mes) }));
+  /* Chart 4: scatter — uma bolha por loja (último mês). Z = CR%. */
+  const scatterLojas = useMemo(() => {
+    if (!lojas) return [] as Array<{ x: number; y: number; z: number; label: string; sellerId: string; custId: string; tier: number }>;
+    const base = lojas
+      .filter((l) => Number.isFinite(l.visitasUlt) && Number.isFinite(l.receitaUlt) && l.visitasUlt > 0 && l.receitaUlt > 0)
+      .map((l) => ({
+        x: l.visitasUlt,
+        y: l.receitaUlt,
+        z: Math.max(0.01, l.crUlt || 0.01),
+        label: l.nickname,
+        sellerId: l.sellerId,
+        custId: l.custId,
+        tier: l.tier,
+      }));
+    if (scatterSeller !== "all") return base.filter((b) => b.sellerId === scatterSeller);
+    if (scatterBusca.trim()) {
+      const q = scatterBusca.trim().toLowerCase();
+      return base.filter((b) => b.label.toLowerCase().includes(q) || String(b.custId).includes(q));
+    }
+    return base;
+  }, [lojas, scatterSeller, scatterBusca]);
+  const scatterSellerOptions = useMemo(
+    () => (lojas ?? []).slice().sort((a, b) => a.nickname.localeCompare(b.nickname)),
+    [lojas],
+  );
 
   /* Chart 5: decomposição empilhada por mês */
   const decompMensal = useMemo(() => {
