@@ -743,20 +743,70 @@ export default function ProjecaoCrescimento() {
           )}
         </Card>
 
-        {/* Chart 4: scatter visitas x receita */}
+        {/* Chart 4: scatter visitas x receita por loja */}
         <Card className="p-5 rounded-2xl">
-          <h3 className="text-sm font-semibold mb-3">Visitas × Receita (escala log)</h3>
-          <div className="h-72">
-            <ResponsiveContainer width="100%" height="100%">
-              <ScatterChart>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="x" name="Visitas" scale="log" domain={["auto", "auto"]} tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(v)} />
-                <YAxis dataKey="y" name="Receita" scale="log" domain={["auto", "auto"]} tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(v)} />
-                <ZAxis dataKey="z" range={[40, 240]} name="CR%" />
-                <RTooltip formatter={(v: any, n: any) => (n === "Receita" ? fmtBRL(Number(v)) : fmtNum(Number(v)))} />
-                <Scatter data={scatter} fill={sust?.cor ?? "#3B82F6"} />
-              </ScatterChart>
-            </ResponsiveContainer>
+          <div className="flex items-baseline justify-between mb-3 flex-wrap gap-2">
+            <div>
+              <h3 className="text-sm font-semibold">Visitas × Receita por loja (escala log)</h3>
+              <p className="text-[11px] text-muted-foreground">
+                Cada bolha = uma loja no último mês. Tamanho = CR%. Cor = tier. {scatterLojas.length} {scatterLojas.length === 1 ? "loja" : "lojas"} no gráfico.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Input
+                placeholder="Buscar loja ou CUST_ID…"
+                value={scatterBusca}
+                onChange={(e) => { setScatterBusca(e.target.value); if (scatterSeller !== "all") setScatterSeller("all"); }}
+                className="h-8 text-xs w-48"
+              />
+              <Select value={scatterSeller} onValueChange={(v) => { setScatterSeller(v); if (v !== "all") setScatterBusca(""); }}>
+                <SelectTrigger className="w-56 h-8 text-xs"><SelectValue placeholder="Loja específica…" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas as lojas</SelectItem>
+                  {scatterSellerOptions.slice(0, 300).map((l) => (
+                    <SelectItem key={l.sellerId} value={l.sellerId}>{l.nickname} · {l.custId}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="h-80">
+            {scatterLojas.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-12 text-center">Nenhuma loja com visitas e receita no último mês para o filtro atual.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <ScatterChart margin={{ top: 8, right: 16, bottom: 8, left: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis type="number" dataKey="x" name="Visitas" scale="log" domain={["auto", "auto"]} tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(Number(v))} />
+                  <YAxis type="number" dataKey="y" name="Receita" scale="log" domain={["auto", "auto"]} tick={{ fontSize: 10 }} tickFormatter={(v) => fmtNum(Number(v))} />
+                  <ZAxis type="number" dataKey="z" range={[40, 320]} name="CR%" />
+                  <RTooltip
+                    cursor={{ strokeDasharray: "3 3" }}
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null;
+                      const d: any = payload[0].payload;
+                      return (
+                        <div className="rounded-md border border-border/60 bg-background px-2.5 py-1.5 text-[11px] shadow-md">
+                          <div className="font-semibold">{d.label} <span className="text-muted-foreground">· {d.custId}</span></div>
+                          <div className="text-muted-foreground">Tier T{d.tier}</div>
+                          <div className="tabular-nums">Visitas: <b>{fmtNum(d.x)}</b></div>
+                          <div className="tabular-nums">Receita: <b>{fmtBRL(d.y)}</b></div>
+                          <div className="tabular-nums">CR: <b>{d.z.toFixed(2)}%</b></div>
+                        </div>
+                      );
+                    }}
+                  />
+                  {[1, 2, 3].map((t) => {
+                    const cor = t === 1 ? "#E5E4E2" : t === 2 ? "#D4AF37" : "#9CA3AF";
+                    const nome = t === 1 ? "T1 platinum" : t === 2 ? "T2 gold" : "T3 silver";
+                    const pts = scatterLojas.filter((p) => p.tier === t);
+                    if (!pts.length) return null;
+                    return <Scatter key={t} name={nome} data={pts} fill={cor} fillOpacity={0.75} stroke={cor} />;
+                  })}
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                </ScatterChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </Card>
 
