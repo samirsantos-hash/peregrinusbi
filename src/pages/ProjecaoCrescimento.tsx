@@ -776,10 +776,35 @@ export default function ProjecaoCrescimento() {
             <div>
               <h3 className="text-sm font-semibold">Visitas × Receita por loja (escala log)</h3>
               <p className="text-[11px] text-muted-foreground">
-                Cada bolha = uma loja no último mês. Tamanho = CR%. Cor = tier. {scatterLojas.length} {scatterLojas.length === 1 ? "loja" : "lojas"} no gráfico.
+                {scatterMode === "seller"
+                  ? "Visão por seller — uma bolha por loja no último mês. Tamanho = CR%. Cor = tier."
+                  : "Visão por loja — foco em uma única loja por vez. Tamanho = CR%. Cor = tier."}
+                {" "}{scatterLojas.length} {scatterLojas.length === 1 ? "loja" : "lojas"} no gráfico.
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
+              <div className="inline-flex rounded-full border border-border overflow-hidden text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => { setScatterMode("seller"); setScatterSeller("all"); }}
+                  className={`px-2.5 py-1 transition-colors ${scatterMode === "seller" ? "bg-[#3B82F6]/15 text-[#3B82F6]" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  Seller (todas)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScatterMode("loja");
+                    setScatterBusca("");
+                    if (scatterSeller === "all" && scatterSellerOptions[0]) {
+                      setScatterSeller(scatterSellerOptions[0].sellerId);
+                    }
+                  }}
+                  className={`px-2.5 py-1 border-l border-border transition-colors ${scatterMode === "loja" ? "bg-[#3B82F6]/15 text-[#3B82F6]" : "text-muted-foreground hover:bg-muted"}`}
+                >
+                  Loja única
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => {
@@ -801,16 +826,21 @@ export default function ProjecaoCrescimento() {
               >
                 {syncHeader ? "● Sincronizado com header" : "○ Sync header"}
               </button>
-              <Input
-                placeholder="Buscar loja ou CUST_ID…"
-                value={scatterBusca}
-                onChange={(e) => { setSyncHeader(false); setScatterBusca(e.target.value); if (scatterSeller !== "all") setScatterSeller("all"); }}
-                className="h-8 text-xs w-48"
-              />
-              <Select value={scatterSeller} onValueChange={(v) => { setSyncHeader(false); setScatterSeller(v); if (v !== "all") setScatterBusca(""); }}>
+              {scatterMode === "seller" && (
+                <Input
+                  placeholder="Buscar loja ou CUST_ID…"
+                  value={scatterBusca}
+                  onChange={(e) => { setSyncHeader(false); setScatterBusca(e.target.value); if (scatterSeller !== "all") setScatterSeller("all"); }}
+                  className="h-8 text-xs w-48"
+                />
+              )}
+              <Select
+                value={scatterMode === "loja" && scatterSeller === "all" ? (scatterSellerOptions[0]?.sellerId ?? "all") : scatterSeller}
+                onValueChange={(v) => { setSyncHeader(false); setScatterSeller(v); if (v !== "all") setScatterBusca(""); }}
+              >
                 <SelectTrigger className="w-56 h-8 text-xs"><SelectValue placeholder="Loja específica…" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todas as lojas</SelectItem>
+                  {scatterMode === "seller" && <SelectItem value="all">Todas as lojas</SelectItem>}
                   {scatterSellerOptions.slice(0, 300).map((l) => (
                     <SelectItem key={l.sellerId} value={l.sellerId}>{l.nickname} · {l.custId}</SelectItem>
                   ))}
