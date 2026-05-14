@@ -143,6 +143,15 @@ const Index = () => {
     setDateRange(undefined); // Reset → will be re-anchored by effect below
   }, []);
 
+  // Persist selected seller globally so other pages (e.g. Projeção de Crescimento) can sync
+  useEffect(() => {
+    if (!selectedSeller) return;
+    try {
+      localStorage.setItem("selected_seller_id", selectedSeller);
+      window.dispatchEvent(new CustomEvent("selected-seller-change", { detail: selectedSeller }));
+    } catch {}
+  }, [selectedSeller]);
+
   useEffect(() => {
     if (sellers.length > 0 && (!selectedSeller || !sellers.find((s) => s.id === selectedSeller))) {
       setSelectedSeller(sellers[0].id);
