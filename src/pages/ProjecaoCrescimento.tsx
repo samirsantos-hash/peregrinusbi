@@ -345,6 +345,17 @@ export default function ProjecaoCrescimento() {
           </Card>
         )}
 
+        {/* Aviso de meses parciais excluídos */}
+        {data?.mesesParciais && data.mesesParciais.length > 0 && (
+          <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
+            <p className="text-xs text-foreground">
+              <span className="font-semibold">Mês parcial detectado e excluído da projeção:</span>{" "}
+              {data.mesesParciais.map((m) => monthLabel(m)).join(", ")} — receita acumulada abaixo de 50% da mediana, indicando dados incompletos. KPIs, MoM, decomposição e forecast usam apenas meses completos.
+            </p>
+          </div>
+        )}
+
         {/* Sustentabilidade banner — só com histórico mínimo de 4 meses */}
         {sust && !poucosDados && !semDados && (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}
