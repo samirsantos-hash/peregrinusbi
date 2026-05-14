@@ -128,7 +128,10 @@ export default function ProjecaoCrescimento() {
   const { data, isLoading } = useCrescimentoMensal();
   const { data: lojas, isLoading: loadingLojas } = useClassificacaoLojas();
   const [filtroClass, setFiltroClass] = useState<string>("all");
-  const [scatterSeller, setScatterSeller] = useState<string>("all");
+  const [scatterSeller, setScatterSeller] = useState<string>(() => {
+    try { return localStorage.getItem("selected_seller_id") || "all"; } catch { return "all"; }
+  });
+  const [syncHeader, setSyncHeader] = useState<boolean>(true);
   const [scatterBusca, setScatterBusca] = useState<string>("");
   const [horizonte, setHorizonte] = useState<number>(3);
   const [alpha, setAlpha] = useState<number>(0.4);
@@ -138,6 +141,25 @@ export default function ProjecaoCrescimento() {
   const pontos = data?.pontos ?? [];
   const poucosDados = !isLoading && pontos.length < 4;
   const semDados = !isLoading && pontos.length === 0;
+
+  // Sync scatter filter with the seller selected in the global header (Index page)
+  useEffect(() => {
+    if (!syncHeader) return;
+    const apply = (id: string | null) => {
+      if (!id) return;
+      setScatterSeller(id);
+      setScatterBusca("");
+    };
+    try { apply(localStorage.getItem("selected_seller_id")); } catch {}
+    const onCustom = (e: Event) => apply((e as CustomEvent<string>).detail ?? null);
+    const onStorage = (e: StorageEvent) => { if (e.key === "selected_seller_id") apply(e.newValue); };
+    window.addEventListener("selected-seller-change", onCustom as EventListener);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("selected-seller-change", onCustom as EventListener);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [syncHeader]);
 
   const fc = useMemo(() => data ? forecastHibrido(data.receita, horizonte, alpha) : null, [data, horizonte, alpha]);
   const slope = useMemo(() => data ? inclinacaoLog(data.receita, 6) : 0, [data]);
