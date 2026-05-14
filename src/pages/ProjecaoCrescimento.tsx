@@ -133,6 +133,7 @@ export default function ProjecaoCrescimento() {
   });
   const [syncHeader, setSyncHeader] = useState<boolean>(true);
   const [scatterBusca, setScatterBusca] = useState<string>("");
+  const [scatterMode, setScatterMode] = useState<"seller" | "loja">("seller");
   const [horizonte, setHorizonte] = useState<number>(3);
   const [alpha, setAlpha] = useState<number>(0.4);
   const [showIC, setShowIC] = useState<boolean>(true);
@@ -246,13 +247,17 @@ export default function ProjecaoCrescimento() {
         custId: l.custId,
         tier: l.tier,
       }));
+    if (scatterMode === "loja") {
+      const target = scatterSeller !== "all" ? scatterSeller : base[0]?.sellerId;
+      return target ? base.filter((b) => b.sellerId === target) : [];
+    }
     if (scatterSeller !== "all") return base.filter((b) => b.sellerId === scatterSeller);
     if (scatterBusca.trim()) {
       const q = scatterBusca.trim().toLowerCase();
       return base.filter((b) => b.label.toLowerCase().includes(q) || String(b.custId).includes(q));
     }
     return base;
-  }, [lojas, scatterSeller, scatterBusca]);
+  }, [lojas, scatterSeller, scatterBusca, scatterMode]);
   const scatterSellerOptions = useMemo(
     () => (lojas ?? []).slice().sort((a, b) => a.nickname.localeCompare(b.nickname)),
     [lojas],
