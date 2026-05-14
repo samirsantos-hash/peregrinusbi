@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { monthKey, monthKeyFromTimMonthId } from "@/lib/dates";
 import type { SerieMensal } from "@/lib/forecast";
+import { detectPartialMonths } from "@/utils/partialPeriodGuard";
 
 export interface PontoMensal {
   mes: string;
@@ -21,6 +22,7 @@ export interface CrescimentoMensalResult {
   cr: SerieMensal;
   aov: SerieMensal;
   invAds: SerieMensal;
+  mesesParciais: string[];
 }
 
 function toNum(x: any): number {
@@ -101,7 +103,7 @@ export function useCrescimentoMensal(custIds?: string[]) {
         }
       }
 
-      const pontos = Array.from(byMonth.values())
+      const pontosFull = Array.from(byMonth.values())
         .map((p) => ({
           ...p,
           cr: p.visitas > 0 ? (p.tsi / p.visitas) * 100 : 0,
@@ -110,6 +112,17 @@ export function useCrescimentoMensal(custIds?: string[]) {
         }))
         .sort((a, b) => (a.mes < b.mes ? -1 : 1));
 
+      // Drop partial months (incomplete data — would distort forecast / MoM / slope)
+      const partialInfo = detectPartialMonths(
+        pontosFull.map((p) => ({ date: `${p.mes}-01`, gmv: p.receita })),
+        { thresholdPct: 0.5 },
+      );
+      const mesesParciais = pontosFull
+        .filter((p) => partialInfo.get(p.mes)?.isPartial)
+        .map((p) => p.mes);
+      const parciaisSet = new Set(mesesParciais);
+      const pontos = pontosFull.filter((p) => !parciaisSet.has(p.mes));
+
       return {
         pontos,
         receita: pontos.map((p) => ({ mes: p.mes, valor: p.receita })),
@@ -117,6 +130,7 @@ export function useCrescimentoMensal(custIds?: string[]) {
         cr: pontos.map((p) => ({ mes: p.mes, valor: p.cr })),
         aov: pontos.map((p) => ({ mes: p.mes, valor: p.aov })),
         invAds: pontos.map((p) => ({ mes: p.mes, valor: p.invAds })),
+        mesesParciais,
       };
     },
     staleTime: 60_000,
