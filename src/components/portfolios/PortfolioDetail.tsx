@@ -12,6 +12,7 @@ import RaioXTable from "./RaioXTable";
 import MedalFilter from "./MedalFilter";
 import GrantsMonitor from "./GrantsMonitor";
 import PerformanceClusterChart from "./PerformanceClusterChart";
+import ProjecaoPanel from "./ProjecaoPanel";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -161,6 +162,9 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
 
       {/* Cluster de Desempenho */}
       <PerformanceClusterChart sellers={filteredSellers} aliases={aliases} />
+
+      {/* Projeção de Crescimento da Carteira */}
+      <ProjecaoPanel custIds={portfolio.cust_ids} portfolioName={portfolio.name} />
 
       {/* 4 KPI Cards */}
       {summary && (
