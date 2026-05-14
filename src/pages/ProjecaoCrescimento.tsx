@@ -775,13 +775,34 @@ export default function ProjecaoCrescimento() {
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !syncHeader;
+                  setSyncHeader(next);
+                  if (next) {
+                    try {
+                      const id = localStorage.getItem("selected_seller_id");
+                      if (id) { setScatterSeller(id); setScatterBusca(""); }
+                    } catch {}
+                  }
+                }}
+                className={`text-[10px] px-2 py-1 rounded-full border transition-colors ${
+                  syncHeader
+                    ? "bg-[#3B82F6]/15 text-[#3B82F6] border-[#3B82F6]/30"
+                    : "bg-muted text-muted-foreground border-border"
+                }`}
+                title="Sincronizar com a loja selecionada no header"
+              >
+                {syncHeader ? "● Sincronizado com header" : "○ Sync header"}
+              </button>
               <Input
                 placeholder="Buscar loja ou CUST_ID…"
                 value={scatterBusca}
-                onChange={(e) => { setScatterBusca(e.target.value); if (scatterSeller !== "all") setScatterSeller("all"); }}
+                onChange={(e) => { setSyncHeader(false); setScatterBusca(e.target.value); if (scatterSeller !== "all") setScatterSeller("all"); }}
                 className="h-8 text-xs w-48"
               />
-              <Select value={scatterSeller} onValueChange={(v) => { setScatterSeller(v); if (v !== "all") setScatterBusca(""); }}>
+              <Select value={scatterSeller} onValueChange={(v) => { setSyncHeader(false); setScatterSeller(v); if (v !== "all") setScatterBusca(""); }}>
                 <SelectTrigger className="w-56 h-8 text-xs"><SelectValue placeholder="Loja específica…" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todas as lojas</SelectItem>
