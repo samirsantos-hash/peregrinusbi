@@ -413,6 +413,28 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
   /* ── 8. Conversion rate ── */
   const conversionRate = pct(totals.ordersClips, totals.visitasClips);
 
+  /* ── Fallback flag: per-item clip data is missing but seller has clip activity ── */
+  const hasSellerLevelClipsOnly = useMemo(() => {
+    const sellerHasClips =
+      totals.visitasClips > 0 || totals.tgmvClips > 0 || totals.ordersClips > 0;
+    const itemHasClips = clipCoverage.withClip > 0;
+    return sellerHasClips && !itemHasClips;
+  }, [totals, clipCoverage]);
+
+  /* ── Effective coverage: use visit share when per-item data is missing ── */
+  const effectiveCoverage = useMemo(() => {
+    if (clipCoverage.withClip > 0 || clipCoverage.total > 0) {
+      return {
+        pct: clipCoverage.total > 0 ? (clipCoverage.withClip / clipCoverage.total) * 100 : 0,
+        label: "cobertura",
+        mode: "items" as const,
+      };
+    }
+    // Fallback: visit share via clips at seller level
+    const sharePct = totals.visits > 0 ? (totals.visitasClips / totals.visits) * 100 : 0;
+    return { pct: sharePct, label: "visitas via clips", mode: "share" as const };
+  }, [clipCoverage, totals]);
+
   /* ── Clips link for seller ── */
   const sellerCustId = selectedSeller && sellerCustIdMap ? sellerCustIdMap[selectedSeller] : null;
   const clipsLink = sellerCustId ? `https://lista.mercadolivre.com.br/_CustId_${sellerCustId}` : null;
@@ -471,10 +493,34 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   const DONUT_COLORS = ["hsl(var(--emerald))", "hsl(var(--muted))"];
 
+  const sellerHasAnyClipActivity =
+    totals.visitasClips > 0 || totals.tgmvClips > 0 || totals.ordersClips > 0;
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+      {/* ── Aviso: dados de clips apenas no nível seller ── */}
+      {hasSellerLevelClipsOnly && (
+        <div className="glass-card p-3 border border-warning/30 bg-warning/5 flex items-start gap-2 text-xs text-foreground">
+          <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+          <span>
+            Este seller possui atividade de Clips agregada (visitas/pedidos/faturamento), mas não há
+            métricas por MLB na base de qualidade de anúncios. O painel exibe totais e tendências do
+            seller — a cobertura por anúncio só ficará disponível quando a base de listings_quality for
+            atualizada com as colunas <code>visitas_clips / orders_clips / si_clips</code>.
+          </span>
+        </div>
+      )}
+
+      {/* ── Sem dados de clips ── */}
+      {!sellerHasAnyClipActivity && clipCoverage.total === 0 && (
+        <div className="glass-card p-6 text-center text-sm text-muted-foreground">
+          <Video className="w-6 h-6 mx-auto mb-2 opacity-40" />
+          Nenhuma atividade de Clips encontrada para o seller / período selecionado.
+        </div>
+      )}
+
       {/* ── Row 0: Clip Coverage Donut ── */}
-      {clipCoverage.total > 0 && (
+      {(clipCoverage.total > 0 || sellerHasAnyClipActivity) && (
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <PieChartIcon className="w-4 h-4 text-emerald" />
@@ -488,7 +534,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={donutData}
+                    data={effectiveCoverage.mode === "items" ? donutData : [
+                      { name: "Visitas via Clips", value: totals.visitasClips },
+                      { name: "Demais visitas", value: Math.max(totals.visits - totals.visitasClips, 0) },
+                    ]}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -502,32 +551,55 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                     ))}
                   </Pie>
                   <text x="50%" y="46%" textAnchor="middle" dominantBaseline="central" className="fill-foreground font-bold text-xl">
-                    {clipCoverage.total > 0 ? `${((clipCoverage.withClip / clipCoverage.total) * 100).toFixed(0)}%` : "0%"}
+                    {`${effectiveCoverage.pct.toFixed(0)}%`}
                   </text>
                   <text x="50%" y="58%" textAnchor="middle" dominantBaseline="central" className="fill-muted-foreground text-[10px]">
-                    cobertura
+                    {effectiveCoverage.label}
                   </text>
                 </PieChart>
               </ResponsiveContainer>
             </div>
             <div className="flex-1 space-y-3">
-              <p className="text-sm text-foreground">
-                <span className="font-bold text-emerald">{clipCoverage.withClip}</span>
-                <span className="text-muted-foreground"> de </span>
-                <span className="font-bold">{clipCoverage.total}</span>
-                <span className="text-muted-foreground"> anúncios possuem Clips ativos</span>
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-sm bg-emerald" />
-                  <span className="text-xs text-muted-foreground">Anúncios com Clip ({clipCoverage.withClip})</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-sm bg-muted" />
-                  <span className="text-xs text-muted-foreground">Anúncios sem Clip ({clipCoverage.withoutClip})</span>
-                </div>
-              </div>
-              {clipCoverage.withoutClip > 0 && (
+              {effectiveCoverage.mode === "items" ? (
+                <>
+                  <p className="text-sm text-foreground">
+                    <span className="font-bold text-emerald">{clipCoverage.withClip}</span>
+                    <span className="text-muted-foreground"> de </span>
+                    <span className="font-bold">{clipCoverage.total}</span>
+                    <span className="text-muted-foreground"> anúncios possuem Clips ativos</span>
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-sm bg-emerald" />
+                      <span className="text-xs text-muted-foreground">Anúncios com Clip ({clipCoverage.withClip})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-sm bg-muted" />
+                      <span className="text-xs text-muted-foreground">Anúncios sem Clip ({clipCoverage.withoutClip})</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-foreground">
+                    <span className="font-bold text-emerald">{fmt(totals.visitasClips)}</span>
+                    <span className="text-muted-foreground"> de </span>
+                    <span className="font-bold">{fmt(totals.visits)}</span>
+                    <span className="text-muted-foreground"> visitas vieram de Clips</span>
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-sm bg-emerald" />
+                      <span className="text-xs text-muted-foreground">Via Clips ({fmt(totals.visitasClips)})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-sm bg-muted" />
+                      <span className="text-xs text-muted-foreground">Demais ({fmt(Math.max(totals.visits - totals.visitasClips, 0))})</span>
+                    </div>
+                  </div>
+                </>
+              )}
+              {effectiveCoverage.mode === "items" && clipCoverage.withoutClip > 0 && (
                 <p className="text-xs text-warning flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
                   {clipCoverage.withoutClip} anúncios sem Clip representam oportunidades perdidas de conversão
