@@ -187,14 +187,17 @@ export function useSellers() {
       if (error) throw error;
       if (!data || data.length === 0) return [];
 
-      return data.map((s) => ({
-        id: s.id,
-        nickname: s.nickname,
-        custId: s.cust_id,
-        cluster: s.cluster_seller || undefined,
-        subCluster: s.sub_cluster_seller || undefined,
-        state: s.cus_state || undefined,
-      }));
+      return data.map((s) => {
+        const nick = (s.nickname || "").trim();
+        return {
+          id: s.id,
+          nickname: nick || `Loja ${s.cust_id}`,
+          custId: s.cust_id,
+          cluster: s.cluster_seller || undefined,
+          subCluster: s.sub_cluster_seller || undefined,
+          state: s.cus_state || undefined,
+        };
+      });
     },
   });
 }
