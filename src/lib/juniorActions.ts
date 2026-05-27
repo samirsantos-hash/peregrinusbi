@@ -10,6 +10,13 @@ const num = (v: any) => (typeof v === "number" && !Number.isNaN(v) ? v : 0);
 export const ACOES_RESUMO: ActionItem[] = [
   {
     prioridade: 1,
+    acao: "Nota de Saúde < 60? Pare e investigue antes de qualquer outra ação.",
+    porqueImporta:
+      "Score abaixo de 60 indica problema estrutural — investir em Ads ou CDP agora desperdiça verba.",
+    condicao: (d) => num(d?.notaSaude) > 0 && num(d?.notaSaude) < 60,
+  },
+  {
+    prioridade: 1,
     acao: "Verificar Full% na aba Logística",
     porqueImporta:
       "Full é o fator de maior peso no algoritmo. Se < 30%, é a causa mais provável de GMV estagnado.",
@@ -55,22 +62,39 @@ export const ACOES_FATURAMENTO: ActionItem[] = [
 export const ACOES_LOGISTICA: ActionItem[] = [
   {
     prioridade: 1,
-    acao: "Full% < 30%? Leve à reunião com GM: quais SKUs migrar para Full?",
-    porqueImporta: "Full é o maior alavancador de posicionamento disponível.",
-    condicao: (d) => num(d?.shareFullPct) > 0 && num(d?.shareFullPct) < 30,
+    acao: "Full + Flex < 30%? Desvantagem estrutural — plano de migração para Full é prioridade máxima.",
+    porqueImporta:
+      "Cada R$ 100k migrado de Coleta para Full adiciona ~R$ 8.900/mês de habilitação no plano (+8,9%).",
+    condicao: (d) => num(d?.shareFullPct) + num(d?.shareFlexPct) < 30,
+  },
+  {
+    prioridade: 1,
+    acao: "Correios > 5% do mix? Migrar para qualquer modal Mercado Envios é o primeiro passo.",
+    porqueImporta:
+      "Correios está fora da malha ML — sem tag, sem peso no plano. É o ponto de partida, não de chegada.",
+    condicao: (d) => num(d?.shareCorreios) > 5,
+  },
+  {
+    prioridade: 1,
+    acao: "Taxa de atrasos > 10%? Crise — verificar etiquetagem, ruptura no CD ou janela de despacho.",
+    porqueImporta:
+      "Atraso neutraliza o Full sem tirar o item do CD — a tag 'chegará amanhã' some e o item compete como Coleta.",
+    condicao: (d) => num(d?.taxaAtrasos) > 10,
   },
   {
     prioridade: 2,
-    acao: "Taxa de atrasos > 5%? Investigar CD e embalagem.",
-    porqueImporta:
-      "Atraso derruba Shipping Score e retira a tag 'chegará amanhã' dos itens Full.",
-    condicao: (d) => num(d?.taxaAtrasos) > 5,
+    acao: "Cross-docking > 20% do mix? Verifique se LOC/Places estão disponíveis na região.",
+    porqueImporta: "Cross-docking é modal de emergência — sem tag e sem peso no plano.",
+    condicao: (d) => num(d?.shareCrossdocking) > 20,
   },
   {
     prioridade: 3,
-    acao: "Full + Flex < 50%? Avalie ativar Flex para capitais.",
-    porqueImporta: "Cobertura logística mínima para competir no topo.",
-    condicao: (d) => num(d?.shareFullPct) + num(d?.shareFlexPct) < 50,
+    acao: "Full + Flex entre 30–60%? Identifique SKUs de Coleta candidatos ao Full.",
+    porqueImporta: "Seller em transição — meta é Full + Flex > 60% para cobertura premium.",
+    condicao: (d) => {
+      const total = num(d?.shareFullPct) + num(d?.shareFlexPct);
+      return total >= 30 && total < 60;
+    },
   },
 ];
 
@@ -133,9 +157,9 @@ export const ACOES_OPORTUNIDADES: ActionItem[] = [
 export const ACOES_REPUTACAO: ActionItem[] = [
   {
     prioridade: 1,
-    acao: "Reputação não é verde? Toda outra ação é secundária até normalizar.",
+    acao: "Reputação amarela ou vermelha? Toda outra ação é secundária até normalizar.",
     porqueImporta:
-      "Reputação amarela/vermelha é freio estrutural que nenhum investimento compensa.",
+      "Nenhuma ação de Ads ou CDP tem efeito pleno enquanto a reputação não for verde. Vermelho = escalar para GM.",
     condicao: (d) =>
       typeof d?.nivelReputacao === "string" &&
       !d.nivelReputacao.toLowerCase().includes("green"),

@@ -90,17 +90,17 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
     oque: "% do faturamento ou unidades enviadas via Mercado Envios Full.",
     algoritmo: '⚠️ CRÍTICO. Full é o fator de MAIOR peso isolado no algoritmo. Itens Full recebem a tag "Chegará amanhã" que dobra a conversão. Sellers Full dominam o topo via shipping_highlighted_fulfillment.',
     seBom: "Full% > 60% → algoritmo empurra para o topo de forma orgânica e gratuita.",
-    seRuim: "Full% < 30% → desvantagem estrutural. Concorre em preço mas perde posicionamento.",
+    seRuim: "Full% < 30% → desvantagem estrutural no algoritmo. Prioridade máxima: plano de migração para Full.",
     correlacao: "Full ↑ → Conversão ↑ → GMV ↑ → Histórico ↑ → Mais exposição orgânica.",
-    benchmark: "Meta Tier 1: > 60%. Mínimo competitivo: > 30%.",
+    benchmark: "Habilitação no plano: +8,9% sobre GMV. Meta Tier 1: > 60%. Mínimo: > 30%.",
   },
   shareFlexPct: {
     oque: "% de unidades enviadas via Mercado Envios Flex (entrega no mesmo dia em capitais).",
     algoritmo: 'Flex é alternativa ao Full. Ativa a tag "Chegará hoje" em grandes capitais, com peso similar ao Full.',
     seBom: "Flex ativo em capitais → cobre o gap de entrega rápida mesmo sem Full.",
     seRuim: "Full baixo E Flex = 0 → sem nenhum fator de velocidade. Desvantagem máxima.",
-    correlacao: "Full + Flex > 50% = cobertura logística mínima para competir no topo.",
-    benchmark: "Flex recomendado para sellers em capitais com catálogo < 300 SKUs.",
+    correlacao: "Full + Flex > 60% = cobertura premium. Entre 30–60% = transição. < 30% = desvantagem estrutural.",
+    benchmark: "Habilitação no plano: +4,1% sobre GMV. Recomendado em capitais enquanto se constrói Full.",
   },
   logisticsMixEvolution: {
     oque: "Evolução do mix logístico (Full / Flex / Agência) mês a mês.",
@@ -196,11 +196,11 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
   // ─── OPORTUNIDADES ─────────────────────────────────────────────────
   itensSemOptin: {
     oque: "Itens elegíveis à CDP que ainda não fizeram opt-in.",
-    algoritmo: "⚠️ CRÍTICO. Cada item sem opt-in é posição de topo deixada na mesa. Opt-in gera tag 'Oferta Imperdível' e abas exclusivas que triplicam o tráfego.",
-    seBom: "0 itens sem opt-in → seller maximizando o combustível orgânico.",
-    seRuim: "Qualquer item elegível sem opt-in → ação imediata. Custo = apenas margem cedida.",
+    algoritmo: "⚠️ CRÍTICO. Item elegível sem opt-in perde visibilidade. Mas a entrada deve ser avaliada pela margem disponível — não force opt-in em itens que não suportam o desconto.",
+    seBom: "0 itens elegíveis sem opt-in com margem suficiente → combustível orgânico maximizado.",
+    seRuim: "Itens com margem ok sem opt-in → ação imediata. Antes, verificar se há campanha com COPARTICIPAÇÃO disponível (ML divide o custo do desconto).",
     correlacao: "Opt-in → tag → tráfego ↑ → conversão ↑ → IPI ↑ → posição ↑.",
-    benchmark: "Se a margem permite desconto de 5%+, sempre fazer opt-in.",
+    benchmark: "Fluxo: 1) campanha com coparticipação? Entrar. 2) Senão, margem suporta desconto mínimo? Entrar. 3) Senão, reduzir custo operacional primeiro.",
   },
   gapDesconto: {
     oque: "Gap entre o desconto sugerido pelo ML e o aplicado pelo seller.",
@@ -212,10 +212,10 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
   },
   // ─── REPUTAÇÃO ──────────────────────────────────────────────────────
   nivelReputacao: {
-    oque: "Nível de reputação: Verde Escuro (Platinum) → Verde → Amarelo → Laranja → Vermelho.",
-    algoritmo: "⚠️ ALTO PESO. Verde Escuro tem peso 'Alto/Essencial'. MercadoLíderes recebem prioridade. Amarelo/Vermelho é freio estrutural que Ads não compensa.",
-    seBom: "Verde Escuro → elegível para Tier 1, máxima visibilidade orgânica.",
-    seRuim: "Amarelo/Vermelho → urgência absoluta. CDP e Ads ineficazes até normalizar.",
+    oque: "Nível de reputação: Verde Escuro (Platinum) → Verde (Gold/Silver) → Amarelo → Vermelho.",
+    algoritmo: "⚠️ Pré-requisito #1. Nenhuma ação de Ads ou CDP tem efeito pleno enquanto a reputação não for verde. Amarelo = algoritmo começa a penalizar. Vermelho = risco de suspensão.",
+    seBom: "Verde Escuro (Platinum) → máxima visibilidade. Foque em Full e CDP para crescer.",
+    seRuim: "Amarelo = urgência. Vermelho = parar tudo e escalar para GM.",
     correlacao: "Resultado de: Reclamação + Atraso + Cancelamento.",
     benchmark: "Tier 1: green_platinum | Tier 2: green_gold | Tier 3: green_silver.",
   },
@@ -229,11 +229,11 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
   },
   taxaAtrasos: {
     oque: "Taxa de envios com atraso (rep_delayed_ht_rate).",
-    algoritmo: "Atraso é diretamente ligado ao Shipping Score. Sellers com atraso alto perdem a tag 'Chegará amanhã' progressivamente.",
-    seBom: "< 2% → logística dentro do SLA.",
-    seRuim: "> 5% → algoritmo retira tag 'amanhã' dos itens Full.",
+    algoritmo: "Único fator que NEUTRALIZA o Full sem tirar o item do CD. Quando sobe, o Shipping Score cai, a tag 'chegará amanhã' some e o item passa a competir como se fosse Coleta — mesmo estando no Full.",
+    seBom: "< 5% → logística dentro do SLA do ML.",
+    seRuim: "> 10% → crise. Verificar etiquetagem, ruptura no CD ou janela de despacho.",
     correlacao: "Atraso ↑ → Shipping Score ↓ → Tag some → Conversão ↓ → Posição ↓.",
-    benchmark: "Meta: < 5%. Acima de 10% = crise logística.",
+    benchmark: "Meta: < 5%. 5–10% = atenção. > 10% = crise logística.",
   },
   taxaCancelamentos: {
     oque: "Taxa de cancelamentos iniciados pelo seller (rep_cancellations_rate).",
@@ -259,5 +259,38 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
     seRuim: "< 7 dias → vermelho. Acionar GM com urgência.",
     correlacao: "Expiração frequente indica falta de orientação consultiva.",
     benchmark: "Verde > 30d | Amarelo 8–30d | Vermelho ≤ 7d | Expirado.",
+  },
+  // ─── EFETIVIDADE vs CATEGORIA ──────────────────────────────────────
+  efetividadeCategoria: {
+    oque: "Índice do seller vs MEDIANA dos pares da mesma categoria (não vs teto, nem vs meta). 100% = igual à mediana.",
+    algoritmo: "Calculado em 6 dimensões relativas: GMV, Conversão, Reputação, Tempo de Resposta, Share Full e ROAS. A dimensão mais fraca é o ponto de alavanca real — nunca interprete o índice geral sozinho.",
+    seBom: "≥ 150% Líder de Categoria | 130–149% Performance Excedente | 110–129% Acima da Média.",
+    seRuim: "90–109% Na Média (sem vantagem) | 70–89% Gap de Vendas | < 70% Potencial de Recuperação (urgência).",
+    correlacao: "Sempre abra as 6 dimensões. Ex: índice 95% com Share Full em 61% = migrar para Full é a ação de maior impacto, antes de mexer em Ads ou preço.",
+    benchmark: "Diferenças entre 95–105% são estatisticamente irrelevantes — qualquer variação mensal as apaga.",
+  },
+  // ─── MIX LOGÍSTICO COMPLETO ────────────────────────────────────────
+  shareCorreios: {
+    oque: "% do mix logístico via Correios (fora da malha Mercado Envios).",
+    algoritmo: "Correios não tem nenhum benefício de plano nem de algoritmo — sem tag de velocidade, sem peso na habilitação. É ponto de partida, não de chegada.",
+    seBom: "0% → seller 100% dentro da malha ML.",
+    seRuim: "> 5% do mix → primeiro passo é migrar para qualquer modal ME (LOC, Places, Cross-docking) antes de pensar em Full/Flex.",
+    benchmark: "Meta: 0%. Sair do Correios é o primeiro passo para entrar na malha de benefícios.",
+  },
+  shareCrossdocking: {
+    oque: "% do mix via Cross-docking — despacho para hub regional do ML.",
+    algoritmo: "Modal de emergência. Sem tag de velocidade, sem peso no plano. Usar apenas quando LOC e Places estão indisponíveis na região.",
+    seBom: "< 5% → uso pontual, como esperado.",
+    seRuim: "> 20% → modal de emergência virou padrão. Verificar se LOC/Places estão disponíveis.",
+    benchmark: "Pirâmide ideal: Full > Flex > Coleta/Places > Cross-docking > Correios.",
+  },
+  // ─── CLIPS — par visitas × conversão ───────────────────────────────
+  clipsConversao: {
+    oque: "Conversão das visitas vindas de Clips comparada à conversão geral do seller.",
+    algoritmo: "O clip deve PRÉ-QUALIFICAR o comprador antes do clique. A pergunta certa não é 'tem clip?', é 'o clip está convertendo?'.",
+    seBom: "Visitas altas + conversão ≥ geral → clip funcionando como vendedor. Replicar formato nos outros SKUs.",
+    seRuim: "Visitas altas + conversão < geral → clip atrai mas não convence. Revisar os primeiros 3s e a demonstração do produto em uso.",
+    correlacao: "Visitas baixas + conversão alta = ajustar hashtags/horário. Tudo baixo = refilmar com nova abordagem.",
+    benchmark: "Meta EcomConsult: 20 clips/mês, 8.000 visitas, 40 pedidos.",
   },
 };
