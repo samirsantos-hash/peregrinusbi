@@ -451,6 +451,55 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
 
       {/* Cumulative growth chart */}
       <div className="glass-card p-5">
+        {/* 6-Dimension Matrix vs Vertical */}
+      </div>
+
+      {matriz.length > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Matriz de 6 Dimensões vs Vertical
+            </h3>
+            <TooltipInfo text="Leitura junior: cada dimensão mostra o desempenho do seller comparado à referência da vertical (mediana ou threshold do algoritmo MELI). Verde = saudável, Amarelo = atenção, Vermelho = crítico." />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {matriz.map((row) => (
+              <div
+                key={row.label}
+                className="bg-muted/20 rounded-lg p-3 border border-border/40"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-foreground">{row.label}</span>
+                    {row.tooltipKey && <AlgoTooltip tooltipKey={row.tooltipKey as any} />}
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] border ${statusTextColor(row.status)} bg-transparent`}
+                  >
+                    {statusText(row.status)}
+                  </Badge>
+                </div>
+                <div className="flex items-baseline justify-between text-[11px] mb-1.5">
+                  <span className="font-mono font-bold text-foreground">{row.sellerLabel}</span>
+                  <span className="text-muted-foreground">ref: {row.benchLabel}</span>
+                </div>
+                <div className="relative w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                  <motion.div
+                    className={`h-full ${statusColor(row.status)}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, row.ratio * 100)}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Cumulative growth chart */}
+      <div className="glass-card p-5">
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Curva de Crescimento Acumulado: Seller vs Vertical
