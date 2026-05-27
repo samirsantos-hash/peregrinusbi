@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
 import { Package, Truck, Mail } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
+import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -138,7 +139,13 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
             <p className={`metric-value ${item.color}`}>{item.value}</p>
             <div className="flex items-center justify-center gap-1 mt-1">
               <p className="metric-label">{item.label}</p>
-              <TooltipInfo text={item.tooltip} />
+              {item.label === "Full" ? (
+                <AlgoTooltip tooltipKey="shareFullPct" />
+              ) : item.label === "Flex" ? (
+                <AlgoTooltip tooltipKey="shareFlexPct" />
+              ) : (
+                <TooltipInfo text={item.tooltip} />
+              )}
             </div>
             <p className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</p>
           </motion.div>
