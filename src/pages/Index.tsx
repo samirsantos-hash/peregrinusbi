@@ -44,6 +44,10 @@ import GrantsPanel from "@/components/dashboard/GrantsPanel";
 import QualityIndexPanel from "@/components/dashboard/QualityIndexPanel";
 import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 import { useVerticalBenchmark } from "@/hooks/useVerticalBenchmark";
+import { SELLER_TABS } from "@/config/sellerTabs";
+import { useJuniorMode } from "@/hooks/useJuniorMode";
+import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
+import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -280,21 +284,9 @@ const Index = () => {
     setIsRefreshing(false);
   }, [queryClient, selectedSeller]);
 
-  const tabs = [
-    // Saúde (topo)
-    { id: "grants", label: "Grants", icon: KeyRound },
-    { id: "efficiency", label: "Resumo", icon: DollarSign },
-    { id: "reputation", label: "Reputação", icon: HeartPulse },
-    // Performance
-    { id: "executive", label: "Faturamento", icon: LayoutDashboard },
-    { id: "logistics", label: "Logística", icon: Truck },
-    // Qualidade & Conteúdo
-    { id: "quality", label: "Qualidade", icon: Shield },
-    { id: "clips", label: "Clips & Audiência", icon: Video },
-    // Base
-    { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
-    { id: "opportunities", label: "Oportunidades", icon: Gift },
-  ];
+  // Ordem lógica de análise — ver src/config/sellerTabs.ts
+  // 1–3: "como está indo?" | 4–6: "por que?" | 7–9: "o que fazer?"
+  const tabs = SELLER_TABS;
 
   // Map seller UUID -> custId for external links
   const sellerCustIdMap = useMemo(() => {
