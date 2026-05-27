@@ -260,4 +260,37 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
     correlacao: "Expiração frequente indica falta de orientação consultiva.",
     benchmark: "Verde > 30d | Amarelo 8–30d | Vermelho ≤ 7d | Expirado.",
   },
+  // ─── EFETIVIDADE vs CATEGORIA ──────────────────────────────────────
+  efetividadeCategoria: {
+    oque: "Índice do seller vs MEDIANA dos pares da mesma categoria (não vs teto, nem vs meta). 100% = igual à mediana.",
+    algoritmo: "Calculado em 6 dimensões relativas: GMV, Conversão, Reputação, Tempo de Resposta, Share Full e ROAS. A dimensão mais fraca é o ponto de alavanca real — nunca interprete o índice geral sozinho.",
+    seBom: "≥ 150% Líder de Categoria | 130–149% Performance Excedente | 110–129% Acima da Média.",
+    seRuim: "90–109% Na Média (sem vantagem) | 70–89% Gap de Vendas | < 70% Potencial de Recuperação (urgência).",
+    correlacao: "Sempre abra as 6 dimensões. Ex: índice 95% com Share Full em 61% = migrar para Full é a ação de maior impacto, antes de mexer em Ads ou preço.",
+    benchmark: "Diferenças entre 95–105% são estatisticamente irrelevantes — qualquer variação mensal as apaga.",
+  },
+  // ─── MIX LOGÍSTICO COMPLETO ────────────────────────────────────────
+  shareCorreios: {
+    oque: "% do mix logístico via Correios (fora da malha Mercado Envios).",
+    algoritmo: "Correios não tem nenhum benefício de plano nem de algoritmo — sem tag de velocidade, sem peso na habilitação. É ponto de partida, não de chegada.",
+    seBom: "0% → seller 100% dentro da malha ML.",
+    seRuim: "> 5% do mix → primeiro passo é migrar para qualquer modal ME (LOC, Places, Cross-docking) antes de pensar em Full/Flex.",
+    benchmark: "Meta: 0%. Sair do Correios é o primeiro passo para entrar na malha de benefícios.",
+  },
+  shareCrossdocking: {
+    oque: "% do mix via Cross-docking — despacho para hub regional do ML.",
+    algoritmo: "Modal de emergência. Sem tag de velocidade, sem peso no plano. Usar apenas quando LOC e Places estão indisponíveis na região.",
+    seBom: "< 5% → uso pontual, como esperado.",
+    seRuim: "> 20% → modal de emergência virou padrão. Verificar se LOC/Places estão disponíveis.",
+    benchmark: "Pirâmide ideal: Full > Flex > Coleta/Places > Cross-docking > Correios.",
+  },
+  // ─── CLIPS — par visitas × conversão ───────────────────────────────
+  clipsConversao: {
+    oque: "Conversão das visitas vindas de Clips comparada à conversão geral do seller.",
+    algoritmo: "O clip deve PRÉ-QUALIFICAR o comprador antes do clique. A pergunta certa não é 'tem clip?', é 'o clip está convertendo?'.",
+    seBom: "Visitas altas + conversão ≥ geral → clip funcionando como vendedor. Replicar formato nos outros SKUs.",
+    seRuim: "Visitas altas + conversão < geral → clip atrai mas não convence. Revisar os primeiros 3s e a demonstração do produto em uso.",
+    correlacao: "Visitas baixas + conversão alta = ajustar hashtags/horário. Tudo baixo = refilmar com nova abordagem.",
+    benchmark: "Meta EcomConsult: 20 clips/mês, 8.000 visitas, 40 pedidos.",
+  },
 };
