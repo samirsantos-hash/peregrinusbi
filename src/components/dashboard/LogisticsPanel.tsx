@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
-import { Package, Truck, Mail } from "lucide-react";
+import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
+import { Badge } from "@/components/ui/badge";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -64,6 +65,26 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
   const shareFullGmv = totalTgmv > 0 ? (totalTgmvFull / totalTgmv) * 100 : 0;
   const shareFlexGmv = totalTgmv > 0 ? (totalTgmvFlex / totalTgmv) * 100 : 0;
   const shareAgenciaGmv = totalTgmv > 0 ? (totalTgmvAgencia / totalTgmv) * 100 : 0;
+
+  // ---------------------------------------------------------------
+  // Junior-friendly status per channel (algoritmo MELI: Full > Flex > Agência)
+  // ---------------------------------------------------------------
+  const statusFull: "ok" | "warn" | "crit" =
+    shareFullGmv >= 60 ? "ok" : shareFullGmv >= 30 ? "warn" : "crit";
+  const statusFlex: "ok" | "warn" | "crit" =
+    shareFlexGmv >= 10 ? "ok" : shareFlexGmv > 0 ? "warn" : "crit";
+  const statusAgencia: "ok" | "warn" | "crit" =
+    shareAgenciaGmv <= 30 ? "ok" : shareAgenciaGmv <= 50 ? "warn" : "crit";
+
+  const statusColor = (s: "ok" | "warn" | "crit") =>
+    s === "ok" ? "text-emerald" : s === "warn" ? "text-warning" : "text-destructive";
+  const statusLabel = (s: "ok" | "warn" | "crit") =>
+    s === "ok" ? "Saudável" : s === "warn" ? "Atenção" : "Crítico";
+
+  // Estimativa de impacto financeiro: migrar 10pp de Agência para Full
+  // Premissa do algoritmo MELI: Full aumenta conversão em ~30% vs Agência
+  const migrationPotentialGmv = totalTgmvAgencia * 0.10 * 0.30;
+  const showMigrationInsight = shareFullGmv < 60 && shareAgenciaGmv > 20;
 
   // Time series for evolution chart
   const evolutionData = useMemo(() => {
