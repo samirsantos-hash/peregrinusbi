@@ -415,13 +415,20 @@ const Index = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="glass-card w-full justify-start gap-0.5 p-1 bg-card/60 h-auto overflow-x-auto flex-nowrap">
                 {tabs.map((tab) =>
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] whitespace-nowrap data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
-                    <tab.icon className="w-3.5 h-3.5 shrink-0" />
-                    {tab.label}
-                  </TabsTrigger>
+                  <Tooltip key={tab.id} delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger
+                        value={tab.id}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] whitespace-nowrap data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
+                        <tab.icon className="w-3.5 h-3.5 shrink-0" />
+                        {tab.label}
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-[260px] text-xs">
+                      <p className="font-semibold mb-0.5">{tab.label}</p>
+                      <p className="text-muted-foreground">{tab.juniorTip}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </TabsList>
 
@@ -434,6 +441,7 @@ const Index = () => {
                   transition={{ duration: 0.25 }}
                   className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
+                    <JuniorActionBanner abaId="executive" dados={dadosJunior} />
                     <Daily7DPanel
                       dailyKpis={allKpisDaily}
                       sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
@@ -443,16 +451,20 @@ const Index = () => {
                     <TrendAnalysisPanel kpis={displayKpis} dataGranularity={granularity} />
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
-                  <TabsContent value="efficiency" className="mt-0">
+                  <TabsContent value="efficiency" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
                   </TabsContent>
-                  <TabsContent value="competitiveness" className="mt-0">
+                  <TabsContent value="competitiveness" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="competitiveness" dados={dadosJunior} />
                     <CompetitivenessPanel kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />
                   </TabsContent>
-                  <TabsContent value="logistics" className="mt-0">
+                  <TabsContent value="logistics" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="quality" dados={dadosJunior} />
                     <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
                     <QualityKpiCards
                       scoreCaracteristica={(() => {
@@ -491,14 +503,20 @@ const Index = () => {
                   <TabsContent value="clips" className="mt-0">
                     <ClipsAudiencePanel kpis={displayKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} dataGranularity={granularity} />
                   </TabsContent>
-                  <TabsContent value="opportunities" className="mt-0">
+                  <TabsContent value="opportunities" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="opportunities" dados={dadosJunior} />
                     <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
-                  <TabsContent value="reputation" className="mt-0">
+                  <TabsContent value="reputation" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="reputation" dados={dadosJunior} />
                     <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
-                  <TabsContent value="grants" className="mt-0">
+                  <TabsContent value="grants" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="grants" dados={dadosJunior} />
                     <GrantsPanel sellers={sellers.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.custId }))} />
+                  </TabsContent>
+                  <TabsContent value="correlacoes" className="mt-0">
+                    <CorrelacaoPanel kpis={displayKpis} />
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>
