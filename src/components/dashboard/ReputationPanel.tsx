@@ -1,11 +1,9 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Activity, TrendingUp, TrendingDown, ShieldCheck } from "lucide-react";
+import { Activity, ShieldCheck } from "lucide-react";
 import {
   LineChart,
   Line,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -14,7 +12,7 @@ import {
   ReferenceArea,
   ReferenceLine,
 } from "recharts";
-import { fmtPct, formatChartDate } from "@/utils/formatters";
+import { formatChartDate } from "@/utils/formatters";
 import { TrendBadge } from "@/components/ui/TrendBadge";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import {
