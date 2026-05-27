@@ -124,6 +124,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
       desc: `GMV: ${fmtBRLCompact(totalTgmvFull)}`,
       tooltip: "Share de GMV via Fulfillment (F_TGMV_LC_FULL). Fonte: CPP_MENSAL. Sellers com Full possuem maior conversão e relevância.",
       isEmpty: totalTgmvFull === 0,
+      status: statusFull,
     },
     {
       label: "Flex",
@@ -133,6 +134,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
       desc: `GMV: ${fmtBRLCompact(totalTgmvFlex)}`,
       tooltip: "Share de GMV via Flex (F_TGMV_LC_FLEX). Fonte: CPP_MENSAL.",
       isEmpty: totalTgmvFlex === 0,
+      status: statusFlex,
     },
     {
       label: "Agência / Coletas",
@@ -142,6 +144,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
       desc: `GMV: ${fmtBRLCompact(totalTgmvAgencia)}`,
       tooltip: "Share de GMV via Agência / Coletas (F_TGMV_LC_COLETAS). Menor priorização no algoritmo.",
       isEmpty: totalTgmvAgencia === 0,
+      status: statusAgencia,
     },
   ];
 
@@ -169,9 +172,68 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
               )}
             </div>
             <p className="text-[10px] text-muted-foreground mt-0.5">{item.desc}</p>
+            {!item.isEmpty && (
+              <Badge
+                variant="outline"
+                className={`mt-2 text-[10px] border bg-transparent ${statusColor(item.status)}`}
+              >
+                {statusLabel(item.status)}
+              </Badge>
+            )}
           </motion.div>
         ))}
       </div>
+
+      {/* Junior strategic reading — financial impact of logistics mix */}
+      {totalTgmv > 0 && (
+        <div
+          className={`glass-card p-4 border-l-4 ${
+            showMigrationInsight ? "border-warning" : "border-emerald"
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            {showMigrationInsight ? (
+              <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+            ) : (
+              <CheckCircle2 className="w-5 h-5 text-emerald shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-foreground mb-1">
+                Leitura Estratégica do Mix Logístico
+              </p>
+              {showMigrationInsight ? (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    O share de Full ({shareFullGmv.toFixed(1)}%) está abaixo do ideal (≥ 60%) e há{" "}
+                    <span className="font-mono font-bold text-foreground">
+                      {fmtBRLCompact(totalTgmvAgencia)}
+                    </span>{" "}
+                    rodando em Agência/Coletas — modalidade despriorizada pelo algoritmo MELI.
+                  </p>
+                  <div className="flex items-center gap-2 mt-2 bg-muted/30 rounded p-2">
+                    <TrendingUp className="w-4 h-4 text-emerald shrink-0" />
+                    <p className="text-xs">
+                      <span className="text-muted-foreground">Migrar 10pp para Full pode gerar </span>
+                      <span className="font-mono font-bold text-emerald">
+                        +{fmtBRLCompact(migrationPotentialGmv)}
+                      </span>
+                      <span className="text-muted-foreground"> de GMV adicional (premissa: +30% conversão em Full).</span>
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground italic mt-2">
+                    Ação consultor: priorize SKUs A/B com alto giro para enviar ao Full primeiro.
+                  </p>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Mix logístico saudável: Full ({shareFullGmv.toFixed(1)}%) acima do limiar do algoritmo.
+                  Mantenha a estratégia e monitore SKUs novos para garantir entrada direta no Full.
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Donut Chart — Summary */}
       <div className="glass-card p-6">
