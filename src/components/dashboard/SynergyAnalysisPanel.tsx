@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Lightbulb, AlertTriangle, TrendingUp, Award, Target, BarChart3 } from "lucide-react";
+import { Lightbulb, BarChart3 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 
 interface SynergyAnalysisPanelProps {
@@ -46,112 +46,86 @@ function corrLabel(r: number): string {
   return "Fraca";
 }
 
+/* ── 5-state interpretation per correlation ── */
+type Correlacao = {
+  id: string;
+  varX: string;
+  varY: string;
+  coef: number;
+  sentidoEsperado: "positivo" | "negativo";
+};
+
+function interpretarCorrelacao(c: Correlacao) {
+  const abs = Math.abs(c.coef);
+  const correto = (c.coef > 0) === (c.sentidoEsperado === "positivo");
+  const forca =
+    abs >= 0.7 ? "forte" : abs >= 0.4 ? "moderada" : abs >= 0.2 ? "fraca" : "ausente";
+
+  if (correto && forca === "forte") {
+    return {
+      tone: "emerald" as const,
+      icone: "✅",
+      titulo: `Sinergia forte (r = ${c.coef.toFixed(2)})`,
+      texto: `${c.varX} e ${c.varY} se movem juntos com alta consistência. Cada melhoria em ${c.varX} tende a se refletir diretamente em ${c.varY}.`,
+      acao: `Manter e ampliar. Investimento em ${c.varX} tem alto retorno esperado em ${c.varY}.`,
+    };
+  }
+  if (correto && forca === "moderada") {
+    return {
+      tone: "emerald" as const,
+      icone: "🟢",
+      titulo: `Correlação moderada (r = ${c.coef.toFixed(2)})`,
+      texto: `${c.varX} influencia ${c.varY}, mas outros fatores também interferem. A relação é real mas não exclusiva.`,
+      acao: `Continuar otimizando ${c.varX} junto com outros drivers. Não depender só dessa alavanca.`,
+    };
+  }
+  if (correto && forca === "fraca") {
+    return {
+      tone: "warning" as const,
+      icone: "🟡",
+      titulo: `Correlação fraca (r = ${c.coef.toFixed(2)})`,
+      texto: `${c.varX} tem pouca influência observada em ${c.varY} neste período. Pode ser sazonalidade, volume insuficiente de dados ou outros fatores dominando.`,
+      acao: `Investigar com mais dados antes de tirar conclusões. Não é evidência de problema — é inconclusivo.`,
+    };
+  }
+  if (forca === "ausente") {
+    return {
+      tone: "muted" as const,
+      icone: "⚪",
+      titulo: `Sem correlação (r = ${c.coef.toFixed(2)})`,
+      texto: `${c.varX} e ${c.varY} não apresentam relação linear neste período.`,
+      acao: `Verificar se há dados suficientes. Se sim, outros fatores estão determinando ${c.varY}.`,
+    };
+  }
+  return {
+    tone: "destructive" as const,
+    icone: "🔴",
+    titulo: `Correlação invertida — atenção (r = ${c.coef.toFixed(2)})`,
+    texto: `${c.varX} está se movendo na direção OPOSTA ao esperado em relação a ${c.varY}. Pode indicar problema operacional ou período atípico.`,
+    acao: `Investigar imediatamente. Possíveis causas: mudança de mix, sazonalidade invertida ou problema operacional específico.`,
+  };
+}
+
+const TONE_STYLES = {
+  emerald: "border-emerald/40 bg-emerald/5",
+  warning: "border-warning/40 bg-warning/5",
+  muted: "border-border/40 bg-muted/10",
+  destructive: "border-destructive/40 bg-destructive/5",
+} as const;
+
+const TONE_TEXT = {
+  emerald: "text-emerald",
+  warning: "text-warning",
+  muted: "text-muted-foreground",
+  destructive: "text-destructive",
+} as const;
+
 const METRICS = [
   { key: "gmv", label: "Faturamento", short: "GMV" },
   { key: "adsInvestment", label: "Investimento Ads", short: "Ads" },
   { key: "visits", label: "Visitas", short: "Visitas" },
   { key: "repCancellationsRate", label: "Cancelamento", short: "Cancel." },
 ];
-
-interface Insight {
-  icon: typeof Lightbulb;
-  title: string;
-  text: string;
-  severity: "positive" | "warning" | "neutral";
-}
-
-function generateInsights(
-  corrAdsGmv: number,
-  corrVisitsGmv: number,
-  corrCancelGmv: number,
-  kpis: any[]
-): Insight[] {
-  const insights: Insight[] = [];
-
-  // Ads vs GMV
-  if (corrAdsGmv > 0.8) {
-    insights.push({
-      icon: TrendingUp,
-      title: "Sinergia Ads → Faturamento",
-      text: "Identificamos uma sinergia fortíssima entre seus anúncios e vendas. Cada real investido está impulsionando o faturamento de forma direta. Recomendação: Escalar orçamento de Ads.",
-      severity: "positive",
-    });
-  } else if (corrAdsGmv > 0.4) {
-    insights.push({
-      icon: Target,
-      title: "Ads com Impacto Moderado",
-      text: "O investimento em Ads tem impacto moderado no faturamento. Recomenda-se otimizar a segmentação e os criativos antes de escalar o orçamento.",
-      severity: "neutral",
-    });
-  } else {
-    insights.push({
-      icon: AlertTriangle,
-      title: "Baixa Eficiência de Ads",
-      text: "O investimento em Ads não está se convertendo em faturamento proporcional. Revise a estratégia de palavras-chave, público-alvo e relevância dos anúncios.",
-      severity: "warning",
-    });
-  }
-
-  // Visits vs GMV
-  if (corrVisitsGmv < 0.3) {
-    insights.push({
-      icon: AlertTriangle,
-      title: "Gargalo de Conversão",
-      text: "Atenção: Suas visitas estão subindo, mas as vendas não acompanham. Isso indica um gargalo na página do produto (fotos, descrição ou confiança). Recomenda-se auditoria de conteúdo.",
-      severity: "warning",
-    });
-  } else if (corrVisitsGmv > 0.7) {
-    insights.push({
-      icon: TrendingUp,
-      title: "Tráfego Qualificado",
-      text: "Excelente conversão de visitas em vendas. O tráfego que chega aos seus anúncios é altamente qualificado. Continue investindo em visibilidade.",
-      severity: "positive",
-    });
-  }
-
-  // Cancellations vs GMV
-  if (corrCancelGmv < -0.4) {
-    insights.push({
-      icon: Lightbulb,
-      title: "Cancelamentos Impactam Vendas",
-      text: "A correlação negativa entre cancelamentos e faturamento indica que reduzir cancelamentos pode liberar potencial de receita represada. Foque em qualidade de atendimento.",
-      severity: "warning",
-    });
-  } else if (Math.abs(corrCancelGmv) < 0.2) {
-    insights.push({
-      icon: Award,
-      title: "Operação Estável",
-      text: "Os cancelamentos não estão impactando significativamente o faturamento. Sua operação logística está saudável neste aspecto.",
-      severity: "positive",
-    });
-  }
-
-  // Market leadership check
-  if (kpis.length > 0) {
-    const latestKpi = [...kpis].sort((a, b) => b.date.localeCompare(a.date))[0];
-    const gmvM1 = latestKpi?.gmvM1 || 0;
-    const gmv = latestKpi?.gmv || 0;
-    if (gmvM1 > 0 && gmv / gmvM1 > 1.5) {
-      insights.push({
-        icon: Award,
-        title: "Liderança de Categoria",
-        text: "Sua conta atingiu a Liderança de Categoria. O crescimento agora virá da otimização de margem e não apenas de volume. Considere testar preços premium.",
-        severity: "positive",
-      });
-    }
-  }
-
-  if (insights.length === 0) {
-    insights.push({
-      icon: Lightbulb,
-      title: "Dados Insuficientes",
-      text: "Precisamos de mais registros no período selecionado para gerar insights confiáveis. Tente expandir o filtro de datas.",
-      severity: "neutral",
-    });
-  }
-
-  return insights;
-}
 
 const SynergyAnalysisPanel = ({ kpis }: SynergyAnalysisPanelProps) => {
   const { matrix, corrAdsGmv, corrVisitsGmv, corrCancelGmv } = useMemo(() => {
@@ -179,24 +153,16 @@ const SynergyAnalysisPanel = ({ kpis }: SynergyAnalysisPanelProps) => {
     };
   }, [kpis]);
 
-  const insights = useMemo(
-    () => generateInsights(corrAdsGmv, corrVisitsGmv, corrCancelGmv, kpis),
-    [corrAdsGmv, corrVisitsGmv, corrCancelGmv, kpis]
-  );
+  const interpretacoes = useMemo(() => {
+    const correlacoes: Correlacao[] = [
+      { id: "ads_gmv", varX: "Investimento em Ads", varY: "GMV", coef: corrAdsGmv, sentidoEsperado: "positivo" },
+      { id: "visitas_gmv", varX: "Visitas", varY: "GMV", coef: corrVisitsGmv, sentidoEsperado: "positivo" },
+      { id: "cancel_gmv", varX: "Cancelamentos", varY: "GMV", coef: corrCancelGmv, sentidoEsperado: "negativo" },
+    ];
+    return correlacoes.map((c) => ({ correlacao: c, ...interpretarCorrelacao(c) }));
+  }, [corrAdsGmv, corrVisitsGmv, corrCancelGmv]);
 
   if (kpis.length === 0) return null;
-
-  const severityStyles = {
-    positive: "border-emerald/30 bg-emerald/5",
-    warning: "border-warning/30 bg-warning/5",
-    neutral: "border-border/30 bg-muted/10",
-  };
-
-  const severityIconColor = {
-    positive: "text-emerald",
-    warning: "text-warning",
-    neutral: "text-muted-foreground",
-  };
 
   return (
     <div className="glass-card p-5">
@@ -293,21 +259,28 @@ const SynergyAnalysisPanel = ({ kpis }: SynergyAnalysisPanelProps) => {
             Leitura Estratégica do Consultor
           </p>
           <div className="space-y-3">
-            {insights.map((insight, i) => (
+            {interpretacoes.map(({ correlacao, tone, icone, titulo, texto, acao }) => (
               <div
-                key={i}
-                className={`rounded-lg border p-4 transition-all ${severityStyles[insight.severity]}`}
+                key={correlacao.id}
+                className={`rounded-lg border p-4 transition-all ${TONE_STYLES[tone]}`}
               >
                 <div className="flex items-start gap-3">
-                  <div className={`mt-0.5 ${severityIconColor[insight.severity]}`}>
-                    <insight.icon className="w-4 h-4" />
-                  </div>
+                  <span className="text-lg leading-none mt-0.5">{icone}</span>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-xs font-semibold text-foreground mb-1">
-                      {insight.title}
-                    </h4>
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <h4 className={`text-xs font-semibold ${TONE_TEXT[tone]}`}>
+                        {titulo}
+                      </h4>
+                      <span className="text-[10px] font-mono text-muted-foreground">
+                        {correlacao.varX} → {correlacao.varY}
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-foreground/85 mb-1.5">
+                      {texto}
+                    </p>
                     <p className="text-[11px] leading-relaxed text-muted-foreground">
-                      {insight.text}
+                      <span className="font-semibold text-foreground/90">💡 Ação: </span>
+                      {acao}
                     </p>
                   </div>
                 </div>
