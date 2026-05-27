@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { SoundProvider } from "@/hooks/useSoundFeedback";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { JuniorModeProvider } from "@/hooks/useJuniorMode";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -74,11 +75,13 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SoundProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <JuniorModeProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </JuniorModeProvider>
       </SoundProvider>
     </TooltipProvider>
   </QueryClientProvider>
