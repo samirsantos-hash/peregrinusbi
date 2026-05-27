@@ -218,7 +218,17 @@ const DashboardHeader = ({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-[340px] p-0 bg-card border-glass-border" align="start">
-                <Command className="bg-transparent">
+                <Command
+                  className="bg-transparent"
+                  filter={(value, search) => {
+                    const norm = (s: string) =>
+                      s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "");
+                    const haystack = norm(value);
+                    const needle = norm(search);
+                    if (!needle) return 1;
+                    return haystack.includes(needle) ? 1 : 0;
+                  }}
+                >
                   <CommandInput placeholder="Pesquisar por nome ou Cust ID..." className="h-9" />
                   <CommandList>
                     <CommandEmpty>Nenhuma loja encontrada.</CommandEmpty>
