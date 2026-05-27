@@ -10,6 +10,8 @@ import GaugeChart from "./GaugeChart";
 import { Badge } from "@/components/ui/badge";
 import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
+import type { VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
+import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 
 interface KpiLike {
   date: string;
@@ -18,12 +20,23 @@ interface KpiLike {
   cdpTgmv: number;
   upliftGmvM1: number;
   gmvM1: number;
+  // optional fields used by the 6-dimension matrix
+  roas?: number;
+  acos?: number;
+  tsi?: number;
+  visits?: number;
+  pctFull?: number;
+  repClaimsRate?: number;
+  repDelayedRate?: number;
+  adsInvestment?: number;
+  tgmvPads?: number;
 }
 
 interface GrowthPotentialPanelProps {
   kpis: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
   campaign?: SellerCampaign | null;
+  benchmark?: VerticalBenchmark | null;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
