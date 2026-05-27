@@ -209,6 +209,133 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
     ? `O Seller está operando a ${potentialPct.toFixed(1)}% do potencial da categoria — superando o benchmark!`
     : `O Seller está operando a ${potentialPct.toFixed(1)}% do potencial total da categoria`;
 
+  // ---------------------------------------------------------------
+  // 6-Dimension matrix vs vertical (junior-friendly)
+  // ---------------------------------------------------------------
+  const matriz = useMemo(() => {
+    if (!kpis.length) return [];
+    const totalGmv = kpis.reduce((s, k) => s + (k.gmv || 0), 0);
+    const totalAds = kpis.reduce((s, k) => s + (k.adsInvestment || 0), 0);
+    const totalTgmvPads = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
+    const totalTsi = kpis.reduce((s, k) => s + (k.tsi || 0), 0);
+    const totalVisits = kpis.reduce((s, k) => s + (k.visits || 0), 0);
+
+    const sellerRoas = totalAds > 0 ? totalTgmvPads / totalAds : 0;
+    const sellerAcos = totalTgmvPads > 0 ? (totalAds / totalTgmvPads) * 100 : 0;
+    const sellerConv = totalVisits > 0 ? (totalTsi / totalVisits) * 100 : 0;
+    const sellerFull = kpis.reduce((s, k) => s + (k.pctFull || 0), 0) / kpis.length;
+    const sellerRep =
+      kpis.reduce((s, k) => s + (k.repClaimsRate || 0) + (k.repDelayedRate || 0), 0) /
+      Math.max(1, kpis.length);
+
+    type Row = {
+      label: string;
+      sellerLabel: string;
+      benchLabel: string;
+      ratio: number; // 0..1.5 (1 = at benchmark)
+      status: "ok" | "warn" | "crit";
+      tooltipKey?: string;
+    };
+    const statusFromRatio = (r: number, higherBetter = true): Row["status"] => {
+      const norm = higherBetter ? r : r === 0 ? 0 : 1 / r;
+      if (norm >= 0.95) return "ok";
+      if (norm >= 0.7) return "warn";
+      return "crit";
+    };
+
+    const rows: Row[] = [];
+
+    // 1. GMV vs benchmark da vertical (efectRtaVertical fornece a relação direta)
+    if (campaign?.efectRtaVertical && campaign.efectRtaVertical > 0) {
+      const r = campaign.efectRtaVertical / 100;
+      rows.push({
+        label: "GMV vs Vertical",
+        sellerLabel: fmtBRLCompact(totalGmv),
+        benchLabel: `${campaign.efectRtaVertical.toFixed(0)}% do potencial`,
+        ratio: Math.min(1.5, r),
+        status: statusFromRatio(r),
+      });
+    }
+
+    // 2. ROAS vs avgRoas
+    if (benchmark?.avgRoas) {
+      const r = sellerRoas / benchmark.avgRoas;
+      rows.push({
+        label: "ROAS vs Vertical",
+        sellerLabel: `${sellerRoas.toFixed(2)}x`,
+        benchLabel: `${benchmark.avgRoas.toFixed(2)}x`,
+        ratio: Math.min(1.5, r),
+        status: statusFromRatio(r),
+        tooltipKey: "roas",
+      });
+    }
+
+    // 3. ACOS vs avgAcos (menor é melhor)
+    if (benchmark?.avgAcos && sellerAcos > 0) {
+      const r = benchmark.avgAcos / sellerAcos; // invertido: benchmark/seller
+      rows.push({
+        label: "ACOS vs Vertical",
+        sellerLabel: `${sellerAcos.toFixed(1)}%`,
+        benchLabel: `${benchmark.avgAcos.toFixed(1)}%`,
+        ratio: Math.min(1.5, r),
+        status: statusFromRatio(r),
+        tooltipKey: "acos",
+      });
+    }
+
+    // 4. Share Full vs 60% (algoritmo MELI prioriza Full)
+    rows.push({
+      label: "Share Full",
+      sellerLabel: `${sellerFull.toFixed(1)}%`,
+      benchLabel: "≥ 60%",
+      ratio: Math.min(1.5, sellerFull / 60),
+      status: statusFromRatio(sellerFull / 60),
+      tooltipKey: "shareFullPct",
+    });
+
+    // 5. Conversão (TSI/Visits) vs 5% referência
+    rows.push({
+      label: "Conversão (TSI/Visits)",
+      sellerLabel: `${sellerConv.toFixed(2)}%`,
+      benchLabel: "≥ 5%",
+      ratio: Math.min(1.5, sellerConv / 5),
+      status: statusFromRatio(sellerConv / 5),
+    });
+
+    // 6. Reputação (claims+delayed combinado, menor é melhor — referência 5%)
+    if (sellerRep > 0) {
+      const r = 5 / Math.max(0.1, sellerRep);
+      rows.push({
+        label: "Reputação (Claims+Atrasos)",
+        sellerLabel: `${sellerRep.toFixed(2)}%`,
+        benchLabel: "≤ 5%",
+        ratio: Math.min(1.5, r),
+        status: statusFromRatio(r),
+      });
+    }
+
+    return rows;
+  }, [kpis, campaign, benchmark]);
+
+  const statusColor = (s: "ok" | "warn" | "crit") =>
+    s === "ok"
+      ? "bg-emerald"
+      : s === "warn"
+      ? "bg-warning"
+      : "bg-destructive";
+  const statusText = (s: "ok" | "warn" | "crit") =>
+    s === "ok"
+      ? "Saudável"
+      : s === "warn"
+      ? "Atenção"
+      : "Crítico";
+  const statusTextColor = (s: "ok" | "warn" | "crit") =>
+    s === "ok"
+      ? "text-emerald"
+      : s === "warn"
+      ? "text-warning"
+      : "text-destructive";
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       {/* Top row: Gauge + Summary */}
