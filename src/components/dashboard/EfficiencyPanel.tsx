@@ -5,6 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
+import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import SalesRecordCard from "./SalesRecordCard";
 import TrafficHeatmap from "./TrafficHeatmap";
 import BestInvestmentPeriod from "./BestInvestmentPeriod";
@@ -233,6 +234,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       color: "neon-text",
       tooltip: "Valor total das vendas brutas no período selecionado.",
       benchmarkText: null,
+      algoKey: "gmv" as const,
     },
     {
       label: "ROAS Médio",
@@ -240,6 +242,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       color: avgRoas >= 2 ? "emerald-text" : "critical-text",
       tooltip: "TGMV_LC_PADS / INV_PADS. Acima de 2x é saudável.",
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgRoas.toFixed(2)}x` : null,
+      algoKey: "roas" as const,
     },
     {
       label: "ACOS Médio",
@@ -247,6 +250,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       color: avgAcos <= 15 ? "emerald-text" : "critical-text",
       tooltip: "(INV_PADS / TGMV_LC_PADS) × 100. Quanto menor, mais eficiente.",
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgAcos.toFixed(2)}%` : null,
+      algoKey: "acos" as const,
     },
     {
       label: "TACOS Médio",
@@ -254,6 +258,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       color: avgTacos <= 10 ? "emerald-text" : "critical-text",
       tooltip: "(INV_PADS / TGMV_LC) × 100. Termômetro real da saúde do negócio.",
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgTacos.toFixed(2)}%` : null,
+      algoKey: "tacos" as const,
     },
     {
       label: "CPA Médio",
@@ -261,6 +266,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       color: "neon-text",
       tooltip: "Custo por aquisição. INV_PADS / TSI_PADS.",
       benchmarkText: null,
+      algoKey: "cpa" as const,
     },
     {
       label: "ROI",
@@ -268,6 +274,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       color: roi > 0 ? "emerald-text" : "critical-text",
       tooltip: "(TGMV_LC_PADS − INV_PADS) / INV_PADS × 100.",
       benchmarkText: null,
+      algoKey: undefined,
     },
     {
       label: "CPC Proxy",
@@ -275,6 +282,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       color: "text-muted-foreground",
       tooltip: "INV_PADS / VISITAS. Proxy do custo por clique.",
       benchmarkText: null,
+      algoKey: undefined,
     },
     {
       label: "Investimento em Marketing",
@@ -282,6 +290,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       color: "text-muted-foreground",
       tooltip: "Total investido em campanhas de Product Ads no período.",
       benchmarkText: benchmark ? `Média da categoria: ${fmtBRLCompact(benchmark.avgInvestment)}` : null,
+      algoKey: undefined,
     },
   ];
 
@@ -353,7 +362,11 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
           >
             <div className="flex items-center gap-1">
               <p className="metric-label">{m.label}</p>
-              <TooltipInfo text={m.tooltip} />
+              {m.algoKey ? (
+                <AlgoTooltip tooltipKey={m.algoKey} />
+              ) : (
+                <TooltipInfo text={m.tooltip} />
+              )}
             </div>
             <p className={`metric-value mt-1 ${m.color}`}>{m.value}</p>
             {m.benchmarkText && (
