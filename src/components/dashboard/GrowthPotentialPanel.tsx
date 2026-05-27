@@ -116,7 +116,7 @@ function getStrategicInsight(potentialPct: number): StrategicInsight {
   };
 }
 
-const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign }: GrowthPotentialPanelProps) => {
+const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark }: GrowthPotentialPanelProps) => {
   // Primary source: Efect Rta Vertical from meli_campaigns
   const hasCampaignData = !!campaign && campaign.efectRtaVertical > 0;
 
