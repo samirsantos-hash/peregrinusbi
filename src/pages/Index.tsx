@@ -447,7 +447,7 @@ const Index = () => {
                       sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
                     />
                     <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
-                    <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} />
+                    <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} />
                     <TrendAnalysisPanel kpis={displayKpis} dataGranularity={granularity} />
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
