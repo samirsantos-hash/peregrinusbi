@@ -196,11 +196,11 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
   // ─── OPORTUNIDADES ─────────────────────────────────────────────────
   itensSemOptin: {
     oque: "Itens elegíveis à CDP que ainda não fizeram opt-in.",
-    algoritmo: "⚠️ CRÍTICO. Cada item sem opt-in é posição de topo deixada na mesa. Opt-in gera tag 'Oferta Imperdível' e abas exclusivas que triplicam o tráfego.",
-    seBom: "0 itens sem opt-in → seller maximizando o combustível orgânico.",
-    seRuim: "Qualquer item elegível sem opt-in → ação imediata. Custo = apenas margem cedida.",
+    algoritmo: "⚠️ CRÍTICO. Item elegível sem opt-in perde visibilidade. Mas a entrada deve ser avaliada pela margem disponível — não force opt-in em itens que não suportam o desconto.",
+    seBom: "0 itens elegíveis sem opt-in com margem suficiente → combustível orgânico maximizado.",
+    seRuim: "Itens com margem ok sem opt-in → ação imediata. Antes, verificar se há campanha com COPARTICIPAÇÃO disponível (ML divide o custo do desconto).",
     correlacao: "Opt-in → tag → tráfego ↑ → conversão ↑ → IPI ↑ → posição ↑.",
-    benchmark: "Se a margem permite desconto de 5%+, sempre fazer opt-in.",
+    benchmark: "Fluxo: 1) campanha com coparticipação? Entrar. 2) Senão, margem suporta desconto mínimo? Entrar. 3) Senão, reduzir custo operacional primeiro.",
   },
   gapDesconto: {
     oque: "Gap entre o desconto sugerido pelo ML e o aplicado pelo seller.",
