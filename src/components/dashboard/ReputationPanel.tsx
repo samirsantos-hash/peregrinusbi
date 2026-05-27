@@ -1,8 +1,28 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Activity, TrendingUp, TrendingDown, ShieldCheck } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceArea,
+  ReferenceLine,
+} from "recharts";
 import { fmtPct, formatChartDate } from "@/utils/formatters";
+import { TrendBadge } from "@/components/ui/TrendBadge";
+import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
+import {
+  statusReputacao,
+  corLinhaTendencia,
+  slopeUltimosN,
+  type MetricaReputacao,
+} from "@/lib/reputationStatus";
 
 interface KpiLike {
   date: string;
@@ -26,6 +46,9 @@ interface TrafficLight {
   severity: Severity;
   description: string;
   thresholds: string;
+  serie: number[];
+  metrica: MetricaReputacao;
+  tooltipKey: "taxaReclamacoes" | "taxaAtrasos" | "taxaCancelamentos";
 }
 
 function getSeverity(value: number, greenMax: number, yellowMax: number): Severity {
@@ -59,13 +82,14 @@ const SEVERITY_CONFIG: Record<Severity, { emoji: string; bg: string; border: str
 };
 
 const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelProps) => {
-  const { lights, latest, trendData, overallSeverity } = useMemo(() => {
+  const { lights, latest, trendData, overallSeverity, slopes } = useMemo(() => {
     if (kpis.length === 0) {
       return {
         lights: [] as TrafficLight[],
         latest: null,
         trendData: [],
         overallSeverity: "yellow" as Severity,
+        slopes: { claims: 0, delays: 0, cancels: 0 },
       };
     }
 
@@ -77,6 +101,10 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
     const cancRate = (lat.repCancellationsRate || 0) * 100;
     const cancSev = getSeverity(cancRate, 2, 5);
 
+    const claimsSerie = sorted.map((k) => +(k.repClaimsRate * 100).toFixed(3));
+    const delaysSerie = sorted.map((k) => +(k.repDelayedRate * 100).toFixed(3));
+    const cancelsSerie = sorted.map((k) => +((k.repCancellationsRate || 0) * 100).toFixed(3));
+
     const lightsArr: TrafficLight[] = [
       {
         label: "Taxa de Reclamações",
@@ -85,6 +113,9 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
         severity: claimsSev,
         description: "Percentual de vendas com reclamações abertas",
         thresholds: "🟢 ≤2% · 🟡 ≤5% · 🔴 >5%",
+        serie: claimsSerie,
+        metrica: "reclamacoes",
+        tooltipKey: "taxaReclamacoes",
       },
       {
         label: "Taxa de Atrasos",
@@ -93,6 +124,9 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
         severity: delaySev,
         description: "Percentual de envios atrasados (handling time)",
         thresholds: "🟢 ≤5% · 🟡 ≤10% · 🔴 >10%",
+        serie: delaysSerie,
+        metrica: "atrasos",
+        tooltipKey: "taxaAtrasos",
       },
       {
         label: "Taxa de Cancelamento",
@@ -101,6 +135,9 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
         severity: cancSev,
         description: "Percentual de vendas canceladas",
         thresholds: "🟢 ≤2% · 🟡 ≤5% · 🔴 >5%",
+        serie: cancelsSerie,
+        metrica: "cancelamentos",
+        tooltipKey: "taxaCancelamentos",
       },
     ];
 
@@ -108,12 +145,23 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
       date: k.date,
       claims: +(k.repClaimsRate * 100).toFixed(2),
       delays: +(k.repDelayedRate * 100).toFixed(2),
+      cancels: +((k.repCancellationsRate || 0) * 100).toFixed(2),
     }));
 
     const worst = [claimsSev, delaySev, cancSev];
     const overall: Severity = worst.includes("red") ? "red" : worst.includes("yellow") ? "yellow" : "green";
 
-    return { lights: lightsArr, latest: lat, trendData: trend, overallSeverity: overall };
+    return {
+      lights: lightsArr,
+      latest: lat,
+      trendData: trend,
+      overallSeverity: overall,
+      slopes: {
+        claims: slopeUltimosN(claimsSerie, 3),
+        delays: slopeUltimosN(delaysSerie, 3),
+        cancels: slopeUltimosN(cancelsSerie, 3),
+      },
+    };
   }, [kpis]);
 
   if (!latest) {
@@ -126,6 +174,37 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
 
   const overallCfg = SEVERITY_CONFIG[overallSeverity];
 
+  // Métricas individuais para os mini-charts
+  const mini = [
+    {
+      key: "claims" as const,
+      label: "Reclamações",
+      metrica: "reclamacoes" as MetricaReputacao,
+      slope: slopes.claims,
+      valor: latest.repClaimsRate * 100,
+      atencao: 2,
+      critico: 5,
+    },
+    {
+      key: "delays" as const,
+      label: "Atrasos",
+      metrica: "atrasos" as MetricaReputacao,
+      slope: slopes.delays,
+      valor: latest.repDelayedRate * 100,
+      atencao: 5,
+      critico: 10,
+    },
+    {
+      key: "cancels" as const,
+      label: "Cancelamentos",
+      metrica: "cancelamentos" as MetricaReputacao,
+      slope: slopes.cancels,
+      valor: (latest.repCancellationsRate || 0) * 100,
+      atencao: 2,
+      critico: 5,
+    },
+  ];
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       {/* Overall Status */}
@@ -134,8 +213,9 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
           <div className="flex items-center gap-3">
             <ShieldCheck className={`w-6 h-6 ${overallCfg.text}`} />
             <div>
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground flex items-center gap-1.5">
                 Saúde Operacional
+                <AlgoTooltip tooltipKey="nivelReputacao" />
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Nível atual: <span className="font-bold text-foreground">{latest.repLevel || "N/A"}</span>
@@ -150,6 +230,13 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {lights.map((light, idx) => {
           const cfg = SEVERITY_CONFIG[light.severity];
+          const slope =
+            light.metrica === "reclamacoes"
+              ? slopes.claims
+              : light.metrica === "atrasos"
+                ? slopes.delays
+                : slopes.cancels;
+          const st = statusReputacao(light.metrica, light.value, slope);
           return (
             <motion.div
               key={light.label}
@@ -164,72 +251,111 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                   {light.formatted}
                 </span>
               </div>
-              <h4 className="text-sm font-semibold text-foreground mb-1">{light.label}</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-1.5">
+                {light.label}
+                <AlgoTooltip tooltipKey={light.tooltipKey} />
+              </h4>
               <p className="text-xs text-muted-foreground mb-2">{light.description}</p>
-              <p className="text-[10px] text-muted-foreground/70 font-mono">{light.thresholds}</p>
+              <p className="text-[10px] text-muted-foreground/70 font-mono mb-2">{light.thresholds}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <TrendBadge serie={light.serie} sentido="menor_melhor" formato="pp" casas={2} />
+              </div>
+              <p
+                className="text-[10px] mt-2 px-2 py-1 rounded font-medium"
+                style={{ color: st.cor, background: st.bg }}
+              >
+                {st.texto}
+              </p>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Trend Chart */}
+      {/* Mini-charts individuais por métrica — eixo Y dinâmico + zonas de risco */}
       {trendData.length > 1 && (
-        <div className="glass-card p-6">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-4 flex items-center gap-2">
-            <Activity className="w-4 h-4 text-neon-blue" />
-            Evolução — Reclamações e Atrasos
-          </h3>
-          <div className="h-[280px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={trendData}>
-                <defs>
-                  <linearGradient id="claimsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="delaysGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                  tickFormatter={(v) => formatChartDate(v, dataGranularity)}
-                />
-                <YAxis
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
-                  tickFormatter={(v) => `${v}%`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                  }}
-                  formatter={(value: number) => [`${value.toFixed(2)}%`]}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="claims"
-                  name="Reclamações"
-                  stroke="hsl(0, 84%, 60%)"
-                  fill="url(#claimsGrad)"
-                  strokeWidth={2}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="delays"
-                  name="Atrasos"
-                  stroke="hsl(40, 95%, 55%)"
-                  fill="url(#delaysGrad)"
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {mini.map((m) => {
+            const cor = corLinhaTendencia(m.slope);
+            return (
+              <div key={m.key} className="glass-card p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 text-neon-blue" />
+                    {m.label}
+                  </h4>
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    meta &lt; {m.atencao}%
+                  </span>
+                </div>
+                <div className="h-[180px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={trendData} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                      <XAxis
+                        dataKey="date"
+                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                        tickFormatter={(v) => formatChartDate(v, dataGranularity)}
+                      />
+                      <YAxis
+                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                        domain={[
+                          (dataMin: number) => Math.max(0, dataMin - 0.5),
+                          (dataMax: number) => Math.max(dataMax + 0.5, m.atencao + 1),
+                        ]}
+                        tickFormatter={(v) => `${Number(v).toFixed(1)}%`}
+                        width={48}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "8px",
+                          fontSize: "11px",
+                        }}
+                        formatter={(value: number) => [`${value.toFixed(2)}%`, m.label]}
+                      />
+                      {/* Zonas de risco */}
+                      <ReferenceArea
+                        y1={m.atencao}
+                        y2={m.critico}
+                        fill="#FEF08A"
+                        fillOpacity={0.18}
+                        ifOverflow="extendDomain"
+                      />
+                      <ReferenceArea
+                        y1={m.critico}
+                        y2={1e6}
+                        fill="#FCA5A5"
+                        fillOpacity={0.18}
+                        ifOverflow="extendDomain"
+                      />
+                      <ReferenceLine
+                        y={m.atencao}
+                        stroke="#D97706"
+                        strokeDasharray="4 3"
+                        label={{ value: `${m.atencao}%`, position: "right", fill: "#D97706", fontSize: 9 }}
+                      />
+                      <ReferenceLine
+                        y={m.critico}
+                        stroke="#DC2626"
+                        strokeDasharray="4 3"
+                        label={{ value: `${m.critico}%`, position: "right", fill: "#DC2626", fontSize: 9 }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey={m.key}
+                        stroke={cor}
+                        strokeWidth={2.5}
+                        dot={{ r: 2, fill: cor }}
+                        activeDot={{ r: 4 }}
+                        isAnimationActive={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
     </motion.div>
