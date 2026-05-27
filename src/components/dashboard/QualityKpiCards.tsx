@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Shield, Barcode, Sparkles, Package } from "lucide-react";
 import GaugeChart from "./GaugeChart";
 import { cn } from "@/lib/utils";
+import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
+import type { TOOLTIPS } from "@/lib/algoTooltips";
 
 interface QualityKpiCardsProps {
   scoreCaracteristica: number;
@@ -108,6 +110,7 @@ const QualityKpiCards = ({
       refKey: "SCORE_FINAL_PADS",
       icon: Shield,
       noFullMessage: null as string | null,
+      algoKey: "scorePads" as keyof typeof TOOLTIPS,
     },
     {
       label: "Score Full",
@@ -115,6 +118,7 @@ const QualityKpiCards = ({
       refKey: "SCORE_FINAL_FULL",
       icon: Package,
       noFullMessage: !hasFullActive ? "Seller sem itens no fulfillment ativo" : null,
+      algoKey: "shareFullPct" as keyof typeof TOOLTIPS,
     },
     {
       label: "Score CDP",
@@ -122,6 +126,7 @@ const QualityKpiCards = ({
       refKey: "SCORE_FINAL_CDP",
       icon: Sparkles,
       noFullMessage: null as string | null,
+      algoKey: "scoreCdp" as keyof typeof TOOLTIPS,
     },
     ...(pontuacaoIpi > 0 ? [{
       label: "Pontuação IPI",
@@ -129,6 +134,7 @@ const QualityKpiCards = ({
       refKey: "PONTUACAO_IPI",
       icon: Shield,
       noFullMessage: null as string | null,
+      algoKey: "ipi" as keyof typeof TOOLTIPS,
     }] : []),
   ];
 
@@ -140,6 +146,7 @@ const QualityKpiCards = ({
       icon: Shield,
       color: "blue" as const,
       isGauge: true,
+      algoKey: "pontuacaoAtributos" as keyof typeof TOOLTIPS | undefined,
     },
     {
       label: "Saúde do Código de Barras",
@@ -149,6 +156,7 @@ const QualityKpiCards = ({
       color: "emerald" as const,
       isGauge: true,
       zeroWarning: normalizedGtin === 0,
+      algoKey: "saudeCodigoBarras" as keyof typeof TOOLTIPS | undefined,
     },
     {
       label: "Atratividade da Oferta",
@@ -157,6 +165,7 @@ const QualityKpiCards = ({
       icon: Sparkles,
       color: "blue" as const,
       isGauge: true,
+      algoKey: "atratividadeOferta" as keyof typeof TOOLTIPS | undefined,
     },
     {
       label: "Total de Anúncios Ativos",
@@ -165,6 +174,7 @@ const QualityKpiCards = ({
       icon: Package,
       color: "emerald" as const,
       isGauge: false,
+      algoKey: undefined,
     },
   ];
 
@@ -185,6 +195,7 @@ const QualityKpiCards = ({
               <div className="flex items-center gap-2">
                 <card.icon className="w-3.5 h-3.5 text-neon-blue" />
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{card.label}</span>
+                {card.algoKey && <AlgoTooltip tooltipKey={card.algoKey} />}
               </div>
               {card.noFullMessage ? (
                 <div className="space-y-1">
@@ -223,6 +234,7 @@ const QualityKpiCards = ({
                 <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
                   {card.label}
                 </h4>
+                {card.algoKey && <AlgoTooltip tooltipKey={card.algoKey} />}
               </div>
               <p className="text-[10px] text-muted-foreground -mt-1">{card.sublabel}</p>
 

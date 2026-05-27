@@ -44,6 +44,10 @@ import GrantsPanel from "@/components/dashboard/GrantsPanel";
 import QualityIndexPanel from "@/components/dashboard/QualityIndexPanel";
 import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 import { useVerticalBenchmark } from "@/hooks/useVerticalBenchmark";
+import { SELLER_TABS } from "@/config/sellerTabs";
+import { useJuniorMode } from "@/hooks/useJuniorMode";
+import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
+import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -280,21 +284,9 @@ const Index = () => {
     setIsRefreshing(false);
   }, [queryClient, selectedSeller]);
 
-  const tabs = [
-    // Saúde (topo)
-    { id: "grants", label: "Grants", icon: KeyRound },
-    { id: "efficiency", label: "Resumo", icon: DollarSign },
-    { id: "reputation", label: "Reputação", icon: HeartPulse },
-    // Performance
-    { id: "executive", label: "Faturamento", icon: LayoutDashboard },
-    { id: "logistics", label: "Logística", icon: Truck },
-    // Qualidade & Conteúdo
-    { id: "quality", label: "Qualidade", icon: Shield },
-    { id: "clips", label: "Clips & Audiência", icon: Video },
-    // Base
-    { id: "competitiveness", label: "Diagnóstico de Preço", icon: Swords },
-    { id: "opportunities", label: "Oportunidades", icon: Gift },
-  ];
+  // Ordem lógica de análise — ver src/config/sellerTabs.ts
+  // 1–3: "como está indo?" | 4–6: "por que?" | 7–9: "o que fazer?"
+  const tabs = SELLER_TABS;
 
   // Map seller UUID -> custId for external links
   const sellerCustIdMap = useMemo(() => {
@@ -304,6 +296,42 @@ const Index = () => {
   }, [sellers]);
 
   const isLoading = !sellersFetched || (hasRealData && (loadingKpis || loadingDailyKpis));
+
+  // Indicadores agregados para o Guia do Consultor (junior banners)
+  const dadosJunior = useMemo(() => {
+    const latest = [...displayKpis].sort((a: any, b: any) => String(b.date).localeCompare(String(a.date)))[0] || {};
+    const totalGmv = displayKpis.reduce((s: number, k: any) => s + (Number(k?.gmv) || Number(k?.revenue) || 0), 0);
+    const totalAds = displayKpis.reduce((s: number, k: any) => s + (Number(k?.adsInvestment) || 0), 0);
+    const tacos = totalGmv > 0 ? (totalAds / totalGmv) * 100 : 0;
+    const itensSemOptin = (eligibilityItems || []).filter((it: any) => it?.elegivel && !it?.optin).length;
+    const gapDescontoMedio = (eligibilityItems || []).reduce((s: number, it: any) => {
+      const gap = Number(it?.gapDesconto) || Math.max(0, (Number(it?.descontoSugerido) || 0) - (Number(it?.descontoAplicado) || 0));
+      return s + (gap > 0 ? gap : 0);
+    }, 0) / Math.max(1, (eligibilityItems || []).length);
+    let diasParaExpirar = 0;
+    if (currentGrant?.expirationDate) {
+      const exp = new Date(currentGrant.expirationDate).getTime();
+      diasParaExpirar = Math.ceil((exp - Date.now()) / (1000 * 60 * 60 * 24));
+    }
+    return {
+      shareFullPct: Number(latest?.shareFullPct) || 0,
+      shareFlexPct: Number(latest?.shareFlexPct) || 0,
+      pontuacaoIpi: Number(latest?.pontuacaoIpi) || 0,
+      scoreCdp: Number(latest?.cdpTgmv) > 0 ? 36 : 0,
+      scoreCaracteristica: Number(latest?.scoreCaracteristica) || 0,
+      taxaAtrasos: Number(latest?.taxaAtrasos) || Number(latest?.repDelayedHtRate) || 0,
+      taxaReclamacoes: Number(latest?.taxaReclamacoes) || Number(latest?.repClaimsRate) || 0,
+      taxaCancelamentos: Number(latest?.taxaCancelamentos) || Number(latest?.repCancellationsRate) || 0,
+      nivelReputacao: String(latest?.nivelReputacao || latest?.repLevel || ""),
+      gmvTrend: 0,
+      corrAdsGmv: 0,
+      tacos,
+      itensSemOptin,
+      gapDescontoMedio,
+      diasParaExpirar,
+      temVerbaAtiva: !!currentGrant,
+    };
+  }, [displayKpis, eligibilityItems, currentGrant]);
 
   // Active date range debug label
   const dateDebugLabel = useMemo(() => {
@@ -387,13 +415,20 @@ const Index = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="glass-card w-full justify-start gap-0.5 p-1 bg-card/60 h-auto overflow-x-auto flex-nowrap">
                 {tabs.map((tab) =>
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] whitespace-nowrap data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
-                    <tab.icon className="w-3.5 h-3.5 shrink-0" />
-                    {tab.label}
-                  </TabsTrigger>
+                  <Tooltip key={tab.id} delayDuration={300}>
+                    <TooltipTrigger asChild>
+                      <TabsTrigger
+                        value={tab.id}
+                        className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] whitespace-nowrap data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
+                        <tab.icon className="w-3.5 h-3.5 shrink-0" />
+                        {tab.label}
+                      </TabsTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" className="max-w-[260px] text-xs">
+                      <p className="font-semibold mb-0.5">{tab.label}</p>
+                      <p className="text-muted-foreground">{tab.juniorTip}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </TabsList>
 
@@ -406,6 +441,7 @@ const Index = () => {
                   transition={{ duration: 0.25 }}
                   className="mt-5">
                   <TabsContent value="executive" className="mt-0 space-y-6">
+                    <JuniorActionBanner abaId="executive" dados={dadosJunior} />
                     <Daily7DPanel
                       dailyKpis={allKpisDaily}
                       sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
@@ -415,16 +451,20 @@ const Index = () => {
                     <TrendAnalysisPanel kpis={displayKpis} dataGranularity={granularity} />
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
-                  <TabsContent value="efficiency" className="mt-0">
+                  <TabsContent value="efficiency" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
                   </TabsContent>
-                  <TabsContent value="competitiveness" className="mt-0">
+                  <TabsContent value="competitiveness" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="competitiveness" dados={dadosJunior} />
                     <CompetitivenessPanel kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />
                   </TabsContent>
-                  <TabsContent value="logistics" className="mt-0">
+                  <TabsContent value="logistics" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="quality" dados={dadosJunior} />
                     <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
                     <QualityKpiCards
                       scoreCaracteristica={(() => {
@@ -463,14 +503,20 @@ const Index = () => {
                   <TabsContent value="clips" className="mt-0">
                     <ClipsAudiencePanel kpis={displayKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} dataGranularity={granularity} />
                   </TabsContent>
-                  <TabsContent value="opportunities" className="mt-0">
+                  <TabsContent value="opportunities" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="opportunities" dados={dadosJunior} />
                     <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
-                  <TabsContent value="reputation" className="mt-0">
+                  <TabsContent value="reputation" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="reputation" dados={dadosJunior} />
                     <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
-                  <TabsContent value="grants" className="mt-0">
+                  <TabsContent value="grants" className="mt-0 space-y-5">
+                    <JuniorActionBanner abaId="grants" dados={dadosJunior} />
                     <GrantsPanel sellers={sellers.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.custId }))} />
+                  </TabsContent>
+                  <TabsContent value="correlacoes" className="mt-0">
+                    <CorrelacaoPanel kpis={displayKpis} />
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>

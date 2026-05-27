@@ -1,98 +1,83 @@
-# Projeção de Crescimento e Tendência
+# Plano: Modo Consultor Junior
 
-Novo módulo no menu lateral (rota `/projecao-crescimento`, ícone `TrendingUp`) que responde 3 perguntas ao GM: para onde a carteira vai, por quê, e se o crescimento é sustentável. Tudo baseado em `cpp_mensal` agregado por `mes_ref`, reaproveitando filtros, alertas, drawer e tokens visuais já existentes.
+Camada didática sobre o dashboard existente, sem refazer o que já funciona. Entrega em 4 fases.
 
-## Observação importante sobre os dados
+## Investigação prévia (rápida, antes de codar)
 
-A tabela `cpp_mensal` **não possui** as colunas `tgmv_orders` nem `mes_ref` confiável em todos os registros — vou usar:
-- **Pedidos** = `tsi` (TSI já é Total Sold Items, proxy de pedidos no projeto)
-- **AOV** = `tgmv_lc / tsi` (consistente com o resto do app)
-- **Mês** = `mes_ref` quando existir, senão derivado de `tim_month_id` via `monthKeyFromTimMonthId()`
+Ler arquivos-chave para descobrir:
+- Onde estão definidas as abas do seller hoje (provavelmente dentro do `Index.tsx` ou de um componente Tabs em `src/pages/Index.tsx` / dashboard wrapper).
+- Onde fica o "drawer do seller" para adicionar a aba Correlações.
+- Como o `DashboardHeader` está montado (para inserir o toggle "Modo Didático").
+- Quais labels exatos existem hoje nos painéis listados na seção 4.2.
 
-## Entregas (PRs pequenos)
+## Fase A — Base: AlgoTooltip + conteúdos + toggle global
 
-### 1. Views SQL (migration)
-- `vw_crescimento_mensal`: agrega `cpp_mensal` por mês com receita, tsi, visitas, inv_pads, CR%, AOV, sellers ativos.
-- `vw_crescimento_seller_mensal`: mesma coisa por seller (drill-down).
-- Filtra `tgmv_lc not null` e exclui meses parciais usando o guard já existente.
+1. Criar `src/components/ui/AlgoTooltip.tsx`
+   - Wrappa `Tooltip` do shadcn, ícone `HelpCircle` (lucide), 4 seções: O que é, Como o algoritmo usa, Bom/Ruim, Correlação, Benchmark.
+   - Usa tokens semânticos (`text-muted-foreground`, `text-emerald`, `text-destructive`, `bg-popover`); nada de cores hardcoded.
+   - Respeita `juniorMode` via hook (não renderiza nada se `false`).
+   - `role="tooltip"`, `aria-label` derivado de `oque`. Suporte mobile via `onClick` no trigger (Radix já cobre via focus, adicionar handler explícito).
 
-### 2. Engine de forecast (`src/lib/forecast.ts`)
-- `regressaoLinearPonderada` (pesos exponenciais nos meses recentes)
-- `cagrProjecao` (taxa composta mensal)
-- `ewma` (α configurável, default 0.4)
-- `holtWinters` aditivo (level + trend + sazonalidade m=12; só ativa com 24+ meses)
-- `forecastHibrido`: backtest MAPE nos últimos 3 meses → pesos = 1/MAPE normalizado → soma ponderada + IC95 (±1.96·σ resíduos) + diagnóstico em pt-BR
-- Estado vazio: < 4 meses → "Precisamos de 4+ meses"
-- Dependência: `simple-statistics` (adicionar via bun)
-- Testes vitest cobrindo: pesos somam 1, forecast 3 pontos, IC95 monotônico, fallback < 4m
+2. Criar `src/lib/algoTooltips.ts` com o dicionário `TOOLTIPS` exatamente como especificado no prompt (adicionar entrada `cpa` simples). Tipar via `as const`.
 
-### 3. Decomposição log-aditiva (`src/lib/decomposicao.ts`)
-- `decompor(atual, anterior)` retorna contribuição % de visitas, CR, AOV e interação
-- Soma ≈ Δlog(Receita) total (erro < 1pp)
+3. Criar `src/hooks/useJuniorMode.tsx`
+   - Hook + contexto leve. `localStorage` chave `peregrinus_junior_mode`. Default `true`.
+   - Expor `{ enabled, toggle }`.
 
-### 4. Sustentabilidade (`src/lib/sustentabilidade.ts`)
-- `classificarCrescimento(serie, decomp)` com 7 rótulos: Saudável, Eficiência operacional, Dependente de tráfego, Conversão em queda, Artificial/ads-driven, Risco de retração, Escalabilidade positiva
-- Usado no banner colorido do topo + frase explicativa
+4. Wrappar `App.tsx` com `JuniorModeProvider`.
 
-### 5. Insights pt-BR (`src/lib/insightsCrescimento.ts`)
-- `insightCrescimento`, `insightConversao`, `insightSazonalidade`, `insightSustentabilidade` — texto factual, sem extrapolar
+5. Adicionar toggle no `DashboardHeader` ao lado do botão Refresh: Switch + label "🎓 Modo Didático" / "Modo Avançado".
 
-### 6. UI — `src/pages/ProjecaoCrescimento.tsx`
-Banner de sustentabilidade no topo + 5 KpiCards reaproveitando `<KpiCard>`:
-1. Receita Projetada (3m)
-2. Crescimento Projetado (MoM, CAGR 12m, YoY com tooltip se < 24m)
-3. Taxa de Conversão (CR atual + Δ pp + chip de tendência)
-4. Ticket Médio (AOV + variações + contribuição)
-5. Tendência de Crescimento (rótulo classificado pela inclinação log-linear 6m)
+## Fase B — Reordenação das abas do seller
 
-5 gráficos Recharts (eixo X via `monthKey`):
-- Linha temporal real + forecast pontilhado + banda IC95
-- CR (linha) vs visitas (barras) com eixo Y duplo + reta regressão 6m
-- Heatmap sazonalidade (mês × ano, z-score) — fallback < 24m
-- Scatter visitas×receita (log/log), bolha=CR, cor=sustentabilidade, click→drawer
-- Decomposição empilhada mensal (visitas/CR/AOV/interação) + linha de crescimento %
+1. Localizar o array/JSX das tabs do seller (provável: `Index.tsx`).
+2. Reordenar para: Resumo → Faturamento → Logística → Qualidade → Clips → Preço → Oportunidades → Reputação → Grants.
+3. Adicionar comentário no topo justificando a ordem (1–3 "como vai", 4–6 "por quê", 7–9 "o que fazer").
+4. Criar `src/config/sellerTabs.ts` com metadados (`id`, `label`, `icon`, `juniorTip`, `order`) para reuso no banner e no tooltip da própria tab.
+5. Ao passar mouse sobre cada `TabsTrigger`, mostrar o `juniorTip` (apenas em juniorMode) via Tooltip simples.
 
-### 7. Filtros adicionais
-Reusa `FiltroContext`. Adiciona local:
-- Horizonte (1/3/6m, default 3m)
-- Suavização α (slider 0.1–0.7)
-- Toggle IC95
-- Comparar com (mês anterior / 3m atrás / média 12m)
+## Fase C — JuniorActionBanner por aba
 
-### 8. Alertas integrados (`src/lib/alerts.ts`)
-Novos tipos chegando à Central de Alertas existente:
-- `CR_QUEDA_3M` (média)
-- `CRESCIMENTO_DESACELERANDO` (atenção)
-- `CAC_ACIMA_RECEITA` (alta)
-- `TICKET_MEDIO_CAINDO` (atenção)
-- `CRESCIMENTO_INSUSTENTAVEL` (alta)
-- `SAZONAL_NEGATIVA_PROXIMA` (informativa)
+1. Criar `src/components/ui/JuniorActionBanner.tsx`
+   - Props: `abaId`, `dados` (objeto plano com os indicadores relevantes).
+   - Renderiza no máximo 3 ações ativas (filtra `condicao(dados) === true`, ordena por `prioridade`).
+   - Colapsável com persistência em `localStorage` chave `peregrinus_banner_<abaId>` (aberto na primeira visita, fechado depois — primeira visita = chave inexistente).
+   - Esconde se `!juniorMode` ou se nenhuma ação ativa.
+   - Cabeçalho: 🎓 Guia do Consultor.
 
-### 9. Componente `<NewBadge>` + onboarding
-- `src/components/ui/NewBadge.tsx` reaproveitável: pill azul `#3B82F6`, h-4 px-1.5 text-[10px], `animate-pulse` 2s respeitando `prefers-reduced-motion`, tooltip, some no primeiro click via `localStorage` chave `feature_seen_<key>`
-- Badge "NEW" no item de menu da nova rota
-- Popover onboarding 3 passos no primeiro acesso, persiste em `feature_onboarded_projecao_v1`
+2. Criar `src/lib/juniorActions.ts` com os arrays `ACOES_RESUMO`, `ACOES_FATURAMENTO`, `ACOES_LOGISTICA`, `ACOES_QUALIDADE`, `ACOES_PRECO`, `ACOES_OPORTUNIDADES`, `ACOES_REPUTACAO` (e mapa por `abaId`).
 
-### 10. Integração ao menu/rotas
-- Rota `/projecao-crescimento` em `src/App.tsx` (protegida)
-- Item no menu lateral logo após "Gestão de Carteira GM" com `<NewBadge featureKey="projecao_v1" />`
+3. Inserir `<JuniorActionBanner>` no topo de cada painel correspondente, passando os dados já calculados internamente.
 
-## Acabamento
+## Fase D — Aplicação dos AlgoTooltips + Painel Correlações
 
-- Tokens semânticos do design system (sem cores hardcoded em componentes)
-- Inter, cards `rounded-2xl shadow-sm p-6`
-- Count-up framer-motion nos KPIs, skeletons durante forecast
-- Mobile: gráficos com scroll horizontal, cards empilhados
-- Sempre `monthKey()` — proibido `getMonth()`/`getFullYear()` em arquivos novos
-- Forecast < 500ms para 12 pontos
+1. Aplicar `<AlgoTooltip ... />` nos labels listados na seção 4.2:
+   - `EfficiencyPanel`, `ExecutivePanel`, `LogisticsPanel`, `QualityKpiCards`, `ClipsAudiencePanel`, `CompetitivenessPanel`, `OpportunitiesPanel`, `ReputationPanel`, `GrantsPanel`.
+   - Trocar uso atual de `TooltipInfo` apenas onde o KPI tem entrada no dicionário; manter `TooltipInfo` para os demais (não quebra nada).
 
-## Ordem de execução
-1. Migration das views + checar se `tgmv_orders` existe (caso sim, usar; senão TSI)
-2. `bun add simple-statistics` + engine forecast + testes
-3. Decomposição + sustentabilidade + insights
-4. Página + KPI cards + filtros locais
-5. 5 gráficos
-6. Alertas na Central existente
-7. `NewBadge` + onboarding + entrada no menu/rotas
+2. Criar `src/components/seller/CorrelacaoPanel.tsx`
+   - Diagrama Mermaid via CDN (carregar script uma vez, `mermaid.run()` após mount).
+   - Tabela de correlações Pearson calculadas a partir dos dados diários do seller (já disponíveis em `useSellerDailyData`): pares Full↔GMV, CDP↔GMV, IPI↔ROAS, %NaoCompetitivo↔Conv, Atrasos↔Conv.
+   - Função utilitária `pearson(xs, ys)` em `src/lib/correlacao.ts`.
+   - Insight automático: pega `argmax |r|` e gera o texto.
+   - Semáforo: |r|<0.3 cinza, 0.3–0.6 amarelo, >0.6 verde/vermelho conforme sinal.
 
-Confirma para eu começar pelas views SQL?
+3. Adicionar aba "🔗 Correlações" no drawer do seller (último item; só visível em juniorMode? — manter sempre visível, é útil em ambos modos).
+
+## Critérios de aceite (resumo)
+
+Ver seção 8 do prompt. Implementação respeita design tokens, evita cores hardcoded, todos os textos em PT-BR conforme dicionário, nenhuma alteração em ingestão ou business logic existente.
+
+## Notas técnicas
+
+- Mermaid: usar `import mermaid from "mermaid"` (instalar `mermaid` via bun add) em vez de CDN — mais confiável dentro do Vite.
+- Pearson: implementação simples O(n), guard contra `stdev=0` retornando 0.
+- Toggle global: contexto + `useSyncExternalStore` para evitar hidratação; localStorage write em `toggle()`.
+- Banners e tooltips: zero impacto fora do juniorMode (early return).
+- Não tocar em: parsers, edge functions, hooks de dados, schemas.
+
+## Escopo NÃO incluído
+
+- Recalcular KPIs já existentes.
+- Alterar layout/estética dos painéis além de adicionar o ícone de tooltip e o banner no topo.
+- Mudanças em rotas, autenticação ou dados.
