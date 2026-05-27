@@ -151,10 +151,11 @@ export function usePortfolioData(custIds: string[]) {
 
       const merged: SellerWithKpi[] = sellersData.map((s) => {
         const k = latestKpi[s.id] || {};
+        const nick = (s.nickname || "").trim();
         return {
           sellerId: s.id,
           custId: s.cust_id,
-          nickname: s.nickname,
+          nickname: nick || `Loja ${s.cust_id}`,
           cusState: s.cus_state,
           repCurrentLevel: k.rep_current_level || null,
           tgmvLc: Number(k.tgmv_lc) || 0,

@@ -100,10 +100,18 @@ export function useClassificacaoLojas() {
         .select("id, cust_id, nickname, cluster_seller, sub_cluster_seller");
       if (sErr) throw sErr;
       const meta = new Map(
-        (sellers ?? []).map((s: any) => [
-          s.id as string,
-          { custId: s.cust_id as string, nickname: s.nickname as string, cluster: s.cluster_seller ?? "—", subCluster: s.sub_cluster_seller ?? "—" },
-        ]),
+        (sellers ?? []).map((s: any) => {
+          const nick = ((s.nickname as string) || "").trim();
+          return [
+            s.id as string,
+            {
+              custId: s.cust_id as string,
+              nickname: nick || `Loja ${s.cust_id}`,
+              cluster: s.cluster_seller ?? "—",
+              subCluster: s.sub_cluster_seller ?? "—",
+            },
+          ];
+        }),
       );
 
       // 2) sellers_kpi paged
