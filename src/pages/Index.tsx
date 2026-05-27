@@ -297,6 +297,42 @@ const Index = () => {
 
   const isLoading = !sellersFetched || (hasRealData && (loadingKpis || loadingDailyKpis));
 
+  // Indicadores agregados para o Guia do Consultor (junior banners)
+  const dadosJunior = useMemo(() => {
+    const latest = [...displayKpis].sort((a: any, b: any) => String(b.date).localeCompare(String(a.date)))[0] || {};
+    const totalGmv = displayKpis.reduce((s: number, k: any) => s + (Number(k?.gmv) || Number(k?.revenue) || 0), 0);
+    const totalAds = displayKpis.reduce((s: number, k: any) => s + (Number(k?.adsInvestment) || 0), 0);
+    const tacos = totalGmv > 0 ? (totalAds / totalGmv) * 100 : 0;
+    const itensSemOptin = (eligibilityItems || []).filter((it: any) => it?.elegivel && !it?.optin).length;
+    const gapDescontoMedio = (eligibilityItems || []).reduce((s: number, it: any) => {
+      const gap = Number(it?.gapDesconto) || Math.max(0, (Number(it?.descontoSugerido) || 0) - (Number(it?.descontoAplicado) || 0));
+      return s + (gap > 0 ? gap : 0);
+    }, 0) / Math.max(1, (eligibilityItems || []).length);
+    let diasParaExpirar = 0;
+    if (currentGrant?.expirationDate) {
+      const exp = new Date(currentGrant.expirationDate).getTime();
+      diasParaExpirar = Math.ceil((exp - Date.now()) / (1000 * 60 * 60 * 24));
+    }
+    return {
+      shareFullPct: Number(latest?.shareFullPct) || 0,
+      shareFlexPct: Number(latest?.shareFlexPct) || 0,
+      pontuacaoIpi: Number(latest?.pontuacaoIpi) || 0,
+      scoreCdp: Number(latest?.cdpTgmv) > 0 ? 36 : 0,
+      scoreCaracteristica: Number(latest?.scoreCaracteristica) || 0,
+      taxaAtrasos: Number(latest?.taxaAtrasos) || Number(latest?.repDelayedHtRate) || 0,
+      taxaReclamacoes: Number(latest?.taxaReclamacoes) || Number(latest?.repClaimsRate) || 0,
+      taxaCancelamentos: Number(latest?.taxaCancelamentos) || Number(latest?.repCancellationsRate) || 0,
+      nivelReputacao: String(latest?.nivelReputacao || latest?.repLevel || ""),
+      gmvTrend: 0,
+      corrAdsGmv: 0,
+      tacos,
+      itensSemOptin,
+      gapDescontoMedio,
+      diasParaExpirar,
+      temVerbaAtiva: !!currentGrant,
+    };
+  }, [displayKpis, eligibilityItems, currentGrant]);
+
   // Active date range debug label
   const dateDebugLabel = useMemo(() => {
     if (!dateRange?.from) return null;
