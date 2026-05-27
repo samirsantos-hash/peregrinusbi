@@ -229,11 +229,11 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
   },
   taxaAtrasos: {
     oque: "Taxa de envios com atraso (rep_delayed_ht_rate).",
-    algoritmo: "Atraso é diretamente ligado ao Shipping Score. Sellers com atraso alto perdem a tag 'Chegará amanhã' progressivamente.",
-    seBom: "< 2% → logística dentro do SLA.",
-    seRuim: "> 5% → algoritmo retira tag 'amanhã' dos itens Full.",
+    algoritmo: "Único fator que NEUTRALIZA o Full sem tirar o item do CD. Quando sobe, o Shipping Score cai, a tag 'chegará amanhã' some e o item passa a competir como se fosse Coleta — mesmo estando no Full.",
+    seBom: "< 5% → logística dentro do SLA do ML.",
+    seRuim: "> 10% → crise. Verificar etiquetagem, ruptura no CD ou janela de despacho.",
     correlacao: "Atraso ↑ → Shipping Score ↓ → Tag some → Conversão ↓ → Posição ↓.",
-    benchmark: "Meta: < 5%. Acima de 10% = crise logística.",
+    benchmark: "Meta: < 5%. 5–10% = atenção. > 10% = crise logística.",
   },
   taxaCancelamentos: {
     oque: "Taxa de cancelamentos iniciados pelo seller (rep_cancellations_rate).",
