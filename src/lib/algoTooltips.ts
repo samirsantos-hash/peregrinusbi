@@ -295,14 +295,6 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
   },
 
   // ─── ALIASES / KEYS COMPLEMENTARES ─────────────────────────────────
-  corr_ads_gmv: {
-    oque: "Correlação entre Investimento em Ads e GMV — coeficiente de Pearson (-1 a 1).",
-    algoritmo: "Correlação alta (>0.7) indica que o crescimento está dependente de tráfego pago. Ideal: GMV cresce mesmo quando Ads fica estável — sinal de que o ranking orgânico está funcionando.",
-    seBom: "Correlação < 0.5 com GMV crescendo → o orgânico está funcionando, Ads apenas amplifica.",
-    seRuim: "Correlação > 0.8 → negócio 'ads-dependent'. Se o orçamento cair, o GMV cai junto.",
-    correlacao: "Para reduzir dependência: aumentar Full%, otimizar IPI, ativar CDP (todos orgânicos e gratuitos).",
-    benchmark: "Correlação saudável: entre 0.3 e 0.6.",
-  },
   posicaoVsVertical: {
     oque: "Índice de efetividade do seller comparado à MEDIANA dos sellers da mesma categoria/vertical.",
     algoritmo: "Calculado por dimensão relativo ao benchmark da categoria específica do seller. Compara GMV, conversão, reputação e ROAS.",
