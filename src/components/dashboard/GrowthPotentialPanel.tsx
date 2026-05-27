@@ -449,11 +449,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         )}
       </div>
 
-      {/* Cumulative growth chart */}
-      <div className="glass-card p-5">
-        {/* 6-Dimension Matrix vs Vertical */}
-      </div>
-
+      {/* 6-Dimension Matrix vs Vertical */}
       {matriz.length > 0 && (
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-4">
