@@ -212,10 +212,10 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
   },
   // ─── REPUTAÇÃO ──────────────────────────────────────────────────────
   nivelReputacao: {
-    oque: "Nível de reputação: Verde Escuro (Platinum) → Verde → Amarelo → Laranja → Vermelho.",
-    algoritmo: "⚠️ ALTO PESO. Verde Escuro tem peso 'Alto/Essencial'. MercadoLíderes recebem prioridade. Amarelo/Vermelho é freio estrutural que Ads não compensa.",
-    seBom: "Verde Escuro → elegível para Tier 1, máxima visibilidade orgânica.",
-    seRuim: "Amarelo/Vermelho → urgência absoluta. CDP e Ads ineficazes até normalizar.",
+    oque: "Nível de reputação: Verde Escuro (Platinum) → Verde (Gold/Silver) → Amarelo → Vermelho.",
+    algoritmo: "⚠️ Pré-requisito #1. Nenhuma ação de Ads ou CDP tem efeito pleno enquanto a reputação não for verde. Amarelo = algoritmo começa a penalizar. Vermelho = risco de suspensão.",
+    seBom: "Verde Escuro (Platinum) → máxima visibilidade. Foque em Full e CDP para crescer.",
+    seRuim: "Amarelo = urgência. Vermelho = parar tudo e escalar para GM.",
     correlacao: "Resultado de: Reclamação + Atraso + Cancelamento.",
     benchmark: "Tier 1: green_platinum | Tier 2: green_gold | Tier 3: green_silver.",
   },
