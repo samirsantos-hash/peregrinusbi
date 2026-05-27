@@ -10,6 +10,8 @@ import GaugeChart from "./GaugeChart";
 import { Badge } from "@/components/ui/badge";
 import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
+import type { VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
+import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 
 interface KpiLike {
   date: string;
@@ -18,12 +20,23 @@ interface KpiLike {
   cdpTgmv: number;
   upliftGmvM1: number;
   gmvM1: number;
+  // optional fields used by the 6-dimension matrix
+  roas?: number;
+  acos?: number;
+  tsi?: number;
+  visits?: number;
+  pctFull?: number;
+  repClaimsRate?: number;
+  repDelayedRate?: number;
+  adsInvestment?: number;
+  tgmvPads?: number;
 }
 
 interface GrowthPotentialPanelProps {
   kpis: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
   campaign?: SellerCampaign | null;
+  benchmark?: VerticalBenchmark | null;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -103,7 +116,7 @@ function getStrategicInsight(potentialPct: number): StrategicInsight {
   };
 }
 
-const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign }: GrowthPotentialPanelProps) => {
+const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark }: GrowthPotentialPanelProps) => {
   // Primary source: Efect Rta Vertical from meli_campaigns
   const hasCampaignData = !!campaign && campaign.efectRtaVertical > 0;
 
@@ -195,6 +208,133 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign }: Gro
   const insightText = isExceedent
     ? `O Seller está operando a ${potentialPct.toFixed(1)}% do potencial da categoria — superando o benchmark!`
     : `O Seller está operando a ${potentialPct.toFixed(1)}% do potencial total da categoria`;
+
+  // ---------------------------------------------------------------
+  // 6-Dimension matrix vs vertical (junior-friendly)
+  // ---------------------------------------------------------------
+  const matriz = useMemo(() => {
+    if (!kpis.length) return [];
+    const totalGmv = kpis.reduce((s, k) => s + (k.gmv || 0), 0);
+    const totalAds = kpis.reduce((s, k) => s + (k.adsInvestment || 0), 0);
+    const totalTgmvPads = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
+    const totalTsi = kpis.reduce((s, k) => s + (k.tsi || 0), 0);
+    const totalVisits = kpis.reduce((s, k) => s + (k.visits || 0), 0);
+
+    const sellerRoas = totalAds > 0 ? totalTgmvPads / totalAds : 0;
+    const sellerAcos = totalTgmvPads > 0 ? (totalAds / totalTgmvPads) * 100 : 0;
+    const sellerConv = totalVisits > 0 ? (totalTsi / totalVisits) * 100 : 0;
+    const sellerFull = kpis.reduce((s, k) => s + (k.pctFull || 0), 0) / kpis.length;
+    const sellerRep =
+      kpis.reduce((s, k) => s + (k.repClaimsRate || 0) + (k.repDelayedRate || 0), 0) /
+      Math.max(1, kpis.length);
+
+    type Row = {
+      label: string;
+      sellerLabel: string;
+      benchLabel: string;
+      ratio: number; // 0..1.5 (1 = at benchmark)
+      status: "ok" | "warn" | "crit";
+      tooltipKey?: string;
+    };
+    const statusFromRatio = (r: number, higherBetter = true): Row["status"] => {
+      const norm = higherBetter ? r : r === 0 ? 0 : 1 / r;
+      if (norm >= 0.95) return "ok";
+      if (norm >= 0.7) return "warn";
+      return "crit";
+    };
+
+    const rows: Row[] = [];
+
+    // 1. GMV vs benchmark da vertical (efectRtaVertical fornece a relação direta)
+    if (campaign?.efectRtaVertical && campaign.efectRtaVertical > 0) {
+      const r = campaign.efectRtaVertical / 100;
+      rows.push({
+        label: "GMV vs Vertical",
+        sellerLabel: fmtBRLCompact(totalGmv),
+        benchLabel: `${campaign.efectRtaVertical.toFixed(0)}% do potencial`,
+        ratio: Math.min(1.5, r),
+        status: statusFromRatio(r),
+      });
+    }
+
+    // 2. ROAS vs avgRoas
+    if (benchmark?.avgRoas) {
+      const r = sellerRoas / benchmark.avgRoas;
+      rows.push({
+        label: "ROAS vs Vertical",
+        sellerLabel: `${sellerRoas.toFixed(2)}x`,
+        benchLabel: `${benchmark.avgRoas.toFixed(2)}x`,
+        ratio: Math.min(1.5, r),
+        status: statusFromRatio(r),
+        tooltipKey: "roas",
+      });
+    }
+
+    // 3. ACOS vs avgAcos (menor é melhor)
+    if (benchmark?.avgAcos && sellerAcos > 0) {
+      const r = benchmark.avgAcos / sellerAcos; // invertido: benchmark/seller
+      rows.push({
+        label: "ACOS vs Vertical",
+        sellerLabel: `${sellerAcos.toFixed(1)}%`,
+        benchLabel: `${benchmark.avgAcos.toFixed(1)}%`,
+        ratio: Math.min(1.5, r),
+        status: statusFromRatio(r),
+        tooltipKey: "acos",
+      });
+    }
+
+    // 4. Share Full vs 60% (algoritmo MELI prioriza Full)
+    rows.push({
+      label: "Share Full",
+      sellerLabel: `${sellerFull.toFixed(1)}%`,
+      benchLabel: "≥ 60%",
+      ratio: Math.min(1.5, sellerFull / 60),
+      status: statusFromRatio(sellerFull / 60),
+      tooltipKey: "shareFullPct",
+    });
+
+    // 5. Conversão (TSI/Visits) vs 5% referência
+    rows.push({
+      label: "Conversão (TSI/Visits)",
+      sellerLabel: `${sellerConv.toFixed(2)}%`,
+      benchLabel: "≥ 5%",
+      ratio: Math.min(1.5, sellerConv / 5),
+      status: statusFromRatio(sellerConv / 5),
+    });
+
+    // 6. Reputação (claims+delayed combinado, menor é melhor — referência 5%)
+    if (sellerRep > 0) {
+      const r = 5 / Math.max(0.1, sellerRep);
+      rows.push({
+        label: "Reputação (Claims+Atrasos)",
+        sellerLabel: `${sellerRep.toFixed(2)}%`,
+        benchLabel: "≤ 5%",
+        ratio: Math.min(1.5, r),
+        status: statusFromRatio(r),
+      });
+    }
+
+    return rows;
+  }, [kpis, campaign, benchmark]);
+
+  const statusColor = (s: "ok" | "warn" | "crit") =>
+    s === "ok"
+      ? "bg-emerald"
+      : s === "warn"
+      ? "bg-warning"
+      : "bg-destructive";
+  const statusText = (s: "ok" | "warn" | "crit") =>
+    s === "ok"
+      ? "Saudável"
+      : s === "warn"
+      ? "Atenção"
+      : "Crítico";
+  const statusTextColor = (s: "ok" | "warn" | "crit") =>
+    s === "ok"
+      ? "text-emerald"
+      : s === "warn"
+      ? "text-warning"
+      : "text-destructive";
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -308,6 +448,51 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign }: Gro
           </div>
         )}
       </div>
+
+      {/* 6-Dimension Matrix vs Vertical */}
+      {matriz.length > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Matriz de 6 Dimensões vs Vertical
+            </h3>
+            <TooltipInfo text="Leitura junior: cada dimensão mostra o desempenho do seller comparado à referência da vertical (mediana ou threshold do algoritmo MELI). Verde = saudável, Amarelo = atenção, Vermelho = crítico." />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {matriz.map((row) => (
+              <div
+                key={row.label}
+                className="bg-muted/20 rounded-lg p-3 border border-border/40"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-foreground">{row.label}</span>
+                    {row.tooltipKey && <AlgoTooltip tooltipKey={row.tooltipKey as any} />}
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={`text-[10px] border ${statusTextColor(row.status)} bg-transparent`}
+                  >
+                    {statusText(row.status)}
+                  </Badge>
+                </div>
+                <div className="flex items-baseline justify-between text-[11px] mb-1.5">
+                  <span className="font-mono font-bold text-foreground">{row.sellerLabel}</span>
+                  <span className="text-muted-foreground">ref: {row.benchLabel}</span>
+                </div>
+                <div className="relative w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
+                  <motion.div
+                    className={`h-full ${statusColor(row.status)}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, row.ratio * 100)}%` }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Cumulative growth chart */}
       <div className="glass-card p-5">
