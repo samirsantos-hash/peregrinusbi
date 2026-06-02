@@ -727,6 +727,38 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         </div>
       )}
 
+      {/* ── Row 2b: Conversion evolution (Geral vs Clips) ── */}
+      {conversionSeries.length > 0 && (totals.visits > 0 || totals.visitasClips > 0) && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="w-4 h-4 text-emerald" />
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Evolução da Conversão — Geral vs Clips
+            </h3>
+            <TooltipInfo text="Compara a taxa de conversão geral da loja (TSI/Visitas) com a taxa de conversão via Clips (Orders Clips/Visitas Clips). Quando a linha de Clips fica acima da Geral, o vídeo está pré-qualificando o comprador." />
+          </div>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={conversionSeries} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
+              <YAxis
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+                tickFormatter={(v) => `${Number(v).toFixed(1)}%`}
+                domain={["auto", "auto"]}
+              />
+              <Tooltip
+                contentStyle={{ background: "hsl(var(--card) / 0.95)", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
+                formatter={(v: any) => `${Number(v).toFixed(2)}%`}
+              />
+              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
+              <Line type="monotone" dataKey="convGeral" name="Conversão Geral" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="convClips" name="Conversão Clips" stroke="hsl(var(--emerald))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
       {/* ── Row 3: Content Efficiency Table with Status Clips column & filter ── */}
       {(topContentItems.length > 0 || filterNoClips) && (
         <div className="glass-card p-5">
