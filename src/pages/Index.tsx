@@ -24,6 +24,7 @@ import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
 import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
 import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
+import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
@@ -498,6 +499,7 @@ const Index = () => {
                       totalLiveListings={liveListingsCount || 0}
                     />
                     <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
+                    <ConversaoPorMLBPanel />
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
                   <TabsContent value="clips" className="mt-0">

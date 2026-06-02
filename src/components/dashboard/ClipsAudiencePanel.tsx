@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
+  ComposedChart, Bar, Line, LineChart, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell,
 } from "recharts";
 import {
   Eye, Video, TrendingUp, Flame, AlertTriangle,
   Play, ShoppingCart, ExternalLink, ChevronDown, ChevronUp,
   FileVideo, Clapperboard, Target, Monitor, CheckCircle2, Circle,
-  Ban, Filter, PieChart as PieChartIcon,
+  Ban, Filter, PieChart as PieChartIcon, Activity,
 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { formatChartDate, fmtBRLCompact, fmtNumCompact } from "@/utils/formatters";
@@ -320,9 +320,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── 1. Aggregate KPI totals ── */
   const totals = useMemo(() => {
-    const t = { visits: 0, visitasClips: 0, tgmvClips: 0, ordersClips: 0, siClips: 0, clipsPubli: 0 };
+    const t = { visits: 0, tsi: 0, visitasClips: 0, tgmvClips: 0, ordersClips: 0, siClips: 0, clipsPubli: 0 };
     for (const k of kpis) {
       t.visits += k.visits;
+      t.tsi += (k as any).tsi || 0;
       t.visitasClips += k.visitasClips;
       t.tgmvClips += k.tgmvLcClips;
       t.ordersClips += k.ordersClips;
@@ -387,6 +388,21 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     }))
   , [kpis, dataGranularity]);
 
+  /* ── 5b. Conversion evolution (Geral vs Clips) ── */
+  const conversionSeries = useMemo(() =>
+    kpis.map((k) => {
+      const tsi = (k as any).tsi || 0;
+      const visits = k.visits || 0;
+      const visC = k.visitasClips || 0;
+      const ordC = k.ordersClips || 0;
+      return {
+        date: formatChartDate(k.date, dataGranularity),
+        convGeral: visits > 0 ? (tsi / visits) * 100 : 0,
+        convClips: visC > 0 ? (ordC / visC) * 100 : 0,
+      };
+    })
+  , [kpis, dataGranularity]);
+
   /* ── 6. Top 5 items by pedidos — deduplicated ── */
   const topContentItems = useMemo(() => {
     const items = dedupedEligibility
@@ -410,8 +426,11 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       .slice(0, 8);
   }, [dedupedEligibility]);
 
-  /* ── 8. Conversion rate ── */
+  /* ── 8. Conversion rates ── */
   const conversionRate = pct(totals.ordersClips, totals.visitasClips);
+  const conversionGeneral = pct(totals.tsi, totals.visits);
+  const clipsVsGeralDelta = conversionRate - conversionGeneral;
+  const clipsBeatsGeral = totals.visitasClips > 0 && totals.visits > 0 && conversionRate >= conversionGeneral;
 
   /* ── Fallback flag: per-item clip data is missing but seller has clip activity ── */
   const hasSellerLevelClipsOnly = useMemo(() => {
@@ -611,7 +630,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       )}
 
       {/* ── Row 1: Metric cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard
           icon={Eye}
           label="Audiência Total"
@@ -619,6 +638,14 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           sub={`Participação Vídeo: ${videoPct.toFixed(1)}%`}
           alert={lowExposure ? "⚠️ Baixa exposição de Clips: Oportunidade de aumentar alcance visual" : null}
           tooltip="Soma de visitas totais do seller no período selecionado."
+        />
+        <MetricCard
+          icon={Activity}
+          label="Conversão Geral"
+          value={`${conversionGeneral.toFixed(2)}%`}
+          sub={`${fmt(totals.tsi)} pedidos / ${fmt(totals.visits)} visitas`}
+          tooltip="Taxa de conversão geral da loja: (TSI / Visitas) × 100. É o benchmark interno que a conversão via Clips precisa superar."
+          accentClass="text-foreground"
         />
         <MetricCard
           icon={Play}
@@ -646,6 +673,35 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         />
       </div>
 
+      {/* ── Banner comparativo: Conversão Clips vs Geral ── */}
+      {totals.visitasClips > 0 && totals.visits > 0 && (
+        <div
+          className={`glass-card p-4 border flex items-start gap-3 ${
+            clipsBeatsGeral
+              ? "border-emerald/30 bg-emerald/5"
+              : "border-warning/30 bg-warning/5"
+          }`}
+        >
+          {clipsBeatsGeral ? (
+            <CheckCircle2 className="w-5 h-5 text-emerald shrink-0 mt-0.5" />
+          ) : (
+            <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+          )}
+          <div className="text-xs space-y-1">
+            <p className="font-semibold text-foreground">
+              {clipsBeatsGeral
+                ? `Clips convertem ACIMA da média da loja (${conversionRate.toFixed(2)}% vs ${conversionGeneral.toFixed(2)}% geral, +${Math.abs(clipsVsGeralDelta).toFixed(2)}pp)`
+                : `Clips convertem ABAIXO da média da loja (${conversionRate.toFixed(2)}% vs ${conversionGeneral.toFixed(2)}% geral, -${Math.abs(clipsVsGeralDelta).toFixed(2)}pp)`}
+            </p>
+            <p className="text-muted-foreground">
+              {clipsBeatsGeral
+                ? "O Clip está pré-qualificando o comprador — visitas via vídeo chegam mais decididas à compra. Escalar produção mantendo o mesmo padrão de roteiro."
+                : "O Clip está trazendo visitas mas convertendo menos que a média da loja. Revisar: primeiros 3 segundos do vídeo, demonstração do produto em uso, CTA final claro."}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── Row 2: Combo chart ── */}
       {chartData.length > 0 && (
         <div className="glass-card p-5">
@@ -667,6 +723,38 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               <Bar yAxisId="left" dataKey="visitasClips" name="Visitas Clips" fill="hsl(var(--neon-blue))" fillOpacity={0.7} radius={[4, 4, 0, 0]} barSize={32} />
               <Line yAxisId="right" type="monotone" dataKey="tgmvClips" name="Faturamento Clips" stroke="hsl(var(--warning))" strokeWidth={2.5} dot={{ fill: "hsl(var(--warning))", r: 4 }} activeDot={{ r: 6 }} />
             </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* ── Row 2b: Conversion evolution (Geral vs Clips) ── */}
+      {conversionSeries.length > 0 && (totals.visits > 0 || totals.visitasClips > 0) && (
+        <div className="glass-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="w-4 h-4 text-emerald" />
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Evolução da Conversão — Geral vs Clips
+            </h3>
+            <TooltipInfo text="Compara a taxa de conversão geral da loja (TSI/Visitas) com a taxa de conversão via Clips (Orders Clips/Visitas Clips). Quando a linha de Clips fica acima da Geral, o vídeo está pré-qualificando o comprador." />
+          </div>
+          <ResponsiveContainer width="100%" height={260}>
+            <LineChart data={conversionSeries} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
+              <YAxis
+                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+                tickFormatter={(v) => `${Number(v).toFixed(1)}%`}
+                domain={["auto", "auto"]}
+              />
+              <Tooltip
+                contentStyle={{ background: "hsl(var(--card) / 0.95)", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
+                formatter={(v: any) => `${Number(v).toFixed(2)}%`}
+              />
+              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
+              <Line type="monotone" dataKey="convGeral" name="Conversão Geral" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="convClips" name="Conversão Clips" stroke="hsl(var(--emerald))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+            </LineChart>
           </ResponsiveContainer>
         </div>
       )}
