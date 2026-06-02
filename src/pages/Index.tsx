@@ -467,6 +467,10 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
+                    <QualityIndexPanelV2
+                      custId={sellerCustIdMap[selectedSeller]}
+                      sellerUuid={selectedSeller}
+                    />
                     <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
                     <QualityKpiCards
                       scoreCaracteristica={(() => {
