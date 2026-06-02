@@ -414,7 +414,7 @@ function PeriodPicker({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-9 px-3 text-xs gap-2 max-w-[420px]">
+        <Button type="button" variant="outline" size="sm" className="h-9 px-3 text-xs gap-2 max-w-[460px]">
           <CalendarDays className="w-3.5 h-3.5" />
           {periodos.length === 0 ? (
             <span className="text-muted-foreground">Selecionar período</span>
@@ -426,6 +426,12 @@ function PeriodPicker({
                   <span className="truncate">{p.label}</span>
                 </span>
               ))}
+              {!atMax && (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-primary/40 text-primary">
+                  <Plus className="w-3 h-3" />
+                  Comparar
+                </span>
+              )}
             </span>
           )}
         </Button>
@@ -450,6 +456,7 @@ function PeriodPicker({
                 {shortRangeLabel(p.inicio, p.fim)}
               </span>
               <button
+                type="button"
                 onClick={() => remove(p.id)}
                 className="text-muted-foreground hover:text-destructive transition-colors"
                 aria-label="Remover período"
@@ -470,6 +477,7 @@ function PeriodPicker({
               {presets.map((ps) => (
                 <button
                   key={ps.label}
+                  type="button"
                   onClick={() => add(ps.build())}
                   className="text-[11px] rounded-md px-2 py-1.5 text-left border border-border/50 bg-muted/30 hover:bg-muted/60 transition-colors"
                   style={{ borderLeft: `3px solid ${nextColor}`, color: nextColor }}
