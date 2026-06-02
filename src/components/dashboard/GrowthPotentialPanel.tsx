@@ -12,10 +12,10 @@ import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 import type { VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import {
-  statusIndexGeral,
-  corDimensao,
-  labelDimensao,
-  forcaDimensao,
+  statusPorDelta,
+  corPorDelta,
+  labelPorDelta,
+  indiceParaDelta,
   type Sentido,
 } from "@/lib/verticalStatus";
 
