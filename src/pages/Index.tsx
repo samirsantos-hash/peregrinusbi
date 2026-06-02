@@ -43,6 +43,7 @@ import GrantAlert from "@/components/dashboard/GrantAlert";
 import { useSellerGrants } from "@/hooks/useSellerGrants";
 import GrantsPanel from "@/components/dashboard/GrantsPanel";
 import QualityIndexPanel from "@/components/dashboard/QualityIndexPanel";
+import QualityIndexPanelV2 from "@/components/seller/QualityIndexPanel";
 import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 import { useVerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { SELLER_TABS } from "@/config/sellerTabs";
