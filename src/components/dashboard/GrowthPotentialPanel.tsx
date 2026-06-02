@@ -456,7 +456,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Matriz de 6 Dimensões vs Vertical
             </h3>
-            <TooltipInfo text="Leitura junior: cada dimensão mostra o desempenho do seller comparado à referência da vertical (mediana ou threshold do algoritmo MELI). Verde = saudável, Amarelo = atenção, Vermelho = crítico." />
+            <TooltipInfo text="Leitura: cada dimensão mostra o desempenho do seller comparado à referência da vertical (mediana ou threshold do algoritmo MELI). Verde = saudável, Amarelo = atenção, Vermelho = crítico." />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {matriz.map((row) => (
