@@ -163,7 +163,10 @@ function gerarAcoes(ql: ListingQuality, el: EligibilityItem | null): AcaoAnuncio
     });
   }
 
-  // CDP
+  // CDP — discount_* vem em basis points (×100), ex.: 277 = 2,77%
+  const descAtualPct = (el?.discountSellerPercentage ?? 0) / 100;
+  const descTotalPct = (el?.discountTotal ?? 0) / 100;
+
   if (el && !el.flagItemSOptin) {
     acoes.push({
       id: "cdp_optin",
@@ -175,16 +178,16 @@ function gerarAcoes(ql: ListingQuality, el: EligibilityItem | null): AcaoAnuncio
       impactoScore: 0,
       icone: "🎯",
     });
-  } else if (el && el.flagItemSOptin && !el.flagBestPromo && el.discountSellerPercentage < 10) {
-    const temCopart = el.discountTotal > el.discountSellerPercentage;
+  } else if (el && el.flagItemSOptin && !el.flagBestPromo && descAtualPct < 5) {
+    const temCopart = descTotalPct > descAtualPct + 0.5;
     acoes.push({
       id: "cdp_melhorar",
       categoria: "cdp_promocao",
       prioridade: 3,
       titulo: "Aumentar desconto na campanha CDP",
-      instrucao: `Opt-in ativo mas desconto de ${el.discountSellerPercentage.toFixed(0)}% está abaixo do recomendado para a tag 'Oferta Imperdível'. ${
+      instrucao: `Opt-in ativo mas desconto de ${descAtualPct.toFixed(1)}% está abaixo do recomendado para a tag 'Oferta Imperdível'. ${
         temCopart
-          ? `ML coparticipa: desconto total é ${el.discountTotal.toFixed(0)}% com custo menor para o seller.`
+          ? `ML coparticipa: desconto total é ${descTotalPct.toFixed(1)}% com custo menor para o seller.`
           : "Verificar se há campanha com coparticipação disponível."
       }`,
       impactoScore: 0,
