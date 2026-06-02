@@ -364,7 +364,7 @@ export async function getQualityIndex(
   if (!Number.isFinite(custIdNum)) return null;
 
   // Últimos 6 meses para tendência + corrente
-  const { data: rows } = await supabase
+  let { data: rows } = await supabase
     .from("cpp_mensal")
     .select(
       "tim_month_id, mes_ref, tgmv_lc, tgmv_lc_fbm, tgmv_lc_flex, tsi, cdp_tsi, score_final_cdp, score_final_servicos, pontuacao_ipi, rep_current_level, rep_claims_rate, visitas",
@@ -372,6 +372,38 @@ export async function getQualityIndex(
     .eq("cus_cust_id_sel", custIdNum)
     .order("tim_month_id", { ascending: false })
     .limit(6);
+
+  // Fallback: cpp_mensal pode estar vazio. Usa sellers_kpi (que também é
+  // mensal — uma linha por seller × tim_month_id) e mapeia para o shape
+  // esperado. Scores de CDP/Serviços ficam zerados (não existem na origem).
+  if ((!rows || rows.length === 0) && sellerUuid) {
+    const { data: kpiRows } = await supabase
+      .from("sellers_kpi")
+      .select(
+        "tim_month_id, data, tgmv_lc, tgmv_lc_full, tgmv_lc_flex, tsi, cdp_tsi, pontuacao_ipi, rep_current_level, rep_claims_rate, visits",
+      )
+      .eq("seller_id", sellerUuid)
+      .not("tim_month_id", "is", null)
+      .order("tim_month_id", { ascending: false })
+      .limit(6);
+    if (kpiRows && kpiRows.length > 0) {
+      rows = kpiRows.map((r: any) => ({
+        tim_month_id: r.tim_month_id,
+        mes_ref: r.data,
+        tgmv_lc: r.tgmv_lc,
+        tgmv_lc_fbm: r.tgmv_lc_full,
+        tgmv_lc_flex: r.tgmv_lc_flex,
+        tsi: r.tsi,
+        cdp_tsi: r.cdp_tsi,
+        score_final_cdp: 0,
+        score_final_servicos: 0,
+        pontuacao_ipi: r.pontuacao_ipi,
+        rep_current_level: r.rep_current_level,
+        rep_claims_rate: r.rep_claims_rate,
+        visitas: r.visits,
+      })) as any;
+    }
+  }
 
   if (!rows || rows.length === 0) return null;
 
