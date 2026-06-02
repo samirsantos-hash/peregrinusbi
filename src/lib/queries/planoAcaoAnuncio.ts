@@ -224,13 +224,77 @@ export function montarPlanos(
   qualities: ListingQuality[],
   eligibilities: EligibilityItem[],
 ): AnuncioPlano[] {
+  // Deduplicar elegibilidade por item_id — uma linha por campanha vira N linhas
+  // por MLB. Mantemos a "melhor" campanha: flag_best_promo > pedidos_7d.
   const elMap = new Map<string, EligibilityItem>();
   for (const e of eligibilities) {
     const key = String(e.itemId).replace(/\D/g, "");
-    if (key) elMap.set(key, e);
+    if (!key) continue;
+    const atual = elMap.get(key);
+    if (!atual) {
+      elMap.set(key, e);
+      continue;
+    }
+    const melhor =
+      (Number(e.flagBestPromo) - Number(atual.flagBestPromo)) ||
+      (e.pedidos7d - atual.pedidos7d) ||
+      (e.estoqueMedio7d - atual.estoqueMedio7d);
+    if (melhor > 0) elMap.set(key, e);
   }
 
-  return qualities.map((ql) => {
+  // Index das qualidades por item_id para fácil lookup
+  const qlMap = new Map<string, ListingQuality>();
+  for (const ql of qualities) {
+    const key = String(ql.itemId).replace(/\D/g, "");
+    if (key) qlMap.set(key, ql);
+  }
+
+  // Quando seller_listings_quality está vazia, usar a elegibilidade como base
+  // (dados parciais — sem scores de IPI/fotos, mas com venda/CDP).
+  const useFallback = qualities.length === 0 && elMap.size > 0;
+  const baseQualities: ListingQuality[] = useFallback
+    ? Array.from(elMap.values()).map((e) => {
+        const key = String(e.itemId).replace(/\D/g, "");
+        return {
+          id: e.id,
+          sellerId: e.sellerId,
+          itemId: key || e.itemId,
+          date: e.data,
+          llPicturesScore: 0,
+          llTitleScore: 0,
+          llTechSpecsScore: 0,
+          llDescriptionScore: 0,
+          llPriceScore: 0,
+          llStockAvailabilityScore: 0,
+          llFreeShippingScore: 0,
+          llPromotionsScore: 0,
+          scorePhoto: 0,
+          scoreTitle: 0,
+          scoreOfertaFinal: 0,
+          scoreCaracteristicaFinal: 0,
+          scoreQualidadeFinal: 0,
+          sellersClipsPubli: 0,
+          visitasClips: 0,
+          siClips: 0,
+          ordersClips: 0,
+          tgmvLcClips: 0,
+          avgScore: 0,
+          issues: [],
+          mlbLink: e.mlbLink,
+        };
+      })
+    : qualities;
+
+  // Garantir unicidade por item_id também no lado das qualidades
+  const seen = new Set<string>();
+  return baseQualities
+    .filter((ql) => {
+      const k = String(ql.itemId).replace(/\D/g, "") || ql.itemId;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    })
+    .map((ql) => {
     const key = String(ql.itemId).replace(/\D/g, "");
     const el = elMap.get(key) ?? null;
     const acoes = gerarAcoes(ql, el);
