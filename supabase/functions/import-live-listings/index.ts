@@ -45,8 +45,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    const lines = csvText.split("\n").filter((l: string) => l.trim());
-    const headerLine = lines[0].replace(/^\uFEFF/, "");
+    // Parse header without holding the full split array longer than needed
+    const firstNl = csvText.indexOf("\n");
+    const headerLine = csvText.slice(0, firstNl === -1 ? csvText.length : firstNl).replace(/^\uFEFF/, "").replace(/\r$/, "");
     const headers = headerLine.split(";");
 
     const colIdx = (name: string) => headers.indexOf(name);
@@ -58,20 +59,7 @@ Deno.serve(async (req) => {
     const iVertical = colIdx("VERTICAL");
     const iDomain = colIdx("DOM_DOMAIN_AGG1");
 
-    // Collect unique sellers
-    const sellerCustIds = new Set<string>();
-    const rows: string[][] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const cols = lines[i].split(";");
-      if (cols.length < 3) continue;
-      const custId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
-      if (!custId) continue;
-      sellerCustIds.add(custId);
-      rows.push(cols);
-    }
-
-    // Get seller IDs from DB
+    // Get seller IDs from DB up front
     const { data: sellerRows, error: sellerErr } = await supabase
       .from("sellers")
       .select("id, cust_id");
@@ -82,10 +70,39 @@ Deno.serve(async (req) => {
       sellerIdMap.set(s.cust_id, s.id);
     }
 
-    // Build listing rows, deduplicating by composite key
+    // Stream-parse the CSV line by line, dedup with a Map keyed by composite,
+    // and flush to DB in batches to keep memory bounded.
     const deduped = new Map<string, any>();
-    for (const cols of rows) {
+    let inserted = 0;
+    const FLUSH_AT = 2000;
+
+    const flush = async () => {
+      if (deduped.size === 0) return;
+      const rows = Array.from(deduped.values());
+      deduped.clear();
+      for (let i = 0; i < rows.length; i += 500) {
+        const batch = rows.slice(i, i + 500);
+        const { error } = await supabase
+          .from("live_listings")
+          .upsert(batch as any[], { onConflict: "seller_id,data,categoria", ignoreDuplicates: false });
+        if (error) throw new Error(`Listing insert error: ${error.message}`);
+        inserted += batch.length;
+      }
+    };
+
+    let pos = firstNl + 1;
+    const len = csvText.length;
+    while (pos < len) {
+      let nl = csvText.indexOf("\n", pos);
+      if (nl === -1) nl = len;
+      const line = csvText.slice(pos, nl);
+      pos = nl + 1;
+      if (!line || !line.trim()) continue;
+
+      const cols = line.split(";");
+      if (cols.length < 3) continue;
       const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
+      if (!cleanCustId) continue;
       const sellerId = sellerIdMap.get(cleanCustId);
       if (!sellerId) continue;
 
@@ -101,19 +118,12 @@ Deno.serve(async (req) => {
         vertical: cols[iVertical]?.trim() || null,
         dom_domain_agg1: cols[iDomain]?.trim() || null,
       });
-    }
-    const listingRows = Array.from(deduped.values());
 
-    // Upsert in batches
-    let inserted = 0;
-    for (let i = 0; i < listingRows.length; i += 200) {
-      const batch = listingRows.slice(i, i + 200);
-      const { error } = await supabase
-        .from("live_listings")
-        .upsert(batch as any[], { onConflict: "seller_id,data,categoria", ignoreDuplicates: false });
-      if (error) throw new Error(`Listing insert error batch ${i}: ${error.message}`);
-      inserted += batch.length;
+      if (deduped.size >= FLUSH_AT) {
+        await flush();
+      }
     }
+    await flush();
 
     // Log the upload
     if (uploadedBy) {
