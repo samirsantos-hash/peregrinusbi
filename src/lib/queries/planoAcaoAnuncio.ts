@@ -242,13 +242,6 @@ export function montarPlanos(
     if (melhor > 0) elMap.set(key, e);
   }
 
-  // Index das qualidades por item_id para fácil lookup
-  const qlMap = new Map<string, ListingQuality>();
-  for (const ql of qualities) {
-    const key = String(ql.itemId).replace(/\D/g, "");
-    if (key) qlMap.set(key, ql);
-  }
-
   // Quando seller_listings_quality está vazia, usar a elegibilidade como base
   // (dados parciais — sem scores de IPI/fotos, mas com venda/CDP).
   const useFallback = qualities.length === 0 && elMap.size > 0;
