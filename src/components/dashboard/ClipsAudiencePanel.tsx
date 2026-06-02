@@ -630,7 +630,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       )}
 
       {/* ── Row 1: Metric cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard
           icon={Eye}
           label="Audiência Total"
@@ -638,6 +638,14 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           sub={`Participação Vídeo: ${videoPct.toFixed(1)}%`}
           alert={lowExposure ? "⚠️ Baixa exposição de Clips: Oportunidade de aumentar alcance visual" : null}
           tooltip="Soma de visitas totais do seller no período selecionado."
+        />
+        <MetricCard
+          icon={Activity}
+          label="Conversão Geral"
+          value={`${conversionGeneral.toFixed(2)}%`}
+          sub={`${fmt(totals.tsi)} pedidos / ${fmt(totals.visits)} visitas`}
+          tooltip="Taxa de conversão geral da loja: (TSI / Visitas) × 100. É o benchmark interno que a conversão via Clips precisa superar."
+          accentClass="text-foreground"
         />
         <MetricCard
           icon={Play}
@@ -664,6 +672,35 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           accentClass={conversionRate > 1 ? "text-emerald" : "text-neon-blue"}
         />
       </div>
+
+      {/* ── Banner comparativo: Conversão Clips vs Geral ── */}
+      {totals.visitasClips > 0 && totals.visits > 0 && (
+        <div
+          className={`glass-card p-4 border flex items-start gap-3 ${
+            clipsBeatsGeral
+              ? "border-emerald/30 bg-emerald/5"
+              : "border-warning/30 bg-warning/5"
+          }`}
+        >
+          {clipsBeatsGeral ? (
+            <CheckCircle2 className="w-5 h-5 text-emerald shrink-0 mt-0.5" />
+          ) : (
+            <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+          )}
+          <div className="text-xs space-y-1">
+            <p className="font-semibold text-foreground">
+              {clipsBeatsGeral
+                ? `Clips convertem ACIMA da média da loja (${conversionRate.toFixed(2)}% vs ${conversionGeneral.toFixed(2)}% geral, +${Math.abs(clipsVsGeralDelta).toFixed(2)}pp)`
+                : `Clips convertem ABAIXO da média da loja (${conversionRate.toFixed(2)}% vs ${conversionGeneral.toFixed(2)}% geral, -${Math.abs(clipsVsGeralDelta).toFixed(2)}pp)`}
+            </p>
+            <p className="text-muted-foreground">
+              {clipsBeatsGeral
+                ? "O Clip está pré-qualificando o comprador — visitas via vídeo chegam mais decididas à compra. Escalar produção mantendo o mesmo padrão de roteiro."
+                : "O Clip está trazendo visitas mas convertendo menos que a média da loja. Revisar: primeiros 3 segundos do vídeo, demonstração do produto em uso, CTA final claro."}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* ── Row 2: Combo chart ── */}
       {chartData.length > 0 && (
