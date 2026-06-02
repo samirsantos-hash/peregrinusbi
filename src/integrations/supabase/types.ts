@@ -127,11 +127,15 @@ export type Database = {
           sub_cluster_seller: string | null
           tgmv_lc: number | null
           tgmv_lc_fbm: number | null
+          tgmv_lc_flex: number | null
           tgmv_lc_me2: number | null
           tgmv_lc_pads: number | null
           tim_month_id: number
           total_livelistings: number | null
           tsi: number | null
+          tsi_flex: number | null
+          tsi_full: number | null
+          tsi_me2: number | null
           visitas: number | null
         }
         Insert: {
@@ -168,11 +172,15 @@ export type Database = {
           sub_cluster_seller?: string | null
           tgmv_lc?: number | null
           tgmv_lc_fbm?: number | null
+          tgmv_lc_flex?: number | null
           tgmv_lc_me2?: number | null
           tgmv_lc_pads?: number | null
           tim_month_id: number
           total_livelistings?: number | null
           tsi?: number | null
+          tsi_flex?: number | null
+          tsi_full?: number | null
+          tsi_me2?: number | null
           visitas?: number | null
         }
         Update: {
@@ -209,11 +217,15 @@ export type Database = {
           sub_cluster_seller?: string | null
           tgmv_lc?: number | null
           tgmv_lc_fbm?: number | null
+          tgmv_lc_flex?: number | null
           tgmv_lc_me2?: number | null
           tgmv_lc_pads?: number | null
           tim_month_id?: number
           total_livelistings?: number | null
           tsi?: number | null
+          tsi_flex?: number | null
+          tsi_full?: number | null
+          tsi_me2?: number | null
           visitas?: number | null
         }
         Relationships: []

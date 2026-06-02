@@ -243,6 +243,11 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
           </h3>
           <TooltipInfo text="Distribuição por GMV dos canais de fulfillment (Fonte: CPP_MENSAL). Maior proporção de Full melhora o desempenho no marketplace." />
         </div>
+        <p className="text-[11px] text-muted-foreground text-center mb-3 leading-relaxed">
+          ℹ️ <span className="font-medium text-foreground">Full</span> = <code className="text-[10px]">TGMV_LC_FULL</code> (FBM) ·{" "}
+          <span className="font-medium text-foreground">Flex</span> = <code className="text-[10px]">TGMV_LC_FLEX</code> ·{" "}
+          <span className="font-medium text-foreground">Agência/Coletas</span> = restante (inclui Coleta, Places e Correios — não separáveis no CSV diário).
+        </p>
         <ResponsiveContainer width="100%" height={320}>
           <PieChart>
             <Pie
