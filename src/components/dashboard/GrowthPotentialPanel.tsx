@@ -12,10 +12,10 @@ import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 import type { VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import {
-  statusIndexGeral,
-  corDimensao,
-  labelDimensao,
-  forcaDimensao,
+  statusPorDelta,
+  corPorDelta,
+  labelPorDelta,
+  indiceParaDelta,
   type Sentido,
 } from "@/lib/verticalStatus";
 
@@ -231,31 +231,31 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
     full_pct: 0.15, acos: 0.10, roas: 0.10,
   };
 
-  const indiceGeral = useMemo(() => {
+  // Delta ponderado vs mediana: 0% = na mediana, +X% = acima, -X% = abaixo.
+  const deltaGeral = useMemo(() => {
     if (!dims.length) return 0;
-    // Para dimensões "menor_melhor", normaliza para o eixo "maior_melhor" antes de ponderar
     let somaPeso = 0;
     let somaPond = 0;
     for (const d of dims) {
       const peso = PESOS[d.id] ?? 0;
       if (peso === 0) continue;
-      const norm = d.sentido === "menor_melhor" ? (d.indice <= 0 ? 0 : 200 - d.indice) : d.indice;
-      somaPond += norm * peso;
+      const delta = indiceParaDelta(d.indice, d.sentido);
+      somaPond += delta * peso;
       somaPeso += peso;
     }
     return somaPeso > 0 ? Math.round(somaPond / somaPeso) : 0;
   }, [dims]);
 
-  const status = statusIndexGeral(indiceGeral);
+  const status = statusPorDelta(deltaGeral);
 
   const dimensaoMaisFraca = useMemo(() => {
     if (!dims.length) return null;
     return [...dims].sort(
-      (a, b) => forcaDimensao(a.indice, a.sentido) - forcaDimensao(b.indice, b.sentido)
+      (a, b) => indiceParaDelta(a.indice, a.sentido) - indiceParaDelta(b.indice, b.sentido)
     )[0];
   }, [dims]);
 
-  const temDimensaoCritica = dims.some(d => forcaDimensao(d.indice, d.sentido) < 80);
+  const temGapOculto = deltaGeral >= 10 && dims.some(d => indiceParaDelta(d.indice, d.sentido) < -20);
 
   const formatValor = (v: number, u: Dimensao["unidade"]) => {
     if (u === "R$") return fmtBRLCompact(v);
@@ -292,9 +292,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                 className="text-4xl font-bold font-mono tabular-nums leading-none"
                 style={{ color: status.cor }}
               >
-                {indiceGeral}%
+                {deltaGeral >= 0 ? "+" : ""}{deltaGeral}%
               </div>
-              <div className="text-[10px] text-muted-foreground mt-1">da mediana</div>
+              <div className="text-[10px] text-muted-foreground mt-1">vs mediana</div>
             </div>
             <Badge
               className={`border ${status.borderClass} ${status.textClass} ${status.bgClass}`}
@@ -315,16 +315,16 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         </div>
       </div>
 
-      {/* ── Alerta de mascaramento (índice geral bom esconde dimensão crítica) ── */}
-      {indiceGeral >= 110 && temDimensaoCritica && (
+      {/* ── Alerta de mascaramento (delta geral positivo esconde dimensão crítica) ── */}
+      {temGapOculto && (
         <div className="glass-card p-4 border border-warning/30 bg-warning/5">
           <div className="flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
             <p className="text-xs text-foreground">
-              <span className="font-semibold text-warning">Atenção:</span> o índice geral de{" "}
-              <span className="font-mono font-bold">{indiceGeral}%</span> está puxado para cima por
-              dimensões fortes, mas há pelo menos uma dimensão abaixo de 80% da mediana. O índice
-              geral pode estar mascarando um gap crítico — ver detalhes abaixo.
+              <span className="font-semibold text-warning">Atenção:</span> o resultado geral de{" "}
+              <span className="font-mono font-bold">+{deltaGeral}%</span> está sendo puxado por
+              dimensões fortes, mas há pelo menos uma dimensão com gap superior a 20% abaixo da
+              mediana. O número geral está mascarando um problema — ver barras abaixo.
             </p>
           </div>
         </div>
@@ -341,11 +341,21 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
           </div>
 
           <div className="space-y-4">
+            {/* Legenda do eixo */}
+            <div className="flex justify-between text-[10px] text-muted-foreground px-1">
+              <span>← abaixo da mediana</span>
+              <span className="font-semibold text-foreground">Mediana = 0%</span>
+              <span>acima da mediana →</span>
+            </div>
+
             {dims.map((d) => {
-              const cor = corDimensao(d.indice, d.sentido);
-              const lbl = labelDimensao(d.indice, d.sentido);
-              // Barra clamped 0..200%; mediana fica em 50% do trilho.
-              const widthPct = Math.min(Math.max(d.indice, 0), 200) / 2;
+              const delta = indiceParaDelta(d.indice, d.sentido);
+              const cor = corPorDelta(delta);
+              const lbl = labelPorDelta(delta);
+              // 1pp de delta = 1pp de barra; clamp em ±50pp para caber no trilho (50% cada lado).
+              const BAR_SCALE = 1;
+              const barWidth = Math.min(Math.abs(delta) * BAR_SCALE, 50);
+              const barLeft  = delta >= 0 ? 50 : 50 - barWidth;
 
               return (
                 <div key={d.id} className="bg-muted/20 rounded-lg p-3 border border-border/40">
@@ -371,7 +381,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                         className="font-mono font-bold tabular-nums"
                         style={{ color: cor }}
                       >
-                        {d.indice.toFixed(0)}%
+                        {delta >= 0 ? "+" : ""}{delta.toFixed(0)}%
                       </span>
                       <span className="text-[10px]" style={{ color: cor }}>
                         {lbl}
@@ -379,25 +389,25 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                     </div>
                   </div>
 
-                  {/* Trilho 0..200% com linha de mediana em 50% */}
+                  {/* Trilho centrado na mediana (50% = 0% delta). Barra cresce para o lado correspondente. */}
                   <div className="relative w-full h-2 bg-muted/40 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full rounded-full"
-                      style={{ background: cor }}
+                      className="absolute top-0 bottom-0 rounded-sm"
+                      style={{ background: cor, left: `${barLeft}%` }}
                       initial={{ width: 0 }}
-                      animate={{ width: `${widthPct}%` }}
+                      animate={{ width: `${barWidth}%` }}
                       transition={{ duration: 0.7, ease: "easeOut" }}
                     />
-                    {/* Linha de referência da mediana */}
+                    {/* Linha vertical da mediana (= 0% delta) */}
                     <div
-                      className="absolute top-0 bottom-0 w-px bg-foreground/40"
+                      className="absolute top-0 bottom-0 w-px bg-foreground/60"
                       style={{ left: "50%" }}
                     />
                   </div>
                   <div className="flex justify-between text-[9px] text-muted-foreground mt-1">
-                    <span>0%</span>
-                    <span>mediana</span>
-                    <span>200%</span>
+                    <span>−50%</span>
+                    <span>mediana (0%)</span>
+                    <span>+50%</span>
                   </div>
                 </div>
               );
@@ -407,7 +417,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
       )}
 
       {/* ── Alerta da dimensão mais fraca ────────────────────────────────── */}
-      {dimensaoMaisFraca && forcaDimensao(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido) < 90 && (
+      {dimensaoMaisFraca && indiceParaDelta(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido) < -10 && (
         <div className="glass-card p-4 border border-orange-500/30 bg-orange-500/5">
           <div className="flex items-start gap-2">
             <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
@@ -415,7 +425,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               <span className="font-semibold text-orange-500">
                 ⚠️ Dimensão mais fraca: {dimensaoMaisFraca.label}
               </span>{" "}
-              <span className="font-mono">({dimensaoMaisFraca.indice.toFixed(0)}% da mediana)</span>.{" "}
+              <span className="font-mono">
+                ({indiceParaDelta(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido).toFixed(0)}% vs mediana)
+              </span>.{" "}
               <span className="text-muted-foreground">
                 {dimensaoMaisFraca.id === "full_pct" && "Sellers da categoria operam com mais Full em média — desvantagem logística direta no algoritmo."}
                 {dimensaoMaisFraca.id === "conversao" && "Taxa de conversão abaixo dos pares — investigar preço, fotos e CDP antes de aumentar Ads."}
@@ -441,8 +453,8 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="gradSellerGrowth" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={indiceGeral >= 110 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={indiceGeral >= 110 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"} stopOpacity={0} />
+                <stop offset="5%" stopColor={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"} stopOpacity={0.3} />
+                <stop offset="95%" stopColor={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradBenchmark" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0.15} />
@@ -484,7 +496,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
             <Area
               type="monotone"
               dataKey="Seller (Acumulado)"
-              stroke={indiceGeral >= 110 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"}
+              stroke={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"}
               fill="url(#gradSellerGrowth)"
               strokeWidth={2.5}
               animationDuration={800}
