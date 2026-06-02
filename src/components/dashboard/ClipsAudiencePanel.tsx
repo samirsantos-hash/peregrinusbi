@@ -1,14 +1,14 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid,
+  ComposedChart, Bar, Line, LineChart, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell,
 } from "recharts";
 import {
   Eye, Video, TrendingUp, Flame, AlertTriangle,
   Play, ShoppingCart, ExternalLink, ChevronDown, ChevronUp,
   FileVideo, Clapperboard, Target, Monitor, CheckCircle2, Circle,
-  Ban, Filter, PieChart as PieChartIcon,
+  Ban, Filter, PieChart as PieChartIcon, Activity,
 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { formatChartDate, fmtBRLCompact, fmtNumCompact } from "@/utils/formatters";
@@ -320,9 +320,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── 1. Aggregate KPI totals ── */
   const totals = useMemo(() => {
-    const t = { visits: 0, visitasClips: 0, tgmvClips: 0, ordersClips: 0, siClips: 0, clipsPubli: 0 };
+    const t = { visits: 0, tsi: 0, visitasClips: 0, tgmvClips: 0, ordersClips: 0, siClips: 0, clipsPubli: 0 };
     for (const k of kpis) {
       t.visits += k.visits;
+      t.tsi += (k as any).tsi || 0;
       t.visitasClips += k.visitasClips;
       t.tgmvClips += k.tgmvLcClips;
       t.ordersClips += k.ordersClips;
@@ -387,6 +388,21 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     }))
   , [kpis, dataGranularity]);
 
+  /* ── 5b. Conversion evolution (Geral vs Clips) ── */
+  const conversionSeries = useMemo(() =>
+    kpis.map((k) => {
+      const tsi = (k as any).tsi || 0;
+      const visits = k.visits || 0;
+      const visC = k.visitasClips || 0;
+      const ordC = k.ordersClips || 0;
+      return {
+        date: formatChartDate(k.date, dataGranularity),
+        convGeral: visits > 0 ? (tsi / visits) * 100 : 0,
+        convClips: visC > 0 ? (ordC / visC) * 100 : 0,
+      };
+    })
+  , [kpis, dataGranularity]);
+
   /* ── 6. Top 5 items by pedidos — deduplicated ── */
   const topContentItems = useMemo(() => {
     const items = dedupedEligibility
@@ -410,8 +426,11 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       .slice(0, 8);
   }, [dedupedEligibility]);
 
-  /* ── 8. Conversion rate ── */
+  /* ── 8. Conversion rates ── */
   const conversionRate = pct(totals.ordersClips, totals.visitasClips);
+  const conversionGeneral = pct(totals.tsi, totals.visits);
+  const clipsVsGeralDelta = conversionRate - conversionGeneral;
+  const clipsBeatsGeral = totals.visitasClips > 0 && totals.visits > 0 && conversionRate >= conversionGeneral;
 
   /* ── Fallback flag: per-item clip data is missing but seller has clip activity ── */
   const hasSellerLevelClipsOnly = useMemo(() => {
