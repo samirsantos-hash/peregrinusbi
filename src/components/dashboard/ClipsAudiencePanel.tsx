@@ -113,7 +113,7 @@ function getVideoStatus(
   avgOrdersClips: number,
 ): { status: VideoStatus; label: string; badgeClass: string } {
   if (!hasClip) {
-    return { status: "no-video", label: "Analisar", badgeClass: "bg-destructive/15 text-destructive border-destructive/20" };
+    return { status: "no-video", label: "Analisar Clip", badgeClass: "bg-warning/15 text-warning border-warning/20" };
   }
   if (visitasClips === 0 && siClips === 0) {
     return { status: "no-reach", label: "Sem Alcance", badgeClass: "bg-destructive/15 text-destructive border-destructive/20" };
@@ -188,10 +188,35 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
               Diagnóstico de Produção
             </p>
             {videoStatus.status === "no-video" ? (
-              <p className="text-xs text-destructive flex items-center gap-1.5">
-                <FileVideo className="w-3.5 h-3.5" />
-                🎥 Gravação Urgente — Sem Clip Ativo
-              </p>
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-warning flex items-center gap-1.5">
+                  <FileVideo className="w-3.5 h-3.5" />
+                  🎬 Clip com baixa performance — Revisar visitas e conversão
+                </p>
+                <p className="text-[11px] text-muted-foreground">
+                  Sem métricas por anúncio disponíveis hoje. Se o clip existe, o problema é alcance
+                  ou conversão; se não existe, priorizar gravação. Confira o roteiro abaixo.
+                </p>
+                {AUDIT_CHECKLIST.map((c, i) => (
+                  <button
+                    key={c.label}
+                    onClick={() => toggleCheck(i)}
+                    className="flex items-start gap-2.5 w-full text-left group"
+                  >
+                    {checks[i] ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald shrink-0 mt-0.5" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5 group-hover:text-neon-blue transition-colors" />
+                    )}
+                    <div>
+                      <p className={`text-xs font-medium ${checks[i] ? "text-emerald line-through opacity-70" : "text-foreground"}`}>
+                        {c.label}
+                      </p>
+                      <p className="text-[11px] text-muted-foreground">{c.question}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             ) : videoStatus.status === "no-reach" ? (
               <p className="text-xs text-destructive flex items-center gap-1.5">
                 <Ban className="w-3.5 h-3.5" />
@@ -230,7 +255,7 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
               <span className="text-xs text-warning font-medium flex items-center gap-1">
                 <Clapperboard className="w-3.5 h-3.5" />
                 {videoStatus.status === "no-video"
-                  ? "Gravação Urgente — Sem Clip Ativo"
+                  ? "Revisar Clip — Baixa visita ou conversão"
                   : "Revisar Roteiro e Edição (Foco em Conversão)"}
               </span>
               {clipsLink && (
