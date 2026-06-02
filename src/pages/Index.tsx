@@ -504,7 +504,7 @@ const Index = () => {
                       totalLiveListings={liveListingsCount || 0}
                     />
                     <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
-                    <ConversaoPorMLBPanel />
+                    <ConversaoPorMLBPanel sellerId={selectedSeller} />
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
                   <TabsContent value="clips" className="mt-0">
