@@ -5,7 +5,8 @@ import { Activity, Info, ChevronDown, ChevronRight, ExternalLink, Lightbulb } fr
 import { supabase } from "@/integrations/supabase/client";
 import TooltipInfo from "./TooltipInfo";
 
-type Diagnostico = "excelente" | "qualidade" | "visibilidade" | "estoque_parado" | "sem_dados";
+type Diagnostico = "ok" | "qualidade" | "visibilidade" | "estoque_parado" | "sem_dados";
+type StatusGiro = "parado" | "lento" | "normal" | "girando";
 
 interface MLBPerformance {
   itemId: string;
@@ -17,9 +18,9 @@ interface MLBPerformance {
   flagOptinCdp: boolean;
   flagBestPromo: boolean;
   descontoSellerPct: number;
-  velocidadeVenda: number;
+  diasEstoque: number | null;
+  statusGiro: StatusGiro;
   shareEstoqueFull: number;
-  temEstoqueParado: boolean;
   qualityScore: number | null;
   scoreFotos: number | null;
   scoreTitulo: number | null;
@@ -70,11 +71,22 @@ async function fetchMLBPerformance(sellerUuid: string): Promise<MLBPerformance[]
     const pedidos = Number(r.pedidos_7d) || 0;
     const estoque = Number(r.estoque_medio_7d) || 0;
     const estFull = Number(r.estoque_medio_full_7d) || 0;
+    const mediaDay = Number(r.media_tsi_diario_7d) || 0;
     const q = qualityMap.get(String(r.item_id));
 
-    const velocidade = estoque > 0 ? pedidos / estoque : 0;
+    const diasEstoque: number | null =
+      mediaDay > 0 ? Math.round(estoque / mediaDay) : pedidos > 0 ? 999 : null;
+
+    const statusGiro: StatusGiro =
+      pedidos === 0
+        ? "parado"
+        : diasEstoque === null || diasEstoque > 60
+          ? "lento"
+          : diasEstoque > 15
+            ? "normal"
+            : "girando";
+
     const shareFull = estoque > 0 ? (estFull / estoque) * 100 : 0;
-    const temEstoqParado = estoque >= 10 && pedidos < 1;
 
     const scoreF = q ? Number(q.ll_pictures_score) || null : null;
     const scoreT = q ? Number(q.ll_title_score) || null : null;
@@ -85,30 +97,32 @@ async function fetchMLBPerformance(sellerUuid: string): Promise<MLBPerformance[]
 
     const flagOptin = Boolean(r.flag_item_s_optin);
     const acoes: string[] = [];
-    let diagnostico: Diagnostico = "excelente";
+    let diagnostico: Diagnostico = "ok";
     let prioridade: 1 | 2 | 3 = 3;
 
     if (q && qualityScore !== null) {
-      if (pedidos < 1 && estoque >= 5) {
+      if (statusGiro === "parado" || statusGiro === "lento") {
         if (qualityScore < 50) {
           diagnostico = "qualidade";
           prioridade = 1;
           const fixFirst =
             (scoreC ?? 100) < 70 ? "ficha técnica" : (scoreF ?? 100) < 60 ? "fotos" : "título";
           acoes.push(
-            `Score de qualidade ${qualityScore.toFixed(0)}/100 — anúncio invisível no orgânico. Corrigir ${fixFirst} primeiro.`,
+            `Score ${qualityScore.toFixed(0)}/100 — anúncio pouco visível no orgânico. Corrigir ${fixFirst} primeiro.`,
           );
         } else if (!flagOptin) {
           diagnostico = "visibilidade";
           prioridade = 1;
           acoes.push(
-            `Estoque parado (${estoque.toFixed(0)} un.) sem vendas e sem opt-in na CDP. Ativar promoção para gerar tráfego.`,
+            statusGiro === "parado"
+              ? `Sem vendas e sem CDP. Ativar promoção para gerar tráfego. Estoque: ${estoque.toFixed(0)} un paradas.`
+              : `Estoque para ${diasEstoque} dias sem CDP ativo. Ativar campanha para acelerar o giro.`,
           );
         } else {
           diagnostico = "estoque_parado";
           prioridade = 2;
           acoes.push(
-            `${estoque.toFixed(0)} unidades em estoque sem movimentação. Avaliar redução de preço ou ativação de campanha.`,
+            `Estoque para ${diasEstoque ?? "?"} dias com CDP ativo. Avaliar redução de preço ou aumento do desconto.`,
           );
         }
       } else if (pedidos > 0 && qualityScore < 70) {
@@ -120,14 +134,16 @@ async function fetchMLBPerformance(sellerUuid: string): Promise<MLBPerformance[]
       }
     } else {
       diagnostico = "sem_dados";
-      if (temEstoqParado) {
+      if (statusGiro === "parado") {
         acoes.push(
-          `${estoque.toFixed(0)} unidades paradas sem venda na semana. Verificar preço e CDP.`,
+          diasEstoque === null
+            ? `${estoque.toFixed(0)} unidades em estoque sem histórico de vendas. Verificar se o anúncio está ativo e com preço competitivo.`
+            : `Estoque para mais de 60 dias sem venda. Capital imobilizado — avaliar promoção ou ajuste de preço.`,
         );
         prioridade = 2;
       }
       if (!flagOptin && pedidos < 3) {
-        acoes.push("Sem opt-in na CDP. Ativar promoção pode melhorar visibilidade.");
+        acoes.push("Sem opt-in na CDP. Ativar promoção pode gerar visibilidade orgânica gratuita.");
       }
     }
 
@@ -143,9 +159,9 @@ async function fetchMLBPerformance(sellerUuid: string): Promise<MLBPerformance[]
       flagOptinCdp: flagOptin,
       flagBestPromo: Boolean(r.flag_best_promo),
       descontoSellerPct: Number(r.discount_seller_percentage) || 0,
-      velocidadeVenda: velocidade,
+      diasEstoque,
+      statusGiro,
       shareEstoqueFull: shareFull,
-      temEstoqueParado: temEstoqParado,
       qualityScore,
       scoreFotos: scoreF,
       scoreTitulo: scoreT,
@@ -163,7 +179,7 @@ const DIAG_EMOJI: Record<Diagnostico, string> = {
   visibilidade: "🟠",
   estoque_parado: "🟡",
   sem_dados: "⚪",
-  excelente: "✅",
+  ok: "✅",
 };
 
 const DIAG_ORDER: Record<Diagnostico, number> = {
@@ -171,17 +187,19 @@ const DIAG_ORDER: Record<Diagnostico, number> = {
   visibilidade: 1,
   estoque_parado: 2,
   sem_dados: 3,
-  excelente: 4,
+  ok: 4,
+};
+
+const GIRO_CONFIG: Record<StatusGiro, { emoji: string; label: string; cls: string; title: string }> = {
+  parado: { emoji: "🔴", label: "Parado", cls: "bg-destructive/10 text-destructive", title: "Nenhum pedido esta semana" },
+  lento: { emoji: "🟠", label: "Lento", cls: "bg-orange-500/10 text-orange-500", title: "Mais de 60 dias de estoque" },
+  normal: { emoji: "🟡", label: "Normal", cls: "bg-warning/10 text-warning", title: "15 a 60 dias de estoque" },
+  girando: { emoji: "🟢", label: "Girando", cls: "bg-emerald/10 text-emerald", title: "Menos de 15 dias — monitorar reposição" },
 };
 
 function ItemRow({ item }: { item: MLBPerformance }) {
   const [aberto, setAberto] = useState(false);
-  const velColor =
-    item.velocidadeVenda >= 0.3
-      ? "text-emerald"
-      : item.velocidadeVenda >= 0.05
-        ? "text-warning"
-        : "text-destructive";
+  const giro = GIRO_CONFIG[item.statusGiro];
   const ipiColor =
     item.qualityScore === null
       ? "text-muted-foreground"
@@ -219,8 +237,22 @@ function ItemRow({ item }: { item: MLBPerformance }) {
           </div>
         </td>
         <td className="py-2 px-2 text-right text-xs font-mono tabular-nums">{item.pedidos7d.toFixed(0)}</td>
-        <td className={`py-2 px-2 text-right text-xs font-mono tabular-nums ${velColor}`}>
-          {(item.velocidadeVenda * 100).toFixed(1)}%/sem
+        <td className="py-2 px-2 text-center">
+          <span
+            className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${giro.cls}`}
+            title={giro.title}
+          >
+            {giro.emoji} {giro.label}
+          </span>
+        </td>
+        <td className="py-2 px-2 text-right text-xs font-mono tabular-nums">
+          {item.diasEstoque === null ? (
+            <span className="text-muted-foreground">—</span>
+          ) : item.diasEstoque >= 999 ? (
+            <span className="text-muted-foreground text-[10px]">s/ histórico</span>
+          ) : (
+            <span>{item.diasEstoque} dias</span>
+          )}
         </td>
         <td className="py-2 px-2 text-right text-xs font-mono tabular-nums">{item.estoqueMedio.toFixed(0)}</td>
         <td className={`py-2 px-2 text-right text-xs font-mono tabular-nums ${item.shareEstoqueFull >= 50 ? "text-emerald font-semibold" : "text-muted-foreground"}`}>
@@ -244,18 +276,25 @@ function ItemRow({ item }: { item: MLBPerformance }) {
           {item.flagBestPromo && <span title="Best promo" className="ml-1">⭐</span>}
         </td>
       </tr>
-      {aberto && item.acoes.length > 0 && (
+      {aberto && (
         <tr className="bg-muted/20">
-          <td colSpan={7} className="px-4 py-3">
+          <td colSpan={8} className="px-4 py-3">
             <div className="space-y-1.5">
-              {item.acoes.map((a, i) => (
-                <p key={i} className="text-[11px] flex items-start gap-1.5 text-foreground">
-                  <Lightbulb className="w-3 h-3 mt-0.5 shrink-0 text-warning" />
-                  <span>{a}</span>
-                </p>
-              ))}
+              {item.acoes.length > 0 ? (
+                item.acoes.map((a, i) => (
+                  <p key={i} className="text-[11px] flex items-start gap-1.5 text-foreground">
+                    <Lightbulb className="w-3 h-3 mt-0.5 shrink-0 text-warning" />
+                    <span>{a}</span>
+                  </p>
+                ))
+              ) : (
+                <p className="text-[11px] text-emerald">✅ Sem gaps identificados.</p>
+              )}
               <p className="text-[10px] text-muted-foreground pt-1">
                 Estoque Full: <span className="font-mono tabular-nums">{item.estoqueFull.toFixed(0)} un</span> ({item.shareEstoqueFull.toFixed(0)}%)
+                {item.diasEstoque !== null && item.diasEstoque < 999 && (
+                  <> · Cobertura: <span className="font-mono tabular-nums">{item.diasEstoque} dias</span></>
+                )}
                 {" · "}
                 Desconto seller: <span className="font-mono tabular-nums">{item.descontoSellerPct.toFixed(0)}%</span>
                 {item.qualityScore !== null && (
@@ -278,15 +317,15 @@ function ResumoOportunidades({ itens }: { itens: MLBPerformance[] }) {
   const qualidade = itens.filter((i) => i.diagnostico === "qualidade").length;
   const visib = itens.filter((i) => i.diagnostico === "visibilidade").length;
   const parado = itens.filter((i) => i.diagnostico === "estoque_parado").length;
-  const estParado = itens
-    .filter((i) => i.temEstoqueParado)
+  const unParadas = itens
+    .filter((i) => i.statusGiro === "parado" || i.statusGiro === "lento")
     .reduce((a, i) => a + i.estoqueMedio, 0);
 
   const cards = [
-    { label: "Gap de qualidade", valor: qualidade, color: "text-destructive", desc: "itens com score < 70" },
+    { label: "Gap de qualidade", valor: qualidade, color: "text-destructive", desc: "score ou ficha a corrigir" },
     { label: "Sem visibilidade", valor: visib, color: "text-orange-500", desc: "itens sem CDP e vendas baixas" },
     { label: "Estoque parado", valor: parado, color: "text-warning", desc: "itens com capital imobilizado" },
-    { label: "Un. sem girar", valor: Math.round(estParado), color: "text-muted-foreground", desc: "unidades sem venda na semana" },
+    { label: "Un. sem girar", valor: Math.round(unParadas), color: "text-muted-foreground", desc: "itens parados ou lentos" },
   ];
 
   return (
@@ -318,7 +357,7 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
 
   const itens = useMemo(() => {
     if (!rawItens) return [];
-    const filtered = filtro === "problemas" ? rawItens.filter((r) => r.diagnostico !== "excelente") : rawItens;
+    const filtered = filtro === "problemas" ? rawItens.filter((r) => r.diagnostico !== "ok") : rawItens;
     return [...filtered].sort((a, b) => {
       if (ordem === "pedidos") return b.pedidos7d - a.pedidos7d;
       if (ordem === "estoque") return b.estoqueMedio - a.estoqueMedio;
@@ -342,10 +381,10 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Performance por Anúncio
             </h3>
-            <TooltipInfo text="Diagnóstico por MLB usando proxy de velocidade de venda (pedidos 7d ÷ estoque) cruzado com qualidade do anúncio." />
+            <TooltipInfo text="Diagnóstico por MLB usando dias de estoque (estoque ÷ média diária de vendas) cruzado com qualidade do anúncio." />
           </div>
           <p className="text-[11px] text-muted-foreground mt-1">
-            Baseado em pedidos 7d, estoque e qualidade — fonte: <code className="px-1 rounded bg-muted">seller_eligibility</code> + <code className="px-1 rounded bg-muted">seller_listings_quality</code>
+            Baseado em giro (dias de estoque) e qualidade — fonte: <code className="px-1 rounded bg-muted">seller_eligibility</code> + <code className="px-1 rounded bg-muted">seller_listings_quality</code>
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -373,19 +412,19 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
       <div className="flex items-start gap-2 p-3 rounded-md border border-border/60 bg-muted/10 text-[11px]">
         <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
         <p className="text-muted-foreground">
-          <span className="font-semibold text-foreground">Metodologia:</span> conversão por item é aproximada via{" "}
-          <span className="font-semibold">velocidade de venda</span> (pedidos 7d ÷ estoque médio). O CSV diarizado é agregado por seller; visitas no nível de item não estão disponíveis.
-          Quando há linha em <code className="px-1 rounded bg-muted">seller_listings_quality</code>, o score médio (fotos+título+ficha) refina o diagnóstico.
+          <span className="font-semibold text-foreground">Como funciona:</span> visitas por anúncio não estão no CSV diarizado.
+          O painel usa <span className="font-semibold">dias de estoque</span> (estoque ÷ média diária de vendas) como sinal de giro — mais acionável que taxa de conversão para decisões de reposição e promoção.
+          Quando há linha em <code className="px-1 rounded bg-muted">seller_listings_quality</code>, o score (fotos+título+ficha) refina o diagnóstico.
         </p>
       </div>
 
       {/* Legenda */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-        <span>🔴 Qualidade</span>
-        <span>🟠 Visibilidade/CDP</span>
+        <span>🔴 Gap de qualidade</span>
+        <span>🟠 Sem visibilidade (CDP)</span>
         <span>🟡 Estoque parado</span>
         <span>⚪ Sem dados de qualidade</span>
-        <span>✅ Sem gaps</span>
+        <span>✅ Sem gap</span>
       </div>
 
       {/* Tabela ou estado vazio */}
@@ -396,7 +435,7 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
       ) : itens.length === 0 ? (
         <div className="text-center text-sm text-muted-foreground py-8">
           {filtro === "problemas"
-            ? "Nenhum item com gap encontrado. 🎉"
+            ? "Nenhum gap identificado — todos os itens com estoque estão girando. 🎉"
             : "Nenhum item de elegibilidade disponível para este seller."}
         </div>
       ) : (
@@ -406,7 +445,8 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
               <tr className="text-muted-foreground border-b border-border">
                 <th className="text-left py-2 px-2 font-semibold">Anúncio</th>
                 <th className="text-right py-2 px-2 font-semibold">Pedidos 7d</th>
-                <th className="text-right py-2 px-2 font-semibold">Velocidade</th>
+                <th className="text-center py-2 px-2 font-semibold">Giro</th>
+                <th className="text-right py-2 px-2 font-semibold">Dias estoque</th>
                 <th className="text-right py-2 px-2 font-semibold">Estoque</th>
                 <th className="text-right py-2 px-2 font-semibold">Full %</th>
                 <th className="text-right py-2 px-2 font-semibold">Score</th>
