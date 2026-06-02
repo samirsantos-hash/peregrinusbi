@@ -472,6 +472,7 @@ const Index = () => {
                       custId={sellerCustIdMap[selectedSeller]}
                       sellerUuid={selectedSeller}
                     />
+                    <PlanoAcaoAnuncioPanel sellerId={selectedSeller} />
                     <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
                     <QualityKpiCards
                       scoreCaracteristica={(() => {
