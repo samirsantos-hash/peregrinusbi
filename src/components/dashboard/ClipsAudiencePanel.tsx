@@ -651,7 +651,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={Play}
           label="Visitas via Clips"
           value={fmt(totals.visitasClips)}
-          sub={`${totals.clipsPubli} clips publicados`}
+          sub={`${fmt(totals.clipsPubli)} clips publicados · ${videoPct.toFixed(1)}% da audiência`}
           tooltip="Total de visitas geradas por vídeos curtos (Clips) do seller."
           accentClass="text-emerald"
         />
@@ -659,7 +659,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={TrendingUp}
           label="Faturamento Clips"
           value={fmtBRL(totals.tgmvClips)}
-          sub={`${totals.siClips} itens vendidos via clip`}
+          sub={`${fmt(totals.siClips)} itens vendidos via clip`}
           tooltip="Receita gerada diretamente por vídeos curtos publicados."
           accentClass="text-warning"
         />
@@ -667,9 +667,17 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={ShoppingCart}
           label="Conversão Clips"
           value={`${conversionRate.toFixed(2)}%`}
-          sub={`${totals.ordersClips} pedidos via clips`}
-          tooltip="Taxa de conversão: (Pedidos via Clips / Visitas via Clips) × 100."
-          accentClass={conversionRate > 1 ? "text-emerald" : "text-neon-blue"}
+          sub={
+            totals.visitasClips > 0 && totals.visits > 0
+              ? `${fmt(totals.ordersClips)} pedidos · ${clipsBeatsGeral ? "+" : ""}${clipsVsGeralDelta.toFixed(2)}pp vs Geral`
+              : `${fmt(totals.ordersClips)} pedidos via clips`
+          }
+          tooltip="Taxa de conversão: (Pedidos via Clips / Visitas via Clips) × 100. Comparada ao benchmark interno (Conversão Geral) — quando acima, o vídeo está pré-qualificando o comprador."
+          accentClass={
+            totals.visitasClips > 0 && totals.visits > 0
+              ? clipsBeatsGeral ? "text-emerald" : "text-warning"
+              : conversionRate > 1 ? "text-emerald" : "text-neon-blue"
+          }
         />
       </div>
 
