@@ -243,6 +243,9 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
     return ordenarPlanos(filtrado, ordem).slice(0, 80);
   }, [qualities, eligibilities, filtro, ordem]);
 
+  const semQualidade = qualities.length === 0;
+  const semElegibilidade = eligibilities.length === 0;
+
   const resumo = useMemo(() => {
     const map = new Map<AcaoCategoria, number>();
     for (const p of planos) {
@@ -261,12 +264,14 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
     );
   }
 
-  if (qualities.length === 0) {
+  if (semQualidade && semElegibilidade) {
     return (
-      <div className="glass-card p-6 text-center text-sm text-muted-foreground">
-        Sem dados em <span className="font-mono">seller_listings_quality</span> para este
-        seller. Carregue o arquivo de qualidade por anúncio para habilitar o plano de
-        ação.
+      <div className="glass-card p-6 text-center text-sm text-muted-foreground space-y-2">
+        <p>Nenhum dado encontrado para este seller.</p>
+        <p className="text-xs">
+          Verifique se os arquivos de <span className="font-mono">seller_listings_quality</span>{" "}
+          e <span className="font-mono">seller_eligibility</span> foram carregados.
+        </p>
       </div>
     );
   }
@@ -301,6 +306,16 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
           </select>
         </div>
       </div>
+
+      {semQualidade && !semElegibilidade && (
+        <div className="rounded-lg border border-warning/40 bg-warning/10 text-warning px-3 py-2 text-[11px]">
+          ⚠️ <strong>Dados parciais:</strong> a tabela{" "}
+          <span className="font-mono">seller_listings_quality</span> está vazia para este
+          seller. Exibindo apenas dados de venda e CDP (elegibilidade). Scores de IPI,
+          fotos, título e ficha técnica não estão disponíveis — carregue o arquivo de
+          qualidade por anúncio para habilitar o diagnóstico completo.
+        </div>
+      )}
 
       {resumo.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 text-[11px] p-2 rounded-md border border-border/60 bg-muted/20">
