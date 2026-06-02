@@ -199,7 +199,7 @@ const GIRO_CONFIG: Record<StatusGiro, { emoji: string; label: string; cls: strin
 
 function ItemRow({ item }: { item: MLBPerformance }) {
   const [aberto, setAberto] = useState(false);
-  const giro = GIRO_CONFIG[item.statusGiro];
+  const giro = GIRO_CONFIG[item.statusGiro] ?? GIRO_CONFIG.parado;
   const ipiColor =
     item.qualityScore === null
       ? "text-muted-foreground"
