@@ -111,11 +111,15 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
     const totalMatch = src.reduce((s, k) => s + k.visitsMatch, 0);
     const totalCheaper = src.reduce((s, k) => s + k.visitsCheaper, 0);
     const totalPriceBands = totalExpensive + totalMatch + totalCheaper;
+    const totalVisitsMonthly = src.reduce((s, k) => s + (k.visits || 0), 0);
     return {
       totalExpensive, totalMatch, totalCheaper, totalPriceBands,
+      totalVisitsMonthly,
       pctExpensive: totalPriceBands > 0 ? (totalExpensive / totalPriceBands) * 100 : 0,
       pctMatch: totalPriceBands > 0 ? (totalMatch / totalPriceBands) * 100 : 0,
       pctCheaper: totalPriceBands > 0 ? (totalCheaper / totalPriceBands) * 100 : 0,
+      indiceCompetitividade: totalPriceBands > 0 ? ((totalMatch + totalCheaper) / totalPriceBands) * 100 : 0,
+      coberturaComparacao: totalVisitsMonthly > 0 ? (totalPriceBands / totalVisitsMonthly) * 100 : 0,
     };
   }, [latestMonthlyKpis, kpis]);
 
