@@ -210,13 +210,13 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
           <td colSpan={7} className="p-4 border-b border-border/40">
             {anuncio.acoes.length === 0 ? (
               <div className="text-xs text-emerald">
-                ✅ Nenhuma ação necessária — anúncio dentro dos padrões.
+                ✅ Nada a investigar — anúncio dentro dos padrões.
               </div>
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold">
-                    Plano de ação — {anuncio.acoes.length} item
+                    Pontos a investigar — {anuncio.acoes.length} item
                     {anuncio.acoes.length !== 1 ? "s" : ""}
                   </span>
                   {anuncio.score_potencial !== null &&
