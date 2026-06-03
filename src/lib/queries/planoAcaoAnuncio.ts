@@ -174,7 +174,7 @@ function gerarAcoes(ql: ListingQuality, el: EligibilityItem | null): AcaoAnuncio
       prioridade: 2,
       titulo: "Ativar opt-in na Central de Promoção",
       instrucao:
-        "Item fora da CDP. Participar gera a tag 'Oferta Imperdível' e acesso a abas exclusivas de promoção sem custo de mídia. Verificar se há campanha com coparticipação do ML disponível — nesse caso o ML divide o custo do desconto.",
+        "Item fora da CDP. Participar gera a tag 'Oferta Imperdível' e acesso a abas exclusivas de promoção sem custo de mídia (Ads). Estratégia inteligente: priorizar campanhas com coparticipação do ML — o ML banca parte do desconto, reduzindo o CPV (custo por venda) e liberando orçamento de Ads para outros anúncios. Resultado: mais exposição com menor custo total de aquisição.",
       impactoScore: 0,
       icone: "🎯",
     });
