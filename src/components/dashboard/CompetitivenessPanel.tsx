@@ -393,9 +393,9 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              BPC — Best Price Competitiveness
+              Índice de Competitividade de Preço (BPC)
             </h3>
-            <TooltipInfo text="Índice de competitividade de preço do MercadoLivre. Escala 0,5 (menos competitivo) a 1,0 (mais competitivo). Sellers com BPC entre 0,7 e 0,8 têm o maior GMV mediano da carteira (R$183k) e conversão de 5,0%." />
+            <TooltipInfo text={`${TOOLTIP_BPC} Escala 0,5 (menos competitivo) a 1,0 (mais competitivo). Sellers com BPC entre 0,7 e 0,8 têm o maior GMV mediano da carteira (R$183k) e conversão de 5,0%.`} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* BPC Value */}
@@ -403,7 +403,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A' }}>
                 {bpcData.median.toFixed(3)}
               </p>
-              <p className="text-xs text-muted-foreground">Mediana BPC</p>
+              <p className="text-xs text-muted-foreground">Índice BPC (mediana)</p>
               <span className="status-badge text-[11px]" style={{
                 backgroundColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.1)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.08)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.1)' : 'rgba(226,75,74,0.1)',
                 color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A',
@@ -431,9 +431,9 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <p className="text-3xl font-bold font-mono text-foreground">
                 {bpcData.count}/{bpcData.total}
               </p>
-              <p className="text-xs text-muted-foreground">Sellers com dado BPC</p>
+              <p className="text-xs text-muted-foreground">Sellers com comparação ativa</p>
               <p className="text-[11px] text-muted-foreground">
-                Cobertura: {Math.round((bpcData.count / bpcData.total) * 100)}%
+                Cobertura de comparação: {Math.round((bpcData.count / bpcData.total) * 100)}%
               </p>
             </div>
           </div>
