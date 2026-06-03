@@ -452,7 +452,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Evolução da Competitividade de Preço (%)
           </h3>
-          <TooltipInfo text="Evolução percentual das faixas de preço ao longo do tempo. Dias sem dado de preço são omitidos do gráfico. Para valores absolutos de %, use os cards acima (fonte mensal)." />
+          <TooltipInfo text={`Evolução percentual das faixas de preço ao longo do tempo. % calculado sobre comparações BPC — não sobre visitas totais. Dias sem dado de preço são omitidos. ${TOOLTIP_BPC}`} />
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={priceEvolutionData}>
@@ -474,12 +474,16 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
             <Tooltip content={<CustomTooltip />} />
+            <ReferenceLine y={30} stroke="hsl(0, 84%, 60%)" strokeDasharray="4 4" label={{ value: "alerta: >30% caro", fill: "hsl(0, 84%, 60%)", fontSize: 10, position: "right" }} />
             <Area type="monotone" dataKey="% Preço Alto" stroke="hsl(0, 84%, 60%)" fill="url(#gradExpensive)" strokeWidth={2} />
             <Area type="monotone" dataKey="% Equivalente" stroke="hsl(199, 100%, 50%)" fill="url(#gradMatch)" strokeWidth={2} />
             <Area type="monotone" dataKey="% Mais Barato" stroke="hsl(160, 84%, 39%)" fill="url(#gradCheaper)" strokeWidth={2} />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
+        <p className="text-[11px] text-muted-foreground mt-3">
+          ℹ️ As três linhas somam sempre 100% — representam como o preço do seller se comparou com rivais nas visitas onde o ML ativou a comparação de preço (BPC). Universo separado do total de visitas.
+        </p>
       </div>
 
       {/* ── Scatter Plot — Matriz de Elasticidade ── */}
