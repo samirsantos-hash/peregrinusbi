@@ -197,7 +197,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
               </span>
             )}
             {anuncio.acoes.length === 0 && (
-              <span className="text-[10px] text-emerald">Sem gaps</span>
+              <span className="text-[10px] text-emerald">Nada a investigar</span>
             )}
           </div>
         </td>
@@ -210,13 +210,13 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
           <td colSpan={7} className="p-4 border-b border-border/40">
             {anuncio.acoes.length === 0 ? (
               <div className="text-xs text-emerald">
-                ✅ Nenhuma ação necessária — anúncio dentro dos padrões.
+                ✅ Nada a investigar — anúncio dentro dos padrões.
               </div>
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold">
-                    Plano de ação — {anuncio.acoes.length} item
+                    Pontos a investigar — {anuncio.acoes.length} item
                     {anuncio.acoes.length !== 1 ? "s" : ""}
                   </span>
                   {anuncio.score_potencial !== null &&
@@ -325,10 +325,11 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
     <div className="glass-card p-5 space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h3 className="text-base font-semibold">Plano de Ação por Anúncio</h3>
+          <h3 className="text-base font-semibold">Pontos a Investigar por Anúncio</h3>
           <p className="text-xs text-muted-foreground">
-            Cruza qualidade do anúncio (LL scores) com vendas, estoque e CDP por MLB.
-            Clique numa linha para ver as instruções específicas.
+            Cruza qualidade do anúncio (LL scores) com vendas, estoque e CDP por MLB
+            para apontar o que investigar primeiro. Clique numa linha para abrir o
+            detalhamento e entender o porquê de cada ponto.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -337,7 +338,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
             onChange={(e) => setFiltro(e.target.value as "acoes" | "todos")}
             className="text-xs rounded px-2 py-1 border border-border bg-card text-foreground"
           >
-            <option value="acoes">Só com ações</option>
+            <option value="acoes">Só com pontos a investigar</option>
             <option value="todos">Todos os anúncios</option>
           </select>
           <select
@@ -347,7 +348,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
           >
             <option value="urgencia">Por urgência</option>
             <option value="pedidos">Por pedidos (7d)</option>
-            <option value="potencial">Por ganho de score</option>
+            <option value="potencial">Por ganho potencial de score</option>
           </select>
         </div>
       </div>
@@ -379,7 +380,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
       {planos.length === 0 ? (
         <div className="text-sm text-center text-muted-foreground py-8">
           {filtro === "acoes"
-            ? "Nenhum gap encontrado — todos os anúncios com dados estão dentro dos padrões. 🎉"
+            ? "Nada a investigar — todos os anúncios com dados estão dentro dos padrões. 🎉"
             : "Nenhum anúncio para exibir."}
         </div>
       ) : (
@@ -396,7 +397,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
                 <th className="text-right py-2 px-3 font-semibold">Pedidos 7d</th>
                 <th className="text-right py-2 px-3 font-semibold">Estoque</th>
                 <th className="text-center py-2 px-3 font-semibold">CDP</th>
-                <th className="text-left py-2 px-3 font-semibold">Ações necessárias</th>
+                <th className="text-left py-2 px-3 font-semibold">Investigar</th>
                 <th></th>
               </tr>
             </thead>
