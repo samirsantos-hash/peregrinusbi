@@ -389,7 +389,9 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
               <tr className="text-muted-foreground border-b border-border">
                 <th className="text-left py-2 px-3 font-semibold">Anúncio</th>
                 <th className="text-left py-2 px-3 font-semibold">
-                  Score atual → potencial
+                  {planos.some((p) => p.tem_dados_qualidade)
+                    ? "IPI atual → potencial"
+                    : "Potencial estimado"}
                 </th>
                 <th className="text-right py-2 px-3 font-semibold">Pedidos 7d</th>
                 <th className="text-right py-2 px-3 font-semibold">Estoque</th>
@@ -404,6 +406,23 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
               ))}
             </tbody>
           </table>
+          <div className="flex gap-4 flex-wrap text-[10px] text-muted-foreground mt-3 pt-3 border-t border-border/40">
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-2 rounded-sm bg-emerald" />
+              IPI atual (verde ≥70 / âmbar ≥50 / vermelho &lt;50)
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-2 rounded-sm bg-cyan-400/55" />
+              Ganho potencial ao corrigir os gaps
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="inline-block w-3 h-2 rounded-sm bg-cyan-700/60" />
+              Estimativa sem IPI base (dados parciais)
+            </span>
+            <span className="italic">
+              "Sem dados" = seller_listings_quality não carregado
+            </span>
+          </div>
         </div>
       )}
     </div>
