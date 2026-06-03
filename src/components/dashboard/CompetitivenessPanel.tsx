@@ -13,6 +13,8 @@ import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
 import PriceAuditTable from "./PriceAuditTable";
 import CompetitivenessInsights from "./CompetitivenessInsights";
+import InsightsPrecificacaoPanel from "@/components/seller/InsightsPrecificacaoPanel";
+import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
 
