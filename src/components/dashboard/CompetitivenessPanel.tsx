@@ -16,6 +16,8 @@ import CompetitivenessInsights from "./CompetitivenessInsights";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
 
+const TOOLTIP_BPC = "BPC (Buy Price Competitive) é o sistema do Mercado Livre que compara automaticamente o preço do seller com o dos concorrentes quando há produtos equivalentes no catálogo. Essa comparação não ocorre em todas as visitas — apenas quando o ML identifica um rival direto. Por isso, as porcentagens de competitividade são calculadas apenas sobre as visitas onde a comparação foi ativada.";
+
 interface KpiLike {
   date: string;
   visits: number;
