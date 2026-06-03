@@ -30,8 +30,8 @@ export type AnuncioPlano = {
   vertical: string;
   mlbLink: string;
 
-  score_atual: number; // avgScore das dimensões LL
-  score_potencial: number;
+  score_atual: number | null; // avgScore das dimensões LL (null = sem dados de qualidade)
+  score_potencial: number | null; // null = sem ganho estimável
 
   pedidos_7d: number;
   media_tsi_7d: number;
@@ -44,6 +44,7 @@ export type AnuncioPlano = {
   acoes: AcaoAnuncio[];
   urgencia: Urgencia;
   quality_disponivel: boolean;
+  tem_dados_qualidade: boolean;
 };
 
 export const CATEGORIA_LABEL: Record<AcaoCategoria, string> = {
@@ -292,8 +293,24 @@ export function montarPlanos(
     const key = String(ql.itemId).replace(/\D/g, "");
     const el = elMap.get(key) ?? null;
     const acoes = gerarAcoes(ql, el);
-    const ganho = acoes.reduce((s, a) => s + a.impactoScore, 0);
-    const scorePotencial = Math.min(100, ql.avgScore + ganho);
+    const temDadosQualidade = !useFallback;
+    const ganhoScore = acoes.reduce((s, a) => s + a.impactoScore, 0);
+
+    // score_atual: null quando não há dados de qualidade
+    const scoreAtual: number | null = temDadosQualidade ? ql.avgScore : null;
+
+    // score_potencial:
+    //  - com dados: avgScore + ganho (caso normal)
+    //  - sem dados mas com ações (ex.: CDP opt-in): estimativa baseada nº de ações
+    //  - sem dados e sem ações: null
+    let scorePotencial: number | null;
+    if (scoreAtual !== null) {
+      scorePotencial = Math.min(100, scoreAtual + ganhoScore);
+    } else if (acoes.length > 0) {
+      scorePotencial = Math.min(25, acoes.length * 8); // estimativa só com sinais comerciais
+    } else {
+      scorePotencial = null;
+    }
 
     const urgencia: Urgencia = acoes.some(
       (a) => a.prioridade === 1 && a.impactoScore >= 20,
@@ -310,7 +327,7 @@ export function montarPlanos(
       item_name: el?.itemName || "",
       vertical: el?.verticalItem || "",
       mlbLink: ql.mlbLink,
-      score_atual: ql.avgScore,
+      score_atual: scoreAtual,
       score_potencial: scorePotencial,
       pedidos_7d: el?.pedidos7d ?? 0,
       media_tsi_7d: el?.mediaTsiDiario7d ?? 0,
@@ -320,7 +337,8 @@ export function montarPlanos(
       desconto_atual: el?.discountSellerPercentage ?? 0,
       acoes,
       urgencia,
-      quality_disponivel: !useFallback,
+      quality_disponivel: temDadosQualidade,
+      tem_dados_qualidade: temDadosQualidade,
     };
   });
 }
@@ -337,8 +355,11 @@ export function ordenarPlanos(
   };
   return [...planos].sort((a, b) => {
     if (ordenarPor === "pedidos") return b.pedidos_7d - a.pedidos_7d;
-    if (ordenarPor === "potencial")
-      return b.score_potencial - b.score_atual - (a.score_potencial - a.score_atual);
+    if (ordenarPor === "potencial") {
+      const ga = (a.score_potencial ?? 0) - (a.score_atual ?? 0);
+      const gb = (b.score_potencial ?? 0) - (b.score_atual ?? 0);
+      return gb - ga;
+    }
     if (a.urgencia !== b.urgencia) return ordemUrg[a.urgencia] - ordemUrg[b.urgencia];
     return b.pedidos_7d - a.pedidos_7d;
   });
