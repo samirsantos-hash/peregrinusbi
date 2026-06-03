@@ -138,6 +138,35 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
     return { median, avg, count: bpcValues.length, total: src.length };
   }, [latestMonthlyKpis, kpis]);
 
+  /* ── Histórico mensal para Insights de Precificação ── */
+  const { historicoInsights, dadosAtualInsights } = useMemo(() => {
+    const src = monthlyKpis.length > 0 ? monthlyKpis : kpis;
+    const byMonth: Record<string, { match: number; cheap: number; exp: number }> = {};
+    for (const k of src) {
+      if (!byMonth[k.date]) byMonth[k.date] = { match: 0, cheap: 0, exp: 0 };
+      byMonth[k.date].match += k.visitsMatch || 0;
+      byMonth[k.date].cheap += k.visitsCheaper || 0;
+      byMonth[k.date].exp += k.visitsExpensive || 0;
+    }
+    const historico: DadosMes[] = Object.entries(byMonth)
+      .map(([mes, v]) => {
+        const total = v.match + v.cheap + v.exp;
+        return {
+          mes,
+          pctMaisBarato: total > 0 ? (v.cheap / total) * 100 : 0,
+          pctEquivalente: total > 0 ? (v.match / total) * 100 : 0,
+          pctMaisCaro: total > 0 ? (v.exp / total) * 100 : 0,
+          totalBPC: total,
+        };
+      })
+      .filter((m) => m.totalBPC > 0)
+      .sort((a, b) => a.mes.localeCompare(b.mes));
+    return {
+      historicoInsights: historico,
+      dadosAtualInsights: historico.length > 0 ? historico[historico.length - 1] : null,
+    };
+  }, [monthlyKpis, kpis]);
+
   /* ── MIN_PRICE_RIVAL from monthly data ── */
   const minPriceRivalData = useMemo(() => {
     const src = latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis;
