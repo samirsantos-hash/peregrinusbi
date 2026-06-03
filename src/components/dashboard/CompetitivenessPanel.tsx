@@ -14,6 +14,7 @@ import McKinseyActionPlans from "./McKinseyActionPlans";
 import PriceAuditTable from "./PriceAuditTable";
 import CompetitivenessInsights from "./CompetitivenessInsights";
 import InsightsPrecificacaoPanel from "@/components/seller/InsightsPrecificacaoPanel";
+import MonitoramentoPrecoPanel from "@/components/seller/MonitoramentoPrecoPanel";
 import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
@@ -583,62 +584,16 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         sellerName={kpis[0]?.productName}
       />
 
-      {/* ── Diagnóstico de Preço por Período ── */}
-      <div className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Diagnóstico de Preço por Período
-          </h3>
-          <TooltipInfo text="Análise temporal da competitividade de preço. Cada linha representa um mês/período com a distribuição percentual de visitas por faixa de preço." />
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Período</th>
-                <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Visitas</th>
-                <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">% Alto</th>
-                <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">% Equiv.</th>
-                <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">% Barato</th>
-                <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Rival Médio</th>
-                <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">GMV</th>
-                <th className="text-center py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {diagnosticRows.map((row, idx) => (
-                <motion.tr
-                  key={row.date}
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.04 }}
-                  className="border-b border-border/50 hover:bg-muted/20 transition-colors"
-                >
-                  <td className="py-2.5 px-3 font-medium font-mono">{row.date}</td>
-                  <td className="text-right py-2.5 px-3 font-mono">{row.visits.toLocaleString("pt-BR")}</td>
-                  <td className="text-right py-2.5 px-3 font-mono text-destructive">{fmtNum(row.pctExp, 1)}%</td>
-                  <td className="text-right py-2.5 px-3 font-mono text-neon-blue">{fmtNum(row.pctMatch, 1)}%</td>
-                  <td className="text-right py-2.5 px-3 font-mono text-emerald">{fmtNum(row.pctCheap, 1)}%</td>
-                  <td className="text-right py-2.5 px-3 font-mono">{fmtBRL(row.avgRival)}</td>
-                  <td className="text-right py-2.5 px-3 font-mono">{fmtBRL(row.gmv)}</td>
-                  <td className="text-center py-2.5 px-3">
-                    <span className={`status-badge text-[11px] ${
-                      row.pctExp > 30 ? "bg-destructive/10 text-destructive border-destructive/20" :
-                      row.pctExp > 15 ? "bg-warning/10 text-warning border-warning/20" :
-                      "bg-emerald/10 text-emerald border-emerald/20"
-                    }`}>
-                      {row.pctExp > 30 ? "⚠ Caro" : row.pctExp > 15 ? "Atenção" : "✓ Competitivo"}
-                    </span>
-                  </td>
-                </motion.tr>
-              ))}
-              {diagnosticRows.length === 0 && (
-                <tr><td colSpan={8} className="text-center py-8 text-muted-foreground">Sem dados de competitividade no período.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* ── Anúncios identificados com problema ── */}
+      <div className="flex items-center gap-3 pt-2">
+        <div className="h-px flex-1 bg-border/60" />
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Anúncios identificados com problema
+        </h3>
+        <div className="h-px flex-1 bg-border/60" />
       </div>
+
+      <MonitoramentoPrecoPanel sellerId={sellers?.[0]?.id} />
 
     </motion.div>
   );
