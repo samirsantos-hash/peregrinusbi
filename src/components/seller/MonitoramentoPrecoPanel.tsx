@@ -240,6 +240,30 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
           <p className="text-[10px] text-muted-foreground font-mono truncate">MLB {a.itemId} · {a.motivos[0]}</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="text-right hidden sm:block">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Pedidos 7d</p>
+            <p
+              className="text-sm font-bold font-mono tabular-nums"
+              style={{
+                color:
+                  a.pctVsMediaPedidos === null
+                    ? "hsl(215, 20%, 65%)"
+                    : a.pctVsMediaPedidos >= 0
+                    ? "#16A34A"
+                    : a.pctVsMediaPedidos > -50
+                    ? "#D97706"
+                    : "#DC2626",
+              }}
+            >
+              {a.pedidos7d}
+              {a.pctVsMediaPedidos !== null && (
+                <span className="text-[10px] ml-1 font-normal">
+                  {a.pctVsMediaPedidos >= 0 ? "+" : ""}
+                  {a.pctVsMediaPedidos.toFixed(0)}%
+                </span>
+              )}
+            </p>
+          </div>
           <div className="text-right">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Score Preço</p>
             <p className="text-sm font-bold font-mono tabular-nums" style={{ color: cfg.cor }}>
