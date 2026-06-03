@@ -43,6 +43,7 @@ export type AnuncioPlano = {
 
   acoes: AcaoAnuncio[];
   urgencia: Urgencia;
+  quality_disponivel: boolean;
 };
 
 export const CATEGORIA_LABEL: Record<AcaoCategoria, string> = {
@@ -319,6 +320,7 @@ export function montarPlanos(
       desconto_atual: el?.discountSellerPercentage ?? 0,
       acoes,
       urgencia,
+      quality_disponivel: !useFallback,
     };
   });
 }

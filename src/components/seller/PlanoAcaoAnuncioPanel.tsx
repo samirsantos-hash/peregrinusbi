@@ -45,7 +45,22 @@ const URGENCIA_TONE: Record<
   },
 };
 
-function ScoreBar({ atual, potencial }: { atual: number; potencial: number }) {
+function ScoreBar({
+  atual,
+  potencial,
+  disponivel,
+}: {
+  atual: number;
+  potencial: number;
+  disponivel: boolean;
+}) {
+  if (!disponivel) {
+    return (
+      <div className="min-w-[140px] text-[11px] text-muted-foreground italic">
+        Sem dados de qualidade
+      </div>
+    );
+  }
   const a = Math.max(0, Math.min(100, atual));
   const p = Math.max(a, Math.min(100, potencial));
   const ganho = p - a;
@@ -122,7 +137,11 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
           </div>
         </td>
         <td className="py-2 px-3">
-          <ScoreBar atual={anuncio.score_atual} potencial={anuncio.score_potencial} />
+          <ScoreBar
+            atual={anuncio.score_atual}
+            potencial={anuncio.score_potencial}
+            disponivel={anuncio.quality_disponivel}
+          />
         </td>
         <td className="py-2 px-3 text-right font-mono tabular-nums text-xs">
           {Math.round(anuncio.pedidos_7d).toLocaleString("pt-BR")}
