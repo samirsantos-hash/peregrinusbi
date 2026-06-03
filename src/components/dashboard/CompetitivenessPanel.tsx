@@ -396,13 +396,21 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <TooltipInfo text={m.tooltip} />
             </div>
             <div className="flex items-center gap-2">
-              <p className={`metric-value ${m.color}`}>{m.value}</p>
+              <p className={`metric-value ${m.color}`} style={(m as any).inlineStyle}>{m.value}</p>
               {sampleWarning && m.label === "% Não Competitivo" && (
                 <span className="status-badge text-[10px] bg-muted/40 text-muted-foreground border-border/40">
                   {sampleWarning}
                 </span>
               )}
             </div>
+            {(m as any).alert && (
+              <p
+                className="text-[10px] mt-1.5 leading-tight font-medium"
+                style={{ color: (m as any).inlineStyle?.color ?? "hsl(40, 95%, 55%)" }}
+              >
+                {(m as any).alert}
+              </p>
+            )}
           </motion.div>
         ))}
       </div>
