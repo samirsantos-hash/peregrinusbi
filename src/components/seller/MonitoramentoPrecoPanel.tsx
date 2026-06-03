@@ -20,9 +20,11 @@ interface AnuncioFlag {
   mlbLink: string;
   precoScoreAtual: number;
   precoScoreAnterior: number | null;
-  quedaPp: number;
+  quedaPp: number;             // anterior - atual (positivo = piorou)
   promoScore: number;
   pedidos7d: number;
+  mediaPedidosSeller: number;  // baseline do próprio seller
+  pctVsMediaPedidos: number | null; // (pedidos - media) / media * 100
   itemName: string;
   motivos: string[];
   acao: string;
@@ -65,41 +67,121 @@ function detectarAnuncios(
     byItem.get(r.item_id)!.push(r);
   }
 
+  // Baseline: média de pedidos_7d do próprio seller (proxy de tração relativa)
+  const pedidosArr = eligibility
+    .map((e) => Number(e.pedidos7d) || 0)
+    .filter((v) => v > 0);
+  const mediaPedidos =
+    pedidosArr.length > 0 ? pedidosArr.reduce((a, b) => a + b, 0) / pedidosArr.length : 0;
+
   const out: AnuncioFlag[] = [];
-  for (const [itemId, rows] of byItem) {
+  // Universo = união dos itens com histórico de qualidade + itens em elegibilidade
+  const todosIds = new Set<string>([
+    ...byItem.keys(),
+    ...eligibility.map((e) => String(e.itemId)),
+  ]);
+
+  for (const itemId of todosIds) {
+    const rows = byItem.get(itemId) || [];
     const sorted = [...rows].sort((a, b) => (a.data < b.data ? 1 : -1));
     const atual = sorted[0];
     const anterior = sorted.find(
-      (r) => r.data !== atual.data && (r.ll_price_score ?? null) !== null
+      (r) => atual && r.data !== atual.data && (r.ll_price_score ?? null) !== null
     );
-    const precoAtual = Number(atual.ll_price_score) || 0;
+    const precoAtual = atual ? Number(atual.ll_price_score) || 0 : 0;
     const precoAnt = anterior ? Number(anterior.ll_price_score) || 0 : null;
     const queda = precoAnt !== null ? precoAnt - precoAtual : 0;
-    const promo = Number(atual.ll_promotions_score) || 0;
+    const promo = atual ? Number(atual.ll_promotions_score) || 0 : 0;
     const el = elMap.get(itemId);
     const pedidos = el?.pedidos7d || 0;
     const semCDP = !el?.flagBestPromo && !el?.flagItemSOptin;
+
+    const pctVsMedia =
+      mediaPedidos > 0 ? ((pedidos - mediaPedidos) / mediaPedidos) * 100 : null;
 
     const motivos: string[] = [];
     let severidade: Severidade = "baixa";
     let acao = "";
 
+    // ── Sinais com 2+ meses ──────────────────────────────────────────────
     if (queda >= 10) {
       motivos.push(`Score de preço caiu ${queda.toFixed(0)}pp (${precoAnt}→${precoAtual})`);
       severidade = "alta";
-      acao = "Revisar preço urgente — possível ajuste pós-aumento ou queda da concorrência.";
+      acao =
+        "Revisar preço com urgência — queda forte no índice de competitividade. Comparar com os 3 primeiros resultados da busca no ML.";
+    } else if (queda >= 5) {
+      motivos.push(`Score de preço caiu ${queda.toFixed(0)}pp (${precoAnt}→${precoAtual})`);
+      severidade = "media";
+      if (!acao)
+        acao =
+          "Queda moderada no score de preço. Verificar se houve reajuste recente ou se concorrente baixou preço.";
     }
-    if (precoAtual > 0 && precoAtual < 60) {
-      motivos.push(`Score de preço atual baixo (${precoAtual}/100)`);
-      if (severidade !== "alta") severidade = "media";
-      if (!acao) acao = "Reduzir preço ou ativar CDP para recuperar competitividade.";
-    }
-    if (semCDP && promo < 50 && pedidos > 5) {
-      motivos.push(`Sem CDP ativo com ${pedidos} pedidos/7d (promo score ${promo})`);
+
+    // ── Sinais com 1 único mês ───────────────────────────────────────────
+    if (precoAtual > 0 && precoAtual < 40) {
+      motivos.push(`Score de preço crítico (${precoAtual}/100)`);
+      severidade = "alta";
+      if (!acao)
+        acao = `Score de preço em ${precoAtual}/100 — muito abaixo da faixa competitiva. ${
+          semCDP
+            ? "Sem CDP ativo, o anúncio perde para concorrentes com promoção."
+            : "Verificar se o desconto CDP atual é suficiente vs concorrência."
+        }`;
+    } else if (precoAtual > 0 && precoAtual < 60 && !motivos.length) {
+      motivos.push(`Score de preço abaixo do ideal (${precoAtual}/100)`);
       if (severidade === "baixa") severidade = "media";
-      if (!acao) acao = "Ativar Campanha de Desconto (CDP) — anúncio com tração sem proteção competitiva.";
+      if (!acao)
+        acao = "Reduzir preço ou ativar CDP para recuperar competitividade.";
     }
+
+    // Tração muito abaixo da média do seller
+    if (
+      mediaPedidos > 0 &&
+      pedidos < mediaPedidos * 0.4 &&
+      pedidos < 5 &&
+      (precoAtual === 0 || precoAtual < 70)
+    ) {
+      motivos.push(
+        `Pedidos 7d (${pedidos}) muito abaixo da média da loja (${mediaPedidos.toFixed(1)})`
+      );
+      if (severidade === "baixa") severidade = "media";
+      if (!acao)
+        acao =
+          "Anúncio com tração muito abaixo da média do seller. Possíveis causas: preço saiu da faixa competitiva, perdeu posição orgânica ou concorrente novo captou o tráfego.";
+    }
+
+    // Sem CDP em item com tração relevante
+    if (semCDP && pedidos >= Math.max(5, mediaPedidos * 0.8)) {
+      motivos.push(
+        `Sem CDP ativo com ${pedidos} pedidos/7d (acima ou na média da loja)`
+      );
+      if (severidade === "baixa") severidade = "media";
+      if (!acao)
+        acao =
+          "Ativar Campanha de Desconto (CDP) — anúncio com tração sem proteção competitiva. O desconto conjunto com o ML melhora o score sem reduzir o preço de tabela.";
+    }
+
+    // Sem CDP + score baixo (qualquer tração)
+    if (semCDP && precoAtual > 0 && precoAtual < 60 && !motivos.some((m) => m.startsWith("Sem CDP"))) {
+      motivos.push(`Sem CDP e score de preço ${precoAtual}/100`);
+      if (severidade === "baixa") severidade = "media";
+      if (!acao)
+        acao =
+          "Ativar CDP — coparticipação do ML melhora a competitividade sem reduzir o preço de tabela diretamente.";
+    }
+
     if (motivos.length === 0) continue;
+
+    // Upgrade para alta se combinar score ruim + tração baixa
+    if (
+      severidade === "media" &&
+      precoAtual > 0 &&
+      precoAtual < 60 &&
+      pctVsMedia !== null &&
+      pctVsMedia < -50
+    ) {
+      severidade = "alta";
+    }
 
     out.push({
       itemId,
@@ -109,7 +191,9 @@ function detectarAnuncios(
       quedaPp: queda,
       promoScore: promo,
       pedidos7d: pedidos,
-      itemName: el?.itemName || `MLB ${itemId}`,
+      mediaPedidosSeller: mediaPedidos,
+      pctVsMediaPedidos: pctVsMedia,
+      itemName: el?.itemName || (atual ? `MLB ${itemId}` : `MLB ${itemId}`),
       motivos,
       acao,
       severidade,
@@ -156,6 +240,30 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
           <p className="text-[10px] text-muted-foreground font-mono truncate">MLB {a.itemId} · {a.motivos[0]}</p>
         </div>
         <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="text-right hidden sm:block">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Pedidos 7d</p>
+            <p
+              className="text-sm font-bold font-mono tabular-nums"
+              style={{
+                color:
+                  a.pctVsMediaPedidos === null
+                    ? "hsl(215, 20%, 65%)"
+                    : a.pctVsMediaPedidos >= 0
+                    ? "#16A34A"
+                    : a.pctVsMediaPedidos > -50
+                    ? "#D97706"
+                    : "#DC2626",
+              }}
+            >
+              {a.pedidos7d}
+              {a.pctVsMediaPedidos !== null && (
+                <span className="text-[10px] ml-1 font-normal">
+                  {a.pctVsMediaPedidos >= 0 ? "+" : ""}
+                  {a.pctVsMediaPedidos.toFixed(0)}%
+                </span>
+              )}
+            </p>
+          </div>
           <div className="text-right">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Score Preço</p>
             <p className="text-sm font-bold font-mono tabular-nums" style={{ color: cfg.cor }}>
@@ -188,7 +296,11 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
           </div>
           <div className="flex items-center justify-between gap-3 pt-1">
             <span className="text-[10px] text-muted-foreground font-mono">
-              Pedidos 7d: <span className="text-foreground tabular-nums">{a.pedidos7d}</span> · Promo: <span className="text-foreground tabular-nums">{a.promoScore}/100</span>
+              Pedidos 7d: <span className="text-foreground tabular-nums">{a.pedidos7d}</span>
+              {a.mediaPedidosSeller > 0 && (
+                <> · média loja: <span className="text-foreground tabular-nums">{a.mediaPedidosSeller.toFixed(1)}</span></>
+              )}
+              {" · "}Promo: <span className="text-foreground tabular-nums">{a.promoScore}/100</span>
             </span>
             <a
               href={a.mlbLink}
