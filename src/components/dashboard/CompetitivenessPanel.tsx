@@ -416,7 +416,26 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       </div>
 
       {/* ── BPC Indicator ── */}
-      {bpcData && (
+      {bpcData && semConcorrentes && (
+        <div className="glass-card p-5 border-dashed">
+          <div className="flex items-center gap-2 mb-2">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+              BPC — Best Price Competitiveness
+            </h3>
+            <TooltipInfo text={TOOLTIP_BPC} />
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Nenhum concorrente direto identificado pelo ML nesta categoria/período
+            ({bpcData.count}/{bpcData.total} seller). O índice BPC e o "Menor Preço
+            Rival" não têm referência externa válida.
+          </p>
+          <p className="text-[11px] text-muted-foreground/70 mt-1">
+            Isso pode indicar: produto de nicho sem concorrentes diretos no catálogo ML,
+            ou dados BPC ainda não disponíveis para este período.
+          </p>
+        </div>
+      )}
+      {bpcData && !semConcorrentes && (
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
@@ -427,10 +446,17 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* BPC Value */}
             <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/20">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                Índice de Competitividade de Preço
+              </p>
               <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A' }}>
                 {bpcData.median.toFixed(3)}
               </p>
-              <p className="text-xs text-muted-foreground">Índice BPC (mediana)</p>
+              <p className="text-[11px] text-muted-foreground text-center leading-snug">
+                = {fmtNum(monthlyTotals.indiceCompetitividade, 1)}% das comparações sem preço mais caro
+                <br />
+                ({fmtNum(monthlyTotals.pctMatch, 1)}% mesmo preço + {fmtNum(monthlyTotals.pctCheaper, 1)}% mais barato)
+              </p>
               <span className="status-badge text-[11px]" style={{
                 backgroundColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.1)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.08)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.1)' : 'rgba(226,75,74,0.1)',
                 color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A',
