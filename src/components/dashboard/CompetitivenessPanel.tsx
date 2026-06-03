@@ -376,7 +376,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             label: "% Mais Caro (rivais)",
             value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`,
             icon: TrendingDown,
-            color: monthlyTotals.pctExpensive < 20 ? "emerald-text" : monthlyTotals.pctExpensive < 30 ? "warning-text" : "destructive-text",
+            color: monthlyTotals.pctExpensive < 20 ? "emerald-text" : "warning-text",
             tooltip: "% das comparações de preço onde o ML identificou que o seller estava mais caro que o rival. Acima de 30%: o algoritmo começa a rebaixar o anúncio progressivamente.",
             alert: pctExpAlert,
             inlineStyle: { color: pctExpColor },
