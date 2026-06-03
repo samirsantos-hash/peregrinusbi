@@ -16,6 +16,8 @@ import CompetitivenessInsights from "./CompetitivenessInsights";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
 
+const TOOLTIP_BPC = "BPC (Buy Price Competitive) é o sistema do Mercado Livre que compara automaticamente o preço do seller com o dos concorrentes quando há produtos equivalentes no catálogo. Essa comparação não ocorre em todas as visitas — apenas quando o ML identifica um rival direto. Por isso, as porcentagens de competitividade são calculadas apenas sobre as visitas onde a comparação foi ativada.";
+
 interface KpiLike {
   date: string;
   visits: number;
@@ -111,11 +113,15 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
     const totalMatch = src.reduce((s, k) => s + k.visitsMatch, 0);
     const totalCheaper = src.reduce((s, k) => s + k.visitsCheaper, 0);
     const totalPriceBands = totalExpensive + totalMatch + totalCheaper;
+    const totalVisitsMonthly = src.reduce((s, k) => s + (k.visits || 0), 0);
     return {
       totalExpensive, totalMatch, totalCheaper, totalPriceBands,
+      totalVisitsMonthly,
       pctExpensive: totalPriceBands > 0 ? (totalExpensive / totalPriceBands) * 100 : 0,
       pctMatch: totalPriceBands > 0 ? (totalMatch / totalPriceBands) * 100 : 0,
       pctCheaper: totalPriceBands > 0 ? (totalCheaper / totalPriceBands) * 100 : 0,
+      indiceCompetitividade: totalPriceBands > 0 ? ((totalMatch + totalCheaper) / totalPriceBands) * 100 : 0,
+      coberturaComparacao: totalVisitsMonthly > 0 ? (totalPriceBands / totalVisitsMonthly) * 100 : 0,
     };
   }, [latestMonthlyKpis, kpis]);
 
@@ -328,11 +334,41 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       {/* Summary Cards — uses MONTHLY % */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: "% Mais Barato", value: `${fmtNum(monthlyTotals.pctCheaper, 1)}%`, icon: TrendingUp, color: "emerald-text", tooltip: `Proporção de visitas onde seu preço era menor que o concorrente (fonte: mensal). Benchmark carteira: mediana 17,2%.` },
-          { label: "% Equivalente", value: `${fmtNum(monthlyTotals.pctMatch, 1)}%`, icon: DollarSign, color: "neon-text", tooltip: `Proporção de visitas com preço equivalente (fonte: mensal). Benchmark carteira: mediana 50,3%.` },
-          { label: "% Não Competitivo", value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`, icon: TrendingDown, color: monthlyTotals.pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: `Proporção de visitas onde seu preço era mais caro (fonte: mensal). Benchmark carteira: mediana 29,4%. Acima de 30% é crítico.` },
-          { label: "Menor Preço Rival", value: minPriceRivalData ? fmtBRL(minPriceRivalData.median) : "—", icon: DollarSign, color: "neon-text", tooltip: minPriceRivalData ? `Mediana do menor preço rival: ${fmtBRL(minPriceRivalData.median)}. Seu preço mínimo precisa ser ≤ este valor para liderar na categoria.` : "Sem rival identificado" },
-          { label: "GMV Total", value: fmtBRLCompact(totalGmv), icon: TrendingUp, color: "neon-text", tooltip: "Faturamento total no período analisado." },
+          {
+            label: "Competitividade de Preço",
+            value: `${fmtNum(monthlyTotals.indiceCompetitividade, 0)}%`,
+            icon: TrendingUp,
+            color: monthlyTotals.indiceCompetitividade >= 70 ? "emerald-text" : monthlyTotals.indiceCompetitividade >= 50 ? "warning-text" : "warning-text",
+            tooltip: `Percentual de vezes que o ML comparou seu preço com o de um rival e seu preço estava igual ou mais barato. Calculado sobre o total de comparações de preço ativadas pelo algoritmo BPC — universo diferente do total de visitas. ${TOOLTIP_BPC}`,
+          },
+          {
+            label: "% Mais Barato (rivais)",
+            value: `${fmtNum(monthlyTotals.pctCheaper, 1)}%`,
+            icon: TrendingUp,
+            color: "emerald-text",
+            tooltip: "% das comparações de preço onde seu preço estava mais barato que o rival. Denominador = total de comparações BPC, não total de visitas.",
+          },
+          {
+            label: "% Preço Igual (rivais)",
+            value: `${fmtNum(monthlyTotals.pctMatch, 1)}%`,
+            icon: DollarSign,
+            color: "neon-text",
+            tooltip: "% das comparações de preço onde seu preço estava no mesmo nível do rival. Denominador = total de comparações BPC.",
+          },
+          {
+            label: "% Mais Caro (rivais)",
+            value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`,
+            icon: TrendingDown,
+            color: monthlyTotals.pctExpensive < 20 ? "emerald-text" : monthlyTotals.pctExpensive < 35 ? "warning-text" : "warning-text",
+            tooltip: "% das comparações de preço onde o ML identificou que o seller estava mais caro que o rival. Acima de 30%: o algoritmo começa a rebaixar o anúncio progressivamente.",
+          },
+          {
+            label: "Visitas em comparação",
+            value: monthlyTotals.totalPriceBands.toLocaleString("pt-BR"),
+            icon: DollarSign,
+            color: "neon-text",
+            tooltip: `De ${monthlyTotals.totalVisitsMonthly.toLocaleString("pt-BR")} visitas totais, ${fmtNum(monthlyTotals.coberturaComparacao, 0)}% ativaram a comparação BPC. ${TOOLTIP_BPC}`,
+          },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
             <div className="flex items-center gap-1.5 mb-1">
@@ -357,9 +393,9 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              BPC — Best Price Competitiveness
+              Índice de Competitividade de Preço (BPC)
             </h3>
-            <TooltipInfo text="Índice de competitividade de preço do MercadoLivre. Escala 0,5 (menos competitivo) a 1,0 (mais competitivo). Sellers com BPC entre 0,7 e 0,8 têm o maior GMV mediano da carteira (R$183k) e conversão de 5,0%." />
+            <TooltipInfo text={`${TOOLTIP_BPC} Escala 0,5 (menos competitivo) a 1,0 (mais competitivo). Sellers com BPC entre 0,7 e 0,8 têm o maior GMV mediano da carteira (R$183k) e conversão de 5,0%.`} />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* BPC Value */}
@@ -367,7 +403,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A' }}>
                 {bpcData.median.toFixed(3)}
               </p>
-              <p className="text-xs text-muted-foreground">Mediana BPC</p>
+              <p className="text-xs text-muted-foreground">Índice BPC (mediana)</p>
               <span className="status-badge text-[11px]" style={{
                 backgroundColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.1)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.08)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.1)' : 'rgba(226,75,74,0.1)',
                 color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A',
@@ -395,9 +431,9 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <p className="text-3xl font-bold font-mono text-foreground">
                 {bpcData.count}/{bpcData.total}
               </p>
-              <p className="text-xs text-muted-foreground">Sellers com dado BPC</p>
+              <p className="text-xs text-muted-foreground">Sellers com comparação ativa</p>
               <p className="text-[11px] text-muted-foreground">
-                Cobertura: {Math.round((bpcData.count / bpcData.total) * 100)}%
+                Cobertura de comparação: {Math.round((bpcData.count / bpcData.total) * 100)}%
               </p>
             </div>
           </div>
@@ -416,7 +452,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Evolução da Competitividade de Preço (%)
           </h3>
-          <TooltipInfo text="Evolução percentual das faixas de preço ao longo do tempo. Dias sem dado de preço são omitidos do gráfico. Para valores absolutos de %, use os cards acima (fonte mensal)." />
+          <TooltipInfo text={`Evolução percentual das faixas de preço ao longo do tempo. % calculado sobre comparações BPC — não sobre visitas totais. Dias sem dado de preço são omitidos. ${TOOLTIP_BPC}`} />
         </div>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={priceEvolutionData}>
@@ -438,12 +474,16 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
             <Tooltip content={<CustomTooltip />} />
+            <ReferenceLine y={30} stroke="hsl(0, 84%, 60%)" strokeDasharray="4 4" label={{ value: "alerta: >30% caro", fill: "hsl(0, 84%, 60%)", fontSize: 10, position: "right" }} />
             <Area type="monotone" dataKey="% Preço Alto" stroke="hsl(0, 84%, 60%)" fill="url(#gradExpensive)" strokeWidth={2} />
             <Area type="monotone" dataKey="% Equivalente" stroke="hsl(199, 100%, 50%)" fill="url(#gradMatch)" strokeWidth={2} />
             <Area type="monotone" dataKey="% Mais Barato" stroke="hsl(160, 84%, 39%)" fill="url(#gradCheaper)" strokeWidth={2} />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
+        <p className="text-[11px] text-muted-foreground mt-3">
+          ℹ️ As três linhas somam sempre 100% — representam como o preço do seller se comparou com rivais nas visitas onde o ML ativou a comparação de preço (BPC). Universo separado do total de visitas.
+        </p>
       </div>
 
       {/* ── Scatter Plot — Matriz de Elasticidade ── */}
