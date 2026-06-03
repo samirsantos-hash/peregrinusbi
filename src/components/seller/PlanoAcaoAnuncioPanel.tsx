@@ -48,27 +48,55 @@ const URGENCIA_TONE: Record<
 function ScoreBar({
   atual,
   potencial,
-  disponivel,
+  temDados,
 }: {
-  atual: number;
-  potencial: number;
-  disponivel: boolean;
+  atual: number | null;
+  potencial: number | null;
+  temDados: boolean;
 }) {
-  if (!disponivel) {
+  // Estado 1: sem nenhum dado
+  if (!temDados && potencial === null) {
     return (
-      <div className="min-w-[140px] text-[11px] text-muted-foreground italic">
-        Sem dados de qualidade
+      <div className="flex items-center gap-2 min-w-[160px]">
+        <div className="flex-1 h-2 rounded-full bg-muted/30" />
+        <span className="text-[11px] italic text-muted-foreground shrink-0">
+          Sem dados
+        </span>
       </div>
     );
   }
+
+  // Estado 2: sem IPI base, só ganho estimado (ex.: só CDP)
+  if (atual === null && potencial !== null) {
+    const p = Math.max(0, Math.min(100, potencial));
+    return (
+      <div className="flex items-center gap-2 min-w-[160px]">
+        <div className="relative flex-1 h-2 rounded-full bg-muted/30 overflow-hidden">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-cyan-700/60"
+            style={{ width: `${p}%` }}
+          />
+        </div>
+        <div className="text-[11px] font-mono tabular-nums whitespace-nowrap shrink-0">
+          <span className="text-muted-foreground">?</span>
+          <span className="text-cyan-400"> → +{p.toFixed(0)}pp</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Estado 3: IPI atual conhecido
+  if (atual === null) return null;
   const a = Math.max(0, Math.min(100, atual));
-  const p = Math.max(a, Math.min(100, potencial));
+  const p = potencial !== null ? Math.max(a, Math.min(100, potencial)) : a;
   const ganho = p - a;
   const corAtual =
     a >= 70 ? "bg-emerald" : a >= 50 ? "bg-warning" : "bg-destructive";
+  const corTxt =
+    a >= 70 ? "text-emerald" : a >= 50 ? "text-warning" : "text-destructive";
 
   return (
-    <div className="flex items-center gap-2 min-w-[140px]">
+    <div className="flex items-center gap-2 min-w-[160px]">
       <div className="relative h-2 flex-1 rounded-full bg-muted/40 overflow-hidden">
         <div
           className={`absolute inset-y-0 left-0 ${corAtual} rounded-full`}
@@ -81,14 +109,8 @@ function ScoreBar({
           />
         )}
       </div>
-      <div className="text-[11px] font-mono tabular-nums whitespace-nowrap">
-        <span
-          className={
-            a >= 70 ? "text-emerald" : a >= 50 ? "text-warning" : "text-destructive"
-          }
-        >
-          {a.toFixed(0)}%
-        </span>
+      <div className="text-[11px] font-mono tabular-nums whitespace-nowrap shrink-0">
+        <span className={corTxt}>{a.toFixed(0)}%</span>
         {ganho > 0 && (
           <span className="text-cyan-400"> → {p.toFixed(0)}%</span>
         )}
@@ -140,7 +162,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
           <ScoreBar
             atual={anuncio.score_atual}
             potencial={anuncio.score_potencial}
-            disponivel={anuncio.quality_disponivel}
+            temDados={anuncio.tem_dados_qualidade}
           />
         </td>
         <td className="py-2 px-3 text-right font-mono tabular-nums text-xs">
@@ -197,10 +219,12 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
                     Plano de ação — {anuncio.acoes.length} item
                     {anuncio.acoes.length !== 1 ? "s" : ""}
                   </span>
-                  {anuncio.score_potencial > anuncio.score_atual && (
+                  {anuncio.score_potencial !== null &&
+                    anuncio.score_atual !== null &&
+                    anuncio.score_potencial > anuncio.score_atual && (
                     <span className="text-[11px] text-cyan-400 font-mono">
-                      Score potencial: {anuncio.score_potencial.toFixed(0)}% (
-                      +{(anuncio.score_potencial - anuncio.score_atual).toFixed(0)}pp)
+                      Score potencial: {anuncio.score_potencial.toFixed(0)}% (+
+                      {(anuncio.score_potencial - anuncio.score_atual).toFixed(0)}pp)
                     </span>
                   )}
                 </div>
