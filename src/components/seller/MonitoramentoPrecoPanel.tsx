@@ -296,7 +296,11 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
           </div>
           <div className="flex items-center justify-between gap-3 pt-1">
             <span className="text-[10px] text-muted-foreground font-mono">
-              Pedidos 7d: <span className="text-foreground tabular-nums">{a.pedidos7d}</span> · Promo: <span className="text-foreground tabular-nums">{a.promoScore}/100</span>
+              Pedidos 7d: <span className="text-foreground tabular-nums">{a.pedidos7d}</span>
+              {a.mediaPedidosSeller > 0 && (
+                <> · média loja: <span className="text-foreground tabular-nums">{a.mediaPedidosSeller.toFixed(1)}</span></>
+              )}
+              {" · "}Promo: <span className="text-foreground tabular-nums">{a.promoScore}/100</span>
             </span>
             <a
               href={a.mlbLink}
