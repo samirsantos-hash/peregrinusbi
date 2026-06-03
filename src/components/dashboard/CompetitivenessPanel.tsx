@@ -338,7 +338,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             label: "Competitividade de Preço",
             value: `${fmtNum(monthlyTotals.indiceCompetitividade, 0)}%`,
             icon: TrendingUp,
-            color: monthlyTotals.indiceCompetitividade >= 70 ? "emerald-text" : monthlyTotals.indiceCompetitividade >= 50 ? "warning-text" : "destructive-text",
+            color: monthlyTotals.indiceCompetitividade >= 70 ? "emerald-text" : monthlyTotals.indiceCompetitividade >= 50 ? "warning-text" : "warning-text",
             tooltip: `Percentual de vezes que o ML comparou seu preço com o de um rival e seu preço estava igual ou mais barato. Calculado sobre o total de comparações de preço ativadas pelo algoritmo BPC — universo diferente do total de visitas. ${TOOLTIP_BPC}`,
           },
           {
@@ -359,7 +359,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             label: "% Mais Caro (rivais)",
             value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`,
             icon: TrendingDown,
-            color: monthlyTotals.pctExpensive < 20 ? "emerald-text" : monthlyTotals.pctExpensive < 35 ? "warning-text" : "destructive-text",
+            color: monthlyTotals.pctExpensive < 20 ? "emerald-text" : monthlyTotals.pctExpensive < 35 ? "warning-text" : "warning-text",
             tooltip: "% das comparações de preço onde o ML identificou que o seller estava mais caro que o rival. Acima de 30%: o algoritmo começa a rebaixar o anúncio progressivamente.",
           },
           {
