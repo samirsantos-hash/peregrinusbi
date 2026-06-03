@@ -334,11 +334,41 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       {/* Summary Cards — uses MONTHLY % */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: "% Mais Barato", value: `${fmtNum(monthlyTotals.pctCheaper, 1)}%`, icon: TrendingUp, color: "emerald-text", tooltip: `Proporção de visitas onde seu preço era menor que o concorrente (fonte: mensal). Benchmark carteira: mediana 17,2%.` },
-          { label: "% Equivalente", value: `${fmtNum(monthlyTotals.pctMatch, 1)}%`, icon: DollarSign, color: "neon-text", tooltip: `Proporção de visitas com preço equivalente (fonte: mensal). Benchmark carteira: mediana 50,3%.` },
-          { label: "% Não Competitivo", value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`, icon: TrendingDown, color: monthlyTotals.pctExpensive > 30 ? "warning-text" : "emerald-text", tooltip: `Proporção de visitas onde seu preço era mais caro (fonte: mensal). Benchmark carteira: mediana 29,4%. Acima de 30% é crítico.` },
-          { label: "Menor Preço Rival", value: minPriceRivalData ? fmtBRL(minPriceRivalData.median) : "—", icon: DollarSign, color: "neon-text", tooltip: minPriceRivalData ? `Mediana do menor preço rival: ${fmtBRL(minPriceRivalData.median)}. Seu preço mínimo precisa ser ≤ este valor para liderar na categoria.` : "Sem rival identificado" },
-          { label: "GMV Total", value: fmtBRLCompact(totalGmv), icon: TrendingUp, color: "neon-text", tooltip: "Faturamento total no período analisado." },
+          {
+            label: "Competitividade de Preço",
+            value: `${fmtNum(monthlyTotals.indiceCompetitividade, 0)}%`,
+            icon: TrendingUp,
+            color: monthlyTotals.indiceCompetitividade >= 70 ? "emerald-text" : monthlyTotals.indiceCompetitividade >= 50 ? "warning-text" : "destructive-text",
+            tooltip: `Percentual de vezes que o ML comparou seu preço com o de um rival e seu preço estava igual ou mais barato. Calculado sobre o total de comparações de preço ativadas pelo algoritmo BPC — universo diferente do total de visitas. ${TOOLTIP_BPC}`,
+          },
+          {
+            label: "% Mais Barato (rivais)",
+            value: `${fmtNum(monthlyTotals.pctCheaper, 1)}%`,
+            icon: TrendingUp,
+            color: "emerald-text",
+            tooltip: "% das comparações de preço onde seu preço estava mais barato que o rival. Denominador = total de comparações BPC, não total de visitas.",
+          },
+          {
+            label: "% Preço Igual (rivais)",
+            value: `${fmtNum(monthlyTotals.pctMatch, 1)}%`,
+            icon: DollarSign,
+            color: "neon-text",
+            tooltip: "% das comparações de preço onde seu preço estava no mesmo nível do rival. Denominador = total de comparações BPC.",
+          },
+          {
+            label: "% Mais Caro (rivais)",
+            value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`,
+            icon: TrendingDown,
+            color: monthlyTotals.pctExpensive < 20 ? "emerald-text" : monthlyTotals.pctExpensive < 35 ? "warning-text" : "destructive-text",
+            tooltip: "% das comparações de preço onde o ML identificou que o seller estava mais caro que o rival. Acima de 30%: o algoritmo começa a rebaixar o anúncio progressivamente.",
+          },
+          {
+            label: "Visitas em comparação",
+            value: monthlyTotals.totalPriceBands.toLocaleString("pt-BR"),
+            icon: DollarSign,
+            color: "neon-text",
+            tooltip: `De ${monthlyTotals.totalVisitsMonthly.toLocaleString("pt-BR")} visitas totais, ${fmtNum(monthlyTotals.coberturaComparacao, 0)}% ativaram a comparação BPC. ${TOOLTIP_BPC}`,
+          },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
             <div className="flex items-center gap-1.5 mb-1">
