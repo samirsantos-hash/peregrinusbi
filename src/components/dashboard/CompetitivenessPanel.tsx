@@ -319,6 +319,23 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
     return "hsl(0, 84%, 60%)";
   };
 
+  // Cor dinâmica para % Mais Caro: <20 verde, 20-30 âmbar, >=30 vermelho
+  const pctExpColor =
+    monthlyTotals.pctExpensive >= 30
+      ? "hsl(0, 84%, 60%)"
+      : monthlyTotals.pctExpensive >= 20
+      ? "hsl(40, 95%, 55%)"
+      : "hsl(160, 84%, 39%)";
+  const pctExpAlert =
+    monthlyTotals.pctExpensive >= 30
+      ? "⚠️ Acima de 30% — o ML começa a rebaixar o anúncio"
+      : monthlyTotals.pctExpensive >= 20
+      ? "→ Próximo do limite. Monitorar."
+      : null;
+
+  // Detecta ausência de concorrentes reais (1/1 sellers)
+  const semConcorrentes = !bpcData || bpcData.total <= 1;
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       {/* Cluster coverage warning */}
