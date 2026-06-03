@@ -111,7 +111,7 @@ function detectarAnuncios(
         "Revisar preço com urgência — queda forte no índice de competitividade. Comparar com os 3 primeiros resultados da busca no ML.";
     } else if (queda >= 5) {
       motivos.push(`Score de preço caiu ${queda.toFixed(0)}pp (${precoAnt}→${precoAtual})`);
-      if (severidade !== "alta") severidade = "media";
+      severidade = "media";
       if (!acao)
         acao =
           "Queda moderada no score de preço. Verificar se houve reajuste recente ou se concorrente baixou preço.";
