@@ -72,10 +72,10 @@ function ScoreBar({ atual, potencial }: { atual: number; potencial: number }) {
             a >= 70 ? "text-emerald" : a >= 50 ? "text-warning" : "text-destructive"
           }
         >
-          {a.toFixed(0)}
+          {a.toFixed(0)}%
         </span>
         {ganho > 0 && (
-          <span className="text-cyan-400"> → {p.toFixed(0)}</span>
+          <span className="text-cyan-400"> → {p.toFixed(0)}%</span>
         )}
       </div>
     </div>
@@ -125,16 +125,18 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
           <ScoreBar atual={anuncio.score_atual} potencial={anuncio.score_potencial} />
         </td>
         <td className="py-2 px-3 text-right font-mono tabular-nums text-xs">
-          {anuncio.pedidos_7d}
+          {Math.round(anuncio.pedidos_7d).toLocaleString("pt-BR")}
         </td>
         <td className="py-2 px-3 text-right font-mono tabular-nums text-xs">
-          {anuncio.estoque_7d.toFixed(0)}
+          {Math.round(anuncio.estoque_7d).toLocaleString("pt-BR")}
         </td>
-        <td className="py-2 px-3 text-center text-xs">
+        <td className="py-2 px-3 text-center text-xs font-mono tabular-nums">
           {anuncio.flag_optin_cdp ? (
-            <span className="text-emerald">🎯</span>
+            <span className="text-emerald">
+              🎯 {(anuncio.desconto_atual / 100).toFixed(1)}%
+            </span>
           ) : (
-            <span className="text-muted-foreground">○</span>
+            <span className="text-muted-foreground">—</span>
           )}
         </td>
         <td className="py-2 px-3">
@@ -178,7 +180,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
                   </span>
                   {anuncio.score_potencial > anuncio.score_atual && (
                     <span className="text-[11px] text-cyan-400 font-mono">
-                      Score potencial: {anuncio.score_potencial.toFixed(0)}/100 (
+                      Score potencial: {anuncio.score_potencial.toFixed(0)}% (
                       +{(anuncio.score_potencial - anuncio.score_atual).toFixed(0)}pp)
                     </span>
                   )}
