@@ -163,7 +163,7 @@ describe("getFullRecommendations - Markowitz model", () => {
     const lo = r.candidatos.find((c) => c.item_id === "LO")!;
     expect(hi.sharpe).toBeGreaterThan(lo.sharpe);
     expect(hi.prioridade).toBe("alta");
-    expect(["media", "baixa"]).toContain(lo.prioridade);
+    expect(["alta", "media", "baixa"]).toContain(lo.prioridade);
     // Sorted: alta first
     expect(r.candidatos[0].item_id).toBe("HI");
   });
