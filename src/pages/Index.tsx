@@ -20,6 +20,7 @@ import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
+import FullRecommendationPanel from "@/components/seller/FullRecommendationPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
 import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
@@ -465,6 +466,10 @@ const Index = () => {
                   <TabsContent value="logistics" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} />
+                    <FullRecommendationPanel
+                      sellerId={selectedSeller}
+                      custId={sellerCustIdMap[selectedSeller]}
+                    />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
