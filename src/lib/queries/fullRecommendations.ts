@@ -72,11 +72,21 @@ export async function getFullRecommendations(
   const { data: eleg } = await supabase
     .from("seller_eligibility")
     .select(
-      "item_id, item_name, vertical_item, pedidos_7d, estoque_medio_7d, flag_item_s_optin, discount_seller_percentage",
+      "item_id, item_name, vertical_item, pedidos_7d, estoque_medio_7d, flag_item_s_optin, discount_seller_percentage, data",
     )
-    .eq("seller_id", sellerId);
+    .eq("seller_id", sellerId)
+    .order("data", { ascending: false });
 
-  const items = (eleg ?? []) as any[];
+  // Deduplicar por item_id mantendo o snapshot mais recente.
+  // Como já vem ordenado por data DESC, o primeiro encontrado vence.
+  const seen = new Set<string>();
+  const items: any[] = [];
+  for (const row of (eleg ?? []) as any[]) {
+    const key = String(row.item_id ?? "");
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    items.push(row);
+  }
   if (items.length === 0) {
     return {
       candidatos: [],
