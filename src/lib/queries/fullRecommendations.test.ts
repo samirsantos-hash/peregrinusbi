@@ -19,6 +19,7 @@ type ElegRow = {
   estoque_medio_7d: number;
   flag_item_s_optin?: boolean;
   discount_seller_percentage?: number;
+  data?: string;
 };
 
 let mockCpp: CppRow = null;
@@ -179,5 +180,67 @@ describe("getFullRecommendations - Markowitz model", () => {
     expect(r.totalGMVGanho).toBeCloseTo(hi.mu, 5);
     expect(r.distribuicaoVertical).toEqual({ Moda: 1 });
     expect(r.indiceEficiencia).toBeGreaterThan(0);
+  });
+
+  describe("deduplication by item_id", () => {
+    it("returns each item_id only once even with many snapshots", async () => {
+      mockEleg = [
+        { item_id: "MLB1", pedidos_7d: 14, estoque_medio_7d: 200, data: "2026-03-20" },
+        { item_id: "MLB1", pedidos_7d: 14, estoque_medio_7d: 200, data: "2026-03-18" },
+        { item_id: "MLB1", pedidos_7d: 14, estoque_medio_7d: 200, data: "2026-03-15" },
+        { item_id: "MLB2", pedidos_7d: 7, estoque_medio_7d: 100, data: "2026-03-20" },
+        { item_id: "MLB2", pedidos_7d: 7, estoque_medio_7d: 100, data: "2026-03-10" },
+      ];
+      const r = await getFullRecommendations("s");
+      const ids = r.candidatos.map((c) => c.item_id);
+      expect(ids).toEqual([...new Set(ids)]);
+      expect(ids.sort()).toEqual(["MLB1", "MLB2"]);
+    });
+
+    it("keeps the most recent snapshot (highest data) when deduplicating", async () => {
+      // Server returns rows already sorted desc by data; mock preserves order
+      mockEleg = [
+        { item_id: "MLB1", pedidos_7d: 70, estoque_medio_7d: 5000, data: "2026-03-20" }, // newest
+        { item_id: "MLB1", pedidos_7d: 0, estoque_medio_7d: 0, data: "2026-01-10" },
+        { item_id: "MLB1", pedidos_7d: 1, estoque_medio_7d: 5, data: "2025-12-01" },
+      ];
+      const r = await getFullRecommendations("s");
+      expect(r.candidatos).toHaveLength(1);
+      expect(r.candidatos[0].pedidos_7d).toBe(70);
+      expect(r.candidatos[0].estoque).toBe(5000);
+    });
+
+    it("ignores rows with empty/null item_id during deduplication", async () => {
+      mockEleg = [
+        { item_id: "", pedidos_7d: 10, estoque_medio_7d: 100 } as any,
+        { item_id: null as any, pedidos_7d: 10, estoque_medio_7d: 100 },
+        { item_id: "MLB_OK", pedidos_7d: 7, estoque_medio_7d: 100 },
+      ];
+      const r = await getFullRecommendations("s");
+      expect(r.candidatos).toHaveLength(1);
+      expect(r.candidatos[0].item_id).toBe("MLB_OK");
+    });
+
+    it("stress test: 200 duplicates of the same item collapse to one candidate", async () => {
+      mockEleg = Array.from({ length: 200 }, (_, i) => ({
+        item_id: "MLB_STRESS",
+        pedidos_7d: 14,
+        estoque_medio_7d: 200,
+        data: `2026-03-${String((i % 28) + 1).padStart(2, "0")}`,
+      }));
+      const r = await getFullRecommendations("s");
+      expect(r.candidatos).toHaveLength(1);
+      expect(r.candidatos[0].item_id).toBe("MLB_STRESS");
+    });
+
+    it("does not collapse different item_ids that share other attributes", async () => {
+      mockEleg = [
+        { item_id: "A", pedidos_7d: 14, estoque_medio_7d: 200, vertical_item: "Moda" },
+        { item_id: "B", pedidos_7d: 14, estoque_medio_7d: 200, vertical_item: "Moda" },
+        { item_id: "C", pedidos_7d: 14, estoque_medio_7d: 200, vertical_item: "Moda" },
+      ];
+      const r = await getFullRecommendations("s");
+      expect(r.candidatos.map((c) => c.item_id).sort()).toEqual(["A", "B", "C"]);
+    });
   });
 });
