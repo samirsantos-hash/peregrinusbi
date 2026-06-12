@@ -14,6 +14,7 @@ import {
   HeartPulse,
   KeyRound,
   Link2,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 
@@ -38,12 +39,14 @@ export const SELLER_TABS: SellerTab[] = [
     juniorTip: "Canal novo de tráfego orgânico — meta: 20 clips/mês, 8.000 visitas." },
   { id: "competitiveness", label: "Preço", icon: Swords, order: 6,
     juniorTip: "% Não Competitivo > 30%? O algoritmo começa a esconder o anúncio." },
-  { id: "opportunities", label: "Oportunidades", icon: Gift, order: 7,
+  { id: "publicidade", label: "Publicidade", icon: Megaphone, order: 7,
+    juniorTip: "ROAS < 3x ou TACOS > 10%? Há vazamento de margem nos Ads." },
+  { id: "opportunities", label: "Oportunidades", icon: Gift, order: 8,
     juniorTip: "CDP = combustível do algoritmo. Item elegível sem opt-in = dinheiro na mesa." },
-  { id: "reputation", label: "Reputação", icon: HeartPulse, order: 8,
+  { id: "reputation", label: "Reputação", icon: HeartPulse, order: 9,
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
-  { id: "grants", label: "Grants", icon: KeyRound, order: 9,
+  { id: "grants", label: "Grants", icon: KeyRound, order: 10,
     juniorTip: "Verba expirando = urgência. Vermelho (<7d) = acionar GM agora." },
-  { id: "correlacoes", label: "Correlações", icon: Link2, order: 10,
+  { id: "correlacoes", label: "Correlações", icon: Link2, order: 11,
     juniorTip: "Veja como os KPIs do seller se influenciam — Pearson e fluxo do algoritmo." },
 ];
