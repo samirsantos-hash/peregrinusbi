@@ -17,7 +17,6 @@ import { TrendBadge } from "@/components/ui/TrendBadge";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import {
   statusReputacao,
-  corLinhaTendencia,
   slopeUltimosN,
   type MetricaReputacao,
 } from "@/lib/reputationStatus";
@@ -269,11 +268,21 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
         })}
       </div>
 
-      {/* Mini-charts individuais por métrica — eixo Y dinâmico + zonas de risco */}
-      {trendData.length > 1 && (
+      {/* Cores semânticas: verde = dentro da meta, amarelo = atenção, vermelho = crítico */}
+      {trendData.length >= 1 && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {mini.map((m) => {
-            const cor = corLinhaTendencia(m.slope);
+            // Cor da linha baseada no valor ATUAL (positivo = verde, negativo = vermelho)
+            const corAtual =
+              m.valor >= m.critico ? "#DC2626" : m.valor >= m.atencao ? "#D97706" : "#16A34A";
+            // Cor da tendência (seta): subindo é ruim (vermelho), descendo é bom (verde)
+            const corTendencia =
+              m.slope > 0.05 ? "#DC2626" : m.slope < -0.05 ? "#16A34A" : "#94A3B8";
+            const tendenciaLabel =
+              m.slope > 0.05 ? "↑ Piorando" : m.slope < -0.05 ? "↓ Melhorando" : "→ Estável";
+            // Cor por ponto, segundo o valor de cada dia
+            const dotColor = (v: number) =>
+              v >= m.critico ? "#DC2626" : v >= m.atencao ? "#D97706" : "#16A34A";
             return (
               <div key={m.key} className="glass-card p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -281,13 +290,28 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                     <Activity className="w-3.5 h-3.5 text-neon-blue" />
                     {m.label}
                   </h4>
-                  <span className="text-[10px] font-mono text-muted-foreground">
-                    meta &lt; {m.atencao}%
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
+                      style={{ color: corTendencia, background: `${corTendencia}1A` }}
+                    >
+                      {tendenciaLabel}
+                    </span>
+                    <span className="text-[10px] font-mono text-muted-foreground">
+                      meta &lt; {m.atencao}%
+                    </span>
+                  </div>
                 </div>
                 <div className="h-[180px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={trendData} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
+                      <defs>
+                        <linearGradient id={`grad-${m.key}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#DC2626" stopOpacity={0.9} />
+                          <stop offset={`${Math.min(100, (m.critico / Math.max(m.critico * 1.5, m.valor + 1)) * 100)}%`} stopColor="#D97706" stopOpacity={0.9} />
+                          <stop offset="100%" stopColor="#16A34A" stopOpacity={0.9} />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
                       <XAxis
                         dataKey="date"
@@ -314,17 +338,24 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                       />
                       {/* Zonas de risco */}
                       <ReferenceArea
+                        y1={0}
+                        y2={m.atencao}
+                        fill="#16A34A"
+                        fillOpacity={0.08}
+                        ifOverflow="extendDomain"
+                      />
+                      <ReferenceArea
                         y1={m.atencao}
                         y2={m.critico}
-                        fill="#FEF08A"
-                        fillOpacity={0.18}
+                        fill="#D97706"
+                        fillOpacity={0.12}
                         ifOverflow="extendDomain"
                       />
                       <ReferenceArea
                         y1={m.critico}
                         y2={1e6}
-                        fill="#FCA5A5"
-                        fillOpacity={0.18}
+                        fill="#DC2626"
+                        fillOpacity={0.15}
                         ifOverflow="extendDomain"
                       />
                       <ReferenceLine
@@ -342,14 +373,49 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                       <Line
                         type="monotone"
                         dataKey={m.key}
-                        stroke={cor}
+                        stroke={corAtual}
                         strokeWidth={2.5}
-                        dot={{ r: 2, fill: cor }}
-                        activeDot={{ r: 4 }}
+                        dot={(props: any) => {
+                          const { cx, cy, payload, index } = props;
+                          if (cx == null || cy == null) return <g key={`d-${index}`} />;
+                          const v = Number(payload?.[m.key]) || 0;
+                          return (
+                            <circle
+                              key={`d-${index}`}
+                              cx={cx}
+                              cy={cy}
+                              r={3}
+                              fill={dotColor(v)}
+                              stroke="hsl(var(--card))"
+                              strokeWidth={1}
+                            />
+                          );
+                        }}
+                        activeDot={{ r: 5, stroke: corAtual, strokeWidth: 2 }}
                         isAnimationActive={false}
                       />
                     </LineChart>
                   </ResponsiveContainer>
+                </div>
+                {/* Legenda compacta */}
+                <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full" style={{ background: "#16A34A" }} />
+                      OK
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full" style={{ background: "#D97706" }} />
+                      Atenção
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full" style={{ background: "#DC2626" }} />
+                      Crítico
+                    </span>
+                  </div>
+                  <span className="font-mono" style={{ color: corAtual }}>
+                    Atual: {m.valor.toFixed(2)}%
+                  </span>
                 </div>
               </div>
             );
