@@ -173,11 +173,11 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
       )}
 
       {/* ── Gráfico de evolução ──────────────────────────────────────── */}
-      {m.historico.length > 1 && (
+      {m.historico.length >= 1 && (
         <div className="rounded-xl border border-border/40 bg-card/60 p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Evolução histórica (últimos {m.historico.length} meses)
+              Evolução histórica ({m.historico.length} {m.historico.length === 1 ? "mês" : "meses"})
             </div>
             <div className="flex gap-2">
               {([
@@ -235,9 +235,45 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   strokeDasharray="4 4"
                   label={{ value: `ROAS mín ${BENCHMARKS_ADS.roas.critico}x`, fontSize: 10, fill: "#DC2626", position: "insideTopLeft" }}
                 />
-                <Line yAxisId="roas" type="monotone" dataKey="roas" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} />
-                <Line yAxisId="pct" type="monotone" dataKey="acos" stroke="#D97706" strokeWidth={2} dot={{ r: 3 }} />
-                <Line yAxisId="pct" type="monotone" dataKey="tacos" stroke="#DC2626" strokeWidth={2} dot={{ r: 3 }} />
+                <Line
+                  yAxisId="roas"
+                  type="monotone"
+                  dataKey="roas"
+                  stroke="#3b82f6"
+                  strokeWidth={2}
+                  dot={(props: any) => {
+                    const { cx, cy, payload, index } = props;
+                    if (cx == null || cy == null) return <g key={`r-${index}`} />;
+                    return <circle key={`r-${index}`} cx={cx} cy={cy} r={4} fill={corRoas(payload.roas)} stroke="#0f172a" strokeWidth={1} />;
+                  }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  yAxisId="pct"
+                  type="monotone"
+                  dataKey="acos"
+                  stroke="#D97706"
+                  strokeWidth={2}
+                  dot={(props: any) => {
+                    const { cx, cy, payload, index } = props;
+                    if (cx == null || cy == null) return <g key={`a-${index}`} />;
+                    return <circle key={`a-${index}`} cx={cx} cy={cy} r={4} fill={corAcos(payload.acos)} stroke="#0f172a" strokeWidth={1} />;
+                  }}
+                  activeDot={{ r: 6 }}
+                />
+                <Line
+                  yAxisId="pct"
+                  type="monotone"
+                  dataKey="tacos"
+                  stroke="#DC2626"
+                  strokeWidth={2}
+                  dot={(props: any) => {
+                    const { cx, cy, payload, index } = props;
+                    if (cx == null || cy == null) return <g key={`t-${index}`} />;
+                    return <circle key={`t-${index}`} cx={cx} cy={cy} r={4} fill={corTacos(payload.tacos)} stroke="#0f172a" strokeWidth={1} />;
+                  }}
+                  activeDot={{ r: 6 }}
+                />
               </ComposedChart>
             ) : (
               <ComposedChart data={m.historico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
@@ -252,11 +288,44 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   ]}
                 />
                 <Legend formatter={(n) => (n === "inv" ? "Investimento" : "GMV via Ads")} />
-                <Bar dataKey="inv" fill="#3b82f6" />
-                <Bar dataKey="gmv_ads" fill="#16A34A" />
+                <Bar dataKey="inv" fill="#3b82f6">
+                  {m.historico.map((d, i) => (
+                    <Cell key={`inv-${i}`} fill={corRoas(d.roas)} fillOpacity={0.55} />
+                  ))}
+                </Bar>
+                <Bar dataKey="gmv_ads" fill="#16A34A">
+                  {m.historico.map((d, i) => (
+                    <Cell key={`gmv-${i}`} fill={corRoas(d.roas)} />
+                  ))}
+                </Bar>
               </ComposedChart>
             )}
           </ResponsiveContainer>
+
+          {/* Legenda de cores por performance ROAS */}
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
+            <span className="font-semibold uppercase tracking-wider">Cor por ROAS do mês:</span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: "#16A34A" }} /> Excelente (≥ {BENCHMARKS_ADS.roas.excelente}x)
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: "#4ade80" }} /> Bom (≥ {BENCHMARKS_ADS.roas.bom}x)
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: "#D97706" }} /> Atenção (≥ {BENCHMARKS_ADS.roas.atencao}x)
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: "#DC2626" }} /> Crítico (&lt; {BENCHMARKS_ADS.roas.atencao}x)
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Banner quando não há histórico mensal */}
+      {m.historico.length === 0 && !semDados && (
+        <div className="rounded-lg border border-border/40 bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
+          ℹ️ Sem histórico mensal disponível (tabela <code>cpp_mensal</code> vazia para este seller).
+          Os KPIs do período acima foram calculados a partir dos dados diários.
         </div>
       )}
 
