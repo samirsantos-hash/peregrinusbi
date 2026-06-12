@@ -52,6 +52,7 @@ import { SELLER_TABS } from "@/config/sellerTabs";
 import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
 import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
+import PublicidadePanel from "@/components/seller/PublicidadePanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
