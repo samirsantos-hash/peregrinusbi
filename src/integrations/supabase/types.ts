@@ -113,9 +113,13 @@ export type Database = {
           meses_no_programa: number | null
           nivel_solucion: string | null
           nombre_solucion: string | null
+          pontuacao_acos: number | null
           pontuacao_hi: number | null
           pontuacao_ipi: number | null
+          pontuacao_itens_com_ads: number | null
+          pontuacao_pct_dias_com_pads: number | null
           pontuacao_sow: number | null
+          pontuacao_tacos: number | null
           programa: string | null
           rep_claims_rate: number | null
           rep_current_level: string | null
@@ -136,6 +140,7 @@ export type Database = {
           tsi_flex: number | null
           tsi_full: number | null
           tsi_me2: number | null
+          tsi_pads: number | null
           visitas: number | null
         }
         Insert: {
@@ -158,9 +163,13 @@ export type Database = {
           meses_no_programa?: number | null
           nivel_solucion?: string | null
           nombre_solucion?: string | null
+          pontuacao_acos?: number | null
           pontuacao_hi?: number | null
           pontuacao_ipi?: number | null
+          pontuacao_itens_com_ads?: number | null
+          pontuacao_pct_dias_com_pads?: number | null
           pontuacao_sow?: number | null
+          pontuacao_tacos?: number | null
           programa?: string | null
           rep_claims_rate?: number | null
           rep_current_level?: string | null
@@ -181,6 +190,7 @@ export type Database = {
           tsi_flex?: number | null
           tsi_full?: number | null
           tsi_me2?: number | null
+          tsi_pads?: number | null
           visitas?: number | null
         }
         Update: {
@@ -203,9 +213,13 @@ export type Database = {
           meses_no_programa?: number | null
           nivel_solucion?: string | null
           nombre_solucion?: string | null
+          pontuacao_acos?: number | null
           pontuacao_hi?: number | null
           pontuacao_ipi?: number | null
+          pontuacao_itens_com_ads?: number | null
+          pontuacao_pct_dias_com_pads?: number | null
           pontuacao_sow?: number | null
+          pontuacao_tacos?: number | null
           programa?: string | null
           rep_claims_rate?: number | null
           rep_current_level?: string | null
@@ -226,6 +240,7 @@ export type Database = {
           tsi_flex?: number | null
           tsi_full?: number | null
           tsi_me2?: number | null
+          tsi_pads?: number | null
           visitas?: number | null
         }
         Relationships: []
