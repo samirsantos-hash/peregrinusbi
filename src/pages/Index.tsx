@@ -464,6 +464,15 @@ const Index = () => {
                     <JuniorActionBanner abaId="competitiveness" dados={dadosJunior} />
                     <CompetitivenessPanel kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />
                   </TabsContent>
+                  <TabsContent value="publicidade" className="mt-0 space-y-5">
+                    <PublicidadePanel
+                      sellerUuid={selectedSeller}
+                      custId={sellerCustIdMap[selectedSeller]}
+                      fromDate={dateRange?.from ? formatDateString(dateRange.from) : minStr}
+                      toDate={dateRange?.to ? formatDateString(dateRange.to) : anchorStr}
+                      sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
+                    />
+                  </TabsContent>
                   <TabsContent value="logistics" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} />
