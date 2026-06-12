@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Bar,
+  Cell,
   CartesianGrid,
   ComposedChart,
   Legend,
