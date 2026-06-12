@@ -11,7 +11,6 @@ import {
   ResponsiveContainer,
   ReferenceArea,
   ReferenceLine,
-  Dot,
 } from "recharts";
 import { formatChartDate } from "@/utils/formatters";
 import { TrendBadge } from "@/components/ui/TrendBadge";
