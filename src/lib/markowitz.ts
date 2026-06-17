@@ -19,6 +19,12 @@ export interface MarkowitzResult {
   lastValue: number;      // last observed value (GMV)
 }
 
+export interface MarkowitzBundle {
+  rows: MarkowitzResult[];
+  correlation: number[][]; // n x n correlation of returns
+  ids: string[];
+}
+
 function simpleReturns(v: number[]): number[] {
   const r: number[] = [];
   for (let i = 1; i < v.length; i++) {
@@ -73,9 +79,9 @@ function invert(m: number[][]): number[][] | null {
   return a.map((row) => row.slice(n));
 }
 
-export function markowitzMinVariance(series: AssetSeries[]): MarkowitzResult[] {
+export function markowitzMinVariance(series: AssetSeries[]): MarkowitzBundle {
   const n = series.length;
-  if (!n) return [];
+  if (!n) return { rows: [], correlation: [], ids: [] };
 
   const returns = series.map((s) => simpleReturns(s.values));
   const means = returns.map(mean);
@@ -119,7 +125,19 @@ export function markowitzMinVariance(series: AssetSeries[]): MarkowitzResult[] {
     }
   }
 
-  return series.map((s, i) => ({
+  // Correlation matrix (Pearson) on the same returns vectors
+  const correlation: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+  for (let i = 0; i < n; i++) {
+    for (let j = i; j < n; j++) {
+      const cij = covariance(returns[i], returns[j]);
+      const denom = (vols[i] || 0) * (vols[j] || 0);
+      const corr = denom > 1e-12 ? Math.max(-1, Math.min(1, cij / denom)) : i === j ? 1 : 0;
+      correlation[i][j] = corr;
+      correlation[j][i] = corr;
+    }
+  }
+
+  const rows = series.map((s, i) => ({
     id: s.id,
     label: s.label,
     meanReturn: means[i] ?? 0,
@@ -127,4 +145,6 @@ export function markowitzMinVariance(series: AssetSeries[]): MarkowitzResult[] {
     weight: weights[i] ?? 0,
     lastValue: lastValues[i],
   }));
+
+  return { rows, correlation, ids: series.map((s) => s.id) };
 }
