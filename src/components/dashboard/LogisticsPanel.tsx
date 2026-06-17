@@ -14,6 +14,14 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { markowitzMinVariance, type AssetSeries } from "@/lib/markowitz";
+import type { EligibilityItem } from "@/hooks/useEligibility";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -52,11 +60,12 @@ interface KpiLike {
 interface LogisticsPanelProps {
   kpis: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
+  eligibilityItems?: EligibilityItem[];
 }
 
 const COLORS = ["hsl(199, 100%, 50%)", "hsl(160, 84%, 39%)", "hsl(280, 80%, 60%)", "hsl(45, 80%, 55%)"];
 
-const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps) => {
+const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = [] }: LogisticsPanelProps) => {
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
     if (!acc[k.productId] || k.date > acc[k.productId].date) acc[k.productId] = k;
     return acc;
