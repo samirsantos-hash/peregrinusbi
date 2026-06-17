@@ -488,12 +488,22 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
       {/* Markowitz — Recomendação de envio por produto */}
       {markowitzRows.length > 0 && (
         <div className="glass-card p-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Boxes className="w-4 h-4 text-neon-blue" />
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              Recomendação de Envio ao Full — Matriz de Markowitz
-            </h3>
-            <TooltipInfo text="Aloca a capacidade de envio entre produtos minimizando a variância da carteira (Markowitz min-variance, long-only). Penaliza produtos voláteis e diversifica entre GMVs descorrelacionados." />
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <Boxes className="w-4 h-4 text-neon-blue" />
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+                Recomendação de Envio ao Full — Matriz de Markowitz
+              </h3>
+              <TooltipInfo text="Aloca a capacidade de envio entre produtos minimizando a variância da carteira (Markowitz min-variance, long-only). Penaliza produtos voláteis e diversifica entre GMVs descorrelacionados." />
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExport}
+              className="h-7 text-[11px] gap-1"
+            >
+              <Download className="w-3 h-3" /> Exportar CSV
+            </Button>
           </div>
           <p className="text-[11px] text-muted-foreground text-center mb-4 leading-relaxed">
             Σ⁻¹·1 / (1ᵀΣ⁻¹1) sobre a matriz de covariância dos retornos diários de GMV por produto ·{" "}
@@ -501,7 +511,23 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
             top {markowitzRows.length} produtos por GMV acumulado.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          {rupturaCount > 0 && (
+            <div className="flex items-start gap-2 p-3 mb-4 rounded border-l-4 border-destructive bg-destructive/10">
+              <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
+              <div className="flex-1 text-xs">
+                <p className="font-semibold text-destructive">
+                  {rupturaCount} produto(s) com risco de ruptura
+                </p>
+                <p className="text-muted-foreground mt-0.5">
+                  A cobertura prevista pelo envio recomendado fica abaixo de 60% do horizonte de{" "}
+                  {horizonte} dias. Considere aumentar a capacidade total ou reposicionar pesos manualmente
+                  nos itens marcados com <span className="text-destructive font-medium">⚠ Ruptura</span>.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <label className="flex flex-col gap-1">
               <span className="text-[11px] text-muted-foreground">
                 Capacidade total de envio (unidades)
@@ -528,6 +554,19 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
                 className="h-8 text-xs font-mono"
               />
             </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] text-muted-foreground">
+                Horizonte de cobertura (dias)
+              </span>
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={horizonteDias}
+                onChange={(e) => setHorizonteDias(e.target.value)}
+                placeholder="30"
+                className="h-8 text-xs font-mono"
+              />
+            </label>
           </div>
 
           <div className="overflow-x-auto">
@@ -540,6 +579,8 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
                   <th className="py-2 px-2 font-medium text-right">Sharpe</th>
                   <th className="py-2 px-2 font-medium text-right">Peso ótimo</th>
                   <th className="py-2 px-2 font-medium text-right">Unidades recomendadas</th>
+                  <th className="py-2 px-2 font-medium text-right">Cobertura (dias)</th>
+                  <th className="py-2 px-2 font-medium text-right">Faltam p/ {horizonte}d</th>
                   <th className="py-2 pl-2 font-medium text-right">GMV alocado</th>
                 </tr>
               </thead>
@@ -548,9 +589,87 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
                   const pct = r.weight * 100;
                   const tone =
                     pct >= 15 ? "text-emerald" : pct >= 5 ? "text-neon-blue" : "text-muted-foreground";
+                  const coberturaTone = r.ruptura
+                    ? "text-destructive font-semibold"
+                    : r.coberturaDias < horizonte
+                    ? "text-warning"
+                    : "text-emerald";
                   return (
                     <tr key={r.id} className="border-b border-border/20 hover:bg-muted/20">
-                      <td className="py-2 pr-3 font-mono text-foreground">{r.label}</td>
+                      <td className="py-2 pr-3 font-mono text-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <span>{r.label}</span>
+                          <HoverCard openDelay={120}>
+                            <HoverCardTrigger asChild>
+                              <button
+                                type="button"
+                                className="text-muted-foreground hover:text-foreground transition-colors"
+                                aria-label="Por que esta recomendação?"
+                              >
+                                <Info className="w-3 h-3" />
+                              </button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-80 text-xs space-y-2">
+                              <div>
+                                <p className="font-semibold text-foreground">{r.label}</p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  Justificativa da quantidade recomendada
+                                </p>
+                              </div>
+                              <p className="leading-relaxed">{explicarPeso(r)}</p>
+                              <div className="grid grid-cols-2 gap-1 font-mono text-[10px] pt-2 border-t border-border/40">
+                                <span className="text-muted-foreground">Peso ótimo:</span>
+                                <span className="text-right">{pct.toFixed(2)}%</span>
+                                <span className="text-muted-foreground">Capacidade × peso:</span>
+                                <span className="text-right">
+                                  {capacity.toLocaleString("pt-BR")} × {pct.toFixed(2)}% ={" "}
+                                  {r.recommendedUnits.toLocaleString("pt-BR")} un.
+                                </span>
+                                <span className="text-muted-foreground">Velocidade diária:</span>
+                                <span className="text-right">
+                                  {r.dailyUnits.toFixed(1)} un/dia
+                                </span>
+                                <span className="text-muted-foreground">Demanda {horizonte}d:</span>
+                                <span className="text-right">
+                                  {r.demandaHorizonte.toFixed(0)} un.
+                                </span>
+                                <span className="text-muted-foreground">Cobertura:</span>
+                                <span
+                                  className={`text-right ${
+                                    r.ruptura ? "text-destructive font-semibold" : ""
+                                  }`}
+                                >
+                                  {isFinite(r.coberturaDias)
+                                    ? `${r.coberturaDias.toFixed(1)} dias`
+                                    : "—"}
+                                </span>
+                                {r.shortfall > 0 && (
+                                  <>
+                                    <span className="text-muted-foreground">Faltam:</span>
+                                    <span className="text-right text-warning">
+                                      {r.shortfall.toLocaleString("pt-BR")} un.
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                              {r.ruptura && (
+                                <p className="text-[10px] text-destructive flex items-start gap-1 pt-1 border-t border-border/40">
+                                  <AlertTriangle className="w-3 h-3 shrink-0 mt-0.5" />
+                                  Ruptura prevista antes do fim do horizonte — aumente a alocação manual.
+                                </p>
+                              )}
+                            </HoverCardContent>
+                          </HoverCard>
+                          {r.ruptura && (
+                            <Badge
+                              variant="outline"
+                              className="h-4 px-1 text-[9px] border-destructive text-destructive"
+                            >
+                              ⚠ Ruptura
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
                       <td className="py-2 px-2 text-right font-mono tnum">
                         {(r.meanReturn * 100).toFixed(2)}%
                       </td>
@@ -565,6 +684,12 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
                       </td>
                       <td className="py-2 px-2 text-right font-mono tnum font-bold text-foreground">
                         {r.recommendedUnits.toLocaleString("pt-BR")}
+                      </td>
+                      <td className={`py-2 px-2 text-right font-mono tnum ${coberturaTone}`}>
+                        {isFinite(r.coberturaDias) ? r.coberturaDias.toFixed(1) : "—"}
+                      </td>
+                      <td className="py-2 px-2 text-right font-mono tnum text-warning">
+                        {r.shortfall > 0 ? r.shortfall.toLocaleString("pt-BR") : "—"}
                       </td>
                       <td className="py-2 pl-2 text-right font-mono tnum text-muted-foreground">
                         {fmtBRLCompact(r.recommendedGmv)}
@@ -583,6 +708,10 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
                   <td className="py-2 px-2 text-right font-mono tnum">
                     {markowitzRows.reduce((s, r) => s + r.recommendedUnits, 0).toLocaleString("pt-BR")}
                   </td>
+                  <td></td>
+                  <td className="py-2 px-2 text-right font-mono tnum text-warning">
+                    {markowitzRows.reduce((s, r) => s + r.shortfall, 0).toLocaleString("pt-BR")}
+                  </td>
                   <td className="py-2 pl-2 text-right font-mono tnum">
                     {fmtBRLCompact(markowitzRows.reduce((s, r) => s + r.recommendedGmv, 0))}
                   </td>
@@ -593,9 +722,126 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
 
           <p className="text-[10px] text-muted-foreground italic mt-3 leading-relaxed">
             Leitura: produtos com maior peso oferecem o melhor trade-off risco/retorno na carteira atual.
-            Pesos baixos ou zero indicam GMV muito volátil ou altamente correlacionado a outro produto já alocado —
-            priorize os pesos altos no próximo envio ao Full.
+            Passe o cursor sobre o ícone <Info className="inline w-3 h-3 align-text-bottom" /> para ver a
+            justificativa numérica de cada recomendação e a previsão de ruptura.
           </p>
+
+          {/* Heatmap — Matriz de correlação entre retornos */}
+          {markowitz.correlation.length > 1 && (
+            <div className="mt-6 pt-6 border-t border-border/40">
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                  Heatmap — Matriz de Correlação dos Retornos
+                </h4>
+                <TooltipInfo text="Correlação de Pearson entre os retornos diários de GMV de cada par de produtos. Vermelho = movem juntos (concentra risco). Verde = movem em direções opostas (diversifica). Markowitz penaliza pares vermelhos." />
+              </div>
+              <p className="text-[10px] text-muted-foreground mb-3">
+                Passe o cursor sobre uma célula para ver o par e o valor exato de correlação (-1 a +1).
+              </p>
+              <div className="overflow-x-auto">
+                <div className="inline-block">
+                  <div
+                    className="grid gap-[2px]"
+                    style={{
+                      gridTemplateColumns: `minmax(110px, max-content) repeat(${markowitz.ids.length}, 28px)`,
+                    }}
+                  >
+                    {/* header row */}
+                    <div></div>
+                    {markowitz.ids.map((id) => (
+                      <div
+                        key={`h-${id}`}
+                        className="text-[8px] font-mono text-muted-foreground rotate-[-60deg] origin-bottom-left h-10 flex items-end justify-start pl-1"
+                        title={id}
+                      >
+                        {id.slice(-6)}
+                      </div>
+                    ))}
+                    {markowitz.ids.map((rowId, i) => (
+                      <>
+                        <div
+                          key={`l-${rowId}`}
+                          className="text-[10px] font-mono text-muted-foreground pr-2 flex items-center justify-end h-7"
+                          title={rowId}
+                        >
+                          {rowId}
+                        </div>
+                        {markowitz.ids.map((colId, j) => {
+                          const c = markowitz.correlation[i]?.[j] ?? 0;
+                          const rowMeta = markowitz.rows[i];
+                          const colMeta = markowitz.rows[j];
+                          return (
+                            <HoverCard key={`c-${rowId}-${colId}`} openDelay={80}>
+                              <HoverCardTrigger asChild>
+                                <div
+                                  className="h-7 w-7 cursor-pointer border border-border/20"
+                                  style={{ background: heatColor(c) }}
+                                />
+                              </HoverCardTrigger>
+                              <HoverCardContent className="w-64 text-xs">
+                                <p className="font-semibold text-foreground">
+                                  {rowId} × {colId}
+                                </p>
+                                <div className="grid grid-cols-2 gap-1 font-mono text-[10px] mt-2">
+                                  <span className="text-muted-foreground">Correlação:</span>
+                                  <span
+                                    className={`text-right font-semibold ${
+                                      c > 0.5
+                                        ? "text-destructive"
+                                        : c < -0.2
+                                        ? "text-emerald"
+                                        : "text-foreground"
+                                    }`}
+                                  >
+                                    {c.toFixed(3)}
+                                  </span>
+                                  {rowMeta && colMeta && (
+                                    <>
+                                      <span className="text-muted-foreground">σ linha:</span>
+                                      <span className="text-right">
+                                        {(rowMeta.volatility * 100).toFixed(2)}%
+                                      </span>
+                                      <span className="text-muted-foreground">σ coluna:</span>
+                                      <span className="text-right">
+                                        {(colMeta.volatility * 100).toFixed(2)}%
+                                      </span>
+                                    </>
+                                  )}
+                                </div>
+                                <p className="text-[10px] text-muted-foreground mt-2 leading-relaxed">
+                                  {c > 0.7
+                                    ? "Correlação forte positiva — produtos sobem e caem juntos. Concentrar envio nos dois aumenta risco."
+                                    : c > 0.3
+                                    ? "Correlação moderada positiva — alguma sobreposição de risco."
+                                    : c > -0.3
+                                    ? "Correlação fraca — produtos praticamente independentes."
+                                    : "Correlação negativa — diversifica o risco da carteira (Markowitz prioriza)."}
+                                </p>
+                              </HoverCardContent>
+                            </HoverCard>
+                          );
+                        })}
+                      </>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-4 mt-4 text-[10px] text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: heatColor(-1) }} />
+                  <span>-1 (diversifica)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: heatColor(0) }} />
+                  <span>0</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm" style={{ background: heatColor(1) }} />
+                  <span>+1 (concentra risco)</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </motion.div>
