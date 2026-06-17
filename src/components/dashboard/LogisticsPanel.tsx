@@ -758,9 +758,8 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
                       </div>
                     ))}
                     {markowitz.ids.map((rowId, i) => (
-                      <>
+                      <div key={`row-${rowId}`} className="contents">
                         <div
-                          key={`l-${rowId}`}
                           className="text-[10px] font-mono text-muted-foreground pr-2 flex items-center justify-end h-7"
                           title={rowId}
                         >
@@ -821,7 +820,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
                             </HoverCard>
                           );
                         })}
-                      </>
+                      </div>
                     ))}
                   </div>
                 </div>
