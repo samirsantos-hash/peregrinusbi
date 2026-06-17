@@ -569,6 +569,109 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             top {markowitzRows.length} produtos por GMV acumulado.
           </p>
 
+          {/* Filtros — subconjunto de produtos antes do cálculo da matriz */}
+          <div className="mb-4 p-3 rounded border border-border/40 bg-muted/10">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
+                Filtros do subconjunto
+              </p>
+              <TooltipInfo text="Aplicados ANTES do cálculo da matriz de correlação e da otimização. Reduzir o universo a SKUs comparáveis (mesma categoria, faixa de estoque) gera uma carteira mais consistente." />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Top N por GMV</span>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={2}
+                  max={50}
+                  value={topN}
+                  onChange={(e) => setTopN(e.target.value)}
+                  className="h-8 text-xs font-mono"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Categoria (vertical)</span>
+                <Select value={verticalFilter} onValueChange={setVerticalFilter}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas</SelectItem>
+                    {verticalOptions.map((v) => (
+                      <SelectItem key={v} value={v} className="text-xs">
+                        {v}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Estoque mín. (un.)</span>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={stockMinInput}
+                  onChange={(e) => setStockMinInput(e.target.value)}
+                  placeholder="0"
+                  className="h-8 text-xs font-mono"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Estoque máx. (un.)</span>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={stockMaxInput}
+                  onChange={(e) => setStockMaxInput(e.target.value)}
+                  placeholder="∞"
+                  className="h-8 text-xs font-mono"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Buscar MLB</span>
+                <Input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="MLB..."
+                  className="h-8 text-xs font-mono"
+                />
+              </label>
+            </div>
+            <div className="flex items-center justify-between mt-2 gap-2">
+              <p className="text-[10px] text-muted-foreground">
+                {markowitz.ids.length} produto(s) selecionado(s) para a matriz ·{" "}
+                {verticalOptions.length === 0 && (
+                  <span className="italic">categoria/estoque indisponíveis (sem dados de elegibilidade)</span>
+                )}
+                {verticalOptions.length > 0 && (
+                  <span>{verticalOptions.length} categoria(s) detectada(s)</span>
+                )}
+              </p>
+              {(verticalFilter !== "__all__" ||
+                stockMinInput !== "" ||
+                stockMaxInput !== "" ||
+                searchInput !== "" ||
+                topN !== "20") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 text-[10px]"
+                  onClick={() => {
+                    setTopN("20");
+                    setVerticalFilter("__all__");
+                    setStockMinInput("");
+                    setStockMaxInput("");
+                    setSearchInput("");
+                  }}
+                >
+                  Limpar filtros
+                </Button>
+              )}
+            </div>
+          </div>
+
           {rupturaCount > 0 && (
             <div className="flex items-start gap-2 p-3 mb-4 rounded border-l-4 border-destructive bg-destructive/10">
               <AlertTriangle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />
