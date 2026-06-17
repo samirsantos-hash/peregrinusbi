@@ -1,11 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
-import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2, Boxes } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { markowitzMinVariance, type AssetSeries } from "@/lib/markowitz";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -147,6 +149,58 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
       status: statusAgencia,
     },
   ];
+
+  // ---------------------------------------------------------------
+  // Markowitz — Recomendação de envio por produto
+  // ---------------------------------------------------------------
+  const markowitz = useMemo(() => {
+    // Build a date axis common to all products and per-product GMV series.
+    const dates = Array.from(new Set(kpis.map((k) => k.date))).sort();
+    if (dates.length < 4) return { rows: [], dates };
+    const byProduct: Record<string, Record<string, number>> = {};
+    for (const k of kpis) {
+      if (!k.productId) continue;
+      byProduct[k.productId] = byProduct[k.productId] || {};
+      byProduct[k.productId][k.date] = (byProduct[k.productId][k.date] || 0) + (k.tgmv || 0);
+    }
+    const ids = Object.keys(byProduct);
+    // Keep up to 20 most relevant products by accumulated GMV
+    const ranked = ids
+      .map((id) => ({
+        id,
+        total: dates.reduce((s, d) => s + (byProduct[id][d] || 0), 0),
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 20)
+      .filter((r) => r.total > 0);
+
+    const series: AssetSeries[] = ranked.map((r) => ({
+      id: r.id,
+      label: r.id,
+      values: dates.map((d) => byProduct[r.id][d] || 0),
+    }));
+
+    return { rows: markowitzMinVariance(series), dates };
+  }, [kpis]);
+
+  // Capacidade de envio (unidades) — ajustável; default heurístico baseado no GMV/ticket assumido
+  const totalGmvLast = markowitz.rows.reduce((s, r) => s + r.lastValue, 0);
+  const defaultCapacity = Math.max(100, Math.round(totalGmvLast / 150)); // ticket assumido R$150
+  const [capacityInput, setCapacityInput] = useState<string>("");
+  const [ticketInput, setTicketInput] = useState<string>("150");
+  const capacity = Number(capacityInput) > 0 ? Number(capacityInput) : defaultCapacity;
+  const ticket = Number(ticketInput) > 0 ? Number(ticketInput) : 150;
+
+  const markowitzRows = useMemo(() => {
+    return [...markowitz.rows]
+      .map((r) => ({
+        ...r,
+        sharpe: r.volatility > 0 ? r.meanReturn / r.volatility : 0,
+        recommendedUnits: Math.round(r.weight * capacity),
+        recommendedGmv: r.weight * capacity * ticket,
+      }))
+      .sort((a, b) => b.weight - a.weight);
+  }, [markowitz.rows, capacity, ticket]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -324,6 +378,120 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
               <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
             </AreaChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Markowitz — Recomendação de envio por produto */}
+      {markowitzRows.length > 0 && (
+        <div className="glass-card p-6">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <Boxes className="w-4 h-4 text-neon-blue" />
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Recomendação de Envio ao Full — Matriz de Markowitz
+            </h3>
+            <TooltipInfo text="Aloca a capacidade de envio entre produtos minimizando a variância da carteira (Markowitz min-variance, long-only). Penaliza produtos voláteis e diversifica entre GMVs descorrelacionados." />
+          </div>
+          <p className="text-[11px] text-muted-foreground text-center mb-4 leading-relaxed">
+            Σ⁻¹·1 / (1ᵀΣ⁻¹1) sobre a matriz de covariância dos retornos diários de GMV por produto ·{" "}
+            <span className="font-medium text-foreground">long-only</span> (clip de pesos negativos) ·{" "}
+            top {markowitzRows.length} produtos por GMV acumulado.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] text-muted-foreground">
+                Capacidade total de envio (unidades)
+              </span>
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={capacityInput}
+                onChange={(e) => setCapacityInput(e.target.value)}
+                placeholder={String(defaultCapacity)}
+                className="h-8 text-xs font-mono"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] text-muted-foreground">
+                Ticket médio assumido (R$)
+              </span>
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={ticketInput}
+                onChange={(e) => setTicketInput(e.target.value)}
+                placeholder="150"
+                className="h-8 text-xs font-mono"
+              />
+            </label>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="text-left text-muted-foreground border-b border-border/40">
+                  <th className="py-2 pr-3 font-medium">Produto (MLB)</th>
+                  <th className="py-2 px-2 font-medium text-right">Retorno μ</th>
+                  <th className="py-2 px-2 font-medium text-right">Volatilidade σ</th>
+                  <th className="py-2 px-2 font-medium text-right">Sharpe</th>
+                  <th className="py-2 px-2 font-medium text-right">Peso ótimo</th>
+                  <th className="py-2 px-2 font-medium text-right">Unidades recomendadas</th>
+                  <th className="py-2 pl-2 font-medium text-right">GMV alocado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {markowitzRows.map((r) => {
+                  const pct = r.weight * 100;
+                  const tone =
+                    pct >= 15 ? "text-emerald" : pct >= 5 ? "text-neon-blue" : "text-muted-foreground";
+                  return (
+                    <tr key={r.id} className="border-b border-border/20 hover:bg-muted/20">
+                      <td className="py-2 pr-3 font-mono text-foreground">{r.label}</td>
+                      <td className="py-2 px-2 text-right font-mono tnum">
+                        {(r.meanReturn * 100).toFixed(2)}%
+                      </td>
+                      <td className="py-2 px-2 text-right font-mono tnum">
+                        {(r.volatility * 100).toFixed(2)}%
+                      </td>
+                      <td className="py-2 px-2 text-right font-mono tnum text-muted-foreground">
+                        {r.sharpe.toFixed(2)}
+                      </td>
+                      <td className={`py-2 px-2 text-right font-mono tnum font-semibold ${tone}`}>
+                        {pct.toFixed(1)}%
+                      </td>
+                      <td className="py-2 px-2 text-right font-mono tnum font-bold text-foreground">
+                        {r.recommendedUnits.toLocaleString("pt-BR")}
+                      </td>
+                      <td className="py-2 pl-2 text-right font-mono tnum text-muted-foreground">
+                        {fmtBRLCompact(r.recommendedGmv)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t border-border/40 font-semibold">
+                  <td className="py-2 pr-3 text-muted-foreground">Total</td>
+                  <td colSpan={3}></td>
+                  <td className="py-2 px-2 text-right font-mono tnum">
+                    {(markowitzRows.reduce((s, r) => s + r.weight, 0) * 100).toFixed(0)}%
+                  </td>
+                  <td className="py-2 px-2 text-right font-mono tnum">
+                    {markowitzRows.reduce((s, r) => s + r.recommendedUnits, 0).toLocaleString("pt-BR")}
+                  </td>
+                  <td className="py-2 pl-2 text-right font-mono tnum">
+                    {fmtBRLCompact(markowitzRows.reduce((s, r) => s + r.recommendedGmv, 0))}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <p className="text-[10px] text-muted-foreground italic mt-3 leading-relaxed">
+            Leitura: produtos com maior peso oferecem o melhor trade-off risco/retorno na carteira atual.
+            Pesos baixos ou zero indicam GMV muito volátil ou altamente correlacionado a outro produto já alocado —
+            priorize os pesos altos no próximo envio ao Full.
+          </p>
         </div>
       )}
     </motion.div>
