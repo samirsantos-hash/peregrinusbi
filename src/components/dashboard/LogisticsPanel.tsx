@@ -1,12 +1,18 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
-import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2, Boxes } from "lucide-react";
+import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2, Boxes, Download, Info } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 import { markowitzMinVariance, type AssetSeries } from "@/lib/markowitz";
 
 const CustomTooltip = ({ active, payload }: any) => {
@@ -156,7 +162,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
   const markowitz = useMemo(() => {
     // Build a date axis common to all products and per-product GMV series.
     const dates = Array.from(new Set(kpis.map((k) => k.date))).sort();
-    if (dates.length < 4) return { rows: [], dates };
+    if (dates.length < 4) return { rows: [], correlation: [] as number[][], ids: [] as string[], dates };
     const byProduct: Record<string, Record<string, number>> = {};
     for (const k of kpis) {
       if (!k.productId) continue;
@@ -180,7 +186,8 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
       values: dates.map((d) => byProduct[r.id][d] || 0),
     }));
 
-    return { rows: markowitzMinVariance(series), dates };
+    const bundle = markowitzMinVariance(series);
+    return { rows: bundle.rows, correlation: bundle.correlation, ids: bundle.ids, dates };
   }, [kpis]);
 
   // Capacidade de envio (unidades) — ajustável; default heurístico baseado no GMV/ticket assumido
@@ -191,16 +198,113 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
   const capacity = Number(capacityInput) > 0 ? Number(capacityInput) : defaultCapacity;
   const ticket = Number(ticketInput) > 0 ? Number(ticketInput) : 150;
 
+  // Horizonte de cobertura desejado (dias) — janela padrão de reposição ao Full
+  const [horizonteDias, setHorizonteDias] = useState<string>("30");
+  const horizonte = Number(horizonteDias) > 0 ? Number(horizonteDias) : 30;
+
   const markowitzRows = useMemo(() => {
     return [...markowitz.rows]
-      .map((r) => ({
-        ...r,
-        sharpe: r.volatility > 0 ? r.meanReturn / r.volatility : 0,
-        recommendedUnits: Math.round(r.weight * capacity),
-        recommendedGmv: r.weight * capacity * ticket,
-      }))
-      .sort((a, b) => b.weight - a.weight);
-  }, [markowitz.rows, capacity, ticket]);
+      .map((r) => {
+        const sharpe = r.volatility > 0 ? r.meanReturn / r.volatility : 0;
+        const recommendedUnits = Math.round(r.weight * capacity);
+        const recommendedGmv = r.weight * capacity * ticket;
+        // Velocidade diária estimada (unidades) a partir do GMV recente
+        const dailyUnits = ticket > 0 ? r.lastValue / ticket : 0;
+        // Demanda esperada no horizonte
+        const demandaHorizonte = dailyUnits * horizonte;
+        // Cobertura (dias) gerada pelo envio recomendado
+        const coberturaDias = dailyUnits > 0 ? recommendedUnits / dailyUnits : Infinity;
+        // Shortfall: unidades faltando para cobrir o horizonte
+        const shortfall = Math.max(0, Math.round(demandaHorizonte - recommendedUnits));
+        // Risco de ruptura: cobertura abaixo de 60% do horizonte
+        const ruptura = isFinite(coberturaDias) && coberturaDias < horizonte * 0.6 && dailyUnits > 0;
+        return {
+          ...r,
+          sharpe,
+          recommendedUnits,
+          recommendedGmv,
+          dailyUnits,
+          demandaHorizonte,
+          coberturaDias,
+          shortfall,
+          ruptura,
+        };
+      })
+      .sort((a, b) => {
+        // Risco de ruptura primeiro, depois maior peso
+        if (a.ruptura !== b.ruptura) return a.ruptura ? -1 : 1;
+        return b.weight - a.weight;
+      });
+  }, [markowitz.rows, capacity, ticket, horizonte]);
+
+  const rupturaCount = markowitzRows.filter((r) => r.ruptura).length;
+
+  // Tradução do peso em razão prática para a recomendação
+  const explicarPeso = (r: typeof markowitzRows[number]) => {
+    const pct = r.weight * 100;
+    if (pct >= 15)
+      return "Peso alto: GMV consistente e pouco correlacionado com a carteira — diversifica risco e merece prioridade no envio.";
+    if (pct >= 5)
+      return "Peso médio: contribui para a estabilidade da carteira sem concentrar risco em um único SKU.";
+    if (pct > 0.5)
+      return "Peso baixo: GMV mais volátil ou correlacionado com produtos já alocados — manter envio mínimo evita exposição extra.";
+    return "Peso quase zero: GMV muito volátil ou redundante com outro SKU já alocado — Markowitz sugere não priorizar neste ciclo.";
+  };
+
+  // Exportação CSV
+  const handleExport = () => {
+    const headers = [
+      "MLB",
+      "Retorno_medio_%",
+      "Volatilidade_%",
+      "Sharpe",
+      "Peso_otimo_%",
+      "Unidades_recomendadas",
+      "GMV_alocado",
+      "Velocidade_diaria_unid",
+      "Demanda_horizonte_unid",
+      "Cobertura_dias",
+      "Shortfall_unid",
+      "Risco_ruptura",
+      "Justificativa",
+    ];
+    const lines = markowitzRows.map((r) =>
+      [
+        r.label,
+        (r.meanReturn * 100).toFixed(2),
+        (r.volatility * 100).toFixed(2),
+        r.sharpe.toFixed(2),
+        (r.weight * 100).toFixed(2),
+        r.recommendedUnits,
+        r.recommendedGmv.toFixed(2),
+        r.dailyUnits.toFixed(2),
+        r.demandaHorizonte.toFixed(0),
+        isFinite(r.coberturaDias) ? r.coberturaDias.toFixed(1) : "",
+        r.shortfall,
+        r.ruptura ? "SIM" : "NAO",
+        `"${explicarPeso(r).replace(/"/g, "'")}"`,
+      ].join(";"),
+    );
+    const csv = [headers.join(";"), ...lines].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `markowitz-envio-full-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  // Heatmap helpers
+  const heatColor = (c: number) => {
+    // Diverging: vermelho (correlação alta) → cinza (0) → verde (negativa)
+    if (c > 0) {
+      const a = Math.min(1, Math.abs(c));
+      return `hsla(0, 75%, 55%, ${0.15 + a * 0.7})`;
+    }
+    const a = Math.min(1, Math.abs(c));
+    return `hsla(160, 75%, 40%, ${0.15 + a * 0.7})`;
+  };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
