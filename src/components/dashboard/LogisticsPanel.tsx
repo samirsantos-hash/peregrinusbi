@@ -168,6 +168,35 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
   // ---------------------------------------------------------------
   // Markowitz — Recomendação de envio por produto
   // ---------------------------------------------------------------
+  // Filtros do subconjunto antes de calcular a matriz de correlação
+  const [topN, setTopN] = useState<string>("20");
+  const [verticalFilter, setVerticalFilter] = useState<string>("__all__");
+  const [stockMinInput, setStockMinInput] = useState<string>("");
+  const [stockMaxInput, setStockMaxInput] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>("");
+
+  // Metadata por itemId vindo de eligibility (vertical/categoria + estoque atual)
+  const itemMeta = useMemo(() => {
+    const map: Record<string, { vertical: string; estoque: number }> = {};
+    for (const it of eligibilityItems) {
+      const id = String(it.itemId || "");
+      if (!id) continue;
+      const prev = map[id];
+      if (!prev || it.estoqueMedio7d > prev.estoque) {
+        map[id] = { vertical: it.verticalItem || "", estoque: it.estoqueMedio7d || 0 };
+      }
+    }
+    return map;
+  }, [eligibilityItems]);
+
+  const verticalOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const m of Object.values(itemMeta)) {
+      if (m.vertical) set.add(m.vertical);
+    }
+    return Array.from(set).sort();
+  }, [itemMeta]);
+
   const markowitz = useMemo(() => {
     // Build a date axis common to all products and per-product GMV series.
     const dates = Array.from(new Set(kpis.map((k) => k.date))).sort();
@@ -179,15 +208,35 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
       byProduct[k.productId][k.date] = (byProduct[k.productId][k.date] || 0) + (k.tgmv || 0);
     }
     const ids = Object.keys(byProduct);
-    // Keep up to 20 most relevant products by accumulated GMV
+    const n = Math.max(2, Math.min(50, Number(topN) || 20));
+    const stockMin = stockMinInput.trim() === "" ? null : Number(stockMinInput);
+    const stockMax = stockMaxInput.trim() === "" ? null : Number(stockMaxInput);
+    const search = searchInput.trim().toLowerCase();
+    // Apply filters BEFORE ranking and slicing
     const ranked = ids
       .map((id) => ({
         id,
         total: dates.reduce((s, d) => s + (byProduct[id][d] || 0), 0),
+        meta: itemMeta[id],
       }))
+      .filter((r) => r.total > 0)
+      .filter((r) => {
+        if (verticalFilter !== "__all__") {
+          if (!r.meta || r.meta.vertical !== verticalFilter) return false;
+        }
+        if (stockMin !== null && !Number.isNaN(stockMin)) {
+          const v = r.meta?.estoque ?? 0;
+          if (v < stockMin) return false;
+        }
+        if (stockMax !== null && !Number.isNaN(stockMax)) {
+          const v = r.meta?.estoque ?? 0;
+          if (v > stockMax) return false;
+        }
+        if (search && !r.id.toLowerCase().includes(search)) return false;
+        return true;
+      })
       .sort((a, b) => b.total - a.total)
-      .slice(0, 20)
-      .filter((r) => r.total > 0);
+      .slice(0, n);
 
     const series: AssetSeries[] = ranked.map((r) => ({
       id: r.id,
@@ -197,7 +246,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
 
     const bundle = markowitzMinVariance(series);
     return { rows: bundle.rows, correlation: bundle.correlation, ids: bundle.ids, dates };
-  }, [kpis]);
+  }, [kpis, topN, verticalFilter, stockMinInput, stockMaxInput, searchInput, itemMeta]);
 
   // Capacidade de envio (unidades) — ajustável; default heurístico baseado no GMV/ticket assumido
   const totalGmvLast = markowitz.rows.reduce((s, r) => s + r.lastValue, 0);
