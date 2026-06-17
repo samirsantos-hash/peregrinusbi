@@ -14,6 +14,14 @@ import {
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
 import { markowitzMinVariance, type AssetSeries } from "@/lib/markowitz";
+import type { EligibilityItem } from "@/hooks/useEligibility";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -52,11 +60,12 @@ interface KpiLike {
 interface LogisticsPanelProps {
   kpis: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
+  eligibilityItems?: EligibilityItem[];
 }
 
 const COLORS = ["hsl(199, 100%, 50%)", "hsl(160, 84%, 39%)", "hsl(280, 80%, 60%)", "hsl(45, 80%, 55%)"];
 
-const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps) => {
+const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = [] }: LogisticsPanelProps) => {
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
     if (!acc[k.productId] || k.date > acc[k.productId].date) acc[k.productId] = k;
     return acc;
@@ -159,6 +168,35 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
   // ---------------------------------------------------------------
   // Markowitz — Recomendação de envio por produto
   // ---------------------------------------------------------------
+  // Filtros do subconjunto antes de calcular a matriz de correlação
+  const [topN, setTopN] = useState<string>("20");
+  const [verticalFilter, setVerticalFilter] = useState<string>("__all__");
+  const [stockMinInput, setStockMinInput] = useState<string>("");
+  const [stockMaxInput, setStockMaxInput] = useState<string>("");
+  const [searchInput, setSearchInput] = useState<string>("");
+
+  // Metadata por itemId vindo de eligibility (vertical/categoria + estoque atual)
+  const itemMeta = useMemo(() => {
+    const map: Record<string, { vertical: string; estoque: number }> = {};
+    for (const it of eligibilityItems) {
+      const id = String(it.itemId || "");
+      if (!id) continue;
+      const prev = map[id];
+      if (!prev || it.estoqueMedio7d > prev.estoque) {
+        map[id] = { vertical: it.verticalItem || "", estoque: it.estoqueMedio7d || 0 };
+      }
+    }
+    return map;
+  }, [eligibilityItems]);
+
+  const verticalOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const m of Object.values(itemMeta)) {
+      if (m.vertical) set.add(m.vertical);
+    }
+    return Array.from(set).sort();
+  }, [itemMeta]);
+
   const markowitz = useMemo(() => {
     // Build a date axis common to all products and per-product GMV series.
     const dates = Array.from(new Set(kpis.map((k) => k.date))).sort();
@@ -170,15 +208,35 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
       byProduct[k.productId][k.date] = (byProduct[k.productId][k.date] || 0) + (k.tgmv || 0);
     }
     const ids = Object.keys(byProduct);
-    // Keep up to 20 most relevant products by accumulated GMV
+    const n = Math.max(2, Math.min(50, Number(topN) || 20));
+    const stockMin = stockMinInput.trim() === "" ? null : Number(stockMinInput);
+    const stockMax = stockMaxInput.trim() === "" ? null : Number(stockMaxInput);
+    const search = searchInput.trim().toLowerCase();
+    // Apply filters BEFORE ranking and slicing
     const ranked = ids
       .map((id) => ({
         id,
         total: dates.reduce((s, d) => s + (byProduct[id][d] || 0), 0),
+        meta: itemMeta[id],
       }))
+      .filter((r) => r.total > 0)
+      .filter((r) => {
+        if (verticalFilter !== "__all__") {
+          if (!r.meta || r.meta.vertical !== verticalFilter) return false;
+        }
+        if (stockMin !== null && !Number.isNaN(stockMin)) {
+          const v = r.meta?.estoque ?? 0;
+          if (v < stockMin) return false;
+        }
+        if (stockMax !== null && !Number.isNaN(stockMax)) {
+          const v = r.meta?.estoque ?? 0;
+          if (v > stockMax) return false;
+        }
+        if (search && !r.id.toLowerCase().includes(search)) return false;
+        return true;
+      })
       .sort((a, b) => b.total - a.total)
-      .slice(0, 20)
-      .filter((r) => r.total > 0);
+      .slice(0, n);
 
     const series: AssetSeries[] = ranked.map((r) => ({
       id: r.id,
@@ -188,7 +246,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
 
     const bundle = markowitzMinVariance(series);
     return { rows: bundle.rows, correlation: bundle.correlation, ids: bundle.ids, dates };
-  }, [kpis]);
+  }, [kpis, topN, verticalFilter, stockMinInput, stockMaxInput, searchInput, itemMeta]);
 
   // Capacidade de envio (unidades) — ajustável; default heurístico baseado no GMV/ticket assumido
   const totalGmvLast = markowitz.rows.reduce((s, r) => s + r.lastValue, 0);
@@ -510,6 +568,109 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily" }: LogisticsPanelProps
             <span className="font-medium text-foreground">long-only</span> (clip de pesos negativos) ·{" "}
             top {markowitzRows.length} produtos por GMV acumulado.
           </p>
+
+          {/* Filtros — subconjunto de produtos antes do cálculo da matriz */}
+          <div className="mb-4 p-3 rounded border border-border/40 bg-muted/10">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
+                Filtros do subconjunto
+              </p>
+              <TooltipInfo text="Aplicados ANTES do cálculo da matriz de correlação e da otimização. Reduzir o universo a SKUs comparáveis (mesma categoria, faixa de estoque) gera uma carteira mais consistente." />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Top N por GMV</span>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min={2}
+                  max={50}
+                  value={topN}
+                  onChange={(e) => setTopN(e.target.value)}
+                  className="h-8 text-xs font-mono"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Categoria (vertical)</span>
+                <Select value={verticalFilter} onValueChange={setVerticalFilter}>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="Todas" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__all__">Todas</SelectItem>
+                    {verticalOptions.map((v) => (
+                      <SelectItem key={v} value={v} className="text-xs">
+                        {v}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Estoque mín. (un.)</span>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={stockMinInput}
+                  onChange={(e) => setStockMinInput(e.target.value)}
+                  placeholder="0"
+                  className="h-8 text-xs font-mono"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Estoque máx. (un.)</span>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  value={stockMaxInput}
+                  onChange={(e) => setStockMaxInput(e.target.value)}
+                  placeholder="∞"
+                  className="h-8 text-xs font-mono"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[10px] text-muted-foreground">Buscar MLB</span>
+                <Input
+                  type="text"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="MLB..."
+                  className="h-8 text-xs font-mono"
+                />
+              </label>
+            </div>
+            <div className="flex items-center justify-between mt-2 gap-2">
+              <p className="text-[10px] text-muted-foreground">
+                {markowitz.ids.length} produto(s) selecionado(s) para a matriz ·{" "}
+                {verticalOptions.length === 0 && (
+                  <span className="italic">categoria/estoque indisponíveis (sem dados de elegibilidade)</span>
+                )}
+                {verticalOptions.length > 0 && (
+                  <span>{verticalOptions.length} categoria(s) detectada(s)</span>
+                )}
+              </p>
+              {(verticalFilter !== "__all__" ||
+                stockMinInput !== "" ||
+                stockMaxInput !== "" ||
+                searchInput !== "" ||
+                topN !== "20") && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 text-[10px]"
+                  onClick={() => {
+                    setTopN("20");
+                    setVerticalFilter("__all__");
+                    setStockMinInput("");
+                    setStockMaxInput("");
+                    setSearchInput("");
+                  }}
+                >
+                  Limpar filtros
+                </Button>
+              )}
+            </div>
+          </div>
 
           {rupturaCount > 0 && (
             <div className="flex items-start gap-2 p-3 mb-4 rounded border-l-4 border-destructive bg-destructive/10">
