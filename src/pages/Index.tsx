@@ -476,7 +476,7 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
-                    <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} />
+                    <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} eligibilityItems={eligibilityItems || []} />
                     <FullRecommendationPanel
                       sellerId={selectedSeller}
                       custId={sellerCustIdMap[selectedSeller]}
