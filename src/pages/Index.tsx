@@ -24,6 +24,7 @@ import FullRecommendationPanel from "@/components/seller/FullRecommendationPanel
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
 import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
+import { CampanhasCofinanciadasPanel } from "@/components/seller/CampanhasCofinanciadasPanel";
 import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
@@ -529,6 +530,7 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="opportunities" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="opportunities" dados={dadosJunior} />
+                    <CampanhasCofinanciadasPanel items={eligibilityItems || []} />
                     <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0 space-y-5">
