@@ -593,7 +593,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         <div className="h-px flex-1 bg-border/60" />
       </div>
 
-      <MonitoramentoPrecoPanel sellerId={sellers?.[0]?.id} />
+      <MonitoramentoPrecoPanel sellerId={(kpis?.[0] as any)?.sellerId} />
 
     </motion.div>
   );
