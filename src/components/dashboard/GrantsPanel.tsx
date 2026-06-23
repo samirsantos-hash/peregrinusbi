@@ -142,7 +142,7 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
         </div>
 
         <ScrollArea className="max-h-[500px]">
-          <div className="divide-y divide-border/20">
+          <div key={activeFilter ?? "all"} className="divide-y divide-border/20">
             {filteredRows.map((row, idx) => {
               const badge = getGrantBadge(row.level!);
               const days = row.days!;
@@ -156,7 +156,7 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
                   key={row.seller.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.03 }}
+                  transition={{ duration: 0.18, delay: Math.min(idx, 12) * 0.015 }}
                   className={`flex items-center gap-4 px-4 py-3 hover:bg-accent/5 transition-colors ${
                     row.level === "blacklist" ? "bg-destructive/5" : ""
                   }`}
