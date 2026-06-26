@@ -154,9 +154,22 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
                 className="pl-9"
               />
             </div>
-            {filteredSellers.length > 0 && (
+            {(filteredSellers.length > 0 || showAddRaw) && (
               <ScrollArea className="max-h-[160px] border border-border/50 rounded-md">
                 <div className="p-1 space-y-0.5">
+                  {showAddRaw && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toggleSeller(trimmedSearch);
+                        setSearchSeller("");
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-1.5 rounded text-sm hover:bg-accent/50 transition-colors text-primary"
+                    >
+                      <span className="truncate">+ Adicionar Cust ID: {trimmedSearch}</span>
+                      <span className="text-xs text-muted-foreground ml-2">novo</span>
+                    </button>
+                  )}
                   {filteredSellers.map((s) => {
                     const selected = selectedCustIds.includes(s.custId);
                     return (
