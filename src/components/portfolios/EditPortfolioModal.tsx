@@ -49,14 +49,19 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
     });
   }, [open]);
 
+  const trimmedSearch = searchSeller.trim();
   const filteredSellers = useMemo(() => {
-    if (!searchSeller.trim()) return [];
-    const q = searchSeller.toLowerCase();
+    if (!trimmedSearch) return [];
+    const q = trimmedSearch.toLowerCase();
     return sellers
       .filter((s) => !selectedCustIds.includes(s.custId))
       .filter((s) => s.nickname.toLowerCase().includes(q) || s.custId.toLowerCase().includes(q))
       .slice(0, 50);
-  }, [searchSeller, sellers, selectedCustIds]);
+  }, [trimmedSearch, sellers, selectedCustIds]);
+  const showAddRaw =
+    /^\d{4,}$/.test(trimmedSearch) &&
+    !sellers.some((s) => s.custId === trimmedSearch) &&
+    !selectedCustIds.includes(trimmedSearch);
 
   const addSeller = (custId: string) => {
     setSelectedCustIds((prev) => prev.includes(custId) ? prev : [...prev, custId]);
@@ -124,9 +129,19 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
                 className="pl-9"
               />
             </div>
-            {filteredSellers.length > 0 && (
+            {(filteredSellers.length > 0 || showAddRaw) && (
               <ScrollArea className="max-h-[160px] border border-border/50 rounded-md">
                 <div className="p-1 space-y-0.5">
+                  {showAddRaw && (
+                    <button
+                      type="button"
+                      onClick={() => addSeller(trimmedSearch)}
+                      className="w-full flex items-center justify-between px-3 py-1.5 rounded text-sm hover:bg-accent/50 text-primary"
+                    >
+                      <span className="truncate">+ Adicionar Cust ID: {trimmedSearch}</span>
+                      <span className="text-xs text-muted-foreground ml-2">novo</span>
+                    </button>
+                  )}
                   {filteredSellers.map((s) => (
                     <button
                       key={s.custId}
