@@ -510,6 +510,39 @@ export type Database = {
           },
         ]
       }
+      portfolio_notifications: {
+        Row: {
+          added_cust_ids: string[]
+          created_at: string
+          id: string
+          message: string
+          portfolio_id: string | null
+          portfolio_name: string
+          read: boolean
+          user_id: string
+        }
+        Insert: {
+          added_cust_ids?: string[]
+          created_at?: string
+          id?: string
+          message: string
+          portfolio_id?: string | null
+          portfolio_name: string
+          read?: boolean
+          user_id: string
+        }
+        Update: {
+          added_cust_ids?: string[]
+          created_at?: string
+          id?: string
+          message?: string
+          portfolio_id?: string | null
+          portfolio_name?: string
+          read?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       portfolios: {
         Row: {
           assigned_to: string | null
