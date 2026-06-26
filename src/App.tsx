@@ -20,6 +20,7 @@ import ResetPassword from "./pages/ResetPassword";
 import CppDashboard from "./pages/CppDashboard";
 import GestaoCarteira from "./pages/GestaoCarteira";
 import ProjecaoCrescimento from "./pages/ProjecaoCrescimento";
+import NotificationsBell from "./components/portfolios/NotificationsBell";
 
 const queryClient = new QueryClient();
 
@@ -80,6 +81,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <AppRoutes />
+            <NotificationsBell />
           </BrowserRouter>
         </JuniorModeProvider>
       </SoundProvider>

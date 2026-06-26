@@ -59,14 +59,27 @@ export function usePortfolios() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Not authenticated" };
 
-    const { error } = await supabase
+    const { data: inserted, error } = await supabase
       .from("portfolios" as any)
-      .insert({ name, cust_ids: custIds, created_by: user.id, assigned_to: assignedTo || null } as any);
+      .insert({ name, cust_ids: custIds, created_by: user.id, assigned_to: assignedTo || null } as any)
+      .select("id")
+      .single();
 
     if (error) {
       toast({ title: "Erro ao criar carteira", description: error.message, variant: "destructive" });
       return { error: error.message };
     }
+
+    if (assignedTo && custIds.length > 0 && assignedTo !== user.id) {
+      await supabase.from("portfolio_notifications" as any).insert({
+        user_id: assignedTo,
+        portfolio_id: (inserted as any)?.id ?? null,
+        portfolio_name: name,
+        added_cust_ids: custIds,
+        message: `Carteira "${name}" criada com ${custIds.length} loja(s) atribuída(s) a você.`,
+      } as any);
+    }
+
     toast({ title: "Carteira criada com sucesso!" });
     await load();
     return { error: null };
@@ -90,6 +103,9 @@ export function usePortfolios() {
     id: string,
     patch: { name?: string; cust_ids?: string[]; assigned_to?: string | null; seller_aliases?: Record<string, string> }
   ) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const previous = portfolios.find((p) => p.id === id);
+
     const { error } = await supabase
       .from("portfolios" as any)
       .update(patch as any)
@@ -98,6 +114,23 @@ export function usePortfolios() {
       toast({ title: "Erro ao atualizar", description: error.message, variant: "destructive" });
       return { error: error.message };
     }
+
+    // Notify when new cust_ids were added
+    if (previous && patch.cust_ids) {
+      const prevSet = new Set(previous.cust_ids || []);
+      const added = patch.cust_ids.filter((c) => !prevSet.has(c));
+      const targetUser = (patch.assigned_to ?? previous.assigned_to) || null;
+      if (added.length > 0 && targetUser && targetUser !== user?.id) {
+        await supabase.from("portfolio_notifications" as any).insert({
+          user_id: targetUser,
+          portfolio_id: id,
+          portfolio_name: patch.name || previous.name,
+          added_cust_ids: added,
+          message: `${added.length} nova(s) loja(s) adicionada(s) à carteira "${patch.name || previous.name}".`,
+        } as any);
+      }
+    }
+
     toast({ title: "Carteira atualizada" });
     await load();
     return { error: null };

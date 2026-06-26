@@ -54,7 +54,7 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
 
   const handleParse = () => {
     if (!bulkInput.trim()) return;
-    const items = bulkInput.split(";").map((s) => s.trim()).filter(Boolean);
+    const items = bulkInput.split(/[;,\s\n]+/).map((s) => s.trim()).filter(Boolean);
     const matched: string[] = [];
     const notFound: string[] = [];
 
@@ -66,14 +66,16 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
       if (match && !matched.includes(match.custId)) {
         matched.push(match.custId);
       } else if (!match) {
-        notFound.push(item);
+        // If it's a numeric-only token, accept as raw cust_id
+        if (/^\d{4,}$/.test(item) && !matched.includes(item)) {
+          matched.push(item);
+        } else {
+          notFound.push(item);
+        }
       }
     }
     setParseResult({ matched, notFound });
-    setSelectedCustIds((prev) => {
-      const all = new Set([...prev, ...matched]);
-      return Array.from(all);
-    });
+    setSelectedCustIds((prev) => Array.from(new Set([...prev, ...matched])));
   };
 
   const toggleSeller = (custId: string) => {
@@ -86,13 +88,18 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
     setSelectedCustIds((prev) => prev.filter((c) => c !== custId));
   };
 
-  // Filtered sellers for interactive search
-  const filteredSellers = searchSeller.trim()
+  // Filtered sellers for interactive search (matches nickname OR cust_id)
+  const trimmedSearch = searchSeller.trim();
+  const filteredSellers = trimmedSearch
     ? sellers.filter((s) => {
-        const q = searchSeller.toLowerCase();
+        const q = trimmedSearch.toLowerCase();
         return s.nickname.toLowerCase().includes(q) || s.custId.toLowerCase().includes(q);
       }).slice(0, 50)
     : [];
+  const showAddRaw =
+    /^\d{4,}$/.test(trimmedSearch) &&
+    !sellers.some((s) => s.custId === trimmedSearch) &&
+    !selectedCustIds.includes(trimmedSearch);
 
   const handleSave = async () => {
     if (!name.trim()) return;
@@ -147,9 +154,22 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
                 className="pl-9"
               />
             </div>
-            {filteredSellers.length > 0 && (
+            {(filteredSellers.length > 0 || showAddRaw) && (
               <ScrollArea className="max-h-[160px] border border-border/50 rounded-md">
                 <div className="p-1 space-y-0.5">
+                  {showAddRaw && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        toggleSeller(trimmedSearch);
+                        setSearchSeller("");
+                      }}
+                      className="w-full flex items-center justify-between px-3 py-1.5 rounded text-sm hover:bg-accent/50 transition-colors text-primary"
+                    >
+                      <span className="truncate">+ Adicionar Cust ID: {trimmedSearch}</span>
+                      <span className="text-xs text-muted-foreground ml-2">novo</span>
+                    </button>
+                  )}
                   {filteredSellers.map((s) => {
                     const selected = selectedCustIds.includes(s.custId);
                     return (
