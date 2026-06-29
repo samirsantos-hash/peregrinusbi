@@ -1,9 +1,13 @@
-import { useState, useMemo } from "react";
-import { ExternalLink, Skull, AlertTriangle, Clock, CheckCircle, KeyRound, Wifi, WifiOff, X } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { BarChart3, Skull, AlertTriangle, Clock, CheckCircle, KeyRound, Wifi, WifiOff, X, Download } from "lucide-react";
 import { motion } from "framer-motion";
-import { useSellerGrants, getGrantLevel, getGrantBadge } from "@/hooks/useSellerGrants";
+import { getGrantLevel, getGrantBadge, type SellerGrant } from "@/hooks/useSellerGrants";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { abrirSellerNoMeli } from "@/lib/sellerLink";
+import * as XLSX from "xlsx";
 
 type GrantFilter = "blacklist" | "critical" | "warning" | "ok" | null;
 
@@ -12,14 +16,52 @@ interface GrantsPanelProps {
 }
 
 export default function GrantsPanel({ sellers }: GrantsPanelProps) {
-  const sellerIds = useMemo(() => sellers.map((s) => s.id), [sellers]);
-  const { grants, loading } = useSellerGrants(sellerIds);
+  const [grants, setGrants] = useState<Record<string, SellerGrant>>({});
+  const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState<GrantFilter>(null);
+
+  useEffect(() => {
+    if (!sellers.length) { setGrants({}); return; }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      let all: any[] = [];
+      let from = 0;
+      const PAGE = 1000;
+      while (true) {
+        const { data, error } = await supabase
+          .from("seller_grants" as any)
+          .select("*")
+          .order("expiration_date", { ascending: true })
+          .range(from, from + PAGE - 1);
+        if (error || !data || data.length === 0) break;
+        all = all.concat(data);
+        if (data.length < PAGE) break;
+        from += PAGE;
+      }
+      if (cancelled) return;
+      const map: Record<string, SellerGrant> = {};
+      for (const row of all as any[]) {
+        const g: SellerGrant = {
+          sellerId: row.seller_id,
+          custId: String(row.cust_id),
+          salesforceUrl: row.salesforce_url,
+          expirationDate: row.expiration_date,
+          daysToExpire: parseInt(String(row.days_to_expire), 10) || 0,
+        };
+        if (row.seller_id) map[row.seller_id] = g;
+        if (row.cust_id) map[String(row.cust_id)] = g;
+      }
+      setGrants(map);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [sellers.map((s) => s.id).join(",")]);
 
   const rows = useMemo(() => {
     return sellers
       .map((s) => {
-        const grant = grants[s.id] || null;
+        const grant = grants[s.id] || grants[s.custId] || null;
         const days = grant ? Math.round(grant.daysToExpire) : null;
         const level = grant ? getGrantLevel(days!) : null;
         return { seller: s, grant, level, days };
@@ -56,13 +98,34 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
     return (
       <div className="glass-card p-8 text-center space-y-2">
         <KeyRound className="w-10 h-10 mx-auto text-muted-foreground/40" />
-        <p className="text-sm text-muted-foreground">Nenhum dado de Grant disponível para os sellers da sua carteira.</p>
+        <p className="text-sm text-muted-foreground">
+          Nenhum dado de Grant disponível para os sellers da sua carteira.
+        </p>
+        <p className="text-[11px] text-muted-foreground/70">
+          {sellers.length} seller(s) na carteira · {Math.floor(Object.keys(grants).length / 2)} grants acessíveis na base.
+        </p>
       </div>
     );
   }
 
   const total = rows.length;
   const atRisk = counts.blacklist + counts.critical + counts.warning;
+
+  const handleExport = () => {
+    const data = filteredRows.map((r) => ({
+      Nickname: r.seller.nickname,
+      "Cust ID": r.seller.custId,
+      "Dias para Expirar": r.days,
+      Status: getGrantBadge(r.level!).label,
+      "Data de Expiração": r.grant!.expirationDate,
+      "Salesforce URL": r.grant!.salesforceUrl || "",
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Grants");
+    const stamp = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `grants_${activeFilter ?? "todos"}_${stamp}.xlsx`);
+  };
 
   return (
     <div className="space-y-5">
@@ -113,21 +176,32 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
         </div>
       </div>
 
-      {/* Active filter indicator */}
-      {activeFilter && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            Filtro ativo: <span className="font-semibold text-foreground">{filterLabels[activeFilter]}</span> — {filteredRows.length} seller(s)
-          </span>
-          <button
-            onClick={() => setActiveFilter(null)}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <X className="w-3 h-3" />
-            Limpar
-          </button>
-        </div>
-      )}
+      {/* Active filter + export */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {activeFilter && (
+          <>
+            <span className="text-xs text-muted-foreground">
+              Filtro ativo: <span className="font-semibold text-foreground">{filterLabels[activeFilter]}</span> — {filteredRows.length} seller(s)
+            </span>
+            <button
+              onClick={() => setActiveFilter(null)}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-3 h-3" />
+              Limpar
+            </button>
+          </>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={handleExport}
+          className="ml-auto h-7 text-xs gap-1.5"
+        >
+          <Download className="w-3.5 h-3.5" />
+          Exportar Excel
+        </Button>
+      </div>
 
       {/* Connection List */}
       <div className="glass-card overflow-hidden">
@@ -183,19 +257,13 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
                   </div>
 
                   <div className="shrink-0">
-                    {row.grant!.salesforceUrl ? (
-                      <a
-                        href={row.grant!.salesforceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors border border-primary/20"
-                      >
-                        <ExternalLink className="w-3.5 h-3.5" />
-                        Acessar Salesforce
-                      </a>
-                    ) : (
-                      <span className="text-muted-foreground/40 text-xs italic">Sem link</span>
-                    )}
+                    <button
+                      onClick={() => abrirSellerNoMeli(Number(row.seller.custId), row.seller.nickname)}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-primary/10 text-primary text-xs font-semibold hover:bg-primary/20 transition-colors border border-primary/20"
+                    >
+                      <BarChart3 className="w-3.5 h-3.5" />
+                      Ver métricas
+                    </button>
                   </div>
                 </motion.div>
               );
