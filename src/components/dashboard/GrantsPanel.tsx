@@ -3,8 +3,9 @@ import { BarChart3, Skull, AlertTriangle, Clock, CheckCircle, KeyRound, Wifi, Wi
 import { motion } from "framer-motion";
 import { getGrantLevel, getGrantBadge, type SellerGrant } from "@/hooks/useSellerGrants";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import * as XLSX from "xlsx";
@@ -19,6 +20,7 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
   const [grants, setGrants] = useState<Record<string, SellerGrant>>({});
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState<GrantFilter>(null);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     if (!sellers.length) { setGrants({}); return; }
@@ -77,9 +79,18 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
   }, [rows]);
 
   const filteredRows = useMemo(() => {
-    if (!activeFilter) return rows;
-    return rows.filter((r) => r.level === activeFilter);
-  }, [rows, activeFilter]);
+    let out = rows;
+    if (activeFilter) out = out.filter((r) => r.level === activeFilter);
+    const q = search.trim().toLowerCase();
+    if (q) {
+      out = out.filter(
+        (r) =>
+          r.seller.nickname.toLowerCase().includes(q) ||
+          String(r.seller.custId).toLowerCase().includes(q),
+      );
+    }
+    return out;
+  }, [rows, activeFilter, search]);
 
   const handleFilterClick = (filter: GrantFilter) => {
     setActiveFilter((prev) => (prev === filter ? null : filter));
@@ -178,6 +189,15 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
 
       {/* Active filter + export */}
       <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative w-full sm:w-72">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nickname ou Cust ID…"
+            className="h-8 pl-8 text-xs"
+          />
+        </div>
         {activeFilter && (
           <>
             <span className="text-xs text-muted-foreground">
@@ -215,8 +235,7 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
           </span>
         </div>
 
-        <ScrollArea className="max-h-[500px]">
-          <div key={activeFilter ?? "all"} className="divide-y divide-border/20">
+        <div key={`${activeFilter ?? "all"}-${search}`} className="divide-y divide-border/20">
             {filteredRows.map((row, idx) => {
               const badge = getGrantBadge(row.level!);
               const days = row.days!;
@@ -273,8 +292,7 @@ export default function GrantsPanel({ sellers }: GrantsPanelProps) {
                 Nenhum seller nesta categoria.
               </div>
             )}
-          </div>
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );
