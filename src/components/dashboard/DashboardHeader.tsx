@@ -4,7 +4,8 @@ import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag, RefreshCw, CalendarDays, Clock } from "lucide-react";
+import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag, RefreshCw, CalendarDays, Clock, Copy } from "lucide-react";
+import { toast } from "@/hooks/use-toast";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
@@ -70,6 +71,7 @@ const DashboardHeader = ({
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("q1");
+  const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
   const { playClick } = useSoundFeedback();
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
 
@@ -107,6 +109,24 @@ const DashboardHeader = ({
   }, [activePeriod, allKpis]);
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
+
+  const handleCopy = async (
+    e: React.MouseEvent,
+    value: string,
+    field: "nickname" | "custId",
+    label: string,
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(field);
+      toast({ title: `${label} copiado`, description: value });
+      setTimeout(() => setCopiedField((c) => (c === field ? null : c)), 2000);
+    } catch {
+      toast({ title: "Falha ao copiar", variant: "destructive" });
+    }
+  };
 
   // Calculate actual data span from FILTERED kpis for projection
   const rangeDays = useMemo(() => {
@@ -207,12 +227,40 @@ const DashboardHeader = ({
                   className="w-[340px] justify-between glass-card border-glass-border bg-card/60 font-normal"
                 >
                   {selectedSellerObj ? (
-                    <span className="truncate">
+                    <span className="truncate flex items-center gap-1">
                       <span className="text-xs text-muted-foreground mr-1">Loja:</span>
                       <span className="font-medium">{selectedSellerObj.nickname}</span>
-                      <span className="mx-2 text-border">|</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Copiar nome da loja"
+                        title="Copiar nome da loja"
+                        onClick={(e) => handleCopy(e, selectedSellerObj.nickname, "nickname", "Loja")}
+                        className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-muted/60 text-muted-foreground hover:text-neon-blue transition-colors"
+                      >
+                        {copiedField === "nickname" ? (
+                          <Check className="w-3 h-3 text-emerald" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                      </span>
+                      <span className="mx-1 text-border">|</span>
                       <span className="text-xs text-muted-foreground mr-1">ID:</span>
                       <span className="text-xs font-mono">{selectedSellerObj.custId}</span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Copiar ID"
+                        title="Copiar ID do seller"
+                        onClick={(e) => handleCopy(e, selectedSellerObj.custId, "custId", "ID")}
+                        className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-muted/60 text-muted-foreground hover:text-neon-blue transition-colors"
+                      >
+                        {copiedField === "custId" ? (
+                          <Check className="w-3 h-3 text-emerald" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                      </span>
                     </span>
                   ) : (
                     <span className="text-muted-foreground">Selecionar loja...</span>
