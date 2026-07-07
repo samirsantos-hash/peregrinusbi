@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, TrendingDown, PauseCircle, Eye, Loader2 } from "lucide-react";
+import {
+  ArrowLeft,
+  TrendingDown,
+  PauseCircle,
+  Eye,
+  Loader2,
+  ArrowUpDown,
+  ExternalLink,
+  Info,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -22,65 +31,147 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortfolios } from "@/hooks/usePortfolios";
 
-interface CppRow {
-  cus_cust_id_sel: number;
-  cus_nickname: string | null;
-  mes_ref: string;
-  tgmv_lc: number | null;
-  tsi: number | null;
-  visitas: number | null;
-}
-
-interface LiveRow {
+interface EligRow {
   seller_id: string;
+  item_id: string;
+  item_name: string | null;
   data: string;
-  itens: number | null;
+  pedidos_7d: number | null;
+  estoque_medio_7d: number | null;
+  media_tsi_diario_7d: number | null;
+  vertical_item: string | null;
 }
 
-interface SellerAggregate {
-  custId: string;
-  nickname: string;
-  gmvAtual: number;
-  gmvAnterior: number;
-  gmvDeltaPct: number;
-  visitasAtual: number;
-  visitasAnterior: number;
-  visitasDeltaPct: number;
+interface QualityRow {
+  seller_id: string;
+  item_id: string;
+  data: string;
+  score_qualidade_final: number | null;
+  visitas_clips: number | null;
+}
+
+interface MlbAggregate {
+  itemId: string;
+  itemName: string;
+  sellerNickname: string;
+  vertical: string;
+  // GMV proxy = pedidos_7d
+  pedidosAtual: number;
+  pedidosAnterior: number;
+  pedidosDeltaPct: number;
+  dataAtual: string;
+  dataAnterior: string;
+  // Sem vendas
+  estoque: number;
+  diasSemVenda: number | null;
+  ultimaVenda: string | null;
+  // Visitas (proxy = média TSI diário 7d; visitas por MLB não existe no banco)
   tsiAtual: number;
-  mesAtual: string;
-  mesAnterior: string;
-  diasSemMovimento: number | null;
-  ultimaMovimentacao: string | null;
+  tsiAnterior: number;
+  tsiDeltaPct: number;
+  // Qualidade complementar
+  scoreAtual: number | null;
+  scoreAnterior: number | null;
+  scoreDeltaPct: number;
 }
 
-function fmtBRL(v: number) {
-  return v.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: 0,
-  });
-}
 function fmtNum(v: number) {
   return v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+}
+function fmtNum2(v: number) {
+  return v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
 }
 function fmtPct(v: number) {
   const sign = v > 0 ? "+" : "";
   return `${sign}${v.toFixed(1)}%`;
 }
-function fmtMes(m: string) {
-  if (!m) return "—";
-  const d = new Date(m);
-  if (isNaN(d.getTime())) return m;
-  return d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
+function fmtDate(d: string | null) {
+  if (!d) return "—";
+  const dt = new Date(d);
+  if (isNaN(dt.getTime())) return d;
+  return dt.toLocaleDateString("pt-BR");
+}
+function mlbLink(itemId: string) {
+  const clean = String(itemId).replace(/\D/g, "");
+  return clean ? `https://produto.mercadolivre.com.br/MLB-${clean}` : "#";
+}
+
+type SortDir = "asc" | "desc";
+function useSort<T>(rows: T[], initialKey: keyof T, initialDir: SortDir = "desc") {
+  const [key, setKey] = useState<keyof T>(initialKey);
+  const [dir, setDir] = useState<SortDir>(initialDir);
+  const sorted = useMemo(() => {
+    const arr = [...rows];
+    arr.sort((a, b) => {
+      const av = a[key];
+      const bv = b[key];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (typeof av === "number" && typeof bv === "number") {
+        return dir === "asc" ? av - bv : bv - av;
+      }
+      const as = String(av);
+      const bs = String(bv);
+      return dir === "asc" ? as.localeCompare(bs) : bs.localeCompare(as);
+    });
+    return arr;
+  }, [rows, key, dir]);
+  const toggle = (k: keyof T) => {
+    if (k === key) setDir(dir === "asc" ? "desc" : "asc");
+    else {
+      setKey(k);
+      setDir("desc");
+    }
+  };
+  return { sorted, key, dir, toggle };
+}
+
+function SortHeader<T>({
+  label,
+  columnKey,
+  sortKey,
+  sortDir,
+  onSort,
+  align = "right",
+}: {
+  label: string;
+  columnKey: keyof T;
+  sortKey: keyof T;
+  sortDir: SortDir;
+  onSort: (k: keyof T) => void;
+  align?: "left" | "right" | "center";
+}) {
+  const active = sortKey === columnKey;
+  const alignCls =
+    align === "left" ? "text-left" : align === "center" ? "text-center" : "text-right";
+  return (
+    <TableHead className={alignCls}>
+      <button
+        onClick={() => onSort(columnKey)}
+        className={`inline-flex items-center gap-1 hover:text-foreground ${
+          active ? "text-foreground" : ""
+        }`}
+      >
+        {label}
+        <ArrowUpDown className="w-3 h-3 opacity-60" />
+        {active && (
+          <span className="text-[10px] text-muted-foreground">
+            {sortDir === "asc" ? "▲" : "▼"}
+          </span>
+        )}
+      </button>
+    </TableHead>
+  );
 }
 
 export default function AnaliseMLB() {
   const navigate = useNavigate();
   const { portfolios, loading: loadingPortfolios } = usePortfolios();
   const [portfolioId, setPortfolioId] = useState<string>("__all__");
-  const [cppRows, setCppRows] = useState<CppRow[]>([]);
-  const [liveRows, setLiveRows] = useState<LiveRow[]>([]);
-  const [sellerCustMap, setSellerCustMap] = useState<Record<string, string>>({});
+  const [eligRows, setEligRows] = useState<EligRow[]>([]);
+  const [qualityRows, setQualityRows] = useState<QualityRow[]>([]);
+  const [sellerNickMap, setSellerNickMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   // Cust IDs do escopo (todas as carteiras acessíveis ou a selecionada)
@@ -93,55 +184,63 @@ export default function AnaliseMLB() {
     return p ? Array.from(new Set(p.cust_ids || [])) : [];
   }, [portfolios, portfolioId]);
 
-  // Carrega cpp_mensal + live_listings do escopo
   useEffect(() => {
     if (loadingPortfolios) return;
     if (scopeCustIds.length === 0) {
-      setCppRows([]);
-      setLiveRows([]);
+      setEligRows([]);
+      setQualityRows([]);
       setLoading(false);
       return;
     }
     let cancel = false;
     (async () => {
       setLoading(true);
-      const custIdsNum = scopeCustIds
-        .map((c) => Number(c))
-        .filter((n) => Number.isFinite(n));
 
-      // cpp_mensal
-      const { data: cpp } = await supabase
-        .from("cpp_mensal")
-        .select("cus_cust_id_sel, cus_nickname, mes_ref, tgmv_lc, tsi, visitas")
-        .in("cus_cust_id_sel", custIdsNum)
-        .order("mes_ref", { ascending: false });
-
-      // sellers → mapear seller_id (uuid) para cust_id
+      // Resolve sellers no escopo
       const { data: sellers } = await supabase
         .from("sellers")
-        .select("id, cust_id")
+        .select("id, cust_id, nickname")
         .in("cust_id", scopeCustIds);
 
-      const sMap: Record<string, string> = {};
+      const nickMap: Record<string, string> = {};
+      const sellerIds: string[] = [];
       (sellers || []).forEach((s: any) => {
-        sMap[s.id] = String(s.cust_id);
+        nickMap[s.id] = (s.nickname || `Loja ${s.cust_id}`) as string;
+        sellerIds.push(s.id);
       });
 
-      const sellerIds = Object.keys(sMap);
-      let live: LiveRow[] = [];
-      if (sellerIds.length > 0) {
-        const { data: ll } = await supabase
-          .from("live_listings")
-          .select("seller_id, data, itens")
-          .in("seller_id", sellerIds)
-          .order("data", { ascending: false });
-        live = (ll as any as LiveRow[]) || [];
+      if (sellerIds.length === 0) {
+        if (!cancel) {
+          setEligRows([]);
+          setQualityRows([]);
+          setSellerNickMap({});
+          setLoading(false);
+        }
+        return;
       }
 
+      // Elegibilidade — pega até 5000 linhas mais recentes do escopo
+      const { data: elig } = await supabase
+        .from("seller_eligibility")
+        .select(
+          "seller_id, item_id, item_name, data, pedidos_7d, estoque_medio_7d, media_tsi_diario_7d, vertical_item"
+        )
+        .in("seller_id", sellerIds)
+        .order("data", { ascending: false })
+        .limit(5000);
+
+      // Qualidade — mesma janela para ter score histórico
+      const { data: quality } = await supabase
+        .from("seller_listings_quality")
+        .select("seller_id, item_id, data, score_qualidade_final, visitas_clips")
+        .in("seller_id", sellerIds)
+        .order("data", { ascending: false })
+        .limit(5000);
+
       if (cancel) return;
-      setCppRows((cpp as any as CppRow[]) || []);
-      setLiveRows(live);
-      setSellerCustMap(sMap);
+      setEligRows((elig as any as EligRow[]) || []);
+      setQualityRows((quality as any as QualityRow[]) || []);
+      setSellerNickMap(nickMap);
       setLoading(false);
     })();
     return () => {
@@ -149,107 +248,122 @@ export default function AnaliseMLB() {
     };
   }, [scopeCustIds.join(","), loadingPortfolios]);
 
-  // Agrega por seller: mês atual vs mês anterior
-  const aggregates: SellerAggregate[] = useMemo(() => {
-    if (cppRows.length === 0) return [];
+  // Agrega por item_id (MLB): pega dois snapshots mais recentes
+  const aggregates: MlbAggregate[] = useMemo(() => {
+    if (eligRows.length === 0) return [];
 
-    // group by cust_id
-    const byCust = new Map<string, CppRow[]>();
-    for (const r of cppRows) {
-      const k = String(r.cus_cust_id_sel);
-      if (!byCust.has(k)) byCust.set(k, []);
-      byCust.get(k)!.push(r);
+    // Group eligibility rows by item_id, sorted desc by data
+    const eligByItem = new Map<string, EligRow[]>();
+    for (const r of eligRows) {
+      if (!r.item_id) continue;
+      if (!eligByItem.has(r.item_id)) eligByItem.set(r.item_id, []);
+      eligByItem.get(r.item_id)!.push(r);
     }
 
-    // last movement date per cust from live_listings (dias com estoque)
-    const lastMovByCust = new Map<string, string>();
-    for (const l of liveRows) {
-      if (!l.data || (l.itens ?? 0) <= 0) continue;
-      const cust = sellerCustMap[l.seller_id];
-      if (!cust) continue;
-      const prev = lastMovByCust.get(cust);
-      if (!prev || prev < l.data) lastMovByCust.set(cust, l.data);
+    // Quality by item_id
+    const qualByItem = new Map<string, QualityRow[]>();
+    for (const q of qualityRows) {
+      if (!q.item_id) continue;
+      if (!qualByItem.has(q.item_id)) qualByItem.set(q.item_id, []);
+      qualByItem.get(q.item_id)!.push(q);
     }
 
     const today = new Date();
+    const out: MlbAggregate[] = [];
 
-    const out: SellerAggregate[] = [];
-    byCust.forEach((rows, cust) => {
+    eligByItem.forEach((rows, itemId) => {
       const sorted = [...rows].sort((a, b) =>
-        (b.mes_ref || "").localeCompare(a.mes_ref || "")
+        (b.data || "").localeCompare(a.data || "")
       );
-      const atual = sorted[0];
-      const anterior = sorted[1];
-      if (!atual) return;
-      const gmvAtual = Number(atual.tgmv_lc) || 0;
-      const gmvAnt = Number(anterior?.tgmv_lc) || 0;
-      const vAt = Number(atual.visitas) || 0;
-      const vAnt = Number(anterior?.visitas) || 0;
-      const gmvDelta = gmvAnt > 0 ? ((gmvAtual - gmvAnt) / gmvAnt) * 100 : 0;
-      const visDelta = vAnt > 0 ? ((vAt - vAnt) / vAnt) * 100 : 0;
-      const lastMov = lastMovByCust.get(cust) || null;
-      const dias =
-        lastMov != null
-          ? Math.floor(
-              (today.getTime() - new Date(lastMov).getTime()) /
-                (1000 * 60 * 60 * 24)
-            )
-          : null;
+      const cur = sorted[0];
+      const prev = sorted.find((r) => r.data !== cur.data);
+      if (!cur) return;
+
+      const pedAt = Number(cur.pedidos_7d) || 0;
+      const pedAnt = Number(prev?.pedidos_7d) || 0;
+      const pedDelta = pedAnt > 0 ? ((pedAt - pedAnt) / pedAnt) * 100 : pedAt > 0 ? 100 : 0;
+
+      const tsiAt = Number(cur.media_tsi_diario_7d) || 0;
+      const tsiAnt = Number(prev?.media_tsi_diario_7d) || 0;
+      const tsiDelta = tsiAnt > 0 ? ((tsiAt - tsiAnt) / tsiAnt) * 100 : 0;
+
+      // "Última venda" — último snapshot com pedidos_7d > 0
+      const ultimaComVenda = sorted.find((r) => (Number(r.pedidos_7d) || 0) > 0);
+      const ultimaVenda = ultimaComVenda?.data || null;
+      const diasSemVenda =
+        pedAt > 0
+          ? 0
+          : ultimaVenda
+            ? Math.floor(
+                (today.getTime() - new Date(ultimaVenda).getTime()) /
+                  (1000 * 60 * 60 * 24)
+              )
+            : null;
+
+      const qs = qualByItem.get(itemId);
+      const qCur = qs?.[0];
+      const qPrev = qs?.find((q) => q.data !== qCur?.data);
+      const scoreAt = qCur ? Number(qCur.score_qualidade_final) : null;
+      const scoreAnt = qPrev ? Number(qPrev.score_qualidade_final) : null;
+      const scoreDelta =
+        scoreAt !== null && scoreAnt !== null && scoreAnt > 0
+          ? ((scoreAt - scoreAnt) / scoreAnt) * 100
+          : 0;
 
       out.push({
-        custId: cust,
-        nickname: atual.cus_nickname || `Loja ${cust}`,
-        gmvAtual,
-        gmvAnterior: gmvAnt,
-        gmvDeltaPct: gmvDelta,
-        visitasAtual: vAt,
-        visitasAnterior: vAnt,
-        visitasDeltaPct: visDelta,
-        tsiAtual: Number(atual.tsi) || 0,
-        mesAtual: atual.mes_ref,
-        mesAnterior: anterior?.mes_ref || "",
-        diasSemMovimento: dias,
-        ultimaMovimentacao: lastMov,
+        itemId,
+        itemName: cur.item_name || "",
+        sellerNickname: sellerNickMap[cur.seller_id] || "—",
+        vertical: cur.vertical_item || "",
+        pedidosAtual: pedAt,
+        pedidosAnterior: pedAnt,
+        pedidosDeltaPct: pedDelta,
+        dataAtual: cur.data,
+        dataAnterior: prev?.data || "",
+        estoque: Number(cur.estoque_medio_7d) || 0,
+        diasSemVenda,
+        ultimaVenda,
+        tsiAtual: tsiAt,
+        tsiAnterior: tsiAnt,
+        tsiDeltaPct: tsiDelta,
+        scoreAtual: scoreAt,
+        scoreAnterior: scoreAnt,
+        scoreDeltaPct: scoreDelta,
       });
     });
 
     return out;
-  }, [cppRows, liveRows, sellerCustMap]);
+  }, [eligRows, qualityRows, sellerNickMap]);
 
-  // Seções
+  // Seções filtradas
   const quedaGmv = useMemo(
     () =>
-      aggregates
-        .filter((a) => a.gmvAnterior > 0 && a.gmvDeltaPct < 0)
-        .sort((a, b) => a.gmvDeltaPct - b.gmvDeltaPct)
-        .slice(0, 50),
+      aggregates.filter(
+        (a) => a.pedidosAnterior > 0 && a.pedidosDeltaPct < 0
+      ),
     [aggregates]
   );
-
   const semVendas = useMemo(
     () =>
-      aggregates
-        .filter(
-          (a) =>
-            (a.diasSemMovimento !== null && a.diasSemMovimento >= 15) ||
-            (a.tsiAtual === 0 && a.gmvAtual === 0)
-        )
-        .sort(
-          (a, b) =>
-            (b.diasSemMovimento ?? 999) - (a.diasSemMovimento ?? 999)
-        )
-        .slice(0, 50),
+      aggregates.filter(
+        (a) =>
+          a.pedidosAtual === 0 &&
+          a.estoque > 0 &&
+          (a.diasSemVenda === null || a.diasSemVenda >= 15)
+      ),
+    [aggregates]
+  );
+  const quedaVisitas = useMemo(
+    () =>
+      aggregates.filter(
+        (a) => a.tsiAnterior > 0 && a.tsiDeltaPct <= -20
+      ),
     [aggregates]
   );
 
-  const quedaVisitas = useMemo(
-    () =>
-      aggregates
-        .filter((a) => a.visitasAnterior > 0 && a.visitasDeltaPct <= -20)
-        .sort((a, b) => a.visitasDeltaPct - b.visitasDeltaPct)
-        .slice(0, 50),
-    [aggregates]
-  );
+  const sortGmv = useSort<MlbAggregate>(quedaGmv, "pedidosDeltaPct", "asc");
+  const sortSem = useSort<MlbAggregate>(semVendas, "diasSemVenda", "desc");
+  const sortVis = useSort<MlbAggregate>(quedaVisitas, "tsiDeltaPct", "asc");
 
   return (
     <div className="min-h-screen bg-background">
@@ -269,10 +383,13 @@ export default function AnaliseMLB() {
                 Análise de MLB
               </h1>
               <p className="text-xs text-muted-foreground">
-                Sinais de risco por seller — GMV, atividade e visitas (fonte:{" "}
-                <code className="px-1 rounded bg-muted">cpp_mensal</code>,{" "}
-                <code className="px-1 rounded bg-muted">cdp_mensal</code>,{" "}
-                <code className="px-1 rounded bg-muted">live_listings</code>)
+                Sinais por MLB — pedidos, atividade e movimento (fonte:{" "}
+                <code className="px-1 rounded bg-muted">seller_eligibility</code>{" "}
+                +{" "}
+                <code className="px-1 rounded bg-muted">
+                  seller_listings_quality
+                </code>
+                )
               </p>
             </div>
           </div>
@@ -294,6 +411,21 @@ export default function AnaliseMLB() {
           </div>
         </motion.div>
 
+        <div className="flex items-start gap-2 p-3 rounded-md border border-border/60 bg-muted/10 text-[11px]">
+          <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
+          <p className="text-muted-foreground">
+            <span className="font-semibold text-foreground">Metodologia:</span>{" "}
+            comparação entre os dois snapshots (
+            <code className="px-1 rounded bg-muted">data</code>) mais recentes de
+            cada MLB no escopo.
+            <br />
+            GMV usa <span className="font-semibold">pedidos_7d</span> como proxy
+            (banco não guarda GMV por item). "Visitas" usa{" "}
+            <span className="font-semibold">média TSI diária 7d</span> como proxy
+            de movimento — não há coluna de visitas por MLB.
+          </p>
+        </div>
+
         {loading || loadingPortfolios ? (
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 animate-spin text-neon-blue" />
@@ -307,200 +439,363 @@ export default function AnaliseMLB() {
           </div>
         ) : (
           <div className="space-y-6">
-            <SectionCard
-              title="MLBs em queda de GMV"
-              icon={<TrendingDown className="w-4 h-4 text-destructive" />}
-              subtitle={`${quedaGmv.length} sellers com queda mês/mês vs mês anterior`}
-              empty="Nenhum seller com queda de GMV no último mês."
-              rows={quedaGmv}
-              renderRow={(r) => (
-                <TableRow key={r.custId}>
-                  <TableCell>
-                    <div className="font-medium">{r.nickname}</div>
-                    <div className="text-[10px] font-mono text-muted-foreground">
-                      {r.custId}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums">
-                    {fmtBRL(r.gmvAnterior)}
-                    <div className="text-[10px] text-muted-foreground">
-                      {fmtMes(r.mesAnterior)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums">
-                    {fmtBRL(r.gmvAtual)}
-                    <div className="text-[10px] text-muted-foreground">
-                      {fmtMes(r.mesAtual)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge
-                      variant="outline"
-                      className={
-                        r.gmvDeltaPct <= -30
-                          ? "border-destructive/40 text-destructive"
-                          : r.gmvDeltaPct <= -10
-                            ? "border-warning/40 text-warning"
-                            : "border-muted-foreground/30 text-muted-foreground"
-                      }
-                    >
-                      {fmtPct(r.gmvDeltaPct)}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
+            {/* Seção 1 — Queda de GMV (proxy: pedidos_7d) */}
+            <motion.section
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card p-6 space-y-3"
+            >
+              <div className="flex items-center gap-2">
+                <TrendingDown className="w-4 h-4 text-destructive" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider">
+                  MLBs em queda de GMV
+                </h2>
+                <span className="text-[11px] text-muted-foreground">
+                  · {quedaGmv.length} itens · proxy: pedidos_7d snapshot atual vs
+                  anterior
+                </span>
+              </div>
+              {quedaGmv.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  Nenhum MLB com queda de pedidos entre os snapshots.
+                </p>
+              ) : (
+                <div className="overflow-x-auto max-h-[520px]">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background z-10">
+                      <TableRow>
+                        <SortHeader<MlbAggregate>
+                          label="MLB / Item"
+                          columnKey="itemName"
+                          sortKey={sortGmv.key}
+                          sortDir={sortGmv.dir}
+                          onSort={sortGmv.toggle}
+                          align="left"
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Loja"
+                          columnKey="sellerNickname"
+                          sortKey={sortGmv.key}
+                          sortDir={sortGmv.dir}
+                          onSort={sortGmv.toggle}
+                          align="left"
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Pedidos anterior"
+                          columnKey="pedidosAnterior"
+                          sortKey={sortGmv.key}
+                          sortDir={sortGmv.dir}
+                          onSort={sortGmv.toggle}
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Pedidos atual"
+                          columnKey="pedidosAtual"
+                          sortKey={sortGmv.key}
+                          sortDir={sortGmv.dir}
+                          onSort={sortGmv.toggle}
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Δ %"
+                          columnKey="pedidosDeltaPct"
+                          sortKey={sortGmv.key}
+                          sortDir={sortGmv.dir}
+                          onSort={sortGmv.toggle}
+                        />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortGmv.sorted.slice(0, 200).map((r) => (
+                        <TableRow key={r.itemId}>
+                          <TableCell className="max-w-[320px]">
+                            <a
+                              href={mlbLink(r.itemId)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] font-mono text-primary hover:underline inline-flex items-center gap-0.5"
+                            >
+                              MLB{r.itemId}
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                            <div className="text-[11px] text-muted-foreground truncate">
+                              {r.itemName}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {r.sellerNickname}
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums">
+                            {fmtNum(r.pedidosAnterior)}
+                            <div className="text-[10px] text-muted-foreground">
+                              {fmtDate(r.dataAnterior)}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums">
+                            {fmtNum(r.pedidosAtual)}
+                            <div className="text-[10px] text-muted-foreground">
+                              {fmtDate(r.dataAtual)}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge
+                              variant="outline"
+                              className={
+                                r.pedidosDeltaPct <= -50
+                                  ? "border-destructive/40 text-destructive"
+                                  : r.pedidosDeltaPct <= -20
+                                    ? "border-warning/40 text-warning"
+                                    : "border-muted-foreground/30 text-muted-foreground"
+                              }
+                            >
+                              {fmtPct(r.pedidosDeltaPct)}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
-              headers={
-                <TableRow>
-                  <TableHead>Loja</TableHead>
-                  <TableHead className="text-right">GMV mês anterior</TableHead>
-                  <TableHead className="text-right">GMV mês atual</TableHead>
-                  <TableHead className="text-right">Δ %</TableHead>
-                </TableRow>
-              }
-            />
+            </motion.section>
 
-            <SectionCard
-              title="MLBs sem vendas há 15+ dias"
-              icon={<PauseCircle className="w-4 h-4 text-warning" />}
-              subtitle={`${semVendas.length} sellers sem movimentação recente (última data em live_listings ou TSI zerado no mês)`}
-              empty="Nenhum seller inativo detectado."
-              rows={semVendas}
-              renderRow={(r) => (
-                <TableRow key={r.custId}>
-                  <TableCell>
-                    <div className="font-medium">{r.nickname}</div>
-                    <div className="text-[10px] font-mono text-muted-foreground">
-                      {r.custId}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums">
-                    {r.ultimaMovimentacao
-                      ? new Date(r.ultimaMovimentacao).toLocaleDateString(
-                          "pt-BR"
-                        )
-                      : "—"}
-                  </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums">
-                    {r.diasSemMovimento !== null
-                      ? `${r.diasSemMovimento} dias`
-                      : "s/ registro"}
-                  </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums">
-                    {fmtNum(r.tsiAtual)}
-                    <div className="text-[10px] text-muted-foreground">
-                      TSI {fmtMes(r.mesAtual)}
-                    </div>
-                  </TableCell>
-                </TableRow>
+            {/* Seção 2 — Sem vendas 15+ dias */}
+            <motion.section
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card p-6 space-y-3"
+            >
+              <div className="flex items-center gap-2">
+                <PauseCircle className="w-4 h-4 text-warning" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider">
+                  MLBs sem vendas há 15+ dias
+                </h2>
+                <span className="text-[11px] text-muted-foreground">
+                  · {semVendas.length} itens com estoque &gt; 0 e pedidos_7d = 0
+                </span>
+              </div>
+              {semVendas.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  Nenhum MLB inativo detectado.
+                </p>
+              ) : (
+                <div className="overflow-x-auto max-h-[520px]">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background z-10">
+                      <TableRow>
+                        <SortHeader<MlbAggregate>
+                          label="MLB / Item"
+                          columnKey="itemName"
+                          sortKey={sortSem.key}
+                          sortDir={sortSem.dir}
+                          onSort={sortSem.toggle}
+                          align="left"
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Loja"
+                          columnKey="sellerNickname"
+                          sortKey={sortSem.key}
+                          sortDir={sortSem.dir}
+                          onSort={sortSem.toggle}
+                          align="left"
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Última venda"
+                          columnKey="ultimaVenda"
+                          sortKey={sortSem.key}
+                          sortDir={sortSem.dir}
+                          onSort={sortSem.toggle}
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Dias sem venda"
+                          columnKey="diasSemVenda"
+                          sortKey={sortSem.key}
+                          sortDir={sortSem.dir}
+                          onSort={sortSem.toggle}
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Estoque"
+                          columnKey="estoque"
+                          sortKey={sortSem.key}
+                          sortDir={sortSem.dir}
+                          onSort={sortSem.toggle}
+                        />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortSem.sorted.slice(0, 200).map((r) => (
+                        <TableRow key={r.itemId}>
+                          <TableCell className="max-w-[320px]">
+                            <a
+                              href={mlbLink(r.itemId)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] font-mono text-primary hover:underline inline-flex items-center gap-0.5"
+                            >
+                              MLB{r.itemId}
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                            <div className="text-[11px] text-muted-foreground truncate">
+                              {r.itemName}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {r.sellerNickname}
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums text-xs">
+                            {fmtDate(r.ultimaVenda)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge
+                              variant="outline"
+                              className={
+                                (r.diasSemVenda ?? 0) >= 30
+                                  ? "border-destructive/40 text-destructive"
+                                  : "border-warning/40 text-warning"
+                              }
+                            >
+                              {r.diasSemVenda === null
+                                ? "s/ histórico"
+                                : `${r.diasSemVenda} dias`}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums">
+                            {fmtNum(r.estoque)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
-              headers={
-                <TableRow>
-                  <TableHead>Loja</TableHead>
-                  <TableHead className="text-right">Última movimentação</TableHead>
-                  <TableHead className="text-right">Dias sem mov.</TableHead>
-                  <TableHead className="text-right">TSI mês atual</TableHead>
-                </TableRow>
-              }
-            />
+            </motion.section>
 
-            <SectionCard
-              title="MLBs com queda de visitas 20%+"
-              icon={<Eye className="w-4 h-4 text-neon-blue" />}
-              subtitle={`${quedaVisitas.length} sellers com queda ≥ 20% em visitas mês/mês`}
-              empty="Nenhum seller com queda relevante de visitas."
-              rows={quedaVisitas}
-              renderRow={(r) => (
-                <TableRow key={r.custId}>
-                  <TableCell>
-                    <div className="font-medium">{r.nickname}</div>
-                    <div className="text-[10px] font-mono text-muted-foreground">
-                      {r.custId}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums">
-                    {fmtNum(r.visitasAnterior)}
-                    <div className="text-[10px] text-muted-foreground">
-                      {fmtMes(r.mesAnterior)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-mono tabular-nums">
-                    {fmtNum(r.visitasAtual)}
-                    <div className="text-[10px] text-muted-foreground">
-                      {fmtMes(r.mesAtual)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge
-                      variant="outline"
-                      className={
-                        r.visitasDeltaPct <= -40
-                          ? "border-destructive/40 text-destructive"
-                          : "border-warning/40 text-warning"
-                      }
-                    >
-                      {fmtPct(r.visitasDeltaPct)}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
+            {/* Seção 3 — Queda de visitas / movimento 20%+ */}
+            <motion.section
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card p-6 space-y-3"
+            >
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-neon-blue" />
+                <h2 className="text-sm font-semibold uppercase tracking-wider">
+                  MLBs com queda de visitas ≥ 20%
+                </h2>
+                <span className="text-[11px] text-muted-foreground">
+                  · {quedaVisitas.length} itens · proxy: média TSI diária 7d
+                  (visitas por MLB não disponível)
+                </span>
+              </div>
+              {quedaVisitas.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  Nenhum MLB com queda relevante de movimento.
+                </p>
+              ) : (
+                <div className="overflow-x-auto max-h-[520px]">
+                  <Table>
+                    <TableHeader className="sticky top-0 bg-background z-10">
+                      <TableRow>
+                        <SortHeader<MlbAggregate>
+                          label="MLB / Item"
+                          columnKey="itemName"
+                          sortKey={sortVis.key}
+                          sortDir={sortVis.dir}
+                          onSort={sortVis.toggle}
+                          align="left"
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Loja"
+                          columnKey="sellerNickname"
+                          sortKey={sortVis.key}
+                          sortDir={sortVis.dir}
+                          onSort={sortVis.toggle}
+                          align="left"
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="TSI anterior"
+                          columnKey="tsiAnterior"
+                          sortKey={sortVis.key}
+                          sortDir={sortVis.dir}
+                          onSort={sortVis.toggle}
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="TSI atual"
+                          columnKey="tsiAtual"
+                          sortKey={sortVis.key}
+                          sortDir={sortVis.dir}
+                          onSort={sortVis.toggle}
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Δ %"
+                          columnKey="tsiDeltaPct"
+                          sortKey={sortVis.key}
+                          sortDir={sortVis.dir}
+                          onSort={sortVis.toggle}
+                        />
+                        <SortHeader<MlbAggregate>
+                          label="Score qualidade"
+                          columnKey="scoreAtual"
+                          sortKey={sortVis.key}
+                          sortDir={sortVis.dir}
+                          onSort={sortVis.toggle}
+                        />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {sortVis.sorted.slice(0, 200).map((r) => (
+                        <TableRow key={r.itemId}>
+                          <TableCell className="max-w-[320px]">
+                            <a
+                              href={mlbLink(r.itemId)}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] font-mono text-primary hover:underline inline-flex items-center gap-0.5"
+                            >
+                              MLB{r.itemId}
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                            <div className="text-[11px] text-muted-foreground truncate">
+                              {r.itemName}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-xs">
+                            {r.sellerNickname}
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums">
+                            {fmtNum2(r.tsiAnterior)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums">
+                            {fmtNum2(r.tsiAtual)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge
+                              variant="outline"
+                              className={
+                                r.tsiDeltaPct <= -50
+                                  ? "border-destructive/40 text-destructive"
+                                  : "border-warning/40 text-warning"
+                              }
+                            >
+                              {fmtPct(r.tsiDeltaPct)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right font-mono tabular-nums">
+                            {r.scoreAtual !== null ? fmtNum(r.scoreAtual) : "—"}
+                            {r.scoreAnterior !== null &&
+                              r.scoreAnterior !== r.scoreAtual && (
+                                <div className="text-[10px] text-muted-foreground">
+                                  antes {fmtNum(r.scoreAnterior)}
+                                </div>
+                              )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               )}
-              headers={
-                <TableRow>
-                  <TableHead>Loja</TableHead>
-                  <TableHead className="text-right">Visitas anterior</TableHead>
-                  <TableHead className="text-right">Visitas atual</TableHead>
-                  <TableHead className="text-right">Δ %</TableHead>
-                </TableRow>
-              }
-            />
+            </motion.section>
           </div>
         )}
       </div>
     </div>
-  );
-}
-
-function SectionCard<T>({
-  title,
-  subtitle,
-  icon,
-  rows,
-  headers,
-  renderRow,
-  empty,
-}: {
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  rows: T[];
-  headers: React.ReactNode;
-  renderRow: (row: T) => React.ReactNode;
-  empty: string;
-}) {
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass-card p-6 space-y-3"
-    >
-      <div className="flex items-center gap-2">
-        {icon}
-        <h2 className="text-sm font-semibold uppercase tracking-wider">
-          {title}
-        </h2>
-        <span className="text-[11px] text-muted-foreground">· {subtitle}</span>
-      </div>
-      {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground text-center py-6">
-          {empty}
-        </p>
-      ) : (
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>{headers}</TableHeader>
-            <TableBody>{rows.map((r) => renderRow(r))}</TableBody>
-          </Table>
-        </div>
-      )}
-    </motion.section>
   );
 }
