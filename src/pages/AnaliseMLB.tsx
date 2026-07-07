@@ -168,6 +168,45 @@ function SortHeader<T>({
   );
 }
 
+function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-3">
+        {Array.from({ length: cols }).map((_, i) => (
+          <Skeleton key={i} className="h-4 flex-1" />
+        ))}
+      </div>
+      {Array.from({ length: rows }).map((_, r) => (
+        <div key={r} className="flex gap-3">
+          {Array.from({ length: cols }).map((_, c) => (
+            <Skeleton key={c} className={`h-8 flex-1 ${c === 0 ? "min-w-[180px]" : ""}`} />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({
+  title,
+  hint,
+  icon: Icon = Inbox,
+}: {
+  title: string;
+  hint?: string;
+  icon?: typeof Inbox;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
+      <div className="w-10 h-10 rounded-full bg-muted/40 flex items-center justify-center">
+        <Icon className="w-5 h-5 text-muted-foreground" />
+      </div>
+      <p className="text-sm text-foreground">{title}</p>
+      {hint && <p className="text-[11px] text-muted-foreground max-w-sm">{hint}</p>}
+    </div>
+  );
+}
+
 export default function AnaliseMLB() {
   const navigate = useNavigate();
   const { portfolios, loading: loadingPortfolios } = usePortfolios();
