@@ -512,16 +512,25 @@ export default function AnaliseMLB() {
           </p>
         </div>
 
-        {loading || loadingPortfolios ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-6 h-6 animate-spin text-neon-blue" />
-            <span className="ml-2 text-sm text-muted-foreground">
-              Carregando dados…
-            </span>
-          </div>
-        ) : scopeCustIds.length === 0 ? (
+        {!loading && !loadingPortfolios && scopeCustIds.length === 0 ? (
           <div className="glass-card p-8 text-center text-sm text-muted-foreground">
             Nenhuma carteira disponível.
+          </div>
+        ) : !loading && !loadingPortfolios && sellerOptions.length === 0 ? (
+          <div className="glass-card p-6">
+            <EmptyState
+              icon={PackageSearch}
+              title="Nenhuma loja encontrada nesta carteira"
+              hint="Selecione outra carteira ou verifique se há sellers vinculados aos CUST IDs."
+            />
+          </div>
+        ) : !loading && !loadingPortfolios && !selectedSellerId ? (
+          <div className="glass-card p-6">
+            <EmptyState
+              icon={PackageSearch}
+              title="Selecione uma loja"
+              hint="Escolha uma loja no seletor acima para visualizar os MLBs."
+            />
           </div>
         ) : (
           <div className="space-y-6">
@@ -541,10 +550,19 @@ export default function AnaliseMLB() {
                   anterior
                 </span>
               </div>
-              {quedaGmv.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">
-                  Nenhum MLB com queda de pedidos entre os snapshots.
-                </p>
+              {loading || loadingPortfolios ? (
+                <TableSkeleton rows={6} cols={5} />
+              ) : aggregatesLoja.length === 0 ? (
+                <EmptyState
+                  icon={PackageSearch}
+                  title="Sem dados para esta loja"
+                  hint="Ainda não há snapshots de elegibilidade suficientes para calcular queda de pedidos."
+                />
+              ) : quedaGmv.length === 0 ? (
+                <EmptyState
+                  title="Nenhum MLB em queda de pedidos"
+                  hint="Todos os MLBs com histórico mantiveram ou aumentaram os pedidos entre os dois snapshots mais recentes."
+                />
               ) : (
                 <div className="overflow-x-auto max-h-[520px]">
                   <Table>
@@ -658,10 +676,19 @@ export default function AnaliseMLB() {
                   · {semVendas.length} itens com estoque &gt; 0 e pedidos_7d = 0
                 </span>
               </div>
-              {semVendas.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">
-                  Nenhum MLB inativo detectado.
-                </p>
+              {loading || loadingPortfolios ? (
+                <TableSkeleton rows={5} cols={5} />
+              ) : aggregatesLoja.length === 0 ? (
+                <EmptyState
+                  icon={PackageSearch}
+                  title="Sem dados para esta loja"
+                  hint="Não há MLBs com histórico para detectar inatividade."
+                />
+              ) : semVendas.length === 0 ? (
+                <EmptyState
+                  title="Nenhum MLB inativo detectado"
+                  hint="Todos os MLBs com estoque tiveram pedidos no último snapshot."
+                />
               ) : (
                 <div className="overflow-x-auto max-h-[520px]">
                   <Table>
@@ -770,10 +797,19 @@ export default function AnaliseMLB() {
                   (visitas por MLB não disponível)
                 </span>
               </div>
-              {quedaVisitas.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">
-                  Nenhum MLB com queda relevante de movimento.
-                </p>
+              {loading || loadingPortfolios ? (
+                <TableSkeleton rows={5} cols={6} />
+              ) : aggregatesLoja.length === 0 ? (
+                <EmptyState
+                  icon={PackageSearch}
+                  title="Sem dados para esta loja"
+                  hint="Sem histórico de TSI para calcular variação de movimento."
+                />
+              ) : quedaVisitas.length === 0 ? (
+                <EmptyState
+                  title="Nenhum MLB com queda relevante de movimento"
+                  hint="Nenhum item apresentou queda ≥ 20% na média TSI diária 7d entre os dois últimos snapshots."
+                />
               ) : (
                 <div className="overflow-x-auto max-h-[520px]">
                   <Table>
