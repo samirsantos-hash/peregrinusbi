@@ -20,6 +20,7 @@ import ResetPassword from "./pages/ResetPassword";
 import CppDashboard from "./pages/CppDashboard";
 import GestaoCarteira from "./pages/GestaoCarteira";
 import ProjecaoCrescimento from "./pages/ProjecaoCrescimento";
+import AnaliseMLB from "./pages/AnaliseMLB";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 
 const queryClient = new QueryClient();
@@ -66,6 +67,7 @@ const AppRoutes = () => {
       <Route path="/cpp" element={<ProtectedRoute><CppDashboard /></ProtectedRoute>} />
       <Route path="/gestao-carteira" element={<ProtectedRoute><GestaoCarteira /></ProtectedRoute>} />
       <Route path="/projecao-crescimento" element={<ProtectedRoute><ProjecaoCrescimento /></ProtectedRoute>} />
+      <Route path="/analise-mlb" element={<ProtectedRoute><AnaliseMLB /></ProtectedRoute>} />
       <Route path="/no-access" element={user ? <NoAccess /> : <Navigate to="/auth" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
