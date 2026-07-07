@@ -10,6 +10,7 @@ import {
   ArrowUpDown,
   ExternalLink,
   Info,
+  Construction,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -52,6 +53,7 @@ interface QualityRow {
 
 interface MlbAggregate {
   itemId: string;
+  sellerId: string;
   itemName: string;
   sellerNickname: string;
   vertical: string;
@@ -172,6 +174,8 @@ export default function AnaliseMLB() {
   const [eligRows, setEligRows] = useState<EligRow[]>([]);
   const [qualityRows, setQualityRows] = useState<QualityRow[]>([]);
   const [sellerNickMap, setSellerNickMap] = useState<Record<string, string>>({});
+  const [sellerOptions, setSellerOptions] = useState<{ id: string; nickname: string; custId: string }[]>([]);
+  const [selectedSellerId, setSelectedSellerId] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   // Cust IDs do escopo (todas as carteiras acessíveis ou a selecionada)
@@ -204,10 +208,13 @@ export default function AnaliseMLB() {
 
       const nickMap: Record<string, string> = {};
       const sellerIds: string[] = [];
+      const opts: { id: string; nickname: string; custId: string }[] = [];
       (sellers || []).forEach((s: any) => {
         nickMap[s.id] = (s.nickname || `Loja ${s.cust_id}`) as string;
         sellerIds.push(s.id);
+        opts.push({ id: s.id, nickname: nickMap[s.id], custId: s.cust_id });
       });
+      opts.sort((a, b) => a.nickname.localeCompare(b.nickname));
 
       if (sellerIds.length === 0) {
         if (!cancel) {
@@ -241,6 +248,11 @@ export default function AnaliseMLB() {
       setEligRows((elig as any as EligRow[]) || []);
       setQualityRows((quality as any as QualityRow[]) || []);
       setSellerNickMap(nickMap);
+      setSellerOptions(opts);
+      setSelectedSellerId((prev) => {
+        if (prev && opts.some((o) => o.id === prev)) return prev;
+        return opts[0]?.id || "";
+      });
       setLoading(false);
     })();
     return () => {
@@ -312,6 +324,7 @@ export default function AnaliseMLB() {
 
       out.push({
         itemId,
+        sellerId: cur.seller_id,
         itemName: cur.item_name || "",
         sellerNickname: sellerNickMap[cur.seller_id] || "—",
         vertical: cur.vertical_item || "",
@@ -335,30 +348,36 @@ export default function AnaliseMLB() {
     return out;
   }, [eligRows, qualityRows, sellerNickMap]);
 
+  // Filtro por loja (obrigatório — plotamos MLBs de uma única loja por vez)
+  const aggregatesLoja = useMemo(
+    () => (selectedSellerId ? aggregates.filter((a) => a.sellerId === selectedSellerId) : []),
+    [aggregates, selectedSellerId]
+  );
+
   // Seções filtradas
   const quedaGmv = useMemo(
     () =>
-      aggregates.filter(
+      aggregatesLoja.filter(
         (a) => a.pedidosAnterior > 0 && a.pedidosDeltaPct < 0
       ),
-    [aggregates]
+    [aggregatesLoja]
   );
   const semVendas = useMemo(
     () =>
-      aggregates.filter(
+      aggregatesLoja.filter(
         (a) =>
           a.pedidosAtual === 0 &&
           a.estoque > 0 &&
           (a.diasSemVenda === null || a.diasSemVenda >= 15)
       ),
-    [aggregates]
+    [aggregatesLoja]
   );
   const quedaVisitas = useMemo(
     () =>
-      aggregates.filter(
+      aggregatesLoja.filter(
         (a) => a.tsiAnterior > 0 && a.tsiDeltaPct <= -20
       ),
-    [aggregates]
+    [aggregatesLoja]
   );
 
   const sortGmv = useSort<MlbAggregate>(quedaGmv, "pedidosDeltaPct", "asc");
@@ -408,8 +427,34 @@ export default function AnaliseMLB() {
                 ))}
               </SelectContent>
             </Select>
+            <span className="text-xs text-muted-foreground ml-2">Loja:</span>
+            <Select
+              value={selectedSellerId}
+              onValueChange={setSelectedSellerId}
+              disabled={sellerOptions.length === 0}
+            >
+              <SelectTrigger className="h-9 w-[260px]">
+                <SelectValue placeholder="Selecione uma loja" />
+              </SelectTrigger>
+              <SelectContent>
+                {sellerOptions.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.nickname}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </motion.div>
+
+        <div className="flex items-start gap-2 p-3 rounded-md border border-warning/40 bg-warning/10 text-[11px]">
+          <Construction className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+          <p className="text-foreground">
+            <span className="font-semibold">Página em construção:</span>{" "}
+            os dados abaixo são preliminares e podem sofrer alterações. Métricas
+            e fontes ainda estão sendo validadas.
+          </p>
+        </div>
 
         <div className="flex items-start gap-2 p-3 rounded-md border border-border/60 bg-muted/10 text-[11px]">
           <Info className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
