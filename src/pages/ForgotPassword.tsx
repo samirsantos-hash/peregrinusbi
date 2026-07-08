@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,10 +12,22 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [sentTo, setSentTo] = useState<string>("");
+  const [resendCooldown, setResendCooldown] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    await sendReset();
+  };
+
+  const sendReset = async () => {
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -26,6 +38,9 @@ const ForgotPassword = () => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       setSent(true);
+      setSentTo(email);
+      setResendCooldown(30);
+      toast({ title: "E-mail enviado", description: `Link enviado para ${email}` });
     }
   };
 
@@ -65,9 +80,33 @@ const ForgotPassword = () => {
             </Button>
           </form>
         ) : (
-          <p className="text-sm text-center text-muted-foreground">
-            Se o e-mail estiver cadastrado, você receberá um link em breve.
-          </p>
+          <div className="space-y-3">
+            <div className="rounded-md border border-border/50 bg-muted/30 p-3 text-center">
+              <p className="text-xs text-muted-foreground">Link enviado para:</p>
+              <p className="text-sm font-medium break-all">{sentTo}</p>
+            </div>
+            <p className="text-xs text-center text-muted-foreground">
+              Se este e-mail estiver cadastrado, você receberá o link em instantes. Verifique também a caixa de spam.
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              disabled={loading || resendCooldown > 0}
+              onClick={sendReset}
+            >
+              {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+              {resendCooldown > 0 ? `Reenviar em ${resendCooldown}s` : "Reenviar e-mail"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              onClick={() => { setSent(false); setSentTo(""); }}
+            >
+              Usar outro e-mail
+            </Button>
+          </div>
         )}
 
         <div className="text-center">
