@@ -511,6 +511,27 @@ export default function AnaliseMLB() {
                 ))}
               </SelectContent>
             </Select>
+            <span className="text-xs text-muted-foreground ml-2">Período:</span>
+            <Select value={periodo} onValueChange={(v) => setPeriodo(v as any)}>
+              <SelectTrigger className="h-9 w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">1 semana</SelectItem>
+                <SelectItem value="15">2 semanas</SelectItem>
+                <SelectItem value="30">1 mês</SelectItem>
+                <SelectItem value="90">3 meses</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="relative w-[220px]">
+              <Search className="absolute left-2 top-2.5 w-3.5 h-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Buscar MLB, item ou vertical..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="pl-7 h-9 text-xs"
+              />
+            </div>
           </div>
         </motion.div>
 
