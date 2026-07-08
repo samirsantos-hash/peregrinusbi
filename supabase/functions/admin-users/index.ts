@@ -50,12 +50,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const callerClient = createClient(supabaseUrl, anonKey!, {
-      global: { headers: { Authorization: authHeader } },
-    });
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Use getUser instead of getClaims for broader compatibility
-    const { data: { user: callerUser }, error: userError } = await callerClient.auth.getUser();
+    // Validate the caller's JWT via the service-role client (uses JWKS)
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user: callerUser }, error: userError } = await adminClient.auth.getUser(token);
     if (userError || !callerUser) {
       console.error("Auth error:", userError?.message);
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -65,7 +64,6 @@ Deno.serve(async (req) => {
     }
 
     const callerId = callerUser.id;
-    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     const body = await req.json();
     const { action } = body;
