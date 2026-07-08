@@ -633,7 +633,7 @@ export default function GestaoCarteira() {
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-2 top-2.5 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar nickname ou ID..."
+              placeholder="Buscar por Nickname ou Cust ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-8"
