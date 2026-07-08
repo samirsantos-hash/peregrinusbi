@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortfolios } from "@/hooks/usePortfolios";
 
@@ -218,6 +220,8 @@ export default function AnaliseMLB() {
   const [sellerOptions, setSellerOptions] = useState<{ id: string; nickname: string; custId: string }[]>([]);
   const [selectedSellerId, setSelectedSellerId] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [busca, setBusca] = useState("");
+  const [periodo, setPeriodo] = useState<"7" | "15" | "30" | "90">("7");
 
   // Cust IDs do escopo (todas as carteiras acessíveis ou a selecionada)
   const scopeCustIds = useMemo(() => {
@@ -301,7 +305,7 @@ export default function AnaliseMLB() {
     };
   }, [scopeCustIds.join(","), loadingPortfolios]);
 
-  // Agrega por item_id (MLB): pega dois snapshots mais recentes
+  // Agrega por item_id (MLB): compara snapshot atual vs snapshot >= N dias antes
   const aggregates: MlbAggregate[] = useMemo(() => {
     if (eligRows.length === 0) return [];
 
@@ -322,6 +326,7 @@ export default function AnaliseMLB() {
     }
 
     const today = new Date();
+    const periodDays = Number(periodo);
     const out: MlbAggregate[] = [];
 
     eligByItem.forEach((rows, itemId) => {
@@ -329,7 +334,17 @@ export default function AnaliseMLB() {
         (b.data || "").localeCompare(a.data || "")
       );
       const cur = sorted[0];
-      const prev = sorted.find((r) => r.data !== cur.data);
+      const curTime = cur?.data ? new Date(cur.data).getTime() : NaN;
+      // snapshot anterior mais próximo do "cur - periodDays"
+      const prev =
+        !isNaN(curTime)
+          ? sorted.find((r) => {
+              if (!r.data || r.data === cur.data) return false;
+              const diffDays =
+                (curTime - new Date(r.data).getTime()) / (1000 * 60 * 60 * 24);
+              return diffDays >= periodDays;
+            }) || sorted.find((r) => r.data !== cur.data)
+          : sorted.find((r) => r.data !== cur.data);
       if (!cur) return;
 
       const pedAt = Number(cur.pedidos_7d) || 0;
@@ -387,12 +402,23 @@ export default function AnaliseMLB() {
     });
 
     return out;
-  }, [eligRows, qualityRows, sellerNickMap]);
+  }, [eligRows, qualityRows, sellerNickMap, periodo]);
 
   // Filtro por loja (obrigatório — plotamos MLBs de uma única loja por vez)
   const aggregatesLoja = useMemo(
-    () => (selectedSellerId ? aggregates.filter((a) => a.sellerId === selectedSellerId) : []),
-    [aggregates, selectedSellerId]
+    () => {
+      if (!selectedSellerId) return [];
+      const base = aggregates.filter((a) => a.sellerId === selectedSellerId);
+      const q = busca.trim().toLowerCase();
+      if (!q) return base;
+      return base.filter(
+        (a) =>
+          a.itemId.toLowerCase().includes(q) ||
+          a.itemName.toLowerCase().includes(q) ||
+          a.vertical.toLowerCase().includes(q)
+      );
+    },
+    [aggregates, selectedSellerId, busca]
   );
 
   // Seções filtradas
@@ -485,6 +511,27 @@ export default function AnaliseMLB() {
                 ))}
               </SelectContent>
             </Select>
+            <span className="text-xs text-muted-foreground ml-2">Período:</span>
+            <Select value={periodo} onValueChange={(v) => setPeriodo(v as any)}>
+              <SelectTrigger className="h-9 w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">1 semana</SelectItem>
+                <SelectItem value="15">2 semanas</SelectItem>
+                <SelectItem value="30">1 mês</SelectItem>
+                <SelectItem value="90">3 meses</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="relative w-[220px]">
+              <Search className="absolute left-2 top-2.5 w-3.5 h-3.5 text-muted-foreground" />
+              <Input
+                placeholder="Buscar MLB, item ou vertical..."
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                className="pl-7 h-9 text-xs"
+              />
+            </div>
           </div>
         </motion.div>
 
