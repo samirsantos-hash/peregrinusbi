@@ -465,7 +465,11 @@ const Index = () => {
                     />
                     <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
                     <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} />
-                    <TrendAnalysisPanel kpis={displayKpis} dataGranularity={granularity} />
+                    <TrendAnalysisPanel
+                      kpis={displayKpis}
+                      dataGranularity={granularity}
+                      allKpisDaily={allKpisDaily}
+                    />
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0 space-y-5">

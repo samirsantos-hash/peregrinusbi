@@ -7,9 +7,10 @@ import {
 import { TrendingUp, TrendingDown, Zap, BarChart3, Calendar } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import TooltipInfo from "./TooltipInfo";
-import { startOfWeek, format, parseISO } from "date-fns";
+import { startOfWeek, format, parseISO, getDaysInMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { fmtBRL, fmtBRLCompact, fmtNum, formatChartDate } from "@/utils/formatters";
+import { detectPartialMonths } from "@/utils/partialPeriodGuard";
 
 interface KpiLike {
   date: string;
@@ -23,6 +24,9 @@ interface KpiLike {
 interface TrendAnalysisPanelProps {
   kpis: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
+  /** Optional: daily rows used to compute real `dias_com_dados` for pro-rata
+   *  scaling of the trailing partial month in consolidated mode. */
+  allKpisDaily?: Array<{ date: string }>;
 }
 
 type Granularity = "day" | "week";
@@ -87,7 +91,7 @@ function computeCorrelation(xs: number[], ys: number[]): number {
   return den === 0 ? 0 : num / den;
 }
 
-const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPanelProps) => {
+const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: TrendAnalysisPanelProps) => {
   const [granularity, setGranularity] = useState<Granularity>("day");
 
   const axisLabel = dataGranularity === "consolidated" ? "Meses" : "Dias";
@@ -109,6 +113,43 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
 
   // Use all data — period filtering is now handled globally by DashboardHeader
   const filteredData = byDate;
+
+  // ── Pro-rata guard (mês parcial) ────────────────────────────────────
+  // Somente em modo consolidado: se o último mês do dataset for parcial,
+  // projeta as métricas aditivas do ÚLTIMO ponto para o mês inteiro usando
+  // dias_com_dados reais em `allKpisDaily` (fallback: nenhuma projeção).
+  const proRata = useMemo(() => {
+    if (dataGranularity !== "consolidated" || filteredData.length < 2) {
+      return { factor: 1, monthKey: "", diasComDados: 0, diasNoMes: 0 };
+    }
+    const info = detectPartialMonths(filteredData as any, { gmvField: "gmv" });
+    const last = filteredData[filteredData.length - 1];
+    const monthKey = String(last.date).slice(0, 7);
+    if (!info.get(monthKey)?.isPartial) {
+      return { factor: 1, monthKey, diasComDados: 0, diasNoMes: 0 };
+    }
+    const diasNoMes = getDaysInMonth(parseISO(last.date));
+    const diasComDados = (allKpisDaily || []).reduce((acc, r) => {
+      return String(r.date).slice(0, 7) === monthKey ? acc + 1 : acc;
+    }, 0);
+    const factor =
+      diasComDados > 0 && diasComDados < diasNoMes ? diasNoMes / diasComDados : 1;
+    return { factor, monthKey, diasComDados, diasNoMes };
+  }, [dataGranularity, filteredData, allKpisDaily]);
+
+  // Ajuste apenas para os cálculos de insights — chart segue com dados brutos.
+  const filteredDataAdjusted = useMemo(() => {
+    if (proRata.factor <= 1 || filteredData.length === 0) return filteredData;
+    const clone = filteredData.map((d) => ({ ...d }));
+    const last = clone[clone.length - 1];
+    const f = proRata.factor;
+    last.gmv = last.gmv * f;
+    last.ads = last.ads * f;
+    last.tgmvAds = last.tgmvAds * f;
+    // ROAS recomputado dos totais projetados, não escalado direto
+    last.roas = last.ads > 0 ? (last.tgmvAds / last.ads) * (last.count || 1) : last.roas;
+    return clone;
+  }, [filteredData, proRata.factor]);
 
   const chartData = useMemo(() => {
     if (granularity === "day") {
@@ -150,25 +191,25 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
 
   // Insights calculations
   const insights = useMemo(() => {
-    if (filteredData.length < 2) {
+    if (filteredDataAdjusted.length < 2) {
       return {
         efficiency: null,
         correlation: null,
         correlationLabel: "Dados insuficientes",
         correlationColor: "text-muted-foreground",
-        totalGmv: filteredData.reduce((s, d) => s + d.gmv, 0),
-        totalAds: filteredData.reduce((s, d) => s + d.ads, 0),
-        avgRoas: filteredData.length > 0 ?
-        filteredData.reduce((s, d) => s + d.roas / d.count, 0) / filteredData.length :
+        totalGmv: filteredDataAdjusted.reduce((s, d) => s + d.gmv, 0),
+        totalAds: filteredDataAdjusted.reduce((s, d) => s + d.ads, 0),
+        avgRoas: filteredDataAdjusted.length > 0 ?
+        filteredDataAdjusted.reduce((s, d) => s + d.roas / d.count, 0) / filteredDataAdjusted.length :
         0
       };
     }
 
-    const gmvs = filteredData.map((d) => d.gmv);
-    const adss = filteredData.map((d) => d.ads);
+    const gmvs = filteredDataAdjusted.map((d) => d.gmv);
+    const adss = filteredDataAdjusted.map((d) => d.ads);
     const totalGmv = gmvs.reduce((a, b) => a + b, 0);
     const totalAds = adss.reduce((a, b) => a + b, 0);
-    const avgRoas = filteredData.reduce((s, d) => s + d.roas / d.count, 0) / filteredData.length;
+    const avgRoas = filteredDataAdjusted.reduce((s, d) => s + d.roas / d.count, 0) / filteredDataAdjusted.length;
 
     // Efficiency of scale: marginal GMV per marginal Ads R$
     const gmvDelta = gmvs[gmvs.length - 1] - gmvs[0];
@@ -191,7 +232,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
     }
 
     return { efficiency, correlation: corr, correlationLabel, correlationColor, totalGmv, totalAds, avgRoas };
-  }, [filteredData]);
+  }, [filteredDataAdjusted]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -348,6 +389,15 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily" }: TrendAnalysisPa
               <Zap className="w-3.5 h-3.5 text-primary" />
               <p className="metric-label text-secondary">Insights Rápidos</p>
               <TooltipInfo text="Análise inteligente da relação entre investimento em Ads e retorno de faturamento." />
+              {proRata.factor > 1 && (
+                <Badge
+                  variant="outline"
+                  className="text-[9px] px-1.5 py-0 font-normal border-warning/40 text-warning ml-auto"
+                  title={`Pro-rata do último mês: ${proRata.diasComDados}d de ${proRata.diasNoMes}d (fator ${proRata.factor.toFixed(2)}x)`}
+                >
+                  Último mês projetado
+                </Badge>
+              )}
             </div>
 
             <div className="space-y-4">

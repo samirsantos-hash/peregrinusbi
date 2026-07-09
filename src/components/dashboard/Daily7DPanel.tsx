@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { format, parseISO, subDays, isAfter, isBefore, startOfDay, differenceInCalendarDays } from "date-fns";
+import { format, parseISO, subDays, isAfter, isBefore, startOfDay, differenceInCalendarDays, getDaysInMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarDays, Plus, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -117,6 +117,8 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
     periodo: Periodo;
     dias: Array<{ data: string; diaIndex: number; gmv: number; ads: number; roas: number; visits: number; tsi: number; tgmvPads: number }>;
     totais: { gmv: number; ads: number; roas: number; visits: number; tsi: number };
+    totaisProjetados: { gmv: number; ads: number; roas: number; visits: number; tsi: number };
+    proRata: { factor: number; diasComDados: number; diasNoMes: number };
   };
 
   const dadosPorPeriodo: PeriodoComputado[] = useMemo(() => {
@@ -141,19 +143,45 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
         dias.reduce((s, d) => s + (Number(d[key]) || 0), 0);
       const totalAds = sum("ads");
       const totalPads = sum("tgmvPads");
+      const totais = {
+        gmv: sum("gmv"),
+        ads: totalAds,
+        roas: totalAds > 0 ? totalPads / totalAds : 0,
+        visits: sum("visits"),
+        tsi: sum("tsi"),
+      };
+
+      // Pro-rata: se o período termina no mês corrente do dataset e o mês
+      // está incompleto, projeta métricas aditivas para o mês inteiro usando
+      // dias_com_dados reais (não dias corridos).
+      const fimDate = parseISO(p.fim);
+      const fimMonthKey = format(fimDate, "yyyy-MM");
+      const maxMonthKey = maxDate ? format(maxDate, "yyyy-MM") : fimMonthKey;
+      const noMesCorrente = fimMonthKey === maxMonthKey;
+      const diasNoMes = getDaysInMonth(fimDate);
+      const diasComDados = sorted.filter((k) => String(k.date).slice(0, 7) === fimMonthKey).length;
+      const factor =
+        noMesCorrente && diasComDados > 0 && diasComDados < diasNoMes
+          ? diasNoMes / diasComDados
+          : 1;
+      const adsProj = totalAds * factor;
+      const padsProj = totalPads * factor;
+      const totaisProjetados = {
+        gmv: totais.gmv * factor,
+        ads: adsProj,
+        roas: adsProj > 0 ? padsProj / adsProj : 0,
+        visits: totais.visits * factor,
+        tsi: totais.tsi * factor,
+      };
       return {
         periodo: p,
         dias,
-        totais: {
-          gmv: sum("gmv"),
-          ads: totalAds,
-          roas: totalAds > 0 ? totalPads / totalAds : 0,
-          visits: sum("visits"),
-          tsi: sum("tsi"),
-        },
+        totais,
+        totaisProjetados,
+        proRata: { factor, diasComDados, diasNoMes },
       };
     });
-  }, [periodos, sorted]);
+  }, [periodos, sorted, maxDate]);
 
   const maxDias = Math.max(1, ...dadosPorPeriodo.map((p) => p.dias.length));
 
@@ -209,6 +237,8 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
             const cfg = KPI_CONFIG[key];
             const principal = dadosPorPeriodo[0];
             const ativo = kpiAtivo === key;
+            const principalFactor = principal?.proRata.factor ?? 1;
+            const isProj = principalFactor > 1;
             return (
               <button
                 key={key}
@@ -219,15 +249,27 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                     ? "bg-primary/10 border-primary/40 ring-1 ring-primary/30"
                     : "bg-card/40 border-border/40 hover:bg-card/60",
                 )}
+                title={
+                  isProj && principal
+                    ? `Projeção pro-rata: ${principal.proRata.diasComDados}d de ${principal.proRata.diasNoMes}d (fator ${principalFactor.toFixed(2)}x)`
+                    : undefined
+                }
               >
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{cfg.label}</div>
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                  <span>{cfg.label}</span>
+                  {isProj && (
+                    <span className="text-[9px] text-muted-foreground/80 normal-case tracking-normal">
+                      · proj.
+                    </span>
+                  )}
+                </div>
                 <div className="text-base font-semibold tnum lnum mt-1" style={{ color: principal?.periodo.cor }}>
-                  {fmtKpi(principal?.totais[key] ?? 0, cfg.format, true)}
+                  {fmtKpi(principal?.totaisProjetados[key] ?? 0, cfg.format, true)}
                 </div>
                 <div className="mt-1.5 space-y-1">
                   {dadosPorPeriodo.slice(1).map((p) => {
-                    const base = principal?.totais[key] ?? 0;
-                    const val = p.totais[key];
+                    const base = principal?.totaisProjetados[key] ?? 0;
+                    const val = p.totaisProjetados[key];
                     const delta = deltaPct(base, val); // principal vs this period
                     return (
                       <div key={p.periodo.id} className="flex items-center justify-between gap-2">
