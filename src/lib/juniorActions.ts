@@ -179,21 +179,6 @@ export const ACOES_REPUTACAO: ActionItem[] = [
   },
 ];
 
-export const ACOES_GRANTS: ActionItem[] = [
-  {
-    prioridade: 1,
-    acao: "Verba expirando em < 7 dias? Acionar GM imediatamente.",
-    porqueImporta: "Grant vencido = oportunidade perdida sem recuperação.",
-    condicao: (d) => num(d?.diasParaExpirar) > 0 && num(d?.diasParaExpirar) <= 7,
-  },
-  {
-    prioridade: 2,
-    acao: "Sem verba ativa? Verifique elegibilidade com o GM.",
-    porqueImporta: "Grants multiplicam GMV sem custo direto quando bem alocados.",
-    condicao: (d) => !d?.temVerbaAtiva,
-  },
-];
-
 export const ACOES_POR_ABA: Record<string, ActionItem[]> = {
   efficiency: ACOES_RESUMO,
   executive: ACOES_FATURAMENTO,
@@ -202,5 +187,4 @@ export const ACOES_POR_ABA: Record<string, ActionItem[]> = {
   competitiveness: ACOES_PRECO,
   opportunities: ACOES_OPORTUNIDADES,
   reputation: ACOES_REPUTACAO,
-  grants: ACOES_GRANTS,
 };

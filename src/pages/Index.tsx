@@ -41,9 +41,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
 import { aggregateKpisByQuarter } from "@/utils/aggregateByQuarter";
 import { useSellerDailyKpis } from "@/hooks/useSellerDailyData";
-import GrantAlert from "@/components/dashboard/GrantAlert";
-import { useSellerGrants } from "@/hooks/useSellerGrants";
-import GrantsPanel from "@/components/dashboard/GrantsPanel";
 import QualityIndexPanel from "@/components/dashboard/QualityIndexPanel";
 import QualityIndexPanelV2 from "@/components/seller/QualityIndexPanel";
 import PlanoAcaoAnuncioPanel from "@/components/seller/PlanoAcaoAnuncioPanel";
@@ -190,13 +187,9 @@ const Index = () => {
     hasRealData ? selectedSeller : undefined
   );
 
-  // Fetch grant for selected seller
-  const sellerIdsForGrant = useMemo(() => selectedSeller ? [selectedSeller] : [], [selectedSeller]);
-  const { grants: sellerGrants } = useSellerGrants(sellerIdsForGrant);
-  const currentGrant = sellerGrants[selectedSeller] || null;
-
   // Fetch campaign data for selected seller
-  const { campaigns: sellerCampaigns } = useMeliCampaigns(sellerIdsForGrant);
+  const sellerIdsForCampaign = useMemo(() => selectedSeller ? [selectedSeller] : [], [selectedSeller]);
+  const { campaigns: sellerCampaigns } = useMeliCampaigns(sellerIdsForCampaign);
   const currentCampaign = sellerCampaigns[selectedSeller] || null;
 
   // Vertical benchmark for Ads panel
@@ -314,11 +307,6 @@ const Index = () => {
       const gap = Number(it?.gapDesconto) || Math.max(0, (Number(it?.descontoSugerido) || 0) - (Number(it?.descontoAplicado) || 0));
       return s + (gap > 0 ? gap : 0);
     }, 0) / Math.max(1, (eligibilityItems || []).length);
-    let diasParaExpirar = 0;
-    if (currentGrant?.expirationDate) {
-      const exp = new Date(currentGrant.expirationDate).getTime();
-      diasParaExpirar = Math.ceil((exp - Date.now()) / (1000 * 60 * 60 * 24));
-    }
     return {
       shareFullPct: Number(latest?.shareFullPct) || 0,
       shareFlexPct: Number(latest?.shareFlexPct) || 0,
@@ -334,10 +322,8 @@ const Index = () => {
       tacos,
       itensSemOptin,
       gapDescontoMedio,
-      diasParaExpirar,
-      temVerbaAtiva: !!currentGrant,
     };
-  }, [displayKpis, eligibilityItems, currentGrant]);
+  }, [displayKpis, eligibilityItems]);
 
   // Active date range debug label
   const dateDebugLabel = useMemo(() => {
@@ -416,9 +402,6 @@ const Index = () => {
               isRefreshing={isRefreshing}
               onPeriodChange={handlePeriodChange}
             />
-
-            {/* Granularity Toggle — desativado para v2.0 */}
-            <GrantAlert grant={currentGrant} />
 
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
@@ -540,10 +523,6 @@ const Index = () => {
                   <TabsContent value="reputation" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="reputation" dados={dadosJunior} />
                     <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
-                  </TabsContent>
-                  <TabsContent value="grants" className="mt-0 space-y-5">
-                    <JuniorActionBanner abaId="grants" dados={dadosJunior} />
-                    <GrantsPanel sellers={sellers.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.custId }))} />
                   </TabsContent>
                   <TabsContent value="correlacoes" className="mt-0">
                     <CorrelacaoPanel kpis={displayKpis} />

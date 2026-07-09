@@ -4,13 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Loader2, Folder, TrendingUp, AlertTriangle, DollarSign, BarChart3, Truck, Tag } from "lucide-react";
 import { usePortfolioData, type Portfolio } from "@/hooks/usePortfolios";
 import { usePortfolioTrends } from "@/hooks/usePortfolioTrends";
-import { useSellerGrants, type GrantLevel } from "@/hooks/useSellerGrants";
 import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 import TrophyCards from "./TrophyCards";
 import AlertMatrix from "./AlertMatrix";
 import RaioXTable from "./RaioXTable";
 import MedalFilter from "./MedalFilter";
-import GrantsMonitor from "./GrantsMonitor";
 import PerformanceClusterChart from "./PerformanceClusterChart";
 import ProjecaoPanel from "./ProjecaoPanel";
 
@@ -31,7 +29,6 @@ interface Props {
 export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const { sellers, loading } = usePortfolioData(portfolio.cust_ids);
   const [selectedMedals, setSelectedMedals] = useState<string[]>([]);
-  const [grantFilter, setGrantFilter] = useState<GrantLevel | null>(null);
   const aliases = portfolio.seller_aliases || {};
   const sellersWithAliases = useMemo(
     () => sellers.map((s) => ({ ...s, nickname: aliases[s.custId] || s.nickname })),
@@ -40,7 +37,6 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
 
   const sellerIds = useMemo(() => sellersWithAliases.map((s) => s.sellerId), [sellersWithAliases]);
   const { trends } = usePortfolioTrends(sellerIds);
-  const { grants } = useSellerGrants(sellerIds);
   const { campaigns } = useMeliCampaigns(sellerIds);
 
   const filteredSellers = useMemo(() => {
@@ -228,15 +224,9 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
         <TrophyCards sellers={filteredSellers} />
       </div>
 
-      {/* Grants Monitor + Alertas + Raio-X */}
+      {/* Alertas + Raio-X */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 space-y-4">
-          <GrantsMonitor
-            sellers={filteredSellers}
-            grants={grants}
-            activeFilter={grantFilter}
-            onFilterChange={setGrantFilter}
-          />
           <div className="space-y-3">
             <h3 className="text-sm font-bold flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-amber-400" />
@@ -251,8 +241,6 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
           <RaioXTable
             sellers={filteredSellers}
             trends={trends}
-            grants={grants}
-            grantFilter={grantFilter}
             portfolioName={portfolio.name}
             campaigns={campaigns}
           />
