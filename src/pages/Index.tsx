@@ -53,6 +53,7 @@ import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 import PublicidadePanel from "@/components/seller/PublicidadePanel";
 import AccessScopeBadge from "@/components/AccessScopeBadge";
 import SellerDiagnosticPanel from "@/components/dashboard/SellerDiagnosticPanel";
+import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
@@ -430,7 +431,7 @@ const Index = () => {
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="glass-card w-full justify-center gap-1 p-1 bg-card/60 h-auto grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10">
+              <TabsList className="glass-card w-full justify-center gap-1 p-1 bg-card/60 h-auto grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-11">
                 {tabs.map((tab) =>
                   <Tooltip key={tab.id} delayDuration={300}>
                     <TooltipTrigger asChild>
@@ -554,6 +555,9 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="correlacoes" className="mt-0">
                     <CorrelacaoPanel kpis={displayKpis} />
+                  </TabsContent>
+                  <TabsContent value="alertas-riscos" className="mt-0">
+                    <SellerRiskPanel />
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>
