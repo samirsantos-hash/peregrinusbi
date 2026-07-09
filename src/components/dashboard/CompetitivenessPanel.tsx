@@ -313,9 +313,10 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       const totalBands = s.visitsExpensive + s.visitsMatch + s.visitsCheaper;
       const gapPct = totalBands > 0 ? ((s.visitsExpensive / totalBands) * 100) : 0;
       const invertedGap = 100 - gapPct;
-      // Lower cancellation rate = better competitiveness (invert: 0% → 100, 10% → 0)
-      const avgCancRate = s.qualCount > 0 ? s.cancellationsRate / s.qualCount : 0;
-      const cancScore = Math.max(0, 100 - avgCancRate * 20); // 5% → 0 score
+      // Lower cancellation rate = better competitiveness (invert: 0% → 100, 5% → 0)
+      // repCancellationsRate vem como fração (0-1). Converter para % antes de escalar.
+      const avgCancRatePct = s.qualCount > 0 ? (s.cancellationsRate / s.qualCount) * 100 : 0;
+      const cancScore = Math.max(0, 100 - avgCancRatePct * 20); // 5% → 0 score
       const forcaCompetitiva = (invertedGap * 0.5) + (cancScore * 0.5);
 
       const avgUplift = s.upliftCount > 0 ? s.upliftGmvM1 / s.upliftCount : 0;

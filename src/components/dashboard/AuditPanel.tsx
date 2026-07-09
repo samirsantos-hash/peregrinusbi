@@ -50,7 +50,10 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
   const avgCaracteristica = avg("scoreCaracteristica");
   const avgCancellations = (() => {
     const valid = products.filter((p) => (p.repCancellationsRate as number) > 0);
-    return valid.length > 0 ? valid.reduce((s, p) => s + (p.repCancellationsRate as number), 0) / valid.length : 0;
+    // repCancellationsRate vem como fração (0-1) do banco. Converter para % antes de exibir/comparar thresholds.
+    return valid.length > 0
+      ? (valid.reduce((s, p) => s + (p.repCancellationsRate as number), 0) / valid.length) * 100
+      : 0;
   })();
 
   const getCancellationScore = (rate: number) => {

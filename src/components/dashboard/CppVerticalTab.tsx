@@ -202,7 +202,8 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
       m.visitas += parseBrNumber(r["VISITAS"]);
       m.invPads += parseBrNumber(r["INV_PADS"]);
       m.tgmvPads += parseBrNumber(r["TGMV_LC_PADS"]);
-      m.fTgmv += parseBrNumber(r["F_TGMV_LC"]);
+      // Share Full = TGMV_LC_FBM / TGMV_LC. F_TGMV_LC é meta CPP, não Full logístico.
+      m.fTgmv += parseBrNumber(r["TGMV_LC_FBM"]);
       m.cdpTgmv += parseBrNumber(r["CDP_TGMV_LC"]);
       m.visitsCheaper += parseBrNumber(r["VISITS_CHEAPER"]);
       m.visitsMatch += parseBrNumber(r["VISITS_MATCH"]);
@@ -253,7 +254,8 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
       visitas += parseBrNumber(r["VISITAS"]);
       invPads += parseBrNumber(r["INV_PADS"]);
       tgmvPads += parseBrNumber(r["TGMV_LC_PADS"]);
-      fTgmv += parseBrNumber(r["F_TGMV_LC"]);
+      // Share Full = TGMV_LC_FBM / TGMV_LC. F_TGMV_LC é meta CPP, não Full logístico.
+      fTgmv += parseBrNumber(r["TGMV_LC_FBM"]);
       cdpTgmv += parseBrNumber(r["CDP_TGMV_LC"]);
       visitsCheaper += parseBrNumber(r["VISITS_CHEAPER"]);
       visitsMatch += parseBrNumber(r["VISITS_MATCH"]);

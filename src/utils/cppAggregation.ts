@@ -392,6 +392,7 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     const tgmvPads = entry.sums["TGMV_LC_PADS"] || 0;
     const visitas = entry.sums["VISITAS"] || 0;
     const fTgmv = entry.sums["F_TGMV_LC"] || 0;
+    const tgmvFull = entry.sums["TGMV_LC_FBM"] || 0;
     const cdpTgmv = entry.sums["CDP_TGMV_LC"] || 0;
     const cdpInv = entry.sums["CDP_TGMV_INVESTIMENT_LC_SELLER"] || 0;
     const listings = entry.sums["TOTAL_LIVELISTINGS"] || 0;
@@ -401,8 +402,8 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
     // ERRO 5: sellers sem investimento → ROAS = null (N/A)
     seller["ROAS"] = invPads > 0 ? tgmvPads / invPads : null;
     seller["TX_CONVERSAO"] = visitas > 0 && tgmv > 0 ? tsi / visitas : null;
-    // ERRO 2: SHARE_FULL uses TGMV_LC consistently, capped at 100%
-    const rawShareFull = tgmv > 0 ? (fTgmv / tgmv) * 100 : null;
+    // SHARE_FULL = GMV logístico Full (TGMV_LC_FBM) / TGMV_LC. F_TGMV_LC é métrica de meta CPP, não Full logístico.
+    const rawShareFull = tgmv > 0 ? (tgmvFull / tgmv) * 100 : null;
     seller["SHARE_FULL"] = rawShareFull !== null ? Math.min(rawShareFull, 100) : null;
     seller["GMV_POR_VISITA"] = visitas > 0 ? tgmv / visitas : null;
     seller["SHARE_CDP"] = tgmv > 0 ? (cdpTgmv / tgmv) * 100 : null;

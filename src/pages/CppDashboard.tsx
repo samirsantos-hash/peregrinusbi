@@ -77,7 +77,7 @@ const TABLE_COLS: { key: string; label: string; fmt: (v: any) => string; align?:
   { key: "INV_PADS", label: "Inv. Ads (R$)", fmt: fmtCurrency, align: "right" },
   { key: "TGMV_LC_PADS", label: "TGMV Ads (R$)", fmt: fmtCurrency, align: "right" },
   { key: "ROAS", label: "ROAS", fmt: fmtRoas, align: "right" },
-  { key: "F_TGMV_LC", label: "Full (R$)", fmt: fmtCurrency, align: "right" },
+  { key: "TGMV_LC_FBM", label: "Full (R$)", fmt: fmtCurrency, align: "right" },
   { key: "SHARE_FULL", label: "Share Full %", fmt: (v: any) => fmtPct(v), align: "right" },
   { key: "VISITAS", label: "Visitas", fmt: fmtNum, align: "right" },
   { key: "TX_CONVERSAO", label: "Tx Conv.", fmt: (v: any) => fmtPct(v != null ? v * 100 : null), align: "right" },

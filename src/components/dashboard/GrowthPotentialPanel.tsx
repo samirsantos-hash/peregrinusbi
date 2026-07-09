@@ -155,9 +155,10 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
     const sellerAcos = totalTgmvPads > 0 ? (totalAds / totalTgmvPads) * 100 : 0;
     const sellerConv = totalVisits > 0 ? (totalTsi / totalVisits) * 100 : 0;
     const sellerFull = kpis.reduce((s, k) => s + (k.pctFull || 0), 0) / kpis.length;
+    // repClaimsRate e repDelayedRate vêm como frações (0-1). Converter soma média para % antes de comparar com mediana em %.
     const sellerRep =
-      kpis.reduce((s, k) => s + (k.repClaimsRate || 0) + (k.repDelayedRate || 0), 0) /
-      Math.max(1, kpis.length);
+      (kpis.reduce((s, k) => s + (k.repClaimsRate || 0) + (k.repDelayedRate || 0), 0) /
+        Math.max(1, kpis.length)) * 100;
 
     const list: Dimensao[] = [];
 
