@@ -232,10 +232,10 @@ const SellerDiagnosticPanel = ({ seller, allKpis }: Props) => {
     <motion.div
       initial={{ opacity: 0, y: -5 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card p-4"
+      className="glass-card p-3 sm:p-4"
     >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
+        <div className="flex items-center gap-2 min-w-0">
           <div className="w-1 h-4 bg-neon-blue rounded-full" />
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
             Diagnóstico do Seller
@@ -243,13 +243,13 @@ const SellerDiagnosticPanel = ({ seller, allKpis }: Props) => {
           <TooltipInfo text="Informações estratégicas do seller e pontos críticos para avançar Tier, Reputação e mix logístico (Full/Flex)." />
         </div>
         {loja && (
-          <span className="text-[10px] text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full">
+          <span className="text-[9px] sm:text-[10px] text-muted-foreground bg-muted/30 px-2 py-0.5 rounded-full whitespace-nowrap">
             Fonte tier: {loja.tierFonte === "reputacao" ? "reputação" : loja.tierFonte === "metricas" ? "métricas oficiais" : "fallback receita"}
           </span>
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         {/* Info do seller */}
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Informações</p>

@@ -344,28 +344,31 @@ const Index = () => {
         backgroundSize: '40px 40px'
       }} />
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-6">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg border border-border/50 p-1 flex items-center justify-center bg-primary-foreground">
+      <div className="relative z-10 max-w-[1400px] mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg border border-border/50 p-1 flex items-center justify-center bg-primary-foreground shrink-0">
               <img alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2f12a5a6-9e0e-4367-a737-5d6a8137e4bd.png" />
             </div>
-            <div className="w-2 h-8 rounded-full bg-neon-blue" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">Peregrinus Business Intelligence</h1>
-              <p className="text-xs text-muted-foreground">
+            <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-neon-blue shrink-0" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-xl font-bold tracking-tight truncate">
+                <span className="hidden sm:inline">Peregrinus Business Intelligence</span>
+                <span className="sm:hidden">Peregrinus BI</span>
+              </h1>
+              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                 Gestão de Performance · Mercado Livre
                 {sellersFetched && hasRealData && <span className="ml-2 text-emerald">● Dados reais</span>}
                 {sellersFetched && !hasRealData && isAdmin && <span className="ml-2 text-warning">● Dados de demonstração</span>}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
             {/* Sound toggle */}
             <SoundToggleButton />
-            <Button variant="outline" size="sm" onClick={() => navigate("/projecao-crescimento")} className="gap-2 relative">
+            <Button variant="outline" size="sm" onClick={() => navigate("/projecao-crescimento")} className="gap-2 relative px-2 sm:px-3">
               <TrendingUp className="w-4 h-4" />
-              Projeção
+              <span className="hidden sm:inline">Projeção</span>
               <NewBadge featureKey="projecao_v1" tooltip="Novo: forecast, decomposição de crescimento e alertas de sustentabilidade" />
             </Button>
             <Button
@@ -378,19 +381,19 @@ const Index = () => {
             >
               {theme === "dark" ? <Sun className="w-4 h-4 text-neon-blue" /> : <Moon className="w-4 h-4 text-neon-blue" />}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/analise-mlb")} className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate("/analise-mlb")} className="gap-2 px-2 sm:px-3">
               <Search className="w-4 h-4" />
-              Análise MLB
+              <span className="hidden sm:inline">Análise MLB</span>
             </Button>
             {(isAdmin || isGerente) &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2">
+              <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2 px-2 sm:px-3">
                 <Settings className="w-4 h-4" />
-                {isGerente && !isAdmin ? "Carteiras" : "Admin"}
+                <span className="hidden sm:inline">{isGerente && !isAdmin ? "Carteiras" : "Admin"}</span>
               </Button>
             }
-            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2">
+            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 px-2 sm:px-3">
               <LogOut className="w-4 h-4" />
-              Sair
+              <span className="hidden sm:inline">Sair</span>
             </Button>
           </div>
         </motion.div>
@@ -427,15 +430,15 @@ const Index = () => {
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="glass-card w-full justify-center gap-1 p-1 bg-card/60 h-auto grid grid-cols-5 md:grid-cols-10">
+              <TabsList className="glass-card w-full justify-center gap-1 p-1 bg-card/60 h-auto grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10">
                 {tabs.map((tab) =>
                   <Tooltip key={tab.id} delayDuration={300}>
                     <TooltipTrigger asChild>
                       <TabsTrigger
                         value={tab.id}
-                        className="flex items-center justify-center gap-1 px-2 py-1.5 text-[11px] whitespace-nowrap w-full data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
+                        className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 text-[10px] sm:text-[11px] whitespace-nowrap w-full data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
                         <tab.icon className="w-3.5 h-3.5 shrink-0" />
-                        {tab.label}
+                        <span className="truncate">{tab.label}</span>
                       </TabsTrigger>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-[260px] text-xs">
