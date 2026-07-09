@@ -7,13 +7,23 @@ export function useLiveListingsCount(sellerId: string | undefined) {
     queryFn: async (): Promise<number> => {
       if (!sellerId) return 0;
 
-      const { count, error } = await supabase
+      const { data, error } = await supabase
         .from("live_listings")
-        .select("*", { count: "exact", head: true })
+        .select("data, itens")
         .eq("seller_id", sellerId);
 
       if (error) throw error;
-      return count || 0;
+      if (!data || data.length === 0) return 0;
+
+      // Snapshot mais recente do seller
+      const maxData = data.reduce(
+        (mx, r) => (r.data && r.data > mx ? r.data : mx),
+        ""
+      );
+
+      return data
+        .filter((r) => r.data === maxData)
+        .reduce((sum, r) => sum + (r.itens ?? 0), 0);
     },
     enabled: !!sellerId,
   });
