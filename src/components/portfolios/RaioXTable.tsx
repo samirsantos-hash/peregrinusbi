@@ -327,26 +327,6 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                       </TableCell>
                       <TableCell>
                         {(() => {
-                          const grant = grants?.[s.sellerId];
-                          if (!grant) return <span className="text-xs text-muted-foreground">—</span>;
-                          const level = getGrantLevel(grant.daysToExpire);
-                          const badge = getGrantBadge(level);
-                          return (
-                            <div className="flex items-center gap-1.5">
-                              <Badge variant="outline" className={`text-[10px] border ${badge.className}`}>
-                                {badge.emoji} {grant.daysToExpire}d
-                              </Badge>
-                              {grant.salesforceUrl && (
-                                <a href={grant.salesforceUrl} target="_blank" rel="noopener noreferrer">
-                                  <ExternalLink className="w-3.5 h-3.5 text-primary hover:text-blue-400 transition-colors" />
-                                </a>
-                              )}
-                            </div>
-                          );
-                        })()}
-                       </TableCell>
-                      <TableCell>
-                        {(() => {
                           const campaign = campaigns?.[s.sellerId];
                           if (!campaign) return <span className="text-xs text-muted-foreground">—</span>;
                           const badge = getEffectivenessBadge(campaign.efectRtaVertical);
