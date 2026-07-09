@@ -4,7 +4,7 @@ import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy, Sun, Moon } from "lucide-react";
+import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,6 @@ import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { GraduationCap } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
