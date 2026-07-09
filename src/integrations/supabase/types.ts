@@ -20,6 +20,7 @@ export type Database = {
           cp_investments_lc: number | null
           created_at: string
           cus_cust_id_sel: number
+          cust_id_text: string | null
           dt_atualizacao: string | null
           f_tgmv_lc: number | null
           f_tgmv_lc_automatic: number | null
@@ -36,6 +37,7 @@ export type Database = {
           nombre_solucion: string | null
           programa: string
           safra: string | null
+          seller_id: string | null
           tim_month_id: number
           total_investiments_lc: number | null
           total_rebates_lc: number | null
@@ -45,6 +47,7 @@ export type Database = {
           cp_investments_lc?: number | null
           created_at?: string
           cus_cust_id_sel: number
+          cust_id_text?: string | null
           dt_atualizacao?: string | null
           f_tgmv_lc?: number | null
           f_tgmv_lc_automatic?: number | null
@@ -61,6 +64,7 @@ export type Database = {
           nombre_solucion?: string | null
           programa?: string
           safra?: string | null
+          seller_id?: string | null
           tim_month_id: number
           total_investiments_lc?: number | null
           total_rebates_lc?: number | null
@@ -70,6 +74,7 @@ export type Database = {
           cp_investments_lc?: number | null
           created_at?: string
           cus_cust_id_sel?: number
+          cust_id_text?: string | null
           dt_atualizacao?: string | null
           f_tgmv_lc?: number | null
           f_tgmv_lc_automatic?: number | null
@@ -86,6 +91,7 @@ export type Database = {
           nombre_solucion?: string | null
           programa?: string
           safra?: string | null
+          seller_id?: string | null
           tim_month_id?: number
           total_investiments_lc?: number | null
           total_rebates_lc?: number | null
@@ -102,6 +108,7 @@ export type Database = {
           cus_cust_id_sel: number
           cus_nickname: string | null
           cus_state: string | null
+          cust_id_text: string | null
           f_tgmv_lc: number | null
           f_tsi: number | null
           fecha_in: string | null
@@ -128,6 +135,7 @@ export type Database = {
           score_final_full: number | null
           score_final_pads: number | null
           score_final_servicos: number | null
+          seller_id: string | null
           sub_cluster_seller: string | null
           tgmv_lc: number | null
           tgmv_lc_fbm: number | null
@@ -152,6 +160,7 @@ export type Database = {
           cus_cust_id_sel: number
           cus_nickname?: string | null
           cus_state?: string | null
+          cust_id_text?: string | null
           f_tgmv_lc?: number | null
           f_tsi?: number | null
           fecha_in?: string | null
@@ -178,6 +187,7 @@ export type Database = {
           score_final_full?: number | null
           score_final_pads?: number | null
           score_final_servicos?: number | null
+          seller_id?: string | null
           sub_cluster_seller?: string | null
           tgmv_lc?: number | null
           tgmv_lc_fbm?: number | null
@@ -202,6 +212,7 @@ export type Database = {
           cus_cust_id_sel?: number
           cus_nickname?: string | null
           cus_state?: string | null
+          cust_id_text?: string | null
           f_tgmv_lc?: number | null
           f_tsi?: number | null
           fecha_in?: string | null
@@ -228,6 +239,7 @@ export type Database = {
           score_final_full?: number | null
           score_final_pads?: number | null
           score_final_servicos?: number | null
+          seller_id?: string | null
           sub_cluster_seller?: string | null
           tgmv_lc?: number | null
           tgmv_lc_fbm?: number | null
@@ -255,6 +267,7 @@ export type Database = {
           created_at: string
           cus_cust_id_sel: number | null
           cus_nickname: string | null
+          cust_id_text: string | null
           data_atualizacao: string | null
           discount_seller_percentage: number | null
           discount_total: number | null
@@ -272,6 +285,7 @@ export type Database = {
           pedidos_7d: number | null
           programa: string | null
           safra: string | null
+          seller_id: string | null
           vertical_item: string | null
         }
         Insert: {
@@ -283,6 +297,7 @@ export type Database = {
           created_at?: string
           cus_cust_id_sel?: number | null
           cus_nickname?: string | null
+          cust_id_text?: string | null
           data_atualizacao?: string | null
           discount_seller_percentage?: number | null
           discount_total?: number | null
@@ -300,6 +315,7 @@ export type Database = {
           pedidos_7d?: number | null
           programa?: string | null
           safra?: string | null
+          seller_id?: string | null
           vertical_item?: string | null
         }
         Update: {
@@ -311,6 +327,7 @@ export type Database = {
           created_at?: string
           cus_cust_id_sel?: number | null
           cus_nickname?: string | null
+          cust_id_text?: string | null
           data_atualizacao?: string | null
           discount_seller_percentage?: number | null
           discount_total?: number | null
@@ -328,6 +345,7 @@ export type Database = {
           pedidos_7d?: number | null
           programa?: string | null
           safra?: string | null
+          seller_id?: string | null
           vertical_item?: string | null
         }
         Relationships: []
@@ -340,6 +358,7 @@ export type Database = {
           cus_cust_id_sel: number | null
           cus_nickname: string | null
           cus_state: string | null
+          cust_id_text: string | null
           data: string | null
           dom_domain_agg1: string | null
           dom_domain_agg2: string | null
@@ -350,6 +369,7 @@ export type Database = {
           itens: number | null
           nivel_solucion: string | null
           programa: string | null
+          seller_id: string | null
           sub_cluster_seller: string | null
           tim_month_id: number | null
           vertical: string | null
@@ -361,6 +381,7 @@ export type Database = {
           cus_cust_id_sel?: number | null
           cus_nickname?: string | null
           cus_state?: string | null
+          cust_id_text?: string | null
           data?: string | null
           dom_domain_agg1?: string | null
           dom_domain_agg2?: string | null
@@ -371,6 +392,7 @@ export type Database = {
           itens?: number | null
           nivel_solucion?: string | null
           programa?: string | null
+          seller_id?: string | null
           sub_cluster_seller?: string | null
           tim_month_id?: number | null
           vertical?: string | null
@@ -382,6 +404,7 @@ export type Database = {
           cus_cust_id_sel?: number | null
           cus_nickname?: string | null
           cus_state?: string | null
+          cust_id_text?: string | null
           data?: string | null
           dom_domain_agg1?: string | null
           dom_domain_agg2?: string | null
@@ -392,6 +415,7 @@ export type Database = {
           itens?: number | null
           nivel_solucion?: string | null
           programa?: string | null
+          seller_id?: string | null
           sub_cluster_seller?: string | null
           tim_month_id?: number | null
           vertical?: string | null
@@ -467,6 +491,13 @@ export type Database = {
             referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "live_listings_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "v_seller_bridge"
+            referencedColumns: ["seller_uuid"]
+          },
         ]
       }
       meli_campaigns: {
@@ -507,6 +538,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "sellers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meli_campaigns_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "v_seller_bridge"
+            referencedColumns: ["seller_uuid"]
           },
         ]
       }
@@ -669,6 +707,13 @@ export type Database = {
             referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "seller_eligibility_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "v_seller_bridge"
+            referencedColumns: ["seller_uuid"]
+          },
         ]
       }
       seller_grants: {
@@ -706,6 +751,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "sellers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_grants_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "v_seller_bridge"
+            referencedColumns: ["seller_uuid"]
           },
         ]
       }
@@ -792,6 +844,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "sellers"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seller_listings_quality_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "v_seller_bridge"
+            referencedColumns: ["seller_uuid"]
           },
         ]
       }
@@ -996,6 +1055,13 @@ export type Database = {
             referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sellers_kpi_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "v_seller_bridge"
+            referencedColumns: ["seller_uuid"]
+          },
         ]
       }
       sellers_kpi_daily: {
@@ -1163,12 +1229,20 @@ export type Database = {
             referencedRelation: "sellers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "sellers_kpi_daily_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "v_seller_bridge"
+            referencedColumns: ["seller_uuid"]
+          },
         ]
       }
       sellers_pm: {
         Row: {
           created_at: string
           cust_id: number
+          cust_id_text: string | null
           data_expiracao_concessao: string | null
           data_ultima_concessao: string | null
           dias_expiracao: number | null
@@ -1178,6 +1252,7 @@ export type Database = {
           nmv_usd: number | null
           penetracao_3pgm_pct: number | null
           sb: number | null
+          seller_id: string | null
           seller_url: string | null
           snapshot_date: string
           vs_pm_3pgm_pct: number | null
@@ -1187,6 +1262,7 @@ export type Database = {
         Insert: {
           created_at?: string
           cust_id: number
+          cust_id_text?: string | null
           data_expiracao_concessao?: string | null
           data_ultima_concessao?: string | null
           dias_expiracao?: number | null
@@ -1196,6 +1272,7 @@ export type Database = {
           nmv_usd?: number | null
           penetracao_3pgm_pct?: number | null
           sb?: number | null
+          seller_id?: string | null
           seller_url?: string | null
           snapshot_date: string
           vs_pm_3pgm_pct?: number | null
@@ -1205,6 +1282,7 @@ export type Database = {
         Update: {
           created_at?: string
           cust_id?: number
+          cust_id_text?: string | null
           data_expiracao_concessao?: string | null
           data_ultima_concessao?: string | null
           dias_expiracao?: number | null
@@ -1214,6 +1292,7 @@ export type Database = {
           nmv_usd?: number | null
           penetracao_3pgm_pct?: number | null
           sb?: number | null
+          seller_id?: string | null
           seller_url?: string | null
           snapshot_date?: string
           vs_pm_3pgm_pct?: number | null
@@ -1341,6 +1420,27 @@ export type Database = {
       }
     }
     Views: {
+      v_seller_bridge: {
+        Row: {
+          cust_id_bigint: number | null
+          cust_id_text: string | null
+          nickname: string | null
+          seller_uuid: string | null
+        }
+        Insert: {
+          cust_id_bigint?: never
+          cust_id_text?: string | null
+          nickname?: string | null
+          seller_uuid?: string | null
+        }
+        Update: {
+          cust_id_bigint?: never
+          cust_id_text?: string | null
+          nickname?: string | null
+          seller_uuid?: string | null
+        }
+        Relationships: []
+      }
       vw_reputacao_mensal: {
         Row: {
           atrasos_mediana: number | null
