@@ -69,26 +69,26 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     <motion.div
       initial={{ opacity: 0, y: -5 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-card p-4"
+      className="glass-card p-3"
     >
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-1 h-4 bg-neon-blue rounded-full" />
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-1 h-3 bg-neon-blue rounded-full" />
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
           Informações do Seller
         </h3>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-0">
         {rows.map((r) => (
           <div
             key={r.label}
-            className="flex items-center justify-between py-2 border-b border-border/40 last:border-b-0 md:[&:nth-last-child(2)]:border-b-0"
+            className="flex items-center justify-between py-1 border-b border-border/30 last:border-b-0 md:[&:nth-last-child(2)]:border-b-0"
           >
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <r.icon className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <r.icon className="w-3 h-3" />
               <span>{r.label}</span>
               <TooltipInfo text={r.tooltip} />
             </div>
-            <span className="text-xs font-medium text-foreground truncate max-w-[60%] text-right">
+            <span className="text-[11px] font-medium text-foreground truncate max-w-[60%] text-right">
               {r.value}
             </span>
           </div>
