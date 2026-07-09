@@ -129,7 +129,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
   const donutData = [
     { name: "Mercado Envios Full", value: Math.round(shareFullGmv * 10) / 10 },
     { name: "Flex", value: Math.round(shareFlexGmv * 10) / 10 },
-    { name: "Agência / Coletas", value: Math.round(shareAgenciaGmv * 10) / 10 },
+    { name: "Outros modais", value: Math.round(shareAgenciaGmv * 10) / 10 },
   ];
 
   const logIcons = [
@@ -154,12 +154,12 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
       status: statusFlex,
     },
     {
-      label: "Agência / Coletas",
+      label: "Outros modais",
       value: `${shareAgenciaGmv.toFixed(1)}%`,
       icon: Mail,
       color: "text-purple-400",
       desc: `GMV: ${fmtBRLCompact(totalTgmvAgencia)}`,
-      tooltip: "Share de GMV via Agência / Coletas (F_TGMV_LC_COLETAS). Menor priorização no algoritmo.",
+      tooltip: "Share de GMV residual (TGMV_LC - Full - Flex). Inclui Agência, Correios e Places, entre outros modais — não separáveis no CSV diário. Menor priorização no algoritmo MELI vs Full.",
       isEmpty: totalTgmvAgencia === 0,
       status: statusAgencia,
     },
@@ -424,7 +424,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                     <span className="font-mono font-bold text-foreground">
                       {fmtBRLCompact(totalTgmvAgencia)}
                     </span>{" "}
-                    rodando em Agência/Coletas — modalidade despriorizada pelo algoritmo MELI.
+                    rodando em Outros modais (inclui Agência, Correios e Places, entre outros — não separáveis no CSV diário) — conjunto despriorizado pelo algoritmo MELI vs Full.
                   </p>
                   <div className="flex items-center gap-2 mt-2 bg-muted/30 rounded p-2">
                     <TrendingUp className="w-4 h-4 text-emerald shrink-0" />
@@ -462,7 +462,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
         <p className="text-[11px] text-muted-foreground text-center mb-3 leading-relaxed">
           ℹ️ <span className="font-medium text-foreground">Full</span> = <code className="text-[10px]">TGMV_LC_FULL</code> (FBM) ·{" "}
           <span className="font-medium text-foreground">Flex</span> = <code className="text-[10px]">TGMV_LC_FLEX</code> ·{" "}
-          <span className="font-medium text-foreground">Agência/Coletas</span> = restante (inclui Coleta, Places e Correios — não separáveis no CSV diário).
+          <span className="font-medium text-foreground">Outros modais</span> = restante (inclui Agência, Correios e Places, entre outros — não separáveis no CSV diário).
         </p>
         <ResponsiveContainer width="100%" height={320}>
           <PieChart>
