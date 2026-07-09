@@ -253,17 +253,15 @@ const SellerDiagnosticPanel = ({ seller, allKpis }: Props) => {
         {/* Info do seller */}
         <div>
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">Informações</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-1">
             {infoRows.map((r) => (
               <div
                 key={r.label}
-                className="flex items-center justify-between py-1 border-b border-border/30 last:border-b-0 md:[&:nth-last-child(2)]:border-b-0"
+                className="flex items-center gap-1.5 py-1 border-b border-border/30 min-w-0"
               >
-                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <r.icon className="w-3 h-3" />
-                  <span>{r.label}</span>
-                </div>
-                <span className={`text-[11px] font-medium truncate max-w-[60%] text-right ${r.status ? statusColor(r.status) : "text-foreground"}`}>
+                <r.icon className="w-3 h-3 shrink-0 text-muted-foreground" />
+                <span className="text-[10px] text-muted-foreground shrink-0">{r.label}:</span>
+                <span className={`text-[11px] font-medium truncate ${r.status ? statusColor(r.status) : "text-foreground"}`}>
                   {r.value}
                 </span>
               </div>
