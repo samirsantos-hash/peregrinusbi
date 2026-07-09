@@ -4,7 +4,7 @@ import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, MapPin, Layers, Tag, RefreshCw, CalendarDays, Clock, Copy } from "lucide-react";
+import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy, Sun, Moon } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { GraduationCap } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
@@ -74,6 +75,7 @@ const DashboardHeader = ({
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
   const { playClick } = useSoundFeedback();
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
+  const { theme, toggle: toggleTheme } = useTheme();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
   const { anchorDate, minDate, availableDays } = useMemo(() => {
@@ -190,17 +192,6 @@ const DashboardHeader = ({
     const from = new Date(year, startMonth - 1, 1);
     const to = new Date(year, endMonth, 0);
     onDateRangeChange({ from, to });
-  };
-
-  const clusterColors: Record<string, string> = {
-    emerging: "bg-neon-blue/10 text-neon-blue border-neon-blue/20",
-    core: "bg-emerald/10 text-emerald border-emerald/20",
-    mature: "bg-warning/10 text-warning border-warning/20",
-  };
-
-  const getClusterStyle = (cluster?: string) => {
-    if (!cluster) return "bg-muted/30 text-muted-foreground border-border";
-    return clusterColors[cluster.toLowerCase()] || "bg-muted/30 text-muted-foreground border-border";
   };
 
   return (
@@ -383,6 +374,16 @@ const DashboardHeader = ({
               <GraduationCap className="w-3.5 h-3.5" />
               {juniorMode ? "Modo Didático" : "Modo Avançado"}
             </button>
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Alternar para modo claro" : "Alternar para modo escuro"}
+              className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-border bg-card/60 text-muted-foreground hover:text-foreground transition-all"
+              aria-label="Alternar tema"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 
@@ -421,63 +422,6 @@ const DashboardHeader = ({
           </div>
         </motion.div>
       </div>
-
-      {/* Segmentation & Context Badges */}
-      {selectedSellerObj && (
-        <motion.div
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15 }}
-          className="flex items-center gap-2 flex-wrap"
-        >
-          {/* Safra (latest date in ALL kpis) */}
-          {allKpis.length > 0 && (() => {
-            const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
-            const latestDate = dates[dates.length - 1];
-            const safraLabel = latestDate ? parseLocalDate(latestDate).toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) : null;
-            return safraLabel ? (
-              <span className="status-badge bg-neon-blue/10 text-neon-blue border-neon-blue/20">
-                <CalendarDays className="w-3 h-3" />
-                Safra: {safraLabel.charAt(0).toUpperCase() + safraLabel.slice(1)}
-              </span>
-            ) : null;
-          })()}
-
-          {/* Meses no Programa */}
-          {allKpis.length > 0 && (() => {
-            const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
-            if (dates.length < 2) return null;
-            const first = parseLocalDate(dates[0]);
-            const last = parseLocalDate(dates[dates.length - 1]);
-            const months = Math.max(1, Math.round((last.getTime() - first.getTime()) / (30.44 * 24 * 60 * 60 * 1000)));
-            return (
-              <span className="status-badge bg-primary/10 text-primary border-primary/20">
-                <Clock className="w-3 h-3" />
-                {months} {months === 1 ? "mês" : "meses"} no programa
-              </span>
-            );
-          })()}
-
-          {selectedSellerObj.cluster && (
-            <span className={`status-badge ${getClusterStyle(selectedSellerObj.cluster)}`}>
-              <Layers className="w-3 h-3" />
-              Segmentação: {selectedSellerObj.cluster}
-            </span>
-          )}
-          {selectedSellerObj.subCluster && (
-            <span className="status-badge bg-muted/30 text-muted-foreground border-border">
-              <Tag className="w-3 h-3" />
-              Sub: {selectedSellerObj.subCluster}
-            </span>
-          )}
-          {selectedSellerObj.state && (
-            <span className="status-badge bg-muted/30 text-muted-foreground border-border">
-              <MapPin className="w-3 h-3" />
-              {selectedSellerObj.state}
-            </span>
-          )}
-        </motion.div>
-      )}
     </motion.div>
   );
 };
