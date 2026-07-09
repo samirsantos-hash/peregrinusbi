@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound, TrendingUp, Search } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound, TrendingUp, Search, Sun, Moon } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import NewBadge from "@/components/ui/NewBadge";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
@@ -52,7 +52,8 @@ import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
 import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 import PublicidadePanel from "@/components/seller/PublicidadePanel";
 import AccessScopeBadge from "@/components/AccessScopeBadge";
-import SellerInfoTable from "@/components/dashboard/SellerInfoTable";
+import SellerDiagnosticPanel from "@/components/dashboard/SellerDiagnosticPanel";
+import { useTheme } from "@/hooks/useTheme";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -101,6 +102,7 @@ const Index = () => {
   const { user, isAdmin, isGerente, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { theme, toggle: toggleTheme } = useTheme();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [activeTab, setActiveTab] = useState("executive");
@@ -366,6 +368,16 @@ const Index = () => {
               Projeção
               <NewBadge featureKey="projecao_v1" tooltip="Novo: forecast, decomposição de crescimento e alertas de sustentabilidade" />
             </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleTheme}
+              className="h-9 w-9"
+              title={theme === "dark" ? "Alternar para modo claro" : "Alternar para modo escuro"}
+              aria-label="Alternar tema"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4 text-neon-blue" /> : <Moon className="w-4 h-4 text-neon-blue" />}
+            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/analise-mlb")} className="gap-2">
               <Search className="w-4 h-4" />
               Análise MLB
@@ -407,12 +419,12 @@ const Index = () => {
               onPeriodChange={handlePeriodChange}
             />
 
-            <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
-
-            <SellerInfoTable
+            <SellerDiagnosticPanel
               seller={sellers.find((s) => s.id === selectedSeller) as any}
               allKpis={allKpis}
             />
+
+            <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="glass-card w-full justify-center gap-1 p-1 bg-card/60 h-auto grid grid-cols-5 md:grid-cols-10">
