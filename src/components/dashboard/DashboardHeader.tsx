@@ -4,7 +4,7 @@ import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy, Sun, Moon } from "lucide-react";
+import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,6 @@ import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { GraduationCap } from "lucide-react";
-import { useTheme } from "@/hooks/useTheme";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
@@ -75,7 +74,6 @@ const DashboardHeader = ({
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
   const { playClick } = useSoundFeedback();
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
-  const { theme, toggle: toggleTheme } = useTheme();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
   const { anchorDate, minDate, availableDays } = useMemo(() => {
@@ -373,16 +371,6 @@ const DashboardHeader = ({
             >
               <GraduationCap className="w-3.5 h-3.5" />
               {juniorMode ? "Modo Didático" : "Modo Avançado"}
-            </button>
-
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              title={theme === "dark" ? "Alternar para modo claro" : "Alternar para modo escuro"}
-              className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-border bg-card/60 text-muted-foreground hover:text-foreground transition-all"
-              aria-label="Alternar tema"
-            >
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
           </div>
         </div>
