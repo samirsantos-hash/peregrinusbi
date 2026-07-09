@@ -74,7 +74,6 @@ const DashboardHeader = ({
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
   const { playClick } = useSoundFeedback();
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
-  const { theme, toggle: toggleTheme } = useTheme();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
   const { anchorDate, minDate, availableDays } = useMemo(() => {
