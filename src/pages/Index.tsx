@@ -52,6 +52,7 @@ import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
 import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 import PublicidadePanel from "@/components/seller/PublicidadePanel";
 import AccessScopeBadge from "@/components/AccessScopeBadge";
+import SellerInfoTable from "@/components/dashboard/SellerInfoTable";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -408,14 +409,19 @@ const Index = () => {
 
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
+            <SellerInfoTable
+              seller={sellers.find((s) => s.id === selectedSeller) as any}
+              allKpis={allKpis}
+            />
+
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="glass-card w-full justify-start gap-0.5 p-1 bg-card/60 h-auto overflow-x-auto flex-nowrap">
+              <TabsList className="glass-card w-full justify-center gap-1 p-1 bg-card/60 h-auto grid grid-cols-5 md:grid-cols-10">
                 {tabs.map((tab) =>
                   <Tooltip key={tab.id} delayDuration={300}>
                     <TooltipTrigger asChild>
                       <TabsTrigger
                         value={tab.id}
-                        className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] whitespace-nowrap data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
+                        className="flex items-center justify-center gap-1 px-2 py-1.5 text-[11px] whitespace-nowrap w-full data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
                         <tab.icon className="w-3.5 h-3.5 shrink-0" />
                         {tab.label}
                       </TabsTrigger>
