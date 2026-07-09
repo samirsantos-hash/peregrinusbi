@@ -1304,21 +1304,27 @@ export type Database = {
       upload_logs: {
         Row: {
           id: string
+          notes: string | null
           rows_imported: number
+          status: string
           upload_type: string
           uploaded_at: string
           uploaded_by: string
         }
         Insert: {
           id?: string
+          notes?: string | null
           rows_imported?: number
+          status?: string
           upload_type: string
           uploaded_at?: string
           uploaded_by: string
         }
         Update: {
           id?: string
+          notes?: string | null
           rows_imported?: number
+          status?: string
           upload_type?: string
           uploaded_at?: string
           uploaded_by?: string
