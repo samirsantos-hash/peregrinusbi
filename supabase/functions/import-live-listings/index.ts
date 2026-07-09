@@ -59,6 +59,28 @@ Deno.serve(async (req) => {
     const iVertical = colIdx("VERTICAL");
     const iDomain = colIdx("DOM_DOMAIN_AGG1");
 
+    // Header validation — if DATA column is missing, refuse the whole file
+    // rather than silently defaulting every row to a fixed date.
+    const missingCols: string[] = [];
+    if (iData < 0) missingCols.push("DATA");
+    if (iCustId < 0) missingCols.push("CUS_CUST_ID_SEL");
+    if (missingCols.length > 0) {
+      const msg = `Colunas obrigatórias ausentes no CSV: ${missingCols.join(", ")}`;
+      if (uploadedBy) {
+        await supabase.from("upload_logs").insert({
+          uploaded_by: uploadedBy,
+          upload_type: "live_listings",
+          rows_imported: 0,
+          status: "error",
+          notes: msg,
+        });
+      }
+      return new Response(JSON.stringify({ error: msg }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     // Get seller IDs from DB up front
     const { data: sellerRows, error: sellerErr } = await supabase
       .from("sellers")
@@ -74,6 +96,8 @@ Deno.serve(async (req) => {
     // and flush to DB in batches to keep memory bounded.
     const deduped = new Map<string, any>();
     let inserted = 0;
+    let skippedNoDate = 0;
+    let skippedNoSeller = 0;
     const FLUSH_AT = 2000;
 
     const flush = async () => {
@@ -104,9 +128,15 @@ Deno.serve(async (req) => {
       const cleanCustId = (cols[iCustId]?.trim() || "").replace(/[.,]0$/, "");
       if (!cleanCustId) continue;
       const sellerId = sellerIdMap.get(cleanCustId);
-      if (!sellerId) continue;
+      if (!sellerId) { skippedNoSeller++; continue; }
 
-      const data = cols[iData]?.trim() || "2026-01-01";
+      // Reject rows without a valid ISO date — do NOT invent a fallback.
+      const rawData = cols[iData]?.trim() || "";
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(rawData)) {
+        skippedNoDate++;
+        continue;
+      }
+      const data = rawData;
       const categoria = cols[iCategoria]?.trim() || null;
       const key = `${sellerId}|${data}|${categoria}`;
 
@@ -127,15 +157,20 @@ Deno.serve(async (req) => {
 
     // Log the upload
     if (uploadedBy) {
+      const skippedNotes: string[] = [];
+      if (skippedNoDate > 0) skippedNotes.push(`${skippedNoDate} linha(s) ignorada(s) por DATA vazia/inválida`);
+      if (skippedNoSeller > 0) skippedNotes.push(`${skippedNoSeller} linha(s) ignorada(s) por cust_id sem seller correspondente`);
       await supabase.from("upload_logs").insert({
         uploaded_by: uploadedBy,
         upload_type: "live_listings",
         rows_imported: inserted,
+        status: skippedNoDate > 0 ? "warning" : "ok",
+        notes: skippedNotes.length > 0 ? skippedNotes.join("; ") : null,
       });
     }
 
     return new Response(
-      JSON.stringify({ success: true, listings: inserted }),
+      JSON.stringify({ success: true, listings: inserted, skipped_no_date: skippedNoDate, skipped_no_seller: skippedNoSeller }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
