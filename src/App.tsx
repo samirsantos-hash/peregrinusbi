@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { SoundProvider } from "@/hooks/useSoundFeedback";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { JuniorModeProvider } from "@/hooks/useJuniorMode";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -78,6 +79,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <SoundProvider>
+        <ThemeProvider>
         <JuniorModeProvider>
           <Toaster />
           <Sonner />
@@ -86,6 +88,7 @@ const App = () => (
             <NotificationsBell />
           </BrowserRouter>
         </JuniorModeProvider>
+        </ThemeProvider>
       </SoundProvider>
     </TooltipProvider>
   </QueryClientProvider>
