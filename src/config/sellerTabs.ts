@@ -1,7 +1,7 @@
 // Ordem lógica de análise (NÃO ALTERAR sem revisão consultiva):
 // Abas 1–3 (Resumo, Faturamento, Logística): respondem "como está indo o negócio?"
 // Abas 4–6 (Qualidade, Clips, Preço): respondem "por que está indo assim?"
-// Abas 7–9 (Oportunidades, Reputação, Grants): respondem "o que fazer para melhorar?"
+// Abas 7–9 (Oportunidades, Reputação): respondem "o que fazer para melhorar?"
 
 import {
   DollarSign,
@@ -12,7 +12,6 @@ import {
   Swords,
   Gift,
   HeartPulse,
-  KeyRound,
   Link2,
   Megaphone,
   type LucideIcon,
@@ -45,8 +44,6 @@ export const SELLER_TABS: SellerTab[] = [
     juniorTip: "CDP = combustível do algoritmo. Item elegível sem opt-in = dinheiro na mesa." },
   { id: "reputation", label: "Reputação", icon: HeartPulse, order: 9,
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
-  { id: "grants", label: "Grants", icon: KeyRound, order: 10,
-    juniorTip: "Verba expirando = urgência. Vermelho (<7d) = acionar GM agora." },
   { id: "correlacoes", label: "Correlações", icon: Link2, order: 11,
     juniorTip: "Veja como os KPIs do seller se influenciam — Pearson e fluxo do algoritmo." },
 ];
