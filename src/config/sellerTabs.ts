@@ -14,6 +14,7 @@ import {
   HeartPulse,
   Link2,
   Megaphone,
+  AlertTriangle,
   type LucideIcon,
 } from "lucide-react";
 
@@ -46,4 +47,6 @@ export const SELLER_TABS: SellerTab[] = [
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
   { id: "correlacoes", label: "Correlações", icon: Link2, order: 11,
     juniorTip: "Veja como os KPIs do seller se influenciam — Pearson e fluxo do algoritmo." },
+  { id: "alertas-riscos", label: "Alertas & Riscos", icon: AlertTriangle, order: 12,
+    juniorTip: "Painel consolidado da carteira: BPC baixo, reputação em risco e churn (jun vs mai). Visão cross-seller." },
 ];
