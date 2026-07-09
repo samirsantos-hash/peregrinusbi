@@ -372,16 +372,6 @@ const DashboardHeader = ({
               <GraduationCap className="w-3.5 h-3.5" />
               {juniorMode ? "Modo Didático" : "Modo Avançado"}
             </button>
-
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              title={theme === "dark" ? "Alternar para modo claro" : "Alternar para modo escuro"}
-              className="h-9 w-9 inline-flex items-center justify-center rounded-md border border-border bg-card/60 text-muted-foreground hover:text-foreground transition-all"
-              aria-label="Alternar tema"
-            >
-              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
           </div>
         </div>
 
