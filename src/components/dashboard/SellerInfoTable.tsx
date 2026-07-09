@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { CalendarDays, Clock, Layers, Tag, MapPin } from "lucide-react";
+import { Award, Clock, Layers, Tag, MapPin } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
+import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
 
 function parseLocalDate(dateStr: string): Date {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -8,7 +9,7 @@ function parseLocalDate(dateStr: string): Date {
 }
 
 interface Props {
-  seller?: { cluster?: string; subCluster?: string; state?: string } | null;
+  seller?: { id?: string; cluster?: string; subCluster?: string; state?: string } | null;
   allKpis: { date?: string }[];
 }
 
@@ -16,13 +17,6 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
   if (!seller) return null;
 
   const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort() as string[];
-  const latest = dates[dates.length - 1];
-  const safra = latest
-    ? (() => {
-        const s = parseLocalDate(latest).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
-        return s.charAt(0).toUpperCase() + s.slice(1);
-      })()
-    : "—";
 
   let tempoPrograma = "—";
   if (dates.length >= 2) {
@@ -32,12 +26,29 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     tempoPrograma = `${months} ${months === 1 ? "mês" : "meses"}`;
   }
 
+  const { data: lojas } = useClassificacaoLojas();
+  const loja = lojas?.find((l) => l.sellerId === seller.id);
+  const tierLabels: Record<1 | 2 | 3, string> = {
+    1: "Tier 1 · Platinum",
+    2: "Tier 2 · Gold",
+    3: "Tier 3 · Silver",
+  };
+  const fonteLabel: Record<string, string> = {
+    reputacao: "reputação oficial",
+    metricas: "métricas oficiais (SoW Pads, OOS, BS)",
+    receita: "fallback por receita",
+  };
+  const tierValue = loja ? tierLabels[loja.tier] : "—";
+  const tierTooltip = loja
+    ? `Classificação Mercado Livre baseada em ${fonteLabel[loja.tierFonte]}. Critérios oficiais: T1 SoW Pads ≥2.5%, OOS ≤15%, BS ≤35%; T2 ≥1.25% / ≤25% / ≤45%; T3 ≥0.5% / ≤35% / ≤55%.`
+    : "Tier oficial Mercado Livre (Platinum/Gold/Silver) — combina reputação e métricas SoW Pads, OOS e Bad Seller do último mês.";
+
   const rows = [
     {
-      icon: CalendarDays,
-      label: "Safra",
-      value: safra,
-      tooltip: "Mês/ano mais recente de dados disponíveis para este seller. Referência para todas as análises.",
+      icon: Award,
+      label: "Tier ML",
+      value: tierValue,
+      tooltip: tierTooltip,
     },
     {
       icon: Clock,
