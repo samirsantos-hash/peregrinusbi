@@ -362,10 +362,21 @@ Deno.serve(async (req) => {
 
     // Log the upload
     if (uploadedBy) {
+      const notes: string[] = [];
+      let status = "ok";
+      if (iItemId < 0) {
+        notes.push(
+          "Aviso: coluna ITE_ITEM_ID ausente no CSV — seller_listings_quality não foi populada. " +
+          "Reenvie o arquivo em granularidade por MLB para preencher essa tabela."
+        );
+        status = "warning";
+      }
       await supabase.from("upload_logs").insert({
         uploaded_by: uploadedBy,
         upload_type: "cpp_mensal",
         rows_imported: inserted,
+        status,
+        notes: notes.length > 0 ? notes.join(" | ") : null,
       });
     }
 
