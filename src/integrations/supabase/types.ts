@@ -500,6 +500,42 @@ export type Database = {
           },
         ]
       }
+      live_listings_backup_20260113_ghost: {
+        Row: {
+          backed_up_at: string
+          categoria: string | null
+          created_at: string | null
+          data: string | null
+          dom_domain_agg1: string | null
+          id: string | null
+          itens: number | null
+          seller_id: string | null
+          vertical: string | null
+        }
+        Insert: {
+          backed_up_at?: string
+          categoria?: string | null
+          created_at?: string | null
+          data?: string | null
+          dom_domain_agg1?: string | null
+          id?: string | null
+          itens?: number | null
+          seller_id?: string | null
+          vertical?: string | null
+        }
+        Update: {
+          backed_up_at?: string
+          categoria?: string | null
+          created_at?: string | null
+          data?: string | null
+          dom_domain_agg1?: string | null
+          id?: string | null
+          itens?: number | null
+          seller_id?: string | null
+          vertical?: string | null
+        }
+        Relationships: []
+      }
       meli_campaigns: {
         Row: {
           created_at: string
