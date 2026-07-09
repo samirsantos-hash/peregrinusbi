@@ -39,6 +39,7 @@ import GraficoReputacao from "@/components/carteira/GraficoReputacao";
 import CreatePortfolioModal from "@/components/portfolios/CreatePortfolioModal";
 import { usePortfolios } from "@/hooks/usePortfolios";
 import NewBadge from "@/components/ui/NewBadge";
+import AccessScopeBadge from "@/components/AccessScopeBadge";
 
 // ── Types ──
 interface CppMensalRow {
@@ -511,6 +512,7 @@ export default function GestaoCarteira() {
         </div>
       </div>
       <div className="container mx-auto px-4 py-6 space-y-6">
+        <AccessScopeBadge />
         {/* Title + Actions */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

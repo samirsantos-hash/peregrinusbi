@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePortfolios } from "@/hooks/usePortfolios";
+import AccessScopeBadge from "@/components/AccessScopeBadge";
 
 interface EligRow {
   seller_id: string;
@@ -454,6 +455,7 @@ export default function AnaliseMLB() {
   return (
     <div className="min-h-screen bg-background">
       <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <AccessScopeBadge />
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}

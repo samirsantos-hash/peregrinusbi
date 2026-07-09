@@ -51,6 +51,7 @@ import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
 import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 import PublicidadePanel from "@/components/seller/PublicidadePanel";
+import AccessScopeBadge from "@/components/AccessScopeBadge";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -380,6 +381,8 @@ const Index = () => {
             </Button>
           </div>
         </motion.div>
+
+        <AccessScopeBadge />
 
         {isLoading &&
           <div className="flex items-center justify-center py-12">
