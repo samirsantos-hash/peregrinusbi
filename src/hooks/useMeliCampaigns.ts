@@ -61,9 +61,23 @@ export function useMeliCampaigns(sellerIds: string[]) {
   return { campaigns, loading };
 }
 
-/** Get effectiveness badge style */
-export function getEffectivenessBadge(efectRta: number): { label: string; className: string } {
-  if (efectRta >= 100) return { label: "Líder de Vertical", className: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" };
-  if (efectRta >= 70) return { label: "Alta Performance", className: "bg-blue-500/20 text-blue-300 border-blue-500/30" };
-  return { label: "Abaixo do Mercado", className: "bg-red-500/20 text-red-300 border-red-500/30" };
+/**
+ * Badge de efetividade.
+ * Se `stat` (μ±z·σ da vertical) for fornecido, usa cortes estatísticos por vertical
+ * (com fallback global embutido pelo `useVerticalThresholds`).
+ * Caso contrário, cai para cortes universais 70 / 100 (compatibilidade).
+ */
+export function getEffectivenessBadge(
+  efectRta: number,
+  stat?: { mean: number; sd: number; low: number; high: number; source: "vertical" | "global" },
+): { label: string; className: string; scope: "vertical" | "global" | "fixed" } {
+  if (stat && stat.sd > 0) {
+    const scope = stat.source;
+    if (efectRta >= stat.high) return { label: "Líder de Vertical", className: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", scope };
+    if (efectRta < stat.low) return { label: "Abaixo do Mercado", className: "bg-red-500/20 text-red-300 border-red-500/30", scope };
+    return { label: "Na média", className: "bg-blue-500/20 text-blue-300 border-blue-500/30", scope };
+  }
+  if (efectRta >= 100) return { label: "Líder de Vertical", className: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", scope: "fixed" };
+  if (efectRta >= 70) return { label: "Alta Performance", className: "bg-blue-500/20 text-blue-300 border-blue-500/30", scope: "fixed" };
+  return { label: "Abaixo do Mercado", className: "bg-red-500/20 text-red-300 border-red-500/30", scope: "fixed" };
 }
