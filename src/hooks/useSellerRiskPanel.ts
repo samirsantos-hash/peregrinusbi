@@ -29,13 +29,19 @@ export function useSellerRiskPanel() {
         .from("sellers_kpi")
         .select("data")
         .order("data", { ascending: false })
-        .limit(3000);
+        .limit(1);
       if (mErr) throw mErr;
-      const distinct = Array.from(
-        new Set((monthsRows || []).map((r: any) => String(r.data))),
-      ).slice(0, 3);
-      if (distinct.length < 3) return null;
-      const [current, closed, prior] = distinct;
+      if (!monthsRows || monthsRows.length === 0) return null;
+      // sellers_kpi.data é sempre o 1º dia do mês; derivamos os 2 meses anteriores.
+      const currentDate = new Date(String(monthsRows[0].data));
+      const toIso = (d: Date) =>
+        `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-01`;
+      const shift = (d: Date, n: number) =>
+        new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + n, 1));
+      const current = toIso(currentDate);
+      const closed = toIso(shift(currentDate, -1));
+      const prior = toIso(shift(currentDate, -2));
+      const distinct = [current, closed, prior];
 
       const { data: kpis, error: kErr } = await supabase
         .from("sellers_kpi")
