@@ -254,6 +254,9 @@ const SellerDiagnosticPanel = ({ seller, allKpis }: Props) => {
     target: string;
     status: Status;
     tip: string;
+    curr?: number;
+    prev?: number;
+    lowerIsBetter?: boolean;
   }[] = [];
 
   // Tier metrics
