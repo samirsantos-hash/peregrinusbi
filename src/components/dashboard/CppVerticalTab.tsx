@@ -546,10 +546,10 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
             </Card>
           )}
 
-          {bench && !computedBenchmarks && (
+          {!bench && (
             <p className="text-[10px] text-amber-400">
               <AlertTriangle className="w-3 h-3 inline mr-1" />
-              Amostra insuficiente no período — usando benchmarks de referência
+              Amostra insuficiente de peers no período (n&lt;3) — sem benchmark de vertical disponível.
             </p>
           )}
 
