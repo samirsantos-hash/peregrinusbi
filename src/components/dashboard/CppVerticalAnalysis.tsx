@@ -12,36 +12,7 @@ import {
   computePeriodComparison, getDailySeries, cleanCustId, parseBrNumber,
 } from "@/utils/cppAggregation";
 import { format } from "date-fns";
-
-// Vertical benchmarks (medians)
-const VERTICAL_BENCHMARKS: Record<string, { gmv: number; tsi: number; roas: number; conv: number }> = {
-  "VEHICLE PARTS & ACCESSORIES": { gmv: 42357, tsi: 235, roas: 8.3, conv: 3.3 },
-  "ACC CARS & VANS": { gmv: 42357, tsi: 235, roas: 8.3, conv: 3.3 },
-  "CONSTRUCTION": { gmv: 71886, tsi: 694, roas: 10.9, conv: 5.3 },
-  "FURNISHING": { gmv: 128840, tsi: 906, roas: 5.9, conv: 2.7 },
-  "FASHION": { gmv: 3876, tsi: 91, roas: 5.6, conv: 1.9 },
-  "CPG": { gmv: 45287, tsi: 534, roas: 10.2, conv: 6.5 },
-  "TECHNOLOGY": { gmv: 57253, tsi: 147, roas: 6.2, conv: 2.4 },
-  "HEALTH": { gmv: 31636, tsi: 357, roas: 6.5, conv: 5.4 },
-  "BEAUTY": { gmv: 5514, tsi: 14, roas: 15.1, conv: 2.5 },
-  "SPORTS": { gmv: 30846, tsi: 495, roas: 12.7, conv: 6.5 },
-  "HOME ELECTRONICS": { gmv: 4855755, tsi: 4317, roas: 18.5, conv: 3.8 },
-};
-
-// Price positioning benchmarks
-const PRICE_BENCHMARKS: Record<string, { cheaper: number; match: number; expensive: number }> = {
-  "VEHICLE PARTS & ACCESSORIES": { cheaper: 20.2, match: 51.5, expensive: 28.4 },
-  "ACC CARS & VANS": { cheaper: 20.2, match: 51.5, expensive: 28.4 },
-  "CONSTRUCTION": { cheaper: 21.6, match: 52.3, expensive: 26.1 },
-  "TECHNOLOGY": { cheaper: 14.8, match: 51.4, expensive: 33.8 },
-  "FURNISHING": { cheaper: 20.6, match: 53.2, expensive: 26.2 },
-  "FASHION": { cheaper: 20.7, match: 52.8, expensive: 26.4 },
-  "CPG": { cheaper: 24.2, match: 52.9, expensive: 23.0 },
-  "HEALTH": { cheaper: 20.2, match: 55.1, expensive: 24.7 },
-  "BEAUTY": { cheaper: 33.7, match: 55.1, expensive: 11.3 },
-  "SPORTS": { cheaper: 19.7, match: 51.0, expensive: 29.4 },
-  "HOME ELECTRONICS": { cheaper: 11.6, match: 51.9, expensive: 36.4 },
-};
+import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
 
 function findVertical(rawRows: CppRow[], custId: string): string | null {
   for (const r of rawRows) {
@@ -52,20 +23,58 @@ function findVertical(rawRows: CppRow[], custId: string): string | null {
   return null;
 }
 
-function findBenchmark(vertical: string) {
+/**
+ * Peers benchmark computado dinamicamente a partir dos próprios rawRows do CPP
+ * (mesma vertical, no período), calculando mediana. Retorna null se n<3.
+ * Substitui os benchmarks literais hardcoded que existiam antes.
+ */
+function computeVerticalBenchmark(
+  rawRows: CppRow[],
+  vertical: string,
+  custId: string,
+  startStr: string,
+  endStr: string,
+) {
   const upper = vertical.toUpperCase();
-  for (const [key, val] of Object.entries(VERTICAL_BENCHMARKS)) {
-    if (upper.includes(key) || key.includes(upper)) return val;
+  const perSeller = new Map<string, { tgmv: number; tsi: number; visitas: number; invPads: number; tgmvPads: number; vch: number; vm: number; vex: number }>();
+  for (const r of rawRows) {
+    const v = String(r["VERTICAL"] || r["vertical"] || r["DOM_DOMAIN_AGG1"] || "").trim().toUpperCase();
+    if (!v || !(v.includes(upper) || upper.includes(v))) continue;
+    const d = String(r["TIM_DAY"] || r["DATA"] || "").trim();
+    if (d && (d < startStr || d > endStr)) continue;
+    const id = cleanCustId(r["CUS_CUST_ID_SEL"]);
+    if (!id || id === custId) continue;
+    let m = perSeller.get(id);
+    if (!m) { m = { tgmv: 0, tsi: 0, visitas: 0, invPads: 0, tgmvPads: 0, vch: 0, vm: 0, vex: 0 }; perSeller.set(id, m); }
+    m.tgmv += parseBrNumber(r["TGMV_LC"]);
+    m.tsi += parseBrNumber(r["TSI"]);
+    m.visitas += parseBrNumber(r["VISITAS"]);
+    m.invPads += parseBrNumber(r["INV_PADS"]);
+    m.tgmvPads += parseBrNumber(r["TGMV_LC_PADS"]);
+    m.vch += parseBrNumber(r["VISITS_CHEAPER"]);
+    m.vm += parseBrNumber(r["VISITS_MATCH"]);
+    m.vex += parseBrNumber(r["VISITS_EXPENSIVE"]);
   }
-  return null;
-}
-
-function findPriceBenchmark(vertical: string) {
-  const upper = vertical.toUpperCase();
-  for (const [key, val] of Object.entries(PRICE_BENCHMARKS)) {
-    if (upper.includes(key) || key.includes(upper)) return val;
+  if (perSeller.size < 3) return null;
+  const arr = Array.from(perSeller.values());
+  const median = (xs: number[]) => { if (!xs.length) return 0; const s = [...xs].sort((a,b)=>a-b); return s[Math.floor(s.length/2)]; };
+  const roas = arr.filter(a => a.invPads > 0).map(a => a.tgmvPads / a.invPads);
+  const conv = arr.filter(a => a.visitas > 0).map(a => (a.tsi / a.visitas) * 100);
+  const cheaperPcts: number[] = [], matchPcts: number[] = [], expPcts: number[] = [];
+  for (const a of arr) {
+    const t = a.vch + a.vm + a.vex;
+    if (t > 0) { cheaperPcts.push((a.vch / t) * 100); matchPcts.push((a.vm / t) * 100); expPcts.push((a.vex / t) * 100); }
   }
-  return null;
+  return {
+    gmv: median(arr.map(a => a.tgmv)),
+    tsi: median(arr.map(a => a.tsi)),
+    roas: median(roas),
+    conv: median(conv),
+    cheaper: median(cheaperPcts),
+    match: median(matchPcts),
+    expensive: median(expPcts),
+    n: perSeller.size,
+  };
 }
 
 interface Props {
@@ -96,8 +105,13 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
     [rawRows, custId, startStr, endStr]
   );
 
-  const benchmark = vertical ? findBenchmark(vertical) : null;
-  const priceBench = vertical ? findPriceBenchmark(vertical) : null;
+  const benchmark = useMemo(
+    () => (vertical ? computeVerticalBenchmark(rawRows, vertical, custId, startStr, endStr) : null),
+    [rawRows, vertical, custId, startStr, endStr]
+  );
+  const priceBench = benchmark
+    ? { cheaper: benchmark.cheaper, match: benchmark.match, expensive: benchmark.expensive }
+    : null;
 
   // Price positioning for seller
   const pricePositioning = useMemo(() => {
@@ -137,24 +151,28 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
       seller: fmtCompact(sellerMetrics.tgmv),
       median: fmtCompact(benchmark.gmv),
       delta: benchmark.gmv > 0 ? ((sellerMetrics.tgmv - benchmark.gmv) / benchmark.gmv) * 100 : null,
+      tooltip: null as string | null,
     },
     {
       label: "Itens vendidos",
       seller: Math.round(sellerMetrics.tsi).toLocaleString("pt-BR"),
       median: benchmark.tsi.toLocaleString("pt-BR"),
       delta: benchmark.tsi > 0 ? ((sellerMetrics.tsi - benchmark.tsi) / benchmark.tsi) * 100 : null,
+      tooltip: null,
     },
     {
       label: "ROAS",
       seller: sellerMetrics.roas !== null ? `${sellerMetrics.roas.toFixed(1)}x` : "—",
       median: `${benchmark.roas.toFixed(1)}x`,
       delta: benchmark.roas > 0 && sellerMetrics.roas !== null ? ((sellerMetrics.roas - benchmark.roas) / benchmark.roas) * 100 : null,
+      tooltip: null,
     },
     {
       label: "Taxa conversão",
       seller: sellerMetrics.txConversao !== null ? `${sellerMetrics.txConversao.toFixed(1)}%` : "—",
       median: `${benchmark.conv.toFixed(1)}%`,
       delta: benchmark.conv > 0 && sellerMetrics.txConversao !== null ? ((sellerMetrics.txConversao - benchmark.conv) / benchmark.conv) * 100 : null,
+      tooltip: CONVERSION_MARKET_BAND,
     },
   ] : [];
 
@@ -162,7 +180,20 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
     <div className="space-y-4">
       <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
         Desempenho vs Concorrência — {vertical}
+        {benchmark && (
+          <span className="ml-2 text-[10px] font-normal text-muted-foreground">
+            (n={benchmark.n} peers no período)
+          </span>
+        )}
       </h3>
+
+      {!benchmark && (
+        <Card className="bg-card border-border">
+          <CardContent className="p-4 text-center text-muted-foreground text-xs">
+            Amostra insuficiente de peers no período (n&lt;3) — sem benchmark de vertical disponível.
+          </CardContent>
+        </Card>
+      )}
 
       {/* Price Positioning Bar */}
       {pricePositioning && (
@@ -231,7 +262,19 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
               <TableBody>
                 {comparisonRows.map(r => (
                   <TableRow key={r.label}>
-                    <TableCell className="text-xs font-medium">{r.label}</TableCell>
+                    <TableCell className="text-xs font-medium">
+                      <span className="inline-flex items-center gap-1">
+                        {r.label}
+                        {r.tooltip && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger><Info className="w-3 h-3 text-muted-foreground" /></TooltipTrigger>
+                              <TooltipContent className="text-xs max-w-[260px]">{r.tooltip}</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
+                      </span>
+                    </TableCell>
                     <TableCell className="text-xs text-right font-mono">{r.seller}</TableCell>
                     <TableCell className="text-xs text-right font-mono text-muted-foreground">{r.median}</TableCell>
                     <TableCell className="text-xs text-right">

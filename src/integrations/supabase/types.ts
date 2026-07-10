@@ -899,6 +899,7 @@ export type Database = {
           id: string
           nickname: string
           sub_cluster_seller: string | null
+          vertical_dominant: string | null
         }
         Insert: {
           cluster_seller?: string | null
@@ -908,6 +909,7 @@ export type Database = {
           id?: string
           nickname: string
           sub_cluster_seller?: string | null
+          vertical_dominant?: string | null
         }
         Update: {
           cluster_seller?: string | null
@@ -917,6 +919,7 @@ export type Database = {
           id?: string
           nickname?: string
           sub_cluster_seller?: string | null
+          vertical_dominant?: string | null
         }
         Relationships: []
       }
