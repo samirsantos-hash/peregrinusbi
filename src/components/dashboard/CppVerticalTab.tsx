@@ -15,39 +15,9 @@ import {
   cleanCustId, parseBrNumber,
 } from "@/utils/cppAggregation";
 import { useEligibility } from "@/hooks/useEligibility";
+import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
 
-/* ──────────────── BENCHMARKS ──────────────── */
-
-const PRICE_BENCHMARKS: Record<string, { cheaper: number; match: number; expensive: number }> = {
-  "VEHICLE PARTS & ACCESSORIES": { cheaper: 19.4, match: 51.3, expensive: 29.3 },
-  "CONSTRUCTION": { cheaper: 22.6, match: 52.3, expensive: 25.1 },
-  "TECHNOLOGY": { cheaper: 16.7, match: 51.8, expensive: 31.5 },
-  "FURNISHING": { cheaper: 21.1, match: 53.1, expensive: 25.8 },
-  "FASHION": { cheaper: 22.6, match: 53.0, expensive: 24.5 },
-  "CPG": { cheaper: 28.1, match: 53.6, expensive: 18.4 },
-  "HEALTH": { cheaper: 16.6, match: 52.0, expensive: 31.4 },
-  "BEAUTY": { cheaper: 26.7, match: 57.7, expensive: 15.6 },
-  "SPORTS": { cheaper: 19.7, match: 51.0, expensive: 29.4 },
-  "HOME ELECTRONICS": { cheaper: 17.1, match: 52.9, expensive: 30.0 },
-};
-
-interface VerticalBench {
-  gmv: number; tsi: number; visitas: number; roas: number; conv: number;
-  shareFull: number; shareCdp: number; sellers: number;
-}
-
-const VERTICAL_BENCHMARKS: Record<string, VerticalBench> = {
-  "VEHICLE PARTS & ACCESSORIES": { gmv: 38012, tsi: 224, visitas: 5352, roas: 8.3, conv: 3.1, shareFull: 94.2, shareCdp: 73.4, sellers: 189 },
-  "CONSTRUCTION": { gmv: 97510, tsi: 944, visitas: 13578, roas: 9.7, conv: 5.8, shareFull: 95.9, shareCdp: 61.6, sellers: 46 },
-  "FURNISHING": { gmv: 82231, tsi: 520, visitas: 23004, roas: 6.2, conv: 2.7, shareFull: 94.6, shareCdp: 72.6, sellers: 29 },
-  "FASHION": { gmv: 5688, tsi: 133, visitas: 3882, roas: 5.6, conv: 1.9, shareFull: 96.1, shareCdp: 92.8, sellers: 20 },
-  "TECHNOLOGY": { gmv: 680492, tsi: 1631, visitas: 56976, roas: 12.2, conv: 3.1, shareFull: 95.7, shareCdp: 90.0, sellers: 16 },
-  "CPG": { gmv: 23733, tsi: 439, visitas: 5672, roas: 10.2, conv: 6.4, shareFull: 98.1, shareCdp: 66.8, sellers: 13 },
-  "HEALTH": { gmv: 31636, tsi: 464, visitas: 5186, roas: 14.9, conv: 8.2, shareFull: 95.5, shareCdp: 33.5, sellers: 7 },
-  "BEAUTY": { gmv: 7993, tsi: 16, visitas: 861, roas: 13.6, conv: 2.8, shareFull: 94.2, shareCdp: 67.3, sellers: 9 },
-  "HOME ELECTRONICS": { gmv: 1543980, tsi: 3067, visitas: 93298, roas: 7.9, conv: 3.4, shareFull: 95.1, shareCdp: 90.2, sellers: 6 },
-  "SPORTS": { gmv: 32405, tsi: 513, visitas: 11872, roas: 10.5, conv: 4.3, shareFull: 97.8, shareCdp: 83.3, sellers: 1 },
-};
+/* ──────────────── CDP SUB-CATEGORY REFERENCE (informativo, sem cortes de classificação) ──────────────── */
 
 const CDP_SUBCATEGORY_BENCHMARKS: Record<string, { itens: number; sellers: number; descMedio: number }> = {
   "ACC CARS & VANS": { itens: 10849, sellers: 104, descMedio: 10.9 },
@@ -344,17 +314,10 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
   // Use fallback benchmarks if computed ones are insufficient
   const bench = useMemo(() => {
     if (computedBenchmarks) return computedBenchmarks;
-    if (!vertical) return null;
-    const fb = matchKey(VERTICAL_BENCHMARKS, vertical);
-    const pb = matchKey(PRICE_BENCHMARKS, vertical);
-    if (!fb) return null;
-    return {
-      gmv: fb.gmv, tsi: fb.tsi, visitas: fb.visitas, roas: fb.roas, conv: fb.conv,
-      shareFull: fb.shareFull, shareCdp: fb.shareCdp,
-      priceCheaper: pb?.cheaper ?? 20, priceMatch: pb?.match ?? 52, priceExpensive: pb?.expensive ?? 28,
-      count: fb.sellers,
-    };
-  }, [computedBenchmarks, vertical]);
+    // Sem literais hardcoded — se a amostra de peers no período for insuficiente,
+    // retornamos null e a UI exibe o aviso "amostra insuficiente" abaixo.
+    return null;
+  }, [computedBenchmarks]);
 
   // Days in period for avg
   const daysInPeriod = useMemo(() => {
@@ -547,12 +510,24 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                       { label: "Itens vendidos", sv: sellerMetrics.tsi, mv: bench.tsi, fmt: fmtNum },
                       { label: "Visitas", sv: sellerMetrics.visitas, mv: bench.visitas, fmt: fmtNum },
                       { label: "ROAS", sv: sellerMetrics.roas, mv: bench.roas, fmt: (v: number) => `${v.toFixed(1)}x` },
-                      { label: "Taxa de conversão", sv: sellerMetrics.conv, mv: bench.conv, fmt: (v: number) => `${v.toFixed(1)}%` },
+                      { label: "Taxa de conversão", sv: sellerMetrics.conv, mv: bench.conv, fmt: (v: number) => `${v.toFixed(1)}%`, tooltip: CONVERSION_MARKET_BAND },
                       { label: "Share Full", sv: sellerMetrics.shareFull, mv: bench.shareFull, fmt: (v: number) => `${v.toFixed(1)}%` },
                       { label: "Share CDP", sv: sellerMetrics.shareCdp, mv: bench.shareCdp, fmt: (v: number) => `${v.toFixed(1)}%` },
-                    ].map(row => (
+                    ].map((row: any) => (
                       <TableRow key={row.label}>
-                        <TableCell className="text-xs font-medium">{row.label}</TableCell>
+                        <TableCell className="text-xs font-medium">
+                          <span className="inline-flex items-center gap-1">
+                            {row.label}
+                            {row.tooltip && (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger><Info className="w-3 h-3 text-muted-foreground" /></TooltipTrigger>
+                                  <TooltipContent className="text-xs max-w-[260px]">{row.tooltip}</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-xs text-right font-mono">{row.sv !== null ? row.fmt(row.sv) : "—"}</TableCell>
                         <TableCell className="text-xs text-right font-mono text-muted-foreground">{row.fmt(row.mv)}</TableCell>
                         <TableCell className="text-xs text-center">
