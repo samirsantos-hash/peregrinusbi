@@ -13,6 +13,7 @@ import { type SellerCampaign } from "@/hooks/useMeliCampaigns";
 import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { type ClusterBenchmarkResult, getPercentileBadge } from "@/hooks/useClusterBenchmark";
 import { Loader2, TrendingUp, Users, Target, BarChart3, Award } from "lucide-react";
+import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
 
 interface Props {
   portfolioBenchmark: PortfolioBenchmark | null;
@@ -191,13 +192,16 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             {[
               { label: "GMV", pct: cb.cluster.percentileGmv, seller: fmtBRLCompact(cb.cluster.sellerGmv), median: fmtBRLCompact(cb.cluster.medianGmv) },
               { label: "ROAS", pct: cb.cluster.percentileRoas, seller: `${cb.cluster.sellerRoas.toFixed(1)}x`, median: `${cb.cluster.medianRoas.toFixed(1)}x` },
-              { label: "Conversão", pct: cb.cluster.percentileConv, seller: `${cb.cluster.sellerConv.toFixed(1)}%`, median: `${cb.cluster.medianConv.toFixed(1)}%` },
+              { label: "Conversão", pct: cb.cluster.percentileConv, seller: `${cb.cluster.sellerConv.toFixed(1)}%`, median: `${cb.cluster.medianConv.toFixed(1)}%`, tooltip: CONVERSION_MARKET_BAND },
             ].map((m) => {
               const badge = getPercentileBadge(m.pct);
               return (
                 <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="rounded-lg border border-border/50 bg-card/60 p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">{m.label}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium inline-flex items-center gap-1">
+                      {m.label}
+                      {(m as any).tooltip && <TooltipInfo text={(m as any).tooltip} />}
+                    </p>
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold border ${badge.className}`}>
                       {m.pct >= 80 ? `Top ${100 - m.pct}%` : badge.label}
                     </span>
