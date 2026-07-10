@@ -16,6 +16,10 @@ import { Badge } from "@/components/ui/badge";
 import CategoryBenchmarkPanel from "./CategoryBenchmarkPanel";
 import { usePortfolioBenchmark } from "@/hooks/usePortfolioBenchmark";
 import { useClusterBenchmark } from "@/hooks/useClusterBenchmark";
+import { useVerticalThresholds, vtStatFor, classifyVsThreshold } from "@/hooks/useVerticalThresholds";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
 
 interface KpiLike {
   date: string;
@@ -103,6 +107,31 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
 
   const { data: portfolioBenchmark, loading: portfolioLoading } = usePortfolioBenchmark();
   const { data: clusterBenchmarkData } = useClusterBenchmark(sellerId, sellerCluster);
+  const thresholds = useVerticalThresholds();
+
+  // Vertical dominante deste seller (fonte de verdade — sellers.vertical_dominant)
+  const [dominantVertical, setDominantVertical] = useState<string | null>(null);
+  useEffect(() => {
+    if (!sellerId) { setDominantVertical(null); return; }
+    let cancelled = false;
+    supabase.from("sellers").select("vertical_dominant").eq("id", sellerId).maybeSingle()
+      .then(({ data }) => { if (!cancelled) setDominantVertical((data as any)?.vertical_dominant || null); });
+    return () => { cancelled = true; };
+  }, [sellerId]);
+
+  const roasStat = vtStatFor(thresholds, "roas", dominantVertical);
+  const acosStat = vtStatFor(thresholds, "acos", dominantVertical);
+  const tacosStat = vtStatFor(thresholds, "tacos", dominantVertical);
+  const efectStat = vtStatFor(thresholds, "efect", dominantVertical);
+
+  const cls = (v: "good" | "warn" | "bad") =>
+    v === "good" ? "emerald-text" : v === "bad" ? "critical-text" : "warning-text";
+
+  const thresholdNote = (stat: { source: "vertical" | "global"; n: number; low: number; high: number; mean: number }) => {
+    if (stat.mean === 0) return "";
+    const scope = stat.source === "vertical" ? `vertical (n=${stat.n})` : `carteira global (n=${stat.n}, vertical <20)`;
+    return `Corte μ±1,2816·σ da ${scope}: μ=${stat.mean.toFixed(2)} · faixa esperada ${stat.low.toFixed(2)}–${stat.high.toFixed(2)}.`;
+  };
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; tgmvPads: number; tgmv: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, tgmvPads: 0, tgmv: 0, count: 0 };
@@ -142,6 +171,10 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
   const avgAcos = totalTgmvPadsForMetrics > 0 ? (totalAds / totalTgmvPadsForMetrics) * 100 : 0;
   const avgTacos = totalGmv > 0 ? (totalAds / totalGmv) * 100 : 0;
   const avgCpa = kpis.length > 0 ? kpis.reduce((s, k) => s + k.cpa, 0) / kpis.length : 0;
+
+  const roasClass = classifyVsThreshold(avgRoas, roasStat, +1);
+  const acosClass = classifyVsThreshold(avgAcos, acosStat, -1);
+  const tacosClass = classifyVsThreshold(avgTacos, tacosStat, -1);
 
   // ROI weighted: (Sum_TGMV_LC_PADS - Sum_INV_PADS) / Sum_INV_PADS * 100
   const totalTgmvPads = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
@@ -239,24 +272,24 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     {
       label: "ROAS Médio",
       value: fmtNum(avgRoas, 2),
-      color: avgRoas >= 2 ? "emerald-text" : "critical-text",
-      tooltip: "TGMV_LC_PADS / INV_PADS. Acima de 2x é saudável.",
+      color: cls(roasClass),
+      tooltip: `TGMV_LC_PADS / INV_PADS. ${thresholdNote(roasStat)}`.trim(),
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgRoas.toFixed(2)}x` : null,
       algoKey: "roas" as const,
     },
     {
       label: "ACOS Médio",
       value: `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
-      color: avgAcos <= 15 ? "emerald-text" : "critical-text",
-      tooltip: "(INV_PADS / TGMV_LC_PADS) × 100. Quanto menor, mais eficiente.",
+      color: cls(acosClass),
+      tooltip: `(INV_PADS / TGMV_LC_PADS) × 100. Quanto menor, mais eficiente. ${thresholdNote(acosStat)}`.trim(),
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgAcos.toFixed(2)}%` : null,
       algoKey: "acos" as const,
     },
     {
       label: "TACOS Médio",
       value: `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
-      color: avgTacos <= 10 ? "emerald-text" : "critical-text",
-      tooltip: "(INV_PADS / TGMV_LC) × 100. Termômetro real da saúde do negócio.",
+      color: cls(tacosClass),
+      tooltip: `(INV_PADS / TGMV_LC) × 100. Termômetro real da saúde do negócio. ${thresholdNote(tacosStat)}`.trim(),
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgTacos.toFixed(2)}%` : null,
       algoKey: "tacos" as const,
     },
@@ -334,17 +367,27 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
           </div>
           <div className="flex items-center gap-4 text-xs">
             <div>
-              <span className="text-muted-foreground">Efetividade: </span>
-              <span className={`font-bold ${campaign.efectRtaVertical >= 100 ? "text-emerald" : campaign.efectRtaVertical >= 70 ? "text-neon-blue" : "text-destructive"}`}>
+              <span className="text-muted-foreground inline-flex items-center gap-1">
+                Efetividade
+                <TooltipInfo text={`Cortes por vertical dominante (${dominantVertical || "sem mapeamento"}) via μ±1,2816·σ. ${thresholdNote(efectStat)}`} />:
+              </span>{" "}
+              <span className={`font-bold ${
+                classifyVsThreshold(campaign.efectRtaVertical, efectStat, +1) === "good" ? "text-emerald" :
+                classifyVsThreshold(campaign.efectRtaVertical, efectStat, +1) === "bad" ? "text-destructive" :
+                "text-neon-blue"
+              }`}>
                 {campaign.efectRtaVertical.toFixed(1)}%
               </span>
             </div>
             <div>
-              <span className="text-muted-foreground">Conv. Vertical: </span>
+              <span className="text-muted-foreground inline-flex items-center gap-1">
+                Conv. Vertical
+                <TooltipInfo text={CONVERSION_MARKET_BAND} />:
+              </span>{" "}
               <span className="font-bold">{campaign.taxaConversaoVertical.toFixed(2)}%</span>
             </div>
-            <Badge className={getEffectivenessBadge(campaign.efectRtaVertical).className}>
-              {getEffectivenessBadge(campaign.efectRtaVertical).label}
+            <Badge className={getEffectivenessBadge(campaign.efectRtaVertical, efectStat).className}>
+              {getEffectivenessBadge(campaign.efectRtaVertical, efectStat).label}
             </Badge>
           </div>
         </div>
