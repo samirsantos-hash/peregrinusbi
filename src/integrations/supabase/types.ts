@@ -257,6 +257,54 @@ export type Database = {
         }
         Relationships: []
       }
+      drive_ingest_log: {
+        Row: {
+          chunks_processed: number | null
+          created_at: string
+          error_message: string | null
+          file_id: string
+          file_name: string
+          file_size: number | null
+          finished_at: string | null
+          id: string
+          import_type: string
+          modified_time: string
+          rows_imported: number | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          chunks_processed?: number | null
+          created_at?: string
+          error_message?: string | null
+          file_id: string
+          file_name: string
+          file_size?: number | null
+          finished_at?: string | null
+          id?: string
+          import_type: string
+          modified_time: string
+          rows_imported?: number | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          chunks_processed?: number | null
+          created_at?: string
+          error_message?: string | null
+          file_id?: string
+          file_name?: string
+          file_size?: number | null
+          finished_at?: string | null
+          id?: string
+          import_type?: string
+          modified_time?: string
+          rows_imported?: number | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       gm_elegibilidade: {
         Row: {
           acao_recomendada: string | null
