@@ -407,9 +407,9 @@ const SellerDiagnosticPanel = ({ seller, allKpis }: Props) => {
         <div className="flex items-center gap-2 min-w-0">
           <div className="w-1 h-4 bg-neon-blue rounded-full" />
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-foreground">
-            Diagnóstico do Seller
+            Página do seller Mercado Livre
           </h3>
-          <TooltipInfo text="Diagnóstico consolidado: informações estratégicas do seller e pontos críticos para avançar Tier, Reputação e mix logístico. Setas comparam o mês corrente com o mês fechado anterior." />
+          <TooltipInfo text="Ficha do seller no Mercado Livre: informações estratégicas e pontos críticos para avançar Tier, Reputação e mix logístico. Setas comparam o mês corrente com o mês fechado anterior." />
         </div>
         <div className="flex items-center gap-2 text-[9px] sm:text-[10px] text-muted-foreground">
           <span className="bg-muted/30 px-2 py-0.5 rounded-full whitespace-nowrap">

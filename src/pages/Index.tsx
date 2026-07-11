@@ -423,10 +423,12 @@ const Index = () => {
               onPeriodChange={handlePeriodChange}
             />
 
-            <SellerDiagnosticPanel
-              seller={sellers.find((s) => s.id === selectedSeller) as any}
-              allKpis={allKpis}
-            />
+            {activeTab === "efficiency" && (
+              <SellerDiagnosticPanel
+                seller={sellers.find((s) => s.id === selectedSeller) as any}
+                allKpis={allKpis}
+              />
+            )}
 
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 

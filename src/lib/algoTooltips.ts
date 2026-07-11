@@ -263,11 +263,11 @@ export const TOOLTIPS: Record<string, AlgoTooltipContent> = {
   // ─── EFETIVIDADE vs CATEGORIA ──────────────────────────────────────
   efetividadeCategoria: {
     oque: "Índice do seller vs MEDIANA dos pares da mesma categoria (não vs teto, nem vs meta). 100% = igual à mediana.",
-    algoritmo: "Calculado em 6 dimensões relativas: GMV, Conversão, Reputação, Tempo de Resposta, Share Full e ROAS. A dimensão mais fraca é o ponto de alavanca real — nunca interprete o índice geral sozinho.",
+    algoritmo: "Calculado em dimensões relativas: GMV, Conversão, Reputação (claims + atrasos, proxy de Tempo de Resposta ao cliente), Share Full, ROAS e ACOS. A dimensão mais fraca é o ponto de alavanca real — nunca interprete o índice geral sozinho.",
     seBom: "≥ 150% Líder de Categoria | 130–149% Performance Excedente | 110–129% Acima da Média.",
     seRuim: "90–109% Na Média (sem vantagem) | 70–89% Gap de Vendas | < 70% Potencial de Recuperação (urgência).",
-    correlacao: "Sempre abra as 6 dimensões. Ex: índice 95% com Share Full em 61% = migrar para Full é a ação de maior impacto, antes de mexer em Ads ou preço.",
-    benchmark: "Diferenças entre 95–105% são estatisticamente irrelevantes — qualquer variação mensal as apaga.",
+    correlacao: "Ordem de investigação sugerida quando o índice geral está fraco: (1) Reputação e Tempo de Resposta — freio estrutural, corrige antes de tudo; (2) Share Full — maior peso isolado no algoritmo; (3) Conversão — preço, fotos, ficha técnica, CDP; (4) ROAS/ACOS — segmentação e qualidade de Ads; (5) GMV — consequência das anteriores. Ex: índice 95% com Share Full em 61% ⇒ migrar para Full é a ação de maior impacto antes de mexer em Ads ou preço.",
+    benchmark: "Diferenças entre 95–105% são estatisticamente irrelevantes — qualquer variação mensal as apaga. Tempo de Resposta entra hoje via proxy de claims + atrasos; quando o dado bruto de resposta ao comprador for ingerido, vira dimensão própria.",
   },
   // ─── MIX LOGÍSTICO COMPLETO ────────────────────────────────────────
   shareCorreios: {
