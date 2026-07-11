@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.import-csv-daily]
 verify_jwt = false
+
+[functions.drive-sync]
+verify_jwt = false
