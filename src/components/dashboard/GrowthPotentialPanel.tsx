@@ -448,7 +448,16 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Curva de Crescimento Acumulado: Seller vs Vertical
           </h3>
-          <TooltipInfo text="Eixo 1: faturamento acumulado do Seller. Eixo 2: benchmark da vertical. A área entre as curvas representa o gap ou ganho de market share." />
+          <TooltipInfo text={
+            "Como ler este gráfico:\n\n" +
+            "• Curva sólida (azul/verde): faturamento acumulado do SELLER no período. Cada ponto soma o dia/mês atual aos anteriores — ela só cresce.\n" +
+            "• Curva tracejada (amarela): faturamento que o seller TERIA se performasse igual à mediana da vertical (calculado a partir do índice Efect Rta Vertical). É o mesmo período, mesmo mix — só corrigido pelo padrão da categoria.\n\n" +
+            "Como interpretar o gap:\n" +
+            "• Seller ACIMA do benchmark ⇒ ganho de market share, o algoritmo do ML tende a devolver mais exposição orgânica.\n" +
+            "• Seller ABAIXO ⇒ receita não capturada dentro da própria vertical; a distância vertical em R$ é o tamanho aproximado da oportunidade.\n" +
+            "• Curvas divergindo ao longo do tempo ⇒ tendência (perda ou ganho estrutural). Curvas paralelas ⇒ posição estável vs categoria.\n\n" +
+            "Para agir: abra as dimensões acima e comece pela mais fraca (Reputação/Tempo de Resposta ⇒ Share Full ⇒ Conversão ⇒ ROAS/ACOS)."
+          } />
         </div>
         <ResponsiveContainer width="100%" height={320}>
           <AreaChart data={chartData}>
