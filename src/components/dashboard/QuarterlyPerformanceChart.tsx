@@ -1,10 +1,11 @@
 import { useMemo, useState, useCallback } from "react";
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
+  ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend
 } from "recharts";
 import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
 import TooltipInfo from "./TooltipInfo";
+import { withMovingAverage } from "@/utils/movingAverage";
 
 import { monthKey as getMonthKey } from "@/lib/dates";
 import { detectPartialMonths } from "@/utils/partialPeriodGuard";
@@ -122,7 +123,11 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
     return { first: fmt(keys[0]), last: fmt(keys[keys.length - 1]) };
   }, [taggedData]);
   const chartData = useMemo(
-    () => (hidePartial ? taggedData.filter((d) => !d.partial) : taggedData),
+    () => {
+      const filtered = hidePartial ? taggedData.filter((d) => !d.partial) : taggedData;
+      const withGmvMa = withMovingAverage(filtered, "gmv", "ma3gmv", 3);
+      return withMovingAverage(withGmvMa, "tgmv", "ma3tgmv", 3);
+    },
     [taggedData, hidePartial],
   );
 
@@ -198,7 +203,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
       </div>
 
       <ResponsiveContainer width="100%" height={340}>
-        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="gradGmv" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.25} />
@@ -256,6 +261,31 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
             hide={hidden.has("tgmv")}
           />
 
+          <Line
+            type="monotone"
+            dataKey="ma3gmv"
+            name="MM3 Bruto"
+            stroke="hsl(199, 70%, 70%)"
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
+            dot={false}
+            connectNulls
+            hide={hidden.has("ma3gmv")}
+            animationDuration={800}
+          />
+          <Line
+            type="monotone"
+            dataKey="ma3tgmv"
+            name="MM3 Realizado"
+            stroke="hsl(160, 60%, 65%)"
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
+            dot={false}
+            connectNulls
+            hide={hidden.has("ma3tgmv")}
+            animationDuration={800}
+          />
+
           <Legend
             wrapperStyle={{ fontSize: 11, cursor: "pointer" }}
             onClick={handleLegendClick}
@@ -271,7 +301,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
               </span>
             )}
           />
-        </AreaChart>
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );
