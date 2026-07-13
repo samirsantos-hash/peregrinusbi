@@ -731,6 +731,7 @@ export default function ProjecaoCrescimento() {
                 {showIC && <Area type="monotone" dataKey="upper" stroke="none" fill="#3B82F6" fillOpacity={0.15} />}
                 {showIC && <Area type="monotone" dataKey="lower" stroke="none" fill="hsl(var(--background))" fillOpacity={1} />}
                 <Line type="monotone" dataKey="real" stroke="#1F4E79" strokeWidth={2.5} dot={false} name="Real" connectNulls={false} />
+                <Line type="monotone" dataKey="ma3real" stroke="#1F4E79" strokeWidth={1.5} strokeDasharray="4 2" strokeOpacity={0.55} dot={false} name="MM3 Real" connectNulls />
                 <Line type="monotone" dataKey="forecast" stroke="#3B82F6" strokeDasharray="5 4" strokeWidth={2.5} dot={{ r: 3 }} name="Projeção" connectNulls={false} />
                 <ReferenceLine x={pontos[pontos.length - 1]?.mes} stroke="#D4AF37" strokeDasharray="2 2" label={{ value: "hoje", position: "top", fill: "#D4AF37", fontSize: 10 }} />
               </ComposedChart>
@@ -758,6 +759,7 @@ export default function ProjecaoCrescimento() {
                 />
                 <Bar yAxisId="v" dataKey="visitas" fill="hsl(var(--muted))" opacity={0.5} name="Visitas" />
                 <Line yAxisId="cr" type="monotone" dataKey="cr" stroke="#D4AF37" strokeWidth={2.5} dot={{ r: 3 }} name="CR (%)" />
+                <Line yAxisId="cr" type="monotone" dataKey="ma3cr" stroke="#D4AF37" strokeWidth={1.5} strokeDasharray="4 2" strokeOpacity={0.55} dot={false} name="MM3 CR" connectNulls />
               </ComposedChart>
             </ResponsiveContainer>
           </div>
