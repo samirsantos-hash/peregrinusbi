@@ -215,11 +215,27 @@ export default function ProjecaoCrescimento() {
   const linhaTemporal = useMemo(() => {
     const real = pontos.map((p) => ({ mes: p.mes, real: p.receita, forecast: null as number | null, lower: null as number | null, upper: null as number | null }));
     const fcRows = (fc?.pontos ?? []).map((p) => ({ mes: p.mes, real: null as number | null, forecast: p.valor, lower: p.lower, upper: p.upper }));
-    return [...real, ...fcRows];
+    const merged = [...real, ...fcRows] as any[];
+    for (let i = 0; i < merged.length; i++) {
+      if (i < 2) { merged[i].ma3real = null; continue; }
+      let sum = 0, count = 0;
+      for (let j = i - 2; j <= i; j++) {
+        const v = merged[j].real;
+        if (typeof v === "number" && Number.isFinite(v)) { sum += v; count++; }
+      }
+      merged[i].ma3real = count > 0 ? sum / count : null;
+    }
+    return merged;
   }, [pontos, fc]);
 
   /* Chart 2: CR vs Visitas */
-  const chartCR = pontos.map((p) => ({ mes: p.mes, cr: p.cr, visitas: p.visitas }));
+  const chartCR = useMemo(() => {
+    const rows = pontos.map((p) => ({ mes: p.mes, cr: p.cr, visitas: p.visitas, ma3cr: null as number | null }));
+    for (let i = 2; i < rows.length; i++) {
+      rows[i].ma3cr = (rows[i].cr + rows[i - 1].cr + rows[i - 2].cr) / 3;
+    }
+    return rows;
+  }, [pontos]);
 
   /* Chart 3: heatmap (only with 24+ months) */
   const heatmap = useMemo(() => {
