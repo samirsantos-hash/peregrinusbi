@@ -52,8 +52,8 @@ export default function ProjecaoPanel({ custIds, portfolioName }: Props) {
       upper: p.upper,
       band: [p.lower, p.upper] as [number, number],
     }));
-    const merged = [...real, ...fcRows];
-    return withMovingAverage(merged, "real", "ma3real", 3);
+    const merged: any[] = [...real, ...fcRows];
+    return withMovingAverage(merged, "real" as any, "ma3real", 3);
   }, [data, fc]);
 
   const projTotal = useMemo(
