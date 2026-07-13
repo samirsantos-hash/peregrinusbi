@@ -16,6 +16,7 @@ import {
 } from "recharts";
 import { useCrescimentoMensal } from "@/hooks/useCrescimentoMensal";
 import { forecastHibrido, inclinacaoLog, classificarTendencia } from "@/lib/forecast";
+import { withMovingAverage } from "@/utils/movingAverage";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -51,7 +52,8 @@ export default function ProjecaoPanel({ custIds, portfolioName }: Props) {
       upper: p.upper,
       band: [p.lower, p.upper] as [number, number],
     }));
-    return [...real, ...fcRows];
+    const merged = [...real, ...fcRows];
+    return withMovingAverage(merged, "real", "ma3real", 3);
   }, [data, fc]);
 
   const projTotal = useMemo(
@@ -135,6 +137,7 @@ export default function ProjecaoPanel({ custIds, portfolioName }: Props) {
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Area type="monotone" dataKey="band" stroke="none" fill="hsl(var(--primary))" fillOpacity={0.12} name="IC95" />
                   <Line type="monotone" dataKey="real" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Receita real" />
+                  <Line type="monotone" dataKey="ma3real" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="4 2" strokeOpacity={0.6} dot={false} connectNulls name="MM3 real" />
                   <Line type="monotone" dataKey="proj" stroke="hsl(var(--primary))" strokeWidth={2} strokeDasharray="5 4" dot={false} name="Projeção" />
                 </ComposedChart>
               </ResponsiveContainer>
