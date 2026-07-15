@@ -256,7 +256,7 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
     // Trava anti-troca: valida assinatura de cabeçalho antes de aceitar o arquivo.
     const headers = extractHeaders(text);
     const check = validateHeaderForSlot(key, headers);
-    if (!check.ok) {
+    if (check.ok === false) {
       updateSlot(key, {
         file: null,
         text: "",
