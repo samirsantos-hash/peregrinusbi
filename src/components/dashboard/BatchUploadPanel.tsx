@@ -253,6 +253,22 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
     } else {
       text = await file.text();
     }
+    // Trava anti-troca: valida assinatura de cabeçalho antes de aceitar o arquivo.
+    const headers = extractHeaders(text);
+    const check = validateHeaderForSlot(key, headers);
+    if (!check.ok) {
+      updateSlot(key, {
+        file: null,
+        text: "",
+        lineCount: 0,
+        status: "error",
+        errorMsg: check.error,
+        result: "",
+      });
+      const ref = inputRefs.current[key];
+      if (ref) ref.value = "";
+      return;
+    }
     const lineCount = countLines(text);
     updateSlot(key, { file, text, lineCount, status: "staged", errorMsg: "", result: "" });
   }, []);
