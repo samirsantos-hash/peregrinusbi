@@ -23,6 +23,98 @@ interface SlotConfig {
   sftpPattern: RegExp;
 }
 
+// Assinatura de cabeçalhos por tipo de upload — evita que o usuário envie
+// um arquivo no slot errado (ex.: elegibilidade no lugar de CPP Mensal).
+interface HeaderSignature {
+  // Todas essas colunas precisam estar presentes.
+  required: string[];
+  // Ao menos uma dessas colunas precisa estar presente (distinguidoras).
+  anyOf?: string[];
+  // Se qualquer uma dessas colunas aparecer, o arquivo é de OUTRO tipo.
+  forbidden?: string[];
+}
+
+const HEADER_SIGNATURES: Record<UploadSlotKey, HeaderSignature> = {
+  cpp_mensal: {
+    required: ["CUS_CUST_ID_SEL", "TIM_MONTH_ID", "CLUSTER_SELLER"],
+    forbidden: ["TIM_DAY", "ITEM_ID", "DISCOUNT_BEST", "CATEGORIA", "ITENS", "Vertical Principal", "Efect Rta Vertical"],
+  },
+  cpp_diarizada: {
+    required: ["CUS_CUST_ID_SEL", "CLUSTER_SELLER"],
+    anyOf: ["TIM_DAY", "DATA"],
+    forbidden: ["TIM_MONTH_ID", "ITEM_ID", "DISCOUNT_BEST", "CATEGORIA", "ITENS", "Vertical Principal", "Efect Rta Vertical"],
+  },
+  live_listings: {
+    required: ["CUS_CUST_ID_SEL", "DATA", "CATEGORIA", "ITENS"],
+    forbidden: ["TIM_MONTH_ID", "TIM_DAY", "ITEM_ID", "DISCOUNT_BEST", "CLUSTER_SELLER", "Vertical Principal", "Efect Rta Vertical"],
+  },
+  elegibilidade: {
+    required: ["CUS_CUST_ID_SEL", "ITEM_ID"],
+    anyOf: ["DISCOUNT_BEST", "DISCOUNT_TOTAL", "FLAG_BEST_PROMO"],
+    forbidden: ["TIM_MONTH_ID", "TIM_DAY", "CLUSTER_SELLER", "CATEGORIA", "ITENS", "Vertical Principal", "Efect Rta Vertical"],
+  },
+  meli_campaigns: {
+    required: [],
+    anyOf: ["Vertical Principal", "vertical_principal", "Efect Rta Vertical", "efect_rta_vertical", "Taxa de Conversão Vertical"],
+    forbidden: ["TIM_MONTH_ID", "CLUSTER_SELLER", "ITEM_ID", "DISCOUNT_BEST", "CATEGORIA", "ITENS"],
+  },
+};
+
+function extractHeaders(csvText: string): string[] {
+  const firstNl = csvText.indexOf("\n");
+  const headerLine = (firstNl === -1 ? csvText : csvText.slice(0, firstNl))
+    .replace(/^\uFEFF/, "")
+    .replace(/\r$/, "");
+  const sep = headerLine.includes(";") ? ";" : ",";
+  return headerLine.split(sep).map((h) => h.trim().replace(/^"|"$/g, ""));
+}
+
+function detectSlotFromHeaders(headers: string[]): UploadSlotKey | null {
+  const set = new Set(headers);
+  for (const key of Object.keys(HEADER_SIGNATURES) as UploadSlotKey[]) {
+    const sig = HEADER_SIGNATURES[key];
+    const okReq = sig.required.every((c) => set.has(c));
+    const okAny = !sig.anyOf || sig.anyOf.some((c) => set.has(c));
+    const okForb = !sig.forbidden || !sig.forbidden.some((c) => set.has(c));
+    if (okReq && okAny && okForb) return key;
+  }
+  return null;
+}
+
+function validateHeaderForSlot(
+  slot: UploadSlotKey,
+  headers: string[]
+): { ok: true } | { ok: false; error: string } {
+  const set = new Set(headers);
+  const sig = HEADER_SIGNATURES[slot];
+  const missing = sig.required.filter((c) => !set.has(c));
+  const hasAny = !sig.anyOf || sig.anyOf.some((c) => set.has(c));
+  const forbidden = (sig.forbidden || []).filter((c) => set.has(c));
+
+  if (missing.length === 0 && hasAny && forbidden.length === 0) return { ok: true };
+
+  const detected = detectSlotFromHeaders(headers);
+  const detectedTitle = detected ? SLOTS.find((s) => s.key === detected)?.title : null;
+  const slotTitle = SLOTS.find((s) => s.key === slot)?.title;
+
+  if (detected && detected !== slot) {
+    return {
+      ok: false,
+      error: `Arquivo incompatível: parece ser "${detectedTitle}", não "${slotTitle}". Verifique o slot correto.`,
+    };
+  }
+  if (missing.length > 0) {
+    return { ok: false, error: `Colunas obrigatórias ausentes: ${missing.slice(0, 3).join(", ")}` };
+  }
+  if (forbidden.length > 0) {
+    return {
+      ok: false,
+      error: `Arquivo não corresponde a "${slotTitle}" (colunas de outro tipo detectadas: ${forbidden.slice(0, 2).join(", ")}).`,
+    };
+  }
+  return { ok: false, error: `Cabeçalho não reconhecido para "${slotTitle}".` };
+}
+
 const SLOTS: SlotConfig[] = [
   {
     key: "cpp_mensal",
