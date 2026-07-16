@@ -47,6 +47,9 @@ interface UploadLog {
   upload_type: string;
   rows_imported: number;
   uploaded_at: string;
+  uploaded_by: string | null;
+  status: "ok" | "warning" | "error" | string;
+  notes: string | null;
 }
 
 const UPLOAD_TYPE_LABELS: Record<string, { label: string; color: string }> = {
@@ -55,6 +58,13 @@ const UPLOAD_TYPE_LABELS: Record<string, { label: string; color: string }> = {
   live_listings: { label: "Live Listings", color: "bg-emerald/10 text-emerald" },
   elegibilidade: { label: "Elegibilidade", color: "bg-warning/10 text-warning" },
   elegibilidade_diarizada: { label: "Eleg. Diarizada", color: "bg-orange-500/10 text-orange-400" },
+  meli_campaigns: { label: "Campanhas", color: "bg-violet-500/10 text-violet-400" },
+};
+
+const STATUS_BADGE: Record<string, { label: string; color: string }> = {
+  ok: { label: "✓ Sucesso", color: "bg-emerald/15 text-emerald border border-emerald/30" },
+  warning: { label: "⚠ Aviso", color: "bg-warning/15 text-warning border border-warning/30" },
+  error: { label: "✕ Erro", color: "bg-destructive/15 text-destructive border border-destructive/30" },
 };
 
 const Admin = () => {
