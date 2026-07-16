@@ -165,6 +165,7 @@ const SLOTS: SlotConfig[] = [
 ];
 
 type SlotStatus = "empty" | "staged" | "uploading" | "success" | "error";
+type ExtractPhase = "reading" | "extracting" | "parsing" | "validating";
 
 interface SlotState {
   file: File | null;
@@ -173,10 +174,13 @@ interface SlotState {
   status: SlotStatus;
   errorMsg: string;
   result: string;
+  extractProgress?: number; // 0..100 during ZIP extraction & validation
+  extractPhase?: ExtractPhase;
 }
 
 const emptySlot = (): SlotState => ({
   file: null, text: "", lineCount: 0, status: "empty", errorMsg: "", result: "",
+  extractProgress: 0, extractPhase: undefined,
 });
 
 function countLines(text: string): number {
@@ -247,19 +251,26 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
 
     let text: string;
     if (ext === ".xlsx") {
+      updateSlot(key, { status: "uploading", extractPhase: "reading", extractProgress: 10, errorMsg: "", file });
       const buffer = await file.arrayBuffer();
+      updateSlot(key, { extractPhase: "parsing", extractProgress: 60 });
       const wb = XLSX.read(buffer, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       text = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
     } else if (ext === ".zip") {
       try {
+        updateSlot(key, { status: "uploading", extractPhase: "reading", extractProgress: 5, errorMsg: "", file });
         const buffer = await file.arrayBuffer();
+        updateSlot(key, { extractPhase: "extracting", extractProgress: 20 });
         const zip = await JSZip.loadAsync(buffer);
         const entries = Object.values(zip.files).filter(
           (f) => !f.dir && /\.(csv|txt|xlsx)$/i.test(f.name),
         );
         if (entries.length === 0) {
-          updateSlot(key, { status: "error", errorMsg: "ZIP não contém arquivo .csv/.txt/.xlsx." });
+          updateSlot(key, {
+            status: "error", errorMsg: "ZIP não contém arquivo .csv/.txt/.xlsx.",
+            extractProgress: 0, extractPhase: undefined, file: null,
+          });
           return;
         }
         // Prefer the largest matching file (usually the data file)
@@ -269,24 +280,32 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
           return sb - sa;
         })[0];
         if (/\.xlsx$/i.test(entry.name)) {
-          const buf = await entry.async("arraybuffer");
+          const buf = await entry.async("arraybuffer", (meta) => {
+            updateSlot(key, { extractProgress: 20 + Math.round(meta.percent * 0.5) });
+          });
+          updateSlot(key, { extractPhase: "parsing", extractProgress: 75 });
           const wb = XLSX.read(buf, { type: "array" });
           const ws = wb.Sheets[wb.SheetNames[0]];
           text = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
         } else {
-          text = await entry.async("string");
+          text = await entry.async("string", (meta) => {
+            updateSlot(key, { extractProgress: 20 + Math.round(meta.percent * 0.6) });
+          });
         }
       } catch (err) {
         updateSlot(key, {
           status: "error",
           errorMsg: `Falha ao ler ZIP: ${err instanceof Error ? err.message : "erro desconhecido"}`,
+          extractProgress: 0, extractPhase: undefined, file: null,
         });
         return;
       }
     } else {
+      updateSlot(key, { status: "uploading", extractPhase: "reading", extractProgress: 40, errorMsg: "", file });
       text = await file.text();
     }
     // Trava anti-troca: valida assinatura de cabeçalho antes de aceitar o arquivo.
+    updateSlot(key, { extractPhase: "validating", extractProgress: 90 });
     const headers = extractHeaders(text);
     const check = validateHeaderForSlot(key, headers);
     if (check.ok === false) {
@@ -297,13 +316,18 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
         status: "error",
         errorMsg: check.error,
         result: "",
+        extractProgress: 0,
+        extractPhase: undefined,
       });
       const ref = inputRefs.current[key];
       if (ref) ref.value = "";
       return;
     }
     const lineCount = countLines(text);
-    updateSlot(key, { file, text, lineCount, status: "staged", errorMsg: "", result: "" });
+    updateSlot(key, {
+      file, text, lineCount, status: "staged", errorMsg: "", result: "",
+      extractProgress: 100, extractPhase: undefined,
+    });
   }, []);
 
   const clearSlot = (key: UploadSlotKey) => {
