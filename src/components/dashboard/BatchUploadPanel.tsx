@@ -37,17 +37,18 @@ interface HeaderSignature {
 
 const HEADER_SIGNATURES: Record<UploadSlotKey, HeaderSignature> = {
   cpp_mensal: {
-    required: ["CUS_CUST_ID_SEL", "TIM_MONTH_ID", "CLUSTER_SELLER"],
+    required: ["CUS_CUST_ID_SEL", "TIM_MONTH_ID"],
+    anyOf: ["CLUSTER_SELLER", "SUB_CLUSTER_SELLER", "NOMBRE_SOLUCION"],
     forbidden: ["TIM_DAY", "ITEM_ID", "DISCOUNT_BEST", "CATEGORIA", "ITENS", "Vertical Principal", "Efect Rta Vertical"],
   },
   cpp_diarizada: {
-    required: ["CUS_CUST_ID_SEL", "CLUSTER_SELLER"],
-    anyOf: ["TIM_DAY", "DATA"],
-    forbidden: ["TIM_MONTH_ID", "ITEM_ID", "DISCOUNT_BEST", "CATEGORIA", "ITENS", "Vertical Principal", "Efect Rta Vertical"],
+    required: ["CUS_CUST_ID_SEL", "TIM_DAY"],
+    anyOf: ["SUB_CLUSTER_SELLER", "CLUSTER_SELLER", "NIVEL_SOLUCION"],
+    forbidden: ["ITEM_ID", "DISCOUNT_BEST", "CATEGORIA", "ITENS", "Vertical Principal", "Efect Rta Vertical"],
   },
   live_listings: {
     required: ["CUS_CUST_ID_SEL", "DATA", "CATEGORIA", "ITENS"],
-    forbidden: ["TIM_MONTH_ID", "TIM_DAY", "ITEM_ID", "DISCOUNT_BEST", "CLUSTER_SELLER", "Vertical Principal", "Efect Rta Vertical"],
+    forbidden: ["TIM_DAY", "ITEM_ID", "DISCOUNT_BEST", "Vertical Principal", "Efect Rta Vertical"],
   },
   elegibilidade: {
     required: ["CUS_CUST_ID_SEL", "ITEM_ID"],
