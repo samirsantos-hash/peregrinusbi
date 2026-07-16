@@ -468,12 +468,18 @@ const Admin = () => {
                         <TableRow>
                           <TableHead>Data do Upload</TableHead>
                           <TableHead>Tipo</TableHead>
+                          <TableHead>Usuário</TableHead>
+                          <TableHead>Status</TableHead>
                           <TableHead className="text-right">Linhas Importadas</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {uploadLogs.map((log) => {
                           const typeInfo = UPLOAD_TYPE_LABELS[log.upload_type] || { label: log.upload_type, color: "bg-muted/20 text-muted-foreground" };
+                          const statusInfo = STATUS_BADGE[log.status] || { label: log.status, color: "bg-muted/20 text-muted-foreground" };
+                          const userEmail = managedUsers.find((u) => u.userId === log.uploaded_by)?.email
+                            || (log.uploaded_by === user?.id ? user?.email : null)
+                            || (log.uploaded_by ? `${log.uploaded_by.slice(0, 8)}…` : "—");
                           return (
                             <TableRow key={log.id}>
                               <TableCell className="text-sm">
@@ -482,6 +488,14 @@ const Admin = () => {
                               <TableCell>
                                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${typeInfo.color}`}>
                                   {typeInfo.label}
+                                </span>
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground max-w-[220px] truncate" title={userEmail}>
+                                {userEmail}
+                              </TableCell>
+                              <TableCell>
+                                <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusInfo.color}`} title={log.notes || undefined}>
+                                  {statusInfo.label}
                                 </span>
                               </TableCell>
                               <TableCell className="text-right font-mono text-sm">
