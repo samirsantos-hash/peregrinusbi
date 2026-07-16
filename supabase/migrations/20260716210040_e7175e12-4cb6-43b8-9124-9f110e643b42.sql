@@ -1,0 +1,1 @@
+CREATE POLICY "Gerentes can view upload_logs" ON public.upload_logs FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'gerente'));
