@@ -1563,6 +1563,14 @@ export type Database = {
     }
     Functions: {
       get_allowed_cust_ids: { Args: never; Returns: string[] }
+      get_data_coverage: {
+        Args: never
+        Returns: {
+          period: string
+          rows: number
+          source: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
