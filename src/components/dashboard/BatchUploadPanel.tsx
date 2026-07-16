@@ -412,7 +412,7 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
                     <input
                       ref={(el) => { inputRefs.current[cfg.key] = el; }}
                       type="file"
-                      accept=".csv,.xlsx,.txt"
+                      accept=".csv,.xlsx,.txt,.zip"
                       className="hidden"
                       onChange={(e) => handleFileSelect(cfg.key, e)}
                     />
