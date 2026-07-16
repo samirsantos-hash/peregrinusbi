@@ -416,7 +416,7 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
                     : s.status === "uploading"
                     ? "border-neon-blue/40 bg-neon-blue/5"
                     : s.status === "staged"
-                    ? "border-primary/30 bg-primary/5"
+                    ? "border-emerald/50 bg-emerald/10 shadow-[0_0_18px_-6px_hsl(var(--emerald)/0.55)]"
                     : "border-border/50 bg-muted/10"
                 }`}
               >
@@ -424,7 +424,15 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
                   <Icon className={`w-5 h-5 ${cfg.colorClass}`} />
                   <h4 className="text-sm font-semibold flex-1">{cfg.title}</h4>
                   {/* Status icon */}
-                  {s.status === "staged" && <CheckCircle className="w-4 h-4 text-muted-foreground" />}
+                  {s.status === "staged" && (
+                    <motion.span
+                      initial={{ scale: 0.4, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: "spring", stiffness: 320, damping: 18 }}
+                    >
+                      <CheckCircle className="w-4 h-4 text-emerald" />
+                    </motion.span>
+                  )}
                   {s.status === "uploading" && <Loader2 className="w-4 h-4 animate-spin text-neon-blue" />}
                   {s.status === "success" && <CheckCircle className="w-4 h-4 text-emerald" />}
                   {s.status === "error" && <AlertCircle className="w-4 h-4 text-destructive" />}
@@ -448,15 +456,24 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
                 )}
 
                 {s.status === "staged" && s.file && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-xs">
-                    <FileText className="w-3.5 h-3.5 shrink-0 text-primary" />
-                    <span className="truncate flex-1 font-medium">{s.file.name}</span>
-                    <span className="text-muted-foreground whitespace-nowrap">{s.lineCount.toLocaleString("pt-BR")} linhas</span>
-                    {batchStatus === "idle" && (
-                      <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => clearSlot(cfg.key)}>
-                        <X className="w-3 h-3" />
-                      </Button>
-                    )}
+                  <motion.div
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="space-y-1"
+                  >
+                    <div className="flex items-center gap-2 text-xs">
+                      <FileText className="w-3.5 h-3.5 shrink-0 text-emerald" />
+                      <span className="truncate flex-1 font-medium text-emerald">{s.file.name}</span>
+                      <span className="text-muted-foreground whitespace-nowrap">{s.lineCount.toLocaleString("pt-BR")} linhas</span>
+                      {batchStatus === "idle" && (
+                        <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => clearSlot(cfg.key)}>
+                          <X className="w-3 h-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-emerald font-semibold flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3" /> Arquivo carregado com sucesso · pronto para processar
+                    </p>
                   </motion.div>
                 )}
 
