@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
+import DataVerifierPanel from "@/components/dashboard/DataVerifierPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import PortfolioManager from "@/components/portfolios/PortfolioManager";
 import TokensDeAcessoTab from "@/components/admin/TokensDeAcessoTab";
@@ -449,6 +450,7 @@ const Admin = () => {
 
           <TabsContent value="upload" className="mt-5 space-y-6">
             <BatchUploadPanel onSuccess={loadData} />
+            <DataVerifierPanel />
 
             {/* Upload Logs */}
             <Card className="glass-card border-glass-border">
