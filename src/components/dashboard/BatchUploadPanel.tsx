@@ -459,7 +459,19 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
                   </motion.div>
                 )}
 
-                {s.status === "uploading" && (
+                {s.status === "uploading" && s.extractPhase && (
+                  <div className="space-y-1">
+                    <Progress value={s.extractProgress ?? 0} className="h-1.5" />
+                    <p className="text-[11px] text-neon-blue font-medium">
+                      {s.extractPhase === "reading" && "Lendo arquivo..."}
+                      {s.extractPhase === "extracting" && "Extraindo ZIP..."}
+                      {s.extractPhase === "parsing" && "Convertendo planilha..."}
+                      {s.extractPhase === "validating" && "Validando cabeçalho..."}
+                      {" "}({s.extractProgress ?? 0}%)
+                    </p>
+                  </div>
+                )}
+                {s.status === "uploading" && !s.extractPhase && (
                   <p className="text-xs text-neon-blue font-medium animate-pulse">Processando...</p>
                 )}
 
