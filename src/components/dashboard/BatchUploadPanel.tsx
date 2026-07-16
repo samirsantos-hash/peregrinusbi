@@ -351,18 +351,52 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
       updateSlot(slot.key, { status: "uploading" });
 
       try {
-        const { data, error } = await supabase.functions.invoke(slot.functionName, {
-          body: { csv: slots[slot.key].text },
-        });
-        if (error) throw new Error(error.message);
-        if (data?.error) throw new Error(data.error);
+        const fullText = slots[slot.key].text;
+        // Elegibilidade tende a ser enorme e estoura o CPU da edge function.
+        // Fatiamos o CSV no cliente (mantendo o header em cada chunk) e
+        // invocamos a função múltiplas vezes.
+        const CHUNK_ROWS = slot.key === "elegibilidade" ? 3000 : Infinity;
+        const lines = fullText.split("\n");
+        const header = lines[0];
+        const dataLines = lines.slice(1).filter((l) => l.trim().length > 0);
+
+        const totals = { sellers: 0, kpis: 0, listings: 0, eligibility: 0, campaigns: 0 };
+        const chunkCount = Number.isFinite(CHUNK_ROWS)
+          ? Math.max(1, Math.ceil(dataLines.length / (CHUNK_ROWS as number)))
+          : 1;
+
+        for (let c = 0; c < chunkCount; c++) {
+          const start = c * (CHUNK_ROWS as number);
+          const slice = Number.isFinite(CHUNK_ROWS)
+            ? dataLines.slice(start, start + (CHUNK_ROWS as number))
+            : dataLines;
+          const csvChunk = chunkCount === 1 ? fullText : [header, ...slice].join("\n");
+
+          if (chunkCount > 1) {
+            updateSlot(slot.key, {
+              result: `Enviando lote ${c + 1}/${chunkCount}…`,
+            });
+          }
+
+          const { data, error } = await supabase.functions.invoke(slot.functionName, {
+            body: { csv: csvChunk },
+          });
+          if (error) throw new Error(error.message);
+          if (data?.error) throw new Error(data.error);
+
+          totals.sellers += Number(data.sellers) || 0;
+          totals.kpis += Number(data.kpis) || 0;
+          totals.listings += Number(data.listings) || 0;
+          totals.eligibility += Number(data.eligibility) || 0;
+          totals.campaigns += Number(data.campaigns) || 0;
+        }
 
         const parts: string[] = [];
-        if (data.sellers != null) parts.push(`${data.sellers} sellers`);
-        if (data.kpis != null) parts.push(`${data.kpis} KPIs`);
-        if (data.listings != null) parts.push(`${data.listings} listings`);
-        if (data.eligibility != null) parts.push(`${data.eligibility} itens`);
-        if (data.campaigns != null) parts.push(`${data.campaigns} campanhas`);
+        if (totals.sellers) parts.push(`${totals.sellers} sellers`);
+        if (totals.kpis) parts.push(`${totals.kpis} KPIs`);
+        if (totals.listings) parts.push(`${totals.listings} listings`);
+        if (totals.eligibility) parts.push(`${totals.eligibility} itens`);
+        if (totals.campaigns) parts.push(`${totals.campaigns} campanhas`);
         updateSlot(slot.key, { status: "success", result: parts.join(" · ") || "OK" });
       } catch (err) {
         updateSlot(slot.key, {
