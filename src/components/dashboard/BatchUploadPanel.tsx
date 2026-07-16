@@ -5,6 +5,7 @@ import {
   CalendarDays, Package, Gift, AlertCircle, PartyPopper, Megaphone,
 } from "lucide-react";
 import * as XLSX from "xlsx";
+import JSZip from "jszip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -239,7 +240,7 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
     if (!file) return;
 
     const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
-    if (![".csv", ".xlsx", ".txt"].includes(ext)) {
+    if (![".csv", ".xlsx", ".txt", ".zip"].includes(ext)) {
       updateSlot(key, { status: "error", errorMsg: `Formato "${ext}" não suportado.` });
       return;
     }
@@ -250,6 +251,38 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
       const wb = XLSX.read(buffer, { type: "array" });
       const ws = wb.Sheets[wb.SheetNames[0]];
       text = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+    } else if (ext === ".zip") {
+      try {
+        const buffer = await file.arrayBuffer();
+        const zip = await JSZip.loadAsync(buffer);
+        const entries = Object.values(zip.files).filter(
+          (f) => !f.dir && /\.(csv|txt|xlsx)$/i.test(f.name),
+        );
+        if (entries.length === 0) {
+          updateSlot(key, { status: "error", errorMsg: "ZIP não contém arquivo .csv/.txt/.xlsx." });
+          return;
+        }
+        // Prefer the largest matching file (usually the data file)
+        const entry = entries.sort((a, b) => {
+          const sa = (a as any)._data?.uncompressedSize ?? 0;
+          const sb = (b as any)._data?.uncompressedSize ?? 0;
+          return sb - sa;
+        })[0];
+        if (/\.xlsx$/i.test(entry.name)) {
+          const buf = await entry.async("arraybuffer");
+          const wb = XLSX.read(buf, { type: "array" });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          text = XLSX.utils.sheet_to_csv(ws, { FS: ";" });
+        } else {
+          text = await entry.async("string");
+        }
+      } catch (err) {
+        updateSlot(key, {
+          status: "error",
+          errorMsg: `Falha ao ler ZIP: ${err instanceof Error ? err.message : "erro desconhecido"}`,
+        });
+        return;
+      }
     } else {
       text = await file.text();
     }
@@ -379,7 +412,7 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
                     <input
                       ref={(el) => { inputRefs.current[cfg.key] = el; }}
                       type="file"
-                      accept=".csv,.xlsx,.txt"
+                      accept=".csv,.xlsx,.txt,.zip"
                       className="hidden"
                       onChange={(e) => handleFileSelect(cfg.key, e)}
                     />
