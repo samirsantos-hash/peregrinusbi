@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound, TrendingUp, Search, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound, TrendingUp, Search, Sun, Moon, Briefcase } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import NewBadge from "@/components/ui/NewBadge";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
@@ -386,6 +386,10 @@ const Index = () => {
             <Button variant="outline" size="sm" onClick={() => navigate("/analise-mlb")} className="gap-2 px-2 sm:px-3">
               <Search className="w-4 h-4" />
               <span className="hidden sm:inline">Análise MLB</span>
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => navigate("/carteira")} className="gap-2 px-2 sm:px-3">
+              <Briefcase className="w-4 h-4" />
+              <span className="hidden sm:inline">Carteira</span>
             </Button>
             {(isAdmin || isGerente) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2 px-2 sm:px-3">

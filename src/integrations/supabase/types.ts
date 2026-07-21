@@ -14,6 +14,438 @@ export type Database = {
   }
   public: {
     Tables: {
+      cart_base_vendedores: {
+        Row: {
+          created_at: string
+          cus_nickname: string | null
+          cus_state: string | null
+          cust_id: number
+          fecha_in: string | null
+          fecha_out: string | null
+          id: string
+          nivel_solucion: string | null
+          source_file: string | null
+          updated_at: string
+          uploaded_at: string
+        }
+        Insert: {
+          created_at?: string
+          cus_nickname?: string | null
+          cus_state?: string | null
+          cust_id: number
+          fecha_in?: string | null
+          fecha_out?: string | null
+          id?: string
+          nivel_solucion?: string | null
+          source_file?: string | null
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Update: {
+          created_at?: string
+          cus_nickname?: string | null
+          cus_state?: string | null
+          cust_id?: number
+          fecha_in?: string | null
+          fecha_out?: string | null
+          id?: string
+          nivel_solucion?: string | null
+          source_file?: string | null
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
+      cart_cdp_diarizado: {
+        Row: {
+          cp_investiments_seller_lc: number | null
+          cp_investments_lc: number | null
+          created_at: string
+          cus_nickname: string | null
+          cust_id: number
+          data: string | null
+          date_id: number | null
+          id: string
+          source_file: string | null
+          total_investiments_lc: number | null
+          total_rebates_lc: number | null
+          updated_at: string
+          uploaded_at: string
+        }
+        Insert: {
+          cp_investiments_seller_lc?: number | null
+          cp_investments_lc?: number | null
+          created_at?: string
+          cus_nickname?: string | null
+          cust_id: number
+          data?: string | null
+          date_id?: number | null
+          id?: string
+          source_file?: string | null
+          total_investiments_lc?: number | null
+          total_rebates_lc?: number | null
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Update: {
+          cp_investiments_seller_lc?: number | null
+          cp_investments_lc?: number | null
+          created_at?: string
+          cus_nickname?: string | null
+          cust_id?: number
+          data?: string | null
+          date_id?: number | null
+          id?: string
+          source_file?: string | null
+          total_investiments_lc?: number | null
+          total_rebates_lc?: number | null
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
+      cart_cdp_mensal: {
+        Row: {
+          cp_investiments_seller_lc: number | null
+          cp_investments_lc: number | null
+          created_at: string
+          cus_nickname: string | null
+          cust_id: number
+          id: string
+          source_file: string | null
+          tim_month_id: number | null
+          total_investiments_lc: number | null
+          total_rebates_lc: number | null
+          updated_at: string
+          uploaded_at: string
+        }
+        Insert: {
+          cp_investiments_seller_lc?: number | null
+          cp_investments_lc?: number | null
+          created_at?: string
+          cus_nickname?: string | null
+          cust_id: number
+          id?: string
+          source_file?: string | null
+          tim_month_id?: number | null
+          total_investiments_lc?: number | null
+          total_rebates_lc?: number | null
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Update: {
+          cp_investiments_seller_lc?: number | null
+          cp_investments_lc?: number | null
+          created_at?: string
+          cus_nickname?: string | null
+          cust_id?: number
+          id?: string
+          source_file?: string | null
+          tim_month_id?: number | null
+          total_investiments_lc?: number | null
+          total_rebates_lc?: number | null
+          updated_at?: string
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
+      cart_cpp_diarizado: {
+        Row: {
+          created_at: string
+          cus_nickname: string | null
+          cust_id: number
+          data: string | null
+          date_id: number | null
+          f_gmv: number | null
+          f_tsi: number | null
+          gmv: number | null
+          id: string
+          localidade: string | null
+          nivel_solucion: string | null
+          source_file: string | null
+          sub_cluster_seller: string | null
+          total_livelistings: number | null
+          tsi: number | null
+          updated_at: string
+          uploaded_at: string
+          visitas: number | null
+        }
+        Insert: {
+          created_at?: string
+          cus_nickname?: string | null
+          cust_id: number
+          data?: string | null
+          date_id?: number | null
+          f_gmv?: number | null
+          f_tsi?: number | null
+          gmv?: number | null
+          id?: string
+          localidade?: string | null
+          nivel_solucion?: string | null
+          source_file?: string | null
+          sub_cluster_seller?: string | null
+          total_livelistings?: number | null
+          tsi?: number | null
+          updated_at?: string
+          uploaded_at?: string
+          visitas?: number | null
+        }
+        Update: {
+          created_at?: string
+          cus_nickname?: string | null
+          cust_id?: number
+          data?: string | null
+          date_id?: number | null
+          f_gmv?: number | null
+          f_tsi?: number | null
+          gmv?: number | null
+          id?: string
+          localidade?: string | null
+          nivel_solucion?: string | null
+          source_file?: string | null
+          sub_cluster_seller?: string | null
+          total_livelistings?: number | null
+          tsi?: number | null
+          updated_at?: string
+          uploaded_at?: string
+          visitas?: number | null
+        }
+        Relationships: []
+      }
+      cart_cpp_mensal: {
+        Row: {
+          bpc: number | null
+          created_at: string
+          cus_nickname: string | null
+          cus_state: string | null
+          cust_id: number
+          id: string
+          inv_pads: number | null
+          nivel_solucion: string | null
+          rep_claims_rate: number | null
+          rep_current_level: string | null
+          rep_disputes_rate: number | null
+          score_final_bbf: number | null
+          score_final_full: number | null
+          sellers_invest_pads: number | null
+          source_file: string | null
+          sub_cluster_seller: string | null
+          tgmv_lc: number | null
+          tgmv_lc_fbm: number | null
+          tgmv_lc_flex: number | null
+          tgmv_lc_full: number | null
+          tgmv_lc_pads: number | null
+          tim_month_id: number | null
+          tsi: number | null
+          tsi_pads: number | null
+          updated_at: string
+          uploaded_at: string
+          visitas: number | null
+        }
+        Insert: {
+          bpc?: number | null
+          created_at?: string
+          cus_nickname?: string | null
+          cus_state?: string | null
+          cust_id: number
+          id?: string
+          inv_pads?: number | null
+          nivel_solucion?: string | null
+          rep_claims_rate?: number | null
+          rep_current_level?: string | null
+          rep_disputes_rate?: number | null
+          score_final_bbf?: number | null
+          score_final_full?: number | null
+          sellers_invest_pads?: number | null
+          source_file?: string | null
+          sub_cluster_seller?: string | null
+          tgmv_lc?: number | null
+          tgmv_lc_fbm?: number | null
+          tgmv_lc_flex?: number | null
+          tgmv_lc_full?: number | null
+          tgmv_lc_pads?: number | null
+          tim_month_id?: number | null
+          tsi?: number | null
+          tsi_pads?: number | null
+          updated_at?: string
+          uploaded_at?: string
+          visitas?: number | null
+        }
+        Update: {
+          bpc?: number | null
+          created_at?: string
+          cus_nickname?: string | null
+          cus_state?: string | null
+          cust_id?: number
+          id?: string
+          inv_pads?: number | null
+          nivel_solucion?: string | null
+          rep_claims_rate?: number | null
+          rep_current_level?: string | null
+          rep_disputes_rate?: number | null
+          score_final_bbf?: number | null
+          score_final_full?: number | null
+          sellers_invest_pads?: number | null
+          source_file?: string | null
+          sub_cluster_seller?: string | null
+          tgmv_lc?: number | null
+          tgmv_lc_fbm?: number | null
+          tgmv_lc_flex?: number | null
+          tgmv_lc_full?: number | null
+          tgmv_lc_pads?: number | null
+          tim_month_id?: number | null
+          tsi?: number | null
+          tsi_pads?: number | null
+          updated_at?: string
+          uploaded_at?: string
+          visitas?: number | null
+        }
+        Relationships: []
+      }
+      cart_elegibilidade: {
+        Row: {
+          acao_recomendada: string | null
+          campaign_id: string | null
+          campaign_id_best: string | null
+          campaign_type: string | null
+          created_at: string
+          cus_nickname: string | null
+          cust_id: number
+          data_atualizacao: string | null
+          discount_best: number | null
+          discount_seller_percentage: number | null
+          discount_total: number | null
+          flag_best_promo: boolean | null
+          flag_item_s_optin: boolean | null
+          flag_seller_s_optin: boolean | null
+          id: string
+          item_id: string | null
+          item_name: string | null
+          media_tsi_diario_7d: number | null
+          pedidos_7d: number | null
+          source_file: string | null
+          updated_at: string
+          uploaded_at: string
+          vertical: string | null
+        }
+        Insert: {
+          acao_recomendada?: string | null
+          campaign_id?: string | null
+          campaign_id_best?: string | null
+          campaign_type?: string | null
+          created_at?: string
+          cus_nickname?: string | null
+          cust_id: number
+          data_atualizacao?: string | null
+          discount_best?: number | null
+          discount_seller_percentage?: number | null
+          discount_total?: number | null
+          flag_best_promo?: boolean | null
+          flag_item_s_optin?: boolean | null
+          flag_seller_s_optin?: boolean | null
+          id?: string
+          item_id?: string | null
+          item_name?: string | null
+          media_tsi_diario_7d?: number | null
+          pedidos_7d?: number | null
+          source_file?: string | null
+          updated_at?: string
+          uploaded_at?: string
+          vertical?: string | null
+        }
+        Update: {
+          acao_recomendada?: string | null
+          campaign_id?: string | null
+          campaign_id_best?: string | null
+          campaign_type?: string | null
+          created_at?: string
+          cus_nickname?: string | null
+          cust_id?: number
+          data_atualizacao?: string | null
+          discount_best?: number | null
+          discount_seller_percentage?: number | null
+          discount_total?: number | null
+          flag_best_promo?: boolean | null
+          flag_item_s_optin?: boolean | null
+          flag_seller_s_optin?: boolean | null
+          id?: string
+          item_id?: string | null
+          item_name?: string | null
+          media_tsi_diario_7d?: number | null
+          pedidos_7d?: number | null
+          source_file?: string | null
+          updated_at?: string
+          uploaded_at?: string
+          vertical?: string | null
+        }
+        Relationships: []
+      }
+      cart_livelistings: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          cus_nickname: string | null
+          cus_state: string | null
+          cust_id: number
+          dom_domain_agg1: string | null
+          dom_domain_agg2: string | null
+          dom_domain_agg3: string | null
+          id: string
+          item_id: string | null
+          item_name: string | null
+          itens: number | null
+          source_file: string | null
+          sub_cluster_seller: string | null
+          tim_month_id: number | null
+          updated_at: string
+          uploaded_at: string
+          vertical: string | null
+          vertical_item: string | null
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          cus_nickname?: string | null
+          cus_state?: string | null
+          cust_id: number
+          dom_domain_agg1?: string | null
+          dom_domain_agg2?: string | null
+          dom_domain_agg3?: string | null
+          id?: string
+          item_id?: string | null
+          item_name?: string | null
+          itens?: number | null
+          source_file?: string | null
+          sub_cluster_seller?: string | null
+          tim_month_id?: number | null
+          updated_at?: string
+          uploaded_at?: string
+          vertical?: string | null
+          vertical_item?: string | null
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          cus_nickname?: string | null
+          cus_state?: string | null
+          cust_id?: number
+          dom_domain_agg1?: string | null
+          dom_domain_agg2?: string | null
+          dom_domain_agg3?: string | null
+          id?: string
+          item_id?: string | null
+          item_name?: string | null
+          itens?: number | null
+          source_file?: string | null
+          sub_cluster_seller?: string | null
+          tim_month_id?: number | null
+          updated_at?: string
+          uploaded_at?: string
+          vertical?: string | null
+          vertical_item?: string | null
+        }
+        Relationships: []
+      }
       cdp_mensal: {
         Row: {
           cp_investiments_seller_lc: number | null
