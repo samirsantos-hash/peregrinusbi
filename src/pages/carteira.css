@@ -1,0 +1,56 @@
+/* Design system local da aba Carteira — navy/dourado/aço */
+.cart-page { min-height: 100vh; background: #F5F6F8; color: #16233F; font-family: Inter, system-ui, sans-serif; }
+.cart-header { background: #16233F; color: #fff; padding: 20px 24px; border-bottom: 4px solid #C9A227; }
+.cart-header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.cart-header h1 { font-family: "Saira Condensed", "Barlow Condensed", sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; margin: 0; text-transform: uppercase; }
+.cart-header p { font-size: 12px; color: #C9A227; margin: 2px 0 0; }
+.cart-back { color: #fff !important; }
+.cart-back:hover { background: rgba(255,255,255,0.1) !important; }
+.cart-main { max-width: 1400px; margin: 0 auto; padding: 24px; }
+.cart-loading, .cart-error, .cart-empty { background: #fff; border-radius: 8px; padding: 32px; text-align: center; color: #5B7396; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.cart-error { color: #B23A48; }
+.cart-empty h2 { font-size: 18px; margin-bottom: 8px; color: #16233F; }
+.cart-empty code { background: #F5F6F8; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+.cart-tabs-sticky { position: sticky; top: 0; z-index: 20; background: #F5F6F8; padding: 8px 0 12px; }
+.cart-tabs { flex-wrap: wrap; height: auto !important; background: #fff !important; border: 1px solid #E5E7EB; padding: 4px !important; gap: 2px; }
+.cart-tabs [data-state="active"] { background: #16233F !important; color: #fff !important; }
+
+.cart-grid { display: grid; gap: 16px; margin-top: 12px; }
+.cart-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+@media (max-width: 900px) { .cart-grid-2 { grid-template-columns: 1fr; } }
+
+.cart-card { background: #fff; border-radius: 8px; border-top: 4px solid #C9A227; box-shadow: 0 1px 3px rgba(22,35,63,0.06); overflow: hidden; }
+.cart-card-head { padding: 14px 18px 8px; border-bottom: 1px solid #F1F1F1; }
+.cart-card-head h3 { font-family: "Saira Condensed", sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; color: #16233F; margin: 0; }
+.cart-card-head p { font-size: 11px; color: #5B7396; margin: 4px 0 0; }
+.cart-card-body { padding: 14px 18px 18px; }
+
+.cart-kpi-cluster { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; padding: 16px; background: #16233F; border-radius: 8px; color: #fff; }
+.cart-kpi { padding: 8px 12px; border-left: 3px solid #C9A227; }
+.cart-kpi-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #C9A227; font-weight: 600; }
+.cart-kpi-value { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 22px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.cart-kpi-hint { font-size: 10px; color: #A9BAD8; margin-top: 2px; }
+
+.cart-stat-line { display: flex; flex-wrap: wrap; gap: 12px; padding: 8px 10px; background: #F5F6F8; border-radius: 6px; margin-bottom: 10px; font-size: 12px; }
+.cart-stat-lbl { font-weight: 600; color: #16233F; }
+.cart-stat-val { font-family: "IBM Plex Mono", ui-monospace, monospace; color: #5B7396; font-variant-numeric: tabular-nums; }
+.cart-stat-reading { display: flex; flex-wrap: wrap; gap: 14px; padding: 8px 10px; background: #16233F; color: #fff; border-radius: 6px; margin-bottom: 12px; font-size: 11px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+.cart-business { margin-top: 12px; padding: 10px 12px; background: #FFF9E5; border-left: 3px solid #C9A227; font-size: 12px; color: #16233F; line-height: 1.5; border-radius: 4px; }
+
+.cart-table-wrap { width: 100%; overflow: auto; max-height: 480px; }
+.cart-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.cart-table th { text-align: left; background: #16233F; color: #fff; padding: 8px 10px; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; position: sticky; top: 0; }
+.cart-table td { padding: 6px 10px; border-bottom: 1px solid #F1F1F1; color: #16233F; }
+.cart-table tr:hover td { background: #F5F6F8; }
+.cart-table .mono, td.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+.cart-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+.cart-badge-ok { background: #E6F2EC; color: #2E7D5B; }
+.cart-badge-atenção { background: #FFF4D6; color: #8A6A00; }
+.cart-badge-crítico { background: #FDECEE; color: #B23A48; }
+.cart-badge-expirado { background: #FDECEE; color: #B23A48; }
+.cart-badge-s\/data { background: #EDEFF3; color: #5B7396; }
+
+.cart-footer { max-width: 1400px; margin: 24px auto 0; padding: 16px 24px 32px; font-size: 11px; color: #5B7396; text-align: center; border-top: 1px solid #E5E7EB; }
+.cart-footer code { background: #F5F6F8; padding: 1px 4px; border-radius: 3px; font-family: "IBM Plex Mono", ui-monospace, monospace; }
