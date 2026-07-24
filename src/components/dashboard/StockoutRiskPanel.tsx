@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Package, Copy, CheckCircle, ExternalLink, AlertTriangle } from "lucide-react";
+import { Package, Copy, CheckCircle, ExternalLink, AlertTriangle, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import TooltipInfo from "./TooltipInfo";
@@ -166,6 +167,38 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
                 .filter((r) => r.reposicao4semanas > 0)
                 .map((r) => `${r.itemId}\t${r.reposicao4semanas}`)
                 .join("\n"))}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const rows = displayed.map((r) => ({
+                  MLB: r.itemId,
+                  "Título": r.itemName || "",
+                  "Vendas 7d": r.vendas7d,
+                  "Venda diária (méd.)": r.vendaDiaria,
+                  "Estoque atual": Math.round(r.estoqueMedio7d),
+                  "Cobertura (dias)": r.coberturaDias >= 999 ? "∞" : r.coberturaDias,
+                  "Profundidade alvo (dias)": 28,
+                  "Envio p/ Full (4 sem.)": r.reposicao4semanas,
+                  "Status": sevLabel[r.severidade],
+                  "Link ML": r.mlbLink || "",
+                }));
+                const ws = XLSX.utils.json_to_sheet(rows);
+                ws["!cols"] = [
+                  { wch: 14 }, { wch: 48 }, { wch: 10 }, { wch: 16 },
+                  { wch: 12 }, { wch: 14 }, { wch: 18 }, { wch: 18 },
+                  { wch: 18 }, { wch: 40 },
+                ];
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Reposição Full");
+                const today = new Date().toISOString().slice(0, 10);
+                XLSX.writeFile(wb, `reposicao-full-${today}.xlsx`);
+              }}
+              className="gap-1.5 text-xs h-7"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Baixar planilha
+            </Button>
           </div>
         </div>
 
