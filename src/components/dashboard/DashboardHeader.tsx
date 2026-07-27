@@ -198,10 +198,10 @@ const DashboardHeader = ({
       animate={{ opacity: 1, y: 0 }}
       className="space-y-4">
 
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+      <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 xl:gap-4 w-full min-w-0">
         {/* Left - Store selector + Date */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="h-12 w-12 rounded-lg bg-background/80 border border-border/50 p-1.5 flex items-center justify-center">
               <img alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2f12a5a6-9e0e-4367-a737-5d6a8137e4bd.png" />
             </div>
@@ -213,7 +213,7 @@ const DashboardHeader = ({
                   variant="outline"
                   role="combobox"
                   aria-expanded={storeOpen}
-                  className="w-[340px] justify-between glass-card border-glass-border bg-card/60 font-normal"
+                  className="w-full sm:w-[300px] max-w-full justify-between glass-card border-glass-border bg-card/60 font-normal"
                 >
                   {selectedSellerObj ? (
                     <span className="truncate flex items-center gap-1">
@@ -302,7 +302,7 @@ const DashboardHeader = ({
           </div>
 
           {/* Date Range Picker with Quick Periods */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 min-w-0">
             {/* Quick period buttons */}
             <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5 border border-border/50">
               {quickRanges.map((qr) => (
