@@ -380,9 +380,9 @@ const DashboardHeader = ({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="glass-card-highlight p-6 neon-border w-full lg:w-auto lg:min-w-[420px]">
+          className="glass-card-highlight p-4 sm:p-5 neon-border w-full xl:w-auto xl:min-w-[380px] xl:max-w-[420px] shrink-0">
 
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-neon-blue animate-pulse-neon" />
               <h3 className="text-sm font-semibold uppercase tracking-wider neon-text">
@@ -394,16 +394,16 @@ const DashboardHeader = ({
               Base: {rangeDays}d
             </span>
           </div>
-          <div className="flex gap-8 justify-around">
+          <div className="flex gap-4 sm:gap-6 justify-between">
             {projections.map((p) =>
-              <div key={p.days} className="text-center min-w-[80px]">
-                <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">{p.days} dias</p>
-                <p className="font-mono font-bold text-2xl emerald-text">
+              <div key={p.days} className="text-center flex-1 min-w-0">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{p.days} dias</p>
+                <p className="font-mono font-bold text-xl sm:text-2xl emerald-text whitespace-nowrap">
                   R$ {(p.value / 1000).toFixed(0)}K
                 </p>
-                <div className="flex items-center justify-center gap-1 mt-1.5">
-                  {clampedUplift >= 0 ? <TrendingUp className="w-4 h-4 text-emerald" /> : <TrendingDown className="w-4 h-4 text-destructive" />}
-                  <span className={cn("text-sm font-medium", clampedUplift >= 0 ? "text-emerald" : "text-destructive")}>{clampedUplift >= 0 ? "+" : ""}{(clampedUplift * 100).toFixed(1)}%</span>
+                <div className="flex items-center justify-center gap-1 mt-1">
+                  {clampedUplift >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-emerald" /> : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
+                  <span className={cn("text-xs font-medium", clampedUplift >= 0 ? "text-emerald" : "text-destructive")}>{clampedUplift >= 0 ? "+" : ""}{(clampedUplift * 100).toFixed(1)}%</span>
                 </div>
               </div>
             )}
