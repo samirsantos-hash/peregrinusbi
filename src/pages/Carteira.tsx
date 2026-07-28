@@ -1204,10 +1204,17 @@ const TABS = [
   { id: "lojas", label: "Loja a loja" },
 ];
 
-/* ═══════════════ Página ═══════════════ */
-export default function Carteira() {
-  const navigate = useNavigate();
-  const { data, loading, error, hasData } = useCarteiraData();
+/* ═══════════════ Painel reutilizável ═══════════════ */
+interface BoardProps {
+  custIds?: string[];
+  title?: string;
+  subtitle?: string;
+  embedded?: boolean;
+  onBack?: () => void;
+}
+
+export function CarteiraBoard({ custIds, title, subtitle, embedded = false, onBack }: BoardProps) {
+  const { data, loading, error, hasData } = useCarteiraData(custIds);
   const [tab, setTab] = useState("panorama");
   const [drill, setDrill] = useState<Drill>(EMPTY_DRILL);
   const drillCtx = useMemo<DrillCtx>(() => ({
@@ -1220,15 +1227,17 @@ export default function Carteira() {
 
   return (
    <DrillContext.Provider value={drillCtx}>
-    <div className="cart-page">
+    <div className={`cart-page ${embedded ? "cart-embedded" : ""}`}>
       <header className="cart-header">
         <div className="cart-header-inner">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="cart-back">
-            <ArrowLeft className="w-4 h-4" /> Voltar
-          </Button>
+          {onBack && (
+            <Button variant="ghost" size="sm" onClick={onBack} className="cart-back">
+              <ArrowLeft className="w-4 h-4" /> Voltar
+            </Button>
+          )}
           <div>
-            <h1>Gestão de Carteira · Carteira</h1>
-            <p>Painel analítico da rede · mediana e faixa interquartil como referência · posição em {fmtDate(data.refDate)}</p>
+            <h1>{title ?? "Gestão de Carteira · Carteira"}</h1>
+            <p>{subtitle ?? "Painel analítico da rede"} · mediana e faixa interquartil como referência · posição em {fmtDate(data.refDate)}</p>
           </div>
         </div>
       </header>
@@ -1248,7 +1257,7 @@ export default function Carteira() {
         {error && !loading && <div className="cart-error">Erro ao carregar: {error}</div>}
         {!loading && !error && !hasData && (
           <div className="cart-empty">
-            <h2>Nenhum dado disponível para a sua carteira.</h2>
+            <h2>Nenhum dado disponível para esta carteira.</h2>
             <p>Suba as bases de performance em <code>Admin → Upload</code> ou verifique as lojas liberadas no seu acesso.</p>
           </div>
         )}
@@ -1281,4 +1290,10 @@ export default function Carteira() {
     </div>
    </DrillContext.Provider>
   );
+}
+
+/* ═══════════════ Página ═══════════════ */
+export default function Carteira() {
+  const navigate = useNavigate();
+  return <CarteiraBoard onBack={() => navigate(-1)} />;
 }
