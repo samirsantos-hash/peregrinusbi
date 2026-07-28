@@ -107,7 +107,9 @@ const CriticalListingsTable = ({ listings }: CriticalListingsTableProps) => {
 
       {criticalListings.length === 0 ? (
         <p className="text-sm text-muted-foreground py-4 text-center">
-          {showClipsOnly
+          {search.trim()
+            ? `Nenhum anúncio encontrado para "${search.trim()}".`
+            : showClipsOnly
             ? "Nenhum anúncio com Clips ativo abaixo do padrão."
             : "🏆 Todos os anúncios estão acima do padrão recomendado!"}
         </p>
