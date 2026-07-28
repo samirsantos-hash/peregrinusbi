@@ -127,3 +127,8 @@
 .cart-drillbar-note { flex-basis: 100%; font-size: 10px; color: #6B5A20; }
 .cart-chip.gold { background: #C9A227; color: #16233F; border-color: #C9A227; font-weight: 600; }
 .cart-link.muted { font-weight: 500; text-decoration-style: dotted; }
+
+/* Painel embutido dentro de uma carteira específica */
+.cart-page.cart-embedded { min-height: 0; border: 1px solid #E2E5EB; border-radius: 10px; overflow: hidden; }
+.cart-page.cart-embedded .cart-header { border-radius: 0; }
+.cart-page.cart-embedded .cart-tabs-sticky { position: static; }
