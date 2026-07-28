@@ -95,7 +95,7 @@ const Admin = () => {
   const loadData = async () => {
     setLoading(true);
     const [sellersRes, usersRes, logsRes, rolesRes] = await Promise.all([
-      supabase.from("sellers").select("id, nickname, cust_id").order("nickname"),
+      supabase.from("sellers").select("id, nickname, cust_id").order("nickname").range(0, 4999),
       supabase.from("user_access_control").select("*").order("created_at", { ascending: false }),
       supabase.from("upload_logs").select("*").order("uploaded_at", { ascending: false }).limit(50),
       supabase.from("user_roles").select("user_id, role"),
