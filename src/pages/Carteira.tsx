@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Search } from "lucide-react";
+import { ArrowLeft, Loader2, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCarteiraData, type CarteiraDataset, type CarteiraSeller } from "@/hooks/carteira/useCarteiraData";
 import {
@@ -100,6 +100,68 @@ const SearchBox = ({ value, onChange, placeholder }: any) => (
 
 const brl = (v: any) => fmtBRL(Number(v));
 
+/* ═══════════════ Drill-down (UF · categoria · loja) ═══════════════ */
+export interface Drill { uf: string | null; categoria: string | null; sellerId: string | null; }
+const EMPTY_DRILL: Drill = { uf: null, categoria: null, sellerId: null };
+interface DrillCtx { drill: Drill; set: (p: Partial<Drill>) => void; clear: (k?: keyof Drill) => void; }
+const DrillContext = createContext<DrillCtx>({ drill: EMPTY_DRILL, set: () => {}, clear: () => {} });
+export const useDrill = () => useContext(DrillContext);
+
+function applyDrill(ds: CarteiraDataset, drill: Drill): CarteiraDataset {
+  if (!drill.uf && !drill.categoria && !drill.sellerId) return ds;
+
+  let sellers = ds.sellers;
+  if (drill.uf) sellers = sellers.filter((s) => s.uf === drill.uf);
+  if (drill.sellerId) sellers = sellers.filter((s) => s.id === drill.sellerId);
+  if (drill.categoria) {
+    const withCat = new Set(
+      ds.listings.filter((l) => l.categoria === drill.categoria).map((l) => l.sellerId)
+    );
+    sellers = sellers.filter((s) => withCat.has(s.id));
+  }
+  const ids = new Set(sellers.map((s) => s.id));
+  const keep = (sid: string) => ids.has(sid);
+
+  return {
+    sellers,
+    sellerById: new Map(sellers.map((s) => [s.id, s])),
+    daily: ds.daily.filter((r) => keep(r.sellerId)),
+    monthly: ds.monthly.filter((r) => keep(r.sellerId)),
+    listings: ds.listings.filter(
+      (l) => keep(l.sellerId) && (!drill.categoria || l.categoria === drill.categoria)
+    ),
+    eligibility: ds.eligibility.filter((e) => keep(e.sellerId)),
+    grants: ds.grants.filter((g) => keep(g.sellerId)),
+    refDate: ds.refDate,
+  };
+}
+
+function DrillChips({ ds }: { ds: CarteiraDataset }) {
+  const { drill, clear } = useDrill();
+  const chips: Array<{ k: keyof Drill; label: string }> = [];
+  if (drill.uf) chips.push({ k: "uf", label: `UF: ${drill.uf}` });
+  if (drill.categoria) chips.push({ k: "categoria", label: `Categoria: ${drill.categoria}` });
+  if (drill.sellerId) {
+    const s = ds.sellerById.get(drill.sellerId);
+    chips.push({ k: "sellerId", label: `Loja: ${s?.nick ?? drill.sellerId}` });
+  }
+  if (!chips.length) return null;
+  return (
+    <div className="cart-drillbar">
+      <span className="cart-drillbar-title">Recorte ativo</span>
+      {chips.map((c) => (
+        <button key={c.k} className="cart-drillchip" onClick={() => clear(c.k)} title="Remover este recorte">
+          {c.label} <X className="w-3 h-3" />
+        </button>
+      ))}
+      <button className="cart-drillclear" onClick={() => clear()}>limpar tudo</button>
+      <span className="cart-drillbar-note">
+        Todos os cards, gráficos e tabelas desta aba consideram apenas o recorte selecionado.
+      </span>
+    </div>
+  );
+}
+
 /* ═══════════════ Agregações compartilhadas ═══════════════ */
 interface SellerAgg extends CarteiraSeller {
   gmv: number; tsi: number; visitas: number; ticket: number; conv: number;
@@ -179,6 +241,7 @@ type Agg = ReturnType<typeof useAgg>;
 
 /* ═══════════════ 01 · Panorama ═══════════════ */
 function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
+  const { set } = useDrill();
   const catRows = useMemo(() => {
     const m = new Map<string, number>();
     for (const l of ds.listings) m.set(l.categoria, (m.get(l.categoria) ?? 0) + l.itens);
@@ -207,7 +270,7 @@ function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
       <StatBand s={sGmv} fmt={(n) => fmtBRLShort(n)} phrase={skewPhrase(sGmv, "GMV por loja")} />
 
       <div className="cart-grid">
-        <Card title="Pareto de categorias" subtitle="Barras = anúncios ativos · linha = % acumulado · tracejado dourado = mediana entre categorias">
+        <Card title="Pareto de categorias" subtitle="Clique em uma barra para filtrar a aba pela categoria · linha = % acumulado · tracejado dourado = mediana entre categorias">
           <div style={{ width: "100%", height: 340 }}>
             <ResponsiveContainer>
               <ComposedChart data={catRows} margin={{ top: 8, right: 24, bottom: 60, left: 0 }}>
@@ -217,7 +280,8 @@ function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
                 <YAxis yAxisId="r" orientation="right" domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
                 <Tooltip formatter={(v: any, n: any) => (n === "% acumulado" ? `${Number(v).toFixed(1)}%` : fmtInt(Number(v)))} />
                 <Legend />
-                <Bar yAxisId="l" dataKey="itens" name="Anúncios" fill={NAVY} />
+                <Bar yAxisId="l" dataKey="itens" name="Anúncios" fill={NAVY} cursor="pointer"
+                  onClick={(d: any) => d?.cat && set({ categoria: d.cat })} />
                 <Line yAxisId="r" type="monotone" dataKey="acum" name="% acumulado" stroke={GOLD} strokeWidth={2} dot={false} />
                 <ReferenceLine yAxisId="l" y={sCat.median} stroke={GOLD} strokeDasharray="5 4" />
               </ComposedChart>
@@ -314,6 +378,7 @@ function Ritmo({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
 
 /* ═══════════════ 03 · Curva A por estado ═══════════════ */
 function CurvaA({ ag }: { ag: Agg }) {
+  const { drill, set } = useDrill();
   const ufs = useMemo(() => {
     const m = new Map<string, number>();
     for (const s of ag.ativos) m.set(s.uf, (m.get(s.uf) ?? 0) + s.gmv);
@@ -335,6 +400,11 @@ function CurvaA({ ag }: { ag: Agg }) {
         {ufs.map((u) => (
           <button key={u} className={`cart-chip ${u === ufAtual ? "on" : ""}`} onClick={() => setUf(u)}>{u}</button>
         ))}
+        {!drill.uf && ufAtual !== "ND" && (
+          <button className="cart-chip gold" onClick={() => set({ uf: ufAtual })}>
+            Filtrar aba por {ufAtual}
+          </button>
+        )}
       </div>
       <div className="cart-kpi-cluster">
         <Kpi label="Lojas curva A" value={`${fmtInt(curvaA.length)} / ${fmtInt(lojas.length)}`} hint={`${ufAtual}`} />
@@ -350,9 +420,11 @@ function CurvaA({ ag }: { ag: Agg }) {
             <thead><tr><th>#</th><th>Loja</th><th className="right">GMV</th><th className="right">Unid.</th><th className="right">Ticket</th><th className="right">Share</th><th className="right">Acum.</th><th>Curva</th></tr></thead>
             <tbody>
               {ranked.slice(0, 80).map((r, i) => (
-                <tr key={r.item.id}>
+                <tr key={r.item.id} className={drill.sellerId === r.item.id ? "sel" : ""}>
                   <td className="mono">{i + 1}</td>
-                  <td>{r.item.nick}</td>
+                  <td>
+                    <button className="cart-link" onClick={() => set({ sellerId: r.item.id })}>{r.item.nick}</button>
+                  </td>
                   <td className="right mono">{fmtBRL(r.value)}</td>
                   <td className="right mono">{fmtInt(r.item.tsi)}</td>
                   <td className="right mono">{fmtBRL(r.item.ticket)}</td>
@@ -375,6 +447,7 @@ function CurvaA({ ag }: { ag: Agg }) {
 
 /* ═══════════════ 04 · Categorias por região ═══════════════ */
 function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
+  const { set } = useDrill();
   const { rows, cats } = useMemo(() => {
     const totalCat = new Map<string, number>();
     for (const l of ds.listings) totalCat.set(l.categoria, (totalCat.get(l.categoria) ?? 0) + l.itens);
@@ -398,7 +471,7 @@ function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
     <>
       <SectionHead n="04" title="Categorias por região" note="Top 5 categorias · mediana entre regiões" />
       <StatBand s={s} fmt={fmtInt} phrase={skewPhrase(s, "sortimento por região")} />
-      <Card title="Sortimento por região" subtitle="Barras empilhadas das 5 maiores categorias · tracejado dourado = mediana regional">
+      <Card title="Sortimento por região" subtitle="Clique em um segmento para filtrar a aba pela categoria · tracejado dourado = mediana regional">
         <div style={{ width: "100%", height: 340 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
@@ -407,7 +480,10 @@ function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
               <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtInt} />
               <Tooltip formatter={(v: any) => fmtInt(Number(v))} />
               <Legend />
-              {cats.map((c, i) => <Bar key={c} dataKey={c} stackId="c" fill={colors[i % colors.length]} name={c} />)}
+              {cats.map((c, i) => (
+                <Bar key={c} dataKey={c} stackId="c" fill={colors[i % colors.length]} name={c}
+                  cursor="pointer" onClick={() => set({ categoria: c })} />
+              ))}
               <ReferenceLine y={s.median} stroke={GOLD} strokeDasharray="5 4" />
             </BarChart>
           </ResponsiveContainer>
@@ -423,6 +499,7 @@ function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
 
 /* ═══════════════ 05 · Ticket por UF ═══════════════ */
 function TicketUF({ ag }: { ag: Agg }) {
+  const { set } = useDrill();
   const rows = useMemo(() => {
     const m = new Map<string, { gmv: number; tsi: number }>();
     for (const s of ag.ativos) {
@@ -443,7 +520,7 @@ function TicketUF({ ag }: { ag: Agg }) {
     <>
       <SectionHead n="05" title="Ticket por UF" note="GMV ÷ unidades — nunca preço de item" />
       <StatBand s={s} fmt={fmtBRL} phrase={skewPhrase(s, "ticket por UF")} />
-      <Card title="Ticket médio por estado" subtitle="Dourado = acima do ticket Brasil · navy = abaixo · linha vermelha = Brasil · tracejado = mediana das UFs">
+      <Card title="Ticket médio por estado" subtitle="Clique em uma barra para filtrar a aba pela UF · dourado = acima do ticket Brasil · linha vermelha = Brasil · tracejado = mediana das UFs">
         <div style={{ width: "100%", height: 340 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
@@ -451,7 +528,8 @@ function TicketUF({ ag }: { ag: Agg }) {
               <XAxis dataKey="uf" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtBRLShort} />
               <Tooltip formatter={(v: any) => brl(v)} />
-              <Bar dataKey="ticket" name="Ticket médio">
+              <Bar dataKey="ticket" name="Ticket médio" cursor="pointer"
+                onClick={(d: any) => d?.uf && set({ uf: d.uf })}>
                 {rows.map((r, i) => <Cell key={i} fill={r.ticket >= brasil ? GOLD : NAVY} />)}
               </Bar>
               <ReferenceLine y={brasil} stroke={RED} label={{ value: `Brasil ${fmtBRL(brasil)}`, position: "insideTopRight", fill: RED, fontSize: 10 }} />
@@ -470,10 +548,11 @@ function TicketUF({ ag }: { ag: Agg }) {
 
 /* ═══════════════ 06 · Tracionadores ═══════════════ */
 function Tracionadores({ ag }: { ag: Agg }) {
+  const { set } = useDrill();
   const movs = ag.sellers.filter((s) => s.gmv > 0 || s.gmvPrev > 0);
   const altas = [...movs].sort((a, b) => b.delta - a.delta).filter((s) => s.delta > 0).slice(0, 8);
   const quedas = [...movs].sort((a, b) => a.delta - b.delta).filter((s) => s.delta < 0).slice(0, 8);
-  const rows = [...altas].reverse().concat(quedas).map((s) => ({ nick: s.nick, delta: s.delta, uf: s.uf }));
+  const rows = [...altas].reverse().concat(quedas).map((s) => ({ id: s.id, nick: s.nick, delta: s.delta, uf: s.uf }));
   const nPos = movs.filter((s) => s.delta > 0).length;
   const nNeg = movs.filter((s) => s.delta < 0).length;
 
@@ -485,7 +564,7 @@ function Tracionadores({ ag }: { ag: Agg }) {
         <Kpi label="Detratores" value={fmtInt(nNeg)} hint="lojas com Δ GMV negativo" />
         <Kpi label="Δ líquido da carteira" value={fmtBRL(movs.reduce((s, r) => s + r.delta, 0))} />
       </div>
-      <Card title="8 maiores altas × 8 maiores quedas" subtitle="Cor estritamente pelo sinal do delta · linha zero divide impulsionadores de detratores">
+      <Card title="8 maiores altas × 8 maiores quedas" subtitle="Clique em uma barra para filtrar a aba pela loja · cor pelo sinal do delta · linha zero divide impulsionadores de detratores">
         <div style={{ width: "100%", height: Math.max(320, rows.length * 26) }}>
           <ResponsiveContainer>
             <BarChart data={rows} layout="vertical" margin={{ left: 120, right: 24 }}>
@@ -494,7 +573,8 @@ function Tracionadores({ ag }: { ag: Agg }) {
               <YAxis type="category" dataKey="nick" tick={{ fontSize: 10 }} width={115} />
               <Tooltip formatter={(v: any) => brl(v)} />
               <ReferenceLine x={0} stroke={NAVY} />
-              <Bar dataKey="delta" name="Δ GMV">
+              <Bar dataKey="delta" name="Δ GMV" cursor="pointer"
+                onClick={(d: any) => d?.id && set({ sellerId: d.id })}>
                 {rows.map((r, i) => <Cell key={i} fill={r.delta >= 0 ? GREEN : RED} />)}
               </Bar>
             </BarChart>
@@ -511,8 +591,9 @@ function Tracionadores({ ag }: { ag: Agg }) {
 
 /* ═══════════════ 07 · Tráfego & conversão ═══════════════ */
 function Trafego({ ag }: { ag: Agg }) {
+  const { set } = useDrill();
   const rows = ag.ativos.filter((s) => s.visitas > 0).slice(0, 40)
-    .map((s) => ({ nick: s.nick, conv: s.conv * 100, visitas: s.visitas, gmv: s.gmv }));
+    .map((s) => ({ id: s.id, nick: s.nick, conv: s.conv * 100, visitas: s.visitas, gmv: s.gmv }));
   const s = describe(ag.ativos.filter((x) => x.visitas > 0).map((x) => x.conv * 100));
   const convPond = ag.totalVisitas > 0 ? ag.totalTsi / ag.totalVisitas : 0;
   const alvo = rows.filter((r) => r.visitas >= median(rows.map((x) => x.visitas)) && r.conv < s.median);
@@ -527,7 +608,7 @@ function Trafego({ ag }: { ag: Agg }) {
         <Kpi label="Mediana entre lojas" value={`${s.median.toFixed(2)}%`} hint={`Q1–Q3 ${s.q1.toFixed(2)}%–${s.q3.toFixed(2)}%`} />
       </div>
       <StatBand s={s} fmt={(n) => `${n.toFixed(2)}%`} phrase={skewPhrase(s, "conversão por loja")} />
-      <Card title="Conversão por loja (40 maiores em GMV)" subtitle="Referência de mercado: <2% baixa · ~3% média · >3,5% ótima">
+      <Card title="Conversão por loja (40 maiores em GMV)" subtitle="Clique em uma barra para filtrar a aba pela loja · referência de mercado: <2% baixa · ~3% média · >3,5% ótima">
         <div style={{ width: "100%", height: 360 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 80, left: 0 }}>
@@ -535,7 +616,8 @@ function Trafego({ ag }: { ag: Agg }) {
               <XAxis dataKey="nick" tick={{ fontSize: 9 }} angle={-45} textAnchor="end" interval={0} height={90} />
               <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
               <Tooltip formatter={(v: any, n: any) => (n === "Conversão" ? `${Number(v).toFixed(2)}%` : fmtInt(Number(v)))} />
-              <Bar dataKey="conv" name="Conversão">
+              <Bar dataKey="conv" name="Conversão" cursor="pointer"
+                onClick={(d: any) => d?.id && set({ sellerId: d.id })}>
                 {rows.map((r, i) => <Cell key={i} fill={r.conv >= s.median ? NAVY : RED} />)}
               </Bar>
               <ReferenceLine y={s.median} stroke={GOLD} strokeDasharray="5 4" label={{ value: "Mediana", position: "insideTopRight", fill: GOLD, fontSize: 10 }} />
@@ -958,6 +1040,7 @@ function Grant({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
 
 /* ═══════════════ 11 · Loja a loja ═══════════════ */
 function LojaALoja({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
+  const { set } = useDrill();
   const [q, setQ] = useState("");
   const [uf, setUf] = useState("todas");
   const [curva, setCurva] = useState("todas");
@@ -1027,7 +1110,7 @@ function LojaALoja({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
               {filtered.slice(0, 300).map((r) => (
                 <tr key={r.id} className={sel === r.id ? "sel" : ""}>
                   <td><button className="cart-link" onClick={() => setSel(r.id)}>{r.nick}</button></td>
-                  <td>{r.uf}</td>
+                  <td><button className="cart-link muted" onClick={() => set({ uf: r.uf })} title="Filtrar aba por esta UF">{r.uf}</button></td>
                   <td className="right mono">{fmtBRL(r.gmv)}</td>
                   <td className="right mono">{fmtPct(r.share)}</td>
                   <td className="right mono">{fmtInt(r.tsi)}</td>
@@ -1125,10 +1208,18 @@ const TABS = [
 export default function Carteira() {
   const navigate = useNavigate();
   const { data, loading, error, hasData } = useCarteiraData();
-  const ag = useAgg(data);
   const [tab, setTab] = useState("panorama");
+  const [drill, setDrill] = useState<Drill>(EMPTY_DRILL);
+  const drillCtx = useMemo<DrillCtx>(() => ({
+    drill,
+    set: (p) => setDrill((d) => ({ ...d, ...p })),
+    clear: (k) => setDrill((d) => (k ? { ...d, [k]: null } : EMPTY_DRILL)),
+  }), [drill]);
+  const view = useMemo(() => applyDrill(data, drill), [data, drill]);
+  const ag = useAgg(view);
 
   return (
+   <DrillContext.Provider value={drillCtx}>
     <div className="cart-page">
       <header className="cart-header">
         <div className="cart-header-inner">
@@ -1163,17 +1254,18 @@ export default function Carteira() {
         )}
         {!loading && hasData && (
           <>
-            {tab === "panorama" && <Panorama ds={data} ag={ag} />}
-            {tab === "ritmo" && <Ritmo ds={data} ag={ag} />}
+            <DrillChips ds={data} />
+            {tab === "panorama" && <Panorama ds={view} ag={ag} />}
+            {tab === "ritmo" && <Ritmo ds={view} ag={ag} />}
             {tab === "curva" && <CurvaA ag={ag} />}
-            {tab === "categorias" && <Categorias ds={data} ag={ag} />}
+            {tab === "categorias" && <Categorias ds={view} ag={ag} />}
             {tab === "ticket" && <TicketUF ag={ag} />}
             {tab === "tracionadores" && <Tracionadores ag={ag} />}
             {tab === "trafego" && <Trafego ag={ag} />}
-            {tab === "pads" && <Pads ds={data} ag={ag} />}
+            {tab === "pads" && <Pads ds={view} ag={ag} />}
             {tab === "stats" && <Estatistica ag={ag} />}
-            {tab === "grant" && <Grant ds={data} ag={ag} />}
-            {tab === "lojas" && <LojaALoja ds={data} ag={ag} />}
+            {tab === "grant" && <Grant ds={view} ag={ag} />}
+            {tab === "lojas" && <LojaALoja ds={view} ag={ag} />}
           </>
         )}
       </main>
@@ -1187,5 +1279,6 @@ export default function Carteira() {
         </p>
       </footer>
     </div>
+   </DrillContext.Provider>
   );
 }
