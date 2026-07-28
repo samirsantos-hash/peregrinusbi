@@ -62,14 +62,28 @@ export function extractedAtFromName(name: string): string | null {
 
 export class SchemaError extends Error {}
 
-export async function parseExtraction(file: File): Promise<Extraction> {
+export type ParseProgress = (p: { step: string; label: string; pct: number }) => void;
+const tick = () => new Promise<void>((r) => setTimeout(r, 0));
+
+export async function parseExtraction(file: File, onProgress?: ParseProgress): Promise<Extraction> {
+  const report = async (step: string, label: string, pct: number) => {
+    onProgress?.({ step, label, pct });
+    await tick();
+  };
+
+  await report("read", "Lendo o arquivo…", 5);
   const buf = await file.arrayBuffer();
+
+  await report("decode", "Decodificando a planilha (.xlsx)…", 20);
   const wb = XLSX.read(buf, { cellDates: true });
   const sheet = wb.Sheets[wb.SheetNames[0]];
   if (!sheet) throw new SchemaError("A planilha não contém nenhuma aba legível.");
+
+  await report("rows", "Convertendo linhas…", 40);
   const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" }) as Record<string, any>[];
   if (!rows.length) throw new SchemaError("A planilha está vazia.");
 
+  await report("schema", "Validando colunas obrigatórias…", 55);
   const headers = new Set(Object.keys(rows[0]).map((h) => h.trim()));
   const missing = REQUIRED_COLS.filter((c) => !headers.has(c));
   if (missing.length) {
@@ -84,7 +98,16 @@ export async function parseExtraction(file: File): Promise<Extraction> {
   let min = "9999-12-31", max = "0000-01-01";
   const stores = new Set<string>();
 
+  await report("aggregate", `Agregando ${rows.length.toLocaleString("pt-BR")} linhas…`, 60);
+  let i = 0;
   for (const r of rows) {
+    if (++i % 20000 === 0) {
+      await report(
+        "aggregate",
+        `Agregando linhas… ${i.toLocaleString("pt-BR")}/${rows.length.toLocaleString("pt-BR")}`,
+        60 + Math.round((i / rows.length) * 30)
+      );
+    }
     const cust = String(r["Seller ID"] ?? "").split(".")[0].trim();
     if (!cust) continue;
     const date = toIsoDate(r["Date Date"]);
@@ -114,6 +137,7 @@ export async function parseExtraction(file: File): Promise<Extraction> {
 
   const cats: CatRow[] = Array.from(catMap.values()).map(({ items, ...rest }) => ({ ...rest, i: items.size }));
 
+  await report("done", "Extração pronta para conferência.", 100);
   return {
     id: `${file.name}::${Date.now()}`,
     fileName: file.name,
