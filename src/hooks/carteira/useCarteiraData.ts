@@ -108,10 +108,15 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
         );
         const allow = isAdmin ? null : new Set(allowedCustIds.map(String));
         const only = custIdsFilter?.length ? new Set(custIdsFilter.map(String)) : null;
+        const normUf = (v: any) => {
+          const raw = String(v ?? "").toUpperCase().trim();
+          const m = raw.match(/([A-Z]{2})$/); // aceita "SP" e "BR-SP"
+          return m ? m[1] : "ND";
+        };
         const sellers: CarteiraSeller[] = rawSellers
           .filter((s: any) => (!allow || allow.has(String(s.cust_id))) && (!only || only.has(String(s.cust_id))))
           .map((s: any) => {
-            const uf = (s.cus_state || "").toUpperCase().trim() || "ND";
+            const uf = normUf(s.cus_state);
             return {
               id: s.id, custId: String(s.cust_id), nick: s.nickname || String(s.cust_id),
               uf, regiao: REGIAO[uf] || "ND",
@@ -135,7 +140,7 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
         const [rawDaily, rawMonthly, rawListings, rawElig, rawGrants] = await Promise.all([
           page(() => scoped(supabase.from("sellers_kpi_daily").select(kpiCols).gte("data", since).order("data") as any)),
           page(() => scoped(supabase.from("sellers_kpi").select(kpiCols).gte("data", isoDaysAgo(400)).order("data") as any)),
-          page(() => scoped(supabase.from("live_listings").select("seller_id, data, categoria, vertical, itens") as any)),
+          page(() => scoped(supabase.from("live_listings").select("seller_id, data, categoria, vertical, dom_domain_agg1, itens") as any)),
           eligDate
             ? page(() => scoped(supabase.from("seller_eligibility")
                 .select("seller_id, item_id, item_name, discount_total, discount_seller_percentage, flag_item_s_optin, pedidos_7d, media_tsi_diario_7d, campaign_type")
@@ -158,7 +163,8 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
           .filter((r: any) => ids.has(r.seller_id))
           .map((r: any) => ({
             sellerId: r.seller_id, data: r.data,
-            categoria: r.categoria || r.vertical || "ND",
+            // `categoria` na base traz sazonalidade (VERÃO/INVERNO) — a categoria real é dom_domain_agg1
+            categoria: r.dom_domain_agg1 || r.vertical || "ND",
             vertical: r.vertical || "ND", itens: num(r.itens),
           }));
         const eligibility: CarteiraElig[] = rawElig
