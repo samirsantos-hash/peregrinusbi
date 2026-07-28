@@ -306,7 +306,14 @@ const UserWalletSheet = ({
                   onCheckedChange={() => toggle(s.custId)}
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="font-medium block truncate">{s.nickname}</span>
+                  <span className="font-medium block truncate">
+                    {s.nickname}
+                    {activeCustIds && !activeCustIds.has(s.custId) && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide text-muted-foreground border border-border rounded px-1 py-0.5">
+                        inativo
+                      </span>
+                    )}
+                  </span>
                   <span className="text-muted-foreground text-xs font-mono">{s.custId}</span>
                 </div>
               </label>
