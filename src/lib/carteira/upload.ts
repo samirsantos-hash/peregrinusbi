@@ -67,7 +67,7 @@ export async function parseExtraction(file: File): Promise<Extraction> {
   const wb = XLSX.read(buf, { cellDates: true });
   const sheet = wb.Sheets[wb.SheetNames[0]];
   if (!sheet) throw new SchemaError("A planilha não contém nenhuma aba legível.");
-  const rows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: "" });
+  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" }) as Record<string, any>[];
   if (!rows.length) throw new SchemaError("A planilha está vazia.");
 
   const headers = new Set(Object.keys(rows[0]).map((h) => h.trim()));
