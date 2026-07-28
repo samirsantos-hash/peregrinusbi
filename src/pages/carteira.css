@@ -149,3 +149,6 @@
 .cart-pill.on { background: #16233F; border-color: #16233F; color: #fff; }
 .cart-refbadge { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: #C9A227; color: #16233F; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 .cart-table tr.on { background: #FDF9EE; }
+.cart-kpigrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.cart-kpigrid .cart-kpi-value { color: #16233F; }
+.cart-kpigrid .cart-kpi-hint { color: #5B7396; }
