@@ -132,3 +132,23 @@
 .cart-page.cart-embedded { min-height: 0; border: 1px solid #E2E5EB; border-radius: 10px; overflow: hidden; }
 .cart-page.cart-embedded .cart-header { border-radius: 0; }
 .cart-page.cart-embedded .cart-tabs-sticky { position: static; }
+
+/* ═══ Upload de dados ═══ */
+.cart-drop { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 26px; border: 2px dashed #C9CFDA; border-radius: 8px; color: #5B7396; background: #FAFBFC; transition: all .15s; }
+.cart-drop.on { border-color: #C9A227; background: #FDF9EE; }
+.cart-drop p { font-size: 12px; margin: 0; }
+.cart-upload-info { margin-top: 14px; display: flex; flex-direction: column; gap: 12px; }
+.cart-kpi-value.sm { font-size: 13px; line-height: 1.3; word-break: break-all; }
+.cart-warn { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; border-radius: 6px; background: #FDF6E3; border: 1px solid #E8D9A6; color: #7A5C00; font-size: 12px; }
+.cart-ignored { margin: 6px 0 0; padding-left: 16px; max-height: 180px; overflow: auto; font-size: 11px; }
+.cart-linkbtn { background: none; border: none; color: #16233F; font-size: 11px; font-weight: 600; text-decoration: underline; cursor: pointer; margin-left: 6px; }
+.cart-process { align-self: flex-start; background: #16233F; color: #fff; }
+.cart-process:hover { background: #24365E; }
+.cart-storefilter { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 11px; color: #5B7396; }
+.cart-pill { padding: 4px 10px; border-radius: 999px; border: 1px solid #D7DCE5; background: #fff; font-size: 11px; font-weight: 600; color: #5B7396; cursor: pointer; }
+.cart-pill.on { background: #16233F; border-color: #16233F; color: #fff; }
+.cart-refbadge { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: #C9A227; color: #16233F; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.cart-table tr.on { background: #FDF9EE; }
+.cart-kpigrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.cart-kpigrid .cart-kpi-value { color: #16233F; }
+.cart-kpigrid .cart-kpi-hint { color: #5B7396; }
