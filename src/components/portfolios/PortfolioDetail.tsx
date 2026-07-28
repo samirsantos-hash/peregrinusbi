@@ -125,6 +125,13 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
         <MedalFilter selected={selectedMedals} onChange={setSelectedMedals} />
       </div>
 
+      <Tabs value={tab} onValueChange={setTab} className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="overview">Visão geral</TabsTrigger>
+          <TabsTrigger value="carteira">Gestão de Carteira</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6 mt-0">
       {/* Resumo Inteligente */}
       {summary && (
         <Card className="border-primary/30 bg-primary/5">
