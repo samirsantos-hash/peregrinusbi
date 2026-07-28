@@ -11,6 +11,7 @@ import RaioXTable from "./RaioXTable";
 import MedalFilter from "./MedalFilter";
 import PerformanceClusterChart from "./PerformanceClusterChart";
 import ProjecaoPanel from "./ProjecaoPanel";
+import { CarteiraBoard } from "@/pages/Carteira";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -245,6 +246,17 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
             campaigns={campaigns}
           />
         </div>
+      </div>
+
+      {/* Painel analítico completo (mesmo de Gestão de Carteira · Carteira) */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold">📈 Painel analítico da carteira</h3>
+        <CarteiraBoard
+          custIds={portfolio.cust_ids}
+          title={`Gestão de Carteira · ${portfolio.name}`}
+          subtitle={`Painel analítico isolado das ${portfolio.cust_ids.length} loja(s) desta carteira`}
+          embedded
+        />
       </div>
     </div>
   );
