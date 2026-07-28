@@ -70,13 +70,14 @@ const EMPTY: CarteiraDataset = {
   listings: [], eligibility: [], grants: [], refDate: null,
 };
 
-export function useCarteiraData() {
+export function useCarteiraData(custIdsFilter?: string[]) {
   const { allowedCustIds, isAdmin, loading: accessLoading } = useMyAccess();
   const [data, setData] = useState<CarteiraDataset>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const scopeKey = isAdmin ? "*" : allowedCustIds.join(",");
+  const filterKey = custIdsFilter ? custIdsFilter.join(",") : "";
 
   useEffect(() => {
     if (accessLoading) return;
@@ -89,8 +90,9 @@ export function useCarteiraData() {
           supabase.from("sellers").select("id, cust_id, nickname, cus_state, cluster_seller, vertical_dominant")
         );
         const allow = isAdmin ? null : new Set(allowedCustIds.map(String));
+        const only = custIdsFilter?.length ? new Set(custIdsFilter.map(String)) : null;
         const sellers: CarteiraSeller[] = rawSellers
-          .filter((s: any) => !allow || allow.has(String(s.cust_id)))
+          .filter((s: any) => (!allow || allow.has(String(s.cust_id))) && (!only || only.has(String(s.cust_id))))
           .map((s: any) => {
             const uf = (s.cus_state || "").toUpperCase().trim() || "ND";
             return {
@@ -169,7 +171,7 @@ export function useCarteiraData() {
       }
     })();
     return () => { alive = false; };
-  }, [accessLoading, isAdmin, scopeKey]);
+  }, [accessLoading, isAdmin, scopeKey, filterKey]);
 
   const hasData = useMemo(
     () => data.daily.length + data.monthly.length + data.listings.length > 0,
