@@ -1199,10 +1199,18 @@ const TABS = [
 export default function Carteira() {
   const navigate = useNavigate();
   const { data, loading, error, hasData } = useCarteiraData();
-  const ag = useAgg(data);
   const [tab, setTab] = useState("panorama");
+  const [drill, setDrill] = useState<Drill>(EMPTY_DRILL);
+  const drillCtx = useMemo<DrillCtx>(() => ({
+    drill,
+    set: (p) => setDrill((d) => ({ ...d, ...p })),
+    clear: (k) => setDrill((d) => (k ? { ...d, [k]: null } : EMPTY_DRILL)),
+  }), [drill]);
+  const view = useMemo(() => applyDrill(data, drill), [data, drill]);
+  const ag = useAgg(view);
 
   return (
+   <DrillContext.Provider value={drillCtx}>
     <div className="cart-page">
       <header className="cart-header">
         <div className="cart-header-inner">
@@ -1237,17 +1245,18 @@ export default function Carteira() {
         )}
         {!loading && hasData && (
           <>
-            {tab === "panorama" && <Panorama ds={data} ag={ag} />}
-            {tab === "ritmo" && <Ritmo ds={data} ag={ag} />}
+            <DrillChips ds={data} />
+            {tab === "panorama" && <Panorama ds={view} ag={ag} />}
+            {tab === "ritmo" && <Ritmo ds={view} ag={ag} />}
             {tab === "curva" && <CurvaA ag={ag} />}
-            {tab === "categorias" && <Categorias ds={data} ag={ag} />}
+            {tab === "categorias" && <Categorias ds={view} ag={ag} />}
             {tab === "ticket" && <TicketUF ag={ag} />}
             {tab === "tracionadores" && <Tracionadores ag={ag} />}
             {tab === "trafego" && <Trafego ag={ag} />}
-            {tab === "pads" && <Pads ds={data} ag={ag} />}
+            {tab === "pads" && <Pads ds={view} ag={ag} />}
             {tab === "stats" && <Estatistica ag={ag} />}
-            {tab === "grant" && <Grant ds={data} ag={ag} />}
-            {tab === "lojas" && <LojaALoja ds={data} ag={ag} />}
+            {tab === "grant" && <Grant ds={view} ag={ag} />}
+            {tab === "lojas" && <LojaALoja ds={view} ag={ag} />}
           </>
         )}
       </main>
@@ -1261,5 +1270,6 @@ export default function Carteira() {
         </p>
       </footer>
     </div>
+   </DrillContext.Provider>
   );
 }
