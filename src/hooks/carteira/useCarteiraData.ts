@@ -140,7 +140,7 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
         const [rawDaily, rawMonthly, rawListings, rawElig, rawGrants] = await Promise.all([
           page(() => scoped(supabase.from("sellers_kpi_daily").select(kpiCols).gte("data", since).order("data") as any)),
           page(() => scoped(supabase.from("sellers_kpi").select(kpiCols).gte("data", isoDaysAgo(400)).order("data") as any)),
-          page(() => scoped(supabase.from("live_listings").select("seller_id, data, categoria, vertical, itens") as any)),
+          page(() => scoped(supabase.from("live_listings").select("seller_id, data, categoria, vertical, dom_domain_agg1, itens") as any)),
           eligDate
             ? page(() => scoped(supabase.from("seller_eligibility")
                 .select("seller_id, item_id, item_name, discount_total, discount_seller_percentage, flag_item_s_optin, pedidos_7d, media_tsi_diario_7d, campaign_type")
