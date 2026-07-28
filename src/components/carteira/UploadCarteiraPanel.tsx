@@ -188,8 +188,8 @@ export function UploadCarteiraPanel({ up, master }: { up: CarteiraUpload; master
           {err && <div className="cart-error" style={{ marginTop: 12 }}><AlertTriangle className="w-4 h-4" /> {err}</div>}
 
           {prog && (
-            <div className="cart-progress" style={{ marginTop: 14 }}>
-              <div className="cart-progress-head">
+            <div className="cart-upprog" style={{ marginTop: 14 }}>
+              <div className="cart-upprog-head">
                 <span>
                   {prog.done
                     ? <CheckCircle2 className="w-3.5 h-3.5" style={{ display: "inline", verticalAlign: "-2px" }} />
@@ -198,8 +198,8 @@ export function UploadCarteiraPanel({ up, master }: { up: CarteiraUpload; master
                 </span>
                 <strong>{prog.pct}%</strong>
               </div>
-              <div className="cart-progress-track">
-                <div className={`cart-progress-bar ${prog.done ? "done" : ""}`} style={{ width: `${prog.pct}%` }} />
+              <div className="cart-upprog-track">
+                <div className={`cart-upprog-bar ${prog.done ? "done" : ""}`} style={{ width: `${prog.pct}%` }} />
               </div>
             </div>
           )}
