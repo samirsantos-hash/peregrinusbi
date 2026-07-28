@@ -44,18 +44,32 @@ const REGIAO: Record<string, string> = {
 };
 
 const PAGE = 1000;
+const CONCURRENCY = 6;
 
+/** Paginação em lotes paralelos — reduz drasticamente o tempo vs. round-trips sequenciais. */
 async function page<T = any>(build: () => any, max = 120): Promise<T[]> {
   const out: T[] = [];
-  for (let i = 0; i < max; i++) {
-    const { data, error } = await build().range(i * PAGE, i * PAGE + PAGE - 1);
-    if (error) { console.warn("[carteira]", error.message); break; }
-    if (!data?.length) break;
-    out.push(...(data as T[]));
-    if (data.length < PAGE) break;
+  let start = 0;
+  while (start < max) {
+    const batch = Array.from({ length: Math.min(CONCURRENCY, max - start) }, (_, k) => start + k);
+    const res = await Promise.all(
+      batch.map((i) => build().range(i * PAGE, i * PAGE + PAGE - 1))
+    );
+    let done = false;
+    for (const { data, error } of res as any[]) {
+      if (error) { console.warn("[carteira]", error.message); done = true; break; }
+      if (!data?.length) { done = true; break; }
+      out.push(...(data as T[]));
+      if (data.length < PAGE) { done = true; break; }
+    }
+    if (done) break;
+    start += batch.length;
   }
   return out;
 }
+
+/** Cache em memória por escopo — evita refetch ao trocar de aba/carteira. */
+const CACHE = new Map<string, CarteiraDataset>();
 
 const num = (v: any) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
