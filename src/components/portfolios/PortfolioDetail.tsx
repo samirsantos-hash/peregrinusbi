@@ -250,13 +250,20 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
 
       {/* Painel analítico completo (mesmo de Gestão de Carteira · Carteira) */}
       <div className="space-y-3">
-        <h3 className="text-sm font-bold">📈 Painel analítico da carteira</h3>
-        <CarteiraBoard
-          custIds={portfolio.cust_ids}
-          title={`Gestão de Carteira · ${portfolio.name}`}
-          subtitle={`Painel analítico isolado das ${portfolio.cust_ids.length} loja(s) desta carteira`}
-          embedded
-        />
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-sm font-bold">📈 Painel analítico da carteira</h3>
+          <Button variant="outline" size="sm" onClick={() => setShowBoard((v) => !v)}>
+            {showBoard ? "Ocultar painel" : "Abrir painel analítico"}
+          </Button>
+        </div>
+        {showBoard && (
+          <CarteiraBoard
+            custIds={portfolio.cust_ids}
+            title={`Gestão de Carteira · ${portfolio.name}`}
+            subtitle={`Painel analítico isolado das ${portfolio.cust_ids.length} loja(s) desta carteira`}
+            embedded
+          />
+        )}
       </div>
     </div>
   );
