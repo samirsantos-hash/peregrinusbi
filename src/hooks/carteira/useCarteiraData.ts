@@ -84,7 +84,7 @@ const EMPTY: CarteiraDataset = {
   listings: [], eligibility: [], grants: [], refDate: null,
 };
 
-export function useCarteiraData(custIdsFilter?: string[]) {
+export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
   const { allowedCustIds, isAdmin, loading: accessLoading } = useMyAccess();
   const [data, setData] = useState<CarteiraDataset>(EMPTY);
   const [loading, setLoading] = useState(true);
@@ -94,7 +94,10 @@ export function useCarteiraData(custIdsFilter?: string[]) {
   const filterKey = custIdsFilter ? custIdsFilter.join(",") : "";
 
   useEffect(() => {
-    if (accessLoading) return;
+    if (accessLoading || !enabled) return;
+    const cacheKey = `${scopeKey}|${filterKey}`;
+    const cached = CACHE.get(cacheKey);
+    if (cached) { setData(cached); setLoading(false); setError(null); return; }
     let alive = true;
     (async () => {
       setLoading(true);
@@ -116,6 +119,10 @@ export function useCarteiraData(custIdsFilter?: string[]) {
             };
           });
         const ids = new Set(sellers.map((s) => s.id));
+        const idList = [...ids];
+        // Filtro server-side quando a carteira é pequena (evita trazer a rede inteira)
+        const scoped = <B extends { in: (c: string, v: any[]) => B }>(q: B): B =>
+          idList.length > 0 && idList.length <= 300 ? q.in("seller_id", idList) : q;
 
         const since = isoDaysAgo(60);
         const kpiCols = "seller_id, data, tgmv_lc, tsi, visits, inv_pads, tgmv_lc_pads, tsi_pads";
@@ -126,15 +133,15 @@ export function useCarteiraData(custIdsFilter?: string[]) {
         const eligDate = lastElig?.[0]?.data ?? null;
 
         const [rawDaily, rawMonthly, rawListings, rawElig, rawGrants] = await Promise.all([
-          page(() => supabase.from("sellers_kpi_daily").select(kpiCols).gte("data", since).order("data")),
-          page(() => supabase.from("sellers_kpi").select(kpiCols).order("data")),
-          page(() => supabase.from("live_listings").select("seller_id, data, categoria, vertical, itens")),
+          page(() => scoped(supabase.from("sellers_kpi_daily").select(kpiCols).gte("data", since).order("data") as any)),
+          page(() => scoped(supabase.from("sellers_kpi").select(kpiCols).gte("data", isoDaysAgo(400)).order("data") as any)),
+          page(() => scoped(supabase.from("live_listings").select("seller_id, data, categoria, vertical, itens") as any)),
           eligDate
-            ? page(() => supabase.from("seller_eligibility")
+            ? page(() => scoped(supabase.from("seller_eligibility")
                 .select("seller_id, item_id, item_name, discount_total, discount_seller_percentage, flag_item_s_optin, pedidos_7d, media_tsi_diario_7d, campaign_type")
-                .eq("data", eligDate))
+                .eq("data", eligDate) as any))
             : Promise.resolve([] as any[]),
-          page(() => supabase.from("seller_grants").select("seller_id, cust_id, expiration_date, days_to_expire, salesforce_url")),
+          page(() => scoped(supabase.from("seller_grants").select("seller_id, cust_id, expiration_date, days_to_expire, salesforce_url") as any)),
         ]);
 
         if (!alive) return;
@@ -174,10 +181,12 @@ export function useCarteiraData(custIdsFilter?: string[]) {
 
         const refDate = daily.length ? daily[daily.length - 1].data : eligDate;
 
-        setData({
+        const next: CarteiraDataset = {
           sellers, sellerById: new Map(sellers.map((s) => [s.id, s])),
           daily, monthly, listings, eligibility, grants, refDate,
-        });
+        };
+        CACHE.set(cacheKey, next);
+        setData(next);
       } catch (e: any) {
         if (alive) setError(e?.message ?? String(e));
       } finally {
@@ -185,7 +194,7 @@ export function useCarteiraData(custIdsFilter?: string[]) {
       }
     })();
     return () => { alive = false; };
-  }, [accessLoading, isAdmin, scopeKey, filterKey]);
+  }, [accessLoading, isAdmin, scopeKey, filterKey, enabled]);
 
   const hasData = useMemo(
     () => data.daily.length + data.monthly.length + data.listings.length > 0,
