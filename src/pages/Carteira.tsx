@@ -241,6 +241,7 @@ type Agg = ReturnType<typeof useAgg>;
 
 /* ═══════════════ 01 · Panorama ═══════════════ */
 function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
+  const { set } = useDrill();
   const catRows = useMemo(() => {
     const m = new Map<string, number>();
     for (const l of ds.listings) m.set(l.categoria, (m.get(l.categoria) ?? 0) + l.itens);
@@ -269,7 +270,7 @@ function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
       <StatBand s={sGmv} fmt={(n) => fmtBRLShort(n)} phrase={skewPhrase(sGmv, "GMV por loja")} />
 
       <div className="cart-grid">
-        <Card title="Pareto de categorias" subtitle="Barras = anúncios ativos · linha = % acumulado · tracejado dourado = mediana entre categorias">
+        <Card title="Pareto de categorias" subtitle="Clique em uma barra para filtrar a aba pela categoria · linha = % acumulado · tracejado dourado = mediana entre categorias">
           <div style={{ width: "100%", height: 340 }}>
             <ResponsiveContainer>
               <ComposedChart data={catRows} margin={{ top: 8, right: 24, bottom: 60, left: 0 }}>
@@ -279,7 +280,8 @@ function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
                 <YAxis yAxisId="r" orientation="right" domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
                 <Tooltip formatter={(v: any, n: any) => (n === "% acumulado" ? `${Number(v).toFixed(1)}%` : fmtInt(Number(v)))} />
                 <Legend />
-                <Bar yAxisId="l" dataKey="itens" name="Anúncios" fill={NAVY} />
+                <Bar yAxisId="l" dataKey="itens" name="Anúncios" fill={NAVY} cursor="pointer"
+                  onClick={(d: any) => d?.cat && set({ categoria: d.cat })} />
                 <Line yAxisId="r" type="monotone" dataKey="acum" name="% acumulado" stroke={GOLD} strokeWidth={2} dot={false} />
                 <ReferenceLine yAxisId="l" y={sCat.median} stroke={GOLD} strokeDasharray="5 4" />
               </ComposedChart>
