@@ -62,6 +62,17 @@ export function extractedAtFromName(name: string): string | null {
 
 export class SchemaError extends Error {}
 
+/** Normaliza cabeçalhos: remove sufixos como " (Yes / No)" e espaços extras. */
+const normHeader = (h: string) =>
+  h.replace(/\s*\([^)]*\)\s*$/, "").replace(/\s+/g, " ").trim();
+
+/** Reindexa a linha por cabeçalho normalizado. */
+const normRow = (r: Record<string, any>) => {
+  const out: Record<string, any> = {};
+  for (const k of Object.keys(r)) out[normHeader(k)] = r[k];
+  return out;
+};
+
 export type ParseProgress = (p: { step: string; label: string; pct: number }) => void;
 const tick = () => new Promise<void>((r) => setTimeout(r, 0));
 
@@ -80,11 +91,12 @@ export async function parseExtraction(file: File, onProgress?: ParseProgress): P
   if (!sheet) throw new SchemaError("A planilha não contém nenhuma aba legível.");
 
   await report("rows", "Convertendo linhas…", 40);
-  const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" }) as Record<string, any>[];
+  const rawRows = XLSX.utils.sheet_to_json(sheet, { defval: "" }) as Record<string, any>[];
+  const rows = rawRows.map(normRow);
   if (!rows.length) throw new SchemaError("A planilha está vazia.");
 
   await report("schema", "Validando colunas obrigatórias…", 55);
-  const headers = new Set(Object.keys(rows[0]).map((h) => h.trim()));
+  const headers = new Set(Object.keys(rows[0]));
   const missing = REQUIRED_COLS.filter((c) => !headers.has(c));
   if (missing.length) {
     throw new SchemaError(
