@@ -491,6 +491,7 @@ function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
 
 /* ═══════════════ 05 · Ticket por UF ═══════════════ */
 function TicketUF({ ag }: { ag: Agg }) {
+  const { set } = useDrill();
   const rows = useMemo(() => {
     const m = new Map<string, { gmv: number; tsi: number }>();
     for (const s of ag.ativos) {
@@ -511,7 +512,7 @@ function TicketUF({ ag }: { ag: Agg }) {
     <>
       <SectionHead n="05" title="Ticket por UF" note="GMV ÷ unidades — nunca preço de item" />
       <StatBand s={s} fmt={fmtBRL} phrase={skewPhrase(s, "ticket por UF")} />
-      <Card title="Ticket médio por estado" subtitle="Dourado = acima do ticket Brasil · navy = abaixo · linha vermelha = Brasil · tracejado = mediana das UFs">
+      <Card title="Ticket médio por estado" subtitle="Clique em uma barra para filtrar a aba pela UF · dourado = acima do ticket Brasil · linha vermelha = Brasil · tracejado = mediana das UFs">
         <div style={{ width: "100%", height: 340 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
@@ -519,7 +520,8 @@ function TicketUF({ ag }: { ag: Agg }) {
               <XAxis dataKey="uf" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtBRLShort} />
               <Tooltip formatter={(v: any) => brl(v)} />
-              <Bar dataKey="ticket" name="Ticket médio">
+              <Bar dataKey="ticket" name="Ticket médio" cursor="pointer"
+                onClick={(d: any) => d?.uf && set({ uf: d.uf })}>
                 {rows.map((r, i) => <Cell key={i} fill={r.ticket >= brasil ? GOLD : NAVY} />)}
               </Bar>
               <ReferenceLine y={brasil} stroke={RED} label={{ value: `Brasil ${fmtBRL(brasil)}`, position: "insideTopRight", fill: RED, fontSize: 10 }} />
@@ -538,10 +540,11 @@ function TicketUF({ ag }: { ag: Agg }) {
 
 /* ═══════════════ 06 · Tracionadores ═══════════════ */
 function Tracionadores({ ag }: { ag: Agg }) {
+  const { set } = useDrill();
   const movs = ag.sellers.filter((s) => s.gmv > 0 || s.gmvPrev > 0);
   const altas = [...movs].sort((a, b) => b.delta - a.delta).filter((s) => s.delta > 0).slice(0, 8);
   const quedas = [...movs].sort((a, b) => a.delta - b.delta).filter((s) => s.delta < 0).slice(0, 8);
-  const rows = [...altas].reverse().concat(quedas).map((s) => ({ nick: s.nick, delta: s.delta, uf: s.uf }));
+  const rows = [...altas].reverse().concat(quedas).map((s) => ({ id: s.id, nick: s.nick, delta: s.delta, uf: s.uf }));
   const nPos = movs.filter((s) => s.delta > 0).length;
   const nNeg = movs.filter((s) => s.delta < 0).length;
 
@@ -553,7 +556,7 @@ function Tracionadores({ ag }: { ag: Agg }) {
         <Kpi label="Detratores" value={fmtInt(nNeg)} hint="lojas com Δ GMV negativo" />
         <Kpi label="Δ líquido da carteira" value={fmtBRL(movs.reduce((s, r) => s + r.delta, 0))} />
       </div>
-      <Card title="8 maiores altas × 8 maiores quedas" subtitle="Cor estritamente pelo sinal do delta · linha zero divide impulsionadores de detratores">
+      <Card title="8 maiores altas × 8 maiores quedas" subtitle="Clique em uma barra para filtrar a aba pela loja · cor pelo sinal do delta · linha zero divide impulsionadores de detratores">
         <div style={{ width: "100%", height: Math.max(320, rows.length * 26) }}>
           <ResponsiveContainer>
             <BarChart data={rows} layout="vertical" margin={{ left: 120, right: 24 }}>
@@ -562,7 +565,8 @@ function Tracionadores({ ag }: { ag: Agg }) {
               <YAxis type="category" dataKey="nick" tick={{ fontSize: 10 }} width={115} />
               <Tooltip formatter={(v: any) => brl(v)} />
               <ReferenceLine x={0} stroke={NAVY} />
-              <Bar dataKey="delta" name="Δ GMV">
+              <Bar dataKey="delta" name="Δ GMV" cursor="pointer"
+                onClick={(d: any) => d?.id && set({ sellerId: d.id })}>
                 {rows.map((r, i) => <Cell key={i} fill={r.delta >= 0 ? GREEN : RED} />)}
               </Bar>
             </BarChart>
@@ -579,8 +583,9 @@ function Tracionadores({ ag }: { ag: Agg }) {
 
 /* ═══════════════ 07 · Tráfego & conversão ═══════════════ */
 function Trafego({ ag }: { ag: Agg }) {
+  const { set } = useDrill();
   const rows = ag.ativos.filter((s) => s.visitas > 0).slice(0, 40)
-    .map((s) => ({ nick: s.nick, conv: s.conv * 100, visitas: s.visitas, gmv: s.gmv }));
+    .map((s) => ({ id: s.id, nick: s.nick, conv: s.conv * 100, visitas: s.visitas, gmv: s.gmv }));
   const s = describe(ag.ativos.filter((x) => x.visitas > 0).map((x) => x.conv * 100));
   const convPond = ag.totalVisitas > 0 ? ag.totalTsi / ag.totalVisitas : 0;
   const alvo = rows.filter((r) => r.visitas >= median(rows.map((x) => x.visitas)) && r.conv < s.median);
@@ -595,7 +600,7 @@ function Trafego({ ag }: { ag: Agg }) {
         <Kpi label="Mediana entre lojas" value={`${s.median.toFixed(2)}%`} hint={`Q1–Q3 ${s.q1.toFixed(2)}%–${s.q3.toFixed(2)}%`} />
       </div>
       <StatBand s={s} fmt={(n) => `${n.toFixed(2)}%`} phrase={skewPhrase(s, "conversão por loja")} />
-      <Card title="Conversão por loja (40 maiores em GMV)" subtitle="Referência de mercado: <2% baixa · ~3% média · >3,5% ótima">
+      <Card title="Conversão por loja (40 maiores em GMV)" subtitle="Clique em uma barra para filtrar a aba pela loja · referência de mercado: <2% baixa · ~3% média · >3,5% ótima">
         <div style={{ width: "100%", height: 360 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 80, left: 0 }}>
@@ -603,7 +608,8 @@ function Trafego({ ag }: { ag: Agg }) {
               <XAxis dataKey="nick" tick={{ fontSize: 9 }} angle={-45} textAnchor="end" interval={0} height={90} />
               <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
               <Tooltip formatter={(v: any, n: any) => (n === "Conversão" ? `${Number(v).toFixed(2)}%` : fmtInt(Number(v)))} />
-              <Bar dataKey="conv" name="Conversão">
+              <Bar dataKey="conv" name="Conversão" cursor="pointer"
+                onClick={(d: any) => d?.id && set({ sellerId: d.id })}>
                 {rows.map((r, i) => <Cell key={i} fill={r.conv >= s.median ? NAVY : RED} />)}
               </Bar>
               <ReferenceLine y={s.median} stroke={GOLD} strokeDasharray="5 4" label={{ value: "Mediana", position: "insideTopRight", fill: GOLD, fontSize: 10 }} />
