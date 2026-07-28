@@ -124,3 +124,35 @@ export function fmtPct(v: number | null | undefined, digits = 1): string {
   const n = typeof v === "number" && Number.isFinite(v) ? v : 0;
   return `${(n * 100).toFixed(digits)}%`;
 }
+// Histograma com curva normal teórica sobreposta
+export interface HistBin { x0: number; x1: number; mid: number; count: number; normal: number; }
+export function histogram(values: number[], bins = 18): HistBin[] {
+  const arr = sortAsc(values);
+  if (arr.length < 2) return [];
+  const min = arr[0];
+  const max = arr[arr.length - 1];
+  if (max <= min) return [];
+  const w = (max - min) / bins;
+  const s = describe(arr);
+  const out: HistBin[] = [];
+  for (let i = 0; i < bins; i++) {
+    const x0 = min + i * w;
+    const x1 = x0 + w;
+    const count = arr.filter((v) => (i === bins - 1 ? v >= x0 && v <= x1 : v >= x0 && v < x1)).length;
+    const mid = (x0 + x1) / 2;
+    const pdf = s.sd > 0
+      ? (1 / (s.sd * Math.sqrt(2 * Math.PI))) * Math.exp(-0.5 * ((mid - s.mean) / s.sd) ** 2)
+      : 0;
+    out.push({ x0, x1, mid, count, normal: pdf * arr.length * w });
+  }
+  return out;
+}
+
+export function fmtBRLShort(v: number | null | undefined): string {
+  const n = typeof v === "number" && Number.isFinite(v) ? v : 0;
+  const abs = Math.abs(n);
+  if (abs >= 1e9) return `R$ ${(n / 1e9).toFixed(1).replace(".", ",")} bi`;
+  if (abs >= 1e6) return `R$ ${(n / 1e6).toFixed(1).replace(".", ",")} mi`;
+  if (abs >= 1e3) return `R$ ${(n / 1e3).toFixed(0)} mil`;
+  return fmtBRL(n);
+}
