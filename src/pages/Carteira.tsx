@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { createContext, useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Search } from "lucide-react";
+import { ArrowLeft, Loader2, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCarteiraData, type CarteiraDataset, type CarteiraSeller } from "@/hooks/carteira/useCarteiraData";
 import {
@@ -99,6 +99,68 @@ const SearchBox = ({ value, onChange, placeholder }: any) => (
 );
 
 const brl = (v: any) => fmtBRL(Number(v));
+
+/* ═══════════════ Drill-down (UF · categoria · loja) ═══════════════ */
+export interface Drill { uf: string | null; categoria: string | null; sellerId: string | null; }
+const EMPTY_DRILL: Drill = { uf: null, categoria: null, sellerId: null };
+interface DrillCtx { drill: Drill; set: (p: Partial<Drill>) => void; clear: (k?: keyof Drill) => void; }
+const DrillContext = createContext<DrillCtx>({ drill: EMPTY_DRILL, set: () => {}, clear: () => {} });
+export const useDrill = () => useContext(DrillContext);
+
+function applyDrill(ds: CarteiraDataset, drill: Drill): CarteiraDataset {
+  if (!drill.uf && !drill.categoria && !drill.sellerId) return ds;
+
+  let sellers = ds.sellers;
+  if (drill.uf) sellers = sellers.filter((s) => s.uf === drill.uf);
+  if (drill.sellerId) sellers = sellers.filter((s) => s.id === drill.sellerId);
+  if (drill.categoria) {
+    const withCat = new Set(
+      ds.listings.filter((l) => l.categoria === drill.categoria).map((l) => l.sellerId)
+    );
+    sellers = sellers.filter((s) => withCat.has(s.id));
+  }
+  const ids = new Set(sellers.map((s) => s.id));
+  const keep = (sid: string) => ids.has(sid);
+
+  return {
+    sellers,
+    sellerById: new Map(sellers.map((s) => [s.id, s])),
+    daily: ds.daily.filter((r) => keep(r.sellerId)),
+    monthly: ds.monthly.filter((r) => keep(r.sellerId)),
+    listings: ds.listings.filter(
+      (l) => keep(l.sellerId) && (!drill.categoria || l.categoria === drill.categoria)
+    ),
+    eligibility: ds.eligibility.filter((e) => keep(e.sellerId)),
+    grants: ds.grants.filter((g) => keep(g.sellerId)),
+    refDate: ds.refDate,
+  };
+}
+
+function DrillChips({ ds }: { ds: CarteiraDataset }) {
+  const { drill, clear } = useDrill();
+  const chips: Array<{ k: keyof Drill; label: string }> = [];
+  if (drill.uf) chips.push({ k: "uf", label: `UF: ${drill.uf}` });
+  if (drill.categoria) chips.push({ k: "categoria", label: `Categoria: ${drill.categoria}` });
+  if (drill.sellerId) {
+    const s = ds.sellerById.get(drill.sellerId);
+    chips.push({ k: "sellerId", label: `Loja: ${s?.nick ?? drill.sellerId}` });
+  }
+  if (!chips.length) return null;
+  return (
+    <div className="cart-drillbar">
+      <span className="cart-drillbar-title">Recorte ativo</span>
+      {chips.map((c) => (
+        <button key={c.k} className="cart-drillchip" onClick={() => clear(c.k)} title="Remover este recorte">
+          {c.label} <X className="w-3 h-3" />
+        </button>
+      ))}
+      <button className="cart-drillclear" onClick={() => clear()}>limpar tudo</button>
+      <span className="cart-drillbar-note">
+        Todos os cards, gráficos e tabelas desta aba consideram apenas o recorte selecionado.
+      </span>
+    </div>
+  );
+}
 
 /* ═══════════════ Agregações compartilhadas ═══════════════ */
 interface SellerAgg extends CarteiraSeller {
