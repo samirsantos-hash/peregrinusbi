@@ -30,6 +30,7 @@ interface Props {
 export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const { sellers, loading } = usePortfolioData(portfolio.cust_ids);
   const [selectedMedals, setSelectedMedals] = useState<string[]>([]);
+  const [showBoard, setShowBoard] = useState(false);
   const aliases = portfolio.seller_aliases || {};
   const sellersWithAliases = useMemo(
     () => sellers.map((s) => ({ ...s, nickname: aliases[s.custId] || s.nickname })),
