@@ -1040,6 +1040,7 @@ function Grant({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
 
 /* ═══════════════ 11 · Loja a loja ═══════════════ */
 function LojaALoja({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
+  const { set } = useDrill();
   const [q, setQ] = useState("");
   const [uf, setUf] = useState("todas");
   const [curva, setCurva] = useState("todas");
@@ -1109,7 +1110,7 @@ function LojaALoja({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
               {filtered.slice(0, 300).map((r) => (
                 <tr key={r.id} className={sel === r.id ? "sel" : ""}>
                   <td><button className="cart-link" onClick={() => setSel(r.id)}>{r.nick}</button></td>
-                  <td>{r.uf}</td>
+                  <td><button className="cart-link muted" onClick={() => set({ uf: r.uf })} title="Filtrar aba por esta UF">{r.uf}</button></td>
                   <td className="right mono">{fmtBRL(r.gmv)}</td>
                   <td className="right mono">{fmtPct(r.share)}</td>
                   <td className="right mono">{fmtInt(r.tsi)}</td>
