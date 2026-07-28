@@ -247,6 +247,17 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
           />
         </div>
       </div>
+
+      {/* Painel analítico completo (mesmo de Gestão de Carteira · Carteira) */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-bold">📈 Painel analítico da carteira</h3>
+        <CarteiraBoard
+          custIds={portfolio.cust_ids}
+          title={`Gestão de Carteira · ${portfolio.name}`}
+          subtitle={`Painel analítico isolado das ${portfolio.cust_ids.length} loja(s) desta carteira`}
+          embedded
+        />
+      </div>
     </div>
   );
 }
