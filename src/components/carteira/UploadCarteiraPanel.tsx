@@ -87,6 +87,7 @@ export function UploadCarteiraPanel({ up, master }: { up: CarteiraUpload; master
   const [err, setErr] = useState<string | null>(null);
   const [drag, setDrag] = useState(false);
   const [showIgnored, setShowIgnored] = useState(false);
+  const [prog, setProg] = useState<{ pct: number; label: string; done?: boolean } | null>(null);
 
   const handleFile = async (file: File) => {
     setErr(null); setPending(null);
@@ -95,11 +96,29 @@ export function UploadCarteiraPanel({ up, master }: { up: CarteiraUpload; master
       return;
     }
     setBusy(true);
+    setProg({ pct: 2, label: "Iniciando…" });
     try {
-      setPending(await parseExtraction(file));
+      const ex = await parseExtraction(file, (p) => setProg({ pct: p.pct, label: p.label }));
+      setPending(ex);
+      setProg({ pct: 100, label: "Validação concluída — confira o resumo e processe.", done: true });
     } catch (e: any) {
       setErr(e instanceof SchemaError ? e.message : `Não foi possível ler o arquivo: ${e?.message ?? e}`);
+      setProg(null);
     } finally { setBusy(false); }
+  };
+
+  const handleProcess = async (ex: Extraction) => {
+    setBusy(true);
+    setProg({ pct: 30, label: "Isolando cust IDs da carteira…" });
+    await new Promise((r) => setTimeout(r, 60));
+    setProg({ pct: 65, label: "Recalculando KPIs, séries diárias e categorias…" });
+    await new Promise((r) => setTimeout(r, 60));
+    up.add(ex);
+    setProg({ pct: 90, label: "Atualizando as abas do painel…" });
+    await new Promise((r) => setTimeout(r, 120));
+    setPending(null);
+    setProg({ pct: 100, label: "Painel atualizado com a nova extração.", done: true });
+    setBusy(false);
   };
 
   const masterCusts = useMemo(() => new Set(master.map((m) => m.custId)), [master]);
@@ -168,6 +187,23 @@ export function UploadCarteiraPanel({ up, master }: { up: CarteiraUpload; master
 
           {err && <div className="cart-error" style={{ marginTop: 12 }}><AlertTriangle className="w-4 h-4" /> {err}</div>}
 
+          {prog && (
+            <div className="cart-progress" style={{ marginTop: 14 }}>
+              <div className="cart-progress-head">
+                <span>
+                  {prog.done
+                    ? <CheckCircle2 className="w-3.5 h-3.5" style={{ display: "inline", verticalAlign: "-2px" }} />
+                    : <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ display: "inline", verticalAlign: "-2px" }} />}
+                  {" "}{prog.label}
+                </span>
+                <strong>{prog.pct}%</strong>
+              </div>
+              <div className="cart-progress-track">
+                <div className={`cart-progress-bar ${prog.done ? "done" : ""}`} style={{ width: `${prog.pct}%` }} />
+              </div>
+            </div>
+          )}
+
           {pending && (
             <div className="cart-upload-info">
               <div className="cart-kpigrid">
@@ -202,8 +238,8 @@ export function UploadCarteiraPanel({ up, master }: { up: CarteiraUpload; master
                 </div>
               )}
 
-              <Button size="sm" className="cart-process" onClick={() => { up.add(pending); setPending(null); }}>
-                <CheckCircle2 className="w-4 h-4" /> Processar e recalcular o painel
+              <Button size="sm" className="cart-process" disabled={busy} onClick={() => handleProcess(pending)}>
+                {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />} Processar e recalcular o painel
               </Button>
             </div>
           )}
