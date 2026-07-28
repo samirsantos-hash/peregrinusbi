@@ -11,6 +11,7 @@ import RaioXTable from "./RaioXTable";
 import MedalFilter from "./MedalFilter";
 import PerformanceClusterChart from "./PerformanceClusterChart";
 import ProjecaoPanel from "./ProjecaoPanel";
+import { CarteiraBoard } from "@/pages/Carteira";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
