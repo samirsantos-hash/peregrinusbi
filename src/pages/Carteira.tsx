@@ -378,6 +378,7 @@ function Ritmo({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
 
 /* ═══════════════ 03 · Curva A por estado ═══════════════ */
 function CurvaA({ ag }: { ag: Agg }) {
+  const { drill, set } = useDrill();
   const ufs = useMemo(() => {
     const m = new Map<string, number>();
     for (const s of ag.ativos) m.set(s.uf, (m.get(s.uf) ?? 0) + s.gmv);
@@ -399,6 +400,11 @@ function CurvaA({ ag }: { ag: Agg }) {
         {ufs.map((u) => (
           <button key={u} className={`cart-chip ${u === ufAtual ? "on" : ""}`} onClick={() => setUf(u)}>{u}</button>
         ))}
+        {!drill.uf && ufAtual !== "ND" && (
+          <button className="cart-chip gold" onClick={() => set({ uf: ufAtual })}>
+            Filtrar aba por {ufAtual}
+          </button>
+        )}
       </div>
       <div className="cart-kpi-cluster">
         <Kpi label="Lojas curva A" value={`${fmtInt(curvaA.length)} / ${fmtInt(lojas.length)}`} hint={`${ufAtual}`} />
@@ -414,9 +420,11 @@ function CurvaA({ ag }: { ag: Agg }) {
             <thead><tr><th>#</th><th>Loja</th><th className="right">GMV</th><th className="right">Unid.</th><th className="right">Ticket</th><th className="right">Share</th><th className="right">Acum.</th><th>Curva</th></tr></thead>
             <tbody>
               {ranked.slice(0, 80).map((r, i) => (
-                <tr key={r.item.id}>
+                <tr key={r.item.id} className={drill.sellerId === r.item.id ? "sel" : ""}>
                   <td className="mono">{i + 1}</td>
-                  <td>{r.item.nick}</td>
+                  <td>
+                    <button className="cart-link" onClick={() => set({ sellerId: r.item.id })}>{r.item.nick}</button>
+                  </td>
                   <td className="right mono">{fmtBRL(r.value)}</td>
                   <td className="right mono">{fmtInt(r.item.tsi)}</td>
                   <td className="right mono">{fmtBRL(r.item.ticket)}</td>
