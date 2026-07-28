@@ -1191,6 +1191,7 @@ function labelMes(d?: string) {
 }
 
 const TABS = [
+  { id: "upload", label: "Upload de dados" },
   { id: "panorama", label: "Panorama" },
   { id: "ritmo", label: "Ritmo diário" },
   { id: "curva", label: "Curva A por estado" },
@@ -1215,15 +1216,22 @@ interface BoardProps {
 
 export function CarteiraBoard({ custIds, title, subtitle, embedded = false, onBack }: BoardProps) {
   const { data, loading, error, hasData } = useCarteiraData(custIds);
-  const [tab, setTab] = useState("panorama");
+  const [tab, setTab] = useState("upload");
+  const scopeKey = custIds?.length ? custIds.slice().sort().join(",") : "all";
+  const up = useCarteiraUpload(scopeKey, data.sellers, data);
+  const source = up.built?.dataset ?? data;
   const [drill, setDrill] = useState<Drill>(EMPTY_DRILL);
   const drillCtx = useMemo<DrillCtx>(() => ({
     drill,
     set: (p) => setDrill((d) => ({ ...d, ...p })),
     clear: (k) => setDrill((d) => (k ? { ...d, [k]: null } : EMPTY_DRILL)),
   }), [drill]);
-  const view = useMemo(() => applyDrill(data, drill), [data, drill]);
+  const view = useMemo(() => applyDrill(source, drill), [source, drill]);
   const ag = useAgg(view);
+  const ex = up.active;
+  const badge = ex
+    ? `posição em ${fmtDate(ex.extractedAt?.slice(0, 10) ?? ex.periodEnd)}, período ${fmtDate(ex.periodStart)}–${fmtDate(ex.periodEnd)}`
+    : `posição em ${fmtDate(data.refDate)}`;
 
   return (
    <DrillContext.Provider value={drillCtx}>
@@ -1237,7 +1245,10 @@ export function CarteiraBoard({ custIds, title, subtitle, embedded = false, onBa
           )}
           <div>
             <h1>{title ?? "Gestão de Carteira · Carteira"}</h1>
-            <p>{subtitle ?? "Painel analítico da rede"} · mediana e faixa interquartil como referência · posição em {fmtDate(data.refDate)}</p>
+            <p>
+              {subtitle ?? "Painel analítico da rede"} · mediana e faixa interquartil como referência · {badge}
+              {ex && <span className="cart-refbadge">extração ativa{up.storeFilter ? ` · ${up.storeFilter}` : ""}</span>}
+            </p>
           </div>
         </div>
       </header>
@@ -1253,15 +1264,16 @@ export function CarteiraBoard({ custIds, title, subtitle, embedded = false, onBa
       </div>
 
       <main className="cart-main">
+        {tab === "upload" && !loading && <UploadCarteiraPanel up={up} master={data.sellers} />}
         {loading && <div className="cart-loading"><Loader2 className="w-5 h-5 animate-spin" /> Carregando dados da carteira…</div>}
         {error && !loading && <div className="cart-error">Erro ao carregar: {error}</div>}
-        {!loading && !error && !hasData && (
+        {tab !== "upload" && !loading && !error && !hasData && (
           <div className="cart-empty">
             <h2>Nenhum dado disponível para esta carteira.</h2>
             <p>Suba as bases de performance em <code>Admin → Upload</code> ou verifique as lojas liberadas no seu acesso.</p>
           </div>
         )}
-        {!loading && hasData && (
+        {tab !== "upload" && !loading && hasData && (
           <>
             <DrillChips ds={data} />
             {tab === "panorama" && <Panorama ds={view} ag={ag} />}
