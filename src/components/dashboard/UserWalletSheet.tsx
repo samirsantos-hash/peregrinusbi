@@ -1,10 +1,10 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Search, Save, Store, Plus, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { Loader2, Search, Save, Store, Plus, AlertTriangle, CheckCircle2, CircleSlash } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,6 +26,8 @@ interface UserWalletSheetProps {
 
 interface BulkResult {
   matched: number;
+  active: string[];
+  inactive: string[];
   notFound: string[];
 }
 
@@ -74,6 +76,35 @@ const UserWalletSheet = ({
   const [saving, setSaving] = useState(false);
   const [bulkInput, setBulkInput] = useState("");
   const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
+  const [activeCustIds, setActiveCustIds] = useState<Set<string> | null>(null);
+
+  // Carrega quais lojas estão ativas (com dados no período mais recente de sellers_kpi)
+  useEffect(() => {
+    if (!open || activeCustIds) return;
+    (async () => {
+      const { data: last } = await supabase
+        .from("sellers_kpi")
+        .select("data")
+        .order("data", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!last?.data) {
+        setActiveCustIds(new Set());
+        return;
+      }
+      const { data: rows } = await supabase
+        .from("sellers_kpi")
+        .select("seller_id")
+        .eq("data", last.data)
+        .range(0, 9999);
+      const ids = new Set((rows || []).map((r: any) => r.seller_id));
+      setActiveCustIds(
+        new Set(sellers.filter((s) => ids.has(s.id)).map((s) => s.custId))
+      );
+    })();
+  }, [open, sellers, activeCustIds]);
+
+  const isActive = (custId: string) => !activeCustIds || activeCustIds.has(custId);
 
   const handleOpenChange = (v: boolean) => {
     if (v) {
@@ -115,7 +146,12 @@ const UserWalletSheet = ({
     if (!bulkInput.trim()) return;
     const result = parseBulkInput(bulkInput, sellers, selectedIds);
     setSelectedIds((prev) => [...new Set([...prev, ...result.toAdd])]);
-    setBulkResult({ matched: result.toAdd.length, notFound: result.notFound });
+    setBulkResult({
+      matched: result.toAdd.length,
+      active: result.toAdd.filter((c) => isActive(c)),
+      inactive: result.toAdd.filter((c) => !isActive(c)),
+      notFound: result.notFound,
+    });
     setBulkInput("");
   };
 
@@ -123,7 +159,12 @@ const UserWalletSheet = ({
     if (!bulkInput.trim()) return;
     const result = parseBulkInput(bulkInput, sellers, []);
     setSelectedIds(result.toAdd);
-    setBulkResult({ matched: result.toAdd.length, notFound: result.notFound });
+    setBulkResult({
+      matched: result.toAdd.length,
+      active: result.toAdd.filter((c) => isActive(c)),
+      inactive: result.toAdd.filter((c) => !isActive(c)),
+      notFound: result.notFound,
+    });
     setBulkInput("");
   };
 
@@ -206,6 +247,21 @@ const UserWalletSheet = ({
                     <span>{bulkResult.matched} Seller(s) identificado(s) e adicionado(s) à seleção.</span>
                   </div>
                 )}
+                {bulkResult.active.length > 0 && (
+                  <div className="text-muted-foreground pl-5">
+                    {bulkResult.active.length} ativo(s) (com dados no período mais recente).
+                  </div>
+                )}
+                {bulkResult.inactive.length > 0 && (
+                  <div className="flex items-start gap-1.5 text-muted-foreground">
+                    <CircleSlash className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                    <span>
+                      {bulkResult.inactive.length} inativo(s) — encontrados na base, mas sem dados
+                      recentes (adicionados mesmo assim):{" "}
+                      <strong>{bulkResult.inactive.join(", ")}</strong>
+                    </span>
+                  </div>
+                )}
                 {bulkResult.notFound.length > 0 && (
                   <div className="flex items-start gap-1.5 text-amber-400">
                     <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
@@ -250,7 +306,14 @@ const UserWalletSheet = ({
                   onCheckedChange={() => toggle(s.custId)}
                 />
                 <div className="flex-1 min-w-0">
-                  <span className="font-medium block truncate">{s.nickname}</span>
+                  <span className="font-medium block truncate">
+                    {s.nickname}
+                    {activeCustIds && !activeCustIds.has(s.custId) && (
+                      <span className="ml-2 text-[10px] uppercase tracking-wide text-muted-foreground border border-border rounded px-1 py-0.5">
+                        inativo
+                      </span>
+                    )}
+                  </span>
                   <span className="text-muted-foreground text-xs font-mono">{s.custId}</span>
                 </div>
               </label>
