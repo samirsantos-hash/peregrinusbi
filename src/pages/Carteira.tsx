@@ -439,6 +439,7 @@ function CurvaA({ ag }: { ag: Agg }) {
 
 /* ═══════════════ 04 · Categorias por região ═══════════════ */
 function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
+  const { set } = useDrill();
   const { rows, cats } = useMemo(() => {
     const totalCat = new Map<string, number>();
     for (const l of ds.listings) totalCat.set(l.categoria, (totalCat.get(l.categoria) ?? 0) + l.itens);
@@ -462,7 +463,7 @@ function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
     <>
       <SectionHead n="04" title="Categorias por região" note="Top 5 categorias · mediana entre regiões" />
       <StatBand s={s} fmt={fmtInt} phrase={skewPhrase(s, "sortimento por região")} />
-      <Card title="Sortimento por região" subtitle="Barras empilhadas das 5 maiores categorias · tracejado dourado = mediana regional">
+      <Card title="Sortimento por região" subtitle="Clique em um segmento para filtrar a aba pela categoria · tracejado dourado = mediana regional">
         <div style={{ width: "100%", height: 340 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
@@ -471,7 +472,10 @@ function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
               <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtInt} />
               <Tooltip formatter={(v: any) => fmtInt(Number(v))} />
               <Legend />
-              {cats.map((c, i) => <Bar key={c} dataKey={c} stackId="c" fill={colors[i % colors.length]} name={c} />)}
+              {cats.map((c, i) => (
+                <Bar key={c} dataKey={c} stackId="c" fill={colors[i % colors.length]} name={c}
+                  cursor="pointer" onClick={() => set({ categoria: c })} />
+              ))}
               <ReferenceLine y={s.median} stroke={GOLD} strokeDasharray="5 4" />
             </BarChart>
           </ResponsiveContainer>
