@@ -1,7 +1,8 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ExternalLink, Copy, Check, Video, Filter, AlertTriangle } from "lucide-react";
+import { ExternalLink, Copy, Check, Video, Filter, AlertTriangle, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { ListingQuality } from "@/hooks/useListingsQuality";
 
@@ -12,6 +13,7 @@ interface CriticalListingsTableProps {
 const CriticalListingsTable = ({ listings }: CriticalListingsTableProps) => {
   const [copied, setCopied] = useState(false);
   const [showClipsOnly, setShowClipsOnly] = useState(false);
+  const [search, setSearch] = useState("");
 
   // Filter only critical listings (score < 70) or with issues
   const criticalListings = useMemo(() => {
@@ -19,8 +21,21 @@ const CriticalListingsTable = ({ listings }: CriticalListingsTableProps) => {
     if (showClipsOnly) {
       filtered = filtered.filter((l) => l.sellersClipsPubli > 0);
     }
+    const term = search.trim().toLowerCase().replace(/\s+/g, "");
+    if (term) {
+      const digits = term.replace(/\D/g, "");
+      filtered = filtered.filter((l) => {
+        const id = l.itemId.toLowerCase();
+        const idDigits = l.itemId.replace(/\D/g, "");
+        return (
+          id.includes(term) ||
+          (digits.length > 0 && idDigits.includes(digits)) ||
+          (l.mlbLink || "").toLowerCase().includes(term)
+        );
+      });
+    }
     return filtered.sort((a, b) => a.avgScore - b.avgScore);
-  }, [listings, showClipsOnly]);
+  }, [listings, showClipsOnly, search]);
 
   const handleCopyAll = async () => {
     const ids = criticalListings.map((l) => `MLB${l.itemId.replace(/\D/g, "")}`).join(", ");
@@ -59,6 +74,15 @@ const CriticalListingsTable = ({ listings }: CriticalListingsTableProps) => {
           </span>
         </h4>
         <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Pesquisar MLB..."
+              className="h-8 w-44 pl-8 text-xs"
+            />
+          </div>
           <Button
             variant="outline"
             size="sm"
