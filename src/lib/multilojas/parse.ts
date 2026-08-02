@@ -169,7 +169,7 @@ export async function lerPlanilhaML(
   onProgress?.(20, "Decodificando a planilha");
   const wb = XLSX.read(buf, { type: "array", cellDates: true });
   const sheetName = wb.SheetNames.find((n) => norm(n).includes("vendas")) || wb.SheetNames[0];
-  const rows = XLSX.utils.sheet_to_json<unknown[]>(wb.Sheets[sheetName], { header: 1, raw: true, defval: "" });
+  const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { header: 1, raw: true, defval: "" }) as unknown[][];
   onProgress?.(40, "Detectando o cabeçalho");
 
   const headerRow = detectHeaderRow(rows);
