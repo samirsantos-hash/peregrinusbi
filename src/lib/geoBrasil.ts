@@ -1,0 +1,32 @@
+/** População (milhões, estimativa IBGE) e PIB per capita (R$ mil) por UF. */
+export const UF_INFO: Record<string, { nome: string; pop: number; pib: number; regiao: string }> = {
+  AC: { nome: "Acre", pop: 0.83, pib: 21.9, regiao: "Norte" },
+  AL: { nome: "Alagoas", pop: 3.13, pib: 21.0, regiao: "Nordeste" },
+  AP: { nome: "Amapá", pop: 0.73, pib: 23.0, regiao: "Norte" },
+  AM: { nome: "Amazonas", pop: 3.94, pib: 32.4, regiao: "Norte" },
+  BA: { nome: "Bahia", pop: 14.14, pib: 22.3, regiao: "Nordeste" },
+  CE: { nome: "Ceará", pop: 8.79, pib: 21.4, regiao: "Nordeste" },
+  DF: { nome: "Distrito Federal", pop: 2.82, pib: 98.0, regiao: "Centro-Oeste" },
+  ES: { nome: "Espírito Santo", pop: 3.83, pib: 44.6, regiao: "Sudeste" },
+  GO: { nome: "Goiás", pop: 7.06, pib: 37.0, regiao: "Centro-Oeste" },
+  MA: { nome: "Maranhão", pop: 6.78, pib: 17.5, regiao: "Nordeste" },
+  MT: { nome: "Mato Grosso", pop: 3.66, pib: 63.4, regiao: "Centro-Oeste" },
+  MS: { nome: "Mato Grosso do Sul", pop: 2.76, pib: 52.0, regiao: "Centro-Oeste" },
+  MG: { nome: "Minas Gerais", pop: 20.54, pib: 37.0, regiao: "Sudeste" },
+  PA: { nome: "Pará", pop: 8.12, pib: 27.4, regiao: "Norte" },
+  PB: { nome: "Paraíba", pop: 3.97, pib: 21.0, regiao: "Nordeste" },
+  PR: { nome: "Paraná", pop: 11.44, pib: 48.0, regiao: "Sul" },
+  PE: { nome: "Pernambuco", pop: 9.06, pib: 23.5, regiao: "Nordeste" },
+  PI: { nome: "Piauí", pop: 3.27, pib: 19.0, regiao: "Nordeste" },
+  RJ: { nome: "Rio de Janeiro", pop: 16.05, pib: 53.0, regiao: "Sudeste" },
+  RN: { nome: "Rio Grande do Norte", pop: 3.30, pib: 22.8, regiao: "Nordeste" },
+  RS: { nome: "Rio Grande do Sul", pop: 10.88, pib: 48.0, regiao: "Sul" },
+  RO: { nome: "Rondônia", pop: 1.58, pib: 34.0, regiao: "Norte" },
+  RR: { nome: "Roraima", pop: 0.64, pib: 30.0, regiao: "Norte" },
+  SC: { nome: "Santa Catarina", pop: 7.61, pib: 56.0, regiao: "Sul" },
+  SP: { nome: "São Paulo", pop: 44.42, pib: 60.0, regiao: "Sudeste" },
+  SE: { nome: "Sergipe", pop: 2.21, pib: 22.0, regiao: "Nordeste" },
+  TO: { nome: "Tocantins", pop: 1.51, pib: 30.0, regiao: "Norte" },
+};
+
+export const POP_TOTAL = Object.values(UF_INFO).reduce((s, u) => s + u.pop, 0);
