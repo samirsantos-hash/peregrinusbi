@@ -38,7 +38,22 @@ const FiltersBar = ({ filtros, set, opcoes }: Props) => {
   return (
     <div className="sticky top-0 z-20 border-b border-border/40 bg-background/95 backdrop-blur px-3 py-2 space-y-2">
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[11px] text-muted-foreground mr-1">Lojas</span>
+        <span className="text-[11px] text-muted-foreground mr-1">
+          Lojas{" "}
+          <span className="text-foreground/70">
+            ({filtros.lojas.length || opcoes.lojas.length}/{opcoes.lojas.length})
+          </span>
+        </span>
+        <button
+          onClick={() => set({ lojas: [] })}
+          className={`px-2 py-0.5 rounded-full text-[11px] border transition-colors ${
+            filtros.lojas.length === 0
+              ? "bg-primary/15 border-primary/60 text-primary"
+              : "border-border/60 text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          rede inteira
+        </button>
         {opcoes.lojas.map((l) => {
           const on = filtros.lojas.includes(l);
           return (
@@ -53,15 +68,16 @@ const FiltersBar = ({ filtros, set, opcoes }: Props) => {
             </button>
           );
         })}
-        {filtros.lojas.length > 0 && (
-          <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]" onClick={() => set({ lojas: [] })}>limpar</Button>
+        {filtros.lojas.length > 0 && filtros.lojas.length < opcoes.lojas.length && (
+          <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px]"
+            onClick={() => set({ lojas: opcoes.lojas })}>selecionar todas</Button>
         )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         <Input type="date" value={filtros.ini} onChange={(e) => set({ ini: e.target.value })} className="h-8 w-[140px] text-xs" />
         <Input type="date" value={filtros.fim} onChange={(e) => set({ fim: e.target.value })} className="h-8 w-[140px] text-xs" />
-        {[30, 60, 90].map((d) => (
+        {[7, 15, 30, 60, 90].map((d) => (
           <Button key={d} variant="outline" size="sm" className="h-8 px-2 text-[11px]"
             onClick={() => set({ ini: shift(opcoes.fim, d), fim: opcoes.fim })}>
             {d}d
