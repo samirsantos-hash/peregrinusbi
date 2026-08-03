@@ -101,7 +101,7 @@ const SoundToggleButton = () => {
 };
 
 const Index = () => {
-  const { user, isAdmin, isGerente, signOut } = useAuth();
+  const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { theme, toggle: toggleTheme } = useTheme();
