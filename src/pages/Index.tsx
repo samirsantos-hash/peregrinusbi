@@ -391,11 +391,13 @@ const Index = () => {
               <Briefcase className="w-4 h-4" />
               <span className="hidden sm:inline">Carteira</span>
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
-              <Store className="w-4 h-4" />
-              <span className="hidden sm:inline">Multilojas</span>
-              <NewBadge featureKey="multilojas_v1" tooltip="Novo: consolidação de rede a partir do relatório de Vendas do Mercado Livre" />
-            </Button>
+            {(isAdmin || isGerente || isGestorLoja) &&
+              <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
+                <Store className="w-4 h-4" />
+                <span className="hidden sm:inline">Multilojas</span>
+                <NewBadge featureKey="multilojas_v1" tooltip="Novo: consolidação de rede a partir do relatório de Vendas do Mercado Livre" />
+              </Button>
+            }
             {(isAdmin || isGerente) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2 px-2 sm:px-3">
                 <Settings className="w-4 h-4" />
