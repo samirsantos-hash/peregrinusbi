@@ -95,19 +95,71 @@ function porChave<T extends string>(ps: PedidoML[], key: (p: PedidoML) => T) {
 }
 
 /* ═══════════════════ página ═══════════════════ */
-const TABS = [
-  "Diretoria", "Lojas", "Séries", "Projeção", "Concentração",
+const TABS_ANALITICAS = [
+  "Diretoria", "Minha loja", "Lojas", "Séries", "Projeção", "Concentração",
   "Geografia", "Clientes", "Operação", "Publicidade", "Alertas",
 ] as const;
-type Tab = typeof TABS[number];
+type Tab = string;
 
 const Multilojas = () => {
   const navigate = useNavigate();
+  const perfilML = usePerfilMultilojas();
+  const { perfil, escopoRede, podeCarregar, podeConfigurar, temAcesso, lojas, minhasLojas, rotuloPerfil } = perfilML;
+
   const [dados, setDados] = useState<{ pedidos: PedidoML[]; diag: Diagnostico } | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erroBase, setErroBase] = useState<string | null>(null);
+  const [modoLocal, setModoLocal] = useState(false);
+  const [lojaSel, setLojaSel] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("Diretoria");
   const [filtros, setFiltros] = useState<Filtros>({
     lojas: [], ini: "", fim: "", uf: "", logi: "", tipo: "", origem: "todos", cancelados: false,
   });
+
+  /* Carga publicada — o recorte por perfil já vem do RLS; o filtro abaixo é
+   * conveniência de renderização, não fronteira de segurança. */
+  const carregarDoBanco = useCallback(async () => {
+    if (!temAcesso) { setCarregando(false); return; }
+    setCarregando(true); setErroBase(null);
+    try {
+      const [{ pedidos }, cargas] = await Promise.all([
+        carregarPedidos(),
+        listarCargas(perfil === "admin").catch(() => [] as Awaited<ReturnType<typeof listarCargas>>),
+      ]);
+      if (!pedidos.length) { setDados(null); setCarregando(false); return; }
+      const diag = diagnosticoDaBase(pedidos, cargas);
+      setDados({ pedidos, diag });
+      setFiltros((f) => ({ ...f, lojas: [], ini: diag.ini, fim: diag.fim }));
+    } catch (e) {
+      setErroBase(e instanceof Error ? e.message : "Falha ao ler as cargas publicadas.");
+    } finally {
+      setCarregando(false);
+    }
+  }, [temAcesso, perfil]);
+
+  useEffect(() => { if (!perfilML.loading && !modoLocal) carregarDoBanco(); }, [perfilML.loading, modoLocal, carregarDoBanco]);
+
+  /* Ao trocar de perfil ou de loja, o recorte anterior não sobrevive. */
+  useEffect(() => {
+    setFiltros((f) => ({ ...f, lojas: [], uf: "", logi: "", tipo: "", origem: "todos" }));
+  }, [perfil, lojaSel]);
+
+  useEffect(() => {
+    if (!lojaSel) setLojaSel((escopoRede ? lojas[0]?.id : minhasLojas[0]?.id) ?? null);
+  }, [lojas, minhasLojas, escopoRede, lojaSel]);
+
+  const lojasVisiveis = escopoRede ? lojas : minhasLojas;
+  const lojaAtual = lojasVisiveis.find((l) => l.id === lojaSel) || lojasVisiveis[0] || null;
+
+  const TABS = useMemo(() => {
+    const t = TABS_ANALITICAS.filter((x) => (escopoRede ? true : x !== "Lojas"));
+    const extras: string[] = [];
+    if (podeCarregar) extras.push("Central de dados");
+    if (podeConfigurar) extras.push("Cadastro de lojas");
+    return [...t, ...extras];
+  }, [escopoRede, podeCarregar, podeConfigurar]);
+
+  useEffect(() => { if (!TABS.includes(tab)) setTab(TABS[0]); }, [TABS, tab]);
 
   const opcoes = useMemo(() => {
     const ps = dados?.pedidos || [];
@@ -149,23 +201,85 @@ const Multilojas = () => {
     };
   }, [dados, filtros]);
 
+  const Topo = ({ titulo, sub }: { titulo: string; sub?: string }) => (
+    <header className="border-b border-border/40 px-4 py-3 flex items-center gap-3 flex-wrap">
+      <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2"><ArrowLeft className="w-4 h-4" />Voltar</Button>
+      <Store className="w-5 h-5 text-primary" />
+      <div className="min-w-0">
+        <h1 className="text-sm font-semibold truncate">{titulo}</h1>
+        {sub && <p className="text-[11px] text-muted-foreground truncate">{sub}</p>}
+      </div>
+      <span className="ml-auto text-[11px] px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground">{rotuloPerfil}</span>
+    </header>
+  );
+
+  if (perfilML.loading || (carregando && !modoLocal)) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Topo titulo="Multilojas · gestão consolidada de rede" />
+        <div className="py-24 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
+          <Loader2 className="w-6 h-6 animate-spin text-primary" /> Carregando as cargas publicadas…
+        </div>
+      </div>
+    );
+  }
+
+  if (!temAcesso) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Topo titulo="Multilojas" />
+        <div className="py-24 text-center text-xs text-muted-foreground">
+          Esta aba é restrita a Administrador, Consultor e Gestor de Loja Oficial.
+        </div>
+      </div>
+    );
+  }
+
+  const painelAdmin = (
+    <>
+      {tab === "Central de dados" && podeCarregar && (
+        <CentralDados perfilAdmin={perfil === "admin"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
+      )}
+      {tab === "Cadastro de lojas" && podeConfigurar && <CadastroLojas />}
+    </>
+  );
+
   if (!dados) {
     return (
       <div className="min-h-screen bg-background">
-        <header className="border-b border-border/40 px-4 py-3 flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2"><ArrowLeft className="w-4 h-4" />Voltar</Button>
-          <Store className="w-5 h-5 text-primary" />
-          <h1 className="text-sm font-semibold">Multilojas · gestão consolidada de rede</h1>
-        </header>
-        <main className="max-w-3xl mx-auto p-6">
-          <p className="text-xs text-muted-foreground mb-4">
-            Suba o relatório nativo de Vendas do Mercado Livre / Mercado Shops (aba <em>Vendas BR</em>). O painel
-            consolida várias contas de vendedor em uma única visão de rede.
-          </p>
-          <UploadPlanilha onReady={(pedidos, diag) => {
-            setDados({ pedidos, diag });
-            setFiltros((f) => ({ ...f, ini: diag.ini, fim: diag.fim }));
-          }} />
+        <Topo titulo="Multilojas · gestão consolidada de rede" sub={erroBase || "Nenhuma carga publicada"} />
+        <nav className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-border/40">
+          {TABS.filter((t) => t === "Central de dados" || t === "Cadastro de lojas").map((t) => (
+            <button key={t} onClick={() => setTab(t)}
+              className={`px-3 py-1 rounded-md text-[11px] whitespace-nowrap transition-colors ${
+                tab === t ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
+              }`}>{t}</button>
+          ))}
+        </nav>
+        <main className="max-w-5xl mx-auto p-6 space-y-4">
+          {podeCarregar ? (
+            tab === "Cadastro de lojas" ? <CadastroLojas /> : (
+              <CentralDados perfilAdmin={perfil === "admin"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
+            )
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-16">
+              O painel ainda não foi publicado pela equipe de consultoria.
+            </p>
+          )}
+          {podeCarregar && (
+            <div className="rounded-xl border border-border/50 bg-card/40 p-4">
+              <h3 className="text-xs font-semibold mb-2">Análise local (sem publicar)</h3>
+              <p className="text-[11px] text-muted-foreground mb-3">
+                Processa a planilha apenas no seu navegador, sem gravar nada no banco — útil para conferir um arquivo antes de publicá-lo.
+              </p>
+              <UploadPlanilha onReady={(pedidos, diag) => {
+                setModoLocal(true);
+                setDados({ pedidos, diag });
+                setTab("Diretoria");
+                setFiltros((f) => ({ ...f, ini: diag.ini, fim: diag.fim }));
+              }} />
+            </div>
+          )}
         </main>
       </div>
     );
@@ -189,14 +303,19 @@ const Multilojas = () => {
         <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2"><ArrowLeft className="w-4 h-4" />Voltar</Button>
         <Store className="w-5 h-5 text-primary" />
         <div className="min-w-0">
-          <h1 className="text-sm font-semibold truncate">Multilojas · {dados.diag.lojas.length} lojas</h1>
+          <h1 className="text-sm font-semibold truncate">
+            Multilojas · {escopoRede ? `${dados.diag.lojas.length} lojas` : lojaAtual?.nome_publico || "minha loja"}
+          </h1>
           <p className="text-[11px] text-muted-foreground truncate">
-            {fInt(dados.diag.validas)} pedidos · {dados.diag.ini} → {dados.diag.fim} · {dados.diag.arquivo}
+            {fInt(dados.diag.validas)} pedidos · {dados.diag.ini} → {dados.diag.fim} · {modoLocal ? "análise local, não publicada" : dados.diag.arquivo}
           </p>
         </div>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-[11px] px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground">{rotuloPerfil}</span>
           <Button variant="outline" size="sm" className="gap-2" onClick={exportarCsv}><Download className="w-4 h-4" />CSV do recorte</Button>
-          <Button variant="ghost" size="sm" onClick={() => setDados(null)}>Trocar arquivo</Button>
+          {modoLocal && (
+            <Button variant="ghost" size="sm" onClick={() => { setModoLocal(false); setDados(null); }}>Voltar à base publicada</Button>
+          )}
         </div>
       </header>
 
@@ -214,10 +333,21 @@ const Multilojas = () => {
       </nav>
 
       <main className="p-3 space-y-3">
-        {!d.base.length ? <Empty /> : (
+        {painelAdmin}
+        {tab === "Minha loja" && (
+          <MinhaLoja
+            loja={lojaAtual}
+            lojasDisponiveis={lojasVisiveis}
+            onTrocarLoja={setLojaSel}
+            pedidos={d.base}
+            ini={d.ini}
+            fim={d.fim}
+          />
+        )}
+        {!d.base.length ? (tab !== "Minha loja" && tab !== "Central de dados" && tab !== "Cadastro de lojas" ? <Empty /> : null) : (
           <>
             {tab === "Diretoria" && <Diretoria d={d} delta={delta} />}
-            {tab === "Lojas" && <Lojas d={d} />}
+            {tab === "Lojas" && escopoRede && <Lojas d={d} />}
             {tab === "Séries" && <Series d={d} />}
             {tab === "Projeção" && <Projecao d={d} />}
             {tab === "Concentração" && <Concentracao d={d} />}
