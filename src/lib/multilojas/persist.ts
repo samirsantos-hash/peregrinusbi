@@ -95,7 +95,7 @@ export async function publicarCargaVendas(opts: {
       linhas: diag.linhas, validas: diag.validas,
       periodo_ini: diag.ini !== "—" ? diag.ini : null,
       periodo_fim: diag.fim !== "—" ? diag.fim : null,
-      gmv, diagnostico: diag as unknown as Record<string, unknown>,
+      gmv, diagnostico: diag as unknown as never,
     })
     .select("id")
     .single();

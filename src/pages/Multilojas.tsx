@@ -1,8 +1,13 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Store, Download } from "lucide-react";
+import { ArrowLeft, Store, Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import UploadPlanilha from "@/components/multilojas/UploadPlanilha";
+import CentralDados from "@/components/multilojas/CentralDados";
+import CadastroLojas from "@/components/multilojas/CadastroLojas";
+import MinhaLoja from "@/components/multilojas/MinhaLoja";
+import { usePerfilMultilojas } from "@/hooks/multilojas/usePerfilMultilojas";
+import { carregarPedidos, listarCargas, diagnosticoDaBase } from "@/lib/multilojas/persist";
 import FiltersBar, { type Filtros } from "@/components/multilojas/FiltersBar";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
 import type { Diagnostico, PedidoML } from "@/lib/multilojas/parse";

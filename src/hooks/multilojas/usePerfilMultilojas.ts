@@ -19,6 +19,7 @@ export interface LojaOficial {
   segmento: string | null;
   conta_id: string | null;
   vinculo: string | null;
+  vinculo_score: number | null;
   gestor_user_id: string | null;
   ativo: boolean;
 }
