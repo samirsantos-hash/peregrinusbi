@@ -7,6 +7,7 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isGestorLoja, setIsGestorLoja] = useState(false);
   const [isGerente, setIsGerente] = useState(false);
   const [mustChangePassword, setMustChangePassword] = useState(false);
 
@@ -43,6 +44,7 @@ export function useAuth() {
 
       setIsAdmin(rolesResult.data?.some((r) => r.role === "admin") ?? false);
       setIsGerente(rolesResult.data?.some((r) => r.role === "gerente") ?? false);
+      setIsGestorLoja(rolesResult.data?.some((r) => r.role === "gestor_loja") ?? false);
 
       const access = accessResult.data;
       if (access) {
@@ -101,5 +103,5 @@ export function useAuth() {
     return { error: null };
   };
 
-  return { user, session, loading, isAdmin, isGerente, mustChangePassword, signIn, signOut, updatePassword };
+  return { user, session, loading, isAdmin, isGerente, isGestorLoja, mustChangePassword, signIn, signOut, updatePassword };
 }
