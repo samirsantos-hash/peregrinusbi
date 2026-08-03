@@ -1064,6 +1064,323 @@ export type Database = {
           },
         ]
       }
+      multilojas_carga: {
+        Row: {
+          arquivo: string
+          ativa: boolean
+          bytes: number | null
+          created_at: string
+          diagnostico: Json | null
+          enviado_por: string | null
+          fonte_id: string
+          gmv: number | null
+          hash: string
+          id: string
+          linhas: number | null
+          periodo_fim: string | null
+          periodo_ini: string | null
+          responsavel: string | null
+          validas: number | null
+        }
+        Insert: {
+          arquivo: string
+          ativa?: boolean
+          bytes?: number | null
+          created_at?: string
+          diagnostico?: Json | null
+          enviado_por?: string | null
+          fonte_id: string
+          gmv?: number | null
+          hash: string
+          id?: string
+          linhas?: number | null
+          periodo_fim?: string | null
+          periodo_ini?: string | null
+          responsavel?: string | null
+          validas?: number | null
+        }
+        Update: {
+          arquivo?: string
+          ativa?: boolean
+          bytes?: number | null
+          created_at?: string
+          diagnostico?: Json | null
+          enviado_por?: string | null
+          fonte_id?: string
+          gmv?: number | null
+          hash?: string
+          id?: string
+          linhas?: number | null
+          periodo_fim?: string | null
+          periodo_ini?: string | null
+          responsavel?: string | null
+          validas?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multilojas_carga_fonte_id_fkey"
+            columns: ["fonte_id"]
+            isOneToOne: false
+            referencedRelation: "multilojas_fonte"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      multilojas_conta: {
+        Row: {
+          atualizado_em: string
+          cluster: string | null
+          created_at: string
+          cust_id: string
+          meses_programa: number | null
+          nickname: string | null
+          nivel: string | null
+          programa: string | null
+          safra: string | null
+          sub_cluster: string | null
+          uf: string | null
+        }
+        Insert: {
+          atualizado_em?: string
+          cluster?: string | null
+          created_at?: string
+          cust_id: string
+          meses_programa?: number | null
+          nickname?: string | null
+          nivel?: string | null
+          programa?: string | null
+          safra?: string | null
+          sub_cluster?: string | null
+          uf?: string | null
+        }
+        Update: {
+          atualizado_em?: string
+          cluster?: string | null
+          created_at?: string
+          cust_id?: string
+          meses_programa?: number | null
+          nickname?: string | null
+          nivel?: string | null
+          programa?: string | null
+          safra?: string | null
+          sub_cluster?: string | null
+          uf?: string | null
+        }
+        Relationships: []
+      }
+      multilojas_fonte: {
+        Row: {
+          cor: string | null
+          created_at: string
+          descricao: string | null
+          granularidade: string | null
+          id: string
+          rotulo: string
+        }
+        Insert: {
+          cor?: string | null
+          created_at?: string
+          descricao?: string | null
+          granularidade?: string | null
+          id: string
+          rotulo: string
+        }
+        Update: {
+          cor?: string | null
+          created_at?: string
+          descricao?: string | null
+          granularidade?: string | null
+          id?: string
+          rotulo?: string
+        }
+        Relationships: []
+      }
+      multilojas_loja: {
+        Row: {
+          ativo: boolean
+          chave_tecnica: string
+          conta_id: string | null
+          created_at: string
+          gestor_user_id: string | null
+          id: string
+          marca: string | null
+          nome_publico: string
+          segmento: string | null
+          updated_at: string
+          vinculo: string | null
+          vinculo_score: number | null
+        }
+        Insert: {
+          ativo?: boolean
+          chave_tecnica: string
+          conta_id?: string | null
+          created_at?: string
+          gestor_user_id?: string | null
+          id?: string
+          marca?: string | null
+          nome_publico: string
+          segmento?: string | null
+          updated_at?: string
+          vinculo?: string | null
+          vinculo_score?: number | null
+        }
+        Update: {
+          ativo?: boolean
+          chave_tecnica?: string
+          conta_id?: string | null
+          created_at?: string
+          gestor_user_id?: string | null
+          id?: string
+          marca?: string | null
+          nome_publico?: string
+          segmento?: string | null
+          updated_at?: string
+          vinculo?: string | null
+          vinculo_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multilojas_loja_conta_id_fkey"
+            columns: ["conta_id"]
+            isOneToOne: false
+            referencedRelation: "multilojas_conta"
+            referencedColumns: ["cust_id"]
+          },
+        ]
+      }
+      multilojas_pedido: {
+        Row: {
+          acre: number | null
+          ads: boolean | null
+          b2b: boolean | null
+          canal: string | null
+          cancelado: boolean | null
+          carga_id: string
+          cidade: string | null
+          created_at: string
+          desconto: number | null
+          devolvido: boolean | null
+          doc_hash: string | null
+          dt: string
+          estorno: number | null
+          frete_custo: number | null
+          frete_rec: number | null
+          gmv: number | null
+          liquido: number | null
+          logistica: string | null
+          loja_chave: string | null
+          loja_id: string | null
+          mediacao: boolean | null
+          mlb: string
+          nfe_ok: boolean | null
+          nfe_status: string | null
+          pedido_id: string
+          preco: number | null
+          reclamacao: boolean | null
+          sku: string | null
+          status: string | null
+          tarifa: number | null
+          tipo_anuncio: string | null
+          titulo: string | null
+          uf: string | null
+          un: number | null
+        }
+        Insert: {
+          acre?: number | null
+          ads?: boolean | null
+          b2b?: boolean | null
+          canal?: string | null
+          cancelado?: boolean | null
+          carga_id: string
+          cidade?: string | null
+          created_at?: string
+          desconto?: number | null
+          devolvido?: boolean | null
+          doc_hash?: string | null
+          dt: string
+          estorno?: number | null
+          frete_custo?: number | null
+          frete_rec?: number | null
+          gmv?: number | null
+          liquido?: number | null
+          logistica?: string | null
+          loja_chave?: string | null
+          loja_id?: string | null
+          mediacao?: boolean | null
+          mlb?: string
+          nfe_ok?: boolean | null
+          nfe_status?: string | null
+          pedido_id: string
+          preco?: number | null
+          reclamacao?: boolean | null
+          sku?: string | null
+          status?: string | null
+          tarifa?: number | null
+          tipo_anuncio?: string | null
+          titulo?: string | null
+          uf?: string | null
+          un?: number | null
+        }
+        Update: {
+          acre?: number | null
+          ads?: boolean | null
+          b2b?: boolean | null
+          canal?: string | null
+          cancelado?: boolean | null
+          carga_id?: string
+          cidade?: string | null
+          created_at?: string
+          desconto?: number | null
+          devolvido?: boolean | null
+          doc_hash?: string | null
+          dt?: string
+          estorno?: number | null
+          frete_custo?: number | null
+          frete_rec?: number | null
+          gmv?: number | null
+          liquido?: number | null
+          logistica?: string | null
+          loja_chave?: string | null
+          loja_id?: string | null
+          mediacao?: boolean | null
+          mlb?: string
+          nfe_ok?: boolean | null
+          nfe_status?: string | null
+          pedido_id?: string
+          preco?: number | null
+          reclamacao?: boolean | null
+          sku?: string | null
+          status?: string | null
+          tarifa?: number | null
+          tipo_anuncio?: string | null
+          titulo?: string | null
+          uf?: string | null
+          un?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multilojas_pedido_carga_id_fkey"
+            columns: ["carga_id"]
+            isOneToOne: false
+            referencedRelation: "multilojas_carga"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multilojas_pedido_carga_id_fkey"
+            columns: ["carga_id"]
+            isOneToOne: false
+            referencedRelation: "multilojas_carga_publica"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "multilojas_pedido_loja_id_fkey"
+            columns: ["loja_id"]
+            isOneToOne: false
+            referencedRelation: "multilojas_loja"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portfolio_notifications: {
         Row: {
           added_cust_ids: string[]
@@ -1945,6 +2262,56 @@ export type Database = {
       }
     }
     Views: {
+      multilojas_carga_publica: {
+        Row: {
+          ativa: boolean | null
+          created_at: string | null
+          enviado_por: string | null
+          fonte_id: string | null
+          gmv: number | null
+          id: string | null
+          linhas: number | null
+          periodo_fim: string | null
+          periodo_ini: string | null
+          responsavel: string | null
+          validas: number | null
+        }
+        Insert: {
+          ativa?: boolean | null
+          created_at?: string | null
+          enviado_por?: string | null
+          fonte_id?: string | null
+          gmv?: number | null
+          id?: string | null
+          linhas?: number | null
+          periodo_fim?: string | null
+          periodo_ini?: string | null
+          responsavel?: string | null
+          validas?: number | null
+        }
+        Update: {
+          ativa?: boolean | null
+          created_at?: string | null
+          enviado_por?: string | null
+          fonte_id?: string | null
+          gmv?: number | null
+          id?: string | null
+          linhas?: number | null
+          periodo_fim?: string | null
+          periodo_ini?: string | null
+          responsavel?: string | null
+          validas?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multilojas_carga_fonte_id_fkey"
+            columns: ["fonte_id"]
+            isOneToOne: false
+            referencedRelation: "multilojas_fonte"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_seller_bridge: {
         Row: {
           cust_id_bigint: number | null
@@ -2011,6 +2378,8 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      ml_lojas_do_usuario: { Args: never; Returns: string[] }
+      ml_pode_carregar: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user" | "gerente" | "gestor_loja"
