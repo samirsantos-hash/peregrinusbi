@@ -128,12 +128,26 @@ Deno.serve(async (req) => {
       console.log(`Creating user ${email} with role ${userRole}, temp password length: ${tempPassword.length}`);
 
       // Create auth user
-      const { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
+      let { data: newUser, error: createErr } = await adminClient.auth.admin.createUser({
         email,
         password: tempPassword,
         email_confirm: true,
         user_metadata: { email },
       });
+
+      // If the e-mail already exists, reuse the account: reset password + re-apply access
+      let reused = false;
+      if (createErr && createErr.message.includes("already been registered")) {
+        const { data: existing } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
+        const found = existing?.users?.find(
+          (u: any) => (u.email || "").toLowerCase() === String(email).toLowerCase()
+        );
+        if (found) {
+          reused = true;
+          createErr = null as any;
+          newUser = { user: found } as any;
+        }
+      }
 
       if (createErr) {
         console.error("Create user error:", createErr.message);
@@ -143,7 +157,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      console.log(`User created: ${newUser.user.id}, setting password in auth...`);
+      console.log(`User ${reused ? "reused" : "created"}: ${newUser.user.id}, setting password in auth...`);
 
       // Force-set the password again to ensure it matches exactly
       const { error: updatePwErr } = await adminClient.auth.admin.updateUserById(newUser.user.id, {
@@ -154,26 +168,36 @@ Deno.serve(async (req) => {
         console.error("Password update error:", updatePwErr.message);
       }
 
-      // Add user role
-      await adminClient.from("user_roles").insert({
-        user_id: newUser.user.id,
-        role: userRole,
-      });
+      // Add user role (ignore duplicates)
+      await adminClient
+        .from("user_roles")
+        .upsert({ user_id: newUser.user.id, role: userRole }, { onConflict: "user_id,role" });
 
-      // Create access control entry
-      await adminClient.from("user_access_control").insert({
+      // Create/update access control entry
+      const accessRow = {
         user_id: newUser.user.id,
         user_email: email,
         cnpj: cnpj || null,
         allowed_cust_ids: allowedCustIds,
         temp_password_expires_at: expiresAt,
         must_change_password: true,
-      });
+      };
+      const { data: existingAccess } = await adminClient
+        .from("user_access_control")
+        .select("id")
+        .eq("user_id", newUser.user.id)
+        .maybeSingle();
+
+      if (existingAccess) {
+        await adminClient.from("user_access_control").update(accessRow).eq("id", existingAccess.id);
+      } else {
+        await adminClient.from("user_access_control").insert(accessRow);
+      }
 
       console.log(`User ${email} setup complete. Password stored in DB matches Auth.`);
 
       return new Response(
-        JSON.stringify({ success: true, tempPassword, userId: newUser.user.id }),
+        JSON.stringify({ success: true, tempPassword, userId: newUser.user.id, reused }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
