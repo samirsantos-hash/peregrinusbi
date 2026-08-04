@@ -135,16 +135,34 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
           password: newPassword.trim() || undefined,
         },
       });
-      if (error) throw new Error(error.message);
+      if (error) {
+        let detail = error.message;
+        try {
+          const ctx = (error as any).context;
+          if (ctx && typeof ctx.json === "function") {
+            const body = await ctx.json();
+            if (body?.error) detail = body.error;
+          }
+        } catch { /* keep default message */ }
+        throw new Error(detail);
+      }
       if (data?.error) throw new Error(data.error);
 
       setCreatedCreds({ email: newEmail.trim(), password: data.tempPassword });
-      setUsers((prev) => [...prev, { userId: data.userId, email: newEmail.trim() }]);
+      setUsers((prev) =>
+        prev.some((u) => u.userId === data.userId)
+          ? prev
+          : [...prev, { userId: data.userId, email: newEmail.trim() }]
+      );
       setAssignedTo(data.userId);
       setNewEmail("");
       setNewPassword("");
       setShowCreate(false);
-      toast({ title: "Usuário criado e designado à carteira" });
+      toast({
+        title: data.reused
+          ? "Usuário já existia: senha e acesso atualizados"
+          : "Usuário criado e designado à carteira",
+      });
     } catch (err: any) {
       toast({ title: "Erro ao criar usuário", description: err.message, variant: "destructive" });
     }
