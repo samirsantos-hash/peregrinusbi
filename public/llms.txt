@@ -1,0 +1,10 @@
+# Peregrinus Business Intelligence
+
+> Painel de business intelligence e gestão de performance para sellers do Mercado Livre: KPIs, diagnósticos, carteiras e projeções.
+
+Peregrinus é uma aplicação privada de análise de performance de lojas em marketplaces. As áreas analíticas exigem autenticação.
+
+## Pages
+
+- [Início](/): Visão geral do painel de performance (requer login).
+- [Acesso](/auth): Página de login para usuários do painel.

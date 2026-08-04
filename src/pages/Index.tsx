@@ -81,6 +81,7 @@ const SoundToggleButton = () => {
           variant="ghost"
           size="icon"
           className="h-9 w-9"
+          aria-label={soundEnabled ? "Desativar sons do painel" : "Ativar sons do painel"}
           onClick={() => {
             toggleSound();
             if (!soundEnabled) playClick(); // Play sound when enabling
@@ -355,7 +356,7 @@ const Index = () => {
             <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-neon-blue shrink-0" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
             <div className="min-w-0">
               <h1 className="text-sm sm:text-xl font-bold tracking-tight truncate">
-                <span className="hidden sm:inline">Peregrinus Business Intelligence</span>
+                <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
                 <span className="sm:hidden">Peregrinus BI</span>
               </h1>
               <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
