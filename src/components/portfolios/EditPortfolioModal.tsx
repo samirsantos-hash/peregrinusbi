@@ -300,12 +300,28 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Input
-                    type="text"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Senha de acesso (deixe vazio para gerar automática)"
-                  />
+                  <Label className="text-xs">Senha provisória</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Digite ou gere uma senha"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+                        let p = "";
+                        for (let i = 0; i < 10; i++) p += chars[Math.floor(Math.random() * chars.length)];
+                        setNewPassword(p);
+                      }}
+                    >
+                      Gerar
+                    </Button>
+                  </div>
                   <p className="text-[11px] text-muted-foreground">Mínimo 8 caracteres. Se vazio, geramos uma senha temporária de 10 caracteres.</p>
                 </div>
                 <p className="text-[11px] text-muted-foreground">
@@ -319,16 +335,21 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
             )}
             {createdCreds && (
               <div className="border border-primary/40 bg-primary/5 rounded-md p-3 space-y-1">
-                <p className="text-xs font-medium">Senha de acesso de {createdCreds.email}</p>
+                <p className="text-xs font-medium">Dados de acesso</p>
                 <div className="flex items-center gap-2">
-                  <code className="text-sm font-mono">{createdCreds.password}</code>
+                  <code className="text-sm font-mono">Login: {createdCreds.email}</code>
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-sm font-mono">Senha provisória: {createdCreds.password}</code>
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-7 w-7"
                     onClick={() => {
-                      navigator.clipboard.writeText(createdCreds.password);
-                      toast({ title: "Senha copiada" });
+                      navigator.clipboard.writeText(
+                        `Login: ${createdCreds.email}\nSenha provisória: ${createdCreds.password}`
+                      );
+                      toast({ title: "Login e senha copiados" });
                     }}
                   >
                     <Copy className="w-3.5 h-3.5" />
