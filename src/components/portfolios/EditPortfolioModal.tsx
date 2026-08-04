@@ -3,8 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Pencil, Search, X, UserCog, Plus, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Search, X, UserCog, Plus, Trash2, UserPlus, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,6 +34,12 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
   const [searchSeller, setSearchSeller] = useState("");
   const [users, setUsers] = useState<UserOption[]>([]);
   const [saving, setSaving] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [newRole, setNewRole] = useState<"user" | "gerente" | "admin">("user");
+  const [creating, setCreating] = useState(false);
+  const [createdCreds, setCreatedCreds] = useState<{ email: string; password: string } | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!portfolio) return;
@@ -87,6 +94,57 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
   };
 
   const handleSave = async () => {
+    if (!portfolio || !name.trim() || selectedCustIds.length === 0) return;
+    setSaving(true);
+    const { error } = await updatePortfolio(portfolio.id, {
+      name: name.trim(),
+      cust_ids: selectedCustIds,
+      assigned_to: assignedTo || null,
+      seller_aliases: aliases,
+    });
+    setSaving(false);
+    if (!error) {
+      onOpenChange(false);
+      onSaved?.();
+    }
+  };
+
+  const handleCreateUser = async () => {
+    if (!newEmail.trim()) {
+      toast({ title: "Informe o e-mail", variant: "destructive" });
+      return;
+    }
+    if (newRole !== "admin" && selectedCustIds.length === 0) {
+      toast({ title: "A carteira precisa ter ao menos uma loja", variant: "destructive" });
+      return;
+    }
+    setCreating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: {
+          action: "create_user",
+          email: newEmail.trim(),
+          cnpj: null,
+          allowedCustIds: newRole === "admin" ? [] : selectedCustIds,
+          role: newRole,
+        },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+
+      setCreatedCreds({ email: newEmail.trim(), password: data.tempPassword });
+      setUsers((prev) => [...prev, { userId: data.userId, email: newEmail.trim() }]);
+      setAssignedTo(data.userId);
+      setNewEmail("");
+      setShowCreate(false);
+      toast({ title: "Usuário criado e designado à carteira" });
+    } catch (err: any) {
+      toast({ title: "Erro ao criar usuário", description: err.message, variant: "destructive" });
+    }
+    setCreating(false);
+  };
+
+  const handleSaveLegacy = async () => {
     if (!portfolio || !name.trim() || selectedCustIds.length === 0) return;
     setSaving(true);
     const { error } = await updatePortfolio(portfolio.id, {
@@ -203,6 +261,64 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
                 ))}
               </SelectContent>
             </Select>
+            {!showCreate && (
+              <Button type="button" variant="outline" size="sm" onClick={() => setShowCreate(true)}>
+                <UserPlus className="w-4 h-4 mr-2" />Criar novo usuário para esta carteira
+              </Button>
+            )}
+            {showCreate && (
+              <div className="border border-border/50 rounded-md p-3 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Novo usuário</p>
+                  <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowCreate(false)}>
+                    <X className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  <Input
+                    type="email"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    placeholder="email@empresa.com.br"
+                  />
+                  <Select value={newRole} onValueChange={(v) => setNewRole(v as any)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">Consultor</SelectItem>
+                      <SelectItem value="gerente">Gerente</SelectItem>
+                      <SelectItem value="admin">Admin</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  O usuário receberá acesso às {selectedCustIds.length} loja(s) desta carteira e será designado como responsável.
+                </p>
+                <Button size="sm" onClick={handleCreateUser} disabled={creating || !newEmail.trim()}>
+                  {creating && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+                  Criar usuário
+                </Button>
+              </div>
+            )}
+            {createdCreds && (
+              <div className="border border-primary/40 bg-primary/5 rounded-md p-3 space-y-1">
+                <p className="text-xs font-medium">Senha temporária de {createdCreds.email}</p>
+                <div className="flex items-center gap-2">
+                  <code className="text-sm font-mono">{createdCreds.password}</code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7"
+                    onClick={() => {
+                      navigator.clipboard.writeText(createdCreds.password);
+                      toast({ title: "Senha copiada" });
+                    }}
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+                <p className="text-[11px] text-muted-foreground">Válida por 48h. Salve as alterações da carteira para concluir.</p>
+              </div>
+            )}
           </div>
         </div>
 
