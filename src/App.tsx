@@ -24,6 +24,7 @@ import ProjecaoCrescimento from "./pages/ProjecaoCrescimento";
 import AnaliseMLB from "./pages/AnaliseMLB";
 import Carteira from "./pages/Carteira";
 import Multilojas from "./pages/Multilojas";
+import ProgramasLoja from "./pages/ProgramasLoja";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 
 const queryClient = new QueryClient();
@@ -73,6 +74,7 @@ const AppRoutes = () => {
       <Route path="/analise-mlb" element={<ProtectedRoute><AnaliseMLB /></ProtectedRoute>} />
       <Route path="/carteira" element={<ProtectedRoute><Carteira /></ProtectedRoute>} />
       <Route path="/multilojas" element={<ProtectedRoute><Multilojas /></ProtectedRoute>} />
+      <Route path="/lojas/:lojaId/programas" element={<ProtectedRoute><ProgramasLoja /></ProtectedRoute>} />
       <Route path="/no-access" element={user ? <NoAccess /> : <Navigate to="/auth" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
