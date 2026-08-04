@@ -359,11 +359,15 @@ const Index = () => {
                 <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
                 <span className="sm:hidden">Peregrinus BI</span>
               </h1>
-              <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                Gestão de Performance · Mercado Livre
-                {sellersFetched && hasRealData && <span className="ml-2 text-emerald">● Dados reais</span>}
-                {sellersFetched && !hasRealData && isAdmin && <span className="ml-2 text-warning">● Dados de demonstração</span>}
-              </p>
+              {sellersFetched && (hasRealData || isAdmin) && (
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+                  {hasRealData ? (
+                    <span className="text-emerald">● Dados reais</span>
+                  ) : (
+                    <span className="text-warning">● Dados de demonstração</span>
+                  )}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
