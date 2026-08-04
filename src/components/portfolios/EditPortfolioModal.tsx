@@ -37,6 +37,7 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
   const [showCreate, setShowCreate] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [newRole, setNewRole] = useState<"user" | "gerente" | "admin">("user");
+  const [newPassword, setNewPassword] = useState("");
   const [creating, setCreating] = useState(false);
   const [createdCreds, setCreatedCreds] = useState<{ email: string; password: string } | null>(null);
   const { toast } = useToast();
@@ -118,6 +119,10 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
       toast({ title: "A carteira precisa ter ao menos uma loja", variant: "destructive" });
       return;
     }
+    if (newPassword.trim() && newPassword.trim().length < 8) {
+      toast({ title: "A senha deve ter no mínimo 8 caracteres", variant: "destructive" });
+      return;
+    }
     setCreating(true);
     try {
       const { data, error } = await supabase.functions.invoke("admin-users", {
@@ -127,6 +132,7 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
           cnpj: null,
           allowedCustIds: newRole === "admin" ? [] : selectedCustIds,
           role: newRole,
+          password: newPassword.trim() || undefined,
         },
       });
       if (error) throw new Error(error.message);
@@ -136,6 +142,7 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
       setUsers((prev) => [...prev, { userId: data.userId, email: newEmail.trim() }]);
       setAssignedTo(data.userId);
       setNewEmail("");
+      setNewPassword("");
       setShowCreate(false);
       toast({ title: "Usuário criado e designado à carteira" });
     } catch (err: any) {
@@ -274,6 +281,15 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
                     </SelectContent>
                   </Select>
                 </div>
+                <div className="space-y-1">
+                  <Input
+                    type="text"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Senha de acesso (deixe vazio para gerar automática)"
+                  />
+                  <p className="text-[11px] text-muted-foreground">Mínimo 8 caracteres. Se vazio, geramos uma senha temporária de 10 caracteres.</p>
+                </div>
                 <p className="text-[11px] text-muted-foreground">
                   O usuário receberá acesso às {selectedCustIds.length} loja(s) desta carteira e será designado como responsável.
                 </p>
@@ -285,7 +301,7 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
             )}
             {createdCreds && (
               <div className="border border-primary/40 bg-primary/5 rounded-md p-3 space-y-1">
-                <p className="text-xs font-medium">Senha temporária de {createdCreds.email}</p>
+                <p className="text-xs font-medium">Senha de acesso de {createdCreds.email}</p>
                 <div className="flex items-center gap-2">
                   <code className="text-sm font-mono">{createdCreds.password}</code>
                   <Button
