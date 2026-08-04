@@ -112,10 +112,17 @@ Deno.serve(async (req) => {
     }
 
     if (action === "create_user") {
-      const { email, cnpj, allowedCustIds, role } = body;
+      const { email, cnpj, allowedCustIds, role, password } = body;
       const userRole = ["admin", "gerente"].includes(role) ? role : "user";
 
-      const tempPassword = generateTempPassword();
+      const customPassword = typeof password === "string" ? password.trim() : "";
+      if (customPassword && customPassword.length < 8) {
+        return new Response(JSON.stringify({ error: "A senha deve ter no mínimo 8 caracteres." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const tempPassword = customPassword || generateTempPassword();
       const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
       console.log(`Creating user ${email} with role ${userRole}, temp password length: ${tempPassword.length}`);
