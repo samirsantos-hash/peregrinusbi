@@ -144,22 +144,6 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
     setCreating(false);
   };
 
-  const handleSaveLegacy = async () => {
-    if (!portfolio || !name.trim() || selectedCustIds.length === 0) return;
-    setSaving(true);
-    const { error } = await updatePortfolio(portfolio.id, {
-      name: name.trim(),
-      cust_ids: selectedCustIds,
-      assigned_to: assignedTo || null,
-      seller_aliases: aliases,
-    });
-    setSaving(false);
-    if (!error) {
-      onOpenChange(false);
-      onSaved?.();
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
