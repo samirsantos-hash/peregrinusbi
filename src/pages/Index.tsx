@@ -81,6 +81,7 @@ const SoundToggleButton = () => {
           variant="ghost"
           size="icon"
           className="h-9 w-9"
+          aria-label={soundEnabled ? "Desativar sons do painel" : "Ativar sons do painel"}
           onClick={() => {
             toggleSound();
             if (!soundEnabled) playClick(); // Play sound when enabling

@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://peregrinus-com-br.lovable.app/sitemap.xml

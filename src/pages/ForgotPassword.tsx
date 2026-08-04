@@ -53,7 +53,7 @@ const ForgotPassword = () => {
       >
         <div className="text-center space-y-2">
           <Mail className="w-8 h-8 text-primary mx-auto" />
-          <h1 className="text-xl font-bold">Recuperar Senha</h1>
+          <h1 className="text-xl font-bold">Ecom Peregrinus — Recuperar Senha</h1>
           <p className="text-xs text-muted-foreground">
             {sent
               ? "Verifique sua caixa de entrada para o link de redefinição."
