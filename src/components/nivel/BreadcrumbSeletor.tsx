@@ -44,7 +44,7 @@ function useIrmaos(cfg: SegmentoBreadcrumb["irmaos"], aberto: boolean) {
       }
       if (cfg.tipo === "lojas") {
         const q = supabase.from("sellers").select("id, nickname, grupo_id").order("nickname");
-        const { data } = cfg.grupoId && cfg.grupoId !== "sem-grupo" ? await q.eq("grupo_id", cfg.grupoId) : await q;
+        const { data } = cfg.grupoId ? await q.eq("grupo_id", cfg.grupoId) : await q;
         const lojas = data || [];
         const { data: kpis } = await supabase
           .from("sellers_kpi")

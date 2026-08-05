@@ -31,6 +31,7 @@ import N3Programas from "./pages/nivel/N3Programas";
 import N4Categoria from "./pages/nivel/N4Categoria";
 import N5Anuncio from "./pages/nivel/N5Anuncio";
 import GuardaNivel from "./components/nivel/GuardaNivel";
+import EntradaPorPerfil from "./components/nivel/EntradaPorPerfil";
 import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 
@@ -73,7 +74,7 @@ const AppRoutes = () => {
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/setup" element={<Setup />} />
       <Route path="/change-password" element={user ? <ChangePassword /> : <Navigate to="/auth" replace />} />
-      <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+      <Route path="/" element={<ProtectedRoute><EntradaPorPerfil><Index /></EntradaPorPerfil></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
       <Route path="/cpp" element={<ProtectedRoute><CppDashboard /></ProtectedRoute>} />
       <Route path="/gestao-carteira" element={<ProtectedRoute><GestaoCarteira /></ProtectedRoute>} />
