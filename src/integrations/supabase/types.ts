@@ -902,6 +902,36 @@ export type Database = {
         }
         Relationships: []
       }
+      grupos: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          descricao: string | null
+          dono_user_id: string | null
+          id: string
+          nome: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          dono_user_id?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          descricao?: string | null
+          dono_user_id?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ingest_log: {
         Row: {
           errors_json: Json | null
@@ -1693,6 +1723,7 @@ export type Database = {
           created_at: string
           cus_state: string | null
           cust_id: string
+          grupo_id: string | null
           id: string
           nickname: string
           sub_cluster_seller: string | null
@@ -1703,6 +1734,7 @@ export type Database = {
           created_at?: string
           cus_state?: string | null
           cust_id: string
+          grupo_id?: string | null
           id?: string
           nickname: string
           sub_cluster_seller?: string | null
@@ -1713,12 +1745,21 @@ export type Database = {
           created_at?: string
           cus_state?: string | null
           cust_id?: string
+          grupo_id?: string | null
           id?: string
           nickname?: string
           sub_cluster_seller?: string | null
           vertical_dominant?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "sellers_grupo_id_fkey"
+            columns: ["grupo_id"]
+            isOneToOne: false
+            referencedRelation: "grupos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sellers_kpi: {
         Row: {
@@ -2370,6 +2411,8 @@ export type Database = {
           source: string
         }[]
       }
+      get_meus_grupos: { Args: never; Returns: string[] }
+      get_perfil: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
