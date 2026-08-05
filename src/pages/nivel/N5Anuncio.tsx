@@ -2,7 +2,6 @@ import { useParams } from "react-router-dom";
 import NivelLayout from "@/components/nivel/NivelLayout";
 import ListaFilhos from "@/components/nivel/ListaFilhos";
 import NavegacaoLateral from "@/components/nivel/NavegacaoLateral";
-import MlbLink from "@/components/common/MlbLink";
 import { useNivel4, useNivel5 } from "@/hooks/nivel/useNivelDados";
 import { useTrilha } from "@/hooks/nivel/useTrilha";
 import { useContextoNavegacao } from "@/contexts/ContextoNavegacao";
@@ -26,7 +25,14 @@ export default function N5Anuncio() {
       breadcrumb={trilha}
       acoesTopo={
         <div className="flex items-center gap-2">
-          <MlbLink mlb={mlb} />
+          <a
+            href={`https://www.mercadolivre.com.br/anuncio/${mlb}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary hover:underline"
+          >
+            Abrir no Mercado Livre
+          </a>
           <NavegacaoLateral anterior={anterior} proximo={proximo} />
         </div>
       }

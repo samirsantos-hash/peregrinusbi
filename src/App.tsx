@@ -24,7 +24,14 @@ import ProjecaoCrescimento from "./pages/ProjecaoCrescimento";
 import AnaliseMLB from "./pages/AnaliseMLB";
 import Carteira from "./pages/Carteira";
 import Multilojas from "./pages/Multilojas";
-import ProgramasLoja from "./pages/ProgramasLoja";
+import N0Carteira from "./pages/nivel/N0Carteira";
+import N1Grupo from "./pages/nivel/N1Grupo";
+import N2Loja from "./pages/nivel/N2Loja";
+import N3Programas from "./pages/nivel/N3Programas";
+import N4Categoria from "./pages/nivel/N4Categoria";
+import N5Anuncio from "./pages/nivel/N5Anuncio";
+import GuardaNivel from "./components/nivel/GuardaNivel";
+import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 
 const queryClient = new QueryClient();
@@ -72,9 +79,14 @@ const AppRoutes = () => {
       <Route path="/gestao-carteira" element={<ProtectedRoute><GestaoCarteira /></ProtectedRoute>} />
       <Route path="/projecao-crescimento" element={<ProtectedRoute><ProjecaoCrescimento /></ProtectedRoute>} />
       <Route path="/analise-mlb" element={<ProtectedRoute><AnaliseMLB /></ProtectedRoute>} />
-      <Route path="/carteira" element={<ProtectedRoute><Carteira /></ProtectedRoute>} />
+      <Route path="/carteira-dados" element={<ProtectedRoute><Carteira /></ProtectedRoute>} />
+      <Route path="/carteira" element={<ProtectedRoute><GuardaNivel nivel={0}><N0Carteira /></GuardaNivel></ProtectedRoute>} />
+      <Route path="/grupos/:grupoId" element={<ProtectedRoute><GuardaNivel nivel={1}><N1Grupo /></GuardaNivel></ProtectedRoute>} />
+      <Route path="/lojas/:lojaId" element={<ProtectedRoute><GuardaNivel nivel={2}><N2Loja /></GuardaNivel></ProtectedRoute>} />
+      <Route path="/lojas/:lojaId/programas/:programaId/categorias/:categoriaId" element={<ProtectedRoute><GuardaNivel nivel={4}><N4Categoria /></GuardaNivel></ProtectedRoute>} />
+      <Route path="/lojas/:lojaId/anuncios/:mlb" element={<ProtectedRoute><GuardaNivel nivel={5}><N5Anuncio /></GuardaNivel></ProtectedRoute>} />
       <Route path="/multilojas" element={<ProtectedRoute><Multilojas /></ProtectedRoute>} />
-      <Route path="/lojas/:lojaId/programas" element={<ProtectedRoute><ProgramasLoja /></ProtectedRoute>} />
+      <Route path="/lojas/:lojaId/programas" element={<ProtectedRoute><GuardaNivel nivel={3}><N3Programas /></GuardaNivel></ProtectedRoute>} />
       <Route path="/no-access" element={user ? <NoAccess /> : <Navigate to="/auth" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
@@ -90,8 +102,10 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <AppRoutes />
-            <NotificationsBell />
+            <ContextoNavegacaoProvider>
+              <AppRoutes />
+              <NotificationsBell />
+            </ContextoNavegacaoProvider>
           </BrowserRouter>
         </JuniorModeProvider>
         </ThemeProvider>
