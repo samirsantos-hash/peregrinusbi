@@ -93,8 +93,16 @@ export function useNivel0() {
       const itens: ItemFilho[] = (grupos || []).map((g) =>
         construir(g.id, g.nome, todasLojas.filter((l) => l.grupo_id === g.id)),
       );
-      const semGrupo = todasLojas.filter((l) => !l.grupo_id);
-      if (semGrupo.length) itens.push(construir("sem-grupo", "Lojas sem grupo", semGrupo));
+      // Grupo ausente é ausência de dado: a loja entra direto na lista do L0,
+      // sem nó de grupo inventado.
+      for (const l of todasLojas.filter((x) => !x.grupo_id)) {
+        const item = construir(l.id, l.nickname || "—", [l]);
+        itens.push({
+          ...item,
+          acao: item.status === "critico" ? "Diagnosticar loja" : "Abrir loja",
+          destino: `/lojas/${l.id}`,
+        });
+      }
 
       const lojasEmRisco = todasLojas.filter((l) => {
         const ag = porLoja.get(l.id);
@@ -128,12 +136,8 @@ export function useNivel1(grupoId: string) {
     enabled: !!grupoId,
     queryFn: async () => {
       const [{ data: grupo }, lojasRes] = await Promise.all([
-        grupoId === "sem-grupo"
-          ? Promise.resolve({ data: { id: "sem-grupo", nome: "Lojas sem grupo" } as any })
-          : supabase.from("grupos").select("id, nome").eq("id", grupoId).maybeSingle(),
-        grupoId === "sem-grupo"
-          ? supabase.from("sellers").select("id, nickname, grupo_id").is("grupo_id", null).order("nickname")
-          : supabase.from("sellers").select("id, nickname, grupo_id").eq("grupo_id", grupoId).order("nickname"),
+        supabase.from("grupos").select("id, nome").eq("id", grupoId).maybeSingle(),
+        supabase.from("sellers").select("id, nickname, grupo_id").eq("grupo_id", grupoId).order("nickname"),
       ]);
       const lojas = lojasRes.data || [];
       const kpis = await carregarKpis(lojas.map((l) => l.id), ini, fim);

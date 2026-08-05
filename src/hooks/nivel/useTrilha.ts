@@ -24,9 +24,10 @@ export function useTrilha({ lojaId, grupoId, programaId, categoriaId, mlb }: Arg
           .maybeSingle();
         loja = (data as any) ?? null;
       }
-      const gid = grupoId ?? loja?.grupo_id ?? (lojaId ? "sem-grupo" : undefined);
-      let grupoNome = gid === "sem-grupo" ? "Lojas sem grupo" : null;
-      if (gid && gid !== "sem-grupo") {
+      // Loja sem grupo: o segmento simplesmente não existe no breadcrumb.
+      const gid = grupoId ?? loja?.grupo_id ?? undefined;
+      let grupoNome: string | null = null;
+      if (gid) {
         const { data } = await supabase.from("grupos").select("nome").eq("id", gid).maybeSingle();
         grupoNome = data?.nome ?? "Grupo";
       }
