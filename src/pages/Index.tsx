@@ -370,23 +370,24 @@ const Index = () => {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
-            {/* Sound toggle */}
+          <div className="flex flex-1 items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
+            {/* 1 — Tema: Modo Claro / Modo Noire */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={toggleTheme}
+              className="gap-2 px-2 sm:px-3"
+              title={theme === "dark" ? "Alternar para Modo Claro" : "Alternar para Modo Noire"}
+              aria-label="Alternar tema"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4 text-neon-blue" /> : <Moon className="w-4 h-4 text-neon-blue" />}
+              <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Noire"}</span>
+            </Button>
             <SoundToggleButton />
             <Button variant="outline" size="sm" onClick={() => navigate("/projecao-crescimento")} className="gap-2 relative px-2 sm:px-3">
               <TrendingUp className="w-4 h-4" />
               <span className="hidden sm:inline">Projeção</span>
               <NewBadge featureKey="projecao_v1" tooltip="Novo: forecast, decomposição de crescimento e alertas de sustentabilidade" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleTheme}
-              className="h-9 w-9"
-              title={theme === "dark" ? "Alternar para modo claro" : "Alternar para modo escuro"}
-              aria-label="Alternar tema"
-            >
-              {theme === "dark" ? <Sun className="w-4 h-4 text-neon-blue" /> : <Moon className="w-4 h-4 text-neon-blue" />}
             </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/analise-mlb")} className="gap-2 px-2 sm:px-3">
               <Search className="w-4 h-4" />
@@ -409,7 +410,7 @@ const Index = () => {
                 <span className="hidden sm:inline">{isGerente && !isAdmin ? "Carteiras" : "Admin"}</span>
               </Button>
             }
-            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 px-2 sm:px-3">
+            <Button variant="ghost" size="sm" onClick={signOut} className="gap-2 px-2 sm:px-3 ml-auto sm:ml-2">
               <LogOut className="w-4 h-4" />
               <span className="hidden sm:inline">Sair</span>
             </Button>
