@@ -33,6 +33,7 @@ import N5Anuncio from "./pages/nivel/N5Anuncio";
 import GuardaNivel from "./components/nivel/GuardaNivel";
 import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
+import RodapeInstitucional from "./components/RodapeInstitucional";
 
 const queryClient = new QueryClient();
 
@@ -52,7 +53,12 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   if (mustChangePassword) return <Navigate to="/change-password" replace />;
   if (adminOnly && !isAdmin && !isGerente) return <Navigate to="/" replace />;
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <RodapeInstitucional />
+    </>
+  );
 }
 
 const AppRoutes = () => {

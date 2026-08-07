@@ -160,7 +160,7 @@ export default function NivelLayout({
       </main>
 
       {/* Zona 5 — faixa de confiança */}
-      <div className="sticky bottom-0 z-20 border-t border-border bg-background/95 backdrop-blur px-4 md:px-6 py-2 text-[11px] text-muted-foreground">
+      <div className="faixa-confianca sticky bottom-0 z-20 border-t border-border bg-background/95 backdrop-blur px-4 md:px-6 py-2 text-[11px] text-muted-foreground">
         {confianca}
       </div>
     </div>
