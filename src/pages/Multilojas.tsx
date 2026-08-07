@@ -209,10 +209,15 @@ const Multilojas = () => {
     const prev = aplicarFiltros(dados.pedidos, prevIni, prevFim, filtros.cancelados);
     const prevCanc = aplicarFiltros(dados.pedidos, prevIni, prevFim, true).filter((p) => p.canc);
 
+    /* Série completa da base (ignora só o recorte de datas) — usada na
+     * comparação mês a mês, que precisa de todos os meses disponíveis. */
+    const baseTotal = aplicarFiltros(dados.pedidos, dados.diag.ini, dados.diag.fim, filtros.cancelados);
+
     return {
       ini, fim, dias, base, canc, prev,
       a: agregar(base, canc), p: agregar(prev, prevCanc),
       serie: serieDiaria(base, ini, fim),
+      serieTotal: serieDiaria(baseTotal, dados.diag.ini, dados.diag.fim),
     };
   }, [dados, filtros]);
 
