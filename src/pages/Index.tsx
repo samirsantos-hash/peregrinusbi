@@ -620,6 +620,8 @@ const Index = () => {
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>
+                </div>
+              </div>
             </Tabs>
           </>
         }
