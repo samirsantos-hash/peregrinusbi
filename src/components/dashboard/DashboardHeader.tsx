@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ const DashboardHeader = ({
   onPeriodChange,
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
-  const [activePeriod, setActivePeriod] = useState<string>("q1");
+  const [activePeriod, setActivePeriod] = useState<string>("");
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
   const { playClick } = useSoundFeedback();
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
@@ -89,24 +89,6 @@ const DashboardHeader = ({
     const days = differenceInDays(anchor, min);
     return { anchorDate: anchor, minDate: min, availableDays: days };
   }, [allKpis]);
-
-  // Warning when selected period exceeds available data
-  const periodWarning = useMemo(() => {
-    if (activePeriod === "custom" || activePeriod === "all") return null;
-    const qMatch = activePeriod.match(/^q(\d)$/);
-    if (qMatch) {
-      const qNum = parseInt(qMatch[1], 10);
-      const startMonth = (qNum - 1) * 3 + 1;
-      const endMonth = qNum * 3;
-      const hasData = allKpis.some((k: any) => {
-        if (!k.date) return false;
-        const m = parseInt(k.date.split("-")[1], 10);
-        return m >= startMonth && m <= endMonth;
-      });
-      if (!hasData) return `Sem dados disponíveis para ${activePeriod.toUpperCase()}`;
-    }
-    return null;
-  }, [activePeriod, allKpis]);
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
@@ -148,6 +130,9 @@ const DashboardHeader = ({
   const clampedUplift = Math.max(-0.5, Math.min(2, avgUplift));
   const totalGmv = filteredKpis.reduce((s, k) => s + k.gmv, 0);
   const dailyGmv = rangeDays > 0 ? totalGmv / rangeDays : 0;
+
+  // Sem base de cálculo → exibir "—" em vez de 0,0%
+  const temBaseProjecao = validUplifts.length > 0 && totalGmv > 0;
 
   const projections = [
     { days: 7, value: dailyGmv * 7 * (1 + clampedUplift) },
