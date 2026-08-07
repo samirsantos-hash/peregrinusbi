@@ -10,6 +10,7 @@ import { usePerfilMultilojas } from "@/hooks/multilojas/usePerfilMultilojas";
 import { carregarPedidos, listarCargas, diagnosticoDaBase } from "@/lib/multilojas/persist";
 import FiltersBar, { type Filtros } from "@/components/multilojas/FiltersBar";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
+import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
 import type { Diagnostico, PedidoML } from "@/lib/multilojas/parse";
 import { rangeDias } from "@/lib/multilojas/parse";
 import {
