@@ -46,7 +46,7 @@ export default function PockGauge({ valor, rotulo, fonte }: Props) {
 
   return (
     <div className="flex flex-col items-center text-center gap-1.5 min-w-0">
-      <div className="relative w-[72px] h-[72px] sm:w-[84px] sm:h-[84px]">
+      <div className="relative w-[84px] h-[84px] lg:w-[96px] lg:h-[96px]">
         <svg viewBox="0 0 84 84" className="w-full h-full -rotate-90">
           <circle cx="42" cy="42" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
           <circle
@@ -61,17 +61,17 @@ export default function PockGauge({ valor, rotulo, fonte }: Props) {
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-lg font-bold tnum" style={{ color: valor === null ? undefined : cor }}>
+          <span className="text-xl lg:text-2xl font-bold tnum" style={{ color: valor === null ? undefined : cor }}>
             {valor === null ? "—" : valor.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
           </span>
         </div>
       </div>
-      <p className="text-[10px] sm:text-[11px] leading-tight font-medium max-w-[130px] break-words">{rotulo}</p>
-      <span className="inline-flex items-start gap-1 text-[9px] sm:text-[10px] leading-tight" style={{ color: valor === null ? undefined : cor }}>
+      <p className="text-[11px] lg:text-xs leading-tight font-medium max-w-[140px] break-words">{rotulo}</p>
+      <span className="inline-flex items-start gap-1 text-[10px] lg:text-[11px] leading-tight" style={{ color: valor === null ? undefined : cor }}>
         <Icon className="w-3 h-3 shrink-0" />
         <span className={valor === null ? "text-muted-foreground" : ""}>{meta.rotulo}</span>
       </span>
-      {fonte && <span className="text-[9px] text-muted-foreground">{fonte}</span>}
+      {fonte && <span className="text-[10px] text-muted-foreground">{fonte}</span>}
     </div>
   );
 }
@@ -83,7 +83,7 @@ export function LegendaFaixas() {
       {FAIXAS.map((f, i) => (
         <span
           key={f.id}
-          className="inline-flex items-center gap-1 text-[10px] rounded-full border px-2 py-0.5"
+          className="inline-flex items-center gap-1 text-[11px] rounded-full border px-2.5 py-1"
           style={{ borderColor: `hsl(var(${f.token}) / 0.4)`, color: `hsl(var(${f.token}))` }}
         >
           <f.Icon className="w-3 h-3" />

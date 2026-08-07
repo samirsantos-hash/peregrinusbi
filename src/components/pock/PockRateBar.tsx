@@ -27,9 +27,9 @@ export default function PockRateBar({ rotulo, valor, limite, maximo = 0.2, fonte
   return (
     <div className="rounded-lg border border-border p-3 space-y-2">
       <div className="flex items-baseline justify-between gap-2">
-        <p className="text-[11px] font-medium">{rotulo}</p>
+        <p className="text-xs font-medium">{rotulo}</p>
         <span
-          className="inline-flex items-center gap-1 text-[10px]"
+          className="inline-flex items-center gap-1 text-[11px]"
           style={{ color: semDado ? undefined : cor }}
         >
           <Icon className="w-3 h-3" />
@@ -40,10 +40,10 @@ export default function PockRateBar({ rotulo, valor, limite, maximo = 0.2, fonte
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="text-base font-bold tnum w-[64px]" style={{ color: semDado ? undefined : cor }}>
+        <span className="text-lg font-bold tnum w-[72px]" style={{ color: semDado ? undefined : cor }}>
           {semDado ? "—" : fmtPct(valor!)}
         </span>
-        <div className="relative flex-1 h-2.5 rounded-full bg-muted/50 overflow-visible">
+        <div className="relative flex-1 h-3 rounded-full bg-muted/50 overflow-visible">
           <div
             className="absolute inset-y-0 left-0 rounded-full"
             style={{ width: `${pctBarra}%`, background: cor }}
@@ -57,12 +57,12 @@ export default function PockRateBar({ rotulo, valor, limite, maximo = 0.2, fonte
         </div>
       </div>
 
-      <div className="flex justify-between text-[9px] text-muted-foreground tnum">
+      <div className="flex justify-between text-[10px] text-muted-foreground tnum">
         {ticks.map((t) => (
           <span key={t}>{fmtPct(t)}</span>
         ))}
       </div>
-      <p className="text-[9px] text-muted-foreground">
+      <p className="text-[10px] text-muted-foreground">
         Limite em <span style={{ color: "hsl(var(--crit))" }}>vermelho</span>: {fmtPct(limite)}
         {fonte ? ` · ${fonte}` : ""}
       </p>

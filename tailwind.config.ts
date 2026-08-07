@@ -55,6 +55,8 @@ export default {
         "surface-alt": "hsl(var(--surface-alt))",
         "muted-alt": "hsl(var(--text-muted))",
         "brand-blue": "hsl(var(--brand-blue))",
+        "brand-navy": "hsl(var(--brand-navy))",
+        "brand-accent": "hsl(var(--brand-accent))",
         "neon-blue-glow": "hsl(var(--neon-blue-glow))",
         emerald: "hsl(var(--emerald))",
         "emerald-glow": "hsl(var(--emerald-glow))",

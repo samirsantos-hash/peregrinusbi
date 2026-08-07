@@ -93,11 +93,11 @@ export default function PockEvolucaoCard({
     <div className="rounded-lg border border-border p-3 space-y-2 bg-card/40">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 min-w-0">
-          <h4 className="text-xs font-semibold truncate">{titulo}</h4>
+          <h4 className="text-[13px] font-semibold truncate">{titulo}</h4>
           {derivadoFormula && (
             <UiTooltip delayDuration={200}>
               <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-1 text-[9px] rounded-full border border-border px-1.5 py-0.5 text-muted-foreground">
+                <span className="inline-flex items-center gap-1 text-[10px] rounded-full border border-border px-1.5 py-0.5 text-muted-foreground">
                   <Info className="w-2.5 h-2.5" /> derivado
                 </span>
               </TooltipTrigger>
@@ -105,21 +105,21 @@ export default function PockEvolucaoCard({
             </UiTooltip>
           )}
         </div>
-        {extra && <span className="text-[10px] text-muted-foreground tnum">{extra}</span>}
+        {extra && <span className="text-[11px] text-muted-foreground tnum">{extra}</span>}
       </div>
 
-      <div className="h-[200px] xl:h-[230px]">
+      <div className="h-[230px] lg:h-[250px] xl:h-[280px]">
         {semDado ? (
           <div className="h-full flex items-center justify-center text-xs text-muted-foreground">—</div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={dados} margin={{ top: 14, right: 8, left: 0, bottom: 0 }}>
+            <ComposedChart data={dados} margin={{ top: 18, right: 12, left: 4, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="mes" tick={{ fontSize: 9 }} interval="preserveStartEnd" minTickGap={4} angle={-35} textAnchor="end" height={38} />
+              <XAxis dataKey="mes" tick={{ fontSize: 11 }} interval="preserveStartEnd" minTickGap={8} angle={-35} textAnchor="end" height={44} />
               <YAxis
                 yAxisId="v"
-                tick={{ fontSize: 9 }}
-                width={42}
+                tick={{ fontSize: 11 }}
+                width={52}
                 tickFormatter={(v) =>
                   Math.abs(v) >= 1_000_000
                     ? `${(v / 1_000_000).toFixed(1)}M`
@@ -131,15 +131,15 @@ export default function PockEvolucaoCard({
               <YAxis
                 yAxisId="p"
                 orientation="right"
-                tick={{ fontSize: 9 }}
-                width={38}
+                tick={{ fontSize: 11 }}
+                width={46}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip
                 contentStyle={{
                   background: "hsl(var(--card))",
                   border: "1px solid hsl(var(--border))",
-                  fontSize: 11,
+                  fontSize: 12,
                 }}
                 formatter={(v: any, name: any) =>
                   name === "Var. YOY" || name === "Var. MOM"
@@ -147,25 +147,25 @@ export default function PockEvolucaoCard({
                     : [fmt(v, formato), name]
                 }
               />
-              <Legend wrapperStyle={{ fontSize: 10 }} />
-              <Bar yAxisId="v" dataKey="anoAnterior" name="Ano anterior" fill="hsl(var(--brand-blue))" fillOpacity={0.3} radius={[3, 3, 0, 0]} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar yAxisId="v" dataKey="anoAnterior" name="Ano anterior" fill="hsl(var(--brand-blue))" fillOpacity={0.35} radius={[3, 3, 0, 0]} />
               <Bar yAxisId="v" dataKey="valor" name="Mês" fill="hsl(var(--brand-blue))" radius={[3, 3, 0, 0]}>
                 <LabelList
                   dataKey="valor"
                   position="top"
-                  style={{ fontSize: 8, fill: "hsl(var(--muted-foreground))" }}
+                  style={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
                   formatter={(v: any) => (v == null ? "" : fmt(v, formato))}
                 />
               </Bar>
               {/* série interrompida em mês sem dado: connectNulls=false */}
-              <Line yAxisId="p" type="monotone" dataKey="yoy" name="Var. YOY" stroke="hsl(var(--brand-purple))" strokeWidth={1.6} strokeDasharray="5 3" dot={false} connectNulls={false} />
-              <Line yAxisId="p" type="monotone" dataKey="mom" name="Var. MOM" stroke="hsl(var(--brand-purple))" strokeOpacity={0.45} strokeWidth={1.4} dot={false} connectNulls={false} />
+              <Line yAxisId="p" type="monotone" dataKey="yoy" name="Var. YOY" stroke="hsl(var(--brand-navy))" strokeWidth={2} strokeDasharray="5 3" dot={false} connectNulls={false} />
+              <Line yAxisId="p" type="monotone" dataKey="mom" name="Var. MOM" stroke="hsl(var(--brand-navy))" strokeOpacity={0.5} strokeWidth={1.6} dot={false} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         )}
       </div>
 
-      <p className="text-[9px] text-muted-foreground tnum">
+      <p className="text-[10px] text-muted-foreground tnum">
         {cobertura !== undefined
           ? `Cobertura do dado: ${cobertura.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% dos meses · série interrompida onde não há dado`
           : "Série interrompida onde não há dado"}
