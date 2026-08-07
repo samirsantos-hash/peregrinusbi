@@ -16,7 +16,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { type DateRange } from "react-day-picker";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
