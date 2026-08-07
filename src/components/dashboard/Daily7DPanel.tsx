@@ -131,6 +131,18 @@ function MiniSerie({ valores, formato }: { valores: (number | null)[]; formato: 
   );
 }
 
+function rotuloFinal(texto: string, total: number, cor: string) {
+  return (props: any) => {
+    if (props.index !== total - 1) return <g />;
+    if (props.x === undefined || props.y === undefined || props.value === null) return <g />;
+    return (
+      <text x={props.x + 6} y={props.y} dy={4} fontSize={10} fill={cor}>
+        {texto}
+      </text>
+    );
+  };
+}
+
 /* ────────────────────────────── componente ────────────────────────────── */
 
 export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
@@ -457,6 +469,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                     type="linear"
                     dataKey="anterior"
                     name="Período anterior"
+                    label={rotuloFinal("Ant.", serie.length, "hsl(var(--muted-foreground))")}
                     stroke={COR_ANTERIOR}
                     strokeWidth={2}
                     dot={false}
@@ -469,6 +482,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                     type="linear"
                     dataKey="mm7"
                     name="Média móvel 7d"
+                    label={rotuloFinal("MM7", serie.length, COR_MM7)}
                     stroke={COR_MM7}
                     strokeWidth={2}
                     strokeDasharray="6 3"
@@ -481,6 +495,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                   type="linear"
                   dataKey="valor"
                   name={cfg.label}
+                  label={rotuloFinal(cfg.label, serie.length, COR_SERIE)}
                   stroke={COR_SERIE}
                   strokeWidth={2}
                   connectNulls={false}
