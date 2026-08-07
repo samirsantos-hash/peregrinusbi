@@ -39,18 +39,33 @@ export interface CarteiraConsolidado {
 }
 
 async function fetchAll(): Promise<any[]> {
-  const rows: any[] = [];
   const page = 1000;
-  for (let i = 0; i < 40; i++) {
-    const { data, error } = await supabase
-      .from("sellers_kpi")
-      .select(SELECT)
-      .order("data", { ascending: true })
-      .range(i * page, i * page + page - 1);
-    if (error) throw error;
-    if (!data?.length) break;
-    rows.push(...data);
-    if (data.length < page) break;
+
+  // 1ª página + contagem total → demais páginas em paralelo (evita 8 idas sequenciais)
+  const first = await supabase
+    .from("sellers_kpi")
+    .select(SELECT, { count: "exact" })
+    .order("data", { ascending: true })
+    .range(0, page - 1);
+  if (first.error) throw first.error;
+
+  const rows: any[] = [...(first.data || [])];
+  const total = first.count ?? rows.length;
+  const pages = Math.min(40, Math.ceil(total / page));
+  if (pages <= 1) return rows;
+
+  const rest = await Promise.all(
+    Array.from({ length: pages - 1 }, (_, k) =>
+      supabase
+        .from("sellers_kpi")
+        .select(SELECT)
+        .order("data", { ascending: true })
+        .range((k + 1) * page, (k + 2) * page - 1),
+    ),
+  );
+  for (const r of rest) {
+    if (r.error) throw r.error;
+    rows.push(...(r.data || []));
   }
   return rows;
 }
