@@ -206,3 +206,37 @@
     scrollbar-color: hsl(var(--muted)) transparent;
   }
 }
+
+/* Impressão: rodapé institucional e faixa de confiança em todas as páginas */
+@media print {
+  .rodape-institucional {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    background: #fff;
+    color: #000;
+    padding-bottom: 12px;
+  }
+
+  .rodape-institucional .aviso-confidencialidade {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .faixa-confianca {
+    display: flex !important;
+    position: fixed;
+    bottom: 160px;
+    left: 0;
+    right: 0;
+    break-inside: avoid;
+  }
+
+  body {
+    margin-bottom: 180px;
+  }
+}
