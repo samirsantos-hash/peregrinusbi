@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, Database } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, Database, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,9 +20,26 @@ interface MesLinha { mes: string; so_cpp: number; so_cdp: number; ambos: number;
 interface NuloLinha { feed: string; coluna: string; total: number; nulos: number; pct_nulo: number }
 interface ImportLinha { feed: string; arquivo: string | null; importado_em: string | null; linhas: number; meses: number; sellers: number }
 interface DivLinha { cust_id: string; nickname: string | null; em_cpp: boolean; em_cdp: boolean; vinculado: boolean }
+interface ExecLinha {
+  id: string; feed: string | null; arquivo: string | null; status: string;
+  linhas_lidas: number | null; linhas_gravadas: number | null; erro: string | null;
+  iniciado_em: string | null; finalizado_em: string | null;
+}
 
 const fmtDT = (s: string | null) =>
   s ? new Date(s).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
+
+const nomeArquivo = (p: string | null) => (p ? p.split("/").pop() ?? p : "—");
+
+/** CSV com ; e BOM — abre direto no Excel pt-BR. */
+function baixarCsv(nome: string, cabecalho: string[], linhas: (string | number)[][]) {
+  const esc = (v: string | number) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const txt = [cabecalho, ...linhas].map((l) => l.map(esc).join(";")).join("\r\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF" + txt], { type: "text/csv;charset=utf-8;" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = nome; a.click();
+  URL.revokeObjectURL(url);
+}
 
 const QualidadeFeeds = () => {
   const [busy, setBusy] = useState(false);
@@ -32,18 +49,22 @@ const QualidadeFeeds = () => {
   const [imports, setImports] = useState<ImportLinha[]>([]);
   const [mesSel, setMesSel] = useState<string | null>(null);
   const [divs, setDivs] = useState<DivLinha[]>([]);
+  const [execs, setExecs] = useState<ExecLinha[]>([]);
+  const [soFalhas, setSoFalhas] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const carregar = useCallback(async () => {
     const cli = supabase as any;
-    const [a, b, c] = await Promise.all([
+    const [a, b, c, d] = await Promise.all([
       cli.rpc("qualidade_feeds_por_mes"),
       cli.rpc("qualidade_nulos_criticos"),
       cli.rpc("qualidade_ultimo_import"),
+      cli.from("ingestao_execucoes").select("*").order("iniciado_em", { ascending: false }).limit(500),
     ]);
     setMeses((a.data ?? []) as MesLinha[]);
     setNulos((b.data ?? []) as NuloLinha[]);
     setImports((c.data ?? []) as ImportLinha[]);
+    setExecs((d.data ?? []) as ExecLinha[]);
     const primeiro = (a.data ?? [])[0]?.mes ?? null;
     setMesSel((m) => m ?? primeiro);
   }, []);
