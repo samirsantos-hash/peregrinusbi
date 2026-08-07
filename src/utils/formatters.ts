@@ -43,6 +43,13 @@ export const fmtPct = (value: number, decimals = 1): string => {
   return `${sign}${value.toFixed(decimals)}%`;
 };
 
+/**
+ * Taxas REP_* são armazenadas em fração (0..1). O ×100 acontece SÓ aqui,
+ * nunca no banco nem na ingestão. 0,125 → "12,5%".
+ */
+export const fmtTaxa = (fracao: number | null | undefined, decimals = 1): string =>
+  fracao == null ? "—" : `${(fracao * 100).toFixed(decimals).replace(".", ",")}%`;
+
 const MONTH_NAMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
 
 /**
