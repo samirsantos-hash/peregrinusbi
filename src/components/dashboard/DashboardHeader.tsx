@@ -241,12 +241,12 @@ const DashboardHeader = ({
                   variant="outline"
                   role="combobox"
                   aria-expanded={storeOpen}
-                  className="w-full sm:w-[300px] max-w-full justify-between glass-card border-glass-border bg-card/60 font-normal"
+                  className="w-full sm:w-auto sm:min-w-[300px] sm:max-w-[560px] max-w-full h-auto min-h-10 py-1.5 justify-between glass-card border-glass-border bg-card/60 font-normal"
                 >
                   {selectedSellerObj ? (
-                    <span className="truncate flex items-center gap-1">
+                    <span className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-left min-w-0">
                       <span className="text-xs text-muted-foreground mr-1">Loja:</span>
-                      <span className="font-medium">{selectedSellerObj.nickname}</span>
+                      <span className="font-medium break-all">{selectedSellerObj.nickname}</span>
                       <span
                         role="button"
                         tabIndex={0}
@@ -263,7 +263,7 @@ const DashboardHeader = ({
                       </span>
                       <span className="mx-1 text-border">|</span>
                       <span className="text-xs text-muted-foreground mr-1">ID:</span>
-                      <span className="text-xs font-mono">{selectedSellerObj.custId}</span>
+                      <span className="text-xs font-mono break-all tnum">{selectedSellerObj.custId}</span>
                       <span
                         role="button"
                         tabIndex={0}
