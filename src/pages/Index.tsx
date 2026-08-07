@@ -476,14 +476,8 @@ const Index = () => {
               onPeriodChange={handlePeriodChange}
             />
 
-            <DiagnosticAlerts
-              kpis={displayKpis}
-              sellerCustIdMap={sellerCustIdMap}
-              seller={sellers.find((s) => s.id === selectedSeller) || null}
-            />
-
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex items-start gap-0 lg:gap-5 isolate">
+              <div className="flex items-start gap-0 lg:gap-4 isolate">
                 <PainelSidebar
                   ativa={activeTab}
                   onChange={setActiveTab}
@@ -491,7 +485,12 @@ const Index = () => {
                   mobileAberto={menuAberto}
                   onMobileChange={setMenuAberto}
                 />
-                <div className="relative z-0 flex-1 min-w-0">
+                <div className="relative z-0 flex-1 min-w-0 space-y-4">
+                  <DiagnosticAlerts
+                    kpis={displayKpis}
+                    sellerCustIdMap={sellerCustIdMap}
+                    seller={sellers.find((s) => s.id === selectedSeller) || null}
+                  />
                   <div className="lg:hidden mb-3">
                     <Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}>
                       <Menu className="w-4 h-4" />
