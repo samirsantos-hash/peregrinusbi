@@ -1268,15 +1268,16 @@ export function CarteiraBoard({ custIds, title, subtitle, embedded = false, onBa
 
       <main className="cart-main">
         {tab === "upload" && !loading && <UploadCarteiraPanel up={up} master={data.sellers} />}
+        {tab === "qualidade" && <QualidadeFeeds />}
         {loading && <div className="cart-loading"><Loader2 className="w-5 h-5 animate-spin" /> Carregando dados da carteira…</div>}
         {error && !loading && <div className="cart-error">Erro ao carregar: {error}</div>}
-        {tab !== "upload" && !loading && !error && !hasData && (
+        {tab !== "upload" && tab !== "qualidade" && !loading && !error && !hasData && (
           <div className="cart-empty">
             <h2>Nenhum dado disponível para esta carteira.</h2>
             <p>Suba as bases de performance em <code>Admin → Upload</code> ou verifique as lojas liberadas no seu acesso.</p>
           </div>
         )}
-        {tab !== "upload" && !loading && hasData && (
+        {tab !== "upload" && tab !== "qualidade" && !loading && hasData && (
           <>
             <DrillChips ds={data} />
             {tab === "panorama" && <Panorama ds={view} ag={ag} />}
