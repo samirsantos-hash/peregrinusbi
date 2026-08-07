@@ -63,7 +63,6 @@ import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
 import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 import PublicidadePanel from "@/components/seller/PublicidadePanel";
-import SellerDiagnosticPanel from "@/components/dashboard/SellerDiagnosticPanel";
 import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
@@ -474,13 +473,6 @@ const Index = () => {
               isRefreshing={isRefreshing}
               onPeriodChange={handlePeriodChange}
             />
-
-            {!isConsolidado && activeTab === "efficiency" && (
-              <SellerDiagnosticPanel
-                seller={sellers.find((s) => s.id === selectedSeller) as any}
-                allKpis={allKpis}
-              />
-            )}
 
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
