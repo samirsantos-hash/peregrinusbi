@@ -31,6 +31,9 @@ const fmtDT = (s: string | null) =>
 
 const nomeArquivo = (p: string | null) => (p ? p.split("/").pop() ?? p : "—");
 
+const ignoradas = (e: ExecLinha) =>
+  Math.max(0, (e.linhas_lidas ?? 0) - (e.linhas_gravadas ?? 0));
+
 /** CSV com ; e BOM — abre direto no Excel pt-BR. */
 function baixarCsv(nome: string, cabecalho: string[], linhas: (string | number)[][]) {
   const esc = (v: string | number) => `"${String(v ?? "").replace(/"/g, '""')}"`;
@@ -52,6 +55,7 @@ const QualidadeFeeds = () => {
   const [execs, setExecs] = useState<ExecLinha[]>([]);
   const [soFalhas, setSoFalhas] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const execsFiltradas = soFalhas ? execs.filter((e) => e.status !== "ok") : execs;
 
   const carregar = useCallback(async () => {
     const cli = supabase as any;
