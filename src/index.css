@@ -50,6 +50,13 @@
     --emerald: 160 84% 39%;
     --emerald-glow: 160 84% 50%;
     --warning: 40 95% 55%;
+
+    /* POCK — escala de status em 4 faixas (0-25 / 25-50 / 50-75 / 75-100) */
+    --crit: 0 84% 60%;
+    --warn: 40 95% 55%;
+    --warn-soft: 14 74% 76%;      /* #EFA893 */
+    --ok: 160 84% 39%;
+    --brand-purple: 280 80% 68%;
     --glass: 222 47% 8%;
     --glass-border: 215 25% 18%;
 
@@ -101,6 +108,12 @@
     --emerald: 160 84% 32%;
     --emerald-glow: 160 84% 40%;
     --warning: 32 95% 44%;
+
+    --crit: 0 72% 50%;
+    --warn: 32 95% 44%;
+    --warn-soft: 14 56% 59%;      /* #D4785A */
+    --ok: 160 84% 32%;
+    --brand-purple: 280 62% 45%;
     --glass: 0 0% 100%;
     --glass-border: 215 20% 86%;
 

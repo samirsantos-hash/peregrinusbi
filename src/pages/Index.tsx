@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { type DateRange } from "react-day-picker";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -67,6 +67,7 @@ import SellerDiagnosticPanel from "@/components/dashboard/SellerDiagnosticPanel"
 import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
+import PockPanel from "@/components/pock/PockPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -119,7 +120,16 @@ const Index = () => {
   const { theme, toggle: toggleTheme } = useTheme();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [activeTab, setActiveTab] = useState("executive");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get("aba") || "executive";
+  const setActiveTab = useCallback(
+    (tab: string) => {
+      const next = new URLSearchParams(searchParams);
+      next.set("aba", tab);
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
   const [activePeriod, setActivePeriod] = useState<string>("q1");
@@ -370,7 +380,7 @@ const Index = () => {
         backgroundSize: '40px 40px'
       }} />
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-3 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
+      <div className="relative z-10 max-w-[1760px] mx-auto px-3 sm:px-5 xl:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg border border-border/50 p-1 flex items-center justify-center bg-primary-foreground shrink-0">
@@ -520,6 +530,15 @@ const Index = () => {
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
+                  </TabsContent>
+                  <TabsContent value="pock" className="mt-0 space-y-5">
+                    <PockPanel
+                      sellerId={selectedSeller || undefined}
+                      nickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
+                      custId={sellerCustIdMap[selectedSeller]}
+                      segmento={(sellers.find((s) => s.id === selectedSeller) as any)?.subCluster}
+                      programas={(sellers.find((s) => s.id === selectedSeller) as any)?.clusterSeller}
+                    />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="competitiveness" dados={dadosJunior} />
