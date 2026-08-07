@@ -313,40 +313,48 @@ const Multilojas = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border/40 px-4 py-3 flex items-center gap-3 flex-wrap">
+      <header className="sticky top-0 z-30 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-5 py-3 flex items-center gap-3 flex-wrap">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2"><ArrowLeft className="w-4 h-4" />Voltar</Button>
-        <Store className="w-5 h-5 text-primary" />
-        <div className="min-w-0">
-          <h1 className="text-sm font-semibold truncate">
+        <Store className="w-5 h-5 shrink-0" style={{ color: "hsl(var(--brand-blue))" }} />
+        <div className="min-w-0 flex-1">
+          <h1 className="text-sm font-semibold truncate leading-tight">
             Multilojas · {escopoRede ? `${dados.diag.lojas.length} lojas` : lojaAtual?.nome_publico || "minha loja"}
           </h1>
-          <p className="text-[11px] text-muted-foreground truncate">
+          <p className="text-[11px] text-muted-foreground truncate mt-0.5 tabular-nums">
             {fInt(dados.diag.validas)} pedidos · {dados.diag.ini} → {dados.diag.fim} · {modoLocal ? "análise local, não publicada" : dados.diag.arquivo}
           </p>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2 flex-wrap">
           <span className="text-[11px] px-2 py-0.5 rounded-full border border-border/60 text-muted-foreground">{rotuloPerfil}</span>
           <Button variant="outline" size="sm" className="gap-2" onClick={exportarCsv}><Download className="w-4 h-4" />CSV do recorte</Button>
           {modoLocal && (
             <Button variant="ghost" size="sm" onClick={() => { setModoLocal(false); setDados(null); }}>Voltar à base publicada</Button>
           )}
         </div>
+        </div>
       </header>
 
-      <FiltersBar filtros={filtros} set={(f) => setFiltros((s) => ({ ...s, ...f }))} opcoes={opcoes} />
+      <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-5">
+        <FiltersBar filtros={filtros} set={(f) => setFiltros((s) => ({ ...s, ...f }))} opcoes={opcoes} />
+      </div>
 
-      <nav className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-border/40">
-        {TABS.map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-3 py-1 rounded-md text-[11px] whitespace-nowrap transition-colors ${
-              tab === t ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
-            }`}>
-            {t}
-          </button>
-        ))}
+      <nav className="border-b border-border/40">
+        <div className="mx-auto w-full max-w-[1600px] flex gap-1 overflow-x-auto px-3 sm:px-5 py-2">
+          {TABS.map((t) => (
+            <button key={t} onClick={() => setTab(t)} aria-current={tab === t ? "page" : undefined}
+              className={`px-3 py-1.5 rounded-md text-[11px] whitespace-nowrap transition-colors border ${
+                tab === t
+                  ? "border-transparent font-semibold text-[hsl(var(--brand-blue))] bg-[hsl(var(--brand-blue)/0.14)]"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              }`}>
+              {t}
+            </button>
+          ))}
+        </div>
       </nav>
 
-      <main className="p-3 space-y-3">
+      <main className="mx-auto w-full max-w-[1600px] px-3 sm:px-5 py-4 space-y-4">
         {painelAdmin}
         {tab === "Minha loja" && (
           <MinhaLoja
