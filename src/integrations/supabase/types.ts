@@ -962,6 +962,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ingestao_execucoes: {
+        Row: {
+          arquivo: string
+          erro: string | null
+          feed: string
+          finalizado_em: string | null
+          id: string
+          iniciado_em: string
+          linhas_gravadas: number | null
+          linhas_lidas: number | null
+          status: string
+        }
+        Insert: {
+          arquivo: string
+          erro?: string | null
+          feed: string
+          finalizado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          linhas_gravadas?: number | null
+          linhas_lidas?: number | null
+          status: string
+        }
+        Update: {
+          arquivo?: string
+          erro?: string | null
+          feed?: string
+          finalizado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          linhas_gravadas?: number | null
+          linhas_lidas?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
       live_listings: {
         Row: {
           categoria: string | null
@@ -1492,6 +1528,54 @@ export type Database = {
           email?: string
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      raw_cdp_mensal: {
+        Row: {
+          arquivo_origem: string
+          cus_cust_id_sel: string
+          dados: Json
+          importado_em: string
+          tim_month_id: string
+        }
+        Insert: {
+          arquivo_origem: string
+          cus_cust_id_sel: string
+          dados: Json
+          importado_em?: string
+          tim_month_id: string
+        }
+        Update: {
+          arquivo_origem?: string
+          cus_cust_id_sel?: string
+          dados?: Json
+          importado_em?: string
+          tim_month_id?: string
+        }
+        Relationships: []
+      }
+      raw_cpp_mensal: {
+        Row: {
+          arquivo_origem: string
+          cus_cust_id_sel: string
+          dados: Json
+          importado_em: string
+          tim_month_id: string
+        }
+        Insert: {
+          arquivo_origem: string
+          cus_cust_id_sel: string
+          dados: Json
+          importado_em?: string
+          tim_month_id: string
+        }
+        Update: {
+          arquivo_origem?: string
+          cus_cust_id_sel?: string
+          dados?: Json
+          importado_em?: string
+          tim_month_id?: string
         }
         Relationships: []
       }
