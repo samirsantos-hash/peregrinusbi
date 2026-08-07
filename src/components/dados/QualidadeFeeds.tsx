@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, Database } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, Database, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -20,9 +20,29 @@ interface MesLinha { mes: string; so_cpp: number; so_cdp: number; ambos: number;
 interface NuloLinha { feed: string; coluna: string; total: number; nulos: number; pct_nulo: number }
 interface ImportLinha { feed: string; arquivo: string | null; importado_em: string | null; linhas: number; meses: number; sellers: number }
 interface DivLinha { cust_id: string; nickname: string | null; em_cpp: boolean; em_cdp: boolean; vinculado: boolean }
+interface ExecLinha {
+  id: string; feed: string | null; arquivo: string | null; status: string;
+  linhas_lidas: number | null; linhas_gravadas: number | null; erro: string | null;
+  iniciado_em: string | null; finalizado_em: string | null;
+}
 
 const fmtDT = (s: string | null) =>
   s ? new Date(s).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
+
+const nomeArquivo = (p: string | null) => (p ? p.split("/").pop() ?? p : "—");
+
+const ignoradas = (e: ExecLinha) =>
+  Math.max(0, (e.linhas_lidas ?? 0) - (e.linhas_gravadas ?? 0));
+
+/** CSV com ; e BOM — abre direto no Excel pt-BR. */
+function baixarCsv(nome: string, cabecalho: string[], linhas: (string | number)[][]) {
+  const esc = (v: string | number) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const txt = [cabecalho, ...linhas].map((l) => l.map(esc).join(";")).join("\r\n");
+  const url = URL.createObjectURL(new Blob(["\uFEFF" + txt], { type: "text/csv;charset=utf-8;" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = nome; a.click();
+  URL.revokeObjectURL(url);
+}
 
 const QualidadeFeeds = () => {
   const [busy, setBusy] = useState(false);
@@ -32,18 +52,23 @@ const QualidadeFeeds = () => {
   const [imports, setImports] = useState<ImportLinha[]>([]);
   const [mesSel, setMesSel] = useState<string | null>(null);
   const [divs, setDivs] = useState<DivLinha[]>([]);
+  const [execs, setExecs] = useState<ExecLinha[]>([]);
+  const [soFalhas, setSoFalhas] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+  const execsFiltradas = soFalhas ? execs.filter((e) => e.status !== "ok") : execs;
 
   const carregar = useCallback(async () => {
     const cli = supabase as any;
-    const [a, b, c] = await Promise.all([
+    const [a, b, c, d] = await Promise.all([
       cli.rpc("qualidade_feeds_por_mes"),
       cli.rpc("qualidade_nulos_criticos"),
       cli.rpc("qualidade_ultimo_import"),
+      cli.from("ingestao_execucoes").select("*").order("iniciado_em", { ascending: false }).limit(500),
     ]);
     setMeses((a.data ?? []) as MesLinha[]);
     setNulos((b.data ?? []) as NuloLinha[]);
     setImports((c.data ?? []) as ImportLinha[]);
+    setExecs((d.data ?? []) as ExecLinha[]);
     const primeiro = (a.data ?? [])[0]?.mes ?? null;
     setMesSel((m) => m ?? primeiro);
   }, []);
@@ -234,6 +259,77 @@ const QualidadeFeeds = () => {
             </div>
           ))}
           {nulos.length === 0 && <p className="text-xs text-muted-foreground">Sem dados importados.</p>}
+        </div>
+      </section>
+
+      {/* Histórico de execuções e falhas */}
+      <section className="rounded-xl border border-border/60 bg-card/40 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-semibold">Relatório de falhas da ingestão</h3>
+          <div className="flex items-center gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setSoFalhas((v) => !v)}>
+              {soFalhas ? "Ver todas as execuções" : "Ver só falhas"}
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={execsFiltradas.length === 0}
+              onClick={() =>
+                baixarCsv(
+                  `ingestao_falhas_${new Date().toISOString().slice(0, 10)}.csv`,
+                  ["Início", "Fim", "Feed", "Arquivo", "Status", "Linhas lidas", "Linhas gravadas", "Linhas ignoradas", "Motivo do abortar"],
+                  execsFiltradas.map((e) => [
+                    fmtDT(e.iniciado_em), fmtDT(e.finalizado_em), e.feed ?? "—", e.arquivo ?? "—", e.status,
+                    e.linhas_lidas ?? 0, e.linhas_gravadas ?? 0, ignoradas(e), e.erro ?? "",
+                  ])
+                )
+              }
+            >
+              <Download className="mr-2 h-3.5 w-3.5" /> Exportar CSV
+            </Button>
+          </div>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Toda execução é registrada, inclusive as abortadas. Como a importação é tudo-ou-nada, uma execução
+          com erro grava zero linha: “ignoradas” é o total lido que não foi persistido, não uma linha descartada
+          individualmente.
+        </p>
+        <div className="mt-3 max-h-96 overflow-auto">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 bg-card/90 text-muted-foreground backdrop-blur">
+              <tr className="border-b border-border/50">
+                <th className="py-1 text-left">Início</th>
+                <th className="py-1 text-left">Feed</th>
+                <th className="py-1 text-left">Arquivo</th>
+                <th className="py-1 text-left">Status</th>
+                <th className="py-1 text-right">Lidas</th>
+                <th className="py-1 text-right">Gravadas</th>
+                <th className="py-1 text-right">Ignoradas</th>
+                <th className="py-1 text-left">Motivo exato</th>
+              </tr>
+            </thead>
+            <tbody>
+              {execsFiltradas.map((e) => (
+                <tr key={e.id} className="border-b border-border/30 align-top">
+                  <td className="py-1 whitespace-nowrap tnum">{fmtDT(e.iniciado_em)}</td>
+                  <td className="py-1">{e.feed ?? "—"}</td>
+                  <td className="py-1 max-w-[220px] break-all">{nomeArquivo(e.arquivo)}</td>
+                  <td className={`py-1 font-medium ${
+                    e.status === "erro" ? "text-destructive" : e.status === "ok" ? "text-emerald" : "text-muted-foreground"
+                  }`}>{e.status}</td>
+                  <td className="py-1 text-right tnum">{(e.linhas_lidas ?? 0).toLocaleString("pt-BR")}</td>
+                  <td className="py-1 text-right tnum">{(e.linhas_gravadas ?? 0).toLocaleString("pt-BR")}</td>
+                  <td className="py-1 text-right tnum">{ignoradas(e).toLocaleString("pt-BR")}</td>
+                  <td className="py-1 max-w-[420px] whitespace-pre-wrap break-words text-destructive">{e.erro ?? "—"}</td>
+                </tr>
+              ))}
+              {execsFiltradas.length === 0 && (
+                <tr><td colSpan={8} className="py-3 text-center text-muted-foreground">
+                  {soFalhas ? "Nenhuma falha registrada." : "Nenhuma execução registrada ainda."}
+                </td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </section>
     </div>
