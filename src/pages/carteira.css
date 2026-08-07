@@ -45,6 +45,11 @@
 .cart-table tr:hover td { background: #F5F6F8; }
 .cart-table .mono, td.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
 
+/* Colunas Loja e Cust ID: largura suficiente para o nome completo, sem quebra de linha */
+.cart-table th:first-child, .cart-table td:first-child { min-width: 240px; white-space: nowrap; }
+.cart-table th:nth-child(2), .cart-table td:nth-child(2) { min-width: 130px; white-space: nowrap; }
+.cart-table tfoot td:first-child { min-width: 0; }
+
 .cart-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
 .cart-badge-ok { background: #E6F2EC; color: #2E7D5B; }
 .cart-badge-atenção { background: #FFF4D6; color: #8A6A00; }
