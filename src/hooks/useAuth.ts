@@ -3,6 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
 const AUTH_PROFILE_TIMEOUT_MS = 8_000;
+// Renova o token quando faltar menos que isso para expirar (iframe do Preview costuma
+// ficar suspenso e perder o ciclo automático de refresh do supabase-js).
+const REFRESH_MARGIN_SECONDS = 5 * 60;
+const REFRESH_CHECK_INTERVAL_MS = 60_000;
 
 async function withTimeout<T>(request: PromiseLike<T>): Promise<T> {
   return Promise.race([
@@ -89,14 +93,58 @@ export function useAuth() {
       });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
+      (event, currentSession) => {
+        // Refresh de token não muda o usuário: só atualiza a sessão, sem recarregar o perfil.
+        if (event === "TOKEN_REFRESHED" && currentSession?.user) {
+          if (!mounted) return;
+          setSession(currentSession);
+          setUser(currentSession.user);
+          return;
+        }
         void syncAuthState(currentSession);
       }
     );
 
+    let refreshing = false;
+    const ensureFreshSession = async () => {
+      if (!mounted || refreshing) return;
+      refreshing = true;
+      try {
+        const { data } = await supabase.auth.getSession();
+        const current = data.session;
+        if (!current) return;
+        const expiresAt = current.expires_at ?? 0;
+        const secondsLeft = expiresAt - Math.floor(Date.now() / 1000);
+        if (secondsLeft > REFRESH_MARGIN_SECONDS) return;
+
+        const { error } = await supabase.auth.refreshSession();
+        if (error) {
+          // Falha transitória (offline, iframe suspenso): mantém a sessão atual e tenta depois.
+          console.warn("Não foi possível renovar a sessão agora", error.message);
+        }
+      } catch (error) {
+        console.warn("Falha ao verificar validade da sessão", error);
+      } finally {
+        refreshing = false;
+      }
+    };
+
+    const onWake = () => {
+      if (document.visibilityState === "visible") void ensureFreshSession();
+    };
+
+    const interval = window.setInterval(() => void ensureFreshSession(), REFRESH_CHECK_INTERVAL_MS);
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener("focus", onWake);
+    window.addEventListener("online", onWake);
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener("focus", onWake);
+      window.removeEventListener("online", onWake);
     };
   }, []);
 
