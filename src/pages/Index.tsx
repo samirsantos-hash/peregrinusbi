@@ -409,11 +409,6 @@ const Index = () => {
               <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Noire"}</span>
             </Button>
             <SoundToggleButton />
-            <Button variant="outline" size="sm" onClick={() => navigate("/projecao-crescimento")} className="gap-2 relative px-2 sm:px-3">
-              <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">Projeção</span>
-              <NewBadge featureKey="projecao_v1" tooltip="Novo: forecast, decomposição de crescimento e alertas de sustentabilidade" />
-            </Button>
             <Button variant="outline" size="sm" onClick={() => navigate("/analise-mlb")} className="gap-2 px-2 sm:px-3">
               <Search className="w-4 h-4" />
               <span className="hidden sm:inline">Análise MLB</span>
