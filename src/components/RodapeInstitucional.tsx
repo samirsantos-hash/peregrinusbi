@@ -1,37 +1,38 @@
-import logoEscuro from "@/assets/logo-dark.png";
-import logoClaro from "@/assets/logo-light.png";
-import { useTheme } from "@/hooks/useTheme";
+import { useState } from "react";
 
 /**
  * Rodapé institucional único do painel.
  * Renderizado uma única vez, ao final do fluxo do documento (ver ProtectedRoute).
  */
 export default function RodapeInstitucional() {
-  const { theme } = useTheme();
   const anoFinal = new Date().getFullYear();
+  const [aberto, setAberto] = useState(false);
 
   return (
     <footer
-      className="rodape-institucional bg-surface-alt border-t border-muted/20 px-6 py-8 pb-16"
+      className="rodape-institucional border-t border-muted/15 bg-transparent px-6 py-3 text-left text-[11px] font-normal leading-[1.5] text-muted-alt"
       style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}
     >
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Coluna 1 — logo */}
-        <div className="flex items-start">
-          <img
-            src={theme === "light" ? logoEscuro : logoClaro}
-            alt="ECOM CONSULT"
-            className="h-7 w-auto"
-            loading="lazy"
-          />
-        </div>
-
-        {/* Coluna 2 — confidencialidade */}
-        <div className="aviso-confidencialidade">
-          <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-muted-alt">
-            Aviso de confidencialidade
+      <p>
+        Copyright © 2017–{anoFinal}. ECOM CONSULT. CNPJ n.º 35.581.459/0001-00 · Av. Antônio Vieira do
+        Nascimento, 186 - Jardim Nathalie, Mogi das Cruzes/SP - CEP 08725-740 · Informações confidenciais
+        de uso restrito.{" "}
+        <button
+          type="button"
+          onClick={() => setAberto((v) => !v)}
+          aria-expanded={aberto}
+          className="text-brand-blue no-underline hover:underline"
+        >
+          Mais informações
+        </button>
+      </p>
+      {aberto && (
+        <div className="aviso-confidencialidade mt-2 space-y-2">
+          <p>
+            Escritório: R. Manuel de Oliveira, 269 - 4º andar, sala 415 - Brasil, Mogi das Cruzes/SP - CEP
+            08773-130
           </p>
-          <p className="mt-2 text-[12px] font-normal leading-relaxed text-muted-alt" style={{ maxWidth: "52ch" }}>
+          <p>
             As informações apresentadas neste painel são confidenciais e de uso restrito ao destinatário
             autorizado. Os dados são provenientes de fontes do marketplace e de sistemas do cliente, e
             destinam-se exclusivamente à gestão da operação contratada. É vedada a reprodução, distribuição
@@ -39,28 +40,7 @@ export default function RodapeInstitucional() {
             CONSULT. O acesso é registrado e auditado.
           </p>
         </div>
-
-        {/* Coluna 3 — endereços */}
-        <div>
-          <p className="text-[12px] font-medium uppercase tracking-[0.04em] text-muted-alt">Endereços</p>
-          <div className="mt-2 space-y-3 text-[12px] font-normal leading-relaxed text-muted-alt">
-            <div>
-              <p className="font-medium">Escritório</p>
-              <p>R. Manuel de Oliveira, 269 — 4º andar, sala 415</p>
-              <p>Brasil, Mogi das Cruzes — SP, 08773-130</p>
-            </div>
-            <div>
-              <p className="font-medium">Sede (endereço registrado no CNPJ)</p>
-              <p>Av. Antônio Vieira do Nascimento, 186 — Jardim Nathalie</p>
-              <p>Mogi das Cruzes — SP, 08725-740</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-8 border-t border-muted/15 pt-4 text-center text-[11px] font-normal text-muted-alt">
-        Copyright © 2017–{anoFinal} ECOM CONSULT · CNPJ 35.581.459/0001-00
-      </div>
+      )}
     </footer>
   );
 }
