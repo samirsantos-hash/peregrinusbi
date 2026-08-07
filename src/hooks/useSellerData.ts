@@ -30,6 +30,7 @@ export interface SellerKPI {
   scoreTitle: number;
   scoreOferta: number;
   scoreCaracteristica: number;
+  scoreQualidade: number;
   repCancellationsRate: number;
   scoreFull: number;
   scorePads: number;
@@ -122,6 +123,7 @@ export function transformKpi(row: any, sellerNickname: string): SellerKPI {
     scoreTitle,
     scoreOferta: Number(row.score_oferta_final) || 0,
     scoreCaracteristica: Number(row.score_caracteristica_final) || 0,
+    scoreQualidade: Number(row.score_qualidade_final) || 0,
     repCancellationsRate: Number(row.rep_cancellations_rate) || 0,
     scoreFull: Number(row.score_final_full) || 0,
     scorePads: Number(row.score_final_pads) || 0,
