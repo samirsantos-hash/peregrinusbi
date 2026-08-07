@@ -484,25 +484,21 @@ const Index = () => {
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="glass-card w-full justify-center gap-1 p-1 bg-card/60 h-auto grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-11">
-                {tabs.map((tab) =>
-                  <Tooltip key={tab.id} delayDuration={300}>
-                    <TooltipTrigger asChild>
-                      <TabsTrigger
-                        value={tab.id}
-                        className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 text-[10px] sm:text-[11px] whitespace-nowrap w-full data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
-                        <tab.icon className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">{tab.label}</span>
-                      </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-[260px] text-xs">
-                      <p className="font-semibold mb-0.5">{tab.label}</p>
-                      <p className="text-muted-foreground">{tab.juniorTip}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </TabsList>
-
+              <div className="flex items-start gap-0 lg:gap-5">
+                <PainelSidebar
+                  ativa={activeTab}
+                  onChange={setActiveTab}
+                  alertas={alertasAtivos}
+                  mobileAberto={menuAberto}
+                  onMobileChange={setMenuAberto}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="lg:hidden mb-3">
+                    <Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}>
+                      <Menu className="w-4 h-4" />
+                      <span>Seções</span>
+                    </Button>
+                  </div>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`${activeTab}-${selectedSeller}-${granularity}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
@@ -510,7 +506,7 @@ const Index = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.25 }}
-                  className="mt-5">
+                  className="mt-0">
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     <JuniorActionBanner abaId="executive" dados={dadosJunior} />
                     <Daily7DPanel
