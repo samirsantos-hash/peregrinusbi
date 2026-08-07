@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
@@ -70,7 +70,7 @@ const DashboardHeader = ({
   onPeriodChange,
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
-  const [activePeriod, setActivePeriod] = useState<string>("q1");
+  const [activePeriod, setActivePeriod] = useState<string>("");
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
   const { playClick } = useSoundFeedback();
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
@@ -89,24 +89,6 @@ const DashboardHeader = ({
     const days = differenceInDays(anchor, min);
     return { anchorDate: anchor, minDate: min, availableDays: days };
   }, [allKpis]);
-
-  // Warning when selected period exceeds available data
-  const periodWarning = useMemo(() => {
-    if (activePeriod === "custom" || activePeriod === "all") return null;
-    const qMatch = activePeriod.match(/^q(\d)$/);
-    if (qMatch) {
-      const qNum = parseInt(qMatch[1], 10);
-      const startMonth = (qNum - 1) * 3 + 1;
-      const endMonth = qNum * 3;
-      const hasData = allKpis.some((k: any) => {
-        if (!k.date) return false;
-        const m = parseInt(k.date.split("-")[1], 10);
-        return m >= startMonth && m <= endMonth;
-      });
-      if (!hasData) return `Sem dados disponíveis para ${activePeriod.toUpperCase()}`;
-    }
-    return null;
-  }, [activePeriod, allKpis]);
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
@@ -148,6 +130,9 @@ const DashboardHeader = ({
   const clampedUplift = Math.max(-0.5, Math.min(2, avgUplift));
   const totalGmv = filteredKpis.reduce((s, k) => s + k.gmv, 0);
   const dailyGmv = rangeDays > 0 ? totalGmv / rangeDays : 0;
+
+  // Sem base de cálculo → exibir "—" em vez de 0,0%
+  const temBaseProjecao = validUplifts.length > 0 && totalGmv > 0;
 
   const projections = [
     { days: 7, value: dailyGmv * 7 * (1 + clampedUplift) },
@@ -191,6 +176,49 @@ const DashboardHeader = ({
     const to = new Date(year, endMonth, 0);
     onDateRangeChange({ from, to });
   };
+
+  // Trimestres que possuem dado (no ano mais recente ou no anterior)
+  const quartersComDado = useMemo(() => {
+    const set = new Set<string>();
+    for (const qr of quickRanges) {
+      const startMonth = qr.months[0];
+      const endMonth = qr.months[qr.months.length - 1];
+      const has = allKpis.some((k: any) => {
+        if (!k.date) return false;
+        const [ky, km] = String(k.date).split("-").map(Number);
+        return (ky === latestYear || ky === latestYear - 1) && km >= startMonth && km <= endMonth;
+      });
+      if (has) set.add(qr.key);
+    }
+    return set;
+  }, [allKpis, latestYear]);
+
+  // Abre sempre no período mais RECENTE COM DADO
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (initialized.current) return;
+    if (allKpis.length === 0) return;
+    const anchorMonth = anchorDate.getMonth() + 1;
+    const anchorQ = `q${Math.ceil(anchorMonth / 3)}`;
+    const alvo =
+      [...quickRanges].reverse().find((qr) => qr.key === anchorQ && quartersComDado.has(qr.key)) ??
+      [...quickRanges].reverse().find((qr) => quartersComDado.has(qr.key));
+    if (!alvo) return;
+    initialized.current = true;
+    setActivePeriod(alvo.key);
+    onPeriodChange?.(alvo.key);
+    const startMonth = alvo.months[0];
+    const endMonth = alvo.months[alvo.months.length - 1];
+    const hasDataInYear = (y: number) =>
+      allKpis.some((k: any) => {
+        if (!k.date) return false;
+        const [ky, km] = String(k.date).split("-").map(Number);
+        return ky === y && km >= startMonth && km <= endMonth;
+      });
+    const year = hasDataInYear(latestYear) ? latestYear : latestYear - 1;
+    onDateRangeChange({ from: new Date(year, startMonth - 1, 1), to: new Date(year, endMonth, 0) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allKpis, quartersComDado, anchorDate, latestYear]);
 
   return (
     <motion.div
@@ -252,7 +280,7 @@ const DashboardHeader = ({
                       </span>
                     </span>
                   ) : (
-                    <span className="text-muted-foreground">Selecionar loja...</span>
+                    <span className="text-muted-foreground">Todas as lojas da sua carteira</span>
                   )}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -273,6 +301,17 @@ const DashboardHeader = ({
                   <CommandList>
                     <CommandEmpty>Nenhuma loja encontrada.</CommandEmpty>
                     <CommandGroup>
+                      <CommandItem
+                        value="Todas as lojas da sua carteira consolidado"
+                        onSelect={() => {
+                          onSellerChange("");
+                          setStoreOpen(false);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", !selectedSeller ? "opacity-100 text-neon-blue" : "opacity-0")} />
+                        <span className="font-medium">Todas as lojas da sua carteira</span>
+                      </CommandItem>
                       {sellers.map((s) => (
                         <CommandItem
                           key={s.id}
@@ -280,7 +319,6 @@ const DashboardHeader = ({
                           onSelect={() => {
                             onSellerChange(s.id);
                             setStoreOpen(false);
-                            setActivePeriod("q1"); // Reset period on seller change
                           }}
                           className="cursor-pointer"
                         >
@@ -309,8 +347,11 @@ const DashboardHeader = ({
                 <button
                   key={qr.key}
                   onClick={() => handleQuickRange(qr)}
+                  disabled={!quartersComDado.has(qr.key)}
+                  title={quartersComDado.has(qr.key) ? undefined : `Sem dados disponíveis para ${qr.label}`}
                   className={cn(
                     "px-2.5 py-1.5 text-[11px] font-medium rounded-md transition-all",
+                    !quartersComDado.has(qr.key) && "opacity-40 cursor-not-allowed",
                     activePeriod === qr.key
                       ? "bg-primary/15 text-primary shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -320,12 +361,6 @@ const DashboardHeader = ({
                 </button>
               ))}
             </div>
-
-            {periodWarning && (
-              <span className="text-[10px] text-warning bg-warning/10 border border-warning/20 px-2 py-1 rounded-md whitespace-nowrap">
-                ⚠ {periodWarning}
-              </span>
-            )}
 
             <button
               onClick={() => {
@@ -398,13 +433,22 @@ const DashboardHeader = ({
             {projections.map((p) =>
               <div key={p.days} className="text-center flex-1 min-w-0">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{p.days} dias</p>
-                <p className="font-mono font-bold text-xl sm:text-2xl emerald-text whitespace-nowrap">
-                  R$ {(p.value / 1000).toFixed(0)}K
-                </p>
-                <div className="flex items-center justify-center gap-1 mt-1">
-                  {clampedUplift >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-emerald" /> : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
-                  <span className={cn("text-xs font-medium", clampedUplift >= 0 ? "text-emerald" : "text-destructive")}>{clampedUplift >= 0 ? "+" : ""}{(clampedUplift * 100).toFixed(1)}%</span>
-                </div>
+                {temBaseProjecao ? (
+                  <>
+                    <p className="font-mono font-bold text-xl sm:text-2xl emerald-text whitespace-nowrap">
+                      R$ {(p.value / 1000).toFixed(0)}K
+                    </p>
+                    <div className="flex items-center justify-center gap-1 mt-1">
+                      {clampedUplift >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-emerald" /> : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
+                      <span className={cn("text-xs font-medium", clampedUplift >= 0 ? "text-emerald" : "text-destructive")}>{clampedUplift >= 0 ? "+" : ""}{(clampedUplift * 100).toFixed(1)}%</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-mono font-bold text-xl sm:text-2xl text-muted-foreground">—</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">sem base</p>
+                  </>
+                )}
               </div>
             )}
           </div>
