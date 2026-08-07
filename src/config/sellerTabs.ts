@@ -30,7 +30,7 @@ export type SellerTab = {
 export const SELLER_TABS: SellerTab[] = [
   { id: "efficiency", label: "Resumo", icon: DollarSign, order: 1,
     juniorTip: "Comece aqui. Dá a fotografia completa em uma tela." },
-  { id: "pock", label: "POCK", icon: Gauge, order: 2,
+  { id: "pock", label: "POCK", icon: Gauge, order: 1.5,
     juniorTip: "Diagnóstico POCK da loja: identidade, medidores de serviços, atendimento e evolução anual." },
   { id: "executive", label: "Faturamento", icon: LayoutDashboard, order: 2,
     juniorTip: "Analise tendências de GMV e eficiência dos Ads antes de qualquer reunião." },
