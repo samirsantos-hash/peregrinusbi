@@ -196,7 +196,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       {/* FAIXA 3 — Evolução ao longo do ano */}
       <section className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
         <h3 className="text-sm font-semibold">Evolução ao longo do ano</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3">
           <PockEvolucaoCard titulo="Evolução TGMV" pontos={pontos.tgmv} formato="moeda" cobertura={data?.cobertura.tgmv} />
           <PockEvolucaoCard titulo="Evolução LL" pontos={pontos.ll} cobertura={data?.cobertura.ll} />
           <PockEvolucaoCard
