@@ -1,45 +1,49 @@
 import { useMemo, useState } from "react";
-import { format, parseISO, subDays, isAfter, isBefore, startOfDay, differenceInCalendarDays, getDaysInMonth } from "date-fns";
+import {
+  format, parseISO, subDays, addDays, startOfDay, differenceInCalendarDays,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarDays, Plus, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { CalendarDays, TrendingUp, TrendingDown, Minus, Table2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import {
-  ResponsiveContainer, LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, ComposedChart, LineChart, Line, Area, XAxis, YAxis,
+  CartesianGrid, Tooltip, Legend, ReferenceLine,
 } from "recharts";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { DateRange } from "react-day-picker";
 
-const PERIOD_COLORS = ["hsl(190 95% 55%)", "hsl(45 95% 55%)", "hsl(265 85% 70%)"] as const;
-const MAX_PERIODS = 3;
-
-type Periodo = {
-  id: string;
-  label: string;
-  inicio: string; // YYYY-MM-DD
-  fim: string;    // YYYY-MM-DD
-  cor: string;
-};
+/* ────────────────────────────── tipos & config ────────────────────────────── */
 
 type KpiKey = "gmv" | "ads" | "roas" | "visits" | "tsi";
+type Modo = "diario" | "acumulado" | "comparar";
 
-const KPI_CONFIG: Record<KpiKey, { label: string; format: "currency" | "number" | "roas" }> = {
-  gmv: { label: "GMV", format: "currency" },
-  ads: { label: "Ads", format: "currency" },
-  roas: { label: "ROAS", format: "roas" },
-  visits: { label: "Visitas", format: "number" },
-  tsi: { label: "Vendas (TSI)", format: "number" },
+const KPI_CONFIG: Record<KpiKey, { label: string; format: "currency" | "number" | "roas"; aditivo: boolean }> = {
+  gmv: { label: "GMV", format: "currency", aditivo: true },
+  ads: { label: "Ads", format: "currency", aditivo: true },
+  roas: { label: "ROAS", format: "roas", aditivo: false },
+  visits: { label: "Visitas", format: "number", aditivo: true },
+  tsi: { label: "Vendas (TSI)", format: "number", aditivo: true },
 };
+
+const COR_SERIE = "hsl(var(--brand-blue))";
+const COR_ANTERIOR = "hsl(var(--muted-foreground) / 0.45)";
+const COR_MM7 = "hsl(var(--brand-purple))";
+const COR_TERCEIRA = "hsl(var(--text-muted))";
+const COR_GRID = "hsl(var(--border))";
 
 interface Daily7DPanelProps {
   dailyKpis: SellerKPI[];
   sellerNickname?: string;
 }
+
+/* ────────────────────────────── formatação ────────────────────────────── */
 
 const fmtBRLCompact = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(v || 0);
@@ -48,161 +52,249 @@ const fmtBRL = (v: number) =>
 const fmtInt = (v: number) => new Intl.NumberFormat("pt-BR").format(Math.round(v || 0));
 const fmtRoas = (v: number) => `${(v || 0).toFixed(2)}x`;
 
-function fmtKpi(v: number, format: "currency" | "number" | "roas", compact = false): string {
-  if (format === "roas") return fmtRoas(v);
-  if (format === "currency") return compact ? fmtBRLCompact(v) : fmtBRL(v);
+function fmtKpi(v: number | null, formato: "currency" | "number" | "roas", compact = false): string {
+  if (v === null || v === undefined || !Number.isFinite(v)) return "—";
+  if (formato === "roas") return fmtRoas(v);
+  if (formato === "currency") return compact ? fmtBRLCompact(v) : fmtBRL(v);
   return fmtInt(v);
 }
 
-function deltaPct(a: number, b: number): number {
-  if (!b) return 0;
-  return ((a - b) / b) * 100;
+const toISO = (d: Date) => format(d, "yyyy-MM-dd");
+const ddMM = (iso: string) => format(parseISO(iso), "dd/MM", { locale: ptBR });
+
+function mediana(vals: number[]): number {
+  if (!vals.length) return 0;
+  const s = [...vals].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 
-function DeltaBadge({ pct }: { pct: number }) {
-  const Icon = pct > 0.5 ? TrendingUp : pct < -0.5 ? TrendingDown : Minus;
-  const cls = pct > 0.5 ? "text-emerald-400" : pct < -0.5 ? "text-rose-400" : "text-muted-foreground";
+/** Regressão linear simples: retorna a inclinação por dia. */
+function inclinacao(pontos: { x: number; y: number }[]): number | null {
+  const n = pontos.length;
+  if (n < 2) return null;
+  const mx = pontos.reduce((s, p) => s + p.x, 0) / n;
+  const my = pontos.reduce((s, p) => s + p.y, 0) / n;
+  let num = 0, den = 0;
+  for (const p of pontos) {
+    num += (p.x - mx) * (p.y - my);
+    den += (p.x - mx) ** 2;
+  }
+  if (!den) return null;
+  return num / den;
+}
+
+/* ────────────────────────── small multiple (sparkline) ────────────────────────── */
+
+function MiniSerie({ valores, formato }: { valores: (number | null)[]; formato: "currency" | "number" | "roas" }) {
+  const largura = 100;
+  const altura = 40;
+  const validos = valores.filter((v): v is number => v !== null && Number.isFinite(v));
+  if (validos.length < 2) {
+    return <div className="h-[40px] flex items-end text-[10px] text-muted-foreground">sem série</div>;
+  }
+  const min = Math.min(...validos);
+  const max = Math.max(...validos);
+  const span = max - min || 1;
+  const dx = valores.length > 1 ? largura / (valores.length - 1) : largura;
+
+  const segmentos: string[] = [];
+  let atual: string[] = [];
+  valores.forEach((v, i) => {
+    if (v === null || !Number.isFinite(v)) {
+      if (atual.length > 1) segmentos.push(atual.join(" "));
+      atual = [];
+      return;
+    }
+    const x = i * dx;
+    const y = altura - 6 - ((v - min) / span) * (altura - 12);
+    atual.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  });
+  if (atual.length > 1) segmentos.push(atual.join(" "));
+
+  const ultimoIdx = [...valores].map((v, i) => ({ v, i })).filter((p) => p.v !== null).pop();
+  const ultimoValor = ultimoIdx?.v as number | undefined;
+
   return (
-    <span className={cn("inline-flex items-center gap-1 text-[11px] tnum lnum font-medium", cls)}>
-      <Icon className="w-3 h-3" />
-      {pct > 0 ? "+" : ""}{pct.toFixed(1)}%
-    </span>
+    <div className="flex items-end gap-1.5 mt-2">
+      <svg viewBox={`0 0 ${largura} ${altura}`} preserveAspectRatio="none" className="h-[40px] flex-1 min-w-0" aria-hidden>
+        {segmentos.map((s, i) => (
+          <polyline key={i} points={s} fill="none" stroke={COR_SERIE} strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        ))}
+      </svg>
+      {ultimoValor !== undefined && (
+        <span className="text-[10px] tnum lnum text-muted-foreground whitespace-nowrap">
+          {fmtKpi(ultimoValor, formato, true)}
+        </span>
+      )}
+    </div>
   );
 }
 
-function uid(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
-  return Math.random().toString(36).slice(2);
+/* ────────────────────────── rótulo direto no ponto final ────────────────────────── */
+
+function RotuloFinal({ texto }: { texto: string }) {
+  return function Render(props: any) {
+    const { x, y, index, data } = props;
+    if (data && index !== data.length - 1) return null;
+    if (x === undefined || y === undefined) return null;
+    return (
+      <text x={x + 6} y={y} dy={4} fontSize={10} fill="hsl(var(--muted-foreground))">
+        {texto}
+      </text>
+    );
+  };
 }
 
-function toISO(d: Date): string {
-  return format(d, "yyyy-MM-dd");
-}
-
-function shortRangeLabel(inicio: string, fim: string): string {
-  const a = format(parseISO(inicio), "dd/MM", { locale: ptBR });
-  const b = format(parseISO(fim), "dd/MM", { locale: ptBR });
-  return `${a} → ${b}`;
-}
-
-function buildPreset(label: string, inicio: Date, fim: Date, cor: string): Periodo {
-  return { id: uid(), label, inicio: toISO(inicio), fim: toISO(fim), cor };
-}
+/* ────────────────────────────── componente ────────────────────────────── */
 
 export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
-  // Sort & dedupe by date
-  const sorted = useMemo(() => {
+  const porData = useMemo(() => {
     const map = new Map<string, SellerKPI>();
     for (const k of dailyKpis || []) {
       const d = String(k.date || "").slice(0, 10);
       if (d) map.set(d, k);
     }
-    return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
+    return map;
   }, [dailyKpis]);
 
-  const minDate = sorted[0] ? parseISO(sorted[0].date) : undefined;
-  const maxDate = sorted[sorted.length - 1] ? parseISO(sorted[sorted.length - 1].date) : undefined;
+  const datasOrdenadas = useMemo(() => Array.from(porData.keys()).sort(), [porData]);
+  const minDate = datasOrdenadas[0] ? parseISO(datasOrdenadas[0]) : undefined;
+  const maxDate = datasOrdenadas.length ? parseISO(datasOrdenadas[datasOrdenadas.length - 1]) : undefined;
 
-  // Default: last 7 days
-  const [periodos, setPeriodos] = useState<Periodo[]>(() => {
+  const [janela, setJanela] = useState<{ inicio: string; fim: string }>(() => {
     const fim = maxDate ?? new Date();
-    const inicio = subDays(fim, 6);
-    return [buildPreset("Últimos 7 dias", inicio, fim, PERIOD_COLORS[0])];
+    return { inicio: toISO(subDays(fim, 6)), fim: toISO(fim) };
   });
-
   const [kpiAtivo, setKpiAtivo] = useState<KpiKey>("gmv");
+  const [modo, setModo] = useState<Modo>("diario");
+  const [comparados, setComparados] = useState<KpiKey[]>(["gmv"]);
+  const [avisoComparar, setAvisoComparar] = useState<string | null>(null);
+  const [mostrarAnterior, setMostrarAnterior] = useState(true);
+  const [verDados, setVerDados] = useState(false);
 
-  // Compute per-period data from existing dailyKpis
-  type PeriodoComputado = {
-    periodo: Periodo;
-    dias: Array<{ data: string; diaIndex: number; gmv: number; ads: number; roas: number; visits: number; tsi: number; tgmvPads: number }>;
-    totais: { gmv: number; ads: number; roas: number; visits: number; tsi: number };
-    totaisProjetados: { gmv: number; ads: number; roas: number; visits: number; tsi: number };
-    proRata: { factor: number; diasComDados: number; diasNoMes: number };
+  const valorDe = (iso: string, key: KpiKey): number | null => {
+    const k = porData.get(iso);
+    if (!k) return null;
+    switch (key) {
+      case "gmv": return Number(k.gmv) || 0;
+      case "ads": return Number(k.adsInvestment) || 0;
+      case "roas": return Number(k.roas) || 0;
+      case "visits": return Number(k.visits) || 0;
+      case "tsi": return Number(k.tsi) || 0;
+    }
   };
 
-  const dadosPorPeriodo: PeriodoComputado[] = useMemo(() => {
-    return periodos.map((p) => {
-      const start = startOfDay(parseISO(p.inicio));
-      const end = startOfDay(parseISO(p.fim));
-      const rows = sorted.filter((k) => {
-        const d = startOfDay(parseISO(k.date));
-        return !isBefore(d, start) && !isAfter(d, end);
-      });
-      const dias = rows.map((k, i) => ({
-        data: k.date,
-        diaIndex: i + 1,
-        gmv: k.gmv || 0,
-        ads: k.adsInvestment || 0,
-        roas: k.roas || 0,
-        visits: k.visits || 0,
-        tsi: k.tsi || 0,
-        tgmvPads: k.tgmvPads || 0,
-      }));
-      const sum = (key: keyof (typeof dias)[number]) =>
-        dias.reduce((s, d) => s + (Number(d[key]) || 0), 0);
-      const totalAds = sum("ads");
-      const totalPads = sum("tgmvPads");
-      const totais = {
-        gmv: sum("gmv"),
-        ads: totalAds,
-        roas: totalAds > 0 ? totalPads / totalAds : 0,
-        visits: sum("visits"),
-        tsi: sum("tsi"),
-      };
+  /** todas as datas da janela (inclusive dias sem dado) */
+  const datasJanela = useMemo(() => {
+    const ini = startOfDay(parseISO(janela.inicio));
+    const fim = startOfDay(parseISO(janela.fim));
+    const n = Math.max(0, differenceInCalendarDays(fim, ini));
+    return Array.from({ length: n + 1 }, (_, i) => toISO(addDays(ini, i)));
+  }, [janela]);
 
-      // Pro-rata: se o período termina no mês corrente do dataset e o mês
-      // está incompleto, projeta métricas aditivas para o mês inteiro usando
-      // dias_com_dados reais (não dias corridos).
-      const fimDate = parseISO(p.fim);
-      const fimMonthKey = format(fimDate, "yyyy-MM");
-      const maxMonthKey = maxDate ? format(maxDate, "yyyy-MM") : fimMonthKey;
-      const noMesCorrente = fimMonthKey === maxMonthKey;
-      const diasNoMes = getDaysInMonth(fimDate);
-      const diasComDados = sorted.filter((k) => String(k.date).slice(0, 7) === fimMonthKey).length;
-      const factor =
-        noMesCorrente && diasComDados > 0 && diasComDados < diasNoMes
-          ? diasNoMes / diasComDados
-          : 1;
-      const adsProj = totalAds * factor;
-      const padsProj = totalPads * factor;
-      const totaisProjetados = {
-        gmv: totais.gmv * factor,
-        ads: adsProj,
-        roas: adsProj > 0 ? padsProj / adsProj : 0,
-        visits: totais.visits * factor,
-        tsi: totais.tsi * factor,
-      };
-      return {
-        periodo: p,
-        dias,
-        totais,
-        totaisProjetados,
-        proRata: { factor, diasComDados, diasNoMes },
-      };
+  const datasAnteriores = useMemo(() => {
+    const len = datasJanela.length;
+    const fimAnt = subDays(parseISO(janela.inicio), 1);
+    return Array.from({ length: len }, (_, i) => toISO(subDays(fimAnt, len - 1 - i)));
+  }, [datasJanela, janela.inicio]);
+
+  const diasComDados = datasJanela.filter((d) => porData.has(d)).length;
+  const diasSemDados = datasJanela.length - diasComDados;
+
+  const cfg = KPI_CONFIG[kpiAtivo];
+
+  /** série principal + anterior + MM7 (MM7 usa histórico real anterior à janela) */
+  const serie = useMemo(() => {
+    const base = datasJanela.map((d, i) => ({
+      date: d,
+      dateAnt: datasAnteriores[i],
+      valor: valorDe(d, kpiAtivo),
+      anterior: valorDe(datasAnteriores[i], kpiAtivo),
+    }));
+    const comMM7 = base.map((p, i) => {
+      const janela7 = base.slice(Math.max(0, i - 6), i + 1)
+        .map((x) => x.valor).filter((v): v is number => v !== null);
+      const mm7 = i >= 6 && janela7.length >= 4
+        ? janela7.reduce((s, v) => s + v, 0) / janela7.length
+        : null;
+      return { ...p, mm7 };
     });
-  }, [periodos, sorted, maxDate]);
+    return comMM7;
+  }, [datasJanela, datasAnteriores, kpiAtivo, porData]);
 
-  const maxDias = Math.max(1, ...dadosPorPeriodo.map((p) => p.dias.length));
+  const valoresValidos = serie.map((p) => p.valor).filter((v): v is number => v !== null);
+  const medianaJanela = mediana(valoresValidos);
+  const limiteOutlier = medianaJanela * 3;
 
-  const chartData = useMemo(() => {
-    return Array.from({ length: maxDias }, (_, i) => {
-      const ponto: Record<string, any> = { dia: `D${i + 1}` };
-      dadosPorPeriodo.forEach((p) => {
-        const d = p.dias[i];
-        ponto[p.periodo.id] = d ? d[kpiAtivo] : null;
+  /** tendência: regressão sobre a MM7, normalizada em % semanal */
+  const tendencia = useMemo(() => {
+    if (diasComDados < 14) return null;
+    const pts = serie
+      .map((p, i) => ({ x: i, y: p.mm7 }))
+      .filter((p): p is { x: number; y: number } => p.y !== null && Number.isFinite(p.y));
+    const slope = inclinacao(pts);
+    if (slope === null) return null;
+    const media = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+    if (!media) return null;
+    return (slope / media) * 100 * 7;
+  }, [serie, diasComDados]);
+
+  /** acumulado */
+  const acumulado = useMemo(() => {
+    let soma = 0;
+    return serie.map((p) => {
+      if (p.valor !== null) soma += p.valor;
+      return { date: p.date, acumulado: soma };
+    });
+  }, [serie]);
+
+  const totalAcumulado = acumulado.length ? acumulado[acumulado.length - 1].acumulado : 0;
+
+  /** comparação em índice base 100 */
+  const dadosComparacao = useMemo(() => {
+    const bases: Partial<Record<KpiKey, number>> = {};
+    comparados.forEach((k) => {
+      const primeiro = datasJanela.map((d) => valorDe(d, k)).find((v) => v !== null && v !== 0);
+      bases[k] = primeiro ?? 0;
+    });
+    return datasJanela.map((d) => {
+      const ponto: Record<string, any> = { date: d };
+      comparados.forEach((k) => {
+        const v = valorDe(d, k);
+        const base = bases[k] || 0;
+        ponto[k] = v === null || !base ? null : (v / base) * 100;
       });
       return ponto;
     });
-  }, [dadosPorPeriodo, kpiAtivo, maxDias]);
+  }, [datasJanela, comparados, porData]);
 
-  const kpiCfg = KPI_CONFIG[kpiAtivo];
   const yFmt = (v: number) =>
-    kpiCfg.format === "currency" ? fmtBRLCompact(v) :
-    kpiCfg.format === "roas" ? `${v.toFixed(1)}x` :
+    cfg.format === "currency" ? fmtBRLCompact(v) :
+    cfg.format === "roas" ? `${v.toFixed(1)}x` :
     new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v);
 
-  if (sorted.length === 0) return null;
+  function toggleComparado(k: KpiKey) {
+    setAvisoComparar(null);
+    if (comparados.includes(k)) {
+      if (comparados.length === 1) return;
+      setComparados(comparados.filter((x) => x !== k));
+      return;
+    }
+    if (comparados.length >= 3) {
+      setAvisoComparar("Máximo de 3 séries em índice base 100. Remova uma para adicionar outra.");
+      return;
+    }
+    setComparados([...comparados, k]);
+  }
+
+  if (datasOrdenadas.length === 0) return null;
+
+  const estilosComparacao: Array<{ cor: string; dash?: string }> = [
+    { cor: COR_SERIE },
+    { cor: COR_MM7, dash: "6 3" },
+    { cor: COR_TERCEIRA, dash: "2 3" },
+  ];
 
   return (
     <Card className="glass-card">
@@ -215,15 +307,14 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                 <Badge variant="secondary" className="text-[10px] font-normal">{sellerNickname}</Badge>
               )}
             </CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
-              {periodos.length === 1
-                ? `${shortRangeLabel(periodos[0].inicio, periodos[0].fim)} • ${dadosPorPeriodo[0]?.dias.length ?? 0} dia(s) com dados`
-                : `Comparando ${periodos.length} períodos`}
+            <p className="text-xs text-muted-foreground mt-1 tnum lnum">
+              {ddMM(janela.inicio)} → {ddMM(janela.fim)} · {diasComDados} {diasComDados === 1 ? "dia" : "dias"} com dados
+              {diasSemDados > 0 && ` · ${diasSemDados} sem dado`}
             </p>
           </div>
-          <PeriodPicker
-            periodos={periodos}
-            onChange={setPeriodos}
+          <JanelaPicker
+            janela={janela}
+            onChange={setJanela}
             minDate={minDate}
             maxDate={maxDate}
           />
@@ -231,342 +322,447 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
       </CardHeader>
 
       <CardContent className="space-y-5">
-        {/* KPI cards with comparison */}
+        {/* Small multiples */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
           {(Object.keys(KPI_CONFIG) as KpiKey[]).map((key) => {
-            const cfg = KPI_CONFIG[key];
-            const principal = dadosPorPeriodo[0];
+            const c = KPI_CONFIG[key];
+            const valores = datasJanela.map((d) => valorDe(d, key));
+            const validos = valores.filter((v): v is number => v !== null);
+            const total = c.aditivo
+              ? validos.reduce((s, v) => s + v, 0)
+              : validos.length ? validos.reduce((s, v) => s + v, 0) / validos.length : 0;
             const ativo = kpiAtivo === key;
-            const principalFactor = principal?.proRata.factor ?? 1;
-            const isProj = principalFactor > 1;
             return (
               <button
                 key={key}
                 onClick={() => setKpiAtivo(key)}
+                aria-pressed={ativo}
                 className={cn(
-                  "rounded-lg border p-3 text-left transition-all",
+                  "rounded-lg border p-3 text-left transition-colors",
                   ativo
-                    ? "bg-primary/10 border-primary/40 ring-1 ring-primary/30"
+                    ? "border-[hsl(var(--brand-blue))]"
                     : "bg-card/40 border-border/40 hover:bg-card/60",
                 )}
-                title={
-                  isProj && principal
-                    ? `Projeção pro-rata: ${principal.proRata.diasComDados}d de ${principal.proRata.diasNoMes}d (fator ${principalFactor.toFixed(2)}x)`
-                    : undefined
-                }
+                style={ativo ? { background: "hsl(var(--brand-blue) / 0.12)" } : undefined}
               >
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                  <span>{cfg.label}</span>
-                  {isProj && (
-                    <span className="text-[9px] text-muted-foreground/80 normal-case tracking-normal">
-                      · proj.
-                    </span>
-                  )}
+                  <span>{c.label}</span>
+                  {!c.aditivo && <span className="normal-case tracking-normal text-[9px]">· média</span>}
                 </div>
-                <div className="text-base font-semibold tnum lnum mt-1" style={{ color: principal?.periodo.cor }}>
-                  {fmtKpi(principal?.totaisProjetados[key] ?? 0, cfg.format, true)}
+                <div className="text-base font-semibold tnum lnum mt-1 text-foreground">
+                  {fmtKpi(total, c.format, true)}
                 </div>
-                <div className="mt-1.5 space-y-1">
-                  {dadosPorPeriodo.slice(1).map((p) => {
-                    const base = principal?.totaisProjetados[key] ?? 0;
-                    const val = p.totaisProjetados[key];
-                    const delta = deltaPct(base, val); // principal vs this period
-                    return (
-                      <div key={p.periodo.id} className="flex items-center justify-between gap-2">
-                        <span className="flex items-center gap-1 text-[10px] text-muted-foreground truncate">
-                          <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: p.periodo.cor }} />
-                          <span className="truncate">{fmtKpi(val, cfg.format, true)}</span>
-                        </span>
-                        <DeltaBadge pct={delta} />
-                      </div>
-                    );
-                  })}
-                  {dadosPorPeriodo.length === 1 && (
-                    <div className="text-[10px] text-muted-foreground">
-                      {shortRangeLabel(principal.periodo.inicio, principal.periodo.fim)}
-                    </div>
-                  )}
-                </div>
+                <MiniSerie valores={valores} formato={c.format} />
               </button>
             );
           })}
         </div>
 
-        {/* Period legend */}
-        {dadosPorPeriodo.length > 1 && (
-          <div className="flex flex-wrap gap-3 text-xs">
-            {dadosPorPeriodo.map((p) => (
-              <div key={p.periodo.id} className="flex items-center gap-2">
-                <span className="w-3 h-0.5 rounded" style={{ background: p.periodo.cor }} />
-                <span className="font-medium text-foreground">{p.periodo.label}</span>
-                <span className="text-muted-foreground">
-                  ({shortRangeLabel(p.periodo.inicio, p.periodo.fim)} • {p.dias.length}d)
-                </span>
-              </div>
-            ))}
+        {/* Controles do gráfico grande */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <ToggleGroup
+            type="single"
+            value={modo}
+            onValueChange={(v) => v && setModo(v as Modo)}
+            size="sm"
+          >
+            <ToggleGroupItem value="diario" className="text-[11px] h-7 px-2.5">Diário</ToggleGroupItem>
+            <ToggleGroupItem value="acumulado" className="text-[11px] h-7 px-2.5">Acumulado</ToggleGroupItem>
+            <ToggleGroupItem value="comparar" className="text-[11px] h-7 px-2.5">Comparar KPIs</ToggleGroupItem>
+          </ToggleGroup>
+
+          <div className="flex items-center gap-3">
+            {modo === "diario" && (
+              <label className="flex items-center gap-1.5 text-[11px] text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={mostrarAnterior}
+                  onChange={(e) => setMostrarAnterior(e.target.checked)}
+                  className="accent-[hsl(var(--brand-blue))]"
+                />
+                Período anterior
+              </label>
+            )}
+            <Button variant="outline" size="sm" className="h-7 text-[11px] gap-1.5" onClick={() => setVerDados((v) => !v)}>
+              <Table2 className="w-3.5 h-3.5" />
+              {verDados ? "Ocultar dados" : "Ver dados"}
+            </Button>
+          </div>
+        </div>
+
+        {/* Bloco de tendência */}
+        {modo !== "comparar" && (
+          <div className="flex justify-end">
+            <TooltipProvider delayDuration={200}>
+              <UiTooltip>
+                <TooltipTrigger asChild>
+                  <div className="rounded-lg border border-border/60 bg-card/40 px-3 py-2 text-right cursor-help">
+                    <div className="text-[9px] uppercase tracking-wider text-muted-foreground flex items-center justify-end gap-1">
+                      Tendência
+                      <span className="rounded border border-border px-1 text-[8px] uppercase text-muted-foreground">der.</span>
+                    </div>
+                    {tendencia === null ? (
+                      <>
+                        <div className="text-sm font-semibold tnum lnum text-foreground">—</div>
+                        <div className="text-[10px] text-muted-foreground">dados insuficientes para tendência</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-sm font-semibold tnum lnum text-foreground flex items-center justify-end gap-1.5">
+                          {tendencia > 0 ? "+" : ""}
+                          {tendencia.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% / semana
+                          {tendencia > 0.5 ? <TrendingUp className="w-3.5 h-3.5" /> : tendencia < -0.5 ? <TrendingDown className="w-3.5 h-3.5" /> : <Minus className="w-3.5 h-3.5" />}
+                          <span className="text-[10px] font-normal text-muted-foreground">
+                            {tendencia > 0.5 ? "subindo" : tendencia < -0.5 ? "caindo" : "estável"}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">base: média móvel de 7 dias</div>
+                      </>
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[300px] text-xs">
+                  Derivado — inclinação da regressão linear sobre a média móvel de 7 dias da janela,
+                  normalizada em % sobre a média do período e multiplicada por 7 (variação semanal).
+                  Requer 14+ dias com dados.
+                </TooltipContent>
+              </UiTooltip>
+            </TooltipProvider>
           </div>
         )}
 
-        {/* Multi-line chart */}
-        <div className="h-[280px] w-full">
+        {/* Gráfico grande */}
+        <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.3)" />
-              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis
-                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
-                tickFormatter={yFmt}
-                width={70}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: 8,
-                  fontSize: 12,
-                }}
-                formatter={(value: any, name: string) => {
-                  const p = dadosPorPeriodo.find((x) => x.periodo.id === name);
-                  const lbl = p?.periodo.label ?? name;
-                  if (value === null || value === undefined) return ["—", lbl];
-                  return [fmtKpi(Number(value), kpiCfg.format), lbl];
-                }}
-              />
-              <Legend
-                wrapperStyle={{ fontSize: 11 }}
-                formatter={(value: string) => {
-                  const p = dadosPorPeriodo.find((x) => x.periodo.id === value);
-                  return <span style={{ color: "hsl(var(--foreground))" }}>{p?.periodo.label ?? value}</span>;
-                }}
-              />
-              {dadosPorPeriodo.map((p) => (
-                <Line
-                  key={p.periodo.id}
-                  type="monotone"
-                  dataKey={p.periodo.id}
-                  name={p.periodo.id}
-                  stroke={p.periodo.cor}
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: p.periodo.cor }}
-                  activeDot={{ r: 5 }}
-                  connectNulls
+            {modo === "diario" ? (
+              <ComposedChart data={serie} margin={{ top: 8, right: 56, bottom: 0, left: 0 }}>
+                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  tickFormatter={yFmt}
+                  width={72}
+                  stroke={COR_GRID}
+                  domain={cfg.format === "currency" ? [0, "auto"] : ["auto", "auto"]}
                 />
-              ))}
-            </LineChart>
+                <Tooltip
+                  cursor={{ stroke: COR_GRID, strokeWidth: 1 }}
+                  content={({ active, payload, label }: any) => {
+                    if (!active || !payload?.length) return null;
+                    const p = payload[0]?.payload;
+                    const outlier = p?.valor !== null && limiteOutlier > 0 && p?.valor > limiteOutlier;
+                    return (
+                      <div className="rounded-lg border border-border bg-card p-2.5 text-xs space-y-1 shadow-lg tnum lnum">
+                        <p className="font-semibold text-foreground">{format(parseISO(label), "dd/MM/yyyy")}</p>
+                        <p className="text-foreground">{cfg.label}: {fmtKpi(p?.valor ?? null, cfg.format)}</p>
+                        {mostrarAnterior && (
+                          <p className="text-muted-foreground">
+                            Período anterior ({p?.dateAnt ? ddMM(p.dateAnt) : "—"}): {fmtKpi(p?.anterior ?? null, cfg.format)}
+                          </p>
+                        )}
+                        <p className="text-muted-foreground">Média móvel 7d: {fmtKpi(p?.mm7 ?? null, cfg.format)}</p>
+                        {outlier && <p className="text-foreground">⚠︎ possível dia parcial (acima de 3× a mediana da janela)</p>}
+                      </div>
+                    );
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} />
+                {mostrarAnterior && (
+                  <Line
+                    type="linear"
+                    dataKey="anterior"
+                    name="Período anterior"
+                    stroke={COR_ANTERIOR}
+                    strokeWidth={2}
+                    dot={false}
+                    connectNulls={false}
+                    isAnimationActive={false}
+                  />
+                )}
+                {diasComDados >= 14 && (
+                  <Line
+                    type="linear"
+                    dataKey="mm7"
+                    name="Média móvel 7d"
+                    stroke={COR_MM7}
+                    strokeWidth={2}
+                    strokeDasharray="6 3"
+                    dot={false}
+                    connectNulls={false}
+                    isAnimationActive={false}
+                  />
+                )}
+                <Line
+                  type="linear"
+                  dataKey="valor"
+                  name={cfg.label}
+                  stroke={COR_SERIE}
+                  strokeWidth={2}
+                  connectNulls={false}
+                  isAnimationActive={false}
+                  dot={(props: any) => {
+                    const { cx, cy, payload, index } = props;
+                    if (cx === undefined || cy === undefined || payload?.valor === null) {
+                      return <g key={`d-${index}`} />;
+                    }
+                    const outlier = limiteOutlier > 0 && payload.valor > limiteOutlier;
+                    return (
+                      <g key={`d-${index}`}>
+                        {outlier && <circle cx={cx} cy={cy} r={9} fill="none" stroke={COR_SERIE} strokeWidth={1.5} />}
+                        <circle cx={cx} cy={cy} r={4} fill={COR_SERIE} />
+                      </g>
+                    );
+                  }}
+                  activeDot={{ r: 5 }}
+                />
+              </ComposedChart>
+            ) : modo === "acumulado" ? (
+              <ComposedChart data={acumulado} margin={{ top: 8, right: 56, bottom: 0, left: 0 }}>
+                <defs>
+                  <linearGradient id="acumGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="hsl(var(--brand-blue))" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="hsl(var(--brand-blue))" stopOpacity={0.2} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  tickFormatter={yFmt}
+                  width={72}
+                  stroke={COR_GRID}
+                  domain={[0, "auto"]}
+                />
+                <Tooltip
+                  cursor={{ stroke: COR_GRID, strokeWidth: 1 }}
+                  content={({ active, payload, label }: any) => {
+                    if (!active || !payload?.length) return null;
+                    return (
+                      <div className="rounded-lg border border-border bg-card p-2.5 text-xs shadow-lg tnum lnum">
+                        <p className="font-semibold text-foreground">{format(parseISO(label), "dd/MM/yyyy")}</p>
+                        <p className="text-foreground">Acumulado: {fmtKpi(payload[0]?.value ?? null, cfg.format)}</p>
+                      </div>
+                    );
+                  }}
+                />
+                <Area
+                  type="linear"
+                  dataKey="acumulado"
+                  name={`${cfg.label} acumulado`}
+                  stroke={COR_SERIE}
+                  strokeWidth={2}
+                  fill="url(#acumGrad)"
+                  isAnimationActive={false}
+                />
+              </ComposedChart>
+            ) : (
+              <LineChart data={dadosComparacao} margin={{ top: 8, right: 64, bottom: 0, left: 0 }}>
+                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
+                <YAxis
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  width={72}
+                  stroke={COR_GRID}
+                  label={{ value: "Índice (base 100)", angle: -90, position: "insideLeft", fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                />
+                <ReferenceLine y={100} stroke={COR_GRID} strokeWidth={1} />
+                <Tooltip
+                  cursor={{ stroke: COR_GRID, strokeWidth: 1 }}
+                  content={({ active, payload, label }: any) => {
+                    if (!active || !payload?.length) return null;
+                    return (
+                      <div className="rounded-lg border border-border bg-card p-2.5 text-xs space-y-1 shadow-lg tnum lnum">
+                        <p className="font-semibold text-foreground">{format(parseISO(label), "dd/MM/yyyy")}</p>
+                        {comparados.map((k) => {
+                          const v = payload.find((x: any) => x.dataKey === k)?.value;
+                          return (
+                            <p key={k} className="text-foreground">
+                              {KPI_CONFIG[k].label}: {v === null || v === undefined ? "—" : `${Number(v).toLocaleString("pt-BR", { maximumFractionDigits: 1 })} (índice)`}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    );
+                  }}
+                />
+                <Legend wrapperStyle={{ fontSize: 11 }} formatter={(v: string) => KPI_CONFIG[v as KpiKey]?.label ?? v} />
+                {comparados.map((k, i) => (
+                  <Line
+                    key={k}
+                    type="linear"
+                    dataKey={k}
+                    name={k}
+                    stroke={estilosComparacao[i].cor}
+                    strokeDasharray={estilosComparacao[i].dash}
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    connectNulls={false}
+                    isAnimationActive={false}
+                    label={RotuloFinal({ texto: KPI_CONFIG[k].label })({ data: dadosComparacao }) as any}
+                  />
+                ))}
+              </LineChart>
+            )}
           </ResponsiveContainer>
         </div>
+
+        {/* Rótulos diretos (modo comparar) — codificação secundária obrigatória */}
+        {modo === "comparar" && (
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {(Object.keys(KPI_CONFIG) as KpiKey[]).map((k) => {
+                const idx = comparados.indexOf(k);
+                const ativo = idx >= 0;
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => toggleComparado(k)}
+                    className={cn(
+                      "text-[11px] rounded-md border px-2 py-1 transition-colors",
+                      ativo ? "border-foreground/40 text-foreground" : "border-border/50 text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      {ativo && (
+                        <svg width="18" height="6" aria-hidden>
+                          <line
+                            x1="0" y1="3" x2="18" y2="3"
+                            stroke={estilosComparacao[idx].cor}
+                            strokeWidth={2}
+                            strokeDasharray={estilosComparacao[idx].dash}
+                          />
+                        </svg>
+                      )}
+                      {KPI_CONFIG[k].label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Eixo em índice base 100 (primeiro dia com dado = 100), não em valor absoluto. Máximo de 3 séries.
+            </p>
+            {avisoComparar && <p className="text-[11px] text-foreground">{avisoComparar}</p>}
+          </div>
+        )}
+
+        {/* Número-herói do modo acumulado */}
+        {modo === "acumulado" && (
+          <div className="rounded-lg border border-border/60 bg-card/40 p-3">
+            <p className="text-sm font-semibold tnum lnum text-foreground">
+              {fmtKpi(totalAcumulado, cfg.format)} acumulados · meta não definida
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              Sem meta definida para o período: a linha de ritmo necessário não é exibida.
+              Janela de {datasJanela.length} dias, {diasComDados} com dados.
+            </p>
+          </div>
+        )}
+
+        {/* Tabela alternativa acessível */}
+        {verDados && (
+          <div className="overflow-x-auto rounded-lg border border-border/60">
+            <table className="w-full text-xs tnum lnum">
+              <caption className="sr-only">Série diária de {cfg.label}</caption>
+              <thead className="bg-muted/30 text-muted-foreground">
+                <tr>
+                  <th scope="col" className="text-left px-2 py-1.5 font-medium">Data</th>
+                  <th scope="col" className="text-right px-2 py-1.5 font-medium">{cfg.label}</th>
+                  <th scope="col" className="text-right px-2 py-1.5 font-medium">Período anterior</th>
+                  <th scope="col" className="text-right px-2 py-1.5 font-medium">MM7</th>
+                </tr>
+              </thead>
+              <tbody>
+                {serie.map((p) => (
+                  <tr key={p.date} className="border-t border-border/40">
+                    <td className="px-2 py-1 text-foreground">{format(parseISO(p.date), "dd/MM/yyyy")}</td>
+                    <td className="px-2 py-1 text-right text-foreground">{fmtKpi(p.valor, cfg.format)}</td>
+                    <td className="px-2 py-1 text-right text-muted-foreground">{fmtKpi(p.anterior, cfg.format)}</td>
+                    <td className="px-2 py-1 text-right text-muted-foreground">{fmtKpi(p.mm7, cfg.format)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
 
-/* ──────────────────────────────────────────────────────────────────────── */
-/* Period picker — popover with presets + range calendar + active list      */
-/* ──────────────────────────────────────────────────────────────────────── */
+/* ────────────────────────── seletor de janela ────────────────────────── */
 
-function PeriodPicker({
-  periodos,
+function JanelaPicker({
+  janela,
   onChange,
   minDate,
   maxDate,
 }: {
-  periodos: Periodo[];
-  onChange: (p: Periodo[]) => void;
+  janela: { inicio: string; fim: string };
+  onChange: (j: { inicio: string; fim: string }) => void;
   minDate?: Date;
   maxDate?: Date;
 }) {
   const [open, setOpen] = useState(false);
   const [range, setRange] = useState<DateRange | undefined>(undefined);
+  const hoje = maxDate ?? new Date();
 
-  const today = maxDate ?? new Date();
-  const nextColor = PERIOD_COLORS[periodos.length % PERIOD_COLORS.length];
-
-  const presets: Array<{ label: string; build: () => Periodo }> = [
-    { label: "Últ. 7 dias", build: () => buildPreset("Últ. 7 dias", subDays(today, 6), today, nextColor) },
-    { label: "Últ. 14 dias", build: () => buildPreset("Últ. 14 dias", subDays(today, 13), today, nextColor) },
-    { label: "Últ. 30 dias", build: () => buildPreset("Últ. 30 dias", subDays(today, 29), today, nextColor) },
-    {
-      label: "Mês atual",
-      build: () => {
-        const inicio = new Date(today.getFullYear(), today.getMonth(), 1);
-        return buildPreset(
-          format(inicio, "MMM yyyy", { locale: ptBR }),
-          inicio, today, nextColor,
-        );
-      },
-    },
-    {
-      label: "Mês anterior",
-      build: () => {
-        const inicio = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-        const fim = new Date(today.getFullYear(), today.getMonth(), 0);
-        return buildPreset(
-          format(inicio, "MMM yyyy", { locale: ptBR }),
-          inicio, fim, nextColor,
-        );
-      },
-    },
-    {
-      label: "Período anterior (espelhado)",
-      build: () => {
-        // Mirror the first period's length immediately before it
-        if (periodos.length === 0) {
-          return buildPreset("Últ. 7 dias", subDays(today, 6), today, nextColor);
-        }
-        const first = periodos[0];
-        const aStart = parseISO(first.inicio);
-        const aEnd = parseISO(first.fim);
-        const len = differenceInCalendarDays(aEnd, aStart);
-        const fim = subDays(aStart, 1);
-        const inicio = subDays(fim, len);
-        return buildPreset(
-          `${format(inicio, "dd/MM")} → ${format(fim, "dd/MM")}`,
-          inicio, fim, nextColor,
-        );
-      },
-    },
+  const presets = [
+    { label: "Últ. 7 dias", dias: 7 },
+    { label: "Últ. 14 dias", dias: 14 },
+    { label: "Últ. 30 dias", dias: 30 },
+    { label: "Últ. 90 dias", dias: 90 },
   ];
-
-  function add(p: Periodo) {
-    if (periodos.length >= MAX_PERIODS) return;
-    onChange([...periodos, p]);
-  }
-
-  function remove(id: string) {
-    onChange(periodos.filter((p) => p.id !== id));
-  }
-
-  function updateLabel(id: string, label: string) {
-    onChange(periodos.map((p) => (p.id === id ? { ...p, label } : p)));
-  }
-
-  function addCustomRange() {
-    if (!range?.from || !range?.to) return;
-    const inicio = range.from;
-    const fim = range.to;
-    add(buildPreset(
-      `${format(inicio, "dd/MM")} → ${format(fim, "dd/MM")}`,
-      inicio, fim, nextColor,
-    ));
-    setRange(undefined);
-  }
-
-  const atMax = periodos.length >= MAX_PERIODS;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button type="button" variant="outline" size="sm" className="h-9 px-3 text-xs gap-2 max-w-[460px]">
+        <Button type="button" variant="outline" size="sm" className="h-9 px-3 text-xs gap-2">
           <CalendarDays className="w-3.5 h-3.5" />
-          {periodos.length === 0 ? (
-            <span className="text-muted-foreground">Selecionar período</span>
-          ) : (
-            <span className="flex items-center gap-1.5 truncate">
-              {periodos.map((p) => (
-                <span key={p.id} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted/50 max-w-[120px]">
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: p.cor }} />
-                  <span className="truncate">{p.label}</span>
-                </span>
-              ))}
-              {!atMax && (
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-dashed border-primary/40 text-primary">
-                  <Plus className="w-3 h-3" />
-                  Comparar
-                </span>
-              )}
-            </span>
-          )}
+          <span className="tnum lnum">{ddMM(janela.inicio)} → {ddMM(janela.fim)}</span>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[380px] p-0" align="end">
-        <div className="p-3 border-b border-border space-y-2">
-          <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
-            Períodos ativos ({periodos.length}/{MAX_PERIODS})
-          </div>
-          {periodos.length === 0 && (
-            <div className="text-xs text-muted-foreground italic">Nenhum período selecionado.</div>
-          )}
-          {periodos.map((p) => (
-            <div key={p.id} className="flex items-center gap-2 rounded-md bg-muted/40 px-2 py-1.5">
-              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: p.cor }} />
-              <input
-                value={p.label}
-                onChange={(e) => updateLabel(p.id, e.target.value)}
-                className="flex-1 bg-transparent text-xs outline-none text-foreground min-w-0"
-              />
-              <span className="text-[10px] text-muted-foreground tnum lnum whitespace-nowrap">
-                {shortRangeLabel(p.inicio, p.fim)}
-              </span>
-              <button
-                type="button"
-                onClick={() => remove(p.id)}
-                className="text-muted-foreground hover:text-destructive transition-colors"
-                aria-label="Remover período"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            </div>
+      <PopoverContent className="w-[320px] p-3 space-y-3" align="end">
+        <div className="grid grid-cols-2 gap-1.5">
+          {presets.map((p) => (
+            <button
+              key={p.label}
+              type="button"
+              onClick={() => {
+                onChange({ inicio: toISO(subDays(hoje, p.dias - 1)), fim: toISO(hoje) });
+                setOpen(false);
+              }}
+              className="text-[11px] rounded-md px-2 py-1.5 text-left border border-border/50 bg-muted/30 hover:bg-muted/60 transition-colors"
+            >
+              {p.label}
+            </button>
           ))}
         </div>
-
-        {!atMax && (
-          <div className="p-3 space-y-3">
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium flex items-center gap-1.5">
-              <Plus className="w-3 h-3" />
-              {periodos.length === 0 ? "Período principal" : "Adicionar comparação"}
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {presets.map((ps) => (
-                <button
-                  key={ps.label}
-                  type="button"
-                  onClick={() => add(ps.build())}
-                  className="text-[11px] rounded-md px-2 py-1.5 text-left border border-border/50 bg-muted/30 hover:bg-muted/60 transition-colors"
-                  style={{ borderLeft: `3px solid ${nextColor}`, color: nextColor }}
-                >
-                  {ps.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="pt-2 border-t border-border">
-              <div className="text-[10px] text-muted-foreground mb-1">Ou intervalo personalizado:</div>
-              <Calendar
-                mode="range"
-                selected={range}
-                onSelect={setRange}
-                numberOfMonths={1}
-                disabled={(date) => {
-                  if (!minDate || !maxDate) return false;
-                  return isBefore(date, startOfDay(minDate)) || isAfter(date, startOfDay(maxDate));
-                }}
-                defaultMonth={maxDate}
-                locale={ptBR}
-                className={cn("p-0 pointer-events-auto")}
-              />
-              {range?.from && range?.to && (
-                <Button
-                  size="sm"
-                  className="w-full mt-2 h-8 text-xs"
-                  onClick={addCustomRange}
-                >
-                  Adicionar {format(range.from, "dd/MM")} → {format(range.to, "dd/MM")}
-                </Button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {atMax && (
-          <div className="p-3 text-xs text-muted-foreground italic">
-            Máximo de {MAX_PERIODS} períodos. Remova um para adicionar outro.
-          </div>
-        )}
-
-        <div className="p-3 border-t border-border flex justify-end">
-          <Button size="sm" className="h-8 text-xs" onClick={() => setOpen(false)}>
-            Aplicar
-          </Button>
+        <div className="pt-2 border-t border-border">
+          <div className="text-[10px] text-muted-foreground mb-1">Ou intervalo personalizado:</div>
+          <Calendar
+            mode="range"
+            selected={range}
+            onSelect={setRange}
+            numberOfMonths={1}
+            defaultMonth={maxDate}
+            locale={ptBR}
+            className="p-0 pointer-events-auto"
+          />
+          {range?.from && range?.to && (
+            <Button
+              size="sm"
+              className="w-full mt-2 h-8 text-xs"
+              onClick={() => {
+                onChange({ inicio: toISO(range.from!), fim: toISO(range.to!) });
+                setRange(undefined);
+                setOpen(false);
+              }}
+            >
+              Aplicar {format(range.from, "dd/MM")} → {format(range.to, "dd/MM")}
+            </Button>
+          )}
         </div>
       </PopoverContent>
     </Popover>
