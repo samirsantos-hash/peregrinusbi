@@ -111,8 +111,8 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       {/* FAIXA 1 — Identidade e diagnóstico */}
       <section className="rounded-xl border border-border bg-card/40 p-4 space-y-4">
         <h3 className="text-sm font-semibold">Identidade e diagnóstico</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-          <div className="lg:col-span-3 rounded-lg border border-border p-3">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 lg:gap-4">
+          <div className="md:col-span-6 lg:col-span-3 rounded-lg border border-border p-3">
             <p className="text-[11px] font-semibold mb-2">Detalhes do Vendedor</p>
             <Linha rotulo="Seller" valor={nickname} />
             <Linha rotulo="Segmento" valor={segmento} />
@@ -122,14 +122,14 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
             <Linha rotulo="Seller ID" valor={custId ? String(custId) : null} />
           </div>
 
-          <div className="lg:col-span-2">
+          <div className="md:col-span-3 lg:col-span-2">
             <Heroi
               titulo="Taxa de Venda"
               legenda="Crescimento do vendedor em comparação ao seu mercado de atuação."
               valor={null}
             />
           </div>
-          <div className="lg:col-span-2">
+          <div className="md:col-span-3 lg:col-span-2">
             <Heroi
               titulo="Favorabilidade"
               legenda="Qualidade de preço dos produtos do vendedor."
@@ -137,22 +137,19 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
             />
           </div>
 
-          <div className="lg:col-span-5 rounded-lg border border-border p-3 space-y-3">
+          <div className="md:col-span-12 lg:col-span-5 rounded-lg border border-border p-3 space-y-3">
             <p className="text-[11px] font-semibold">Serviços · escala fixa 0–100</p>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-x-2 gap-y-4">
               <PockGauge valor={s?.scoreBbf ?? null} rotulo="Qualidade de Publicações" fonte="SCORE_FINAL_BBF" />
               <PockGauge valor={s?.usoCentralPromocoes ?? null} rotulo="Uso de Central de Promoções" fonte="derivado CDP" />
               <PockGauge valor={s?.scoreFull ?? null} rotulo="Uso de Fulfillment" fonte="SCORE_FINAL_FULL" />
-            </div>
-            <div className="grid grid-cols-3 gap-3">
               <PockGauge valor={s?.scorePads ?? null} rotulo="Grau de Investimento em PADS" fonte="SCORE_FINAL_PADS" />
               <PockGauge valor={s?.scoreIntegradores ?? null} rotulo="Utilização de Integradores" fonte="SCORE_FINAL_INTEGRADORES" />
-              <div />
             </div>
             <LegendaFaixas />
           </div>
 
-          <div className="lg:col-span-4 lg:col-start-4 rounded-lg border border-border p-3">
+          <div className="md:col-span-12 lg:col-span-7 lg:col-start-1 rounded-lg border border-border p-3">
             <div className="flex items-center justify-between gap-2">
               <p className="text-[11px] font-semibold">Recomendação</p>
               <span className="text-[10px] rounded-full border border-border px-2 py-0.5 text-muted-foreground">
@@ -199,7 +196,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       {/* FAIXA 3 — Evolução ao longo do ano */}
       <section className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
         <h3 className="text-sm font-semibold">Evolução ao longo do ano</h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3">
           <PockEvolucaoCard titulo="Evolução TGMV" pontos={pontos.tgmv} formato="moeda" cobertura={data?.cobertura.tgmv} />
           <PockEvolucaoCard titulo="Evolução LL" pontos={pontos.ll} cobertura={data?.cobertura.ll} />
           <PockEvolucaoCard
