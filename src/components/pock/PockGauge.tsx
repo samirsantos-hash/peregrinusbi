@@ -45,8 +45,8 @@ export default function PockGauge({ valor, rotulo, fonte }: Props) {
   const Icon = meta.Icon;
 
   return (
-    <div className="flex flex-col items-center text-center gap-1.5 min-w-0">
-      <div className="relative w-[84px] h-[84px] lg:w-[96px] lg:h-[96px]">
+    <div className="flex h-full w-full min-w-0 flex-col items-center gap-1.5 text-center">
+      <div className="relative w-[76px] h-[76px] lg:w-[88px] lg:h-[88px] shrink-0">
         <svg viewBox="0 0 84 84" className="w-full h-full -rotate-90">
           <circle cx="42" cy="42" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
           <circle
@@ -66,12 +66,14 @@ export default function PockGauge({ valor, rotulo, fonte }: Props) {
           </span>
         </div>
       </div>
-      <p className="text-[11px] lg:text-xs leading-tight font-medium max-w-[140px] break-words">{rotulo}</p>
-      <span className="inline-flex items-start gap-1 text-[10px] lg:text-[11px] leading-tight" style={{ color: valor === null ? undefined : cor }}>
+      <p className="w-full text-[11px] lg:text-xs leading-tight font-medium break-words hyphens-auto">{rotulo}</p>
+      <span className="inline-flex w-full items-start justify-center gap-1 text-[10px] lg:text-[11px] leading-tight" style={{ color: valor === null ? undefined : cor }}>
         <Icon className="w-3 h-3 shrink-0" />
-        <span className={valor === null ? "text-muted-foreground" : ""}>{meta.rotulo}</span>
+        <span className={cn("min-w-0 break-words", valor === null && "text-muted-foreground")}>{meta.rotulo}</span>
       </span>
-      {fonte && <span className="text-[10px] text-muted-foreground">{fonte}</span>}
+      {fonte && (
+        <span className="mt-auto w-full break-all text-[9px] lg:text-[10px] leading-tight text-muted-foreground">{fonte}</span>
+      )}
     </div>
   );
 }

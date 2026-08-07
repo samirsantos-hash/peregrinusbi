@@ -139,7 +139,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
 
           <div className="md:col-span-12 lg:col-span-5 rounded-lg border border-border p-3 space-y-3">
             <p className="text-[11px] font-semibold">Serviços · escala fixa 0–100</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-x-2 gap-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-x-3 gap-y-4 items-start">
               <PockGauge valor={s?.scoreBbf ?? null} rotulo="Qualidade de Publicações" fonte="SCORE_FINAL_BBF" />
               <PockGauge valor={s?.usoCentralPromocoes ?? null} rotulo="Uso de Central de Promoções" fonte="derivado CDP" />
               <PockGauge valor={s?.scoreFull ?? null} rotulo="Uso de Fulfillment" fonte="SCORE_FINAL_FULL" />
