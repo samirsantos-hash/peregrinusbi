@@ -13,10 +13,10 @@
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 96%;
 
-    --primary: 199 100% 50%;
+    --primary: 210 53% 55%;
     --primary-foreground: 222 84% 5%;
 
-    --secondary: 160 84% 39%;
+    --secondary: 167 60% 39%;
     --secondary-foreground: 222 84% 5%;
 
     --muted: 215 25% 14%;
@@ -25,9 +25,12 @@
     /* Rodapé institucional — contraste verificado >= 4,5:1 */
     --surface-alt: 215 25% 14%;
     --text-muted: 215 20% 58%;
-    --brand-blue: 224 76% 70%;
+    /* Paleta 60/30/10 — navy #151F6D · azul #4E8AC9 · verde #29A084 */
+    --brand-navy: 233 67% 62%;
+    --brand-blue: 210 53% 60%;
+    --brand-accent: 167 60% 45%;
 
-    --accent: 160 84% 39%;
+    --accent: 167 60% 39%;
     --accent-foreground: 222 84% 5%;
 
     --destructive: 0 84% 60%;
@@ -35,20 +38,20 @@
 
     --border: 215 25% 16%;
     --input: 215 25% 16%;
-    --ring: 199 100% 50%;
+    --ring: 210 53% 55%;
 
     --radius: 0.75rem;
 
-    --chart-1: 199 100% 50%;
-    --chart-2: 160 84% 39%;
-    --chart-3: 280 80% 60%;
+    --chart-1: 210 53% 60%;
+    --chart-2: 233 67% 62%;
+    --chart-3: 167 60% 45%;
     --chart-4: 40 95% 55%;
     --chart-5: 0 84% 60%;
 
-    --neon-blue: 199 100% 50%;
-    --neon-blue-glow: 199 100% 60%;
-    --emerald: 160 84% 39%;
-    --emerald-glow: 160 84% 50%;
+    --neon-blue: 210 53% 60%;
+    --neon-blue-glow: 210 53% 70%;
+    --emerald: 167 60% 45%;
+    --emerald-glow: 167 60% 55%;
     --warning: 40 95% 55%;
 
     /* POCK — escala de status em 4 faixas (0-25 / 25-50 / 50-75 / 75-100) */
@@ -56,18 +59,18 @@
     --warn: 40 95% 55%;
     --warn-soft: 14 74% 76%;      /* #EFA893 */
     --ok: 160 84% 39%;
-    --brand-purple: 280 80% 68%;
+    --brand-purple: 233 67% 62%;
     --glass: 222 47% 8%;
     --glass-border: 215 25% 18%;
 
     --sidebar-background: 222 47% 6%;
     --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 199 100% 50%;
+    --sidebar-primary: 210 53% 60%;
     --sidebar-primary-foreground: 222 84% 5%;
     --sidebar-accent: 215 25% 14%;
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 215 25% 16%;
-    --sidebar-ring: 199 100% 50%;
+    --sidebar-ring: 210 53% 60%;
   }
 
   .light {
@@ -80,10 +83,10 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 199 89% 42%;
+    --primary: 233 67% 25%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 160 84% 32%;
+    --secondary: 210 45% 55%;
     --secondary-foreground: 0 0% 100%;
 
     --muted: 210 40% 94%;
@@ -91,9 +94,11 @@
 
     --surface-alt: 210 40% 94%;
     --text-muted: 215 16% 40%;
-    --brand-blue: 232 68% 32%;
+    --brand-navy: 233 67% 25%;
+    --brand-blue: 210 53% 45%;
+    --brand-accent: 167 60% 39%;
 
-    --accent: 160 84% 32%;
+    --accent: 167 60% 39%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 50%;
@@ -101,30 +106,36 @@
 
     --border: 215 20% 86%;
     --input: 215 20% 86%;
-    --ring: 199 89% 42%;
+    --ring: 233 67% 25%;
 
-    --neon-blue: 199 89% 42%;
-    --neon-blue-glow: 199 89% 55%;
-    --emerald: 160 84% 32%;
-    --emerald-glow: 160 84% 40%;
+    --chart-1: 210 53% 45%;
+    --chart-2: 233 67% 25%;
+    --chart-3: 167 60% 39%;
+    --chart-4: 32 95% 44%;
+    --chart-5: 0 72% 50%;
+
+    --neon-blue: 210 53% 45%;
+    --neon-blue-glow: 210 53% 55%;
+    --emerald: 167 60% 39%;
+    --emerald-glow: 167 60% 48%;
     --warning: 32 95% 44%;
 
     --crit: 0 72% 50%;
     --warn: 32 95% 44%;
     --warn-soft: 14 56% 59%;      /* #D4785A */
     --ok: 160 84% 32%;
-    --brand-purple: 280 62% 45%;
+    --brand-purple: 233 67% 25%;
     --glass: 0 0% 100%;
     --glass-border: 215 20% 86%;
 
     --sidebar-background: 210 40% 96%;
     --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 199 89% 42%;
+    --sidebar-primary: 233 67% 25%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 210 40% 92%;
     --sidebar-accent-foreground: 222 47% 11%;
     --sidebar-border: 215 20% 86%;
-    --sidebar-ring: 199 89% 42%;
+    --sidebar-ring: 233 67% 25%;
   }
 }
 
