@@ -465,6 +465,11 @@ const Diretoria = ({ d, delta }: { d: Ctx; delta: (a: number, b: number) => numb
         </ResponsiveContainer>
       </Card>
 
+      <GmvMesVsMes
+        pontos={d.serieTotal.map((s) => ({ date: s.dia, gmv: s.gmv }))}
+        titulo="GMV mês vs mês (comparação anual)"
+      />
+
       <div className="grid gap-3 lg:grid-cols-2">
         <Card title="Cascata do resultado">
           <ResponsiveContainer width="100%" height={240}>
