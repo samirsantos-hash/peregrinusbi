@@ -301,6 +301,17 @@ const DashboardHeader = ({
                   <CommandList>
                     <CommandEmpty>Nenhuma loja encontrada.</CommandEmpty>
                     <CommandGroup>
+                      <CommandItem
+                        value="Todas as lojas da sua carteira consolidado"
+                        onSelect={() => {
+                          onSellerChange("");
+                          setStoreOpen(false);
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <Check className={cn("mr-2 h-4 w-4", !selectedSeller ? "opacity-100 text-neon-blue" : "opacity-0")} />
+                        <span className="font-medium">Todas as lojas da sua carteira</span>
+                      </CommandItem>
                       {sellers.map((s) => (
                         <CommandItem
                           key={s.id}
@@ -308,7 +319,6 @@ const DashboardHeader = ({
                           onSelect={() => {
                             onSellerChange(s.id);
                             setStoreOpen(false);
-                            setActivePeriod("q1"); // Reset period on seller change
                           }}
                           className="cursor-pointer"
                         >
@@ -337,8 +347,11 @@ const DashboardHeader = ({
                 <button
                   key={qr.key}
                   onClick={() => handleQuickRange(qr)}
+                  disabled={!quartersComDado.has(qr.key)}
+                  title={quartersComDado.has(qr.key) ? undefined : `Sem dados disponíveis para ${qr.label}`}
                   className={cn(
                     "px-2.5 py-1.5 text-[11px] font-medium rounded-md transition-all",
+                    !quartersComDado.has(qr.key) && "opacity-40 cursor-not-allowed",
                     activePeriod === qr.key
                       ? "bg-primary/15 text-primary shadow-sm"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -348,12 +361,6 @@ const DashboardHeader = ({
                 </button>
               ))}
             </div>
-
-            {periodWarning && (
-              <span className="text-[10px] text-warning bg-warning/10 border border-warning/20 px-2 py-1 rounded-md whitespace-nowrap">
-                ⚠ {periodWarning}
-              </span>
-            )}
 
             <button
               onClick={() => {
