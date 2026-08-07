@@ -10,6 +10,7 @@ import { usePerfilMultilojas } from "@/hooks/multilojas/usePerfilMultilojas";
 import { carregarPedidos, listarCargas, diagnosticoDaBase } from "@/lib/multilojas/persist";
 import FiltersBar, { type Filtros } from "@/components/multilojas/FiltersBar";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
+import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
 import type { Diagnostico, PedidoML } from "@/lib/multilojas/parse";
 import { rangeDias } from "@/lib/multilojas/parse";
 import {
@@ -208,10 +209,15 @@ const Multilojas = () => {
     const prev = aplicarFiltros(dados.pedidos, prevIni, prevFim, filtros.cancelados);
     const prevCanc = aplicarFiltros(dados.pedidos, prevIni, prevFim, true).filter((p) => p.canc);
 
+    /* Série completa da base (ignora só o recorte de datas) — usada na
+     * comparação mês a mês, que precisa de todos os meses disponíveis. */
+    const baseTotal = aplicarFiltros(dados.pedidos, dados.diag.ini, dados.diag.fim, filtros.cancelados);
+
     return {
       ini, fim, dias, base, canc, prev,
       a: agregar(base, canc), p: agregar(prev, prevCanc),
       serie: serieDiaria(base, ini, fim),
+      serieTotal: serieDiaria(baseTotal, dados.diag.ini, dados.diag.fim),
     };
   }, [dados, filtros]);
 
@@ -389,6 +395,7 @@ type Ctx = NonNullable<ReturnType<typeof useCtxType>>;
 function useCtxType() { return null as null | {
   ini: string; fim: string; dias: string[]; base: PedidoML[]; canc: PedidoML[]; prev: PedidoML[];
   a: Agg; p: Agg; serie: { dia: string; gmv: number }[];
+  serieTotal: { dia: string; gmv: number }[];
 }; }
 
 /* ═══════════════ 3.1 Diretoria ═══════════════ */
@@ -457,6 +464,11 @@ const Diretoria = ({ d, delta }: { d: Ctx; delta: (a: number, b: number) => numb
           </ComposedChart>
         </ResponsiveContainer>
       </Card>
+
+      <GmvMesVsMes
+        pontos={d.serieTotal.map((s) => ({ date: s.dia, gmv: s.gmv }))}
+        titulo="GMV mês vs mês (comparação anual)"
+      />
 
       <div className="grid gap-3 lg:grid-cols-2">
         <Card title="Cascata do resultado">

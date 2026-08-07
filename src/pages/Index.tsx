@@ -25,6 +25,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
 import { Daily7DPanel } from "@/components/dashboard/Daily7DPanel";
+import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
@@ -510,6 +511,13 @@ const Index = () => {
                     <Daily7DPanel
                       dailyKpis={allKpisDaily}
                       sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
+                    />
+                    <GmvMesVsMes
+                      pontos={(allKpisDaily.length ? allKpisDaily : allKpisMonthly).map((k: any) => ({
+                        date: String(k.date || "").slice(0, 10),
+                        gmv: Number(k.gmv ?? k.revenue ?? 0),
+                      }))}
+                      titulo="GMV mês vs mês (comparação anual)"
                     />
                     <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
                     <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} />
