@@ -962,6 +962,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ingestao_execucoes: {
+        Row: {
+          arquivo: string
+          erro: string | null
+          feed: string
+          finalizado_em: string | null
+          id: string
+          iniciado_em: string
+          linhas_gravadas: number | null
+          linhas_lidas: number | null
+          status: string
+        }
+        Insert: {
+          arquivo: string
+          erro?: string | null
+          feed: string
+          finalizado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          linhas_gravadas?: number | null
+          linhas_lidas?: number | null
+          status: string
+        }
+        Update: {
+          arquivo?: string
+          erro?: string | null
+          feed?: string
+          finalizado_em?: string | null
+          id?: string
+          iniciado_em?: string
+          linhas_gravadas?: number | null
+          linhas_lidas?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
       live_listings: {
         Row: {
           categoria: string | null
@@ -1492,6 +1528,54 @@ export type Database = {
           email?: string
           id?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      raw_cdp_mensal: {
+        Row: {
+          arquivo_origem: string
+          cus_cust_id_sel: string
+          dados: Json
+          importado_em: string
+          tim_month_id: string
+        }
+        Insert: {
+          arquivo_origem: string
+          cus_cust_id_sel: string
+          dados: Json
+          importado_em?: string
+          tim_month_id: string
+        }
+        Update: {
+          arquivo_origem?: string
+          cus_cust_id_sel?: string
+          dados?: Json
+          importado_em?: string
+          tim_month_id?: string
+        }
+        Relationships: []
+      }
+      raw_cpp_mensal: {
+        Row: {
+          arquivo_origem: string
+          cus_cust_id_sel: string
+          dados: Json
+          importado_em: string
+          tim_month_id: string
+        }
+        Insert: {
+          arquivo_origem: string
+          cus_cust_id_sel: string
+          dados: Json
+          importado_em?: string
+          tim_month_id: string
+        }
+        Update: {
+          arquivo_origem?: string
+          cus_cust_id_sel?: string
+          dados?: Json
+          importado_em?: string
+          tim_month_id?: string
         }
         Relationships: []
       }
@@ -2423,6 +2507,47 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
       ml_pode_carregar: { Args: never; Returns: boolean }
+      qualidade_divergencias: {
+        Args: { _mes: string }
+        Returns: {
+          cust_id: string
+          em_cdp: boolean
+          em_cpp: boolean
+          nickname: string
+          vinculado: boolean
+        }[]
+      }
+      qualidade_feeds_por_mes: {
+        Args: never
+        Returns: {
+          ambos: number
+          mes: string
+          sem_vinculo: number
+          so_cdp: number
+          so_cpp: number
+        }[]
+      }
+      qualidade_nulos_criticos: {
+        Args: never
+        Returns: {
+          coluna: string
+          feed: string
+          nulos: number
+          pct_nulo: number
+          total: number
+        }[]
+      }
+      qualidade_ultimo_import: {
+        Args: never
+        Returns: {
+          arquivo: string
+          feed: string
+          importado_em: string
+          linhas: number
+          meses: number
+          sellers: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "gerente" | "gestor_loja"
