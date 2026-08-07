@@ -326,7 +326,7 @@ const Index = () => {
 
   const isLoading =
     !sellersFetched ||
-    (hasRealData && (isConsolidado ? loadingCarteira : loadingKpis || loadingDailyKpis));
+    (hasRealData && !isConsolidado && (loadingKpis || loadingDailyKpis));
 
   // Indicadores agregados para o Guia do Consultor (junior banners)
   const dadosJunior = useMemo(() => {
