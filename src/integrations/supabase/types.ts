@@ -2507,6 +2507,47 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
       ml_pode_carregar: { Args: never; Returns: boolean }
+      qualidade_divergencias: {
+        Args: { _mes: string }
+        Returns: {
+          cust_id: string
+          em_cdp: boolean
+          em_cpp: boolean
+          nickname: string
+          vinculado: boolean
+        }[]
+      }
+      qualidade_feeds_por_mes: {
+        Args: never
+        Returns: {
+          ambos: number
+          mes: string
+          sem_vinculo: number
+          so_cdp: number
+          so_cpp: number
+        }[]
+      }
+      qualidade_nulos_criticos: {
+        Args: never
+        Returns: {
+          coluna: string
+          feed: string
+          nulos: number
+          pct_nulo: number
+          total: number
+        }[]
+      }
+      qualidade_ultimo_import: {
+        Args: never
+        Returns: {
+          arquivo: string
+          feed: string
+          importado_em: string
+          linhas: number
+          meses: number
+          sellers: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "gerente" | "gestor_loja"
