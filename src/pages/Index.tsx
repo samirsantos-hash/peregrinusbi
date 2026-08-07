@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound, TrendingUp, Sun, Moon, Store, Menu } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import NewBadge from "@/components/ui/NewBadge";
 import {
@@ -16,7 +16,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { type DateRange } from "react-day-picker";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
@@ -83,36 +82,6 @@ function formatDateString(date: Date): string {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
-
-/* Sound Toggle Button */
-const SoundToggleButton = () => {
-  const { soundEnabled, toggleSound, playClick } = useSoundFeedback();
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9"
-          aria-label={soundEnabled ? "Desativar sons do painel" : "Ativar sons do painel"}
-          onClick={() => {
-            toggleSound();
-            if (!soundEnabled) playClick(); // Play sound when enabling
-          }}
-        >
-          {soundEnabled ? (
-            <Volume2 className="w-4 h-4 text-neon-blue" />
-          ) : (
-            <VolumeX className="w-4 h-4 text-muted-foreground" />
-          )}
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>Ativar/Desativar sons de confirmação</p>
-      </TooltipContent>
-    </Tooltip>
-  );
-};
 
 const Index = () => {
   const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
@@ -418,7 +387,6 @@ const Index = () => {
               {theme === "dark" ? <Sun className="w-4 h-4 text-neon-blue" /> : <Moon className="w-4 h-4 text-neon-blue" />}
               <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Noire"}</span>
             </Button>
-            <SoundToggleButton />
             {(isAdmin || isGerente || isGestorLoja) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
                 <Store className="w-4 h-4" />
