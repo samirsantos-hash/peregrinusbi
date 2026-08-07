@@ -119,14 +119,6 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
     };
   }, [kpis, hasCampaignData, campaign]);
 
-  if (kpis.length === 0) {
-    return (
-      <div className="glass-card p-5 text-center text-muted-foreground text-sm">
-        Dados insuficientes para análise de potencial de crescimento.
-      </div>
-    );
-  }
-
   // ---------------------------------------------------------------
   // 6 dimensões vs categoria (com índice relativo à mediana ou referência)
   // ---------------------------------------------------------------
@@ -257,6 +249,14 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
   }, [dims]);
 
   const temGapOculto = deltaGeral >= 10 && dims.some(d => indiceParaDelta(d.indice, d.sentido) < -20);
+
+  if (kpis.length === 0) {
+    return (
+      <div className="glass-card p-5 text-center text-muted-foreground text-sm">
+        Dados insuficientes para análise de potencial de crescimento.
+      </div>
+    );
+  }
 
   const formatValor = (v: number, u: Dimensao["unidade"]) => {
     if (u === "R$") return fmtBRLCompact(v);

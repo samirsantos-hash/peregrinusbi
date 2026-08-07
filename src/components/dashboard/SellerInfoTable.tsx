@@ -14,6 +14,8 @@ interface Props {
 }
 
 const SellerInfoTable = ({ seller, allKpis }: Props) => {
+  const { data: lojas } = useClassificacaoLojas();
+
   if (!seller) return null;
 
   const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort() as string[];
@@ -26,7 +28,6 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     tempoPrograma = `${months} ${months === 1 ? "mês" : "meses"}`;
   }
 
-  const { data: lojas } = useClassificacaoLojas();
   const loja = lojas?.find((l) => l.sellerId === seller.id);
   const tierLabels: Record<1 | 2 | 3, string> = {
     1: "Tier 1 · Platinum",
