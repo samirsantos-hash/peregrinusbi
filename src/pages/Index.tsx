@@ -63,7 +63,6 @@ import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
 import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 import PublicidadePanel from "@/components/seller/PublicidadePanel";
-import AccessScopeBadge from "@/components/AccessScopeBadge";
 import SellerDiagnosticPanel from "@/components/dashboard/SellerDiagnosticPanel";
 import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
@@ -443,8 +442,6 @@ const Index = () => {
             </AlertDialog>
           </div>
         </motion.div>
-
-        <AccessScopeBadge />
 
         {isLoading &&
           <div className="flex items-center justify-center py-12">
