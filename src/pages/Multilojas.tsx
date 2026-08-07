@@ -22,13 +22,22 @@ import {
 } from "@/lib/multilojas/stats";
 import { UF_INFO, POP_TOTAL } from "@/lib/geoBrasil";
 
-const COLORS = ["hsl(var(--primary))", "#C9A227", "#2E7D5B", "#5B7396", "#B23A48", "#7C5BA6"];
+/* Paleta 60/30/10 — Navy domina, Blue apoia, Green é acento.
+ * Vermelho fica reservado a valores negativos/alertas. */
+const COLORS = [
+  "hsl(var(--brand-navy))",
+  "hsl(var(--brand-blue))",
+  "hsl(var(--brand-accent))",
+  "hsl(var(--muted-foreground))",
+  "hsl(var(--destructive))",
+  "hsl(var(--brand-blue) / 0.6)",
+];
 
 /* ───────── primitives ───────── */
 const Card = ({ title, hint, children, className = "" }: { title?: string; hint?: string; children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-xl border border-border/50 bg-card/60 p-4 ${className}`}>
+  <div className={`rounded-xl border border-border/50 bg-card/60 p-4 lg:p-5 min-w-0 ${className}`}>
     {title && (
-      <h3 className="text-xs font-semibold text-foreground mb-3 flex items-center">
+      <h3 className="text-xs lg:text-[13px] font-semibold text-foreground mb-3 flex items-center gap-1">
         {title}{hint && <TooltipInfo text={hint} />}
       </h3>
     )}
@@ -37,11 +46,11 @@ const Card = ({ title, hint, children, className = "" }: { title?: string; hint?
 );
 
 const Kpi = ({ label, value, delta, hint }: { label: string; value: string; delta?: number; hint?: string }) => (
-  <div className="rounded-lg border border-border/40 bg-card/50 p-3">
-    <div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center">
+  <div className="rounded-lg border border-border/40 bg-card/50 p-3 min-w-0">
+    <div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1 leading-tight">
       {label}{hint && <TooltipInfo text={hint} />}
     </div>
-    <div className="text-lg font-semibold tabular-nums mt-0.5">{value}</div>
+    <div className="text-lg lg:text-xl font-semibold tabular-nums mt-1 truncate">{value}</div>
     {delta !== undefined && Number.isFinite(delta) && (
       <div className={`text-[11px] tabular-nums ${delta >= 0 ? "text-emerald" : "text-destructive"}`}>
         {fDelta(delta)} vs período anterior
