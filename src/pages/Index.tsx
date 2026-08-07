@@ -323,10 +323,6 @@ const Index = () => {
     setIsRefreshing(false);
   }, [queryClient, selectedSeller]);
 
-  // Ordem lógica de análise — ver src/config/sellerTabs.ts
-  // 1–3: "como está indo?" | 4–6: "por que?" | 7–9: "o que fazer?"
-  const tabs = SELLER_TABS;
-
   // Map seller UUID -> custId for external links
   const sellerCustIdMap = useMemo(() => {
     const map: Record<string, string> = {};
