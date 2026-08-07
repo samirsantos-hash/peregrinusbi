@@ -32,6 +32,17 @@ function detectFeed(path: string): Feed | null {
 
 const stripBom = (s: string) => s.replace(/^\uFEFF/, "");
 
+/**
+ * Chave do seller: CPP traz "3294245579,0" (float BR) e CDP traz "82935283".
+ * Sempre TEXTO — o ID estoura int32 e perde precisão como float.
+ * Remove sufixo decimal (",0" / ".0") e qualquer caractere não numérico.
+ */
+function normalizeKey(raw: string): string {
+  const v = (raw ?? "").trim().replace(/^"|"$/g, "");
+  if (v === "") return "";
+  return v.replace(/[.,]\d+$/, "").replace(/\D/g, "");
+}
+
 function parseLine(line: string, delimiter: string): string[] {
   const out: string[] = [];
   let cur = "";
@@ -148,8 +159,8 @@ Deno.serve(async (req) => {
           `Linha ${i + 1}: ${cols.length} colunas, esperado ${header.length}. Importação abortada — nenhuma linha gravada.`,
         );
       }
-      const cust = (cols[iCust] ?? "").trim().split(".")[0];
-      const month = (cols[iMonth] ?? "").trim().split(".")[0];
+      const cust = normalizeKey(cols[iCust] ?? "");
+      const month = normalizeKey(cols[iMonth] ?? "");
       if (!cust || !month) {
         return await fail(`Linha ${i + 1}: CUS_CUST_ID_SEL ou TIM_MONTH_ID vazio. Importação abortada.`);
       }
