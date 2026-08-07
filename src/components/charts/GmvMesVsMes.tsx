@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import {
   ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend,
+  CartesianGrid, Tooltip, Legend, ReferenceLine,
 } from "recharts";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -40,6 +40,9 @@ const fBRL = (v: number) =>
 const fDelta = (v: number) =>
   Number.isFinite(v) ? `${v >= 0 ? "+" : ""}${(v * 100).toFixed(1)}%` : "—";
 
+const fIndice = (v: number) =>
+  Number.isFinite(v) ? v.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : "—";
+
 /** Compara o GMV de dois meses dia a dia (barras = mês base, linha = mês de comparação). */
 export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", className = "" }: Props) {
   const porMes = useMemo(() => {
@@ -59,7 +62,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
 
   const [mesA, setMesA] = useState<string>("");
   const [mesB, setMesB] = useState<string>("");
-  const [modo, setModo] = useState<"diario" | "acumulado">("diario");
+  const [modo, setModo] = useState<"diario" | "acumulado" | "indice">("diario");
 
   useEffect(() => {
     if (!meses.length) return;
@@ -88,6 +91,14 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
       const vb = b?.get(dia) ?? null;
       accA += va ?? 0;
       accB += vb ?? 0;
+      if (modo === "indice") {
+        // Base 100: mês comparado = 100 em cada dia (acumulado), mês base indexado sobre ele.
+        return {
+          dia: String(dia).padStart(2, "0"),
+          base: accB > 0 ? (accA / accB) * 100 : null,
+          comp: accB > 0 ? 100 : null,
+        };
+      }
       return {
         dia: String(dia).padStart(2, "0"),
         base: modo === "acumulado" ? (va === null && accA === 0 ? null : accA) : va,
