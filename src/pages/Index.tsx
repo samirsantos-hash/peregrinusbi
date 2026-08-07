@@ -476,7 +476,11 @@ const Index = () => {
               onPeriodChange={handlePeriodChange}
             />
 
-            <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
+            <DiagnosticAlerts
+              kpis={displayKpis}
+              sellerCustIdMap={sellerCustIdMap}
+              seller={sellers.find((s) => s.id === selectedSeller) || null}
+            />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-start gap-0 lg:gap-5">
