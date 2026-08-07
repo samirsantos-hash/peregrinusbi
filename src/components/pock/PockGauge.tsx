@@ -46,7 +46,7 @@ export default function PockGauge({ valor, rotulo, fonte }: Props) {
 
   return (
     <div className="flex flex-col items-center text-center gap-1.5 min-w-0">
-      <div className="relative w-[84px] h-[84px]">
+      <div className="relative w-[72px] h-[72px] sm:w-[84px] sm:h-[84px]">
         <svg viewBox="0 0 84 84" className="w-full h-full -rotate-90">
           <circle cx="42" cy="42" r={r} fill="none" stroke="hsl(var(--border))" strokeWidth="8" />
           <circle
@@ -66,8 +66,8 @@ export default function PockGauge({ valor, rotulo, fonte }: Props) {
           </span>
         </div>
       </div>
-      <p className="text-[11px] leading-tight font-medium max-w-[120px]">{rotulo}</p>
-      <span className="inline-flex items-center gap-1 text-[10px]" style={{ color: valor === null ? undefined : cor }}>
+      <p className="text-[10px] sm:text-[11px] leading-tight font-medium max-w-[130px] break-words">{rotulo}</p>
+      <span className="inline-flex items-start gap-1 text-[9px] sm:text-[10px] leading-tight" style={{ color: valor === null ? undefined : cor }}>
         <Icon className="w-3 h-3 shrink-0" />
         <span className={valor === null ? "text-muted-foreground" : ""}>{meta.rotulo}</span>
       </span>
