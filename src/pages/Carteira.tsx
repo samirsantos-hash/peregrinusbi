@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCarteiraData, type CarteiraDataset, type CarteiraSeller } from "@/hooks/carteira/useCarteiraData";
 import { UploadCarteiraPanel, useCarteiraUpload } from "@/components/carteira/UploadCarteiraPanel";
+import QualidadeFeeds from "@/components/dados/QualidadeFeeds";
 import {
   describe, abc, linreg, movingAverage, histogram, median,
   fmtBRL, fmtBRLShort, fmtInt, fmtPct, type DescriptiveStats,
@@ -1204,6 +1205,7 @@ const TABS = [
   { id: "stats", label: "Análise estatística" },
   { id: "grant", label: "Grant / Renovação" },
   { id: "lojas", label: "Loja a loja" },
+  { id: "qualidade", label: "Qualidade dos dados" },
 ];
 
 /* ═══════════════ Painel reutilizável ═══════════════ */
