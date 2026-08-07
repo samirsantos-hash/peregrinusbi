@@ -1,4 +1,5 @@
-import logo from "@/assets/logo.png";
+import logoEscuro from "@/assets/logo-dark.png";
+import logoClaro from "@/assets/logo-light.png";
 import { useTheme } from "@/hooks/useTheme";
 
 /**
@@ -17,16 +18,12 @@ export default function RodapeInstitucional() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Coluna 1 — logo */}
         <div className="flex items-start">
-          {theme === "light" ? (
-            <span
-              className="inline-flex items-center rounded"
-              style={{ backgroundColor: "#151F6D", padding: "10px 14px" }}
-            >
-              <img src={logo} alt="ECOM CONSULT" className="h-7 w-auto" loading="lazy" />
-            </span>
-          ) : (
-            <img src={logo} alt="ECOM CONSULT" className="h-7 w-auto" loading="lazy" />
-          )}
+          <img
+            src={theme === "light" ? logoEscuro : logoClaro}
+            alt="ECOM CONSULT"
+            className="h-7 w-auto"
+            loading="lazy"
+          />
         </div>
 
         {/* Coluna 2 — confidencialidade */}
