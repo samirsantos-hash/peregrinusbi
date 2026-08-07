@@ -18,7 +18,7 @@ export default function AccessScopeBadge() {
     return (
       <div className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-md border border-primary/30 bg-primary/5 text-primary w-fit">
         <ShieldCheck className="w-3.5 h-3.5" />
-        <span className="font-semibold">Acesso total (admin)</span>
+        <span className="font-semibold">Acesso total</span>
         <span className="text-muted-foreground">
           · {allowedSellers.length} loja(s) no sistema
         </span>
@@ -46,9 +46,9 @@ export default function AccessScopeBadge() {
         className="w-full flex items-center gap-2 px-3 py-1.5 text-emerald hover:bg-emerald/10 transition-colors rounded-md"
       >
         <ShieldCheck className="w-3.5 h-3.5" />
-        <span className="font-semibold">Escopo de acesso</span>
+        <span className="font-semibold">Sua carteira</span>
         <span className="text-muted-foreground">
-          · Você pode visualizar {total} loja(s)
+          · {total} loja(s)
         </span>
         <span className="ml-auto flex items-center gap-1 text-muted-foreground">
           {open ? "Ocultar" : "Ver lojas"}

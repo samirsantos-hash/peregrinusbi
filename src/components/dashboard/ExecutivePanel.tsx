@@ -50,7 +50,10 @@ const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: Exe
     ? validUplifts.reduce((s, k) => s + k.upliftGmvM1, 0) / validUplifts.length
     : 0;
 
-  const upliftDisplay = getUpliftDisplay(avgUplift);
+  const temBaseUplift = validUplifts.length > 0;
+  const upliftDisplay = temBaseUplift
+    ? getUpliftDisplay(avgUplift)
+    : { label: "Otimização de Margem", color: "text-muted-foreground", icon: Target };
   const UpliftIcon = upliftDisplay.icon;
 
   const validScores = kpis.filter((k) => k.scoreFull > 0);
@@ -76,7 +79,9 @@ const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: Exe
 
   // Uplift value: always show absolute value with strategic label
   const upliftPctAbs = Math.abs(avgUplift * 100);
-  const upliftValueStr = `${avgUplift >= 0 ? "+" : ""}${(avgUplift * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+  const upliftValueStr = temBaseUplift
+    ? `${avgUplift >= 0 ? "+" : ""}${(avgUplift * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+    : "—";
 
   const metrics = [
     { label: "Faturamento Bruto (GMV)", value: fmtBRLCompact(totalGmv), icon: DollarSign, color: "neon-text", tooltip: "Valor total das vendas brutas no período selecionado (GMV = Gross Merchandise Value)." },
@@ -88,7 +93,9 @@ const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: Exe
       value: upliftValueStr,
       icon: UpliftIcon,
       color: upliftDisplay.color,
-      tooltip: avgUplift >= 0
+      tooltip: !temBaseUplift
+        ? "Sem base de cálculo no período selecionado (não há faturamento do mês anterior para comparação)."
+        : avgUplift >= 0
         ? "O seller está acima do potencial esperado para sua categoria/domínio. Considere otimizar margens ou expandir mix."
         : "Existe um gap entre a performance atual e o potencial da categoria. Invista em visibilidade e competitividade.",
     },
