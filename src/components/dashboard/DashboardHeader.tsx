@@ -177,6 +177,49 @@ const DashboardHeader = ({
     onDateRangeChange({ from, to });
   };
 
+  // Trimestres que possuem dado (no ano mais recente ou no anterior)
+  const quartersComDado = useMemo(() => {
+    const set = new Set<string>();
+    for (const qr of quickRanges) {
+      const startMonth = qr.months[0];
+      const endMonth = qr.months[qr.months.length - 1];
+      const has = allKpis.some((k: any) => {
+        if (!k.date) return false;
+        const [ky, km] = String(k.date).split("-").map(Number);
+        return (ky === latestYear || ky === latestYear - 1) && km >= startMonth && km <= endMonth;
+      });
+      if (has) set.add(qr.key);
+    }
+    return set;
+  }, [allKpis, latestYear]);
+
+  // Abre sempre no período mais RECENTE COM DADO
+  const initialized = useRef(false);
+  useEffect(() => {
+    if (initialized.current) return;
+    if (allKpis.length === 0) return;
+    const anchorMonth = anchorDate.getMonth() + 1;
+    const anchorQ = `q${Math.ceil(anchorMonth / 3)}`;
+    const alvo =
+      [...quickRanges].reverse().find((qr) => qr.key === anchorQ && quartersComDado.has(qr.key)) ??
+      [...quickRanges].reverse().find((qr) => quartersComDado.has(qr.key));
+    if (!alvo) return;
+    initialized.current = true;
+    setActivePeriod(alvo.key);
+    onPeriodChange?.(alvo.key);
+    const startMonth = alvo.months[0];
+    const endMonth = alvo.months[alvo.months.length - 1];
+    const hasDataInYear = (y: number) =>
+      allKpis.some((k: any) => {
+        if (!k.date) return false;
+        const [ky, km] = String(k.date).split("-").map(Number);
+        return ky === y && km >= startMonth && km <= endMonth;
+      });
+    const year = hasDataInYear(latestYear) ? latestYear : latestYear - 1;
+    onDateRangeChange({ from: new Date(year, startMonth - 1, 1), to: new Date(year, endMonth, 0) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allKpis, quartersComDado, anchorDate, latestYear]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
