@@ -58,7 +58,6 @@ import QualityIndexPanelV2 from "@/components/seller/QualityIndexPanel";
 import PlanoAcaoAnuncioPanel from "@/components/seller/PlanoAcaoAnuncioPanel";
 import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 import { useVerticalBenchmark } from "@/hooks/useVerticalBenchmark";
-import { SELLER_TABS } from "@/config/sellerTabs";
 import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
 import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
