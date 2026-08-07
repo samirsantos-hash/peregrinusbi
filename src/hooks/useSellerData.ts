@@ -82,7 +82,7 @@ export interface SellerKPI {
   productId: string;
 }
 
-function transformKpi(row: any, sellerNickname: string): SellerKPI {
+export function transformKpi(row: any, sellerNickname: string): SellerKPI {
   const gmv = Number(row.gmv_lc) || 0;
   const tgmv = Number(row.tgmv_lc) || 0;
   const invPads = Number(row.inv_pads) || 0;
@@ -181,7 +181,8 @@ export function useSellers() {
       const { data, error } = await supabase
         .from("sellers")
         .select("id, nickname, cust_id, cluster_seller, sub_cluster_seller, cus_state")
-        .order("nickname");
+        .order("nickname")
+        .range(0, 4999);
 
       if (error) throw error;
       if (!data || data.length === 0) return [];
