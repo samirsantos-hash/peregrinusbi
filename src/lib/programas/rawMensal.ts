@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Alavanca, EstadoAlavanca, Metrica, Okr, StatusOkr } from "@/types/programas";
+import { flag, mapIntegrador, cobertura } from "./flags";
 
 /* ═══════ Camada de agregação: raw_* (texto) → modelo do painel ═══════
    A ingestão grava tudo como texto. A conversão de tipo é feita AQUI.
@@ -23,6 +24,19 @@ export function txt(v: string | null | undefined): string | null {
   const s = (v ?? "").trim();
   return s === "" ? null : s;
 }
+
+/** Chave do seller sempre TEXTO: CPP vem como "3294245579,0", CDP como "82935283". */
+export function normalizarCustId(v: string | number | null | undefined): string {
+  const s = String(v ?? "").trim();
+  if (s === "") return "";
+  return s.replace(/[.,]\d+$/, "").replace(/\D/g, "");
+}
+
+/** Taxas REP_* vêm em fração (0,125 = 12,5%). O ×100 acontece só aqui. */
+export const fmtTaxa = (fracao: number | null, casas = 1): string =>
+  fracao == null ? "—" : `${(fracao * 100).toFixed(casas).replace(".", ",")}%`;
+
+export { mapIntegrador, cobertura };
 
 /** REP_CURRENT_LEVEL vazio é sem_dado — NÃO é um nível. */
 export type NivelReputacao = "verde" | "atencao" | "critico" | "newbie" | "sem_dado";
@@ -60,7 +74,7 @@ export interface RawSeller {
 export async function carregarRawDoSeller(lojaId: string): Promise<RawSeller | null> {
   const { data: seller } = await supabase
     .from("sellers").select("cust_id").eq("id", lojaId).maybeSingle();
-  const custId = (seller as { cust_id?: string } | null)?.cust_id;
+  const custId = normalizarCustId((seller as { cust_id?: string } | null)?.cust_id);
   if (!custId) return null;
 
   const [cpp, cdp] = await Promise.all([
@@ -96,10 +110,11 @@ export function overlayAlavancas(base: Alavanca[], raw: RawSeller): Alavanca[] {
 
   const invPads = num(c.INV_PADS);
   const gmvPads = num(c.TGMV_LC_PADS);
-  const investSeller = num(c.SELLERS_INVEST_PADS);
+  // SELLERS_* são sinalizadores (repetem o CUS_CUST_ID_SEL) — booleano, nunca soma.
+  const investePads = flag(c.SELLERS_INVEST_PADS);
   const preAcordo = num(d.F_TGMV_LC_PRE_ACORDO);
   const itensFull = num(c.ITENS_FULL);
-  const clips = num(c.SELLERS_CLIPS_PUBLI);
+  const publicaClips = flag(c.SELLERS_CLIPS_PUBLI);
   const gmvClips = num(c.TGMV_LC_CLIPS);
   const promo = [num(d.F_TGMV_LC_CUPOM), num(d.F_TGMV_LC_DOD), num(d.F_TGMV_LC_LIGHTNING)];
   const promoTotal = promo.every((v) => v == null) ? null : promo.reduce<number>((s, v) => s + (v ?? 0), 0);
@@ -114,14 +129,20 @@ export function overlayAlavancas(base: Alavanca[], raw: RawSeller): Alavanca[] {
         };
       case "pads":
         return { ...a,
-          estado: estado(gmvPads, null),
-          valorAtual: met(investSeller ?? invPads, "BRL", FONTE_CPP, at),
+          estado: investePads == null
+            ? estado(gmvPads, null)
+            : investePads ? "ativo" : "nao_ativado",
+          valorAtual: met(invPads, "BRL", FONTE_CPP, at),
           resultadoAtribuido: met(gmvPads, "BRL", FONTE_CPP, at),
         };
       case "clips":
         return { ...a,
-          estado: estado(clips, a.valorContratado.valor),
-          valorAtual: met(clips, "un", FONTE_CPP, at),
+          estado: publicaClips == null ? "sem_dado" : publicaClips ? "ativo" : "nao_ativado",
+          valorAtual: met(
+            publicaClips == null ? null : publicaClips ? 1 : 0,
+            "un", FONTE_CPP, at, "derivado",
+            "SELLERS_CLIPS_PUBLI é sinalizador (0/1), não contagem de clips",
+          ),
           resultadoAtribuido: met(gmvClips, "BRL", FONTE_CPP, at),
         };
       case "full":

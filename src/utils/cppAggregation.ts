@@ -16,7 +16,9 @@ const SUM_COLS = [
   "INV_PADS", "TGMV_LC_PADS", "TSI_PADS",
   "CDP_TGMV_LC", "CDP_TSI", "CDP_TGMV_INVESTIMENT_LC_SELLER",
   "CDP_TGMV_INVESTIMENT_SELLER_LC_REBATE", "CDP_TGMV_INVESTIMENT_SELLER_LC_SEM_REBATE",
-  "ITEMS_OPTIN_CDP", "SELLERS_MINHA_PAGINA", "SUCC_SELLERS_MINHA_PAGINA",
+  // SELLERS_MINHA_PAGINA é sinalizador (repete o CUS_CUST_ID_SEL) — jamais somar.
+  // SUCC_SELLERS_MINHA_PAGINA é contagem real e permanece somável.
+  "ITEMS_OPTIN_CDP", "SUCC_SELLERS_MINHA_PAGINA",
   "VISITS_MATCH", "VISITS_CHEAPER", "VISITS_EXPENSIVE",
   "VIDEOS_PUBLI", "TOTAL_LIVELISTINGS", "VISITAS",
   "VISITAS_CLIPS", "TGMV_LC_CLIPS", "SI_CLIPS", "ORDERS_CLIPS",
@@ -89,7 +91,10 @@ export function parseBrNumber(val: unknown): number {
 }
 
 export function cleanCustId(raw: unknown): string {
-  return String(raw || "").trim().replace(/[.,]0$/, "");
+  // CPP traz "3294245579,0" (float BR) e CDP traz "82935283" — sempre TEXTO.
+  const s = String(raw || "").trim();
+  if (s === "") return "";
+  return s.replace(/[.,]\d+$/, "").replace(/\D/g, "");
 }
 
 function getRowDate(row: CppRow): string {
