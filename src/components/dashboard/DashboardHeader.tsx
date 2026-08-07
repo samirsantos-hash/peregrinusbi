@@ -280,7 +280,7 @@ const DashboardHeader = ({
                       </span>
                     </span>
                   ) : (
-                    <span className="text-muted-foreground">Selecionar loja...</span>
+                    <span className="text-muted-foreground">Todas as lojas da sua carteira</span>
                   )}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -433,13 +433,22 @@ const DashboardHeader = ({
             {projections.map((p) =>
               <div key={p.days} className="text-center flex-1 min-w-0">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">{p.days} dias</p>
-                <p className="font-mono font-bold text-xl sm:text-2xl emerald-text whitespace-nowrap">
-                  R$ {(p.value / 1000).toFixed(0)}K
-                </p>
-                <div className="flex items-center justify-center gap-1 mt-1">
-                  {clampedUplift >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-emerald" /> : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
-                  <span className={cn("text-xs font-medium", clampedUplift >= 0 ? "text-emerald" : "text-destructive")}>{clampedUplift >= 0 ? "+" : ""}{(clampedUplift * 100).toFixed(1)}%</span>
-                </div>
+                {temBaseProjecao ? (
+                  <>
+                    <p className="font-mono font-bold text-xl sm:text-2xl emerald-text whitespace-nowrap">
+                      R$ {(p.value / 1000).toFixed(0)}K
+                    </p>
+                    <div className="flex items-center justify-center gap-1 mt-1">
+                      {clampedUplift >= 0 ? <TrendingUp className="w-3.5 h-3.5 text-emerald" /> : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
+                      <span className={cn("text-xs font-medium", clampedUplift >= 0 ? "text-emerald" : "text-destructive")}>{clampedUplift >= 0 ? "+" : ""}{(clampedUplift * 100).toFixed(1)}%</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-mono font-bold text-xl sm:text-2xl text-muted-foreground">—</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">sem base</p>
+                  </>
+                )}
               </div>
             )}
           </div>
