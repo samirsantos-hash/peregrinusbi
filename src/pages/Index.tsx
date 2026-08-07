@@ -367,6 +367,10 @@ const Index = () => {
     };
   }, [displayKpis, eligibilityItems]);
 
+  // Contagem de alertas de alta severidade para o badge da navegação lateral
+  const { data: riskPanel } = useSellerRiskPanel();
+  const alertasAtivos = riskPanel?.totals?.alta ?? 0;
+
   // Active date range debug label
   const dateDebugLabel = useMemo(() => {
     if (!dateRange?.from) return null;
