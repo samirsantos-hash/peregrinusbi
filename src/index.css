@@ -22,6 +22,10 @@
     --muted: 215 25% 14%;
     --muted-foreground: 215 20% 55%;
 
+    /* Rodapé institucional — contraste verificado >= 4,5:1 */
+    --surface-alt: 215 25% 14%;
+    --text-muted: 215 20% 58%;
+
     --accent: 160 84% 39%;
     --accent-foreground: 222 84% 5%;
 
@@ -76,6 +80,9 @@
 
     --muted: 210 40% 94%;
     --muted-foreground: 215 16% 40%;
+
+    --surface-alt: 210 40% 94%;
+    --text-muted: 215 16% 40%;
 
     --accent: 160 84% 32%;
     --accent-foreground: 0 0% 100%;
