@@ -123,6 +123,7 @@ const Index = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("aba") || "executive";
+  const [menuAberto, setMenuAberto] = useState(false);
   const setActiveTab = useCallback(
     (tab: string) => {
       const next = new URLSearchParams(searchParams);
