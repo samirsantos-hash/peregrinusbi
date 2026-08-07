@@ -65,7 +65,6 @@ import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 import PublicidadePanel from "@/components/seller/PublicidadePanel";
 import AccessScopeBadge from "@/components/AccessScopeBadge";
 import SellerDiagnosticPanel from "@/components/dashboard/SellerDiagnosticPanel";
-import CarteiraDiagnosticPanel from "@/components/dashboard/CarteiraDiagnosticPanel";
 import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
@@ -468,15 +467,6 @@ const Index = () => {
               isRefreshing={isRefreshing}
               onPeriodChange={handlePeriodChange}
             />
-
-            {isConsolidado && (
-              <CarteiraDiagnosticPanel
-                lojas={carteira?.lojas ?? []}
-                totalLojas={carteira?.totalLojasComDado ?? sellers.length}
-                loading={loadingCarteira}
-                onSelectSeller={handleSellerChange}
-              />
-            )}
 
             {!isConsolidado && activeTab === "efficiency" && (
               <SellerDiagnosticPanel
