@@ -41,7 +41,7 @@ export default function N2Loja() {
     ) : (
       <ListaFilhos
         itens={data?.itens ?? []}
-        vazio="Esta loja não participa de nenhum programa no período."
+        vazio="Sem dados de programas (CPP) carregados na base para o período. Não é restrição de acesso: a base de programas está vazia até o próximo import."
         reconciliacao={{ totalPai: data?.heroi ?? null, comDado: data?.comDado ?? 0, totalFilhos: data?.totalFilhos ?? 0 }}
       />
     );
