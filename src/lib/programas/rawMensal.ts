@@ -129,7 +129,7 @@ export function overlayAlavancas(base: Alavanca[], raw: RawSeller): Alavanca[] {
         };
       case "pads":
         return { ...a,
-          estado: publicaClips == null && investePads == null
+          estado: investePads == null
             ? estado(gmvPads, null)
             : investePads ? "ativo" : "nao_ativado",
           valorAtual: met(invPads, "BRL", FONTE_CPP, at),
