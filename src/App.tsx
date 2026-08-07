@@ -20,7 +20,6 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import CppDashboard from "./pages/CppDashboard";
 import GestaoCarteira from "./pages/GestaoCarteira";
-import AnaliseMLB from "./pages/AnaliseMLB";
 import Carteira from "./pages/Carteira";
 import Multilojas from "./pages/Multilojas";
 import N0Carteira from "./pages/nivel/N0Carteira";
@@ -83,7 +82,6 @@ const AppRoutes = () => {
       <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
       <Route path="/cpp" element={<ProtectedRoute><CppDashboard /></ProtectedRoute>} />
       <Route path="/gestao-carteira" element={<ProtectedRoute><GestaoCarteira /></ProtectedRoute>} />
-      <Route path="/analise-mlb" element={<ProtectedRoute><AnaliseMLB /></ProtectedRoute>} />
       <Route path="/carteira-dados" element={<ProtectedRoute><Carteira /></ProtectedRoute>} />
       <Route path="/carteira" element={<ProtectedRoute><GuardaNivel nivel={0}><N0Carteira /></GuardaNivel></ProtectedRoute>} />
       <Route path="/grupos/:grupoId" element={<ProtectedRoute><GuardaNivel nivel={1}><N1Grupo /></GuardaNivel></ProtectedRoute>} />

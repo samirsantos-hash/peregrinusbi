@@ -409,14 +409,6 @@ const Index = () => {
               <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Noire"}</span>
             </Button>
             <SoundToggleButton />
-            <Button variant="outline" size="sm" onClick={() => navigate("/analise-mlb")} className="gap-2 px-2 sm:px-3">
-              <Search className="w-4 h-4" />
-              <span className="hidden sm:inline">Análise MLB</span>
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/carteira")} className="gap-2 px-2 sm:px-3">
-              <Briefcase className="w-4 h-4" />
-              <span className="hidden sm:inline">Carteira</span>
-            </Button>
             {(isAdmin || isGerente || isGestorLoja) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
                 <Store className="w-4 h-4" />
