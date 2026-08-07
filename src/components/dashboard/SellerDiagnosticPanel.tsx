@@ -239,6 +239,8 @@ type Row = {
 };
 
 const SellerDiagnosticPanel = ({ seller, allKpis }: Props) => {
+  const { data: lojas } = useClassificacaoLojas();
+
   if (!seller) return null;
 
   // ---- M-1 aggregates ----
@@ -260,7 +262,6 @@ const SellerDiagnosticPanel = ({ seller, allKpis }: Props) => {
   }
 
   // ---- Classificação oficial (para tier "fonte" e nextTh) ----
-  const { data: lojas } = useClassificacaoLojas();
   const loja = lojas?.find((l) => l.sellerId === seller.id);
   const tierLabels: Record<1 | 2 | 3, string> = {
     1: "Tier 1 · Platinum",
