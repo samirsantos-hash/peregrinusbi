@@ -31,7 +31,6 @@ import N3Programas from "./pages/nivel/N3Programas";
 import N4Categoria from "./pages/nivel/N4Categoria";
 import N5Anuncio from "./pages/nivel/N5Anuncio";
 import GuardaNivel from "./components/nivel/GuardaNivel";
-import EntradaPorPerfil from "./components/nivel/EntradaPorPerfil";
 import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 

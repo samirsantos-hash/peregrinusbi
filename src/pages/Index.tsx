@@ -65,6 +65,8 @@ import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
 import PublicidadePanel from "@/components/seller/PublicidadePanel";
 import AccessScopeBadge from "@/components/AccessScopeBadge";
 import SellerDiagnosticPanel from "@/components/dashboard/SellerDiagnosticPanel";
+import CarteiraDiagnosticPanel from "@/components/dashboard/CarteiraDiagnosticPanel";
+import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
 /* ------------------------------------------------------------------ */
@@ -123,6 +125,7 @@ const Index = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
   const [activePeriod, setActivePeriod] = useState<string>("q1");
+  // Sem loja selecionada = leitura consolidada da carteira
 
   // Handle period changes from DashboardHeader
   const handlePeriodChange = useCallback((period: string) => {
@@ -177,11 +180,18 @@ const Index = () => {
     } catch {}
   }, [selectedSeller]);
 
+  // Se a loja selecionada sair do escopo, volta para o consolidado (nunca escolhe uma loja arbitrária)
   useEffect(() => {
-    if (sellers.length > 0 && (!selectedSeller || !sellers.find((s) => s.id === selectedSeller))) {
-      setSelectedSeller(sellers[0].id);
+    if (selectedSeller && sellers.length > 0 && !sellers.find((s) => s.id === selectedSeller)) {
+      setSelectedSeller("");
     }
-  }, [sellers]);
+  }, [sellers, selectedSeller]);
+
+  const isConsolidado = !selectedSeller;
+  const { data: carteira, isLoading: loadingCarteira } = useCarteiraConsolidado(
+    sellers,
+    Boolean(hasRealData && isConsolidado),
+  );
 
   const { data: dbKpis, isLoading: loadingKpis } = useSellerKpis(
     hasRealData ? selectedSeller : undefined
@@ -215,15 +225,17 @@ const Index = () => {
 
   // ALL kpis (unfiltered) — monthly source for consolidated view
   const allKpisMonthly: any[] = useMemo(() => {
+    if (isConsolidado) return carteira?.kpis || [];
     if (hasRealData) return dbKpis || [];
     return mockSellerKPIs[selectedSeller] || [];
-  }, [hasRealData, dbKpis, selectedSeller]);
+  }, [hasRealData, dbKpis, selectedSeller, isConsolidado, carteira]);
 
   // Daily kpis from dedicated daily table
   const allKpisDaily: any[] = useMemo(() => {
+    if (isConsolidado) return [];
     if (hasRealData) return dbDailyKpis || [];
     return [];
-  }, [hasRealData, dbDailyKpis]);
+  }, [hasRealData, dbDailyKpis, isConsolidado]);
 
   // Quarter periods and "all" use consolidated (monthly) data
   const isDailyPeriod = !activePeriod.startsWith("q") && activePeriod !== "all" && activePeriod !== "custom";
@@ -312,7 +324,9 @@ const Index = () => {
     return map;
   }, [sellers]);
 
-  const isLoading = !sellersFetched || (hasRealData && (loadingKpis || loadingDailyKpis));
+  const isLoading =
+    !sellersFetched ||
+    (hasRealData && (isConsolidado ? loadingCarteira : loadingKpis || loadingDailyKpis));
 
   // Indicadores agregados para o Guia do Consultor (junior banners)
   const dadosJunior = useMemo(() => {
@@ -468,7 +482,16 @@ const Index = () => {
               onPeriodChange={handlePeriodChange}
             />
 
-            {activeTab === "efficiency" && (
+            {isConsolidado && (
+              <CarteiraDiagnosticPanel
+                lojas={carteira?.lojas ?? []}
+                totalLojas={carteira?.totalLojasComDado ?? sellers.length}
+                loading={loadingCarteira}
+                onSelectSeller={handleSellerChange}
+              />
+            )}
+
+            {!isConsolidado && activeTab === "efficiency" && (
               <SellerDiagnosticPanel
                 seller={sellers.find((s) => s.id === selectedSeller) as any}
                 allKpis={allKpis}
