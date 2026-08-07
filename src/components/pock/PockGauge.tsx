@@ -1,4 +1,5 @@
 import { AlertTriangle, AlertCircle, Minus, CheckCircle2, HelpCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type Faixa = "crit" | "warn" | "warn-soft" | "ok" | "sem_dado";
 
