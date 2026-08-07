@@ -235,7 +235,7 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="glass-card p-4 sm:p-5 space-y-3">
+      <div className="glass-card rounded-none p-4 sm:p-5 space-y-3">
         <div className="flex items-center justify-between gap-3">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Diagnóstico</h3>
           {alertas.length > 0 && (
