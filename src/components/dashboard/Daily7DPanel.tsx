@@ -131,21 +131,6 @@ function MiniSerie({ valores, formato }: { valores: (number | null)[]; formato: 
   );
 }
 
-/* ────────────────────────── rótulo direto no ponto final ────────────────────────── */
-
-function RotuloFinal({ texto }: { texto: string }) {
-  return function Render(props: any) {
-    const { x, y, index, data } = props;
-    if (data && index !== data.length - 1) return null;
-    if (x === undefined || y === undefined) return null;
-    return (
-      <text x={x + 6} y={y} dy={4} fontSize={10} fill="hsl(var(--muted-foreground))">
-        {texto}
-      </text>
-    );
-  };
-}
-
 /* ────────────────────────────── componente ────────────────────────────── */
 
 export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
@@ -598,7 +583,15 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                     dot={{ r: 3 }}
                     connectNulls={false}
                     isAnimationActive={false}
-                    label={RotuloFinal({ texto: KPI_CONFIG[k].label })({ data: dadosComparacao }) as any}
+                    label={(props: any) => {
+                      if (props.index !== dadosComparacao.length - 1) return <g key={`l-${k}-${props.index}`} />;
+                      if (props.x === undefined || props.y === undefined) return <g key={`l-${k}-x`} />;
+                      return (
+                        <text key={`l-${k}`} x={props.x + 6} y={props.y} dy={4} fontSize={10} fill="hsl(var(--muted-foreground))">
+                          {KPI_CONFIG[k].label}
+                        </text>
+                      );
+                    }}
                   />
                 ))}
               </LineChart>
