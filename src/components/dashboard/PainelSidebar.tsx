@@ -183,7 +183,7 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
       {/* Desktop / tablet */}
       <aside
         className={cn(
-          "hidden lg:block shrink-0 sticky self-start top-4 border-r border-muted/[0.15] bg-surface-alt rounded-l-lg",
+          "hidden lg:block shrink-0 sticky self-start top-4 z-30 border-r border-muted/[0.15] bg-surface-alt rounded-l-lg overflow-hidden",
           recolhida ? "w-[56px]" : "w-[224px]",
         )}
         style={{ height: "calc(100vh - 2rem)" }}
