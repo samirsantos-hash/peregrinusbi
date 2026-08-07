@@ -2,6 +2,17 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
+const AUTH_PROFILE_TIMEOUT_MS = 8_000;
+
+async function withTimeout<T>(request: PromiseLike<T>): Promise<T> {
+  return Promise.race([
+    Promise.resolve(request),
+    new Promise<never>((_, reject) => {
+      window.setTimeout(() => reject(new Error("Tempo limite ao carregar o perfil de acesso")), AUTH_PROFILE_TIMEOUT_MS);
+    }),
+  ]);
+}
+
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -28,40 +39,54 @@ export function useAuth() {
         return;
       }
 
-      const [rolesResult, accessResult] = await Promise.all([
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", currentSession.user.id),
-        supabase
-          .from("user_access_control")
-          .select("must_change_password, temp_password_expires_at")
-          .eq("user_id", currentSession.user.id)
-          .maybeSingle(),
-      ]);
+      try {
+        const [rolesResult, accessResult] = await withTimeout(Promise.all([
+          supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", currentSession.user.id),
+          supabase
+            .from("user_access_control")
+            .select("must_change_password, temp_password_expires_at")
+            .eq("user_id", currentSession.user.id)
+            .maybeSingle(),
+        ]));
 
-      if (!mounted) return;
+        if (!mounted) return;
 
-      setIsAdmin(rolesResult.data?.some((r) => r.role === "admin") ?? false);
-      setIsGerente(rolesResult.data?.some((r) => r.role === "gerente") ?? false);
-      setIsGestorLoja(rolesResult.data?.some((r) => r.role === "gestor_loja") ?? false);
+        setIsAdmin(rolesResult.data?.some((r) => r.role === "admin") ?? false);
+        setIsGerente(rolesResult.data?.some((r) => r.role === "gerente") ?? false);
+        setIsGestorLoja(rolesResult.data?.some((r) => r.role === "gestor_loja") ?? false);
 
-      const access = accessResult.data;
-      if (access) {
-        const expired = access.temp_password_expires_at
-          ? new Date(access.temp_password_expires_at) < new Date()
-          : false;
-        setMustChangePassword(access.must_change_password && !expired);
-      } else {
+        const access = accessResult.data;
+        if (access) {
+          const expired = access.temp_password_expires_at
+            ? new Date(access.temp_password_expires_at) < new Date()
+            : false;
+          setMustChangePassword(access.must_change_password && !expired);
+        } else {
+          setMustChangePassword(false);
+        }
+      } catch (error) {
+        console.error("Falha ao carregar o perfil de acesso", error);
+        if (!mounted) return;
+        setIsAdmin(false);
+        setIsGerente(false);
+        setIsGestorLoja(false);
         setMustChangePassword(false);
+      } finally {
+        if (mounted) setLoading(false);
       }
-
-      setLoading(false);
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      void syncAuthState(session);
-    });
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
+        void syncAuthState(session);
+      })
+      .catch((error) => {
+        console.error("Falha ao restaurar a sessão", error);
+        if (mounted) setLoading(false);
+      });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, currentSession) => {
