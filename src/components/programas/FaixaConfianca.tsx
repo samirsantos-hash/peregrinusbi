@@ -31,7 +31,7 @@ const FaixaConfianca = ({ participacoes, atualizadoEm, coberturaDadosPct }: Prop
   const fontes = fontesPorBloco(participacoes);
 
   return (
-    <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex h-11 items-center gap-4 border-t border-border bg-muted/60 px-4 backdrop-blur-md text-[11px] text-muted-foreground overflow-x-auto scrollbar-thin">
+    <div className="faixa-confianca sticky bottom-0 z-20 -mx-4 mt-6 flex h-11 items-center gap-4 border-t border-border bg-muted/60 px-4 backdrop-blur-md text-[11px] text-muted-foreground overflow-x-auto scrollbar-thin">
       <span className="whitespace-nowrap">
         Atualizado em {new Date(atualizadoEm).toLocaleDateString("pt-BR")}
       </span>
