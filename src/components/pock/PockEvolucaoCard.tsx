@@ -108,23 +108,31 @@ export default function PockEvolucaoCard({
         {extra && <span className="text-[10px] text-muted-foreground tnum">{extra}</span>}
       </div>
 
-      <div className="h-[190px]">
+      <div className="h-[200px] xl:h-[230px]">
         {semDado ? (
           <div className="h-full flex items-center justify-center text-xs text-muted-foreground">—</div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={dados} margin={{ top: 14, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="mes" tick={{ fontSize: 9 }} interval={0} angle={-35} textAnchor="end" height={38} />
+              <XAxis dataKey="mes" tick={{ fontSize: 9 }} interval="preserveStartEnd" minTickGap={4} angle={-35} textAnchor="end" height={38} />
               <YAxis
                 yAxisId="v"
                 tick={{ fontSize: 9 }}
-                tickFormatter={(v) => (Math.abs(v) >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)}
+                width={42}
+                tickFormatter={(v) =>
+                  Math.abs(v) >= 1_000_000
+                    ? `${(v / 1_000_000).toFixed(1)}M`
+                    : Math.abs(v) >= 1000
+                      ? `${(v / 1000).toFixed(0)}k`
+                      : `${v}`
+                }
               />
               <YAxis
                 yAxisId="p"
                 orientation="right"
                 tick={{ fontSize: 9 }}
+                width={38}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip
