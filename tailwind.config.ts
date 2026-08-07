@@ -52,6 +52,8 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         "neon-blue": "hsl(var(--neon-blue))",
+        "surface-alt": "hsl(var(--surface-alt))",
+        "muted-alt": "hsl(var(--text-muted))",
         "neon-blue-glow": "hsl(var(--neon-blue-glow))",
         emerald: "hsl(var(--emerald))",
         "emerald-glow": "hsl(var(--emerald-glow))",
