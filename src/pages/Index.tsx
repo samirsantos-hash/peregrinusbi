@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound, TrendingUp, Sun, Moon, Store } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, Volume2, VolumeX, KeyRound, TrendingUp, Sun, Moon, Store, Menu } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import NewBadge from "@/components/ui/NewBadge";
 import {
@@ -58,7 +58,6 @@ import QualityIndexPanelV2 from "@/components/seller/QualityIndexPanel";
 import PlanoAcaoAnuncioPanel from "@/components/seller/PlanoAcaoAnuncioPanel";
 import { useMeliCampaigns } from "@/hooks/useMeliCampaigns";
 import { useVerticalBenchmark } from "@/hooks/useVerticalBenchmark";
-import { SELLER_TABS } from "@/config/sellerTabs";
 import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { JuniorActionBanner } from "@/components/ui/JuniorActionBanner";
 import CorrelacaoPanel from "@/components/seller/CorrelacaoPanel";
@@ -67,6 +66,8 @@ import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
 import PockPanel from "@/components/pock/PockPanel";
+import PainelSidebar from "@/components/dashboard/PainelSidebar";
+import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -121,6 +122,7 @@ const Index = () => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("aba") || "executive";
+  const [menuAberto, setMenuAberto] = useState(false);
   const setActiveTab = useCallback(
     (tab: string) => {
       const next = new URLSearchParams(searchParams);
@@ -320,10 +322,6 @@ const Index = () => {
     setIsRefreshing(false);
   }, [queryClient, selectedSeller]);
 
-  // Ordem lógica de análise — ver src/config/sellerTabs.ts
-  // 1–3: "como está indo?" | 4–6: "por que?" | 7–9: "o que fazer?"
-  const tabs = SELLER_TABS;
-
   // Map seller UUID -> custId for external links
   const sellerCustIdMap = useMemo(() => {
     const map: Record<string, string> = {};
@@ -363,6 +361,10 @@ const Index = () => {
       gapDescontoMedio,
     };
   }, [displayKpis, eligibilityItems]);
+
+  // Contagem de alertas de alta severidade para o badge da navegação lateral
+  const { data: riskPanel } = useSellerRiskPanel();
+  const alertasAtivos = riskPanel?.totals?.alta ?? 0;
 
   // Active date range debug label
   const dateDebugLabel = useMemo(() => {
@@ -477,25 +479,21 @@ const Index = () => {
             <DiagnosticAlerts kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="glass-card w-full justify-center gap-1 p-1 bg-card/60 h-auto grid grid-cols-3 sm:grid-cols-6 lg:grid-cols-11">
-                {tabs.map((tab) =>
-                  <Tooltip key={tab.id} delayDuration={300}>
-                    <TooltipTrigger asChild>
-                      <TabsTrigger
-                        value={tab.id}
-                        className="flex items-center justify-center gap-1 px-1.5 sm:px-2 py-1.5 text-[10px] sm:text-[11px] whitespace-nowrap w-full data-[state=active]:bg-neon-blue/10 data-[state=active]:text-neon-blue data-[state=active]:tab-glow data-[state=active]:border-neon-blue/30 rounded-lg transition-all border border-transparent">
-                        <tab.icon className="w-3.5 h-3.5 shrink-0" />
-                        <span className="truncate">{tab.label}</span>
-                      </TabsTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="max-w-[260px] text-xs">
-                      <p className="font-semibold mb-0.5">{tab.label}</p>
-                      <p className="text-muted-foreground">{tab.juniorTip}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </TabsList>
-
+              <div className="flex items-start gap-0 lg:gap-5">
+                <PainelSidebar
+                  ativa={activeTab}
+                  onChange={setActiveTab}
+                  alertas={alertasAtivos}
+                  mobileAberto={menuAberto}
+                  onMobileChange={setMenuAberto}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="lg:hidden mb-3">
+                    <Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}>
+                      <Menu className="w-4 h-4" />
+                      <span>Seções</span>
+                    </Button>
+                  </div>
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`${activeTab}-${selectedSeller}-${granularity}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
@@ -503,7 +501,7 @@ const Index = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.25 }}
-                  className="mt-5">
+                  className="mt-0">
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     <JuniorActionBanner abaId="executive" dados={dadosJunior} />
                     <Daily7DPanel
@@ -617,6 +615,8 @@ const Index = () => {
                   </TabsContent>
                 </motion.div>
               </AnimatePresence>
+                </div>
+              </div>
             </Tabs>
           </>
         }
