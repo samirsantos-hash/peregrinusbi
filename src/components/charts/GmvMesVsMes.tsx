@@ -125,7 +125,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <h3 className="text-xs lg:text-[13px] font-semibold flex items-center gap-1">
           {titulo}
-          <TooltipInfo text="Barras = mês base, linha = mês de comparação, alinhados pelo dia do mês. Escolha os meses para ver a variação (YoY quando o mesmo mês do ano anterior existe na base)." />
+          <TooltipInfo text="Barras = mês base, linha = mês de comparação, alinhados pelo dia do mês. No modo Índice 100, o mês comparado vale 100 em cada dia (acumulado) e o mês base aparece como índice relativo: 112 = 12% acima, 88 = 12% abaixo." />
         </h3>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={mesA} onValueChange={setMesA}>
@@ -144,6 +144,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
           <ToggleGroup type="single" value={modo} onValueChange={(v) => v && setModo(v as any)} size="sm" className="h-7">
             <ToggleGroupItem value="diario" className="text-[10px] px-2 h-6">Diário</ToggleGroupItem>
             <ToggleGroupItem value="acumulado" className="text-[10px] px-2 h-6">Acumulado</ToggleGroupItem>
+            <ToggleGroupItem value="indice" className="text-[10px] px-2 h-6">Índice 100</ToggleGroupItem>
           </ToggleGroup>
         </div>
       </div>
@@ -169,15 +170,39 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
         <ComposedChart data={dados} margin={{ top: 6, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
           <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={8} />
-          <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={fShort} width={62} />
+          <YAxis
+            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+            tickFormatter={modo === "indice" ? fIndice : fShort}
+            width={62}
+            domain={modo === "indice" ? ["auto", "auto"] : undefined}
+          />
           <Tooltip
             contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
             labelFormatter={(l) => `Dia ${l}`}
-            formatter={(v: any, n: any) => [v == null ? "—" : fBRL(Number(v)), n]}
+            formatter={(v: any, n: any) => [
+              v == null ? "—" : modo === "indice" ? fIndice(Number(v)) : fBRL(Number(v)),
+              n,
+            ]}
           />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
-          <Bar dataKey="base" name={rotuloMes(mesA || "")} fill={NAVY} opacity={0.85} radius={[3, 3, 0, 0]} />
-          <Line dataKey="comp" name={rotuloMes(mesB || "")} stroke={BLUE} strokeWidth={2} dot={false} connectNulls />
+          {modo === "indice" && (
+            <ReferenceLine y={100} stroke="hsl(var(--border))" strokeDasharray="4 4" />
+          )}
+          <Bar
+            dataKey="base"
+            name={modo === "indice" ? `${rotuloMes(mesA || "")} (índice)` : rotuloMes(mesA || "")}
+            fill={NAVY}
+            opacity={0.85}
+            radius={[3, 3, 0, 0]}
+          />
+          <Line
+            dataKey="comp"
+            name={modo === "indice" ? `${rotuloMes(mesB || "")} = 100` : rotuloMes(mesB || "")}
+            stroke={BLUE}
+            strokeWidth={2}
+            dot={false}
+            connectNulls
+          />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
