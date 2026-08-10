@@ -85,7 +85,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
     return (
       <div className="rounded-xl border border-dashed border-border p-10 text-center space-y-2">
         <Store className="w-7 h-7 mx-auto text-muted-foreground" />
-        <p className="text-sm font-semibold">Selecione uma loja para ver o diagnóstico POCK</p>
+        <p className="text-sm font-semibold">Selecione uma loja para ver o diagnóstico Pock</p>
         <p className="text-xs text-muted-foreground max-w-md mx-auto">
           Use o seletor de loja no cabeçalho. Os medidores e a medalha são por vendedor — a visão
           consolidada da carteira não é somável aqui.

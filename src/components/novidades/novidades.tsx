@@ -18,9 +18,9 @@ interface Registro {
 /** Textos explicativos das novas seções do painel. */
 export const NOVIDADES: Record<string, { titulo: string; texto: string }> = {
   pock: {
-    titulo: "Nova aba POCK",
+    titulo: "Nova aba Pock",
     texto:
-      "Nova aba POCK: consolida identidade da loja, medidores de qualidade de atendimento e a evolução mensal de TGMV, LL, conversão, visitas, Flex, FBM, PADS, CDP e Clips em um único lugar.",
+      "Nova aba Pock: consolida identidade da loja, medidores de qualidade de atendimento e a evolução mensal de TGMV, LL, conversão, visitas, Flex, FBM, PADS, CDP e Clips em um único lugar.",
   },
   "alertas-riscos": {
     titulo: "Novo painel Alertas & Riscos",

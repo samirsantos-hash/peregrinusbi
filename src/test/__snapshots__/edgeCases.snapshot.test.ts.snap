@@ -1,0 +1,154 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`snapshots de casos extremos — guardas percentuais > normalização de taxas REP_*_RATE 1`] = `
+[
+  {
+    "caso": "fracao 0.02",
+    "pct": 2,
+  },
+  {
+    "caso": "fracao 1",
+    "pct": 100,
+  },
+  {
+    "caso": "percentual 2.5",
+    "pct": 2.5,
+  },
+  {
+    "caso": "percentual 100",
+    "pct": 100,
+  },
+  {
+    "caso": "acima de 100",
+    "pct": 100,
+  },
+  {
+    "caso": "zero",
+    "pct": 0,
+  },
+  {
+    "caso": "negativo",
+    "pct": 0,
+  },
+  {
+    "caso": "null",
+    "pct": null,
+  },
+  {
+    "caso": "undefined",
+    "pct": null,
+  },
+  {
+    "caso": "NaN",
+    "pct": null,
+  },
+  {
+    "caso": "string vazia",
+    "pct": null,
+  },
+]
+`;
+
+exports[`snapshots de casos extremos — guardas percentuais > razões protegidas 1`] = `
+[
+  {
+    "caso": "normal",
+    "pct": 25,
+    "share": 0.25,
+  },
+  {
+    "caso": "base zero",
+    "pct": null,
+    "share": null,
+  },
+  {
+    "caso": "base negativa",
+    "pct": null,
+    "share": null,
+  },
+  {
+    "caso": "base null",
+    "pct": null,
+    "share": null,
+  },
+  {
+    "caso": "base undefined",
+    "pct": null,
+    "share": null,
+  },
+  {
+    "caso": "base NaN",
+    "pct": null,
+    "share": null,
+  },
+  {
+    "caso": "numerador NaN",
+    "pct": null,
+    "share": null,
+  },
+  {
+    "caso": "numerador null",
+    "pct": 0,
+    "share": 0,
+  },
+  {
+    "caso": "numerador negativo",
+    "pct": 0,
+    "share": 0,
+  },
+  {
+    "caso": "numerador maior que a base",
+    "pct": 100,
+    "share": 1,
+  },
+  {
+    "caso": "numerador igual a base",
+    "pct": 100,
+    "share": 1,
+  },
+  {
+    "caso": "base infinita",
+    "pct": null,
+    "share": null,
+  },
+  {
+    "caso": "numerador infinito",
+    "pct": null,
+    "share": null,
+  },
+  {
+    "caso": "base fracionaria",
+    "pct": 100,
+    "share": 1,
+  },
+]
+`;
+
+exports[`snapshots de casos extremos — guardas percentuais > share de visitas caras por série diária 1`] = `
+[
+  {
+    "caso": "serie saudavel",
+    "share": 0.19444444444444445,
+  },
+  {
+    "caso": "regressao 5694 por cento",
+    "share": 1,
+  },
+  {
+    "caso": "base zero em todos os dias",
+    "share": null,
+  },
+  {
+    "caso": "valores nulos e NaN",
+    "share": 0,
+  },
+  {
+    "caso": "negativos",
+    "share": 0,
+  },
+  {
+    "caso": "serie vazia",
+    "share": null,
+  },
+]
+`;
