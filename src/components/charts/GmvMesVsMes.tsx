@@ -81,10 +81,12 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
     const a = porMes.get(mesA);
     const b = porMes.get(mesB);
     if (!a && !b) return [];
-    const maxDia = Math.max(
-      ...Array.from(a?.keys() || [0]),
-      ...Array.from(b?.keys() || [0]),
-    );
+    const diasA = Array.from(a?.keys() || []).filter((d) => (a?.get(d) || 0) !== 0);
+    const diasB = Array.from(b?.keys() || []).filter((d) => (b?.get(d) || 0) !== 0);
+    const ultimoA = diasA.length ? Math.max(...diasA) : 0;
+    const ultimoB = diasB.length ? Math.max(...diasB) : 0;
+    const maxDia = Math.max(ultimoA, ultimoB);
+    if (maxDia < 1) return [];
     let accA = 0, accB = 0;
     return Array.from({ length: maxDia }, (_, i) => {
       const dia = i + 1;
@@ -92,22 +94,24 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
       const vb = b?.get(dia) ?? null;
       accA += va ?? 0;
       accB += vb ?? 0;
+      // Meses parciais: não prolongar a curva depois do último dia com dado (evita "linha reta").
+      const vivoA = dia <= ultimoA;
+      const vivoB = dia <= ultimoB;
       if (modo === "indice") {
-        // Base 100: mês comparado = 100 em cada dia (acumulado), mês base indexado sobre ele.
         return {
           dia: String(dia).padStart(2, "0"),
-          base: accB > 0 ? (accA / accB) * 100 : null,
-          comp: accB > 0 ? 100 : null,
-          accA,
-          accB,
+          base: vivoA && vivoB && accB > 0 ? (accA / accB) * 100 : null,
+          comp: vivoB && accB > 0 ? 100 : null,
+          accA: vivoA ? accA : null,
+          accB: vivoB ? accB : null,
         };
       }
       return {
         dia: String(dia).padStart(2, "0"),
-        base: modo === "acumulado" ? (va === null && accA === 0 ? null : accA) : va,
-        comp: modo === "acumulado" ? (vb === null && accB === 0 ? null : accB) : vb,
-        accA,
-        accB,
+        base: modo === "acumulado" ? (vivoA && accA > 0 ? accA : null) : va,
+        comp: modo === "acumulado" ? (vivoB && accB > 0 ? accB : null) : vb,
+        accA: vivoA ? accA : null,
+        accB: vivoB ? accB : null,
       };
     });
   }, [porMes, mesA, mesB, modo]);
