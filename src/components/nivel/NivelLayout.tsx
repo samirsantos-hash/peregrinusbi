@@ -1,4 +1,8 @@
+import { useEffect, useState } from "react";
+import { useIsFetching, useQueryClient } from "@tanstack/react-query";
+import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import BreadcrumbSeletor, { type SegmentoBreadcrumb } from "./BreadcrumbSeletor";
 import SemaforoStatus from "@/components/programas/base/SemaforoStatus";
 import { useContextoNavegacao } from "@/contexts/ContextoNavegacao";
@@ -41,14 +45,55 @@ interface Props {
 }
 
 function BarraContexto({ status, extra }: { status?: StatusOkr; extra?: React.ReactNode }) {
-  const { periodo } = useContextoNavegacao();
+  const { periodo, setPeriodo } = useContextoNavegacao();
+  const queryClient = useQueryClient();
+  const buscando = useIsFetching() > 0;
+  const [atualizadoEm, setAtualizadoEm] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (!buscando) setAtualizadoEm(new Date());
+  }, [buscando]);
+
   return (
     <div className="flex items-center gap-3 flex-wrap px-4 md:px-6 py-2 border-b border-border bg-muted/20 text-xs">
-      <span className="text-muted-foreground font-mono tabular-nums">
-        {periodo.inicio} → {periodo.fim}
-      </span>
+      <div className="flex items-center gap-1.5">
+        <input
+          type="month"
+          aria-label="Mês inicial"
+          value={periodo.inicio}
+          max={periodo.fim}
+          onChange={(e) => e.target.value && setPeriodo({ inicio: e.target.value, fim: periodo.fim })}
+          className="h-7 rounded border border-border bg-background px-1.5 font-mono tabular-nums text-xs"
+        />
+        <span className="text-muted-foreground">→</span>
+        <input
+          type="month"
+          aria-label="Mês final"
+          value={periodo.fim}
+          min={periodo.inicio}
+          onChange={(e) => e.target.value && setPeriodo({ inicio: periodo.inicio, fim: e.target.value })}
+          className="h-7 rounded border border-border bg-background px-1.5 font-mono tabular-nums text-xs"
+        />
+      </div>
       {extra}
       {status && <SemaforoStatus status={status} />}
+      <div className="ml-auto flex items-center gap-2">
+        {atualizadoEm && !buscando && (
+          <span className="text-muted-foreground tabular-nums hidden sm:inline">
+            atualizado {atualizadoEm.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+        )}
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-7 px-2 text-xs"
+          disabled={buscando}
+          onClick={() => queryClient.invalidateQueries()}
+        >
+          <RefreshCw className={cn("w-3.5 h-3.5 mr-1", buscando && "animate-spin")} />
+          {buscando ? "Atualizando" : "Atualizar"}
+        </Button>
+      </div>
     </div>
   );
 }
