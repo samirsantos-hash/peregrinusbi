@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, AlertTriangle, Info } from "lucide-react";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
+import { NovidadeTip } from "@/components/novidades/novidades";
 import { RiskSellerTable } from "./RiskSellerTable";
 import type { SignalKind } from "@/lib/risk/riskAggregator";
 
@@ -67,7 +68,10 @@ export function SellerRiskPanel() {
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-warning" />
             <div>
-              <h2 className="text-lg font-semibold">Alertas & Riscos — Painel Consolidado</h2>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                Alertas &amp; Riscos — Painel Consolidado
+                <NovidadeTip id="alertas-riscos" />
+              </h2>
               <p className="text-xs text-muted-foreground">
                 Cruzamento de BPC (μ − 1,2816·σ por vertical, piso 0,55), reputação
                 (claims/atrasos ≥ 2% alerta, ≥ 5% crítico) e churn (z-score MoM por vertical &lt; −1).
