@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { shareVisitasCaras } from "@/lib/percentGuards";
 
 type Severidade = "critico" | "atencao" | "info";
 type Semaforo = "ok" | "atencao" | "critico" | "neutro" | "sem_dado";
@@ -260,14 +261,10 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
         ],
       });
 
-    const visitas = soma((k) => Number(k.visits) || 0);
-    // visits_expensive pode vir maior que visits em alguns dias (contagem por anúncio),
-    // então limitamos linha a linha antes de somar para o share ficar entre 0 e 100%.
-    const visitasCaras = soma((k) =>
-      Math.min(Number(k.visitsExpensive) || 0, Number(k.visits) || 0),
-    );
-    const shareCaras = visitas > 0 ? Math.min(visitasCaras / visitas, 1) : 0;
-    if (visitas > 0 && shareCaras > 0.3)
+    // visits_expensive pode vir maior que visits em alguns dias (contagem por anúncio):
+    // o helper limita linha a linha e trava o share em 0–100%.
+    const shareCaras = shareVisitasCaras(linhas);
+    if (shareCaras != null && shareCaras > 0.3)
       lista.push({
         id: "preco", severidade: "atencao", descricao: "Preço não competitivo em parte relevante das visitas.", acao: "Revisar Preço",
         titulo: "Preço não competitivo",
