@@ -261,12 +261,17 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
       });
 
     const visitas = soma((k) => Number(k.visits) || 0);
-    const visitasCaras = soma((k) => Number(k.visitsExpensive) || 0);
-    if (visitas > 0 && visitasCaras / visitas > 0.3)
+    // visits_expensive pode vir maior que visits em alguns dias (contagem por anúncio),
+    // então limitamos linha a linha antes de somar para o share ficar entre 0 e 100%.
+    const visitasCaras = soma((k) =>
+      Math.min(Number(k.visitsExpensive) || 0, Number(k.visits) || 0),
+    );
+    const shareCaras = visitas > 0 ? Math.min(visitasCaras / visitas, 1) : 0;
+    if (visitas > 0 && shareCaras > 0.3)
       lista.push({
         id: "preco", severidade: "atencao", descricao: "Preço não competitivo em parte relevante das visitas.", acao: "Revisar Preço",
         titulo: "Preço não competitivo",
-        contexto: `${((visitasCaras / visitas) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% das visitas caem em anúncios com preço acima do concorrente (limite de referência: 30%).`,
+        contexto: `${(shareCaras * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% das visitas caem em anúncios com preço acima do concorrente (limite de referência: 30%).`,
         passos: [
           "Comparar com o menor preço rival nos SKUs de maior visita.",
           "Avaliar cupons ou campanhas cofinanciadas antes de baixar preço-base.",
