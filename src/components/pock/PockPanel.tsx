@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePockData } from "@/hooks/usePockData";
+import { NovidadeTip } from "@/components/novidades/novidades";
 import PockGauge, { LegendaFaixas } from "./PockGauge";
 import PockRateBar from "./PockRateBar";
 import PockEvolucaoCard from "./PockEvolucaoCard";
