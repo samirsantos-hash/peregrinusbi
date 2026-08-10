@@ -64,6 +64,7 @@ export function shareVisitasCaras(
  * já percentuais; o resultado é limitado a 0–100.
  */
 export function normalizeRateToPct(valor: number | null | undefined): number | null {
+  if (valor === null || valor === undefined || valor === "" as unknown as number) return null;
   const v = Number(valor);
   if (!Number.isFinite(v)) return null;
   const pct = Math.abs(v) <= 1 ? v * 100 : v;
