@@ -108,3 +108,12 @@ describe("resumirComparacao — mesma janela de dias", () => {
     expect(Number.isFinite(r.variacao)).toBe(false);
   });
 });
+
+describe("diasNoMes", () => {
+  it("resolve meses de 28/30/31 dias", async () => {
+    const { diasNoMes } = await import("./gmvMesVsMes");
+    expect(diasNoMes("2026-02")).toBe(28);
+    expect(diasNoMes("2026-06")).toBe(30);
+    expect(diasNoMes("2026-07")).toBe(31);
+  });
+});

@@ -49,6 +49,13 @@ export function limitesMes(mes?: Map<number, number>): { primeiro: number; ultim
   return { primeiro: Math.min(...dias), ultimo: Math.max(...dias) };
 }
 
+/** Dias do mês a partir da chave YYYY-MM. */
+export function diasNoMes(chave: string): number {
+  const [a, m] = String(chave).split("-").map(Number);
+  if (!a || !m) return 31;
+  return new Date(a, m, 0).getDate();
+}
+
 export function construirSerie(
   porMes: MapaMeses,
   mesA: string,
@@ -116,7 +123,9 @@ export function resumirComparacao(porMes: MapaMeses, mesA: string, mesB: string)
   const totalB = soma(b);
   const la = limitesMes(a);
   const lb = limitesMes(b);
-  const parcial = la.ultimo > 0 && lb.ultimo > 0 && la.ultimo < lb.ultimo;
+  // Mês base só é parcial se ainda não chegou ao fim do próprio mês.
+  const parcial =
+    la.ultimo > 0 && lb.ultimo > 0 && la.ultimo < diasNoMes(mesA) && la.ultimo < lb.ultimo;
 
   let totalBJanela = totalB;
   if (parcial && b) {
