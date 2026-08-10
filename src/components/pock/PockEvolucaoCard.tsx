@@ -108,18 +108,28 @@ export default function PockEvolucaoCard({
         {extra && <span className="text-[11px] text-muted-foreground tnum">{extra}</span>}
       </div>
 
-      <div className="h-[230px] lg:h-[250px] xl:h-[280px]">
+      <div className="h-[260px] lg:h-[300px] xl:h-[330px]">
         {semDado ? (
           <div className="h-full flex items-center justify-center text-xs text-muted-foreground">—</div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={dados} margin={{ top: 18, right: 12, left: 4, bottom: 0 }}>
+            <ComposedChart data={dados} margin={{ top: 24, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="22%">
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="mes" tick={{ fontSize: 11 }} interval="preserveStartEnd" minTickGap={8} angle={-35} textAnchor="end" height={44} />
+              <XAxis
+                dataKey="mes"
+                tick={{ fontSize: 10 }}
+                interval="preserveStartEnd"
+                minTickGap={14}
+                angle={-35}
+                textAnchor="end"
+                height={40}
+                tickMargin={4}
+              />
               <YAxis
                 yAxisId="v"
-                tick={{ fontSize: 11 }}
-                width={52}
+                tick={{ fontSize: 10 }}
+                width={46}
+                tickCount={5}
                 tickFormatter={(v) =>
                   Math.abs(v) >= 1_000_000
                     ? `${(v / 1_000_000).toFixed(1)}M`
@@ -131,8 +141,9 @@ export default function PockEvolucaoCard({
               <YAxis
                 yAxisId="p"
                 orientation="right"
-                tick={{ fontSize: 11 }}
-                width={46}
+                tick={{ fontSize: 10 }}
+                width={40}
+                tickCount={5}
                 tickFormatter={(v) => `${v}%`}
               />
               <Tooltip
@@ -147,15 +158,17 @@ export default function PockEvolucaoCard({
                     : [fmt(v, formato), name]
                 }
               />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Bar yAxisId="v" dataKey="anoAnterior" name="Ano anterior" fill="hsl(var(--brand-blue))" fillOpacity={0.35} radius={[3, 3, 0, 0]} />
-              <Bar yAxisId="v" dataKey="valor" name="Mês" fill="hsl(var(--brand-blue))" radius={[3, 3, 0, 0]}>
-                <LabelList
-                  dataKey="valor"
-                  position="top"
-                  style={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-                  formatter={(v: any) => (v == null ? "" : fmt(v, formato))}
-                />
+              <Legend wrapperStyle={{ fontSize: 10, paddingTop: 2 }} iconSize={8} />
+              <Bar yAxisId="v" dataKey="anoAnterior" name="Ano anterior" fill="hsl(var(--brand-blue))" fillOpacity={0.3} radius={[3, 3, 0, 0]} maxBarSize={18} />
+              <Bar yAxisId="v" dataKey="valor" name="Mês" fill="hsl(var(--brand-navy))" radius={[3, 3, 0, 0]} maxBarSize={18}>
+                {mostrarRotulos && (
+                  <LabelList
+                    dataKey="valor"
+                    position="top"
+                    style={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                    formatter={(v: any) => (v == null ? "" : fmt(v, formato))}
+                  />
+                )}
               </Bar>
               {/* série interrompida em mês sem dado: connectNulls=false */}
               <Line yAxisId="p" type="monotone" dataKey="yoy" name="Var. YOY" stroke="hsl(var(--brand-navy))" strokeWidth={2} strokeDasharray="5 3" dot={false} connectNulls={false} />
