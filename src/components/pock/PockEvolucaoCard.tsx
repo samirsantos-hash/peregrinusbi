@@ -88,6 +88,8 @@ export default function PockEvolucaoCard({
   }, [pontos, mesAtual]);
 
   const semDado = dados.every((d) => d.valor === null);
+  // rótulos só quando há espaço: séries curtas evitam sobreposição de números
+  const mostrarRotulos = dados.length <= 8;
 
   return (
     <div className="rounded-lg border border-border p-3 space-y-2 bg-card/40">
