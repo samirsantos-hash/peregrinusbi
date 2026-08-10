@@ -97,12 +97,16 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
           dia: String(dia).padStart(2, "0"),
           base: accB > 0 ? (accA / accB) * 100 : null,
           comp: accB > 0 ? 100 : null,
+          accA,
+          accB,
         };
       }
       return {
         dia: String(dia).padStart(2, "0"),
         base: modo === "acumulado" ? (va === null && accA === 0 ? null : accA) : va,
         comp: modo === "acumulado" ? (vb === null && accB === 0 ? null : accB) : vb,
+        accA,
+        accB,
       };
     });
   }, [porMes, mesA, mesB, modo]);
@@ -176,14 +180,48 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
             width={62}
             domain={modo === "indice" ? ["auto", "auto"] : undefined}
           />
-          <Tooltip
-            contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
-            labelFormatter={(l) => `Dia ${l}`}
-            formatter={(v: any, n: any) => [
-              v == null ? "—" : modo === "indice" ? fIndice(Number(v)) : fBRL(Number(v)),
-              n,
-            ]}
-          />
+          {modo === "indice" ? (
+            <Tooltip
+              content={({ active, payload, label }: any) => {
+                if (!active || !payload?.length) return null;
+                const p = payload[0]?.payload;
+                if (!p) return null;
+                const idx = p.base as number | null;
+                const delta = idx == null ? NaN : (idx - 100) / 100;
+                return (
+                  <div className="rounded-lg border border-border bg-card p-2.5 text-[11px] space-y-1 min-w-[210px]">
+                    <p className="font-semibold text-foreground">Dia {label} · acumulado</p>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">{rotuloMes(mesA || "")} (base)</span>
+                      <span className="tabular-nums font-medium">{fBRL(p.accA || 0)}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">{rotuloMes(mesB || "")} (comparado)</span>
+                      <span className="tabular-nums font-medium">{fBRL(p.accB || 0)}</span>
+                    </div>
+                    <div className="flex justify-between gap-3 border-t border-border/50 pt-1">
+                      <span className="text-muted-foreground">Índice (base 100)</span>
+                      <span className="tabular-nums font-semibold">{idx == null ? "—" : fIndice(idx)}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span className="text-muted-foreground">Variação relativa</span>
+                      <span
+                        className={`tabular-nums font-semibold ${!Number.isFinite(delta) ? "" : delta >= 0 ? "text-emerald" : "text-destructive"}`}
+                      >
+                        {fDelta(delta)}
+                      </span>
+                    </div>
+                  </div>
+                );
+              }}
+            />
+          ) : (
+            <Tooltip
+              contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
+              labelFormatter={(l) => `Dia ${l}`}
+              formatter={(v: any, n: any) => [v == null ? "—" : fBRL(Number(v)), n]}
+            />
+          )}
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
           {modo === "indice" && (
             <ReferenceLine y={100} stroke="hsl(var(--border))" strokeDasharray="4 4" />

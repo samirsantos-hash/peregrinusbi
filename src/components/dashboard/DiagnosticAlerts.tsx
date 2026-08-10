@@ -92,6 +92,9 @@ interface Alerta {
   severidade: Severidade;
   descricao: string;
   acao: string;
+  titulo: string;
+  contexto: string;
+  passos: string[];
 }
 
 const PESO: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };
@@ -100,6 +103,7 @@ const PESO: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };
 
 const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: DiagnosticAlertsProps) => {
   const [drawer, setDrawer] = useState(false);
+  const [detalhe, setDetalhe] = useState<Alerta | null>(null);
 
   const { nome, custId, chips, indicadores, alertas, resumo } = useMemo(() => {
     const ordenados = [...(kpis || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)));
@@ -179,9 +183,26 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
     // Linha 3 — alertas determinísticos
     const lista: Alerta[] = [];
     if (inds[0].estado === "critico")
-      lista.push({ id: "rep", severidade: "critico", descricao: "Reputação fora da faixa verde.", acao: "Ver detalhe" });
+      lista.push({
+        id: "rep", severidade: "critico", descricao: "Reputação fora da faixa verde.", acao: "Ver detalhe",
+        titulo: "Reputação fora da faixa verde",
+        contexto: `Nível atual: ${inds[0].valor}. Meta: verde. Fonte: REP_LEVEL do último período com dado.`,
+        passos: [
+          "Reduzir atrasos de envio e cancelamentos por falta de estoque.",
+          "Responder e resolver reclamações abertas dentro do prazo.",
+          "Revisar anúncios com maior volume de mediações.",
+        ],
+      });
     else if (inds[0].estado === "atencao")
-      lista.push({ id: "rep", severidade: "atencao", descricao: "Reputação em amarelo — risco de rebaixamento.", acao: "Ver detalhe" });
+      lista.push({
+        id: "rep", severidade: "atencao", descricao: "Reputação em amarelo — risco de rebaixamento.", acao: "Ver detalhe",
+        titulo: "Reputação em amarelo",
+        contexto: `Nível atual: ${inds[0].valor}. Meta: verde. Amarelo indica risco de rebaixamento no próximo ciclo.`,
+        passos: [
+          "Monitorar diariamente reclamações e atrasos.",
+          "Priorizar SKUs com maior giro para evitar rupturas.",
+        ],
+      });
 
     if (inds[1].foraDaMeta)
       lista.push({
@@ -189,15 +210,40 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
         severidade: inds[1].estado === "critico" ? "critico" : "atencao",
         descricao: `Envios no prazo em ${inds[1].valor}, abaixo da meta de ${META_PRAZO}%.`,
         acao: "Ver detalhe",
+        titulo: "Envios no prazo abaixo da meta",
+        contexto: `Atual: ${inds[1].valor} · Meta: ≥ ${META_PRAZO}%. Cálculo: 1 − REP_DELAYED_HT_RATE (campo na escala 0–1).`,
+        passos: [
+          "Verificar handling time cadastrado versus o real.",
+          "Avaliar migração dos SKUs de maior giro para Full.",
+          "Ajustar cut-off de coleta e calendário de feriados.",
+        ],
       });
 
     const fotos = mediaPonderada((k) => k.scorePhoto);
     if (fotos != null && fotos < 70)
-      lista.push({ id: "fotos", severidade: "critico", descricao: "Score de fotos abaixo de 70.", acao: "Melhorar Fotos" });
+      lista.push({
+        id: "fotos", severidade: "critico", descricao: "Score de fotos abaixo de 70.", acao: "Melhorar Fotos",
+        titulo: "Score de fotos abaixo de 70",
+        contexto: `Média do período: ${fotos.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} (faixa saudável ≥ 70).`,
+        passos: [
+          "Fundo branco, produto centralizado e mínimo de 1200px.",
+          "Ao menos 4 imagens por anúncio, incluindo detalhes e escala.",
+          "Remover textos e selos promocionais das imagens principais.",
+        ],
+      });
 
     const titulos = mediaPonderada((k) => k.scoreTitle);
     if (titulos != null && titulos < 70)
-      lista.push({ id: "titulo", severidade: "atencao", descricao: "Score de título abaixo de 70.", acao: "Ajustar SEO" });
+      lista.push({
+        id: "titulo", severidade: "atencao", descricao: "Score de título abaixo de 70.", acao: "Ajustar SEO",
+        titulo: "Score de título abaixo de 70",
+        contexto: `Média do período: ${titulos.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} (faixa saudável ≥ 70).`,
+        passos: [
+          "Estrutura: produto + marca + modelo + atributo principal.",
+          "Evitar repetição de palavras e caracteres promocionais.",
+          "Completar ficha técnica — atributos alimentam a busca.",
+        ],
+      });
 
     if (inds[3].foraDaMeta)
       lista.push({
@@ -205,15 +251,40 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
         severidade: inds[3].estado === "critico" ? "critico" : "atencao",
         descricao: `Investimento em Ads em ${inds[3].valor} do faturamento (meta ${META_ADS}%).`,
         acao: "Ver detalhe",
+        titulo: "Investimento em Ads acima da meta",
+        contexto: `Atual: ${inds[3].valor} do faturamento · Meta: ${META_ADS}%. Cálculo: INV_PADS ÷ TGMV_LC no período exibido.`,
+        passos: [
+          "Revisar campanhas com ROAS abaixo de 2,0x.",
+          "Concentrar orçamento nos SKUs com maior conversão orgânica.",
+          "Checar se a alta de TACOS não vem de queda de faturamento.",
+        ],
       });
 
     const visitas = soma((k) => Number(k.visits) || 0);
     const visitasCaras = soma((k) => Number(k.visitsExpensive) || 0);
     if (visitas > 0 && visitasCaras / visitas > 0.3)
-      lista.push({ id: "preco", severidade: "atencao", descricao: "Preço não competitivo em parte relevante das visitas.", acao: "Revisar Preço" });
+      lista.push({
+        id: "preco", severidade: "atencao", descricao: "Preço não competitivo em parte relevante das visitas.", acao: "Revisar Preço",
+        titulo: "Preço não competitivo",
+        contexto: `${((visitasCaras / visitas) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% das visitas caem em anúncios com preço acima do concorrente (limite de referência: 30%).`,
+        passos: [
+          "Comparar com o menor preço rival nos SKUs de maior visita.",
+          "Avaliar cupons ou campanhas cofinanciadas antes de baixar preço-base.",
+          "Checar frete grátis, que entra na percepção de preço final.",
+        ],
+      });
 
     if (inds[2].foraDaMeta)
-      lista.push({ id: "qualidade", severidade: "info", descricao: "Qualidade do anúncio abaixo da faixa 80–100.", acao: "Ver detalhe" });
+      lista.push({
+        id: "qualidade", severidade: "info", descricao: "Qualidade do anúncio abaixo da faixa 80–100.", acao: "Ver detalhe",
+        titulo: "Qualidade do anúncio abaixo da faixa ideal",
+        contexto: `Atual: ${inds[2].valor} · Faixa ideal: 80–100. Combina ficha técnica, fotos, título e conversão.`,
+        passos: [
+          "Completar atributos obrigatórios e EAN.",
+          "Revisar descrição e ficha técnica dos anúncios de maior visita.",
+          "Acompanhar o painel de Qualidade para os itens com score < 70.",
+        ],
+      });
 
     lista.sort((a, b) => PESO[a.severidade] - PESO[b.severidade]);
 
@@ -322,7 +393,7 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
               <span>Nenhum alerta ativo neste período.</span>
             </div>
           ) : (
-            visiveis.map((a) => <LinhaAlerta key={a.id} alerta={a} />)
+            visiveis.map((a) => <LinhaAlerta key={a.id} alerta={a} onAbrir={setDetalhe} />)
           )}
           {alertas.length > 5 && (
             <Button variant="ghost" size="sm" className="text-[11px] h-7" onClick={() => setDrawer(true)}>
@@ -338,9 +409,44 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
             </SheetHeader>
             <div className="mt-4 space-y-1">
               {alertas.map((a) => (
-                <LinhaAlerta key={a.id} alerta={a} />
+                <LinhaAlerta key={a.id} alerta={a} onAbrir={setDetalhe} />
               ))}
             </div>
+          </SheetContent>
+        </Sheet>
+
+        <Sheet open={!!detalhe} onOpenChange={(o) => !o && setDetalhe(null)}>
+          <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+            {detalhe && (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2 text-base">
+                    <IconeSemaforo estado={detalhe.severidade === "critico" ? "critico" : detalhe.severidade === "atencao" ? "atencao" : "neutro"} />
+                    {detalhe.titulo}
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 space-y-4">
+                  <div className="rounded-lg border border-border bg-muted/10 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-alt mb-1">Situação</p>
+                    <p className="text-[13px] leading-snug">{detalhe.contexto}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wide text-muted-alt mb-1.5">O que fazer</p>
+                    <ul className="space-y-1.5">
+                      {detalhe.passos.map((p) => (
+                        <li key={p} className="text-[13px] leading-snug flex gap-2">
+                          <span className="text-brand-blue">•</span>
+                          <span>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Loja: {nome}{custId ? ` · Cust ID ${custId}` : ""}
+                  </p>
+                </div>
+              </>
+            )}
           </SheetContent>
         </Sheet>
       </div>
@@ -348,7 +454,7 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
   );
 };
 
-function LinhaAlerta({ alerta }: { alerta: Alerta }) {
+function LinhaAlerta({ alerta, onAbrir }: { alerta: Alerta; onAbrir: (a: Alerta) => void }) {
   const estado: Semaforo = alerta.severidade === "critico" ? "critico" : alerta.severidade === "atencao" ? "atencao" : "neutro";
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors px-3 py-1.5">
@@ -356,7 +462,12 @@ function LinhaAlerta({ alerta }: { alerta: Alerta }) {
         <IconeSemaforo estado={estado} />
         <span className="text-[12px] truncate">{alerta.descricao}</span>
       </div>
-      <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px] text-brand-blue shrink-0">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 px-2 text-[11px] text-brand-blue shrink-0"
+        onClick={() => onAbrir(alerta)}
+      >
         {alerta.acao}
       </Button>
     </div>
