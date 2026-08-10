@@ -475,6 +475,7 @@ const Index = () => {
                   transition={{ duration: 0.25 }}
                   className="mt-0">
                   <TabsContent value="executive" className="mt-0 space-y-6">
+                    <NovidadesPrompt />
                     <JuniorActionBanner abaId="executive" dados={dadosJunior} />
                     <Daily7DPanel
                       dailyKpis={allKpisDaily}
