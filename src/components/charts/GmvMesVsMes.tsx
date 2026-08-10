@@ -118,7 +118,31 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
 
   const totalA = useMemo(() => Array.from(porMes.get(mesA)?.values() || []).reduce((s, v) => s + v, 0), [porMes, mesA]);
   const totalB = useMemo(() => Array.from(porMes.get(mesB)?.values() || []).reduce((s, v) => s + v, 0), [porMes, mesB]);
-  const variacao = totalB ? (totalA - totalB) / Math.abs(totalB) : NaN;
+
+  /** Último dia com dado em cada mês (para comparação justa em mês parcial). */
+  const ultimoDiaA = useMemo(() => {
+    const dias = Array.from(porMes.get(mesA)?.entries() || []).filter(([, v]) => v !== 0).map(([d]) => d);
+    return dias.length ? Math.max(...dias) : 0;
+  }, [porMes, mesA]);
+  const ultimoDiaB = useMemo(() => {
+    const dias = Array.from(porMes.get(mesB)?.entries() || []).filter(([, v]) => v !== 0).map(([d]) => d);
+    return dias.length ? Math.max(...dias) : 0;
+  }, [porMes, mesB]);
+
+  const parcial = ultimoDiaA > 0 && ultimoDiaB > 0 && ultimoDiaA < ultimoDiaB;
+
+  /** Total do mês comparado limitado à mesma janela de dias do mês base. */
+  const totalBJanela = useMemo(() => {
+    if (!parcial) return totalB;
+    const b = porMes.get(mesB);
+    if (!b) return 0;
+    let s = 0;
+    for (const [d, v] of b.entries()) if (d <= ultimoDiaA) s += v;
+    return s;
+  }, [parcial, porMes, mesB, ultimoDiaA, totalB]);
+
+  const baseComparacao = parcial ? totalBJanela : totalB;
+  const variacao = baseComparacao ? (totalA - baseComparacao) / Math.abs(baseComparacao) : NaN;
 
   if (meses.length < 1) {
     return (
@@ -163,13 +187,17 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
         <div className="rounded-lg border border-border/40 bg-card/50 p-2">
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{rotuloMes(mesA || "")}</div>
           <div className="text-sm font-semibold tabular-nums">{fBRL(totalA)}</div>
+          {parcial && <div className="text-[9px] text-muted-foreground">parcial · até dia {String(ultimoDiaA).padStart(2, "0")}</div>}
         </div>
         <div className="rounded-lg border border-border/40 bg-card/50 p-2">
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{rotuloMes(mesB || "")}</div>
-          <div className="text-sm font-semibold tabular-nums">{fBRL(totalB)}</div>
+          <div className="text-sm font-semibold tabular-nums">{fBRL(parcial ? totalBJanela : totalB)}</div>
+          {parcial && <div className="text-[9px] text-muted-foreground">mesma janela · mês cheio {fBRL(totalB)}</div>}
         </div>
         <div className="rounded-lg border border-border/40 bg-card/50 p-2">
-          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Variação</div>
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Variação{parcial ? " (janela comparável)" : ""}
+          </div>
           <div className={`text-sm font-semibold tabular-nums ${!Number.isFinite(variacao) ? "" : variacao >= 0 ? "text-emerald" : "text-destructive"}`}>
             {fDelta(variacao)}
           </div>
