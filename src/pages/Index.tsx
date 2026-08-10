@@ -66,6 +66,7 @@ import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
 import PockPanel from "@/components/pock/PockPanel";
+import { NovidadesPrompt } from "@/components/novidades/novidades";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
