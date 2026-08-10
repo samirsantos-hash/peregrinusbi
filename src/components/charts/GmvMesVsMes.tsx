@@ -6,6 +6,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
+import { NovidadeTip } from "@/components/novidades/novidades";
 
 export interface PontoDiario {
   /** YYYY-MM-DD */
@@ -130,6 +131,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
         <h3 className="text-xs lg:text-[13px] font-semibold flex items-center gap-1">
           {titulo}
           <TooltipInfo text="Barras = mês base, linha = mês de comparação, alinhados pelo dia do mês. No modo Índice 100, o mês comparado vale 100 em cada dia (acumulado) e o mês base aparece como índice relativo: 112 = 12% acima, 88 = 12% abaixo." />
+          <NovidadeTip id="gmv-mes-vs-mes" className="ml-1" />
         </h3>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={mesA} onValueChange={setMesA}>

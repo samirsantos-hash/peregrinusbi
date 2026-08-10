@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { usePockData } from "@/hooks/usePockData";
+import { NovidadeTip } from "@/components/novidades/novidades";
 import PockGauge, { LegendaFaixas } from "./PockGauge";
 import PockRateBar from "./PockRateBar";
 import PockEvolucaoCard from "./PockEvolucaoCard";
@@ -110,7 +111,10 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
       {/* FAIXA 1 — Identidade e diagnóstico */}
       <section className="rounded-xl border border-border bg-card/40 p-4 space-y-4">
-        <h3 className="text-sm font-semibold">Identidade e diagnóstico</h3>
+        <h3 className="text-sm font-semibold flex items-center gap-2">
+          Identidade e diagnóstico
+          <NovidadeTip id="pock" />
+        </h3>
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 lg:gap-4">
           <div className="md:col-span-6 lg:col-span-3 rounded-lg border border-border p-3">
             <p className="text-[11px] font-semibold mb-2">Detalhes do Vendedor</p>

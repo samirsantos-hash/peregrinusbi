@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { SELLER_TABS, type SellerTab } from "@/config/sellerTabs";
+import { NovidadeTip } from "@/components/novidades/novidades";
 
 const CHAVE = "peregrinus.sidebar.collapsed";
 
@@ -106,8 +107,9 @@ function Conteudo({
         {GRUPOS.map((g) => (
           <div key={g.titulo} className="mt-5 first:mt-2">
             {!recolhida && (
-              <p className="px-3 mb-1 text-[10px] font-medium uppercase tracking-[0.06em] text-muted-alt">
+              <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.06em] text-muted-alt">
                 {g.titulo}
+                {g.titulo === "Visão" && <NovidadeTip id="sidebar" />}
               </p>
             )}
             <ul className="space-y-0.5">
