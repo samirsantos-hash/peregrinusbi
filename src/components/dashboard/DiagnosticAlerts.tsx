@@ -103,6 +103,7 @@ const PESO: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };
 
 const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: DiagnosticAlertsProps) => {
   const [drawer, setDrawer] = useState(false);
+  const [detalhe, setDetalhe] = useState<Alerta | null>(null);
 
   const { nome, custId, chips, indicadores, alertas, resumo } = useMemo(() => {
     const ordenados = [...(kpis || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)));
@@ -392,7 +393,7 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
               <span>Nenhum alerta ativo neste período.</span>
             </div>
           ) : (
-            visiveis.map((a) => <LinhaAlerta key={a.id} alerta={a} />)
+            visiveis.map((a) => <LinhaAlerta key={a.id} alerta={a} onAbrir={setDetalhe} />)
           )}
           {alertas.length > 5 && (
             <Button variant="ghost" size="sm" className="text-[11px] h-7" onClick={() => setDrawer(true)}>
@@ -408,9 +409,44 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
             </SheetHeader>
             <div className="mt-4 space-y-1">
               {alertas.map((a) => (
-                <LinhaAlerta key={a.id} alerta={a} />
+                <LinhaAlerta key={a.id} alerta={a} onAbrir={setDetalhe} />
               ))}
             </div>
+          </SheetContent>
+        </Sheet>
+
+        <Sheet open={!!detalhe} onOpenChange={(o) => !o && setDetalhe(null)}>
+          <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+            {detalhe && (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2 text-base">
+                    <IconeSemaforo estado={detalhe.severidade === "critico" ? "critico" : detalhe.severidade === "atencao" ? "atencao" : "neutro"} />
+                    {detalhe.titulo}
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="mt-4 space-y-4">
+                  <div className="rounded-lg border border-border bg-muted/10 px-3 py-2">
+                    <p className="text-[11px] uppercase tracking-wide text-muted-alt mb-1">Situação</p>
+                    <p className="text-[13px] leading-snug">{detalhe.contexto}</p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wide text-muted-alt mb-1.5">O que fazer</p>
+                    <ul className="space-y-1.5">
+                      {detalhe.passos.map((p) => (
+                        <li key={p} className="text-[13px] leading-snug flex gap-2">
+                          <span className="text-brand-blue">•</span>
+                          <span>{p}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Loja: {nome}{custId ? ` · Cust ID ${custId}` : ""}
+                  </p>
+                </div>
+              </>
+            )}
           </SheetContent>
         </Sheet>
       </div>
@@ -418,7 +454,7 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
   );
 };
 
-function LinhaAlerta({ alerta }: { alerta: Alerta }) {
+function LinhaAlerta({ alerta, onAbrir }: { alerta: Alerta; onAbrir: (a: Alerta) => void }) {
   const estado: Semaforo = alerta.severidade === "critico" ? "critico" : alerta.severidade === "atencao" ? "atencao" : "neutro";
   return (
     <div className="flex items-center justify-between gap-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors px-3 py-1.5">
@@ -426,7 +462,12 @@ function LinhaAlerta({ alerta }: { alerta: Alerta }) {
         <IconeSemaforo estado={estado} />
         <span className="text-[12px] truncate">{alerta.descricao}</span>
       </div>
-      <Button variant="ghost" size="sm" className="h-6 px-2 text-[11px] text-brand-blue shrink-0">
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-6 px-2 text-[11px] text-brand-blue shrink-0"
+        onClick={() => onAbrir(alerta)}
+      >
         {alerta.acao}
       </Button>
     </div>
