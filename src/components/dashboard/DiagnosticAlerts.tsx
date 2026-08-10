@@ -92,6 +92,9 @@ interface Alerta {
   severidade: Severidade;
   descricao: string;
   acao: string;
+  titulo: string;
+  contexto: string;
+  passos: string[];
 }
 
 const PESO: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };
