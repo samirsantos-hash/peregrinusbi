@@ -81,10 +81,12 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
     const a = porMes.get(mesA);
     const b = porMes.get(mesB);
     if (!a && !b) return [];
-    const maxDia = Math.max(
-      ...Array.from(a?.keys() || [0]),
-      ...Array.from(b?.keys() || [0]),
-    );
+    const diasA = Array.from(a?.keys() || []).filter((d) => (a?.get(d) || 0) !== 0);
+    const diasB = Array.from(b?.keys() || []).filter((d) => (b?.get(d) || 0) !== 0);
+    const ultimoA = diasA.length ? Math.max(...diasA) : 0;
+    const ultimoB = diasB.length ? Math.max(...diasB) : 0;
+    const maxDia = Math.max(ultimoA, ultimoB);
+    if (maxDia < 1) return [];
     let accA = 0, accB = 0;
     return Array.from({ length: maxDia }, (_, i) => {
       const dia = i + 1;
@@ -92,29 +94,55 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
       const vb = b?.get(dia) ?? null;
       accA += va ?? 0;
       accB += vb ?? 0;
+      // Meses parciais: não prolongar a curva depois do último dia com dado (evita "linha reta").
+      const vivoA = dia <= ultimoA;
+      const vivoB = dia <= ultimoB;
       if (modo === "indice") {
-        // Base 100: mês comparado = 100 em cada dia (acumulado), mês base indexado sobre ele.
         return {
           dia: String(dia).padStart(2, "0"),
-          base: accB > 0 ? (accA / accB) * 100 : null,
-          comp: accB > 0 ? 100 : null,
-          accA,
-          accB,
+          base: vivoA && vivoB && accB > 0 ? (accA / accB) * 100 : null,
+          comp: vivoB && accB > 0 ? 100 : null,
+          accA: vivoA ? accA : null,
+          accB: vivoB ? accB : null,
         };
       }
       return {
         dia: String(dia).padStart(2, "0"),
-        base: modo === "acumulado" ? (va === null && accA === 0 ? null : accA) : va,
-        comp: modo === "acumulado" ? (vb === null && accB === 0 ? null : accB) : vb,
-        accA,
-        accB,
+        base: modo === "acumulado" ? (vivoA && accA > 0 ? accA : null) : va,
+        comp: modo === "acumulado" ? (vivoB && accB > 0 ? accB : null) : vb,
+        accA: vivoA ? accA : null,
+        accB: vivoB ? accB : null,
       };
     });
   }, [porMes, mesA, mesB, modo]);
 
   const totalA = useMemo(() => Array.from(porMes.get(mesA)?.values() || []).reduce((s, v) => s + v, 0), [porMes, mesA]);
   const totalB = useMemo(() => Array.from(porMes.get(mesB)?.values() || []).reduce((s, v) => s + v, 0), [porMes, mesB]);
-  const variacao = totalB ? (totalA - totalB) / Math.abs(totalB) : NaN;
+
+  /** Último dia com dado em cada mês (para comparação justa em mês parcial). */
+  const ultimoDiaA = useMemo(() => {
+    const dias = Array.from(porMes.get(mesA)?.entries() || []).filter(([, v]) => v !== 0).map(([d]) => d);
+    return dias.length ? Math.max(...dias) : 0;
+  }, [porMes, mesA]);
+  const ultimoDiaB = useMemo(() => {
+    const dias = Array.from(porMes.get(mesB)?.entries() || []).filter(([, v]) => v !== 0).map(([d]) => d);
+    return dias.length ? Math.max(...dias) : 0;
+  }, [porMes, mesB]);
+
+  const parcial = ultimoDiaA > 0 && ultimoDiaB > 0 && ultimoDiaA < ultimoDiaB;
+
+  /** Total do mês comparado limitado à mesma janela de dias do mês base. */
+  const totalBJanela = useMemo(() => {
+    if (!parcial) return totalB;
+    const b = porMes.get(mesB);
+    if (!b) return 0;
+    let s = 0;
+    for (const [d, v] of b.entries()) if (d <= ultimoDiaA) s += v;
+    return s;
+  }, [parcial, porMes, mesB, ultimoDiaA, totalB]);
+
+  const baseComparacao = parcial ? totalBJanela : totalB;
+  const variacao = baseComparacao ? (totalA - baseComparacao) / Math.abs(baseComparacao) : NaN;
 
   if (meses.length < 1) {
     return (
@@ -159,13 +187,17 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
         <div className="rounded-lg border border-border/40 bg-card/50 p-2">
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{rotuloMes(mesA || "")}</div>
           <div className="text-sm font-semibold tabular-nums">{fBRL(totalA)}</div>
+          {parcial && <div className="text-[9px] text-muted-foreground">parcial · até dia {String(ultimoDiaA).padStart(2, "0")}</div>}
         </div>
         <div className="rounded-lg border border-border/40 bg-card/50 p-2">
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{rotuloMes(mesB || "")}</div>
-          <div className="text-sm font-semibold tabular-nums">{fBRL(totalB)}</div>
+          <div className="text-sm font-semibold tabular-nums">{fBRL(parcial ? totalBJanela : totalB)}</div>
+          {parcial && <div className="text-[9px] text-muted-foreground">mesma janela · mês cheio {fBRL(totalB)}</div>}
         </div>
         <div className="rounded-lg border border-border/40 bg-card/50 p-2">
-          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Variação</div>
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+            Variação{parcial ? " (janela comparável)" : ""}
+          </div>
           <div className={`text-sm font-semibold tabular-nums ${!Number.isFinite(variacao) ? "" : variacao >= 0 ? "text-emerald" : "text-destructive"}`}>
             {fDelta(variacao)}
           </div>
