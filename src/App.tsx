@@ -33,7 +33,15 @@ import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 import RodapeInstitucional from "./components/RodapeInstitucional";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      refetchOnWindowFocus: true,
+      refetchOnMount: "always",
+    },
+  },
+});
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { user, loading, isAdmin, isGerente, mustChangePassword } = useAuth();
