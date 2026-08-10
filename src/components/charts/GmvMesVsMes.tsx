@@ -7,12 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
 import { NovidadeTip } from "@/components/novidades/novidades";
+import {
+  agruparPorMes, construirSerie, resumirComparacao, type PontoDiario,
+} from "@/lib/gmvMesVsMes";
 
-export interface PontoDiario {
-  /** YYYY-MM-DD */
-  date: string;
-  gmv: number;
-}
+export type { PontoDiario };
 
 interface Props {
   pontos: PontoDiario[];
@@ -46,18 +45,7 @@ const fIndice = (v: number) =>
 
 /** Compara o GMV de dois meses dia a dia (barras = mês base, linha = mês de comparação). */
 export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", className = "" }: Props) {
-  const porMes = useMemo(() => {
-    const m = new Map<string, Map<number, number>>();
-    for (const p of pontos) {
-      if (!p.date || p.date.length < 10) continue;
-      const chave = p.date.slice(0, 7);
-      const dia = Number(p.date.slice(8, 10));
-      if (!m.has(chave)) m.set(chave, new Map());
-      const dd = m.get(chave)!;
-      dd.set(dia, (dd.get(dia) || 0) + (Number(p.gmv) || 0));
-    }
-    return m;
-  }, [pontos]);
+  const porMes = useMemo(() => agruparPorMes(pontos), [pontos]);
 
   const meses = useMemo(() => Array.from(porMes.keys()).sort(), [porMes]);
 
@@ -77,72 +65,13 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
     setMesB((v) => (v && meses.includes(v) ? v : padraoB));
   }, [meses]);
 
-  const dados = useMemo(() => {
-    const a = porMes.get(mesA);
-    const b = porMes.get(mesB);
-    if (!a && !b) return [];
-    const diasA = Array.from(a?.keys() || []).filter((d) => (a?.get(d) || 0) !== 0);
-    const diasB = Array.from(b?.keys() || []).filter((d) => (b?.get(d) || 0) !== 0);
-    const ultimoA = diasA.length ? Math.max(...diasA) : 0;
-    const ultimoB = diasB.length ? Math.max(...diasB) : 0;
-    const maxDia = Math.max(ultimoA, ultimoB);
-    if (maxDia < 1) return [];
-    let accA = 0, accB = 0;
-    return Array.from({ length: maxDia }, (_, i) => {
-      const dia = i + 1;
-      const va = a?.get(dia) ?? null;
-      const vb = b?.get(dia) ?? null;
-      accA += va ?? 0;
-      accB += vb ?? 0;
-      // Meses parciais: não prolongar a curva depois do último dia com dado (evita "linha reta").
-      const vivoA = dia <= ultimoA;
-      const vivoB = dia <= ultimoB;
-      if (modo === "indice") {
-        return {
-          dia: String(dia).padStart(2, "0"),
-          base: vivoA && vivoB && accB > 0 ? (accA / accB) * 100 : null,
-          comp: vivoB && accB > 0 ? 100 : null,
-          accA: vivoA ? accA : null,
-          accB: vivoB ? accB : null,
-        };
-      }
-      return {
-        dia: String(dia).padStart(2, "0"),
-        base: modo === "acumulado" ? (vivoA && accA > 0 ? accA : null) : va,
-        comp: modo === "acumulado" ? (vivoB && accB > 0 ? accB : null) : vb,
-        accA: vivoA ? accA : null,
-        accB: vivoB ? accB : null,
-      };
-    });
-  }, [porMes, mesA, mesB, modo]);
+  const dados = useMemo(
+    () => construirSerie(porMes, mesA, mesB, modo),
+    [porMes, mesA, mesB, modo],
+  );
 
-  const totalA = useMemo(() => Array.from(porMes.get(mesA)?.values() || []).reduce((s, v) => s + v, 0), [porMes, mesA]);
-  const totalB = useMemo(() => Array.from(porMes.get(mesB)?.values() || []).reduce((s, v) => s + v, 0), [porMes, mesB]);
-
-  /** Último dia com dado em cada mês (para comparação justa em mês parcial). */
-  const ultimoDiaA = useMemo(() => {
-    const dias = Array.from(porMes.get(mesA)?.entries() || []).filter(([, v]) => v !== 0).map(([d]) => d);
-    return dias.length ? Math.max(...dias) : 0;
-  }, [porMes, mesA]);
-  const ultimoDiaB = useMemo(() => {
-    const dias = Array.from(porMes.get(mesB)?.entries() || []).filter(([, v]) => v !== 0).map(([d]) => d);
-    return dias.length ? Math.max(...dias) : 0;
-  }, [porMes, mesB]);
-
-  const parcial = ultimoDiaA > 0 && ultimoDiaB > 0 && ultimoDiaA < ultimoDiaB;
-
-  /** Total do mês comparado limitado à mesma janela de dias do mês base. */
-  const totalBJanela = useMemo(() => {
-    if (!parcial) return totalB;
-    const b = porMes.get(mesB);
-    if (!b) return 0;
-    let s = 0;
-    for (const [d, v] of b.entries()) if (d <= ultimoDiaA) s += v;
-    return s;
-  }, [parcial, porMes, mesB, ultimoDiaA, totalB]);
-
-  const baseComparacao = parcial ? totalBJanela : totalB;
-  const variacao = baseComparacao ? (totalA - baseComparacao) / Math.abs(baseComparacao) : NaN;
+  const resumo = useMemo(() => resumirComparacao(porMes, mesA, mesB), [porMes, mesA, mesB]);
+  const { totalA, totalB, totalBJanela, ultimoDiaA, parcial, variacao } = resumo;
 
   if (meses.length < 1) {
     return (
