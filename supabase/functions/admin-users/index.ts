@@ -252,6 +252,53 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "update_role") {
+      const { targetUserId, role } = body;
+      const allowedRoles = ["admin", "gerente", "user"];
+
+      if (!targetUserId || !allowedRoles.includes(role)) {
+        return new Response(JSON.stringify({ error: "targetUserId e role válidos são obrigatórios" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (targetUserId === callerId && role !== "admin") {
+        return new Response(JSON.stringify({ error: "Você não pode remover o seu próprio acesso de admin." }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: delErr } = await adminClient
+        .from("user_roles")
+        .delete()
+        .eq("user_id", targetUserId)
+        .in("role", allowedRoles);
+
+      if (delErr) {
+        return new Response(JSON.stringify({ error: delErr.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: insErr } = await adminClient
+        .from("user_roles")
+        .upsert({ user_id: targetUserId, role }, { onConflict: "user_id,role" });
+
+      if (insErr) {
+        return new Response(JSON.stringify({ error: insErr.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, role }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (action === "update_wallet") {
       const { targetUserId, allowedCustIds } = body;
 

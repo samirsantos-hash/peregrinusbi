@@ -205,6 +205,26 @@ const Admin = () => {
     }
   };
 
+  const [changingRole, setChangingRole] = useState<string | null>(null);
+
+  const handleChangeRole = async (userId: string, email: string, role: AppRole) => {
+    const labels: Record<AppRole, string> = { admin: "Admin", gerente: "Gerente", user: "Consultor" };
+    if (!confirm(`Alterar o perfil de ${email} para ${labels[role]}?`)) return;
+    setChangingRole(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "update_role", targetUserId: userId, role },
+      });
+      if (error) throw new Error(await getEdgeFunctionErrorMessage(error, "Falha ao alterar perfil"));
+      if (data?.error) throw new Error(data.error);
+      toast({ title: `Perfil alterado para ${labels[role]}` });
+      await loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    }
+    setChangingRole(null);
+  };
+
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
 
   const togglePasswordVisibility = (id: string) => {
@@ -430,6 +450,20 @@ const Admin = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-1">
+                          <Select
+                            value={u.role}
+                            onValueChange={(v) => handleChangeRole(u.userId, u.email, v as AppRole)}
+                            disabled={changingRole === u.userId}
+                          >
+                            <SelectTrigger className="h-8 w-[130px] text-xs" title="Alterar perfil de acesso">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">Consultor</SelectItem>
+                              <SelectItem value="gerente">Gerente</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Button variant="ghost" size="icon" title="Editar carteira de lojas" onClick={() => setWalletUser(u)}>
                             <Store className="w-4 h-4 text-emerald" />
                           </Button>
