@@ -205,6 +205,42 @@ const Admin = () => {
     }
   };
 
+  const [changingRole, setChangingRole] = useState<string | null>(null);
+
+  const handleChangeRole = async (userId: string, email: string, role: AppRole) => {
+    const labels: Record<AppRole, string> = { admin: "Admin", gerente: "Gerente", user: "Consultor" };
+    if (!confirm(`Alterar o perfil de ${email} para ${labels[role]}?`)) return;
+    setChangingRole(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "update_role", targetUserId: userId, role },
+      });
+      if (error) throw new Error(await getEdgeFunctionErrorMessage(error, "Falha ao alterar perfil"));
+      if (data?.error) throw new Error(data.error);
+      toast({ title: `Perfil alterado para ${labels[role]}` });
+      await loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    }
+    setChangingRole(null);
+  };
+
+  const handleResetPasswordLegacy = async (userId: string, email: string) => {
+    if (!confirm(`Gerar nova senha temporária para ${email}?`)) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "reset_password", targetUserId: userId },
+      });
+      if (error) throw new Error(await getEdgeFunctionErrorMessage(error, "Falha ao redefinir senha"));
+      if (data?.error) throw new Error(data.error);
+      setCreatedPasswordDialog({ email, password: data.tempPassword });
+      toast({ title: "Nova senha gerada!" });
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    }
+  };
+
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
 
   const togglePasswordVisibility = (id: string) => {
