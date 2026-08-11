@@ -273,7 +273,7 @@ const Admin = () => {
           <Button variant="outline" size="sm" onClick={signOut}>Sair</Button>
         </motion.div>
 
-        <Tabs defaultValue={isAdmin ? "users" : isGerente ? "upload" : "portfolios"} className="w-full">
+        <Tabs defaultValue={isAdmin ? "users" : "portfolios"} className="w-full">
           <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto">
             {isAdmin && (
               <TabsTrigger value="users" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
@@ -287,12 +287,10 @@ const Admin = () => {
                 Upload de Dados
               </TabsTrigger>
             )}
-            {!isGerente && (
-              <TabsTrigger value="portfolios" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
-                <Folder className="w-4 h-4" />
-                Gestão de Carteiras
-              </TabsTrigger>
-            )}
+            <TabsTrigger value="portfolios" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+              <Folder className="w-4 h-4" />
+              Gestão de Carteiras
+            </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="tokens" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <KeyRound className="w-4 h-4" />
@@ -548,11 +546,9 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          {!isGerente && (
-            <TabsContent value="portfolios" className="mt-5">
-              <PortfolioManager />
-            </TabsContent>
-          )}
+          <TabsContent value="portfolios" className="mt-5">
+            <PortfolioManager />
+          </TabsContent>
 
           {isAdmin && (
             <TabsContent value="tokens" className="mt-5">
