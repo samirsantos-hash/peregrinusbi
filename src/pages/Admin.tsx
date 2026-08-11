@@ -466,6 +466,20 @@ const Admin = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-1">
+                          <Select
+                            value={u.role}
+                            onValueChange={(v) => handleChangeRole(u.userId, u.email, v as AppRole)}
+                            disabled={changingRole === u.userId}
+                          >
+                            <SelectTrigger className="h-8 w-[130px] text-xs" title="Alterar perfil de acesso">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">Consultor</SelectItem>
+                              <SelectItem value="gerente">Gerente</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Button variant="ghost" size="icon" title="Editar carteira de lojas" onClick={() => setWalletUser(u)}>
                             <Store className="w-4 h-4 text-emerald" />
                           </Button>
