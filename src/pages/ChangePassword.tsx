@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, KeyRound } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 const ChangePassword = () => {
@@ -13,7 +12,6 @@ const ChangePassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { updatePassword } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +31,9 @@ const ChangePassword = () => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Senha alterada com sucesso!" });
-      navigate("/", { replace: true });
+      // Recarrega a aplicação em vez de trocar a árvore React durante a animação
+      // (evita o erro "insertBefore" ao remontar as rotas protegidas).
+      window.location.replace("/");
     }
   };
 

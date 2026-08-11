@@ -121,7 +121,7 @@ const ResetPassword = () => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Senha redefinida com sucesso!" });
-      navigate("/");
+      window.location.replace("/");
     }
   };
 
