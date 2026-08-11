@@ -252,10 +252,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (action === "update_wallet") {
-      // handled below
-    }
-
     if (action === "update_role") {
       const { targetUserId, role } = body;
       const allowedRoles = ["admin", "gerente", "user"];
