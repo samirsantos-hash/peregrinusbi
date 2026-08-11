@@ -33,7 +33,9 @@ const ChangePassword = () => {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Senha alterada com sucesso!" });
-      navigate("/", { replace: true });
+      // Recarrega a aplicação em vez de trocar a árvore React durante a animação
+      // (evita o erro "insertBefore" ao remontar as rotas protegidas).
+      window.location.replace("/");
     }
   };
 
