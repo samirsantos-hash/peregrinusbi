@@ -546,11 +546,9 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          {!isGerente && (
-            <TabsContent value="portfolios" className="mt-5">
-              <PortfolioManager />
-            </TabsContent>
-          )}
+          <TabsContent value="portfolios" className="mt-5">
+            <PortfolioManager />
+          </TabsContent>
 
           {isAdmin && (
             <TabsContent value="tokens" className="mt-5">
