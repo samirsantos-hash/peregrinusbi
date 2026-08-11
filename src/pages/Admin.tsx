@@ -225,22 +225,6 @@ const Admin = () => {
     setChangingRole(null);
   };
 
-  const handleResetPasswordLegacy = async (userId: string, email: string) => {
-    if (!confirm(`Gerar nova senha temporária para ${email}?`)) return;
-    try {
-      const { data, error } = await supabase.functions.invoke("admin-users", {
-        body: { action: "reset_password", targetUserId: userId },
-      });
-      if (error) throw new Error(await getEdgeFunctionErrorMessage(error, "Falha ao redefinir senha"));
-      if (data?.error) throw new Error(data.error);
-      setCreatedPasswordDialog({ email, password: data.tempPassword });
-      toast({ title: "Nova senha gerada!" });
-      loadData();
-    } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
-    }
-  };
-
   const [visiblePasswords, setVisiblePasswords] = useState<Set<string>>(new Set());
 
   const togglePasswordVisibility = (id: string) => {
