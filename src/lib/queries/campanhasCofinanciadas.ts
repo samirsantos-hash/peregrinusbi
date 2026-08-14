@@ -69,7 +69,13 @@ export const COR_PESO: Record<number, string> = {
  * Observação: o schema atual de seller_eligibility não expõe um campaign_id
  * "ativo" separado — usamos campaign_id_best como código de referência e
  * campaign_type como o tipo ativo.
+ *
+ * Unidades: discount_seller_percentage / discount_total / discount_best vêm
+ * da base em basis points (×100). Ex.: 82 = 0,82% e 274 = 2,74%. Por isso
+ * dividimos por 100 aqui, uma única vez, antes de qualquer exibição.
  */
+const BPS = 100;
+
 export function buildCampanhasCofinanciadas(items: EligibilityItem[]): CampanhaPortfolio {
   // Dedup por item_id
   const byId = new Map<string, EligibilityItem>();
@@ -82,12 +88,12 @@ export function buildCampanhasCofinanciadas(items: EligibilityItem[]): CampanhaP
   const itens: CampanhaItem[] = Array.from(byId.values())
     .filter((r) => r.campaignType || r.campaignIdBest)
     .map((r) => {
-      const disc_total = Number(r.discountTotal) || 0;
-      const disc_seller = Number(r.discountSellerPercentage) || 0;
+      const disc_total = (Number(r.discountTotal) || 0) / BPS;
+      const disc_seller = (Number(r.discountSellerPercentage) || 0) / BPS;
       const disc_ml = Math.max(0, disc_total - disc_seller);
       const pct_ml = disc_total > 0 ? (disc_ml / disc_total) * 100 : 0;
       const tipo = (r.campaignType || "").toUpperCase();
-      const disc_best = Number(r.discountBest) || 0;
+      const disc_best = (Number(r.discountBest) || 0) / BPS;
 
       return {
         item_id: String(r.itemId),
@@ -101,7 +107,7 @@ export function buildCampanhasCofinanciadas(items: EligibilityItem[]): CampanhaP
         pct_ml,
         best_campaign_id: r.campaignIdBest || "",
         discount_best: disc_best,
-        pode_melhorar: disc_best > disc_total + 0.5,
+        pode_melhorar: disc_best > disc_total + 0.05,
         optin: !r.flagItemSOptin,
         flag_best_promo: Boolean(r.flagBestPromo),
         pedidos_7d: Number(r.pedidos7d) || 0,
