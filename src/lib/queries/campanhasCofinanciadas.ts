@@ -71,10 +71,12 @@ export const COR_PESO: Record<number, string> = {
  * campaign_type como o tipo ativo.
  *
  * Unidades: discount_seller_percentage / discount_total / discount_best vêm
- * da base em basis points (×100). Ex.: 82 = 0,82% e 274 = 2,74%. Por isso
- * dividimos por 100 aqui, uma única vez, antes de qualquer exibição.
+ * da base em décimos de ponto percentual (×10). Ex.: 30 = 3,0%, 50 = 5,0%,
+ * 274 = 27,4%. A prova está na distribuição: 58k itens em 30 e 19k em 50 —
+ * são os pisos de desconto de campanha (3% e 5%), e o p99 = 559 = 55,9%.
+ * Dividimos por 10 aqui, uma única vez, antes de qualquer exibição.
  */
-const BPS = 100;
+const ESCALA = 10;
 
 export function buildCampanhasCofinanciadas(items: EligibilityItem[]): CampanhaPortfolio {
   // Dedup por item_id
@@ -88,12 +90,12 @@ export function buildCampanhasCofinanciadas(items: EligibilityItem[]): CampanhaP
   const itens: CampanhaItem[] = Array.from(byId.values())
     .filter((r) => r.campaignType || r.campaignIdBest)
     .map((r) => {
-      const disc_total = (Number(r.discountTotal) || 0) / BPS;
-      const disc_seller = (Number(r.discountSellerPercentage) || 0) / BPS;
+      const disc_total = (Number(r.discountTotal) || 0) / ESCALA;
+      const disc_seller = (Number(r.discountSellerPercentage) || 0) / ESCALA;
       const disc_ml = Math.max(0, disc_total - disc_seller);
       const pct_ml = disc_total > 0 ? (disc_ml / disc_total) * 100 : 0;
       const tipo = (r.campaignType || "").toUpperCase();
-      const disc_best = (Number(r.discountBest) || 0) / BPS;
+      const disc_best = (Number(r.discountBest) || 0) / ESCALA;
 
       return {
         item_id: String(r.itemId),
@@ -107,7 +109,7 @@ export function buildCampanhasCofinanciadas(items: EligibilityItem[]): CampanhaP
         pct_ml,
         best_campaign_id: r.campaignIdBest || "",
         discount_best: disc_best,
-        pode_melhorar: disc_best > disc_total + 0.05,
+        pode_melhorar: disc_best > disc_total + 0.5,
         optin: !r.flagItemSOptin,
         flag_best_promo: Boolean(r.flagBestPromo),
         pedidos_7d: Number(r.pedidos7d) || 0,
