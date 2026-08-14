@@ -26,6 +26,7 @@ import {
   getPublicidadeMetricas,
 } from "@/lib/queries/publicidade";
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
+import AdsGranularidadePanel from "./AdsGranularidadePanel";
 
 type Props = {
   sellerUuid: string;
@@ -328,6 +329,9 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           Os KPIs do período acima foram calculados a partir dos dados diários.
         </div>
       )}
+
+      {/* ── Granularidade de investimento em Ads ─────────────────────── */}
+      <AdsGranularidadePanel sellerUuid={sellerUuid} fromDate={fromDate} toDate={toDate} />
 
       {/* ── Impacto do TACOS na margem ───────────────────────────────── */}
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">
