@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Sparkles, AlertTriangle, RefreshCw, CheckCircle2, Tag } from "lucide-react";
 import type { EligibilityItem } from "@/hooks/useEligibility";
+import TooltipInfo from "@/components/dashboard/TooltipInfo";
 import {
   buildCampanhasCofinanciadas,
   PESO_CAMPANHA,
@@ -231,9 +232,18 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
           <div>Anúncio</div>
           <div>Código campanha</div>
           <div className="text-center">Peso</div>
-          <div className="text-right">Seller</div>
-          <div className="text-right">ML</div>
-          <div className="text-right">Total</div>
+          <div className="text-right">
+            Seller
+            <TooltipInfo text={"Desconto bancado pelo seller.\n\nFórmula: discount_seller_percentage ÷ 100 (a base grava em basis points: 82 = 0,82%).\n\nÉ a abertura de preço real do seller sobre o preço cheio do anúncio."} />
+          </div>
+          <div className="text-right">
+            ML
+            <TooltipInfo text={"Parte do desconto bancada pelo Mercado Livre.\n\nFórmula: (discount_total − discount_seller_percentage) ÷ 100, nunca negativa.\n\n'ML banca X%' = parte ML ÷ desconto total × 100, ou seja, quanto da abertura de preço não sai do bolso do seller."} />
+          </div>
+          <div className="text-right">
+            Total
+            <TooltipInfo text={"Desconto total visto pelo comprador.\n\nFórmula: discount_total ÷ 100 (basis points).\n\nAbertura de preço total = Seller + ML. Preço final ≈ preço cheio × (1 − desconto total ÷ 100)."} />
+          </div>
           <div className="text-center">Opt-in</div>
         </div>
 
