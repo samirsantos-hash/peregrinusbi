@@ -171,9 +171,9 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
           .filter((r: any) => ids.has(r.seller_id))
           .map((r: any) => ({
             sellerId: r.seller_id, itemId: String(r.item_id), itemName: r.item_name || "",
-            // discount_* são armazenados em basis points (×100)
-            descontoTotal: num(r.discount_total) / 100,
-            descontoSeller: num(r.discount_seller_percentage) / 100,
+            // discount_* são armazenados em décimos de ponto percentual (×10): 30 = 3%
+            descontoTotal: num(r.discount_total) / 10,
+            descontoSeller: num(r.discount_seller_percentage) / 10,
             optIn: !!r.flag_item_s_optin,
             pedidos7d: num(r.pedidos_7d), tsiDiario: num(r.media_tsi_diario_7d),
             campaignType: r.campaign_type || "ND",

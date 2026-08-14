@@ -350,15 +350,15 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
                 <th className="text-center py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Tipo</th>
                 <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                   Desc. Seller
-                  <TooltipInfo text={"Desconto que sai do bolso do seller.\n\nFórmula: discount_seller_percentage ÷ 100.\nO campo vem da base em basis points (×100): 82 = 0,82%, 274 = 2,74%.\n\nÉ a abertura de preço do seller sobre o preço cheio do anúncio — não inclui a parte bancada pelo Mercado Livre."} />
+                  <TooltipInfo text={"Desconto que sai do bolso do seller.\n\nFórmula: discount_seller_percentage ÷ 10.\nO campo vem da base em décimos de ponto percentual (×10): 82 = 8,2%, 274 = 27,4%.\n\nÉ a abertura de preço do seller sobre o preço cheio do anúncio — não inclui a parte bancada pelo Mercado Livre."} />
                 </th>
                 <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                   Desc. Sugerido
-                  <TooltipInfo text={"Desconto total visto pelo comprador na campanha sugerida.\n\nFórmula: discount_total ÷ 100 (também em basis points).\n\nAbertura de preço: parte ML = discount_total − discount_seller_percentage (nunca negativa). Quanto maior essa diferença, maior a fatia do desconto bancada pelo Mercado Livre."} />
+                  <TooltipInfo text={"Desconto total visto pelo comprador na campanha sugerida.\n\nFórmula: discount_total ÷ 10 (mesma escala; pisos típicos 30 = 3% e 50 = 5%).\n\nAbertura de preço: parte ML = discount_total − discount_seller_percentage (nunca negativa). Quanto maior essa diferença, maior a fatia do desconto bancada pelo Mercado Livre."} />
                 </th>
                 <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">
                   Gap
-                  <TooltipInfo text={"Gap = Desc. Sugerido − Desc. Seller, em pontos percentuais.\n\nFórmula: (discount_total − discount_seller_percentage) ÷ 100.\n\nGap positivo = o ML está disposto a bancar essa diferença; o seller ainda não aplicou o desconto necessário para ativar a campanha. Gap negativo = seller já desconta mais do que a campanha exige (abertura de preço acima do necessário — margem sendo entregue sem contrapartida)."} />
+                  <TooltipInfo text={"Gap = Desc. Sugerido − Desc. Seller, em pontos percentuais.\n\nFórmula: (discount_total − discount_seller_percentage) ÷ 10.\n\nGap positivo = o ML está disposto a bancar essa diferença; o seller ainda não aplicou o desconto necessário para ativar a campanha. Gap negativo = seller já desconta mais do que a campanha exige (abertura de preço acima do necessário — margem sendo entregue sem contrapartida)."} />
                 </th>
                 <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">Pedidos 7d</th>
                 <th className="text-right py-2 px-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-medium">TSI diário</th>
