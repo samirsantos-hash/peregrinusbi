@@ -22,7 +22,6 @@ import {
 import { corRoas } from "@/lib/queries/publicidade";
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
-import { sellerItemUrl } from "@/lib/sellerLink";
 
 type Props = {
   sellerUuid: string;
@@ -281,7 +280,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
               <div key={p.item_id} className="rounded-lg border border-border/30 bg-background/30 p-3">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <a
-                    href={sellerItemUrl(p.item_id)}
+                    href={`https://produto.mercadolivre.com.br/MLB-${String(p.item_id).replace(/\D/g, "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="max-w-[70%] truncate text-xs font-medium text-primary hover:underline"
