@@ -229,7 +229,22 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
             <tbody>
               {displayed.slice(0, 100).map((r) => (
                 <tr key={r.id} className="border-b border-border/20 hover:bg-muted/20 transition-colors">
-                  <td className="py-1.5 px-2 font-mono text-[11px]">{r.itemId}</td>
+                  <td className="py-1.5 px-2 font-mono text-[11px]">
+                    <span className="inline-flex items-center gap-1">
+                      {r.itemId}
+                      <button
+                        type="button"
+                        title="Copiar MLB"
+                        aria-label={`Copiar MLB ${r.itemId}`}
+                        onClick={() => doCopy(`row-${r.id}`, String(r.itemId))}
+                        className="text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {copied === `row-${r.id}`
+                          ? <CheckCircle className="w-3 h-3 text-emerald-400" />
+                          : <Copy className="w-3 h-3" />}
+                      </button>
+                    </span>
+                  </td>
                   <td className="py-1.5 px-2 max-w-[280px] truncate text-foreground/90" title={r.itemName}>
                     {r.itemName || "—"}
                   </td>
