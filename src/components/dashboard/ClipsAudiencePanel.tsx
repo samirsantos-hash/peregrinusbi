@@ -560,6 +560,15 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   const DONUT_COLORS = ["hsl(var(--emerald))", "hsl(var(--muted))"];
 
+  const pieData = useMemo(() =>
+    effectiveCoverage.mode === "items"
+      ? donutData
+      : [
+          { name: "Visitas via Clips", value: totals.visitasClips },
+          { name: "Demais visitas", value: Math.max(totals.visits - totals.visitasClips, 0) },
+        ]
+  , [effectiveCoverage.mode, donutData, totals]);
+
   const sellerHasAnyClipActivity =
     totals.visitasClips > 0 || totals.tgmvClips > 0 || totals.ordersClips > 0;
 
@@ -601,10 +610,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={effectiveCoverage.mode === "items" ? donutData : [
-                      { name: "Visitas via Clips", value: totals.visitasClips },
-                      { name: "Demais visitas", value: Math.max(totals.visits - totals.visitasClips, 0) },
-                    ]}
+                    data={pieData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -613,7 +619,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                     dataKey="value"
                     stroke="none"
                   >
-                    {donutData.map((_, idx) => (
+                    {pieData.map((_, idx) => (
                       <Cell key={idx} fill={DONUT_COLORS[idx]} />
                     ))}
                   </Pie>
@@ -683,7 +689,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={Eye}
           label="Audiência Total"
           value={fmt(totals.visits)}
-          sub={`Participação Vídeo: ${videoPct.toFixed(1)}%`}
+          sub={`Participação Vídeo: ${videoPctSafe.toFixed(1)}%`}
           alert={lowExposure ? "⚠️ Baixa exposição de Clips: Oportunidade de aumentar alcance visual" : null}
           tooltip="Soma de visitas totais do seller no período selecionado."
         />
@@ -699,16 +705,20 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={Play}
           label="Visitas via Clips"
           value={fmt(totals.visitasClips)}
-          sub={`${fmt(totals.clipsPubli)} clips publicados · ${videoPct.toFixed(1)}% da audiência`}
-          tooltip="Total de visitas geradas por vídeos curtos (Clips) do seller."
+          sub={
+            hasClipsPubli
+              ? `${fmt(totals.clipsPubli)} clips publicados · ${videoPctSafe.toFixed(1)}% da audiência`
+              : `Clips publicados: n/d · ${videoPctSafe.toFixed(1)}% da audiência`
+          }
+          tooltip="Total de visitas geradas por vídeos curtos (Clips) do seller. A contagem de clips publicados só aparece quando a base traz a coluna SELLERS_CLIPS_PUBLI preenchida — quando exibe 'n/d', o dado não foi informado na carga e não deve ser lido como zero."
           accentClass="text-emerald"
         />
         <MetricCard
           icon={TrendingUp}
           label="Faturamento Clips"
           value={fmtBRL(totals.tgmvClips)}
-          sub={`${fmt(totals.siClips)} itens vendidos via clip`}
-          tooltip="Receita gerada diretamente por vídeos curtos publicados."
+          sub={`${fmt(totals.siClips)} itens · ${fmt(totals.ordersClips)} pedidos via clip`}
+          tooltip="Receita atribuída a Clips no período (TGMV_LC_CLIPS). 'Itens' = SI_CLIPS (unidades vendidas) e 'pedidos' = ORDERS_CLIPS — são bases diferentes e não devem ser confundidos com a quantidade de vídeos publicados."
           accentClass="text-warning"
         />
         <MetricCard
