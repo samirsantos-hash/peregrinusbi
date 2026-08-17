@@ -10,6 +10,8 @@ import type { SellerTrend } from "@/hooks/usePortfolioTrends";
 import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 import { getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { useGmConcessionarias } from "@/hooks/useGmConcessionarias";
 
 function safePct(num: number, den: number): number {
   if (!den || den === 0) return 0;
@@ -107,6 +109,14 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
   const [filter, setFilter] = useState<FilterPill>("all");
   const [sortKey, setSortKey] = useState<SortKey>("tgmvLc");
   const [sortAsc, setSortAsc] = useState(false);
+  const [busca, setBusca] = useState("");
+  const [divisao, setDivisao] = useState<"todas" | "Norte" | "Sul">("todas");
+
+  const { byCustId, rows: gmRows } = useGmConcessionarias();
+  const temGm = useMemo(
+    () => sellers.some((s) => byCustId.has(String(s.custId))),
+    [sellers, byCustId]
+  );
 
   const enriched = useMemo(() => enrichRows(sellers), [sellers]);
 
@@ -135,8 +145,21 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
         });
         break;
     }
+
+    if (divisao !== "todas") {
+      list = list.filter((s) => byCustId.get(String(s.custId))?.[0]?.divisao === divisao);
+    }
+
+    const q = busca.trim().toLowerCase();
+    if (q) {
+      list = list.filter((s) => {
+        const cad = byCustId.get(String(s.custId))?.[0];
+        return [s.nickname, String(s.custId), cad?.nome, cad?.responsavel, cad?.cidade, cad?.uf]
+          .some((v) => (v || "").toLowerCase().includes(q));
+      });
+    }
     return list;
-  }, [enriched, filter, trends]);
+  }, [enriched, filter, trends, divisao, busca, byCustId]);
 
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
@@ -221,6 +244,26 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                 {p.label}
               </Button>
             ))}
+            {gmRows.length > 0 && temGm && (["todas", "Norte", "Sul"] as const).map((d) => (
+              <Button
+                key={d}
+                variant={divisao === d ? "default" : "outline"}
+                size="sm"
+                className="text-xs"
+                onClick={() => setDivisao(d)}
+              >
+                {d === "todas" ? "Todas as regiões" : `Divisão ${d}`}
+              </Button>
+            ))}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={busca}
+                onChange={(e) => setBusca(e.target.value)}
+                placeholder="Buscar nickname, CUST ID, cidade…"
+                className="h-8 pl-7 text-xs w-60"
+              />
+            </div>
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -247,6 +290,11 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
             <TableHeader>
               <TableRow>
                 <SortHeader label="Seller" k="nickname" />
+                {temGm && <TableHead className="whitespace-nowrap">CUST ID</TableHead>}
+                {temGm && <TableHead className="whitespace-nowrap">Divisão</TableHead>}
+                {temGm && <TableHead className="whitespace-nowrap">Status</TableHead>}
+                {temGm && <TableHead className="whitespace-nowrap">Responsável</TableHead>}
+                {temGm && <TableHead className="whitespace-nowrap">Praça</TableHead>}
                 <SortHeader label="Medalha" k="repCurrentLevel" />
                 <SortHeader label="Faturamento" k="tgmvLc" />
                 <SortHeader label="ROAS" k="roas" />
@@ -262,7 +310,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
             <TableBody>
               {sorted.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={temGm ? 16 : 11} className="text-center text-muted-foreground py-8">
                     Nenhum seller encontrado com esse filtro.
                   </TableCell>
                 </TableRow>
@@ -270,6 +318,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                 sorted.map((s) => {
                   const medal = getMedalStyle(s.repCurrentLevel);
                   const trend = trends?.[s.sellerId];
+                  const cad = byCustId.get(String(s.custId))?.[0];
                   const potenciaColor = s.potenciaFull >= 70 ? "text-emerald-400" : s.potenciaFull >= 40 ? "text-yellow-400" : "text-red-400";
                   return (
                     <TableRow key={s.custId}>
@@ -285,7 +334,51 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           )}
                           {s.nickname}
                         </span>
+                        {temGm && cad?.nome && (
+                          <div className="text-[10px] text-muted-foreground">{cad.nome}</div>
+                        )}
                       </TableCell>
+                      {temGm && (
+                        <>
+                          <TableCell className="text-xs tabular-nums text-muted-foreground">{s.custId}</TableCell>
+                          <TableCell>
+                            {cad ? (
+                              <Badge
+                                variant="outline"
+                                className={
+                                  cad.divisao === "Norte"
+                                    ? "bg-sky-500/15 text-sky-400 border-sky-500/30 text-[10px]"
+                                    : "bg-primary/15 text-primary border-primary/30 text-[10px]"
+                                }
+                              >
+                                {cad.divisao}
+                              </Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {cad ? (
+                              <Badge
+                                variant="outline"
+                                className={
+                                  cad.status.toLowerCase() === "ativa"
+                                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px]"
+                                    : "bg-muted/30 text-muted-foreground border-border text-[10px]"
+                                }
+                              >
+                                {cad.status}
+                              </Badge>
+                            ) : (
+                              <span className="text-xs text-muted-foreground">—</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-xs">{cad?.responsavel || "—"}</TableCell>
+                          <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                            {[cad?.cidade, cad?.uf].filter(Boolean).join(" · ") || "—"}
+                          </TableCell>
+                        </>
+                      )}
                       <TableCell>
                         <Badge variant="outline" className={`text-xs border ${medal.className}`}>
                           {medal.label}
