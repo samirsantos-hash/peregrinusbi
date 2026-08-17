@@ -171,7 +171,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
       <PerformanceClusterChart sellers={filteredSellers} aliases={aliases} />
 
       {/* Cadastro GM (status, responsável, praça e divisão Norte/Sul) */}
-      <GmCadastroPanel custIds={portfolio.cust_ids} />
+      <GmCadastroPanel custIds={portfolio.cust_ids} sellers={filteredSellers} />
 
       {/* Projeção de Crescimento da Carteira */}
       <ProjecaoPanel custIds={portfolio.cust_ids} portfolioName={portfolio.name} />
