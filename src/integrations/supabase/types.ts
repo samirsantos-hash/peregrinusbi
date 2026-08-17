@@ -737,6 +737,45 @@ export type Database = {
         }
         Relationships: []
       }
+      gm_concessionarias: {
+        Row: {
+          cidade: string | null
+          created_at: string
+          cust_id: string
+          divisao: string
+          id: string
+          nome: string
+          responsavel: string | null
+          status: string
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          cidade?: string | null
+          created_at?: string
+          cust_id: string
+          divisao: string
+          id?: string
+          nome: string
+          responsavel?: string | null
+          status: string
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cidade?: string | null
+          created_at?: string
+          cust_id?: string
+          divisao?: string
+          id?: string
+          nome?: string
+          responsavel?: string | null
+          status?: string
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gm_elegibilidade: {
         Row: {
           acao_recomendada: string | null
