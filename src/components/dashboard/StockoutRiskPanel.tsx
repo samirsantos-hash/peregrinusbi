@@ -158,7 +158,11 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
             >
               {onlyRisk ? "Ver todos" : "Somente em risco"}
             </Button>
-            {copyBtn("mlbs", "MLBs", () => displayed.map((r) => r.itemId).join("\n"))}
+            {copyBtn(
+              "mlbs",
+              `Copiar todos os MLBs (${displayed.length})`,
+              () => displayed.map((r) => r.itemId).join("\n"),
+            )}
             {copyBtn("titulos", "Títulos", () => displayed.map((r) => r.itemName || r.itemId).join("\n"))}
             {copyBtn("vendas", "Vendas 7d", () =>
               displayed.map((r) => `${r.itemId}\t${r.vendas7d}`).join("\n"))}
