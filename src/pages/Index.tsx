@@ -458,6 +458,7 @@ const Index = () => {
                 <div className="relative z-0 flex-1 min-w-0 space-y-4">
                   <DiagnosticAlerts
                     kpis={displayKpis}
+                    fallbackKpis={allKpisMonthly}
                     sellerCustIdMap={sellerCustIdMap}
                     seller={sellers.find((s) => s.id === selectedSeller) || null}
                   />
