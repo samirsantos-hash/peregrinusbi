@@ -29,6 +29,8 @@ interface KpiLike {
 
 interface DiagnosticAlertsProps {
   kpis: KpiLike[];
+  /** Série mensal usada como fallback quando a série diária não traz o indicador (ex.: score de qualidade só existe no mensal). */
+  fallbackKpis?: KpiLike[];
   sellerCustIdMap?: Record<string, string>;
   seller?: { nickname: string; custId?: string; cluster?: string; subCluster?: string; state?: string } | null;
 }
@@ -102,7 +104,7 @@ const PESO: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };
 
 /* ---------------- componente ---------------- */
 
-const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: DiagnosticAlertsProps) => {
+const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, seller = null }: DiagnosticAlertsProps) => {
   const [drawer, setDrawer] = useState(false);
   const [detalhe, setDetalhe] = useState<Alerta | null>(null);
 
@@ -135,7 +137,27 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
     const atraso = mediaPonderada((k) => k.repDelayedRate); // escala 0–1
     const noPrazo = atraso != null ? (1 - atraso) * 100 : null;
 
-    const qualidade = mediaPonderada((k) => k.scoreQualidade);
+    // Qualidade do anúncio: score_qualidade_final vem zerado na base diária.
+    // Quando isso ocorre, usamos o último período da série mensal (fonte real do score).
+    const mediaEm = (linhasBase: KpiLike[], fn: (k: KpiLike) => number | undefined) => {
+      const validos = linhasBase.filter((k) => Number(fn(k)) > 0);
+      if (validos.length === 0) return null;
+      return validos.reduce((s, k) => s + Number(fn(k)), 0) / validos.length;
+    };
+    const scoreDe = (k: KpiLike) => {
+      const q = Number(k.scoreQualidade) || 0;
+      if (q > 0) return q;
+      const partes = [Number(k.scorePhoto) || 0, Number(k.scoreTitle) || 0].filter((v) => v > 0);
+      return partes.length ? partes.reduce((s, v) => s + v, 0) / partes.length : 0;
+    };
+    let qualidade = mediaEm(linhas, scoreDe);
+    let qualidadeFallback = false;
+    if (qualidade == null && fallbackKpis.length > 0) {
+      const ordFb = [...fallbackKpis].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      const ultimaFb = ordFb[0]?.date;
+      qualidade = mediaEm(ordFb.filter((k) => k.date === ultimaFb), scoreDe);
+      qualidadeFallback = qualidade != null;
+    }
 
     const tgmvTotal = soma((k) => Number(k.tgmv) || Number(k.revenue) || 0);
     const adsTotal = soma((k) => Number(k.adsInvestment) || 0);
@@ -166,6 +188,9 @@ const DiagnosticAlerts = ({ kpis, sellerCustIdMap = {}, seller = null }: Diagnos
         valor: qualidade != null ? qualidade.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : "—",
         meta: "meta: 80–100",
         estado: qualidade == null ? "sem_dado" : qualidade >= 80 ? "ok" : qualidade >= 60 ? "atencao" : "critico",
+        derivado: qualidadeFallback
+          ? "SCORE_QUALIDADE_FINAL do último mês fechado — a base diária não traz esse score."
+          : "SCORE_QUALIDADE_FINAL do período exibido.",
         temDado: qualidade != null,
         foraDaMeta: qualidade != null && qualidade < 80,
       },
