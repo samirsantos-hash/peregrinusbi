@@ -231,8 +231,17 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
               </tr>
             </thead>
             <tbody>
-              {displayed.slice(0, 100).map((r) => (
-                <tr key={r.id} className="border-b border-border/20 hover:bg-muted/20 transition-colors">
+              {displayed.slice(0, 100).map((r) => {
+                const isCopied = copied === `row-${r.id}` || copied === "mlbs";
+                return (
+                <tr
+                  key={r.id}
+                  className={`border-b border-border/20 transition-colors ${
+                    isCopied
+                      ? "bg-emerald-500/10 ring-1 ring-inset ring-emerald-500/40"
+                      : "hover:bg-muted/20"
+                  }`}
+                >
                   <td className="py-1.5 px-2 font-mono text-[11px]">
                     <span className="inline-flex items-center gap-1">
                       {r.itemId}
@@ -279,7 +288,8 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
                     )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
           {displayed.length > 100 && (
