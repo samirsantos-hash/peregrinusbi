@@ -12,6 +12,7 @@ import RaioXTable from "./RaioXTable";
 import MedalFilter from "./MedalFilter";
 import PerformanceClusterChart from "./PerformanceClusterChart";
 import ProjecaoPanel from "./ProjecaoPanel";
+import GmCadastroPanel from "./GmCadastroPanel";
 import { CarteiraBoard } from "@/pages/Carteira";
 
 function fmtBRL(v: number): string {
@@ -168,6 +169,9 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
 
       {/* Cluster de Desempenho */}
       <PerformanceClusterChart sellers={filteredSellers} aliases={aliases} />
+
+      {/* Cadastro GM (status, responsável, praça e divisão Norte/Sul) */}
+      <GmCadastroPanel custIds={portfolio.cust_ids} />
 
       {/* Projeção de Crescimento da Carteira */}
       <ProjecaoPanel custIds={portfolio.cust_ids} portfolioName={portfolio.name} />
