@@ -363,6 +363,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   const videoPct = pct(totals.visitasClips, totals.visits);
   const lowExposure = videoPct < 5 && totals.visits > 0;
+  /** Share de audiência via clips — limitado a 100% (protege contra bases inconsistentes). */
+  const videoPctSafe = Math.min(videoPct, 100);
+  /** A coluna sellers_clips_publi não é preenchida em toda a base: só exibir quando houver dado. */
+  const hasClipsPubli = totals.clipsPubli > 0;
 
   /* ── 2. Per-item clip data map from listings quality ── */
   const itemClipMap = useMemo(() => {
@@ -398,24 +402,35 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     return { withClip, withoutClip, total: withClip + withoutClip };
   }, [dedupedQuality, dedupedEligibility]);
 
-  /* ── 4. Average orders for threshold ── */
+  /* ── 4. Average orders per MLB (benchmark de item, nunca do seller) ──
+     Comparar pedidos de um anúncio com a média do SELLER inflava o corte e marcava
+     quase todo item como "baixa conversão". A média agora vem do nível MLB. */
   const avgOrdersClips = useMemo(() => {
-    if (kpis.length === 0) return 0;
-    return kpis.reduce((s, k) => s + k.ordersClips, 0) / kpis.length;
-  }, [kpis]);
+    const comClip = (dedupedQuality || []).filter((lq) =>
+      hasClipData(lq.visitasClips, lq.siClips, lq.ordersClips),
+    );
+    if (comClip.length === 0) return 0;
+    return comClip.reduce((s, lq) => s + (lq.ordersClips || 0), 0) / comClip.length;
+  }, [dedupedQuality]);
+
+  /* ── KPIs ordenados por data (evita séries fora de ordem no gráfico) ── */
+  const kpisOrdenados = useMemo(
+    () => [...kpis].sort((a, b) => String(a.date).localeCompare(String(b.date))),
+    [kpis],
+  );
 
   /* ── 5. Temporal data for combo chart ── */
   const chartData = useMemo(() =>
-    kpis.map((k) => ({
+    kpisOrdenados.map((k) => ({
       date: formatChartDate(k.date, dataGranularity),
       visitasClips: k.visitasClips,
       tgmvClips: k.tgmvLcClips,
     }))
-  , [kpis, dataGranularity]);
+  , [kpisOrdenados, dataGranularity]);
 
   /* ── 5b. Conversion evolution (Geral vs Clips) ── */
   const conversionSeries = useMemo(() =>
-    kpis.map((k) => {
+    kpisOrdenados.map((k) => {
       const tsi = (k as any).tsi || 0;
       const visits = k.visits || 0;
       const visC = k.visitasClips || 0;
@@ -426,7 +441,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         convClips: visC > 0 ? (ordC / visC) * 100 : 0,
       };
     })
-  , [kpis, dataGranularity]);
+  , [kpisOrdenados, dataGranularity]);
 
   /* ── 6. Top 5 items by pedidos — deduplicated ── */
   const topContentItems = useMemo(() => {
@@ -467,7 +482,12 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── Effective coverage: use visit share when per-item data is missing ── */
   const effectiveCoverage = useMemo(() => {
-    if (clipCoverage.withClip > 0 || clipCoverage.total > 0) {
+    const sellerHasClips =
+      totals.visitasClips > 0 || totals.tgmvClips > 0 || totals.ordersClips > 0;
+    // Só usar o modo "por anúncio" quando existir ao menos um MLB com clip medido.
+    // Sem isso, um seller com clips ativos aparecia como 0% de cobertura ao lado de
+    // um faturamento de clips relevante — leitura contraditória.
+    if (clipCoverage.withClip > 0 || (clipCoverage.total > 0 && !sellerHasClips)) {
       return {
         pct: clipCoverage.total > 0 ? (clipCoverage.withClip / clipCoverage.total) * 100 : 0,
         label: "cobertura",
@@ -475,7 +495,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       };
     }
     // Fallback: visit share via clips at seller level
-    const sharePct = totals.visits > 0 ? (totals.visitasClips / totals.visits) * 100 : 0;
+    const sharePct = Math.min(totals.visits > 0 ? (totals.visitasClips / totals.visits) * 100 : 0, 100);
     return { pct: sharePct, label: "visitas via clips", mode: "share" as const };
   }, [clipCoverage, totals]);
 
@@ -495,6 +515,9 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── Get clip status badge for an item ── */
   const getClipStatusBadge = (itemId: string) => {
+    if (itemClipMap.size === 0) {
+      return <Badge className="text-[11px] bg-muted/40 text-muted-foreground border-border">Sem dado por MLB</Badge>;
+    }
     const clip = itemClipMap.get(itemId);
     const hc = clip ? clip.hasClip : false;
     if (hc) {
@@ -537,6 +560,15 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   const DONUT_COLORS = ["hsl(var(--emerald))", "hsl(var(--muted))"];
 
+  const pieData = useMemo(() =>
+    effectiveCoverage.mode === "items"
+      ? donutData
+      : [
+          { name: "Visitas via Clips", value: totals.visitasClips },
+          { name: "Demais visitas", value: Math.max(totals.visits - totals.visitasClips, 0) },
+        ]
+  , [effectiveCoverage.mode, donutData, totals]);
+
   const sellerHasAnyClipActivity =
     totals.visitasClips > 0 || totals.tgmvClips > 0 || totals.ordersClips > 0;
 
@@ -578,10 +610,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={effectiveCoverage.mode === "items" ? donutData : [
-                      { name: "Visitas via Clips", value: totals.visitasClips },
-                      { name: "Demais visitas", value: Math.max(totals.visits - totals.visitasClips, 0) },
-                    ]}
+                    data={pieData}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -590,7 +619,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                     dataKey="value"
                     stroke="none"
                   >
-                    {donutData.map((_, idx) => (
+                    {pieData.map((_, idx) => (
                       <Cell key={idx} fill={DONUT_COLORS[idx]} />
                     ))}
                   </Pie>
@@ -660,7 +689,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={Eye}
           label="Audiência Total"
           value={fmt(totals.visits)}
-          sub={`Participação Vídeo: ${videoPct.toFixed(1)}%`}
+          sub={`Participação Vídeo: ${videoPctSafe.toFixed(1)}%`}
           alert={lowExposure ? "⚠️ Baixa exposição de Clips: Oportunidade de aumentar alcance visual" : null}
           tooltip="Soma de visitas totais do seller no período selecionado."
         />
@@ -676,16 +705,20 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={Play}
           label="Visitas via Clips"
           value={fmt(totals.visitasClips)}
-          sub={`${fmt(totals.clipsPubli)} clips publicados · ${videoPct.toFixed(1)}% da audiência`}
-          tooltip="Total de visitas geradas por vídeos curtos (Clips) do seller."
+          sub={
+            hasClipsPubli
+              ? `${fmt(totals.clipsPubli)} clips publicados · ${videoPctSafe.toFixed(1)}% da audiência`
+              : `Clips publicados: n/d · ${videoPctSafe.toFixed(1)}% da audiência`
+          }
+          tooltip="Total de visitas geradas por vídeos curtos (Clips) do seller. A contagem de clips publicados só aparece quando a base traz a coluna SELLERS_CLIPS_PUBLI preenchida — quando exibe 'n/d', o dado não foi informado na carga e não deve ser lido como zero."
           accentClass="text-emerald"
         />
         <MetricCard
           icon={TrendingUp}
           label="Faturamento Clips"
           value={fmtBRL(totals.tgmvClips)}
-          sub={`${fmt(totals.siClips)} itens vendidos via clip`}
-          tooltip="Receita gerada diretamente por vídeos curtos publicados."
+          sub={`${fmt(totals.siClips)} itens · ${fmt(totals.ordersClips)} pedidos via clip`}
+          tooltip="Receita atribuída a Clips no período (TGMV_LC_CLIPS). 'Itens' = SI_CLIPS (unidades vendidas) e 'pedidos' = ORDERS_CLIPS — são bases diferentes e não devem ser confundidos com a quantidade de vídeos publicados."
           accentClass="text-warning"
         />
         <MetricCard
