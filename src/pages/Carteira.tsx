@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, Search, X } from "lucide-react";
+import { ArrowLeft, Loader2, Search, X, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCarteiraData, type CarteiraDataset, type CarteiraSeller } from "@/hooks/carteira/useCarteiraData";
 import { UploadCarteiraPanel, useCarteiraUpload } from "@/components/carteira/UploadCarteiraPanel";
@@ -1218,7 +1218,7 @@ interface BoardProps {
 }
 
 export function CarteiraBoard({ custIds, title, subtitle, embedded = false, onBack }: BoardProps) {
-  const { data, loading, error, hasData } = useCarteiraData(custIds);
+  const { data, loading, error, hasData, refresh } = useCarteiraData(custIds);
   const [tab, setTab] = useState("upload");
   const scopeKey = custIds?.length ? custIds.slice().sort().join(",") : "all";
   const up = useCarteiraUpload(scopeKey, data.sellers, data);
@@ -1253,6 +1253,17 @@ export function CarteiraBoard({ custIds, title, subtitle, embedded = false, onBa
               {ex && <span className="cart-refbadge">extração ativa{up.storeFilter ? ` · ${up.storeFilter}` : ""}</span>}
             </p>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refresh}
+            disabled={loading}
+            className="ml-auto gap-2"
+            title="Limpa o cache e recarrega as lojas da carteira"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            Atualizar
+          </Button>
         </div>
       </header>
 

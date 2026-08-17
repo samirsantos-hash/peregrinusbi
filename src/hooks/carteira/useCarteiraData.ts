@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMyAccess } from "@/hooks/useMyAccess";
 
@@ -71,6 +71,11 @@ async function page<T = any>(build: () => any, max = 120): Promise<T[]> {
 /** Cache em memória por escopo — evita refetch ao trocar de aba/carteira. */
 const CACHE = new Map<string, CarteiraDataset>();
 
+/** Invalida o cache em memória da carteira (usar após criar/editar carteiras ou lojas). */
+export function clearCarteiraCache() {
+  CACHE.clear();
+}
+
 const num = (v: any) => (Number.isFinite(Number(v)) ? Number(v) : 0);
 
 function isoDaysAgo(n: number) {
@@ -89,6 +94,13 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
   const [data, setData] = useState<CarteiraDataset>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nonce, setNonce] = useState(0);
+
+  /** Força limpeza de cache + refetch imediato. */
+  const refresh = useCallback(() => {
+    clearCarteiraCache();
+    setNonce((n) => n + 1);
+  }, []);
 
   const scopeKey = isAdmin ? "*" : allowedCustIds.join(",");
   const filterKey = custIdsFilter ? custIdsFilter.join(",") : "";
@@ -200,12 +212,12 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
       }
     })();
     return () => { alive = false; };
-  }, [accessLoading, isAdmin, scopeKey, filterKey, enabled]);
+  }, [accessLoading, isAdmin, scopeKey, filterKey, enabled, nonce]);
 
   const hasData = useMemo(
     () => data.daily.length + data.monthly.length + data.listings.length > 0,
     [data]
   );
 
-  return { data, loading, error, hasData };
+  return { data, loading, error, hasData, refresh };
 }

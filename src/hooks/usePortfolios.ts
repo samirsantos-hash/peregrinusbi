@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { clearCarteiraCache } from "@/hooks/carteira/useCarteiraData";
 
 export interface Portfolio {
   id: string;
@@ -37,6 +39,7 @@ export function usePortfolios() {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -54,6 +57,13 @@ export function usePortfolios() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  /** Limpa todos os caches (memória + react-query) e recarrega as carteiras. */
+  const sync = useCallback(async () => {
+    clearCarteiraCache();
+    await queryClient.invalidateQueries();
+    await load();
+  }, [queryClient, load]);
 
   const create = async (name: string, custIds: string[], assignedTo?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -81,6 +91,8 @@ export function usePortfolios() {
     }
 
     toast({ title: "Carteira criada com sucesso!" });
+    clearCarteiraCache();
+    await queryClient.invalidateQueries();
     await load();
     return { error: null };
   };
@@ -95,6 +107,8 @@ export function usePortfolios() {
       toast({ title: "Erro ao remover", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Carteira removida" });
+      clearCarteiraCache();
+      await queryClient.invalidateQueries();
       await load();
     }
   };
@@ -132,11 +146,13 @@ export function usePortfolios() {
     }
 
     toast({ title: "Carteira atualizada" });
+    clearCarteiraCache();
+    await queryClient.invalidateQueries();
     await load();
     return { error: null };
   };
 
-  return { portfolios, loading, reload: load, create, remove, update };
+  return { portfolios, loading, reload: load, sync, create, remove, update };
 }
 
 export function usePortfolioData(custIds: string[]) {
