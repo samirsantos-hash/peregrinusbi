@@ -153,10 +153,20 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     let qualidade = mediaEm(linhas, scoreDe);
     let qualidadeFallback = false;
     if (qualidade == null && fallbackKpis.length > 0) {
-      const ordFb = [...fallbackKpis].sort((a, b) => String(b.date).localeCompare(String(a.date)));
-      const ultimaFb = ordFb[0]?.date;
-      qualidade = mediaEm(ordFb.filter((k) => k.date === ultimaFb), scoreDe);
-      qualidadeFallback = qualidade != null;
+      const datasFallback = [...new Set(
+        fallbackKpis
+          .filter((k) => scoreDe(k) > 0)
+          .map((k) => String(k.date || ""))
+          .filter(Boolean),
+      )].sort((a, b) => b.localeCompare(a));
+      const ultimaDataComScore = datasFallback[0];
+      if (ultimaDataComScore) {
+        qualidade = mediaEm(
+          fallbackKpis.filter((k) => k.date === ultimaDataComScore),
+          scoreDe,
+        );
+        qualidadeFallback = qualidade != null;
+      }
     }
 
     const tgmvTotal = soma((k) => Number(k.tgmv) || Number(k.revenue) || 0);
