@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FolderPlus, Folder, Trash2, Calendar, Pencil } from "lucide-react";
+import { Loader2, FolderPlus, Folder, Trash2, Calendar, Pencil, RefreshCw } from "lucide-react";
 import { usePortfolios, type Portfolio } from "@/hooks/usePortfolios";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import CreatePortfolioModal from "./CreatePortfolioModal";
 import EditPortfolioModal from "./EditPortfolioModal";
@@ -17,13 +18,15 @@ interface SellerOption {
 }
 
 export default function PortfolioManager() {
-  const { portfolios, loading, reload, create, remove, update } = usePortfolios();
+  const { portfolios, loading, reload, sync, create, remove, update } = usePortfolios();
   const [sellers, setSellers] = useState<SellerOption[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [editPortfolio, setEditPortfolio] = useState<Portfolio | null>(null);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
+  const [syncing, setSyncing] = useState(false);
+  const { toast } = useToast();
 
-  useEffect(() => {
+  const loadSellers = useCallback(() => {
     supabase
       .from("sellers")
       .select("id, nickname, cust_id")
@@ -32,6 +35,19 @@ export default function PortfolioManager() {
         if (data) setSellers(data.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.cust_id })));
       });
   }, []);
+
+  useEffect(() => { loadSellers(); }, [loadSellers]);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    try {
+      await sync();
+      loadSellers();
+      toast({ title: "Carteiras sincronizadas", description: "Cache limpo e dados atualizados." });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -54,10 +70,16 @@ export default function PortfolioManager() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Minhas Carteiras</h2>
-        <Button onClick={() => setShowCreate(true)} className="gap-2">
-          <FolderPlus className="w-4 h-4" />
-          Criar Carteira
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleSync} disabled={syncing} className="gap-2">
+            <RefreshCw className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Sincronizando..." : "Sincronizar"}
+          </Button>
+          <Button onClick={() => setShowCreate(true)} className="gap-2">
+            <FolderPlus className="w-4 h-4" />
+            Criar Carteira
+          </Button>
+        </div>
       </div>
 
       {portfolios.length === 0 ? (
