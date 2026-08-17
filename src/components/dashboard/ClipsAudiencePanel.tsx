@@ -482,7 +482,12 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── Effective coverage: use visit share when per-item data is missing ── */
   const effectiveCoverage = useMemo(() => {
-    if (clipCoverage.withClip > 0 || clipCoverage.total > 0) {
+    const sellerHasClips =
+      totals.visitasClips > 0 || totals.tgmvClips > 0 || totals.ordersClips > 0;
+    // Só usar o modo "por anúncio" quando existir ao menos um MLB com clip medido.
+    // Sem isso, um seller com clips ativos aparecia como 0% de cobertura ao lado de
+    // um faturamento de clips relevante — leitura contraditória.
+    if (clipCoverage.withClip > 0 || (clipCoverage.total > 0 && !sellerHasClips)) {
       return {
         pct: clipCoverage.total > 0 ? (clipCoverage.withClip / clipCoverage.total) * 100 : 0,
         label: "cobertura",
@@ -490,7 +495,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
       };
     }
     // Fallback: visit share via clips at seller level
-    const sharePct = totals.visits > 0 ? (totals.visitasClips / totals.visits) * 100 : 0;
+    const sharePct = Math.min(totals.visits > 0 ? (totals.visitasClips / totals.visits) * 100 : 0, 100);
     return { pct: sharePct, label: "visitas via clips", mode: "share" as const };
   }, [clipCoverage, totals]);
 
@@ -510,6 +515,9 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   /* ── Get clip status badge for an item ── */
   const getClipStatusBadge = (itemId: string) => {
+    if (itemClipMap.size === 0) {
+      return <Badge className="text-[11px] bg-muted/40 text-muted-foreground border-border">Sem dado por MLB</Badge>;
+    }
     const clip = itemClipMap.get(itemId);
     const hc = clip ? clip.hasClip : false;
     if (hc) {
