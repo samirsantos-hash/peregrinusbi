@@ -41,13 +41,6 @@ export function usePortfolios() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  /** Limpa todos os caches (memória + react-query) e recarrega as carteiras. */
-  const sync = useCallback(async () => {
-    clearCarteiraCache();
-    await queryClient.invalidateQueries();
-    await load();
-  }, [queryClient]);
-
   const load = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
@@ -64,6 +57,13 @@ export function usePortfolios() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  /** Limpa todos os caches (memória + react-query) e recarrega as carteiras. */
+  const sync = useCallback(async () => {
+    clearCarteiraCache();
+    await queryClient.invalidateQueries();
+    await load();
+  }, [queryClient, load]);
 
   const create = async (name: string, custIds: string[], assignedTo?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
