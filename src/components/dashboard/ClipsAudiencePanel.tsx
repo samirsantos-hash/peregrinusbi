@@ -363,6 +363,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   const videoPct = pct(totals.visitasClips, totals.visits);
   const lowExposure = videoPct < 5 && totals.visits > 0;
+  /** Share de audiência via clips — limitado a 100% (protege contra bases inconsistentes). */
+  const videoPctSafe = Math.min(videoPct, 100);
+  /** A coluna sellers_clips_publi não é preenchida em toda a base: só exibir quando houver dado. */
+  const hasClipsPubli = totals.clipsPubli > 0;
 
   /* ── 2. Per-item clip data map from listings quality ── */
   const itemClipMap = useMemo(() => {
@@ -398,24 +402,35 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     return { withClip, withoutClip, total: withClip + withoutClip };
   }, [dedupedQuality, dedupedEligibility]);
 
-  /* ── 4. Average orders for threshold ── */
+  /* ── 4. Average orders per MLB (benchmark de item, nunca do seller) ──
+     Comparar pedidos de um anúncio com a média do SELLER inflava o corte e marcava
+     quase todo item como "baixa conversão". A média agora vem do nível MLB. */
   const avgOrdersClips = useMemo(() => {
-    if (kpis.length === 0) return 0;
-    return kpis.reduce((s, k) => s + k.ordersClips, 0) / kpis.length;
-  }, [kpis]);
+    const comClip = (dedupedQuality || []).filter((lq) =>
+      hasClipData(lq.visitasClips, lq.siClips, lq.ordersClips),
+    );
+    if (comClip.length === 0) return 0;
+    return comClip.reduce((s, lq) => s + (lq.ordersClips || 0), 0) / comClip.length;
+  }, [dedupedQuality]);
+
+  /* ── KPIs ordenados por data (evita séries fora de ordem no gráfico) ── */
+  const kpisOrdenados = useMemo(
+    () => [...kpis].sort((a, b) => String(a.date).localeCompare(String(b.date))),
+    [kpis],
+  );
 
   /* ── 5. Temporal data for combo chart ── */
   const chartData = useMemo(() =>
-    kpis.map((k) => ({
+    kpisOrdenados.map((k) => ({
       date: formatChartDate(k.date, dataGranularity),
       visitasClips: k.visitasClips,
       tgmvClips: k.tgmvLcClips,
     }))
-  , [kpis, dataGranularity]);
+  , [kpisOrdenados, dataGranularity]);
 
   /* ── 5b. Conversion evolution (Geral vs Clips) ── */
   const conversionSeries = useMemo(() =>
-    kpis.map((k) => {
+    kpisOrdenados.map((k) => {
       const tsi = (k as any).tsi || 0;
       const visits = k.visits || 0;
       const visC = k.visitasClips || 0;
@@ -426,7 +441,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         convClips: visC > 0 ? (ordC / visC) * 100 : 0,
       };
     })
-  , [kpis, dataGranularity]);
+  , [kpisOrdenados, dataGranularity]);
 
   /* ── 6. Top 5 items by pedidos — deduplicated ── */
   const topContentItems = useMemo(() => {
