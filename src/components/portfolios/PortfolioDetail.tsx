@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ArrowLeft, Loader2, Folder, TrendingUp, AlertTriangle, DollarSign, BarChart3, Truck, Tag } from "lucide-react";
 import { usePortfolioData, type Portfolio } from "@/hooks/usePortfolios";
 import { usePortfolioTrends } from "@/hooks/usePortfolioTrends";
@@ -13,7 +12,6 @@ import MedalFilter from "./MedalFilter";
 import PerformanceClusterChart from "./PerformanceClusterChart";
 import ProjecaoPanel from "./ProjecaoPanel";
 import GmCadastroPanel from "./GmCadastroPanel";
-import { CarteiraBoard } from "@/pages/Carteira";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -32,7 +30,6 @@ interface Props {
 export default function PortfolioDetail({ portfolio, onBack }: Props) {
   const { sellers, loading } = usePortfolioData(portfolio.cust_ids);
   const [selectedMedals, setSelectedMedals] = useState<string[]>([]);
-  const [tab, setTab] = useState("overview");
   const aliases = portfolio.seller_aliases || {};
   const sellersWithAliases = useMemo(
     () => sellers.map((s) => ({ ...s, nickname: aliases[s.custId] || s.nickname })),
@@ -127,13 +124,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
         <MedalFilter selected={selectedMedals} onChange={setSelectedMedals} />
       </div>
 
-      <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="overview">Visão geral</TabsTrigger>
-          <TabsTrigger value="carteira">Gestão de Carteira</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6 mt-0">
+      <div className="space-y-6">
       {/* Resumo Inteligente */}
       {summary && (
         <Card className="border-primary/30 bg-primary/5">
@@ -261,19 +252,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
         </div>
       </div>
 
-        </TabsContent>
-
-        <TabsContent value="carteira" className="mt-0">
-          {tab === "carteira" && (
-            <CarteiraBoard
-              custIds={portfolio.cust_ids}
-              title={`Gestão de Carteira · ${portfolio.name}`}
-              subtitle={`Painel analítico isolado das ${portfolio.cust_ids.length} loja(s) desta carteira`}
-              embedded
-            />
-          )}
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   );
 }
