@@ -16,6 +16,7 @@ import {
   Megaphone,
   AlertTriangle,
   Gauge,
+  Target,
   type LucideIcon,
 } from "lucide-react";
 
@@ -48,6 +49,8 @@ export const SELLER_TABS: SellerTab[] = [
     juniorTip: "CDP = combustível do algoritmo. Item elegível sem opt-in = dinheiro na mesa." },
   { id: "reputation", label: "Reputação", icon: HeartPulse, order: 9,
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
+  { id: "metas", label: "Metas", icon: Target, order: 10,
+    juniorTip: "Defina metas de faturamento, clips e reposição por loja e compare com o realizado." },
   { id: "correlacoes", label: "Correlações", icon: Link2, order: 11,
     juniorTip: "Veja como os KPIs do seller se influenciam — Pearson e fluxo do algoritmo." },
   { id: "alertas-riscos", label: "Alertas & Riscos", icon: AlertTriangle, order: 12,

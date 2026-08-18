@@ -12,7 +12,7 @@ const GRUPOS: { titulo: string; ids: string[] }[] = [
   { titulo: "Visão", ids: ["efficiency", "pock"] },
   { titulo: "Performance", ids: ["executive", "competitiveness", "publicidade"] },
   { titulo: "Operação", ids: ["logistics", "quality", "clips"] },
-  { titulo: "Estratégia", ids: ["opportunities", "reputation", "correlacoes"] },
+  { titulo: "Estratégia", ids: ["opportunities", "reputation", "metas", "correlacoes"] },
 ];
 
 const ID_ALERTAS = "alertas-riscos";
