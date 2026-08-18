@@ -67,6 +67,7 @@ import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
 import PockPanel from "@/components/pock/PockPanel";
 import { NovidadesPrompt } from "@/components/novidades/novidades";
+import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
@@ -588,6 +589,9 @@ const Index = () => {
                   <TabsContent value="reputation" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="reputation" dados={dadosJunior} />
                     <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
+                  </TabsContent>
+                  <TabsContent value="metas" className="mt-0">
+                    <MetasPanel sellerId={selectedSeller} kpis={allKpisMonthly} />
                   </TabsContent>
                   <TabsContent value="correlacoes" className="mt-0">
                     <CorrelacaoPanel kpis={displayKpis} />
