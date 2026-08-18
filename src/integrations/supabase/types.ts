@@ -1169,6 +1169,60 @@ export type Database = {
           },
         ]
       }
+      metas_loja: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          mes: string
+          meta_clips: number | null
+          meta_faturamento: number | null
+          meta_reposicao: number | null
+          observacao: string | null
+          seller_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          mes: string
+          meta_clips?: number | null
+          meta_faturamento?: number | null
+          meta_reposicao?: number | null
+          observacao?: string | null
+          seller_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          mes?: string
+          meta_clips?: number | null
+          meta_faturamento?: number | null
+          meta_reposicao?: number | null
+          observacao?: string | null
+          seller_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metas_loja_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "sellers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metas_loja_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "v_seller_bridge"
+            referencedColumns: ["seller_uuid"]
+          },
+        ]
+      }
       multilojas_carga: {
         Row: {
           arquivo: string
