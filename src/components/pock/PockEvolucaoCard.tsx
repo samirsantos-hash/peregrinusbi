@@ -33,6 +33,8 @@ interface Props {
   cobertura?: number;
   /** rótulo "derivado" com a fórmula */
   derivadoFormula?: string;
+  /** explicação do gráfico (como ler / o que mostra) */
+  explicacao?: string;
   extra?: string;
 }
 
@@ -57,6 +59,7 @@ export default function PockEvolucaoCard({
   formato = "numero",
   cobertura,
   derivadoFormula,
+  explicacao,
   extra,
 }: Props) {
   const hoje = new Date();
@@ -96,6 +99,22 @@ export default function PockEvolucaoCard({
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 min-w-0">
           <h4 className="text-[13px] font-semibold truncate">{titulo}</h4>
+          {explicacao && (
+            <UiTooltip delayDuration={200}>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label={`Como ler: ${titulo}`}
+                  className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                >
+                  <Info className="w-3.5 h-3.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="text-xs max-w-[300px] leading-relaxed whitespace-pre-line">
+                {explicacao}
+              </TooltipContent>
+            </UiTooltip>
+          )}
           {derivadoFormula && (
             <UiTooltip delayDuration={200}>
               <TooltipTrigger asChild>
