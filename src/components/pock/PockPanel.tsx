@@ -201,31 +201,62 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       <section className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
         <h3 className="text-sm font-semibold">Evolução ao longo do ano</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3">
-          <PockEvolucaoCard titulo="Evolução TGMV" pontos={pontos.tgmv} formato="moeda" cobertura={data?.cobertura.tgmv} />
-          <PockEvolucaoCard titulo="Evolução LL" pontos={pontos.ll} cobertura={data?.cobertura.ll} />
+          <PockEvolucaoCard
+            titulo="Evolução TGMV"
+            pontos={pontos.tgmv}
+            formato="moeda"
+            cobertura={data?.cobertura.tgmv}
+            explicacao={"Faturamento bruto mensal da loja (TGMV_LC).\nBarra escura = mês atual; barra clara = mesmo mês do ano anterior.\nLinha tracejada = variação YoY (vs. ano anterior) e linha fina = variação MoM (vs. mês anterior), ambas no eixo direito em %.\nUse para ver sazonalidade e se o crescimento é real ou efeito de comparação fraca."}
+          />
+          <PockEvolucaoCard
+            titulo="Evolução LL"
+            pontos={pontos.ll}
+            cobertura={data?.cobertura.ll}
+            explicacao={"LL = anúncios ativos (live listings) somados no mês.\nMede a amplitude do sortimento exposto na plataforma.\nQueda de LL com queda de visitas costuma indicar perda de exposição; LL subindo sem visitas indica cadastro sem qualidade ou sem giro."}
+          />
           <PockEvolucaoCard
             titulo="Evolução Taxa de Conversão"
             pontos={pontos.conversao}
             formato="percent"
             cobertura={data?.cobertura.tsi}
             derivadoFormula="Conversão = TSI / VISITAS × 100"
+            explicacao={"Quantos itens são vendidos a cada 100 visitas (TSI ÷ Visitas).\nMede eficiência da página: preço, ficha, reputação e frete.\nConversão caindo com visitas estáveis aponta problema de oferta, não de tráfego."}
           />
-          <PockEvolucaoCard titulo="Evolução Visitas" pontos={pontos.visitas} cobertura={data?.cobertura.visitas} />
-          <PockEvolucaoCard titulo="Evolução Flex" pontos={pontos.flex} formato="moeda" cobertura={data?.cobertura.tgmvFlex} />
+          <PockEvolucaoCard
+            titulo="Evolução Visitas"
+            pontos={pontos.visitas}
+            cobertura={data?.cobertura.visitas}
+            explicacao={"Total de visitas recebidas pelos anúncios no mês.\nÉ o topo do funil: mede exposição e demanda captada (orgânica + ads).\nCompare com TGMV e conversão para separar problema de tráfego de problema de oferta."}
+          />
+          <PockEvolucaoCard
+            titulo="Evolução Flex"
+            pontos={pontos.flex}
+            formato="moeda"
+            cobertura={data?.cobertura.tgmvFlex}
+            explicacao={"Faturamento gerado por vendas com envio Flex (entrega feita pelo próprio vendedor no mesmo dia).\nCrescimento indica ganho de conversão por prazo curto; queda pode indicar redução de raio de entrega ou migração para Full."}
+          />
           <PockEvolucaoCard
             titulo="Penetração de FBM"
             pontos={pontos.fbm}
             formato="percent"
             cobertura={data?.cobertura.tgmvFbm}
             derivadoFormula="Penetração FBM = TGMV_LC_FBM / TGMV_LC × 100"
+            explicacao={"Percentual do faturamento que sai por Fulfillment (estoque no centro de distribuição do Mercado Livre).\nMaior penetração costuma trazer mais exposição e prazo melhor.\nO restante não é um modal único: inclui Flex, agência, coletas, Correios e outros, não separáveis nesta base."}
           />
-          <PockEvolucaoCard titulo="Penetração PADS (INV_PADS)" pontos={pontos.pads} formato="moeda" cobertura={data?.cobertura.invPads} />
+          <PockEvolucaoCard
+            titulo="Penetração PADS (INV_PADS)"
+            pontos={pontos.pads}
+            formato="moeda"
+            cobertura={data?.cobertura.invPads}
+            explicacao={"Investimento mensal em Product Ads (INV_PADS), em reais.\nMostra o esforço de mídia da loja mês a mês.\nLeia junto com TGMV: aumento de investimento sem aumento proporcional de faturamento indica queda de ROAS."}
+          />
           <PockEvolucaoCard
             titulo="Penetração CDP"
             pontos={pontos.cdp}
             formato="percent"
             cobertura={data?.cobertura.cdpTgmv}
             derivadoFormula="Penetração CDP = CDP_TGMV_LC / TGMV_LC × 100"
+            explicacao={"Parcela do faturamento originada em campanhas da Central de Promoções (CDP).\nMede a dependência de promoções para vender.\nPenetração muito alta pode indicar margem pressionada; muito baixa indica oportunidade de adesão a campanhas."}
           />
           <PockEvolucaoCard
             titulo="Penetração de Clips x LL"
@@ -233,8 +264,15 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
             formato="percent"
             cobertura={data?.cobertura.temClips}
             derivadoFormula="Flag SELLERS_CLIPS_PUBLI (booleana, nunca somada): 100% quando o mês tem publicação de clips."
+            explicacao={"Indicador de presença: 100% nos meses em que a loja publicou Clips e 0% nos meses sem publicação.\nÉ uma flag booleana — não representa quantidade de vídeos nem share sobre os anúncios.\nMeses sem a informação aparecem interrompidos na série."}
           />
-          <PockEvolucaoCard titulo="Evolução de Clips" pontos={pontos.clips} formato="moeda" cobertura={data?.cobertura.tgmvClips} />
+          <PockEvolucaoCard
+            titulo="Evolução de Clips"
+            pontos={pontos.clips}
+            formato="moeda"
+            cobertura={data?.cobertura.tgmvClips}
+            explicacao={"Faturamento atribuído a vendas originadas em Clips (vídeos curtos).\nMede o retorno comercial do conteúdo em vídeo.\nCompare com a penetração de Clips: faturamento alto com poucos meses de publicação indica alto potencial de escala."}
+          />
         </div>
       </section>
     </motion.div>
