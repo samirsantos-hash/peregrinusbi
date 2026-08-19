@@ -113,9 +113,10 @@ describe("getFullRecommendations - Markowitz model", () => {
     expect(c.gmv_atual_estimado).toBeCloseTo(gmvAtual, 5);
     expect(c.mu).toBeCloseTo(muExpected, 5);
     expect(c.stockout_risk).toBeCloseTo(Math.exp(-days / FULL_ESTOQUE_MINIMO_DIAS), 6);
-    const demand = 1 / Math.sqrt(14 + 1);
+    // demanda agora usa a janela de 30 dias (velocity 2/dia → 60 pedidos)
+    const demand = 1 / Math.sqrt(60 + 1);
     expect(c.demand_uncertainty).toBeCloseTo(demand, 6);
-    expect(c.sigma).toBeCloseTo(c.stockout_risk * 0.6 + demand * 0.4, 6);
+    expect(c.sigma).toBeCloseTo(c.stockout_risk * 0.5 + demand * 0.3, 6);
     expect(c.sharpe).toBeCloseTo(c.mu / (1 + c.sigma), 6);
     expect(c.stock_gap).toBe(0);
   });

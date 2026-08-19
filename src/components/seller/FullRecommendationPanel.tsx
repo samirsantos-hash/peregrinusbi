@@ -24,6 +24,7 @@ const COR_PRIORIDADE: Record<FullCandidate["prioridade"], string> = {
   media: "hsl(45, 80%, 55%)",
   baixa: "hsl(215, 20%, 45%)",
   aguardar_estoque: "hsl(215, 25%, 30%)",
+  sem_vendas: "hsl(0, 60%, 45%)",
 };
 
 const BADGE_PRIORIDADE: Record<FullCandidate["prioridade"], string> = {
@@ -31,6 +32,14 @@ const BADGE_PRIORIDADE: Record<FullCandidate["prioridade"], string> = {
   media: "🟡 Média",
   baixa: "⬜ Baixa",
   aguardar_estoque: "📦 Repor Estoque",
+  sem_vendas: "🚫 Sem vendas",
+};
+
+const COR_CURVA: Record<string, string> = {
+  A: "hsl(160, 84%, 45%)",
+  B: "hsl(199, 100%, 60%)",
+  C: "hsl(45, 80%, 55%)",
+  sem_venda: "hsl(0, 60%, 50%)",
 };
 
 const fmtBRL = (v: number) =>
@@ -45,7 +54,7 @@ type Props = { sellerId: string; custId?: string | number };
 const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<
-    "todos" | "alta" | "media" | "aguardar_estoque"
+    "todos" | "alta" | "media" | "aguardar_estoque" | "sem_vendas"
   >("todos");
   const [mostrarFronteira, setMostrarFronteira] = useState(false);
 
@@ -111,6 +120,13 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
             Maximiza ganho de GMV por risco de ruptura · Uplift estimado +
             {(portfolio.fullPremiumUsado * 100).toFixed(0)}% para este seller.
           </p>
+          {portfolio.dataReferencia && (
+            <p className="text-[10px] text-muted-foreground">
+              Base: snapshots de elegibilidade até{" "}
+              {new Date(`${portfolio.dataReferencia}T00:00:00`).toLocaleDateString("pt-BR")} ·
+              janelas móveis de 7, 15 e 30 dias.
+            </p>
+          )}
         </div>
         <button
           onClick={() => setMostrarFronteira((v) => !v)}
@@ -151,6 +167,69 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
           <p className="text-[10px] text-muted-foreground mt-1">
             Sharpe do portfólio (GMV / risco) · desconto ρ aplicado
           </p>
+        </div>
+      </div>
+
+      {/* Curva por janela (7/15/30 dias) */}
+      <div className="glass-card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Curva de demanda do cust — 7 / 15 / 30 dias
+          </p>
+          <TooltipInfo text="Velocidade média por janela móvel, calculada sobre os snapshots de PEDIDOS_7D. A velocidade usada no modelo é ponderada: 50% janela 7d, 30% 15d, 20% 30d." />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {portfolio.janelas.map((j) => (
+            <div key={j.dias} className="p-3 rounded-md bg-card border border-border">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Últimos {j.dias} dias
+              </p>
+              <p className="text-sm font-mono tabular-nums text-foreground mt-1">
+                {j.pedidos.toLocaleString("pt-BR")} pedidos
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {j.itens_com_venda} MLBs com venda · GMV estimado {fmtBRL(j.gmv_estimado)}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+            Curva ABC (Pareto sobre GMV estimado de 30 dias)
+          </p>
+          <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted/30">
+            {portfolio.curvaAbc
+              .filter((c) => c.itens > 0)
+              .map((c) => (
+                <div
+                  key={c.curva}
+                  style={{
+                    width: `${(c.itens / portfolio.candidatos.length) * 100}%`,
+                    background: COR_CURVA[c.curva],
+                  }}
+                  title={`${c.curva}: ${c.itens} MLBs`}
+                />
+              ))}
+          </div>
+          <div className="flex flex-wrap gap-3 mt-2">
+            {portfolio.curvaAbc.map((c) => (
+              <div key={c.curva} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: COR_CURVA[c.curva] }}
+                />
+                {c.curva === "sem_venda" ? "Sem venda (30d)" : `Curva ${c.curva}`} · {c.itens} MLBs
+                {c.curva !== "sem_venda" && ` · ${(c.share * 100).toFixed(0)}% do GMV`}
+              </div>
+            ))}
+          </div>
+          {portfolio.itensSemVenda > 0 && (
+            <p className="text-[10px] text-destructive mt-2">
+              {portfolio.itensSemVenda} MLBs sem nenhum pedido em 30 dias foram removidos da
+              recomendação de envio ao Full (gerariam armazenagem sem giro).
+            </p>
+          )}
         </div>
       </div>
 
@@ -269,7 +348,7 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-2">
-        {(["todos", "alta", "media", "aguardar_estoque"] as const).map((f) => {
+        {(["todos", "alta", "media", "aguardar_estoque", "sem_vendas"] as const).map((f) => {
           const count =
             f === "todos"
               ? portfolio.candidatos.length
@@ -281,7 +360,9 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
                 ? "🟢 Alta"
                 : f === "media"
                   ? "🟡 Média"
-                  : "📦 Repor Estoque";
+                  : f === "aguardar_estoque"
+                    ? "📦 Repor Estoque"
+                    : "🚫 Sem vendas";
           const active = filtro === f;
           return (
             <button
@@ -301,9 +382,11 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
 
       {/* Lista */}
       <div className="glass-card overflow-hidden">
-        <div className="grid grid-cols-[1fr_70px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/20">
+        <div className="grid grid-cols-[1fr_60px_60px_60px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/20">
           <div>Anúncio</div>
-          <div className="text-right">Ped/sem</div>
+          <div className="text-right">7d</div>
+          <div className="text-right">15d</div>
+          <div className="text-right">30d</div>
           <div className="text-right">Estoque</div>
           <div className="text-right">Dias cob.</div>
           <div className="text-right">GMV atual</div>
@@ -323,16 +406,23 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
               <div key={item.item_id} className="border-b border-border last:border-b-0">
                 <button
                   onClick={() => setExpanded(isOpen ? null : item.item_id)}
-                  className="w-full grid grid-cols-[1fr_70px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[11px] hover:bg-muted/30 transition-colors text-left items-center"
+                  className="w-full grid grid-cols-[1fr_60px_60px_60px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[11px] hover:bg-muted/30 transition-colors text-left items-center"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-foreground">{item.item_name || item.item_id}</p>
                     <p className="text-[10px] text-muted-foreground">
-                      Sharpe {item.sharpe.toFixed(0)} · {item.vertical}
+                      Curva {item.curva === "sem_venda" ? "—" : item.curva} · Sharpe{" "}
+                      {item.sharpe.toFixed(0)} · {item.vertical}
                     </p>
                   </div>
                   <div className="text-right font-mono tabular-nums text-foreground">
                     {item.pedidos_7d}
+                  </div>
+                  <div className="text-right font-mono tabular-nums text-muted-foreground">
+                    {item.pedidos_15d}
+                  </div>
+                  <div className="text-right font-mono tabular-nums text-muted-foreground">
+                    {item.pedidos_30d}
                   </div>
                   <div
                     className="text-right font-mono tabular-nums"
@@ -414,16 +504,22 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
                       </p>
                       {[
                         {
-                          label: `Ruptura de estoque (peso 60%)`,
+                          label: `Ruptura de estoque (peso 50%)`,
                           value: item.stockout_risk,
                           cor: "hsl(0, 70%, 60%)",
                           tooltip: `e^(-${item.days_of_stock.toFixed(0)}/30)`,
                         },
                         {
-                          label: `Incerteza de demanda (peso 40%)`,
+                          label: `Incerteza de demanda (peso 30%)`,
                           value: item.demand_uncertainty,
                           cor: "hsl(45, 80%, 60%)",
-                          tooltip: `Poisson 1/√(${item.pedidos_7d}+1)`,
+                          tooltip: `Poisson 1/√(${item.pedidos_30d}+1)`,
+                        },
+                        {
+                          label: `Volatilidade entre janelas (peso 20%)`,
+                          value: item.volatilidade,
+                          cor: "hsl(280, 80%, 70%)",
+                          tooltip: `7d ${item.velocity_7d.toFixed(2)} · 15d ${item.velocity_15d.toFixed(2)} · 30d ${item.velocity_30d.toFixed(2)} un/dia`,
                         },
                       ].map((r) => (
                         <div key={r.label}>
