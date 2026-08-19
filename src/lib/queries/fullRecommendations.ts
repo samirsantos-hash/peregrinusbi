@@ -286,8 +286,9 @@ export async function getFullRecommendations(
   let acumulado = 0;
   for (const c of comVenda) {
     c.share_demanda = gmvTotal > 0 ? c.gmv_atual_estimado / gmvTotal : 0;
+    const antes = acumulado;
     acumulado += c.share_demanda;
-    c.curva = acumulado <= 0.8 ? "A" : acumulado <= 0.95 ? "B" : "C";
+    c.curva = antes < 0.8 ? "A" : antes < 0.95 ? "B" : "C";
   }
 
   // 5) Prioridade — item sem venda nos 30 dias NUNCA é recomendado para Full.
