@@ -24,6 +24,7 @@ const COR_PRIORIDADE: Record<FullCandidate["prioridade"], string> = {
   media: "hsl(45, 80%, 55%)",
   baixa: "hsl(215, 20%, 45%)",
   aguardar_estoque: "hsl(215, 25%, 30%)",
+  sem_vendas: "hsl(0, 60%, 45%)",
 };
 
 const BADGE_PRIORIDADE: Record<FullCandidate["prioridade"], string> = {
@@ -31,6 +32,14 @@ const BADGE_PRIORIDADE: Record<FullCandidate["prioridade"], string> = {
   media: "🟡 Média",
   baixa: "⬜ Baixa",
   aguardar_estoque: "📦 Repor Estoque",
+  sem_vendas: "🚫 Sem vendas",
+};
+
+const COR_CURVA: Record<string, string> = {
+  A: "hsl(160, 84%, 45%)",
+  B: "hsl(199, 100%, 60%)",
+  C: "hsl(45, 80%, 55%)",
+  sem_venda: "hsl(0, 60%, 50%)",
 };
 
 const fmtBRL = (v: number) =>
@@ -45,7 +54,7 @@ type Props = { sellerId: string; custId?: string | number };
 const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filtro, setFiltro] = useState<
-    "todos" | "alta" | "media" | "aguardar_estoque"
+    "todos" | "alta" | "media" | "aguardar_estoque" | "sem_vendas"
   >("todos");
   const [mostrarFronteira, setMostrarFronteira] = useState(false);
 
