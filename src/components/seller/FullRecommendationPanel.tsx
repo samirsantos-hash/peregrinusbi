@@ -120,6 +120,13 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
             Maximiza ganho de GMV por risco de ruptura · Uplift estimado +
             {(portfolio.fullPremiumUsado * 100).toFixed(0)}% para este seller.
           </p>
+          {portfolio.dataReferencia && (
+            <p className="text-[10px] text-muted-foreground">
+              Base: snapshots de elegibilidade até{" "}
+              {new Date(`${portfolio.dataReferencia}T00:00:00`).toLocaleDateString("pt-BR")} ·
+              janelas móveis de 7, 15 e 30 dias.
+            </p>
+          )}
         </div>
         <button
           onClick={() => setMostrarFronteira((v) => !v)}
@@ -160,6 +167,69 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
           <p className="text-[10px] text-muted-foreground mt-1">
             Sharpe do portfólio (GMV / risco) · desconto ρ aplicado
           </p>
+        </div>
+      </div>
+
+      {/* Curva por janela (7/15/30 dias) */}
+      <div className="glass-card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Curva de demanda do cust — 7 / 15 / 30 dias
+          </p>
+          <TooltipInfo text="Velocidade média por janela móvel, calculada sobre os snapshots de PEDIDOS_7D. A velocidade usada no modelo é ponderada: 50% janela 7d, 30% 15d, 20% 30d." />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {portfolio.janelas.map((j) => (
+            <div key={j.dias} className="p-3 rounded-md bg-card border border-border">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Últimos {j.dias} dias
+              </p>
+              <p className="text-sm font-mono tabular-nums text-foreground mt-1">
+                {j.pedidos.toLocaleString("pt-BR")} pedidos
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {j.itens_com_venda} MLBs com venda · GMV estimado {fmtBRL(j.gmv_estimado)}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4">
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+            Curva ABC (Pareto sobre GMV estimado de 30 dias)
+          </p>
+          <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted/30">
+            {portfolio.curvaAbc
+              .filter((c) => c.itens > 0)
+              .map((c) => (
+                <div
+                  key={c.curva}
+                  style={{
+                    width: `${(c.itens / portfolio.candidatos.length) * 100}%`,
+                    background: COR_CURVA[c.curva],
+                  }}
+                  title={`${c.curva}: ${c.itens} MLBs`}
+                />
+              ))}
+          </div>
+          <div className="flex flex-wrap gap-3 mt-2">
+            {portfolio.curvaAbc.map((c) => (
+              <div key={c.curva} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                <span
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: COR_CURVA[c.curva] }}
+                />
+                {c.curva === "sem_venda" ? "Sem venda (30d)" : `Curva ${c.curva}`} · {c.itens} MLBs
+                {c.curva !== "sem_venda" && ` · ${(c.share * 100).toFixed(0)}% do GMV`}
+              </div>
+            ))}
+          </div>
+          {portfolio.itensSemVenda > 0 && (
+            <p className="text-[10px] text-destructive mt-2">
+              {portfolio.itensSemVenda} MLBs sem nenhum pedido em 30 dias foram removidos da
+              recomendação de envio ao Full (gerariam armazenagem sem giro).
+            </p>
+          )}
         </div>
       </div>
 
