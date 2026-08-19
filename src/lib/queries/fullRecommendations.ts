@@ -76,21 +76,60 @@ const VERTICAL_CORRELATION: Record<string, number> = {
 const diasEntre = (a: string, b: string) =>
   Math.round((Date.parse(a) - Date.parse(b)) / 86_400_000);
 
-/** Média de pedidos_7d dos snapshots dentro da janela → velocidade diária. */
-function velocidadeJanela(
+/**
+ * `pedidos_7d` é uma janela MÓVEL de 7 dias. Somar/mediar snapshots sobrepostos
+ * infla 15d/30d. Aqui reconstruímos a janela em blocos de 7 dias NÃO sobrepostos:
+ * para cada bloco pegamos o snapshot mais próximo do fim do bloco.
+ */
+function snapshotEm(
+  snaps: { data: string; pedidos: number }[],
+  ref: string,
+  offsetDias: number,
+): { data: string; pedidos: number } | null {
+  let melhor: { data: string; pedidos: number } | null = null;
+  let melhorDist = Infinity;
+  for (const s of snaps) {
+    const d = ref ? diasEntre(ref, s.data) : 0;
+    if (!Number.isFinite(d) || d < 0) continue;
+    const dist = Math.abs(d - offsetDias);
+    if (dist > 3.5) continue;
+    if (dist < melhorDist) {
+      melhorDist = dist;
+      melhor = s;
+    }
+  }
+  return melhor;
+}
+
+function pedidosJanela(
   snaps: { data: string; pedidos: number }[],
   ref: string,
   dias: number,
-): { velocity: number; amostras: number } {
-  const dentro = ref
-    ? snaps.filter((s) => {
-        const d = diasEntre(ref, s.data);
-        return Number.isFinite(d) ? d <= dias - 1 : true;
-      })
-    : snaps;
-  if (dentro.length === 0) return { velocity: 0, amostras: 0 };
-  const media = dentro.reduce((s, x) => s + x.pedidos, 0) / dentro.length;
-  return { velocity: media / 7, amostras: dentro.length };
+): { pedidos: number; velocity: number; cobertura: number; amostras: number } {
+  const blocos = Math.floor(dias / 7);
+  const resto = dias - blocos * 7;
+  let total = 0;
+  let diasCobertos = 0;
+  let amostras = 0;
+  for (let b = 0; b < blocos; b++) {
+    const s = snapshotEm(snaps, ref, b * 7);
+    if (!s) continue;
+    total += s.pedidos;
+    diasCobertos += 7;
+    amostras++;
+  }
+  if (resto > 0) {
+    const s = snapshotEm(snaps, ref, blocos * 7);
+    if (s) {
+      total += s.pedidos * (resto / 7);
+      diasCobertos += resto;
+      amostras++;
+    }
+  }
+  if (diasCobertos === 0) return { pedidos: 0, velocity: 0, cobertura: 0, amostras: 0 };
+  const velocity = total / diasCobertos;
+  // dias sem snapshot são extrapolados pela velocidade observada
+  return { pedidos: velocity * dias, velocity, cobertura: diasCobertos / dias, amostras };
 }
 
 export async function getFullRecommendations(
