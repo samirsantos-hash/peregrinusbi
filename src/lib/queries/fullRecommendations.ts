@@ -76,21 +76,60 @@ const VERTICAL_CORRELATION: Record<string, number> = {
 const diasEntre = (a: string, b: string) =>
   Math.round((Date.parse(a) - Date.parse(b)) / 86_400_000);
 
-/** Média de pedidos_7d dos snapshots dentro da janela → velocidade diária. */
-function velocidadeJanela(
+/**
+ * `pedidos_7d` é uma janela MÓVEL de 7 dias. Somar/mediar snapshots sobrepostos
+ * infla 15d/30d. Aqui reconstruímos a janela em blocos de 7 dias NÃO sobrepostos:
+ * para cada bloco pegamos o snapshot mais próximo do fim do bloco.
+ */
+function snapshotEm(
+  snaps: { data: string; pedidos: number }[],
+  ref: string,
+  offsetDias: number,
+): { data: string; pedidos: number } | null {
+  let melhor: { data: string; pedidos: number } | null = null;
+  let melhorDist = Infinity;
+  for (const s of snaps) {
+    const d = ref ? diasEntre(ref, s.data) : 0;
+    if (!Number.isFinite(d) || d < 0) continue;
+    const dist = Math.abs(d - offsetDias);
+    if (dist > 3.5) continue;
+    if (dist < melhorDist) {
+      melhorDist = dist;
+      melhor = s;
+    }
+  }
+  return melhor;
+}
+
+function pedidosJanela(
   snaps: { data: string; pedidos: number }[],
   ref: string,
   dias: number,
-): { velocity: number; amostras: number } {
-  const dentro = ref
-    ? snaps.filter((s) => {
-        const d = diasEntre(ref, s.data);
-        return Number.isFinite(d) ? d <= dias - 1 : true;
-      })
-    : snaps;
-  if (dentro.length === 0) return { velocity: 0, amostras: 0 };
-  const media = dentro.reduce((s, x) => s + x.pedidos, 0) / dentro.length;
-  return { velocity: media / 7, amostras: dentro.length };
+): { pedidos: number; velocity: number; cobertura: number; amostras: number } {
+  const blocos = Math.floor(dias / 7);
+  const resto = dias - blocos * 7;
+  let total = 0;
+  let diasCobertos = 0;
+  let amostras = 0;
+  for (let b = 0; b < blocos; b++) {
+    const s = snapshotEm(snaps, ref, b * 7);
+    if (!s) continue;
+    total += s.pedidos;
+    diasCobertos += 7;
+    amostras++;
+  }
+  if (resto > 0) {
+    const s = snapshotEm(snaps, ref, blocos * 7);
+    if (s) {
+      total += s.pedidos * (resto / 7);
+      diasCobertos += resto;
+      amostras++;
+    }
+  }
+  if (diasCobertos === 0) return { pedidos: 0, velocity: 0, cobertura: 0, amostras: 0 };
+  const velocity = total / diasCobertos;
+  // dias sem snapshot são extrapolados pela velocidade observada
+  return { pedidos: velocity * dias, velocity, cobertura: diasCobertos / dias, amostras };
 }
 
 export async function getFullRecommendations(
@@ -189,17 +228,18 @@ export async function getFullRecommendations(
     const desconto = Number(item.discount_seller_percentage) || 0;
 
     const snaps = agg.snaps.sort((a, b) => (a.data < b.data ? 1 : -1));
-    const j7 = velocidadeJanela(snaps, ref, 7);
-    const j15 = velocidadeJanela(snaps, ref, 15);
-    const j30 = velocidadeJanela(snaps, ref, 30);
+    const j7 = pedidosJanela(snaps, ref, 7);
+    const j15 = pedidosJanela(snaps, ref, 15);
+    const j30 = pedidosJanela(snaps, ref, 30);
 
     const velocity_7d = j7.amostras > 0 ? j7.velocity : j15.velocity;
     const velocity_15d = j15.amostras > 0 ? j15.velocity : j30.velocity;
-    const velocity_30d = j30.velocity;
+    const velocity_30d = j30.amostras > 0 ? j30.velocity : velocity_15d;
 
-    const pedidos_7d = Math.round(velocity_7d * 7);
-    const pedidos_15d = Math.round(velocity_15d * 15);
-    const pedidos_30d = Math.round(velocity_30d * 30);
+    // Pedidos REAIS por janela (blocos de 7 dias não sobrepostos, sem dupla contagem)
+    const pedidos_7d = Math.round(j7.amostras > 0 ? j7.pedidos : velocity_7d * 7);
+    const pedidos_15d = Math.round(j15.amostras > 0 ? j15.pedidos : velocity_15d * 15);
+    const pedidos_30d = Math.round(j30.amostras > 0 ? j30.pedidos : velocity_30d * 30);
 
     if (pedidos_30d === 0 && estoque === 0) continue;
 
