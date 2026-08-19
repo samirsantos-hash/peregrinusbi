@@ -82,7 +82,12 @@ function velocidadeJanela(
   ref: string,
   dias: number,
 ): { velocity: number; amostras: number } {
-  const dentro = snaps.filter((s) => diasEntre(ref, s.data) <= dias - 1);
+  const dentro = ref
+    ? snaps.filter((s) => {
+        const d = diasEntre(ref, s.data);
+        return Number.isFinite(d) ? d <= dias - 1 : true;
+      })
+    : snaps;
   if (dentro.length === 0) return { velocity: 0, amostras: 0 };
   const media = dentro.reduce((s, x) => s + x.pedidos, 0) / dentro.length;
   return { velocity: media / 7, amostras: dentro.length };
