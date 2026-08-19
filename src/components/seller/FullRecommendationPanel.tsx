@@ -504,16 +504,22 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
                       </p>
                       {[
                         {
-                          label: `Ruptura de estoque (peso 60%)`,
+                          label: `Ruptura de estoque (peso 50%)`,
                           value: item.stockout_risk,
                           cor: "hsl(0, 70%, 60%)",
                           tooltip: `e^(-${item.days_of_stock.toFixed(0)}/30)`,
                         },
                         {
-                          label: `Incerteza de demanda (peso 40%)`,
+                          label: `Incerteza de demanda (peso 30%)`,
                           value: item.demand_uncertainty,
                           cor: "hsl(45, 80%, 60%)",
-                          tooltip: `Poisson 1/√(${item.pedidos_7d}+1)`,
+                          tooltip: `Poisson 1/√(${item.pedidos_30d}+1)`,
+                        },
+                        {
+                          label: `Volatilidade entre janelas (peso 20%)`,
+                          value: item.volatilidade,
+                          cor: "hsl(280, 80%, 70%)",
+                          tooltip: `7d ${item.velocity_7d.toFixed(2)} · 15d ${item.velocity_15d.toFixed(2)} · 30d ${item.velocity_30d.toFixed(2)} un/dia`,
                         },
                       ].map((r) => (
                         <div key={r.label}>
