@@ -348,7 +348,7 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-2">
-        {(["todos", "alta", "media", "aguardar_estoque"] as const).map((f) => {
+        {(["todos", "alta", "media", "aguardar_estoque", "sem_vendas"] as const).map((f) => {
           const count =
             f === "todos"
               ? portfolio.candidatos.length
@@ -360,7 +360,9 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
                 ? "🟢 Alta"
                 : f === "media"
                   ? "🟡 Média"
-                  : "📦 Repor Estoque";
+                  : f === "aguardar_estoque"
+                    ? "📦 Repor Estoque"
+                    : "🚫 Sem vendas";
           const active = filtro === f;
           return (
             <button
@@ -380,9 +382,11 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
 
       {/* Lista */}
       <div className="glass-card overflow-hidden">
-        <div className="grid grid-cols-[1fr_70px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/20">
+        <div className="grid grid-cols-[1fr_60px_60px_60px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/20">
           <div>Anúncio</div>
-          <div className="text-right">Ped/sem</div>
+          <div className="text-right">7d</div>
+          <div className="text-right">15d</div>
+          <div className="text-right">30d</div>
           <div className="text-right">Estoque</div>
           <div className="text-right">Dias cob.</div>
           <div className="text-right">GMV atual</div>
@@ -402,16 +406,23 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
               <div key={item.item_id} className="border-b border-border last:border-b-0">
                 <button
                   onClick={() => setExpanded(isOpen ? null : item.item_id)}
-                  className="w-full grid grid-cols-[1fr_70px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[11px] hover:bg-muted/30 transition-colors text-left items-center"
+                  className="w-full grid grid-cols-[1fr_60px_60px_60px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[11px] hover:bg-muted/30 transition-colors text-left items-center"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-foreground">{item.item_name || item.item_id}</p>
                     <p className="text-[10px] text-muted-foreground">
-                      Sharpe {item.sharpe.toFixed(0)} · {item.vertical}
+                      Curva {item.curva === "sem_venda" ? "—" : item.curva} · Sharpe{" "}
+                      {item.sharpe.toFixed(0)} · {item.vertical}
                     </p>
                   </div>
                   <div className="text-right font-mono tabular-nums text-foreground">
                     {item.pedidos_7d}
+                  </div>
+                  <div className="text-right font-mono tabular-nums text-muted-foreground">
+                    {item.pedidos_15d}
+                  </div>
+                  <div className="text-right font-mono tabular-nums text-muted-foreground">
+                    {item.pedidos_30d}
                   </div>
                   <div
                     className="text-right font-mono tabular-nums"
