@@ -72,38 +72,38 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
   const radarData = useMemo(() => {
     if (!sellerVertical || !sellerBenchmark || !myVertical) return [];
 
-    const maxRoas = Math.max(sellerMetrics.avgRoas, myVertical.avgRoas, portfolio.avgRoas, 1);
-    const maxAcos = Math.max(sellerMetrics.avgAcos, myVertical.avgAcos, portfolio.avgAcos, 1);
-    const maxTacos = Math.max(sellerMetrics.avgTacos, myVertical.avgTacos, portfolio.avgTacos, 1);
-    const maxInv = Math.max(sellerMetrics.totalAds, myVertical.avgInv, portfolio.avgInv, 1);
+    const maxRoas = Math.max(sellerMetrics.avgRoas, myVertical.avgRoas, cartRoas, 1);
+    const maxAcos = Math.max(sellerMetrics.avgAcos, myVertical.avgAcos, cartAcos, 1);
+    const maxTacos = Math.max(sellerMetrics.avgTacos, myVertical.avgTacos, cartTacos, 1);
+    const maxInv = Math.max(sellerMetrics.totalAds, myVertical.avgInv, stats?.invMediana ?? 0, 1);
 
     return [
       {
         metric: "ROAS",
         Seller: (sellerMetrics.avgRoas / maxRoas) * 100,
         [`Vertical (${sellerVertical})`]: (myVertical.avgRoas / maxRoas) * 100,
-        Carteira: (portfolio.avgRoas / maxRoas) * 100,
+        Carteira: (cartRoas / maxRoas) * 100,
       },
       {
         metric: "Eficiência (1/ACOS)",
         Seller: maxAcos > 0 ? ((maxAcos - sellerMetrics.avgAcos) / maxAcos) * 100 : 0,
         [`Vertical (${sellerVertical})`]: maxAcos > 0 ? ((maxAcos - myVertical.avgAcos) / maxAcos) * 100 : 0,
-        Carteira: maxAcos > 0 ? ((maxAcos - portfolio.avgAcos) / maxAcos) * 100 : 0,
+        Carteira: maxAcos > 0 ? ((maxAcos - cartAcos) / maxAcos) * 100 : 0,
       },
       {
         metric: "Saúde (1/TACOS)",
         Seller: maxTacos > 0 ? ((maxTacos - sellerMetrics.avgTacos) / maxTacos) * 100 : 0,
         [`Vertical (${sellerVertical})`]: maxTacos > 0 ? ((maxTacos - myVertical.avgTacos) / maxTacos) * 100 : 0,
-        Carteira: maxTacos > 0 ? ((maxTacos - portfolio.avgTacos) / maxTacos) * 100 : 0,
+        Carteira: maxTacos > 0 ? ((maxTacos - cartTacos) / maxTacos) * 100 : 0,
       },
       {
         metric: "Investimento",
         Seller: (sellerMetrics.totalAds / maxInv) * 100,
         [`Vertical (${sellerVertical})`]: (myVertical.avgInv / maxInv) * 100,
-        Carteira: (portfolio.avgInv / maxInv) * 100,
+        Carteira: ((stats?.invMediana ?? 0) / maxInv) * 100,
       },
     ];
-  }, [sellerVertical, sellerBenchmark, sellerMetrics, myVertical, portfolio]);
+  }, [sellerVertical, sellerBenchmark, sellerMetrics, myVertical, stats, cartRoas, cartAcos, cartTacos]);
 
   const verticalKey = sellerVertical ? `Vertical (${sellerVertical})` : "Vertical";
 
@@ -122,25 +122,25 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
         kpi: "ROAS",
         Seller: sellerMetrics.avgRoas,
         [verticalKey]: myVertical.avgRoas,
-        Carteira: portfolio.avgRoas,
+        Carteira: cartRoas,
         format: "x",
       },
       {
         kpi: "ACOS",
         Seller: sellerMetrics.avgAcos,
         [verticalKey]: myVertical.avgAcos,
-        Carteira: portfolio.avgAcos,
+        Carteira: cartAcos,
         format: "%",
       },
       {
         kpi: "TACOS",
         Seller: sellerMetrics.avgTacos,
         [verticalKey]: myVertical.avgTacos,
-        Carteira: portfolio.avgTacos,
+        Carteira: cartTacos,
         format: "%",
       },
     ];
-  }, [myVertical, sellerMetrics, portfolio, verticalKey]);
+  }, [myVertical, sellerMetrics, cartRoas, cartAcos, cartTacos, verticalKey]);
 
   if (loading) {
     return (
@@ -285,9 +285,9 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
       {!myVertical && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "ROAS Mediano Carteira", value: `${fmtNum(portfolio.avgRoas, 2)}x`, icon: TrendingUp, color: "text-neon-blue" },
-            { label: "ACOS Médio Carteira", value: `${fmtNum(portfolio.avgAcos, 2)}%`, icon: Target, color: portfolio.avgAcos <= 15 ? "text-emerald" : "text-destructive" },
-            { label: "TACOS Médio Carteira", value: `${fmtNum(portfolio.avgTacos, 2)}%`, icon: Target, color: portfolio.avgTacos <= 10 ? "text-emerald" : "text-destructive" },
+            { label: "ROAS Carteira (agregado)", value: `${fmtNum(cartRoas, 2)}x`, icon: TrendingUp, color: "text-neon-blue" },
+            { label: "ACOS Carteira (agregado)", value: `${fmtNum(cartAcos, 2)}%`, icon: Target, color: cartAcos <= 15 ? "text-emerald" : "text-destructive" },
+            { label: "TACOS Carteira (agregado)", value: `${fmtNum(cartTacos, 2)}%`, icon: Target, color: cartTacos <= 10 ? "text-emerald" : "text-destructive" },
             { label: "Sellers na Carteira", value: String(portfolio.totalSellers), icon: Users, color: "text-muted-foreground" },
           ].map((m, i) => (
             <motion.div
@@ -347,9 +347,9 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             <ResponsiveContainer width="100%" height={280}>
               <BarChart
                 data={[
-                  { kpi: "ROAS", Seller: sellerMetrics.avgRoas, [verticalKey]: myVertical.avgRoas, Carteira: portfolio.avgRoas },
-                  { kpi: "ACOS (%)", Seller: sellerMetrics.avgAcos, [verticalKey]: myVertical.avgAcos, Carteira: portfolio.avgAcos },
-                  { kpi: "TACOS (%)", Seller: sellerMetrics.avgTacos, [verticalKey]: myVertical.avgTacos, Carteira: portfolio.avgTacos },
+                  { kpi: "ROAS", Seller: sellerMetrics.avgRoas, [verticalKey]: myVertical.avgRoas, Carteira: cartRoas },
+                  { kpi: "ACOS (%)", Seller: sellerMetrics.avgAcos, [verticalKey]: myVertical.avgAcos, Carteira: cartAcos },
+                  { kpi: "TACOS (%)", Seller: sellerMetrics.avgTacos, [verticalKey]: myVertical.avgTacos, Carteira: cartTacos },
                 ]}
                 barCategoryGap="25%"
               >
