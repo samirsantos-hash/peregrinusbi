@@ -14,6 +14,7 @@ import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { type ClusterBenchmarkResult, getPercentileBadge } from "@/hooks/useClusterBenchmark";
 import { Loader2, TrendingUp, Users, Target, BarChart3, Award } from "lucide-react";
 import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
+import { percentilDoValor, reconciliarAcos } from "@/lib/ratioStats";
 
 interface Props {
   portfolioBenchmark: PortfolioBenchmark | null;
@@ -53,6 +54,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerBenchmark, sellerMetrics, clusterBenchmark }: Props) => {
   const verticals = portfolioBenchmark?.verticals || [];
   const portfolio = portfolioBenchmark?.portfolio || { totalSellers: 0, avgInv: 0, avgRoas: 0, avgAcos: 0, avgTacos: 0 };
+  const stats = portfolioBenchmark?.stats || null;
+  // Agregados da carteira = razão dos totais (nunca média de razões).
+  const cartRoas = stats?.roasAgregado ?? 0;
+  const cartAcos = stats?.acosAgregado ?? 0;
+  const cartTacos = stats?.tacosAgregado ?? 0;
   const sellerVertical = campaign?.verticalPrincipal || null;
   const cb = clusterBenchmark;
 
