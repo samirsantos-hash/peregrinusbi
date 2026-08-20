@@ -206,6 +206,24 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     const qualidade = bbf.valor; // SCORE_FINAL_BBF — sem clamp
     const itensQualidade: ItemDecomposto[] = decomporQualidade(linhaQualidade);
 
+    // Contexto de percentil na carteira do usuário (omitido com menos de 10 lojas).
+    const distribuicao = carteira?.scores || [];
+    const percentil = qualidade != null ? percentilNaCarteira(qualidade, distribuicao) : null;
+    const melhorCarteira = distribuicao.length >= 10 ? carteira?.melhor ?? null : null;
+    const medianaCarteira = (() => {
+      if (distribuicao.length < 10) return null;
+      const ord = [...distribuicao].sort((a, b) => a - b);
+      const meio = Math.floor(ord.length / 2);
+      return ord.length % 2 ? ord[meio] : (ord[meio - 1] + ord[meio]) / 2;
+    })();
+    const fmt1 = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+    const contextoQualidade = [
+      percentil != null ? `percentil ${percentil} da carteira` : null,
+      melhorCarteira != null ? `melhor da carteira: ${fmt1(melhorCarteira)}` : null,
+    ]
+      .filter(Boolean)
+      .join("  ·  ");
+
     const tgmvTotal = soma((k) => Number(k.tgmv) || Number(k.revenue) || 0);
     const adsTotal = soma((k) => Number(k.adsInvestment) || 0);
     const shareAds = tgmvTotal > 0 && adsTotal > 0 ? (adsTotal / tgmvTotal) * 100 : null;
