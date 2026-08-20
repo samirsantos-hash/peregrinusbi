@@ -1,10 +1,20 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, ExternalLink, Info, MinusCircle, OctagonAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronRight, ExternalLink, HelpCircle, Info, MinusCircle, OctagonAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { shareVisitasCaras } from "@/lib/percentGuards";
+import QualityIndexDrawer from "@/components/dashboard/QualityIndexDrawer";
+import { useQualityCarteira } from "@/hooks/useQualityCarteira";
+import {
+  decomporQualidade,
+  percentilNaCarteira,
+  reconciliarBbf,
+  TEXTO_AJUDA_QUALITY,
+  type ItemDecomposto,
+} from "@/lib/qualityIndex";
 
 type Severidade = "critico" | "atencao" | "info";
 type Semaforo = "ok" | "atencao" | "critico" | "neutro" | "sem_dado";
@@ -17,6 +27,18 @@ interface KpiLike {
   repDelayedRate?: number;
   repClaimsRate?: number;
   scoreQualidade?: number;
+  scoreOferta?: number;
+  scoreCaracteristica?: number;
+  scoreFinalBbf?: number;
+  llPicturesScore?: number;
+  llTitleScore?: number;
+  llTechSpecsScore?: number;
+  llDescriptionScore?: number;
+  llPriceScore?: number;
+  llStockAvailabilityScore?: number;
+  llFreeShippingScore?: number;
+  llPromotionsScore?: number;
+  pontuacaoLlGtin?: number;
   scorePhoto?: number;
   scoreTitle?: number;
   adsInvestment?: number;
@@ -88,6 +110,9 @@ interface Indicador {
   derivado?: string;
   temDado: boolean;
   foraDaMeta: boolean;
+  contexto?: string;
+  ajuda?: string;
+  onAbrir?: () => void;
 }
 
 interface Alerta {
@@ -107,8 +132,10 @@ const PESO: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };
 const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, seller = null }: DiagnosticAlertsProps) => {
   const [drawer, setDrawer] = useState(false);
   const [detalhe, setDetalhe] = useState<Alerta | null>(null);
+  const [qualidadeDrawer, setQualidadeDrawer] = useState(false);
+  const { data: carteira } = useQualityCarteira();
 
-  const { nome, custId, chips, indicadores, alertas, resumo } = useMemo(() => {
+  const { nome, custId, chips, indicadores, alertas, resumo, qualidade: qualidadeInfo } = useMemo(() => {
     const ordenados = [...(kpis || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)));
     const ultimaData = ordenados[0]?.date;
     const linhas = ordenados.filter((k) => k.date === ultimaData);
@@ -137,37 +164,65 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     const atraso = mediaPonderada((k) => k.repDelayedRate); // escala 0–1
     const noPrazo = atraso != null ? (1 - atraso) * 100 : null;
 
-    // Qualidade do anúncio: score_qualidade_final vem zerado na base diária.
-    // Quando isso ocorre, usamos o último período da série mensal (fonte real do score).
+    // Quality Index (SCORE_FINAL_BBF): média dos três blocos. A base diária vem zerada
+    // nesses scores, então caímos no último período mensal com dado.
     const mediaEm = (linhasBase: KpiLike[], fn: (k: KpiLike) => number | undefined) => {
       const validos = linhasBase.filter((k) => Number(fn(k)) > 0);
       if (validos.length === 0) return null;
       return validos.reduce((s, k) => s + Number(fn(k)), 0) / validos.length;
     };
-    const scoreDe = (k: KpiLike) => {
-      const q = Number(k.scoreQualidade) || 0;
-      if (q > 0) return q;
-      const partes = [Number(k.scorePhoto) || 0, Number(k.scoreTitle) || 0].filter((v) => v > 0);
-      return partes.length ? partes.reduce((s, v) => s + v, 0) / partes.length : 0;
+    const CAMPOS_QUALIDADE = [
+      "scoreCaracteristica", "scoreOferta", "scoreQualidade", "scoreFinalBbf",
+      "llPicturesScore", "llTitleScore", "llTechSpecsScore", "llDescriptionScore",
+      "llPriceScore", "llStockAvailabilityScore", "llFreeShippingScore", "llPromotionsScore",
+      "pontuacaoLlGtin",
+    ] as const;
+    const temScore = (k: KpiLike) =>
+      (Number(k.scoreCaracteristica) || 0) > 0 ||
+      (Number(k.scoreOferta) || 0) > 0 ||
+      (Number(k.scoreQualidade) || 0) > 0;
+    const agregar = (base: KpiLike[]): Record<string, number | null> => {
+      const out: Record<string, number | null> = {};
+      for (const campo of CAMPOS_QUALIDADE) {
+        out[campo] = mediaEm(base, (k) => (k as any)[campo]);
+      }
+      return out;
     };
-    let qualidade = mediaEm(linhas, scoreDe);
+
+    let baseQualidade = linhas.filter(temScore);
     let qualidadeFallback = false;
-    if (qualidade == null && fallbackKpis.length > 0) {
+    if (baseQualidade.length === 0 && fallbackKpis.length > 0) {
       const datasFallback = [...new Set(
-        fallbackKpis
-          .filter((k) => scoreDe(k) > 0)
-          .map((k) => String(k.date || ""))
-          .filter(Boolean),
+        fallbackKpis.filter(temScore).map((k) => String(k.date || "")).filter(Boolean),
       )].sort((a, b) => b.localeCompare(a));
       const ultimaDataComScore = datasFallback[0];
       if (ultimaDataComScore) {
-        qualidade = mediaEm(
-          fallbackKpis.filter((k) => k.date === ultimaDataComScore),
-          scoreDe,
-        );
-        qualidadeFallback = qualidade != null;
+        baseQualidade = fallbackKpis.filter((k) => k.date === ultimaDataComScore && temScore(k));
+        qualidadeFallback = baseQualidade.length > 0;
       }
     }
+    const linhaQualidade = baseQualidade.length ? agregar(baseQualidade) : null;
+    const bbf = reconciliarBbf(linhaQualidade);
+    const qualidade = bbf.valor; // SCORE_FINAL_BBF — sem clamp
+    const itensQualidade: ItemDecomposto[] = decomporQualidade(linhaQualidade);
+
+    // Contexto de percentil na carteira do usuário (omitido com menos de 10 lojas).
+    const distribuicao = carteira?.scores || [];
+    const percentil = qualidade != null ? percentilNaCarteira(qualidade, distribuicao) : null;
+    const melhorCarteira = distribuicao.length >= 10 ? carteira?.melhor ?? null : null;
+    const medianaCarteira = (() => {
+      if (distribuicao.length < 10) return null;
+      const ord = [...distribuicao].sort((a, b) => a - b);
+      const meio = Math.floor(ord.length / 2);
+      return ord.length % 2 ? ord[meio] : (ord[meio - 1] + ord[meio]) / 2;
+    })();
+    const fmt1 = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+    const contextoQualidade = [
+      percentil != null ? `percentil ${percentil} da carteira` : null,
+      melhorCarteira != null ? `melhor da carteira: ${fmt1(melhorCarteira)}` : null,
+    ]
+      .filter(Boolean)
+      .join("  ·  ");
 
     const tgmvTotal = soma((k) => Number(k.tgmv) || Number(k.revenue) || 0);
     const adsTotal = soma((k) => Number(k.adsInvestment) || 0);
@@ -199,8 +254,15 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         meta: "meta: 80–100",
         estado: qualidade == null ? "sem_dado" : qualidade >= 80 ? "ok" : qualidade >= 60 ? "atencao" : "critico",
         derivado: qualidadeFallback
-          ? "SCORE_QUALIDADE_FINAL do último mês fechado — a base diária não traz esse score."
-          : "SCORE_QUALIDADE_FINAL do período exibido.",
+          ? "SCORE_FINAL_BBF do último mês fechado — a base diária não traz esses scores."
+          : "SCORE_FINAL_BBF do período exibido.",
+        contexto: contextoQualidade,
+        onAbrir: qualidade != null ? () => setQualidadeDrawer(true) : undefined,
+        ajuda: `${TEXTO_AJUDA_QUALITY} Referência: mediana da carteira ${
+          medianaCarteira != null ? medianaCarteira.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) : "33"
+        } · melhor da carteira ${
+          melhorCarteira != null ? melhorCarteira.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) : "87"
+        } · meta do programa 80–100.`,
         temDado: qualidade != null,
         foraDaMeta: qualidade != null && qualidade < 80,
       },
@@ -335,8 +397,16 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     if (pior) frase += ` ${pior.severidade === "critico" ? "Crítico" : "Atenção"}: ${pior.descricao}`;
     if (cobertura < 70) frase = `Leitura parcial (${cobertura}% de cobertura) — ${frase}`;
 
-    return { nome: nomeLoja, custId: cust, chips: chipsId, indicadores: inds, alertas: lista, resumo: frase };
-  }, [kpis, sellerCustIdMap, seller]);
+    return {
+      nome: nomeLoja,
+      custId: cust,
+      chips: chipsId,
+      indicadores: inds,
+      alertas: lista,
+      resumo: frase,
+      qualidade: { score: qualidade, itens: itensQualidade, origem: bbf.origem, divergencia: bbf.divergencia },
+    };
+  }, [kpis, fallbackKpis, sellerCustIdMap, seller, carteira]);
 
   const criticos = alertas.filter((a) => a.severidade === "critico").length;
   const visiveis = alertas.slice(0, 5);
@@ -389,9 +459,44 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         {/* LINHA 2 — indicadores */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
           {indicadores.map((i) => (
-            <div key={i.rotulo} className="rounded-lg border border-border bg-muted/10 px-3 py-2 flex flex-col justify-between min-h-[86px]">
+            <div
+              key={i.rotulo}
+              onClick={i.onAbrir}
+              role={i.onAbrir ? "button" : undefined}
+              tabIndex={i.onAbrir ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (i.onAbrir && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault();
+                  i.onAbrir();
+                }
+              }}
+              className={cn(
+                "rounded-lg border border-border bg-muted/10 px-3 py-2 flex flex-col justify-between min-h-[86px]",
+                i.onAbrir && "cursor-pointer hover:bg-muted/20 transition-colors",
+              )}
+            >
               <div className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-muted-alt">
                 <span>{i.rotulo}</span>
+                {i.ajuda && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-muted-foreground hover:text-foreground"
+                        aria-label={`Ajuda sobre ${i.rotulo}`}
+                      >
+                        <HelpCircle className="w-3 h-3" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[330px] text-xs leading-relaxed"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {i.ajuda}
+                    </PopoverContent>
+                  </Popover>
+                )}
                 {i.derivado && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -417,7 +522,11 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
               <div className={cn("flex items-center gap-1 text-[11px] mt-1.5", CORES[i.estado])}>
                 <IconeSemaforo estado={i.estado} />
                 <span>{ROTULO_SEMAFORO[i.estado]}</span>
+                {i.onAbrir && <ChevronRight className="w-3 h-3 ml-auto text-muted-foreground" />}
               </div>
+              {i.contexto && (
+                <p className="text-[10px] text-muted-alt leading-snug mt-1">{i.contexto}</p>
+              )}
             </div>
           ))}
         </div>
@@ -438,6 +547,16 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
             </Button>
           )}
         </div>
+
+        <QualityIndexDrawer
+          aberto={qualidadeDrawer}
+          onOpenChange={setQualidadeDrawer}
+          loja={nome}
+          score={qualidadeInfo.score}
+          origem={qualidadeInfo.origem}
+          divergencia={qualidadeInfo.divergencia}
+          itens={qualidadeInfo.itens}
+        />
 
         <Sheet open={drawer} onOpenChange={setDrawer}>
           <SheetContent className="w-full sm:max-w-md overflow-y-auto">
