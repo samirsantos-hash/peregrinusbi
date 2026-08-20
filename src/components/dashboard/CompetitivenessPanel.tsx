@@ -13,6 +13,7 @@ import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
 import PriceAuditTable from "./PriceAuditTable";
 import CompetitivenessInsights from "./CompetitivenessInsights";
+import PriceCompetitivenessChart from "./PriceCompetitivenessChart";
 import InsightsPrecificacaoPanel from "@/components/seller/InsightsPrecificacaoPanel";
 import MonitoramentoPrecoPanel from "@/components/seller/MonitoramentoPrecoPanel";
 import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
