@@ -382,13 +382,11 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
 
       {/* Lista */}
       <div className="glass-card overflow-hidden">
-        <div className="grid grid-cols-[1fr_60px_60px_60px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/20">
+        <div className="grid grid-cols-[1fr_60px_60px_60px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/20">
           <div>Anúncio</div>
           <div className="text-right">7d</div>
           <div className="text-right">15d</div>
           <div className="text-right">30d</div>
-          <div className="text-right">Estoque</div>
-          <div className="text-right">Dias cob.</div>
           <div className="text-right">GMV atual</div>
           <div className="text-right">GMV c/ Full</div>
           <div className="text-center">Prioridade</div>
@@ -406,7 +404,7 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
               <div key={item.item_id} className="border-b border-border last:border-b-0">
                 <button
                   onClick={() => setExpanded(isOpen ? null : item.item_id)}
-                  className="w-full grid grid-cols-[1fr_60px_60px_60px_70px_70px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[11px] hover:bg-muted/30 transition-colors text-left items-center"
+                  className="w-full grid grid-cols-[1fr_60px_60px_60px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[11px] hover:bg-muted/30 transition-colors text-left items-center"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-foreground">{item.item_name || item.item_id}</p>
@@ -423,28 +421,6 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
                   </div>
                   <div className="text-right font-mono tabular-nums text-muted-foreground">
                     {item.pedidos_30d}
-                  </div>
-                  <div
-                    className="text-right font-mono tabular-nums"
-                    style={{
-                      color:
-                        item.stock_gap > 0 ? "hsl(0, 70%, 60%)" : "hsl(215, 20%, 80%)",
-                    }}
-                  >
-                    {item.estoque.toFixed(0)}
-                  </div>
-                  <div
-                    className="text-right font-mono tabular-nums"
-                    style={{
-                      color:
-                        item.days_of_stock >= 30
-                          ? "hsl(160, 84%, 50%)"
-                          : item.days_of_stock >= 14
-                            ? "hsl(45, 80%, 60%)"
-                            : "hsl(0, 70%, 60%)",
-                    }}
-                  >
-                    {item.days_of_stock >= 365 ? "—" : `${item.days_of_stock.toFixed(0)}d`}
                   </div>
                   <div className="text-right font-mono tabular-nums text-muted-foreground">
                     {fmtBRL(item.gmv_atual_estimado)}
