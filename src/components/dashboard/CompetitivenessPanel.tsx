@@ -13,6 +13,7 @@ import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
 import PriceAuditTable from "./PriceAuditTable";
 import CompetitivenessInsights from "./CompetitivenessInsights";
+import PriceCompetitivenessChart from "./PriceCompetitivenessChart";
 import InsightsPrecificacaoPanel from "@/components/seller/InsightsPrecificacaoPanel";
 import MonitoramentoPrecoPanel from "@/components/seller/MonitoramentoPrecoPanel";
 import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
@@ -532,45 +533,12 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       {/* ── Auditoria de Preço ── */}
       <PriceAuditTable kpis={kpis} sellerCustIdMap={sellerCustIdMap} />
 
-      {/* ── Price Evolution Line Chart ── */}
-      <div className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Evolução da Competitividade de Preço (%)
-          </h3>
-          <TooltipInfo text={`Evolução percentual das faixas de preço ao longo do tempo. % calculado sobre comparações BPC — não sobre visitas totais. Dias sem dado de preço são omitidos. ${TOOLTIP_BPC}`} />
-        </div>
-        <ResponsiveContainer width="100%" height={300}>
-          <AreaChart data={priceEvolutionData}>
-            <defs>
-              <linearGradient id="gradExpensive" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="gradMatch" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.05} />
-              </linearGradient>
-              <linearGradient id="gradCheaper" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.05} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-            <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
-            <Tooltip content={<CustomTooltip />} />
-            <ReferenceLine y={30} stroke="hsl(0, 84%, 60%)" strokeDasharray="4 4" label={{ value: "alerta: >30% caro", fill: "hsl(0, 84%, 60%)", fontSize: 10, position: "right" }} />
-            <Area type="monotone" dataKey="% Preço Alto" stroke="hsl(0, 84%, 60%)" fill="url(#gradExpensive)" strokeWidth={2} />
-            <Area type="monotone" dataKey="% Equivalente" stroke="hsl(199, 100%, 50%)" fill="url(#gradMatch)" strokeWidth={2} />
-            <Area type="monotone" dataKey="% Mais Barato" stroke="hsl(160, 84%, 39%)" fill="url(#gradCheaper)" strokeWidth={2} />
-            <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
-          </AreaChart>
-        </ResponsiveContainer>
-        <p className="text-[11px] text-muted-foreground mt-3">
-          ℹ️ As três linhas somam sempre 100% — representam como o preço do seller se comparou com rivais nas visitas onde o ML ativou a comparação de preço (BPC). Universo separado do total de visitas.
-        </p>
-      </div>
+      {/* ── Evolução da Competitividade de Preço — área empilhada 100% ── */}
+      <PriceCompetitivenessChart
+        kpis={monthlyKpis.length > 0 ? monthlyKpis : kpis}
+        granularity={monthlyKpis.length > 0 ? "consolidated" : dataGranularity}
+        tooltipBpc={`Faixas de preço em área empilhada 100% sobre as comparações BPC — não sobre visitas totais. ${TOOLTIP_BPC}`}
+      />
 
       {/* ── Insights e Sugestões de Investigação ── */}
       <InsightsPrecificacaoPanel
