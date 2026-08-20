@@ -1,10 +1,20 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, CheckCircle2, ExternalLink, Info, MinusCircle, OctagonAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronRight, ExternalLink, HelpCircle, Info, MinusCircle, OctagonAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { shareVisitasCaras } from "@/lib/percentGuards";
+import QualityIndexDrawer from "@/components/dashboard/QualityIndexDrawer";
+import { useQualityCarteira } from "@/hooks/useQualityCarteira";
+import {
+  decomporQualidade,
+  percentilNaCarteira,
+  reconciliarBbf,
+  TEXTO_AJUDA_QUALITY,
+  type ItemDecomposto,
+} from "@/lib/qualityIndex";
 
 type Severidade = "critico" | "atencao" | "info";
 type Semaforo = "ok" | "atencao" | "critico" | "neutro" | "sem_dado";
@@ -17,6 +27,18 @@ interface KpiLike {
   repDelayedRate?: number;
   repClaimsRate?: number;
   scoreQualidade?: number;
+  scoreOferta?: number;
+  scoreCaracteristica?: number;
+  scoreFinalBbf?: number;
+  llPicturesScore?: number;
+  llTitleScore?: number;
+  llTechSpecsScore?: number;
+  llDescriptionScore?: number;
+  llPriceScore?: number;
+  llStockAvailabilityScore?: number;
+  llFreeShippingScore?: number;
+  llPromotionsScore?: number;
+  pontuacaoLlGtin?: number;
   scorePhoto?: number;
   scoreTitle?: number;
   adsInvestment?: number;
@@ -88,6 +110,9 @@ interface Indicador {
   derivado?: string;
   temDado: boolean;
   foraDaMeta: boolean;
+  contexto?: string;
+  ajuda?: string;
+  onAbrir?: () => void;
 }
 
 interface Alerta {
