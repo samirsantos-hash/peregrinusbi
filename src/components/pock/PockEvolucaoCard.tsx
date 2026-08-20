@@ -97,6 +97,8 @@ export default function PockEvolucaoCard({
   }, [pontos, mesAtual]);
 
   const mesesComDado = dados.filter((d) => d.valor !== null).length;
+  // legenda nunca declara série ausente: só renderiza "Ano anterior" se houver valor
+  const temAnoAnterior = dados.some((d) => d.anoAnterior !== null && d.anoAnterior !== undefined);
   const semDado = mesesComDado === 0;
   const baseInsuficiente = !semDado && (mesesComDado < 3 || (cobertura !== undefined && cobertura < 50));
   // rótulos só quando há espaço: séries curtas evitam sobreposição de números
@@ -229,7 +231,9 @@ export default function PockEvolucaoCard({
                 }
               />
               <Legend wrapperStyle={{ fontSize: 10, paddingTop: 2 }} iconSize={8} />
-              <Bar yAxisId="v" dataKey="anoAnterior" name="Ano anterior" fill="hsl(var(--brand-blue))" fillOpacity={0.3} radius={[3, 3, 0, 0]} maxBarSize={18} />
+              {temAnoAnterior && (
+                <Bar yAxisId="v" dataKey="anoAnterior" name="Ano anterior" fill="hsl(var(--brand-blue))" fillOpacity={0.3} radius={[3, 3, 0, 0]} maxBarSize={18} />
+              )}
               <Bar yAxisId="v" dataKey="valor" name="Mês" fill="hsl(var(--brand-navy))" radius={[3, 3, 0, 0]} maxBarSize={18}>
                 {mostrarRotulos && (
                   <LabelList
@@ -241,8 +245,10 @@ export default function PockEvolucaoCard({
                 )}
               </Bar>
               {/* série interrompida em mês sem dado: connectNulls=false */}
-              <Line yAxisId="p" type="monotone" dataKey="yoy" name="Var. YOY" stroke="hsl(var(--brand-navy))" strokeWidth={2} strokeDasharray="5 3" dot={false} connectNulls={false} />
-              <Line yAxisId="p" type="monotone" dataKey="mom" name="Var. MOM" stroke="hsl(var(--brand-navy))" strokeOpacity={0.5} strokeWidth={1.6} dot={false} connectNulls={false} />
+              {temAnoAnterior && (
+                <Line yAxisId="p" type="linear" dataKey="yoy" name="Var. YOY" stroke="hsl(var(--brand-navy))" strokeWidth={2} strokeDasharray="5 3" dot={false} connectNulls={false} />
+              )}
+              <Line yAxisId="p" type="linear" dataKey="mom" name="Var. MOM" stroke="hsl(var(--brand-navy))" strokeOpacity={0.5} strokeWidth={1.6} dot={false} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         )}

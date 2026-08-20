@@ -12,6 +12,8 @@ import { NovidadeTip } from "@/components/novidades/novidades";
 import PockGauge, { LegendaFaixas } from "./PockGauge";
 import PockRateBar from "./PockRateBar";
 import PockEvolucaoCard from "./PockEvolucaoCard";
+import PockMecanismosDesconto from "./PockMecanismosDesconto";
+import PockAdesaoFull from "./PockAdesaoFull";
 
 interface Props {
   sellerId?: string;
@@ -73,12 +75,9 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       conversao: p((m) => (m.tsi !== null && m.visitas ? (m.tsi / m.visitas) * 100 : null)),
       visitas: p((m) => m.visitas),
       flex: p((m) => m.tgmvFlex),
-      fbm: p((m) => (m.tgmvFbm !== null && m.tgmv ? (m.tgmvFbm / m.tgmv) * 100 : null)),
+      fbm: p((m) => (m.tgmvFbm !== null && m.tgmv ? Math.min(100, (m.tgmvFbm / m.tgmv) * 100) : null)),
       pads: p((m) => m.invPads),
-      cdp: p((m) => (m.cdpTgmv !== null && m.tgmv ? (m.cdpTgmv / m.tgmv) * 100 : null)),
-      clipsGmv: p((m) =>
-        m.tgmvClips !== null && m.tgmv ? (m.tgmvClips / m.tgmv) * 100 : null,
-      ),
+      cdp: p((m) => (m.cdpTgmv !== null && m.tgmv ? Math.min(100, (m.cdpTgmv / m.tgmv) * 100) : null)),
       clips: p((m) => m.tgmvClips),
     };
   }, [series]);
@@ -258,7 +257,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
             comoLer="Penetração maior costuma trazer mais exposição e prazo melhor. O restante não é um modal único: inclui Flex, agência, coletas, Correios e outros, que não são separáveis nesta base."
           />
           <PockEvolucaoCard
-            titulo="Penetração PADS (INV_PADS)"
+            titulo="Investimento em Product Ads (R$)"
             pontos={pontos.pads}
             formato="moeda"
             cobertura={data?.cobertura.invPads}
@@ -274,27 +273,29 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
             unidade="% do faturamento do mês"
             derivado="Calculado comparando o faturamento vindo de campanhas da Central de Promoções com o faturamento total do mês."
             oQueMostra="Que fatia das vendas depende de campanhas promocionais."
-            comoLer="Muito alta sugere margem pressionada pelas promoções; muito baixa indica oportunidade de aderir a mais campanhas."
+            comoLer="Muito alta sugere margem pressionada pelas promoções; muito baixa indica oportunidade de aderir a mais campanhas. Meses em que toda a venda passou por campanha aparecem em 100%."
           />
           <PockEvolucaoCard
-            titulo="Penetração de Clips no GMV"
-            pontos={pontos.clipsGmv}
-            formato="percent"
-            cobertura={data?.cobertura.tgmvClips}
-            unidade="% do faturamento do mês"
-            derivado="Calculado comparando o faturamento atribuído a vendas por Clips com o faturamento total do mês."
-            oQueMostra="Que fatia do faturamento vem de vendas originadas nos vídeos curtos (Clips)."
-            comoLer="Penetração crescente mostra que o conteúdo em vídeo já sustenta vendas; próxima de zero indica canal ainda inexplorado."
-          />
-          <PockEvolucaoCard
-            titulo="Evolução de Clips"
+            titulo="GMV influenciado por Clips"
             pontos={pontos.clips}
             formato="moeda"
             cobertura={data?.cobertura.tgmvClips}
-            unidade="R$ (faturamento atribuído a Clips)"
-            oQueMostra="Quanto a loja faturou em vendas originadas nos vídeos curtos (Clips) em cada mês."
-            comoLer="Compare com a penetração de Clips: valor alto concentrado em poucos meses indica potencial de escala se a publicação for constante."
+            unidade="R$ (faturamento influenciado por Clips)"
+            oQueMostra="Quanto faturamento foi influenciado por vendas originadas nos vídeos curtos (Clips) em cada mês."
+            comoLer="Exibido em reais porque a atribuição de Clips não é uma fatia do faturamento total: em alguns meses ela supera o próprio faturamento do mês, então qualquer percentual seria enganoso enquanto o denominador correto não for confirmado com a fonte."
           />
+        </div>
+      </section>
+
+      {/* FAIXA 4 — Alavancas */}
+      <section className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
+        <h3 className="text-sm font-semibold">Alavancas</h3>
+        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-3">
+          <PockMecanismosDesconto
+            mecanismos={data?.mecanismos ?? []}
+            base={data?.mecanismosBase ?? 0}
+          />
+          <PockAdesaoFull dados={data?.full ?? []} coberturaFbm={data?.coberturaFbm} />
         </div>
       </section>
     </motion.div>
