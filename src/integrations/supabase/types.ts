@@ -2598,6 +2598,7 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
       ml_pode_carregar: { Args: never; Returns: boolean }
       ml_pode_ver_rede: { Args: never; Returns: boolean }
@@ -2644,7 +2645,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "gerente" | "gestor_loja"
+      app_role: "admin" | "user" | "gerente" | "gestor_loja" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2772,7 +2773,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "gerente", "gestor_loja"],
+      app_role: ["admin", "user", "gerente", "gestor_loja", "super_admin"],
     },
   },
 } as const

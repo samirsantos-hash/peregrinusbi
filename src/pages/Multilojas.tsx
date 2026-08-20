@@ -259,7 +259,7 @@ const Multilojas = () => {
   const painelAdmin = (
     <>
       {tab === "Central de dados" && podeCarregar && (
-        <CentralDados perfilAdmin={perfil === "admin"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
+        <CentralDados perfilAdmin={perfil === "super"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
       )}
       {tab === "Cadastro de lojas" && podeConfigurar && <CadastroLojas />}
     </>
@@ -280,7 +280,7 @@ const Multilojas = () => {
         <main className="max-w-5xl mx-auto p-6 space-y-4">
           {podeCarregar ? (
             tab === "Cadastro de lojas" ? <CadastroLojas /> : (
-              <CentralDados perfilAdmin={perfil === "admin"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
+              <CentralDados perfilAdmin={perfil === "super"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
             )
           ) : (
             <p className="text-xs text-muted-foreground text-center py-16">
@@ -435,6 +435,17 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
 
   return (
     <div className="space-y-3">
+      <Card title="Resumo por loja">
+        <TickerLojas
+          base={d.base}
+          prev={d.prev}
+          dias={d.dias}
+          periodoAtual={{ ini: d.ini, fim: d.fim }}
+          periodoAnterior={d.prev.length ? { ini: d.prevIni, fim: d.prevFim } : null}
+          onSelecionarLoja={onSelecionarLoja}
+        />
+      </Card>
+
       <div className="grid gap-2 grid-cols-2 md:grid-cols-4 xl:grid-cols-6">
         <Kpi label="GMV bruto" value={fShort(a.gmv)} delta={delta(a.gmv, p.gmv)} />
         <Kpi label="Receita líquida" value={fShort(a.liq)} delta={delta(a.liq, p.liq)} />
@@ -545,17 +556,7 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
       </Card>
 
       <Tabela
-        titulo="Resumo por loja"
-        topo={
-          <TickerLojas
-            base={d.base}
-            prev={d.prev}
-            dias={d.dias}
-            periodoAtual={{ ini: d.ini, fim: d.fim }}
-            periodoAnterior={d.prev.length ? { ini: d.prevIni, fim: d.prevFim } : null}
-            onSelecionarLoja={onSelecionarLoja}
-          />
-        }
+        titulo="Detalhamento por loja"
         cols={["Loja", "Pedidos", "GMV", "Líquido", "Margem", "Take", "Ticket", "Un/ped", "Anúncios", "Clientes", "% ads", "% devol", "% NF-e", "GMV/dia"]}
         rows={porLoja.map((l) => [
           l.loja, fInt(l.pedidos), fShort(l.gmv), fShort(l.liq), fPct(l.margem), fPct(l.take), fBRL(l.ticket),

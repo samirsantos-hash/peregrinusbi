@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export type PerfilML = "admin" | "consultor" | "rede" | "gestor" | "nenhum";
+export type PerfilML = "super" | "admin" | "consultor" | "rede" | "gestor" | "nenhum";
 
 export const PERFIS = {
-  admin: { nome: "Administrador", escopo: "rede", podeCarregar: true, podeConfigurar: true },
-  consultor: { nome: "Consultor", escopo: "rede", podeCarregar: true, podeConfigurar: false },
+  // Somente o Super admin envia planilhas, publica cargas e cadastra lojas da rede.
+  super: { nome: "Super admin", escopo: "rede", podeCarregar: true, podeConfigurar: true },
+  admin: { nome: "Administrador", escopo: "rede", podeCarregar: false, podeConfigurar: false },
+  consultor: { nome: "Consultor", escopo: "rede", podeCarregar: false, podeConfigurar: false },
   // Consultor com acesso ao cliente piloto (MEGAJU): vê a rede, mas não carrega nem configura.
   rede: { nome: "Consultor (somente leitura)", escopo: "rede", podeCarregar: false, podeConfigurar: false },
   gestor: { nome: "Gestor Loja Oficial", escopo: "loja", podeCarregar: false, podeConfigurar: false },
@@ -49,7 +51,8 @@ export function usePerfilMultilojas() {
       if (!vivo) return;
 
       const r = (roles || []).map((x) => x.role as string);
-      const p: PerfilML = r.includes("admin") ? "admin"
+      const p: PerfilML = r.includes("super_admin") ? "super"
+        : r.includes("admin") ? "admin"
         : r.includes("gerente") ? "consultor"
         : r.includes("gestor_loja") ? "gestor"
         : podeVerRede === true ? "rede"
