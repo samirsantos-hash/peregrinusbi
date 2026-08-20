@@ -132,8 +132,10 @@ const PESO: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };
 const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, seller = null }: DiagnosticAlertsProps) => {
   const [drawer, setDrawer] = useState(false);
   const [detalhe, setDetalhe] = useState<Alerta | null>(null);
+  const [qualidadeDrawer, setQualidadeDrawer] = useState(false);
+  const { data: carteira } = useQualityCarteira();
 
-  const { nome, custId, chips, indicadores, alertas, resumo } = useMemo(() => {
+  const { nome, custId, chips, indicadores, alertas, resumo, qualidade: qualidadeInfo } = useMemo(() => {
     const ordenados = [...(kpis || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)));
     const ultimaData = ordenados[0]?.date;
     const linhas = ordenados.filter((k) => k.date === ultimaData);
@@ -162,37 +164,47 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     const atraso = mediaPonderada((k) => k.repDelayedRate); // escala 0–1
     const noPrazo = atraso != null ? (1 - atraso) * 100 : null;
 
-    // Qualidade do anúncio: score_qualidade_final vem zerado na base diária.
-    // Quando isso ocorre, usamos o último período da série mensal (fonte real do score).
+    // Quality Index (SCORE_FINAL_BBF): média dos três blocos. A base diária vem zerada
+    // nesses scores, então caímos no último período mensal com dado.
     const mediaEm = (linhasBase: KpiLike[], fn: (k: KpiLike) => number | undefined) => {
       const validos = linhasBase.filter((k) => Number(fn(k)) > 0);
       if (validos.length === 0) return null;
       return validos.reduce((s, k) => s + Number(fn(k)), 0) / validos.length;
     };
-    const scoreDe = (k: KpiLike) => {
-      const q = Number(k.scoreQualidade) || 0;
-      if (q > 0) return q;
-      const partes = [Number(k.scorePhoto) || 0, Number(k.scoreTitle) || 0].filter((v) => v > 0);
-      return partes.length ? partes.reduce((s, v) => s + v, 0) / partes.length : 0;
+    const CAMPOS_QUALIDADE = [
+      "scoreCaracteristica", "scoreOferta", "scoreQualidade", "scoreFinalBbf",
+      "llPicturesScore", "llTitleScore", "llTechSpecsScore", "llDescriptionScore",
+      "llPriceScore", "llStockAvailabilityScore", "llFreeShippingScore", "llPromotionsScore",
+      "pontuacaoLlGtin",
+    ] as const;
+    const temScore = (k: KpiLike) =>
+      (Number(k.scoreCaracteristica) || 0) > 0 ||
+      (Number(k.scoreOferta) || 0) > 0 ||
+      (Number(k.scoreQualidade) || 0) > 0;
+    const agregar = (base: KpiLike[]): Record<string, number | null> => {
+      const out: Record<string, number | null> = {};
+      for (const campo of CAMPOS_QUALIDADE) {
+        out[campo] = mediaEm(base, (k) => (k as any)[campo]);
+      }
+      return out;
     };
-    let qualidade = mediaEm(linhas, scoreDe);
+
+    let baseQualidade = linhas.filter(temScore);
     let qualidadeFallback = false;
-    if (qualidade == null && fallbackKpis.length > 0) {
+    if (baseQualidade.length === 0 && fallbackKpis.length > 0) {
       const datasFallback = [...new Set(
-        fallbackKpis
-          .filter((k) => scoreDe(k) > 0)
-          .map((k) => String(k.date || ""))
-          .filter(Boolean),
+        fallbackKpis.filter(temScore).map((k) => String(k.date || "")).filter(Boolean),
       )].sort((a, b) => b.localeCompare(a));
       const ultimaDataComScore = datasFallback[0];
       if (ultimaDataComScore) {
-        qualidade = mediaEm(
-          fallbackKpis.filter((k) => k.date === ultimaDataComScore),
-          scoreDe,
-        );
-        qualidadeFallback = qualidade != null;
+        baseQualidade = fallbackKpis.filter((k) => k.date === ultimaDataComScore && temScore(k));
+        qualidadeFallback = baseQualidade.length > 0;
       }
     }
+    const linhaQualidade = baseQualidade.length ? agregar(baseQualidade) : null;
+    const bbf = reconciliarBbf(linhaQualidade);
+    const qualidade = bbf.valor; // SCORE_FINAL_BBF — sem clamp
+    const itensQualidade: ItemDecomposto[] = decomporQualidade(linhaQualidade);
 
     const tgmvTotal = soma((k) => Number(k.tgmv) || Number(k.revenue) || 0);
     const adsTotal = soma((k) => Number(k.adsInvestment) || 0);
