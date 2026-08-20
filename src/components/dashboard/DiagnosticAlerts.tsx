@@ -12,6 +12,7 @@ import {
   decomporQualidade,
   percentilNaCarteira,
   reconciliarBbf,
+  serieBbf,
   TEXTO_AJUDA_QUALITY,
   type ItemDecomposto,
 } from "@/lib/qualityIndex";
@@ -205,6 +206,10 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     const bbf = reconciliarBbf(linhaQualidade);
     const qualidade = bbf.valor; // SCORE_FINAL_BBF — sem clamp
     const itensQualidade: ItemDecomposto[] = decomporQualidade(linhaQualidade);
+
+    // Série histórica do índice no período selecionado (diária quando medida, senão mensal).
+    const baseSerie = (kpis || []).filter(temScore).length > 0 ? kpis || [] : fallbackKpis;
+    const serieQualidade = serieBbf(baseSerie.filter(temScore) as unknown as Array<Record<string, unknown>>);
 
     // Contexto de percentil na carteira do usuário (omitido com menos de 10 lojas).
     const distribuicao = carteira?.scores || [];
@@ -404,7 +409,13 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       indicadores: inds,
       alertas: lista,
       resumo: frase,
-      qualidade: { score: qualidade, itens: itensQualidade, origem: bbf.origem, divergencia: bbf.divergencia },
+      qualidade: {
+        score: qualidade,
+        itens: itensQualidade,
+        origem: bbf.origem,
+        divergencia: bbf.divergencia,
+        serie: serieQualidade,
+      },
     };
   }, [kpis, fallbackKpis, sellerCustIdMap, seller, carteira]);
 
@@ -556,6 +567,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
           origem={qualidadeInfo.origem}
           divergencia={qualidadeInfo.divergencia}
           itens={qualidadeInfo.itens}
+          serie={qualidadeInfo.serie}
         />
 
         <Sheet open={drawer} onOpenChange={setDrawer}>
