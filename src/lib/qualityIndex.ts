@@ -111,6 +111,45 @@ export function decomporQualidade(row: Record<string, unknown> | null | undefine
 }
 
 /** Percentil (0–100) de um valor dentro de uma distribuição. */
+export interface PontoBbf {
+  data: string;
+  valor: number;
+}
+
+/**
+ * Série do SCORE_FINAL_BBF por data: agrega os três blocos (média das linhas com dado)
+ * e reconstrói o índice. Datas sem nenhum bloco medido são omitidas (sem interpolar).
+ */
+export function serieBbf(rows: Array<Record<string, unknown>> | null | undefined): PontoBbf[] {
+  const porData = new Map<string, Array<Record<string, unknown>>>();
+  for (const r of rows || []) {
+    const d = String((r as any)?.date ?? "");
+    if (!d) continue;
+    const arr = porData.get(d);
+    if (arr) arr.push(r);
+    else porData.set(d, [r]);
+  }
+  const media = (base: Array<Record<string, unknown>>, campo: string) => {
+    const validos = base.map((b) => Number((b as any)[campo])).filter((v) => Number.isFinite(v) && v > 0);
+    if (!validos.length) return null;
+    return validos.reduce((s, v) => s + v, 0) / validos.length;
+  };
+  return [...porData.entries()]
+    .map(([data, base]) => {
+      const valor = calcularBbf({
+        scoreCaracteristica: media(base, "scoreCaracteristica"),
+        scoreOferta: media(base, "scoreOferta"),
+        scoreQualidade: media(base, "scoreQualidade"),
+        scoreFinalBbf: media(base, "scoreFinalBbf"),
+      } as Record<string, unknown>);
+      const fonte = media(base, "scoreFinalBbf");
+      const final = fonte ?? valor;
+      return final != null ? { data, valor: final } : null;
+    })
+    .filter((p): p is PontoBbf => p !== null)
+    .sort((a, b) => a.data.localeCompare(b.data));
+}
+
 export function percentilNaCarteira(valor: number, distribuicao: number[]): number | null {
   const validos = distribuicao.filter((v) => Number.isFinite(v));
   if (validos.length < 10) return null; // base insuficiente

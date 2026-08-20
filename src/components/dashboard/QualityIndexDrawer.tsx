@@ -2,6 +2,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Lightbulb, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DESTAQUE_ITENS_VERDES, type ItemDecomposto } from "@/lib/qualityIndex";
+import type { PontoBbf } from "@/lib/qualityIndex";
+import QualityIndexTrend from "@/components/dashboard/QualityIndexTrend";
 
 const fmt = (v: number, casas = 1) =>
   v.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
@@ -20,9 +22,10 @@ interface Props {
   origem: "fonte" | "recalculado";
   divergencia: number | null;
   itens: ItemDecomposto[];
+  serie?: PontoBbf[];
 }
 
-const QualityIndexDrawer = ({ aberto, onOpenChange, loja, score, origem, divergencia, itens }: Props) => {
+const QualityIndexDrawer = ({ aberto, onOpenChange, loja, score, origem, divergencia, itens, serie = [] }: Props) => {
   const maiorGanho = Math.max(1, ...itens.map((i) => i.ganho ?? 0));
   const semDado = itens.filter((i) => i.valor == null).length;
 
@@ -62,6 +65,9 @@ const QualityIndexDrawer = ({ aberto, onOpenChange, loja, score, origem, diverge
               </p>
             )}
           </div>
+
+          {/* evolução no período */}
+          <QualityIndexTrend serie={serie} />
 
           {/* itens */}
           <div>
