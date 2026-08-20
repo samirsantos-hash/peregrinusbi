@@ -11,6 +11,7 @@ import { carregarPedidos, listarCargas, diagnosticoDaBase } from "@/lib/multiloj
 import FiltersBar, { type Filtros } from "@/components/multilojas/FiltersBar";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
 import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
+import TickerLojas from "@/components/multilojas/TickerLojas";
 import type { Diagnostico, PedidoML } from "@/lib/multilojas/parse";
 import { rangeDias } from "@/lib/multilojas/parse";
 import {
@@ -214,7 +215,7 @@ const Multilojas = () => {
     const baseTotal = aplicarFiltros(dados.pedidos, dados.diag.ini, dados.diag.fim, filtros.cancelados);
 
     return {
-      ini, fim, dias, base, canc, prev,
+      ini, fim, prevIni, prevFim, dias, base, canc, prev,
       a: agregar(base, canc), p: agregar(prev, prevCanc),
       serie: serieDiaria(base, ini, fim),
       serieTotal: serieDiaria(baseTotal, dados.diag.ini, dados.diag.fim),
@@ -374,7 +375,9 @@ const Multilojas = () => {
         )}
         {!d.base.length ? (tab !== "Minha loja" && tab !== "Central de dados" && tab !== "Cadastro de lojas" ? <Empty /> : null) : (
           <>
-            {tab === "Diretoria" && <Diretoria d={d} delta={delta} />}
+            {tab === "Diretoria" && (
+              <Diretoria d={d} delta={delta} onSelecionarLoja={(loja) => setFiltros((f) => ({ ...f, lojas: [loja] }))} />
+            )}
             {tab === "Lojas" && escopoRede && <Lojas d={d} />}
             {tab === "Séries" && <Series d={d} />}
             {tab === "Projeção" && <Projecao d={d} />}
@@ -393,13 +396,14 @@ const Multilojas = () => {
 
 type Ctx = NonNullable<ReturnType<typeof useCtxType>>;
 function useCtxType() { return null as null | {
-  ini: string; fim: string; dias: string[]; base: PedidoML[]; canc: PedidoML[]; prev: PedidoML[];
+  ini: string; fim: string; prevIni: string; prevFim: string;
+  dias: string[]; base: PedidoML[]; canc: PedidoML[]; prev: PedidoML[];
   a: Agg; p: Agg; serie: { dia: string; gmv: number }[];
   serieTotal: { dia: string; gmv: number }[];
 }; }
 
 /* ═══════════════ 3.1 Diretoria ═══════════════ */
-const Diretoria = ({ d, delta }: { d: Ctx; delta: (a: number, b: number) => number }) => {
+const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, b: number) => number; onSelecionarLoja?: (loja: string) => void }) => {
   const { a, p } = d;
   const gmvs = d.serie.map((s) => s.gmv);
   const mm7 = mm(gmvs, 7), mm28 = mm(gmvs, 28);
@@ -410,6 +414,9 @@ const Diretoria = ({ d, delta }: { d: Ctx; delta: (a: number, b: number) => numb
     .map(([loja, ps]) => ({ loja, ...agregar(ps) }))
     .sort((x, y) => y.gmv - x.gmv);
   const hhiLojas = hhi(porLoja.map((l) => l.gmv));
+  /* Coluna "venda por publicidade" ausente na base atual: nenhum pedido marcado
+   * como ads. Sem base → "—", nunca 0,0%. */
+  const temBaseAds = d.base.some((p) => p.ads);
   const fx = faixaHHI(hhiLojas);
 
   const cascata = [
@@ -539,11 +546,21 @@ const Diretoria = ({ d, delta }: { d: Ctx; delta: (a: number, b: number) => numb
 
       <Tabela
         titulo="Resumo por loja"
+        topo={
+          <TickerLojas
+            base={d.base}
+            prev={d.prev}
+            dias={d.dias}
+            periodoAtual={{ ini: d.ini, fim: d.fim }}
+            periodoAnterior={d.prev.length ? { ini: d.prevIni, fim: d.prevFim } : null}
+            onSelecionarLoja={onSelecionarLoja}
+          />
+        }
         cols={["Loja", "Pedidos", "GMV", "Líquido", "Margem", "Take", "Ticket", "Un/ped", "Anúncios", "Clientes", "% ads", "% devol", "% NF-e", "GMV/dia"]}
         rows={porLoja.map((l) => [
           l.loja, fInt(l.pedidos), fShort(l.gmv), fShort(l.liq), fPct(l.margem), fPct(l.take), fBRL(l.ticket),
           (l.pedidos ? l.un / l.pedidos : 0).toFixed(2), fInt(l.anuncios), fInt(l.compradores),
-          fPct(l.adsShare), fPct(l.devolRate), fPct(l.nfeRate), fShort(l.gmv / Math.max(1, d.dias.length)),
+          temBaseAds ? fPct(l.adsShare) : "—", fPct(l.devolRate), fPct(l.nfeRate), fShort(l.gmv / Math.max(1, d.dias.length)),
         ])}
       />
     </div>
@@ -559,7 +576,7 @@ const parseVal = (s: string) => {
   return Number.isFinite(n) ? n : NaN;
 };
 
-const Tabela = ({ titulo, cols, rows }: { titulo: string; cols: string[]; rows: (string | number)[][] }) => {
+const Tabela = ({ titulo, cols, rows, topo }: { titulo: string; cols: string[]; rows: (string | number)[][]; topo?: React.ReactNode }) => {
   const [sort, setSort] = useState<{ i: number; dir: 1 | -1 } | null>(null);
   const data = useMemo(() => {
     if (!sort) return rows;
@@ -572,6 +589,7 @@ const Tabela = ({ titulo, cols, rows }: { titulo: string; cols: string[]; rows: 
 
   return (
     <Card title={titulo}>
+      {topo}
       {!rows.length ? <Empty /> : (
         <div className="overflow-x-auto max-h-[520px]">
           <table className="w-full text-[11px]">
