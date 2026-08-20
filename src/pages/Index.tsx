@@ -21,6 +21,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import SecaoHeader from "@/components/dashboard/SecaoHeader";
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
 import { Daily7DPanel } from "@/components/dashboard/Daily7DPanel";
@@ -365,10 +366,10 @@ const Index = () => {
             </div>
             <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-neon-blue shrink-0" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
             <div className="min-w-0">
-              <h1 className="text-sm sm:text-xl font-bold tracking-tight truncate">
+              <p className="text-sm sm:text-xl font-bold tracking-tight truncate">
                 <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
                 <span className="sm:hidden">Peregrinus BI</span>
-              </h1>
+              </p>
               {sellersFetched && (hasRealData || isAdmin) && (
                 <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                   {hasRealData ? (
@@ -461,6 +462,11 @@ const Index = () => {
                   onMobileChange={setMenuAberto}
                 />
                 <div className="relative z-0 flex-1 min-w-0 space-y-4">
+                  <SecaoHeader
+                    ativa={activeTab}
+                    loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
+                    contexto={dateDebugLabel}
+                  />
                   <DiagnosticAlerts
                     kpis={displayKpis}
                     fallbackKpis={allKpisMonthly}
@@ -476,10 +482,10 @@ const Index = () => {
               <AnimatePresence mode="wait">
                 <motion.div
                   key={`${activeTab}-${selectedSeller}-${granularity}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.25 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
                   className="mt-0">
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     <NovidadesPrompt />
