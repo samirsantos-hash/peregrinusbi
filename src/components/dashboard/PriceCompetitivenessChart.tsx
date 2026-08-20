@@ -3,7 +3,7 @@ import {
   ComposedChart, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, ReferenceLine, Cell, BarChart,
 } from "recharts";
-import { AlertTriangle, Table as TableIcon, ExternalLink } from "lucide-react";
+import { Table as TableIcon, ExternalLink } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { fmtBRL, formatChartDate } from "@/utils/formatters";
 
