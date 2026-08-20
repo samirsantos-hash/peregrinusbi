@@ -396,7 +396,8 @@ const Multilojas = () => {
 
 type Ctx = NonNullable<ReturnType<typeof useCtxType>>;
 function useCtxType() { return null as null | {
-  ini: string; fim: string; dias: string[]; base: PedidoML[]; canc: PedidoML[]; prev: PedidoML[];
+  ini: string; fim: string; prevIni: string; prevFim: string;
+  dias: string[]; base: PedidoML[]; canc: PedidoML[]; prev: PedidoML[];
   a: Agg; p: Agg; serie: { dia: string; gmv: number }[];
   serieTotal: { dia: string; gmv: number }[];
 }; }
