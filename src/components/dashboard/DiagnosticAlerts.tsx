@@ -396,8 +396,16 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     if (pior) frase += ` ${pior.severidade === "critico" ? "Crítico" : "Atenção"}: ${pior.descricao}`;
     if (cobertura < 70) frase = `Leitura parcial (${cobertura}% de cobertura) — ${frase}`;
 
-    return { nome: nomeLoja, custId: cust, chips: chipsId, indicadores: inds, alertas: lista, resumo: frase };
-  }, [kpis, sellerCustIdMap, seller]);
+    return {
+      nome: nomeLoja,
+      custId: cust,
+      chips: chipsId,
+      indicadores: inds,
+      alertas: lista,
+      resumo: frase,
+      qualidade: { score: qualidade, itens: itensQualidade, origem: bbf.origem, divergencia: bbf.divergencia },
+    };
+  }, [kpis, fallbackKpis, sellerCustIdMap, seller, carteira]);
 
   const criticos = alertas.filter((a) => a.severidade === "critico").length;
   const visiveis = alertas.slice(0, 5);
