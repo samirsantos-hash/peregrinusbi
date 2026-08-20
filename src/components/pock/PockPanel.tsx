@@ -208,72 +208,92 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
             pontos={pontos.tgmv}
             formato="moeda"
             cobertura={data?.cobertura.tgmv}
-            explicacao={"Faturamento bruto mensal da loja (TGMV_LC).\nBarra escura = mês atual; barra clara = mesmo mês do ano anterior.\nLinha tracejada = variação YoY (vs. ano anterior) e linha fina = variação MoM (vs. mês anterior), ambas no eixo direito em %.\nUse para ver sazonalidade e se o crescimento é real ou efeito de comparação fraca."}
+            unidade="R$ (faturamento bruto do mês)"
+            oQueMostra="Quanto a loja faturou em cada mês, comparado com o mesmo mês do ano anterior."
+            comoLer="Barra escura é o mês atual e a clara é o ano anterior; as linhas mostram a variação contra o ano anterior e contra o mês anterior. Serve para separar sazonalidade de crescimento real."
           />
           <PockEvolucaoCard
             titulo="Evolução LL"
             pontos={pontos.ll}
             cobertura={data?.cobertura.ll}
-            explicacao={"LL = anúncios ativos (live listings) somados no mês.\nMede a amplitude do sortimento exposto na plataforma.\nQueda de LL com queda de visitas costuma indicar perda de exposição; LL subindo sem visitas indica cadastro sem qualidade ou sem giro."}
+            unidade="quantidade de anúncios ativos"
+            oQueMostra="O tamanho do sortimento exposto na plataforma em cada mês."
+            comoLer="Queda junto com queda de visitas indica perda de exposição; crescimento sem visitas indica cadastro novo sem qualidade ou sem giro."
           />
           <PockEvolucaoCard
             titulo="Evolução Taxa de Conversão"
             pontos={pontos.conversao}
             formato="percent"
             cobertura={data?.cobertura.tsi}
-            derivadoFormula="Conversão = TSI / VISITAS × 100"
-            explicacao={"Quantos itens são vendidos a cada 100 visitas (TSI ÷ Visitas).\nMede eficiência da página: preço, ficha, reputação e frete.\nConversão caindo com visitas estáveis aponta problema de oferta, não de tráfego."}
+            unidade="% (itens vendidos a cada 100 visitas)"
+            derivado="Calculado comparando os itens vendidos com as visitas recebidas no mesmo mês."
+            oQueMostra="Quantos itens a loja vende a cada 100 visitas recebidas."
+            comoLer="Mede a eficiência da página (preço, ficha, reputação e frete). Se cair com visitas estáveis, o problema é a oferta, não o tráfego."
           />
           <PockEvolucaoCard
             titulo="Evolução Visitas"
             pontos={pontos.visitas}
             cobertura={data?.cobertura.visitas}
-            explicacao={"Total de visitas recebidas pelos anúncios no mês.\nÉ o topo do funil: mede exposição e demanda captada (orgânica + ads).\nCompare com TGMV e conversão para separar problema de tráfego de problema de oferta."}
+            unidade="quantidade de visitas"
+            oQueMostra="Quantas visitas os anúncios da loja receberam no mês, somando tráfego orgânico e de anúncios."
+            comoLer="É o topo do funil. Compare com faturamento e conversão para saber se falta tráfego ou se falta converter o tráfego que já chega."
           />
           <PockEvolucaoCard
             titulo="Evolução Flex"
             pontos={pontos.flex}
             formato="moeda"
             cobertura={data?.cobertura.tgmvFlex}
-            explicacao={"Faturamento gerado por vendas com envio Flex (entrega feita pelo próprio vendedor no mesmo dia).\nCrescimento indica ganho de conversão por prazo curto; queda pode indicar redução de raio de entrega ou migração para Full."}
+            unidade="R$ (faturamento em vendas com envio Flex)"
+            oQueMostra="Quanto a loja faturou em vendas entregues pelo próprio vendedor no mesmo dia (Flex)."
+            comoLer="Crescimento indica ganho de conversão pelo prazo curto; queda pode ser redução de raio de entrega ou migração das vendas para o Full."
           />
           <PockEvolucaoCard
             titulo="Penetração de FBM"
             pontos={pontos.fbm}
             formato="percent"
             cobertura={data?.cobertura.tgmvFbm}
-            derivadoFormula="Penetração FBM = TGMV_LC_FBM / TGMV_LC × 100"
-            explicacao={"Percentual do faturamento que sai por Fulfillment (estoque no centro de distribuição do Mercado Livre).\nMaior penetração costuma trazer mais exposição e prazo melhor.\nO restante não é um modal único: inclui Flex, agência, coletas, Correios e outros, não separáveis nesta base."}
+            unidade="% do faturamento do mês"
+            derivado="Calculado comparando o faturamento enviado por Fulfillment com o faturamento total do mês."
+            oQueMostra="Que fatia do faturamento sai com estoque no centro de distribuição do Mercado Livre."
+            comoLer="Penetração maior costuma trazer mais exposição e prazo melhor. O restante não é um modal único: inclui Flex, agência, coletas, Correios e outros, que não são separáveis nesta base."
           />
           <PockEvolucaoCard
             titulo="Penetração PADS (INV_PADS)"
             pontos={pontos.pads}
             formato="moeda"
             cobertura={data?.cobertura.invPads}
-            explicacao={"Investimento mensal em Product Ads (INV_PADS), em reais.\nMostra o esforço de mídia da loja mês a mês.\nLeia junto com TGMV: aumento de investimento sem aumento proporcional de faturamento indica queda de ROAS."}
+            unidade="R$ (investimento em Product Ads no mês)"
+            oQueMostra="Quanto a loja investiu em anúncios patrocinados (Product Ads) em cada mês."
+            comoLer="Leia junto com o faturamento: investimento subindo sem faturamento proporcional indica perda de retorno da mídia."
           />
           <PockEvolucaoCard
             titulo="Penetração CDP"
             pontos={pontos.cdp}
             formato="percent"
             cobertura={data?.cobertura.cdpTgmv}
-            derivadoFormula="Penetração CDP = CDP_TGMV_LC / TGMV_LC × 100"
-            explicacao={"Parcela do faturamento originada em campanhas da Central de Promoções (CDP).\nMede a dependência de promoções para vender.\nPenetração muito alta pode indicar margem pressionada; muito baixa indica oportunidade de adesão a campanhas."}
+            unidade="% do faturamento do mês"
+            derivado="Calculado comparando o faturamento vindo de campanhas da Central de Promoções com o faturamento total do mês."
+            oQueMostra="Que fatia das vendas depende de campanhas promocionais."
+            comoLer="Muito alta sugere margem pressionada pelas promoções; muito baixa indica oportunidade de aderir a mais campanhas."
           />
           <PockEvolucaoCard
             titulo="Penetração de Clips no GMV"
             pontos={pontos.clipsGmv}
             formato="percent"
             cobertura={data?.cobertura.tgmvClips}
-            derivadoFormula="Penetração Clips = TGMV_LC_CLIPS / TGMV_LC × 100"
-            explicacao={"Parcela do faturamento do mês originada por vendas atribuídas a Clips.\nSubstitui o antigo indicador de presença, que usava a coluna SELLERS_CLIPS_PUBLI — hoje zerada na base e por isso sem série válida.\nMeses sem faturamento ou sem dado de Clips aparecem interrompidos na série."}
+            unidade="% do faturamento do mês"
+            derivado="Calculado comparando o faturamento atribuído a vendas por Clips com o faturamento total do mês."
+            oQueMostra="Que fatia do faturamento vem de vendas originadas nos vídeos curtos (Clips)."
+            comoLer="Penetração crescente mostra que o conteúdo em vídeo já sustenta vendas; próxima de zero indica canal ainda inexplorado."
           />
           <PockEvolucaoCard
             titulo="Evolução de Clips"
             pontos={pontos.clips}
             formato="moeda"
             cobertura={data?.cobertura.tgmvClips}
-            explicacao={"Faturamento atribuído a vendas originadas em Clips (vídeos curtos).\nMede o retorno comercial do conteúdo em vídeo.\nCompare com a penetração de Clips: faturamento alto com poucos meses de publicação indica alto potencial de escala."}
+            unidade="R$ (faturamento atribuído a Clips)"
+            oQueMostra="Quanto a loja faturou em vendas originadas nos vídeos curtos (Clips) em cada mês."
+            comoLer="Compare com a penetração de Clips: valor alto concentrado em poucos meses indica potencial de escala se a publicação for constante."
           />
         </div>
       </section>
