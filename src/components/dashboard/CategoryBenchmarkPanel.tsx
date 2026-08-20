@@ -367,6 +367,156 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
         )}
       </div>
 
+      {/* Detalhamento — três referências: seller, carteira agregada, seller típico */}
+      <div className="glass-card p-5">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-1">
+          Detalhamento — {sellerVertical || "Todas as Verticais"}
+        </h3>
+        <p className="text-[11px] text-muted-foreground mb-4">
+          Agregados calculados como razão dos totais. Mediana descreve o seller do meio.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border/30">
+                <th className="text-left py-2 px-3 text-muted-foreground font-medium">Referência</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Sellers</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Investimento (mediana)</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Total investido</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">ROAS</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">ACOS</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">TACOS</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Faturamento Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* 1 — Este seller */}
+              <tr className="border-b border-border/10 bg-neon-blue/10">
+                <td className="py-2.5 px-3 font-medium">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[hsl(199,100%,50%)]" />
+                    <span className="text-neon-blue font-semibold">Este Seller</span>
+                  </div>
+                </td>
+                <td className="py-2.5 px-3 text-right text-muted-foreground">1</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(sellerMetrics.totalAds)}</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(sellerMetrics.totalAds)}</td>
+                <td className={`py-2.5 px-3 text-right font-mono font-semibold ${sellerMetrics.avgRoas >= 2 ? "text-emerald" : "text-destructive"}`}>
+                  {fmtNum(sellerMetrics.avgRoas, 2)}x
+                  {pctRoas != null && <span className="block text-[9px] text-muted-foreground font-normal">percentil {pctRoas} da carteira</span>}
+                </td>
+                <td className={`py-2.5 px-3 text-right font-mono ${sellerMetrics.avgAcos <= 15 ? "text-emerald" : "text-destructive"}`}>
+                  {fmtNum(sellerMetrics.avgAcos, 2)}%
+                  {pctAcos != null && <span className="block text-[9px] text-muted-foreground font-normal">percentil {pctAcos} da carteira</span>}
+                </td>
+                <td className={`py-2.5 px-3 text-right font-mono ${sellerMetrics.avgTacos <= 10 ? "text-emerald" : "text-destructive"}`}>
+                  {fmtNum(sellerMetrics.avgTacos, 2)}%
+                  {pctTacos != null && <span className="block text-[9px] text-muted-foreground font-normal">percentil {pctTacos} da carteira</span>}
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(sellerMetrics.totalGmv)}</td>
+              </tr>
+
+              {/* vertical do seller — mediana dos pares */}
+              {myVertical && (
+                <tr className="border-b border-border/10">
+                  <td className="py-2.5 px-3 font-medium">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[hsl(160,84%,39%)]" />
+                      <span className="text-foreground">{myVertical.vertical}</span>
+                      <Badge variant="outline" className="text-[9px]">Mediana</Badge>
+                    </div>
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-muted-foreground">{myVertical.sellersCount}</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(myVertical.stats.invMediana ?? 0)}</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(myVertical.stats.totalInv)}</td>
+                  <td className="py-2.5 px-3 text-right font-mono font-semibold">{fmtNum(myVertical.stats.roasMediana ?? 0, 2)}x</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtNum(myVertical.stats.acosMediana ?? 0, 2)}%</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtNum(myVertical.stats.tacosMediana ?? 0, 2)}%</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(myVertical.totalTgmv)}</td>
+                </tr>
+              )}
+
+              {/* 2 — Carteira agregada (razão dos totais) + dispersão p10–p90 */}
+              <tr className="border-t-2 border-border/30 bg-card/30">
+                <td className="py-2.5 px-3 font-semibold text-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[hsl(40,95%,55%)]" />
+                    Carteira agregada
+                    <TooltipInfo text="Eficiência do conjunto: razão dos totais (Σ TGMV_LC_PADS / Σ INV_PADS). Não é média de razões." />
+                  </div>
+                </td>
+                <td className="py-2.5 px-3 text-right font-semibold">{stats?.nComInvestimento ?? 0}</td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">{fmtBRLCompact(stats?.invMediana ?? 0)}</td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">{fmtBRLCompact(stats?.totalInv ?? 0)}</td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold text-neon-blue">
+                  {fmtNum(cartRoas, 2)}x
+                  <span className="block text-[9px] text-muted-foreground font-normal">
+                    p10 {fmtNum(stats?.roasP10 ?? 0, 2)} — p90 {fmtNum(stats?.roasP90 ?? 0, 2)}
+                  </span>
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">
+                  {fmtNum(cartAcos, 2)}%
+                  <span className="block text-[9px] text-muted-foreground font-normal">
+                    p10 {fmtNum(stats?.acosP10 ?? 0, 2)} — p90 {fmtNum(stats?.acosP90 ?? 0, 2)}
+                  </span>
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">
+                  {fmtNum(cartTacos, 2)}%
+                  <span className="block text-[9px] text-muted-foreground font-normal">
+                    p10 {fmtNum(stats?.tacosP10 ?? 0, 2)} — p90 {fmtNum(stats?.tacosP90 ?? 0, 2)}
+                  </span>
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">{fmtBRLCompact(stats?.totalTgmv ?? 0)}</td>
+              </tr>
+
+              {/* 3 — Seller típico (mediana das razões) */}
+              <tr className="border-t border-border/20">
+                <td className="py-2.5 px-3 font-medium text-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-muted-foreground/60" />
+                    Seller típico
+                    <Badge variant="outline" className="text-[9px]">Mediana</Badge>
+                  </div>
+                </td>
+                <td className="py-2.5 px-3 text-right text-muted-foreground">{stats?.nComInvestimento ?? 0}</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(stats?.invMediana ?? 0)}</td>
+                <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">
+                  média {fmtBRLCompact(stats?.invMedia ?? 0)}
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtNum(stats?.roasMediana ?? 0, 2)}x</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtNum(stats?.acosMediana ?? 0, 2)}%</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtNum(stats?.tacosMediana ?? 0, 2)}%</td>
+                <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Base e regra de exclusão */}
+        {stats && (
+          <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
+            Base: {stats.nComInvestimento} sellers com investimento &gt; 0 no período.{" "}
+            {stats.nSemInvestimento} sellers ({fmtNum(stats.pctSemInvestimento, 0)}%) sem investimento foram
+            excluídos do cálculo de ROAS, ACOS e TACOS — razão indefinida sem investimento. Eles permanecem no
+            total de faturamento.
+          </p>
+        )}
+
+        {/* Rodapé de método + reconciliação */}
+        {stats && (
+          <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed border-t border-border/20 pt-2">
+            Agregados calculados como razão dos totais, não como média de razões. Investimento apresentado em
+            mediana devido à concentração (top 10% dos sellers = {fmtNum(stats.shareTop10Pct ?? 0, 0)}% do
+            investimento).{" "}
+            {reconciliacao.conferido
+              ? "Reconciliação: o ACOS agregado confere com Σ INV_PADS / Σ TGMV_LC_PADS calculado à parte."
+              : reconciliacao.recalculado != null
+                ? `Reconciliação: divergência de ${fmtNum(reconciliacao.divergencia ?? 0, 4)} p.p. entre o ACOS exibido e Σ INV_PADS / Σ TGMV_LC_PADS.`
+                : "Reconciliação indisponível: sem faturamento atribuído a Ads no período."}
+          </p>
+        )}
+      </div>
+
       {/* Vertical detail table — only seller's vertical + portfolio */}
       <div className="glass-card p-5">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-4">
