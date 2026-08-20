@@ -259,7 +259,7 @@ const Multilojas = () => {
   const painelAdmin = (
     <>
       {tab === "Central de dados" && podeCarregar && (
-        <CentralDados perfilAdmin={perfil === "admin"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
+        <CentralDados perfilAdmin={perfil === "super"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
       )}
       {tab === "Cadastro de lojas" && podeConfigurar && <CadastroLojas />}
     </>
@@ -280,7 +280,7 @@ const Multilojas = () => {
         <main className="max-w-5xl mx-auto p-6 space-y-4">
           {podeCarregar ? (
             tab === "Cadastro de lojas" ? <CadastroLojas /> : (
-              <CentralDados perfilAdmin={perfil === "admin"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
+              <CentralDados perfilAdmin={perfil === "super"} onPublicado={() => { setModoLocal(false); carregarDoBanco(); }} />
             )
           ) : (
             <p className="text-xs text-muted-foreground text-center py-16">
