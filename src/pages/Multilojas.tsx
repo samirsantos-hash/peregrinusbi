@@ -539,11 +539,21 @@ const Diretoria = ({ d, delta }: { d: Ctx; delta: (a: number, b: number) => numb
 
       <Tabela
         titulo="Resumo por loja"
+        topo={
+          <TickerLojas
+            base={d.base}
+            prev={d.prev}
+            dias={d.dias}
+            periodoAtual={{ ini: d.ini, fim: d.fim }}
+            periodoAnterior={d.prev.length ? { ini: d.prevIni, fim: d.prevFim } : null}
+            onSelecionarLoja={onSelecionarLoja}
+          />
+        }
         cols={["Loja", "Pedidos", "GMV", "Líquido", "Margem", "Take", "Ticket", "Un/ped", "Anúncios", "Clientes", "% ads", "% devol", "% NF-e", "GMV/dia"]}
         rows={porLoja.map((l) => [
           l.loja, fInt(l.pedidos), fShort(l.gmv), fShort(l.liq), fPct(l.margem), fPct(l.take), fBRL(l.ticket),
           (l.pedidos ? l.un / l.pedidos : 0).toFixed(2), fInt(l.anuncios), fInt(l.compradores),
-          fPct(l.adsShare), fPct(l.devolRate), fPct(l.nfeRate), fShort(l.gmv / Math.max(1, d.dias.length)),
+          temBaseAds ? fPct(l.adsShare) : "—", fPct(l.devolRate), fPct(l.nfeRate), fShort(l.gmv / Math.max(1, d.dias.length)),
         ])}
       />
     </div>
