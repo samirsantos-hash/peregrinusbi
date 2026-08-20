@@ -367,10 +367,27 @@ export function MonitoramentoPrecoPanel({ sellerId }: MonitoramentoPrecoPanelPro
       )}
 
       {!isLoading && anuncios.length === 0 && (
-        <div className="rounded-xl border border-emerald/30 bg-emerald/5 p-6 text-center">
-          <p className="text-sm font-medium text-emerald">✅ Nenhum anúncio com alteração detectada.</p>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            Nenhum MLB apresentou queda de score de preço, score baixo ou tração sem CDP no período avaliado.
+        <div className="rounded-xl border border-border/60 bg-muted/10 p-5 space-y-3">
+          <p className="text-sm font-medium text-foreground">O que este bloco analisa</p>
+          <ul className="text-[12px] text-muted-foreground space-y-1.5 list-disc pl-4">
+            <li>
+              <span className="text-foreground">Queda de score de preço:</span> MLBs cujo índice de
+              competitividade de preço caiu entre os períodos avaliados — sinal de reajuste próprio ou de
+              concorrente que baixou o preço.
+            </li>
+            <li>
+              <span className="text-foreground">Score de preço baixo:</span> anúncios que seguem abaixo do
+              patamar aceitável, mesmo sem variação recente. Indicam preço fora da faixa do catálogo.
+            </li>
+            <li>
+              <span className="text-foreground">Tração sem CDP:</span> anúncios com visitas/vendas relevantes
+              que não estão elegíveis ou não aderiram ao desconto co-financiado — oportunidade direta.
+            </li>
+          </ul>
+          <p className="text-[11px] text-muted-foreground">
+            Como ler: priorize os itens marcados como críticos e com maior volume de visitas — é onde a
+            perda de conversão por preço custa mais. Sem itens listados, nenhum MLB cruzou esses critérios
+            no período; isso não substitui a leitura do painel de BPC.
           </p>
         </div>
       )}
