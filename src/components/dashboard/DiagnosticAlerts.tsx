@@ -236,8 +236,14 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         meta: "meta: 80–100",
         estado: qualidade == null ? "sem_dado" : qualidade >= 80 ? "ok" : qualidade >= 60 ? "atencao" : "critico",
         derivado: qualidadeFallback
-          ? "SCORE_QUALIDADE_FINAL do último mês fechado — a base diária não traz esse score."
-          : "SCORE_QUALIDADE_FINAL do período exibido.",
+          ? "SCORE_FINAL_BBF do último mês fechado — a base diária não traz esses scores."
+          : "SCORE_FINAL_BBF do período exibido.",
+        contexto: contextoQualidade,
+        ajuda: `${TEXTO_AJUDA_QUALITY} Referência: mediana da carteira ${
+          medianaCarteira != null ? medianaCarteira.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) : "33"
+        } · melhor da carteira ${
+          melhorCarteira != null ? melhorCarteira.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) : "87"
+        } · meta do programa 80–100.`,
         temDado: qualidade != null,
         foraDaMeta: qualidade != null && qualidade < 80,
       },
