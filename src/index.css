@@ -59,6 +59,11 @@
     --warn: 40 95% 55%;
     --warn-soft: 14 74% 76%;      /* #EFA893 */
     --ok: 160 84% 39%;
+
+    /* Escala divergente de preço — quente (caro) · neutro · frio (barato) */
+    --price-hot: 14 72% 56%;      /* #E06540 */
+    --price-neutral: 220 15% 66%; /* #9AA3B5 */
+    --price-cool: 210 53% 60%;    /* #4E8AC9 */
     --brand-purple: 233 67% 62%;
     --glass: 222 47% 8%;
     --glass-border: 215 25% 18%;
