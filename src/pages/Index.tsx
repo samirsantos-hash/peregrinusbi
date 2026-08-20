@@ -48,6 +48,7 @@ import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
 import { useAuth } from "@/hooks/useAuth";
+import { useMyAccess } from "@/hooks/useMyAccess";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
