@@ -526,12 +526,6 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
                       <p className="text-[10px] text-muted-foreground italic mt-1">
                         {item.justificativa}
                       </p>
-                      {item.stock_gap > 0 && (
-                        <p className="text-[11px] text-warning mt-2 flex items-center gap-1">
-                          📦 Precisa de mais {item.stock_gap.toFixed(0)} unidades para{" "}
-                          {FULL_ESTOQUE_MINIMO_DIAS} dias de cobertura.
-                        </p>
-                      )}
                     </div>
                   </div>
                 )}
