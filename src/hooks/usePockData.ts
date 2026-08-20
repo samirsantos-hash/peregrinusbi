@@ -39,7 +39,44 @@ export interface PockData {
   series: PockMes[];
   snapshot: PockSnapshot;
   cobertura: Record<string, number>;
+  /** Mecanismos de desconto (cdp_mensal) — não exclusivos entre si */
+  mecanismos: PockMecanismo[];
+  /** Base do período para % dos mecanismos (F_TGMV_LC somado) */
+  mecanismosBase: number;
+  /** Adesão ao FULL por mês */
+  full: PockFullMes[];
+  /** cobertura % dos meses com TGMV_LC_FBM */
+  coberturaFbm: number;
 }
+
+export interface PockMecanismo {
+  chave: string;
+  rotulo: string;
+  valor: number;
+  /** últimos 12 meses, para sparkline */
+  historico: { mes: string; valor: number }[];
+}
+
+export interface PockFullMes {
+  mes: string;
+  itensFull: number | null;
+  itensForaFull: number | null;
+  /** % do GMV via FULL (null = sem cobertura, linha interrompe) */
+  pctGmvFull: number | null;
+}
+
+export const MECANISMOS_DESCONTO: { chave: string; coluna: string; rotulo: string }[] = [
+  { chave: "cdp", coluna: "f_tgmv_lc_cdp", rotulo: "CDP / Desconto Programado" },
+  { chave: "automatic", coluna: "f_tgmv_lc_automatic", rotulo: "Automático" },
+  { chave: "cupom", coluna: "f_tgmv_lc_cupom", rotulo: "Cupom" },
+  { chave: "tiers", coluna: "f_tgmv_lc_tiers", rotulo: "Tiers" },
+  { chave: "custom_seller", coluna: "f_tgmv_lc_custom_seller", rotulo: "Custom seller" },
+  { chave: "dxb", coluna: "f_tgmv_lc_dxb", rotulo: "DXB" },
+  { chave: "pre_acordo", coluna: "f_tgmv_lc_pre_acordo", rotulo: "Pré-Acordo" },
+  { chave: "dod", coluna: "f_tgmv_lc_dod", rotulo: "DOD" },
+  { chave: "lightning", coluna: "f_tgmv_lc_lightning", rotulo: "Lightning" },
+  { chave: "regular", coluna: "f_tgmv_lc_regular", rotulo: "Regular (sem desconto)" },
+];
 
 const num = (v: any): number | null =>
   v === null || v === undefined || v === "" ? null : Number(v);
@@ -57,7 +94,7 @@ export function usePockData(sellerId: string | undefined) {
     queryFn: async (): Promise<PockData> => {
       if (!sellerId) throw new Error("sem seller");
 
-      const [kpiRes, llRes] = await Promise.all([
+      const [kpiRes, llRes, cdpRes] = await Promise.all([
         supabase
           .from("sellers_kpi")
           .select(
@@ -71,6 +108,13 @@ export function usePockData(sellerId: string | undefined) {
           .eq("seller_id", sellerId)
           .order("data", { ascending: true })
           .range(0, 4999),
+        supabase
+          .from("cdp_mensal")
+          .select(
+            `tim_month_id, f_tgmv_lc, ${MECANISMOS_DESCONTO.map((m) => m.coluna).join(", ")}`,
+          )
+          .eq("seller_id", sellerId)
+          .order("tim_month_id", { ascending: true }),
       ]);
 
       if (kpiRes.error) throw kpiRes.error;
@@ -107,6 +151,37 @@ export function usePockData(sellerId: string | undefined) {
 
       const ultima: any = (kpiRes.data ?? [])[(kpiRes.data ?? []).length - 1] ?? {};
 
+      // ── Mecanismos de desconto (não exclusivos: a soma pode passar de 100%) ──
+      const cdpRows: any[] = (cdpRes?.data as any[]) ?? [];
+      const ultimos12 = cdpRows.slice(-12);
+      const mecanismosBase = ultimos12.reduce((s, r) => s + (Number(r.f_tgmv_lc) || 0), 0);
+      const mesDe = (id: any) => {
+        const t = String(id ?? "");
+        return t.length === 6 ? `${t.slice(0, 4)}-${t.slice(4, 6)}-01` : t;
+      };
+      const mecanismos: PockMecanismo[] = MECANISMOS_DESCONTO.map((m) => ({
+        chave: m.chave,
+        rotulo: m.rotulo,
+        valor: ultimos12.reduce((s, r) => s + (Number(r[m.coluna]) || 0), 0),
+        historico: ultimos12.map((r) => ({
+          mes: mesDe(r.tim_month_id),
+          valor: Number(r[m.coluna]) || 0,
+        })),
+      }));
+
+      // ── Adesão ao FULL ────────────────────────────────────────────────
+      // ITENS_FULL / ITENS_FORA_FULL não existem na camada agregada hoje:
+      // ficam null (a área não é fabricada). A linha usa TGMV_LC_FULL/TGMV_LC.
+      const full: PockFullMes[] = series.map((m) => ({
+        mes: m.mes,
+        itensFull: null,
+        itensForaFull: null,
+        pctGmvFull:
+          m.tgmvFbm !== null && m.tgmv
+            ? Math.min(100, (m.tgmvFbm / m.tgmv) * 100)
+            : null,
+      }));
+
       const snapshot: PockSnapshot = {
         repLevel: ultima.rep_current_level || null,
         repClaimsRate: num(ultima.rep_claims_rate),
@@ -125,6 +200,10 @@ export function usePockData(sellerId: string | undefined) {
       return {
         series,
         snapshot,
+        mecanismos,
+        mecanismosBase,
+        full,
+        coberturaFbm: cobertura(series, "tgmvFbm"),
         cobertura: {
           tgmv: cobertura(series, "tgmv"),
           ll: cobertura(series, "ll"),
