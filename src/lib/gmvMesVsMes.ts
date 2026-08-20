@@ -14,7 +14,7 @@ export interface PontoDiario {
   gmv: number;
 }
 
-export type ModoComparacao = "diario" | "acumulado" | "indice";
+export type ModoComparacao = "diario" | "acumulado" | "indice" | "variacao";
 
 export interface LinhaSerie {
   dia: string;
@@ -22,6 +22,8 @@ export interface LinhaSerie {
   comp: number | null;
   accA: number | null;
   accB: number | null;
+  /** false = dia que ainda não ocorreu / sem registro no mês base. */
+  ocorrido?: boolean;
 }
 
 export type MapaMeses = Map<string, Map<number, number>>;
@@ -82,6 +84,17 @@ export function construirSerie(
     const vivoA = la.primeiro > 0 && dia >= la.primeiro && dia <= la.ultimo;
     const vivoB = lb.primeiro > 0 && dia >= lb.primeiro && dia <= lb.ultimo;
     const dd = String(dia).padStart(2, "0");
+    const ocorrido = la.ultimo > 0 && dia <= la.ultimo;
+    if (modo === "variacao") {
+      return {
+        dia: dd,
+        base: vivoA && vivoB && accB > 0 ? (accA / accB - 1) * 100 : null,
+        comp: null,
+        accA: vivoA ? accA : null,
+        accB: vivoB ? accB : null,
+        ocorrido,
+      };
+    }
     if (modo === "indice") {
       return {
         dia: dd,
@@ -89,6 +102,7 @@ export function construirSerie(
         comp: vivoB && accB > 0 ? 100 : null,
         accA: vivoA ? accA : null,
         accB: vivoB ? accB : null,
+        ocorrido,
       };
     }
     return {
@@ -97,8 +111,60 @@ export function construirSerie(
       comp: modo === "acumulado" ? (vivoB && accB > 0 ? accB : null) : vb,
       accA: vivoA ? accA : null,
       accB: vivoB ? accB : null,
+      ocorrido,
     };
   });
+}
+
+export type CausaJanela = "incompleta" | "sem-registro" | "confirmada";
+
+export interface DiagnosticoJanela {
+  causa: CausaJanela;
+  texto: string;
+}
+
+/**
+ * Explica de forma determinística por que a variação da janela é o que é.
+ * Sempre retorna uma das três leituras — nunca deixa o delta sem contexto.
+ */
+export function diagnosticarJanela(
+  porMes: MapaMeses,
+  mesA: string,
+  mesB: string,
+): DiagnosticoJanela {
+  const a = porMes.get(mesA);
+  const la = limitesMes(a);
+  const lb = limitesMes(porMes.get(mesB));
+  const totalDiasA = diasNoMes(mesA);
+
+  if (la.ultimo < 1) {
+    return { causa: "incompleta", texto: "sem registro no mês base" };
+  }
+
+  // Buracos dentro da própria janela do mês base.
+  const faltando: number[] = [];
+  for (let d = la.primeiro; d <= la.ultimo; d++) {
+    const v = a?.get(d);
+    if (!Number.isFinite(v as number) || (v as number) === 0) faltando.push(d);
+  }
+  if (faltando.length) {
+    return {
+      causa: "sem-registro",
+      texto: `sem registro a partir do dia ${String(faltando[0]).padStart(2, "0")} (${faltando.length} dia(s) sem dado na janela)`,
+    };
+  }
+
+  const fimEsperado = lb.ultimo > 0 ? Math.min(totalDiasA, lb.ultimo) : totalDiasA;
+  if (la.ultimo < fimEsperado) {
+    const dataUlt = `${mesA}-${String(la.ultimo).padStart(2, "0")}`;
+    const [ano, mes, dia] = dataUlt.split("-");
+    return {
+      causa: "incompleta",
+      texto: `janela pode estar incompleta — última atualização em ${dia}/${mes}/${ano}`,
+    };
+  }
+
+  return { causa: "confirmada", texto: "variação confirmada na janela comparável" };
 }
 
 export interface ResumoComparacao {
