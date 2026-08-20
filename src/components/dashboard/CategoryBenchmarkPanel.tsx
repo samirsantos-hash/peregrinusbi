@@ -62,6 +62,16 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
   const sellerVertical = campaign?.verticalPrincipal || null;
   const cb = clusterBenchmark;
 
+  // Percentil do seller dentro da distribuição da carteira (mais informativo que a comparação com um agregado).
+  const pctRoas = stats ? percentilDoValor(sellerMetrics.avgRoas, stats.distRoas) : null;
+  // ACOS/TACOS: menor é melhor, então invertemos o percentil para "quanto maior, melhor".
+  const pctAcosBruto = stats ? percentilDoValor(sellerMetrics.avgAcos, stats.distAcos) : null;
+  const pctTacosBruto = stats ? percentilDoValor(sellerMetrics.avgTacos, stats.distTacos) : null;
+  const pctAcos = pctAcosBruto != null ? 100 - pctAcosBruto : null;
+  const pctTacos = pctTacosBruto != null ? 100 - pctTacosBruto : null;
+
+  const reconciliacao = reconciliarAcos(cartAcos, stats?.totalInv ?? 0, stats?.totalTgmvPads ?? 0);
+
   // Find the seller's own vertical stats
   const myVertical = useMemo(() => {
     if (!sellerVertical) return null;
