@@ -48,6 +48,7 @@ import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
 import { useAuth } from "@/hooks/useAuth";
+import { useMyAccess } from "@/hooks/useMyAccess";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
 import { aggregateKpisByMonth } from "@/utils/aggregateByMonth";
@@ -87,6 +88,9 @@ function formatDateString(date: Date): string {
 
 const Index = () => {
   const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
+  const { allowedSellers } = useMyAccess();
+  // Piloto: consultores com acesso ao cliente MEGAJU também enxergam a rede consolidada.
+  const temRedePiloto = allowedSellers.some((s) => /megaju/i.test(s.nickname));
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { theme, toggle: toggleTheme } = useTheme();
@@ -389,7 +393,7 @@ const Index = () => {
               {theme === "dark" ? <Sun className="w-4 h-4 text-neon-blue" /> : <Moon className="w-4 h-4 text-neon-blue" />}
               <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Noire"}</span>
             </Button>
-            {(isAdmin || isGerente || isGestorLoja) &&
+            {(isAdmin || isGerente || isGestorLoja || temRedePiloto) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
                 <Store className="w-4 h-4" />
                 <span className="hidden sm:inline">Multilojas</span>
