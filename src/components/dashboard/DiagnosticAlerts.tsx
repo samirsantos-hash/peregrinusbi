@@ -458,9 +458,44 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         {/* LINHA 2 — indicadores */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
           {indicadores.map((i) => (
-            <div key={i.rotulo} className="rounded-lg border border-border bg-muted/10 px-3 py-2 flex flex-col justify-between min-h-[86px]">
+            <div
+              key={i.rotulo}
+              onClick={i.onAbrir}
+              role={i.onAbrir ? "button" : undefined}
+              tabIndex={i.onAbrir ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (i.onAbrir && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault();
+                  i.onAbrir();
+                }
+              }}
+              className={cn(
+                "rounded-lg border border-border bg-muted/10 px-3 py-2 flex flex-col justify-between min-h-[86px]",
+                i.onAbrir && "cursor-pointer hover:bg-muted/20 transition-colors",
+              )}
+            >
               <div className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-muted-alt">
                 <span>{i.rotulo}</span>
+                {i.ajuda && (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-muted-foreground hover:text-foreground"
+                        aria-label={`Ajuda sobre ${i.rotulo}`}
+                      >
+                        <HelpCircle className="w-3 h-3" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-[330px] text-xs leading-relaxed"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {i.ajuda}
+                    </PopoverContent>
+                  </Popover>
+                )}
                 {i.derivado && (
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -486,7 +521,11 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
               <div className={cn("flex items-center gap-1 text-[11px] mt-1.5", CORES[i.estado])}>
                 <IconeSemaforo estado={i.estado} />
                 <span>{ROTULO_SEMAFORO[i.estado]}</span>
+                {i.onAbrir && <ChevronRight className="w-3 h-3 ml-auto text-muted-foreground" />}
               </div>
+              {i.contexto && (
+                <p className="text-[10px] text-muted-alt leading-snug mt-1">{i.contexto}</p>
+              )}
             </div>
           ))}
         </div>
