@@ -14,6 +14,8 @@ interface KpiLike {
   tgmv: number;
   adsInvestment: number;
   roas: number;
+  /** faturamento atribuído a Ads — necessário para agregar ROAS como razão dos totais */
+  tgmvPads?: number;
   upliftGmvM1: number;
   scoreFull: number;
   repDelayedRate: number;
