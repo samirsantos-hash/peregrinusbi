@@ -70,3 +70,11 @@ export const SELLER_TABS: SellerTab[] = [
     descricao: "O que exige ação agora",
     juniorTip: "Painel consolidado da carteira: BPC baixo, reputação em risco e churn (jun vs mai). Visão cross-seller." },
 ];
+/** Fonte única dos nomes/descrições de seção (sidebar, título e document.title). */
+export const SECOES: Record<string, { label: string; descricao: string }> = Object.fromEntries(
+  SELLER_TABS.map((t) => [t.id, { label: t.label, descricao: t.descricao }]),
+);
+
+export function getSecao(id: string) {
+  return SECOES[id] ?? { label: "Painel", descricao: "" };
+}
