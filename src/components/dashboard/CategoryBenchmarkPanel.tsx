@@ -14,6 +14,7 @@ import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { type ClusterBenchmarkResult, getPercentileBadge } from "@/hooks/useClusterBenchmark";
 import { Loader2, TrendingUp, Users, Target, BarChart3, Award } from "lucide-react";
 import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
+import { percentilDoValor, reconciliarAcos } from "@/lib/ratioStats";
 
 interface Props {
   portfolioBenchmark: PortfolioBenchmark | null;
@@ -53,8 +54,23 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerBenchmark, sellerMetrics, clusterBenchmark }: Props) => {
   const verticals = portfolioBenchmark?.verticals || [];
   const portfolio = portfolioBenchmark?.portfolio || { totalSellers: 0, avgInv: 0, avgRoas: 0, avgAcos: 0, avgTacos: 0 };
+  const stats = portfolioBenchmark?.stats || null;
+  // Agregados da carteira = razão dos totais (nunca média de razões).
+  const cartRoas = stats?.roasAgregado ?? 0;
+  const cartAcos = stats?.acosAgregado ?? 0;
+  const cartTacos = stats?.tacosAgregado ?? 0;
   const sellerVertical = campaign?.verticalPrincipal || null;
   const cb = clusterBenchmark;
+
+  // Percentil do seller dentro da distribuição da carteira (mais informativo que a comparação com um agregado).
+  const pctRoas = stats ? percentilDoValor(sellerMetrics.avgRoas, stats.distRoas) : null;
+  // ACOS/TACOS: menor é melhor, então invertemos o percentil para "quanto maior, melhor".
+  const pctAcosBruto = stats ? percentilDoValor(sellerMetrics.avgAcos, stats.distAcos) : null;
+  const pctTacosBruto = stats ? percentilDoValor(sellerMetrics.avgTacos, stats.distTacos) : null;
+  const pctAcos = pctAcosBruto != null ? 100 - pctAcosBruto : null;
+  const pctTacos = pctTacosBruto != null ? 100 - pctTacosBruto : null;
+
+  const reconciliacao = reconciliarAcos(cartAcos, stats?.totalInv ?? 0, stats?.totalTgmvPads ?? 0);
 
   // Find the seller's own vertical stats
   const myVertical = useMemo(() => {
@@ -66,38 +82,38 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
   const radarData = useMemo(() => {
     if (!sellerVertical || !sellerBenchmark || !myVertical) return [];
 
-    const maxRoas = Math.max(sellerMetrics.avgRoas, myVertical.avgRoas, portfolio.avgRoas, 1);
-    const maxAcos = Math.max(sellerMetrics.avgAcos, myVertical.avgAcos, portfolio.avgAcos, 1);
-    const maxTacos = Math.max(sellerMetrics.avgTacos, myVertical.avgTacos, portfolio.avgTacos, 1);
-    const maxInv = Math.max(sellerMetrics.totalAds, myVertical.avgInv, portfolio.avgInv, 1);
+    const maxRoas = Math.max(sellerMetrics.avgRoas, myVertical.avgRoas, cartRoas, 1);
+    const maxAcos = Math.max(sellerMetrics.avgAcos, myVertical.avgAcos, cartAcos, 1);
+    const maxTacos = Math.max(sellerMetrics.avgTacos, myVertical.avgTacos, cartTacos, 1);
+    const maxInv = Math.max(sellerMetrics.totalAds, myVertical.avgInv, stats?.invMediana ?? 0, 1);
 
     return [
       {
         metric: "ROAS",
         Seller: (sellerMetrics.avgRoas / maxRoas) * 100,
         [`Vertical (${sellerVertical})`]: (myVertical.avgRoas / maxRoas) * 100,
-        Carteira: (portfolio.avgRoas / maxRoas) * 100,
+        Carteira: (cartRoas / maxRoas) * 100,
       },
       {
         metric: "Eficiência (1/ACOS)",
         Seller: maxAcos > 0 ? ((maxAcos - sellerMetrics.avgAcos) / maxAcos) * 100 : 0,
         [`Vertical (${sellerVertical})`]: maxAcos > 0 ? ((maxAcos - myVertical.avgAcos) / maxAcos) * 100 : 0,
-        Carteira: maxAcos > 0 ? ((maxAcos - portfolio.avgAcos) / maxAcos) * 100 : 0,
+        Carteira: maxAcos > 0 ? ((maxAcos - cartAcos) / maxAcos) * 100 : 0,
       },
       {
         metric: "Saúde (1/TACOS)",
         Seller: maxTacos > 0 ? ((maxTacos - sellerMetrics.avgTacos) / maxTacos) * 100 : 0,
         [`Vertical (${sellerVertical})`]: maxTacos > 0 ? ((maxTacos - myVertical.avgTacos) / maxTacos) * 100 : 0,
-        Carteira: maxTacos > 0 ? ((maxTacos - portfolio.avgTacos) / maxTacos) * 100 : 0,
+        Carteira: maxTacos > 0 ? ((maxTacos - cartTacos) / maxTacos) * 100 : 0,
       },
       {
         metric: "Investimento",
         Seller: (sellerMetrics.totalAds / maxInv) * 100,
         [`Vertical (${sellerVertical})`]: (myVertical.avgInv / maxInv) * 100,
-        Carteira: (portfolio.avgInv / maxInv) * 100,
+        Carteira: ((stats?.invMediana ?? 0) / maxInv) * 100,
       },
     ];
-  }, [sellerVertical, sellerBenchmark, sellerMetrics, myVertical, portfolio]);
+  }, [sellerVertical, sellerBenchmark, sellerMetrics, myVertical, stats, cartRoas, cartAcos, cartTacos]);
 
   const verticalKey = sellerVertical ? `Vertical (${sellerVertical})` : "Vertical";
 
@@ -116,25 +132,25 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
         kpi: "ROAS",
         Seller: sellerMetrics.avgRoas,
         [verticalKey]: myVertical.avgRoas,
-        Carteira: portfolio.avgRoas,
+        Carteira: cartRoas,
         format: "x",
       },
       {
         kpi: "ACOS",
         Seller: sellerMetrics.avgAcos,
         [verticalKey]: myVertical.avgAcos,
-        Carteira: portfolio.avgAcos,
+        Carteira: cartAcos,
         format: "%",
       },
       {
         kpi: "TACOS",
         Seller: sellerMetrics.avgTacos,
         [verticalKey]: myVertical.avgTacos,
-        Carteira: portfolio.avgTacos,
+        Carteira: cartTacos,
         format: "%",
       },
     ];
-  }, [myVertical, sellerMetrics, portfolio, verticalKey]);
+  }, [myVertical, sellerMetrics, cartRoas, cartAcos, cartTacos, verticalKey]);
 
   if (loading) {
     return (
@@ -279,9 +295,9 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
       {!myVertical && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "ROAS Mediano Carteira", value: `${fmtNum(portfolio.avgRoas, 2)}x`, icon: TrendingUp, color: "text-neon-blue" },
-            { label: "ACOS Médio Carteira", value: `${fmtNum(portfolio.avgAcos, 2)}%`, icon: Target, color: portfolio.avgAcos <= 15 ? "text-emerald" : "text-destructive" },
-            { label: "TACOS Médio Carteira", value: `${fmtNum(portfolio.avgTacos, 2)}%`, icon: Target, color: portfolio.avgTacos <= 10 ? "text-emerald" : "text-destructive" },
+            { label: "ROAS Carteira (agregado)", value: `${fmtNum(cartRoas, 2)}x`, icon: TrendingUp, color: "text-neon-blue" },
+            { label: "ACOS Carteira (agregado)", value: `${fmtNum(cartAcos, 2)}%`, icon: Target, color: cartAcos <= 15 ? "text-emerald" : "text-destructive" },
+            { label: "TACOS Carteira (agregado)", value: `${fmtNum(cartTacos, 2)}%`, icon: Target, color: cartTacos <= 10 ? "text-emerald" : "text-destructive" },
             { label: "Sellers na Carteira", value: String(portfolio.totalSellers), icon: Users, color: "text-muted-foreground" },
           ].map((m, i) => (
             <motion.div
@@ -341,9 +357,9 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             <ResponsiveContainer width="100%" height={280}>
               <BarChart
                 data={[
-                  { kpi: "ROAS", Seller: sellerMetrics.avgRoas, [verticalKey]: myVertical.avgRoas, Carteira: portfolio.avgRoas },
-                  { kpi: "ACOS (%)", Seller: sellerMetrics.avgAcos, [verticalKey]: myVertical.avgAcos, Carteira: portfolio.avgAcos },
-                  { kpi: "TACOS (%)", Seller: sellerMetrics.avgTacos, [verticalKey]: myVertical.avgTacos, Carteira: portfolio.avgTacos },
+                  { kpi: "ROAS", Seller: sellerMetrics.avgRoas, [verticalKey]: myVertical.avgRoas, Carteira: cartRoas },
+                  { kpi: "ACOS (%)", Seller: sellerMetrics.avgAcos, [verticalKey]: myVertical.avgAcos, Carteira: cartAcos },
+                  { kpi: "TACOS (%)", Seller: sellerMetrics.avgTacos, [verticalKey]: myVertical.avgTacos, Carteira: cartTacos },
                 ]}
                 barCategoryGap="25%"
               >
@@ -358,6 +374,156 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
               </BarChart>
             </ResponsiveContainer>
           </div>
+        )}
+      </div>
+
+      {/* Detalhamento — três referências: seller, carteira agregada, seller típico */}
+      <div className="glass-card p-5">
+        <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground mb-1">
+          Detalhamento — {sellerVertical || "Todas as Verticais"}
+        </h3>
+        <p className="text-[11px] text-muted-foreground mb-4">
+          Agregados calculados como razão dos totais. Mediana descreve o seller do meio.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-border/30">
+                <th className="text-left py-2 px-3 text-muted-foreground font-medium">Referência</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Sellers</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Investimento (mediana)</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Total investido</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">ROAS</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">ACOS</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">TACOS</th>
+                <th className="text-right py-2 px-3 text-muted-foreground font-medium">Faturamento Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {/* 1 — Este seller */}
+              <tr className="border-b border-border/10 bg-neon-blue/10">
+                <td className="py-2.5 px-3 font-medium">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[hsl(199,100%,50%)]" />
+                    <span className="text-neon-blue font-semibold">Este Seller</span>
+                  </div>
+                </td>
+                <td className="py-2.5 px-3 text-right text-muted-foreground">1</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(sellerMetrics.totalAds)}</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(sellerMetrics.totalAds)}</td>
+                <td className={`py-2.5 px-3 text-right font-mono font-semibold ${sellerMetrics.avgRoas >= 2 ? "text-emerald" : "text-destructive"}`}>
+                  {fmtNum(sellerMetrics.avgRoas, 2)}x
+                  {pctRoas != null && <span className="block text-[9px] text-muted-foreground font-normal">percentil {pctRoas} da carteira</span>}
+                </td>
+                <td className={`py-2.5 px-3 text-right font-mono ${sellerMetrics.avgAcos <= 15 ? "text-emerald" : "text-destructive"}`}>
+                  {fmtNum(sellerMetrics.avgAcos, 2)}%
+                  {pctAcos != null && <span className="block text-[9px] text-muted-foreground font-normal">percentil {pctAcos} da carteira</span>}
+                </td>
+                <td className={`py-2.5 px-3 text-right font-mono ${sellerMetrics.avgTacos <= 10 ? "text-emerald" : "text-destructive"}`}>
+                  {fmtNum(sellerMetrics.avgTacos, 2)}%
+                  {pctTacos != null && <span className="block text-[9px] text-muted-foreground font-normal">percentil {pctTacos} da carteira</span>}
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(sellerMetrics.totalGmv)}</td>
+              </tr>
+
+              {/* vertical do seller — mediana dos pares */}
+              {myVertical && (
+                <tr className="border-b border-border/10">
+                  <td className="py-2.5 px-3 font-medium">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[hsl(160,84%,39%)]" />
+                      <span className="text-foreground">{myVertical.vertical}</span>
+                      <Badge variant="outline" className="text-[9px]">Mediana</Badge>
+                    </div>
+                  </td>
+                  <td className="py-2.5 px-3 text-right text-muted-foreground">{myVertical.sellersCount}</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(myVertical.stats.invMediana ?? 0)}</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(myVertical.stats.totalInv)}</td>
+                  <td className="py-2.5 px-3 text-right font-mono font-semibold">{fmtNum(myVertical.stats.roasMediana ?? 0, 2)}x</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtNum(myVertical.stats.acosMediana ?? 0, 2)}%</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtNum(myVertical.stats.tacosMediana ?? 0, 2)}%</td>
+                  <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(myVertical.totalTgmv)}</td>
+                </tr>
+              )}
+
+              {/* 2 — Carteira agregada (razão dos totais) + dispersão p10–p90 */}
+              <tr className="border-t-2 border-border/30 bg-card/30">
+                <td className="py-2.5 px-3 font-semibold text-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[hsl(40,95%,55%)]" />
+                    Carteira agregada
+                    <TooltipInfo text="Eficiência do conjunto: razão dos totais (Σ TGMV_LC_PADS / Σ INV_PADS). Não é média de razões." />
+                  </div>
+                </td>
+                <td className="py-2.5 px-3 text-right font-semibold">{stats?.nComInvestimento ?? 0}</td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">{fmtBRLCompact(stats?.invMediana ?? 0)}</td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">{fmtBRLCompact(stats?.totalInv ?? 0)}</td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold text-neon-blue">
+                  {fmtNum(cartRoas, 2)}x
+                  <span className="block text-[9px] text-muted-foreground font-normal">
+                    p10 {fmtNum(stats?.roasP10 ?? 0, 2)} — p90 {fmtNum(stats?.roasP90 ?? 0, 2)}
+                  </span>
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">
+                  {fmtNum(cartAcos, 2)}%
+                  <span className="block text-[9px] text-muted-foreground font-normal">
+                    p10 {fmtNum(stats?.acosP10 ?? 0, 2)} — p90 {fmtNum(stats?.acosP90 ?? 0, 2)}
+                  </span>
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">
+                  {fmtNum(cartTacos, 2)}%
+                  <span className="block text-[9px] text-muted-foreground font-normal">
+                    p10 {fmtNum(stats?.tacosP10 ?? 0, 2)} — p90 {fmtNum(stats?.tacosP90 ?? 0, 2)}
+                  </span>
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono font-semibold">{fmtBRLCompact(stats?.totalTgmv ?? 0)}</td>
+              </tr>
+
+              {/* 3 — Seller típico (mediana das razões) */}
+              <tr className="border-t border-border/20">
+                <td className="py-2.5 px-3 font-medium text-foreground">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0 bg-muted-foreground/60" />
+                    Seller típico
+                    <Badge variant="outline" className="text-[9px]">Mediana</Badge>
+                  </div>
+                </td>
+                <td className="py-2.5 px-3 text-right text-muted-foreground">{stats?.nComInvestimento ?? 0}</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtBRLCompact(stats?.invMediana ?? 0)}</td>
+                <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">
+                  média {fmtBRLCompact(stats?.invMedia ?? 0)}
+                </td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtNum(stats?.roasMediana ?? 0, 2)}x</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtNum(stats?.acosMediana ?? 0, 2)}%</td>
+                <td className="py-2.5 px-3 text-right font-mono">{fmtNum(stats?.tacosMediana ?? 0, 2)}%</td>
+                <td className="py-2.5 px-3 text-right font-mono text-muted-foreground">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Base e regra de exclusão */}
+        {stats && (
+          <p className="mt-3 text-[11px] text-muted-foreground leading-relaxed">
+            Base: {stats.nComInvestimento} sellers com investimento &gt; 0 no período.{" "}
+            {stats.nSemInvestimento} sellers ({fmtNum(stats.pctSemInvestimento, 0)}%) sem investimento foram
+            excluídos do cálculo de ROAS, ACOS e TACOS — razão indefinida sem investimento. Eles permanecem no
+            total de faturamento.
+          </p>
+        )}
+
+        {/* Rodapé de método + reconciliação */}
+        {stats && (
+          <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed border-t border-border/20 pt-2">
+            Agregados calculados como razão dos totais, não como média de razões. Investimento apresentado em
+            mediana devido à concentração (top 10% dos sellers = {fmtNum(stats.shareTop10Pct ?? 0, 0)}% do
+            investimento).{" "}
+            {reconciliacao.conferido
+              ? "Reconciliação: o ACOS agregado confere com Σ INV_PADS / Σ TGMV_LC_PADS calculado à parte."
+              : reconciliacao.recalculado != null
+                ? `Reconciliação: divergência de ${fmtNum(reconciliacao.divergencia ?? 0, 4)} p.p. entre o ACOS exibido e Σ INV_PADS / Σ TGMV_LC_PADS.`
+                : "Reconciliação indisponível: sem faturamento atribuído a Ads no período."}
+          </p>
         )}
       </div>
 

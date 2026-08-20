@@ -14,6 +14,8 @@ interface KpiLike {
   tgmv: number;
   adsInvestment: number;
   roas: number;
+  /** faturamento atribuído a Ads — necessário para agregar ROAS como razão dos totais */
+  tgmvPads?: number;
   upliftGmvM1: number;
   scoreFull: number;
   repDelayedRate: number;
@@ -43,7 +45,9 @@ const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: Exe
   const totalTgmv = kpis.reduce((s, k) => s + k.tgmv, 0);
   const totalTsi = kpis.reduce((s, k) => s + k.tsi, 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
-  const avgRoas = kpis.length > 0 ? kpis.reduce((s, k) => s + k.roas, 0) / kpis.length : 0;
+  // ROAS é razão: agrega como razão dos totais (Σ TGMV_LC_PADS / Σ INV_PADS), nunca média de razões.
+  const totalTgmvPads = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
+  const avgRoas = totalAds > 0 ? totalTgmvPads / totalAds : 0;
 
   const validUplifts = kpis.filter((k) => k.upliftGmvM1 !== 0);
   const avgUplift = validUplifts.length > 0

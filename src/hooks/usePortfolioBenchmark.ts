@@ -1,5 +1,10 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  calcularEstatisticaRazoes,
+  type EstatisticaRazoes,
+  type UnidadeRazao,
+} from "@/lib/ratioStats";
 
 export interface VerticalStats {
   vertical: string;
@@ -11,6 +16,8 @@ export interface VerticalStats {
   avgRoas: number;
   avgAcos: number;
   avgTacos: number;
+  /** estatística completa: agregado (razão dos totais), mediana e dispersão */
+  stats: EstatisticaRazoes;
 }
 
 export interface PortfolioBenchmark {
@@ -22,6 +29,8 @@ export interface PortfolioBenchmark {
     avgAcos: number;
     avgTacos: number;
   };
+  /** carteira inteira — agregados como razão dos totais + dispersão */
+  stats: EstatisticaRazoes;
 }
 
 function median(values: number[]): number {
@@ -120,6 +129,7 @@ export function usePortfolioBenchmark() {
               avgRoas: median(roasValues),
               avgAcos: median(acosValues),
               avgTacos: median(tacosValues),
+              stats: calcularEstatisticaRazoes(sellers as UnidadeRazao[]),
             };
           })
           .sort((a, b) => b.totalTgmv - a.totalTgmv);
@@ -140,6 +150,7 @@ export function usePortfolioBenchmark() {
             avgAcos: median(pAcosValues),
             avgTacos: median(pTacosValues),
           },
+          stats: calcularEstatisticaRazoes(allSellers as UnidadeRazao[]),
         });
       } catch (err) {
         console.error("Portfolio benchmark error:", err);
