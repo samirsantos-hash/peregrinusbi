@@ -14,7 +14,6 @@ import {
 import { ChevronDown, ChevronRight, Package2, TrendingUp } from "lucide-react";
 import {
   getFullRecommendations,
-  FULL_ESTOQUE_MINIMO_DIAS,
   type FullCandidate,
 } from "@/lib/queries/fullRecommendations";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
