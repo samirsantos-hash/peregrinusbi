@@ -148,29 +148,55 @@ export async function publicarCargaVendas(opts: {
 }
 
 const PAGINA = 1000;
+const PARALELO = 6;
 
 /** Lê os pedidos publicados (já recortados pelo RLS) e devolve no formato do painel. */
 export async function carregarPedidos(
   onProgress?: (n: number) => void,
 ): Promise<{ pedidos: PedidoML[]; lojas: Map<string, string> }> {
-  const { data: ls } = await supabase.from("multilojas_loja").select("id, nome_publico, chave_tecnica");
+  /* Metadados em paralelo — não há dependência entre lojas e cargas. */
+  const [{ data: ls }, { data: cargas }] = await Promise.all([
+    supabase.from("multilojas_loja").select("id, nome_publico, chave_tecnica"),
+    supabase.from("multilojas_carga_publica").select("id").eq("ativa", true),
+  ]);
   const nomes = new Map<string, string>((ls || []).map((l) => [l.id, l.nome_publico]));
+  const ativas = (cargas || []).map((c) => c.id as string);
 
-  const { data: cargas } = await supabase.from("multilojas_carga_publica").select("id").eq("ativa", true);
-  const ativas = new Set((cargas || []).map((c) => c.id as string));
+  /* Filtra as cargas ativas no servidor e conta antes de paginar, para poder
+   * disparar as páginas em paralelo em vez de uma cascata sequencial. */
+  const consulta = () => {
+    const q = supabase.from("multilojas_pedido").select("*");
+    return ativas.length ? q.in("carga_id", ativas) : q;
+  };
+
+  const { count } = await (ativas.length
+    ? supabase.from("multilojas_pedido").select("carga_id", { count: "exact", head: true }).in("carga_id", ativas)
+    : supabase.from("multilojas_pedido").select("carga_id", { count: "exact", head: true }));
+
+  const total = count || 0;
+  const paginas = Math.max(1, Math.ceil(total / PAGINA));
+  const brutos: Record<string, unknown>[] = [];
+
+  for (let i = 0; i < paginas; i += PARALELO) {
+    const lote = Array.from({ length: Math.min(PARALELO, paginas - i) }, (_, k) => i + k);
+    const resultados = await Promise.all(
+      lote.map((pag) =>
+        consulta()
+          .order("dt", { ascending: true })
+          .range(pag * PAGINA, pag * PAGINA + PAGINA - 1),
+      ),
+    );
+    for (const { data, error } of resultados) {
+      if (error) throw error;
+      brutos.push(...((data || []) as Record<string, unknown>[]));
+    }
+    onProgress?.(brutos.length);
+  }
 
   const pedidos: PedidoML[] = [];
-  for (let pag = 0; ; pag++) {
-    const { data, error } = await supabase
-      .from("multilojas_pedido")
-      .select("*")
-      .order("dt", { ascending: true })
-      .range(pag * PAGINA, pag * PAGINA + PAGINA - 1);
-    if (error) throw error;
-    const linhas = data || [];
-    for (const r of linhas) {
-      if (ativas.size && !ativas.has(r.carga_id as string)) continue;
-      const dt = new Date(r.dt as string);
+  for (const row of brutos) {
+    const r = row as never as Record<string, never>;
+    const dt = new Date(r.dt as string);
       const dia = diaLocal(dt);
       pedidos.push({
         id: String(r.pedido_id), dt, dia, mes: dia.slice(0, 7), dow: dt.getDay(), hora: dt.getHours(),
@@ -186,10 +212,8 @@ export async function carregarPedidos(
         recl: !!r.reclamacao, status: r.status || "", canc: !!r.cancelado,
         devol: !!r.devolvido, medi: !!r.mediacao, entregue: /entregue/i.test(String(r.status || "")),
       });
-    }
-    onProgress?.(pedidos.length);
-    if (linhas.length < PAGINA) break;
   }
+  onProgress?.(pedidos.length);
 
   return { pedidos, lojas: nomes };
 }
