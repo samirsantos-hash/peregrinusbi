@@ -481,7 +481,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Faturamento Bruto vs Investimento em Marketing
             </h3>
-            <TooltipInfo text="Comparativo entre o GMV gerado e o valor investido em Ads ao longo do tempo." />
+            <TooltipInfo text="Comparativo entre o GMV gerado (eixo esquerdo) e o valor investido em Ads (eixo direito). As escalas são independentes porque o investimento é de ordem de grandeza muito menor que o faturamento — compare o formato das curvas, não a altura." />
           </div>
         </div>
         <ResponsiveContainer width="100%" height={280}>
@@ -506,13 +506,28 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
               textAnchor={allDates.length > 6 ? "end" : "middle"}
               height={allDates.length > 6 ? 50 : 30}
             />
-            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+            <YAxis
+              yAxisId="gmv"
+              tick={{ fill: "hsl(199, 100%, 60%)", fontSize: 11 }}
+              axisLine={false}
+              tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+            />
+            <YAxis
+              yAxisId="ads"
+              orientation="right"
+              tick={{ fill: "hsl(160, 70%, 50%)", fontSize: 11 }}
+              axisLine={false}
+              tickFormatter={(v) => `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}K`}
+            />
             <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Area type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Escalas independentes: faturamento no eixo esquerdo (azul), investimento em Ads no eixo direito (verde).
+        </p>
       </div>
 
       {/* Line Chart — ROAS / ACOS / TACOS */}
