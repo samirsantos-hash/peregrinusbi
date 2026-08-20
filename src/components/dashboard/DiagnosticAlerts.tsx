@@ -548,6 +548,16 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         </div>
 
         <Sheet open={drawer} onOpenChange={setDrawer}>
+        <QualityIndexDrawer
+          aberto={qualidadeDrawer}
+          onOpenChange={setQualidadeDrawer}
+          loja={nome}
+          score={qualidadeInfo.score}
+          origem={qualidadeInfo.origem}
+          divergencia={qualidadeInfo.divergencia}
+          itens={qualidadeInfo.itens}
+        />
+
           <SheetContent className="w-full sm:max-w-md overflow-y-auto">
             <SheetHeader>
               <SheetTitle>Alertas — {nome}</SheetTitle>
