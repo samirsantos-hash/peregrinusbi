@@ -257,6 +257,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
           ? "SCORE_FINAL_BBF do último mês fechado — a base diária não traz esses scores."
           : "SCORE_FINAL_BBF do período exibido.",
         contexto: contextoQualidade,
+        onAbrir: qualidade != null ? () => setQualidadeDrawer(true) : undefined,
         ajuda: `${TEXTO_AJUDA_QUALITY} Referência: mediana da carteira ${
           medianaCarteira != null ? medianaCarteira.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) : "33"
         } · melhor da carteira ${
