@@ -61,7 +61,7 @@ export function usePockData(sellerId: string | undefined) {
         supabase
           .from("sellers_kpi")
           .select(
-            "data, tgmv_lc, visits, tsi, tgmv_lc_flex, tgmv_lc_full, inv_pads, tgmv_lc_pads, cdp_tgmv_lc, tgmv_lc_clips, sellers_clips_publi, rep_current_level, rep_claims_rate, rep_delayed_ht_rate, rep_cancellations_rate, score_final_full, score_final_pads, score_qualidade_final",
+            "data, tgmv_lc, visits, tsi, tgmv_lc_flex, tgmv_lc_full, inv_pads, tgmv_lc_pads, cdp_tgmv_lc, tgmv_lc_clips, visitas_clips, orders_clips, rep_current_level, rep_claims_rate, rep_delayed_ht_rate, rep_cancellations_rate, score_final_full, score_final_pads, score_qualidade_final",
           )
           .eq("seller_id", sellerId)
           .order("data", { ascending: true }),
@@ -84,7 +84,10 @@ export function usePockData(sellerId: string | undefined) {
 
       const series: PockMes[] = (kpiRes.data ?? []).map((r: any) => {
         const mes = `${String(r.data).slice(0, 7)}-01`;
-        const clipsFlag = r.sellers_clips_publi;
+        // SELLERS_CLIPS_PUBLI vem zerada na base: presença de Clips é inferida
+        // pelos sinais reais (GMV, visitas e pedidos via Clips).
+        const sinais = [r.tgmv_lc_clips, r.visitas_clips, r.orders_clips];
+        const temSinal = sinais.some((v) => v !== null && v !== undefined);
         return {
           mes,
           tgmv: num(r.tgmv_lc),
@@ -97,8 +100,7 @@ export function usePockData(sellerId: string | undefined) {
           tgmvPads: num(r.tgmv_lc_pads),
           cdpTgmv: num(r.cdp_tgmv_lc),
           tgmvClips: num(r.tgmv_lc_clips),
-          temClips:
-            clipsFlag === null || clipsFlag === undefined ? null : Number(clipsFlag) > 0,
+          temClips: temSinal ? sinais.some((v) => (Number(v) || 0) > 0) : null,
           ll: llPorMes.has(mes) ? llPorMes.get(mes)! : null,
         };
       });
