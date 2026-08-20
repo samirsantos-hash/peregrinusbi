@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ComposedChart, Area, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, ReferenceLine, Cell, BarChart,
@@ -17,6 +17,9 @@ const GRID = "hsl(var(--border))";
 const AXIS = "hsl(var(--muted-foreground))";
 
 const LIMITE_CARO = 30;
+/* Margem direita reservada só para rótulos — mantém a área de plotagem limpa. */
+const ESPACO_MARGEM = 10;
+const ALTURA_ROTULO = 13;
 
 const RESSALVA_UNIDADE =
   "As colunas VISITS_MATCH / VISITS_EXPENSIVE / VISITS_CHEAPER não são contagem de visitas: contêm valores decimais e somam muito acima de VISITAS. Por isso não existe denominador válido para calcular cobertura BPC, e o volume mostrado serve apenas para comparar meses entre si — nunca como número absoluto em relatório ou reunião.";
@@ -31,6 +34,32 @@ const AJUDA =
   "O algoritmo cruza cliques e conversão. Anúncio que recebe visita e não converte por preço perde posição de forma progressiva e automática. Acima de 30% em preço alto, o efeito costuma ficar visível na exposição orgânica.\n\n" +
   "COMO LER E O QUE FAZER\n" +
   "Leia primeiro a faixa de volume abaixo do gráfico: mês com barra clara ou hachurada tem base pequena e não sustenta conclusão. Depois olhe a tendência da faixa laranja contra a linha de 30%. Se subir, priorize os itens da tabela abaixo, ordenados por visitas — é onde o preço custa mais tráfego. Onde a margem não permite baixar preço, avalie CDP com coparticipação.";
+
+/** Faixas que somam EXATAMENTE 100 (invariante do gráfico empilhado).
+ *  Arredonda duas faixas, fecha a terceira com o resto e reabsorve
+ *  qualquer sobra causada por clamp em 0..100. */
+export function calcularFaixas(cheap: number, match: number, exp: number) {
+  const bpc = cheap + match + exp;
+  if (!(bpc > 0)) return { cheaper: null, match: null, expensive: null };
+  const r = (v: number) => Math.round((v / bpc) * 1000) / 10;
+  let c = Math.max(0, Math.min(100, r(cheap)));
+  let m = Math.max(0, Math.min(100 - c, r(match)));
+  let e = Math.round((100 - c - m) * 10) / 10;
+  if (e < 0) { m = Math.max(0, Math.round((m + e) * 10) / 10); e = 0; }
+  const sobra = Math.round((100 - c - m - e) * 10) / 10;
+  if (sobra !== 0) c = Math.round((c + sobra) * 10) / 10;
+  return { cheaper: c, match: m, expensive: e };
+}
+
+/** Invariante 1: soma das três faixas = 100 em todo período com dado. */
+export function validarSoma100(
+  pontos: { key: string; cheaper: number | null; match: number | null; expensive: number | null }[],
+) {
+  return pontos
+    .filter((p) => p.cheaper != null)
+    .filter((p) => Math.abs((p.cheaper! + p.match! + p.expensive!) - 100) > 0.05)
+    .map((p) => p.key);
+}
 
 const pct = (v: number, d = 1) =>
   `${v.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d })}%`;
@@ -93,11 +122,7 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
     const ps: Ponto[] = chaves.map((c) => {
       const v = map.get(c)!;
       const bpc = v.exp + v.match + v.cheap;
-      /* Soma exata de 100%: duas faixas arredondadas, a terceira fecha o resto. */
-      const cheaper = bpc > 0 ? Math.round((v.cheap / bpc) * 1000) / 10 : null;
-      const match = bpc > 0 ? Math.round((v.match / bpc) * 1000) / 10 : null;
-      const expensive =
-        bpc > 0 ? Math.round((100 - (cheaper as number) - (match as number)) * 10) / 10 : null;
+      const faixas = calcularFaixas(v.cheap, v.match, v.exp);
       const parcial = c.slice(0, 7) === mesCorrente;
       const amostraPequena = bpc > 0 && mediana > 0 && bpc < mediana * 0.05;
       return {
@@ -105,9 +130,9 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
         label: formatChartDate(c, granularity),
         bpc,
         visits: v.visits,
-        cheaper,
-        match,
-        expensive: expensive != null ? Math.max(0, Math.min(100, expensive)) : null,
+        cheaper: faixas.cheaper,
+        match: faixas.match,
+        expensive: faixas.expensive,
         amostraPequena,
         parcial,
         hachura: amostraPequena || parcial ? 100 : 0,
@@ -122,6 +147,20 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
   }, [kpis, granularity]);
 
   const ultimo = [...pontos].reverse().find((p) => p.bpc > 0) || null;
+
+  /* Validação automática das invariantes visuais/numéricas do gráfico. */
+  const quebras = useMemo(() => validarSoma100(pontos), [pontos]);
+  const rotulosSuprimidos = useRef<number>(0);
+  rotulosSuprimidos.current = 0;
+  const rotulosY = useRef<number[]>([]);
+  rotulosY.current = [];
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    if (quebras.length) {
+      console.warn("[PriceCompetitivenessChart] faixas não somam 100% em:", quebras.join(", "));
+    }
+  }, [quebras]);
 
   /* Camada acionável: ordenada por visitas (perde-se mais onde há tráfego),
    * nunca pela maior diferença de preço. */
@@ -183,9 +222,29 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
   const rotuloFinal = (cor: string) => (props: any) => {
     const { x, y, index, value } = props;
     if (index !== pontos.length - 1 || value == null) return null;
+    /* Último período parcial: rótulo suprimido (invadiria a faixa hachurada). */
     if (pontos[pontos.length - 1]?.parcial) return null;
+    const px = Number(x);
+    const py = Number(y);
+    if (!Number.isFinite(px) || !Number.isFinite(py)) return null;
+    /* Guarda 1: só desenha na margem direita reservada, nunca sobre a plotagem. */
+    const xRotulo = px + ESPACO_MARGEM;
+    if (xRotulo <= px) { rotulosSuprimidos.current++; return null; }
+    /* Guarda 2: nunca colide com outro rótulo já desenhado. */
+    if (rotulosY.current.some((v) => Math.abs(v - py) < ALTURA_ROTULO)) {
+      rotulosSuprimidos.current++;
+      return null;
+    }
+    rotulosY.current.push(py);
     return (
-      <text x={x + 14} y={y + 4} fill={cor} fontSize={11} className="tabular-nums">
+      <text
+        x={xRotulo}
+        y={Math.max(ALTURA_ROTULO, py + 4)}
+        fill={cor}
+        fontSize={11}
+        textAnchor="start"
+        className="tabular-nums"
+      >
         {pct(Number(value), 0)}
       </text>
     );
