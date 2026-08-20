@@ -11,7 +11,7 @@ import {
   Legend,
   LabelList,
 } from "recharts";
-import { Info } from "lucide-react";
+import { Info, AlertTriangle } from "lucide-react";
 import {
   Tooltip as UiTooltip,
   TooltipContent,
@@ -31,10 +31,14 @@ interface Props {
   formato?: Formato;
   /** 0–100 */
   cobertura?: number;
-  /** rótulo "derivado" com a fórmula */
-  derivadoFormula?: string;
-  /** explicação do gráfico (como ler / o que mostra) */
-  explicacao?: string;
+  /** unidade exibida no tooltip padrão (ex.: "R$ (reais)", "% do faturamento") */
+  unidade?: string;
+  /** origem didática do número quando ele é calculado a partir de outros dados */
+  derivado?: string;
+  /** o que o gráfico mostra, em linguagem simples */
+  oQueMostra?: string;
+  /** como interpretar o resultado */
+  comoLer?: string;
   extra?: string;
 }
 
@@ -58,8 +62,10 @@ export default function PockEvolucaoCard({
   pontos,
   formato = "numero",
   cobertura,
-  derivadoFormula,
-  explicacao,
+  unidade,
+  derivado,
+  oQueMostra,
+  comoLer,
   extra,
 }: Props) {
   const hoje = new Date();
@@ -90,16 +96,21 @@ export default function PockEvolucaoCard({
     });
   }, [pontos, mesAtual]);
 
-  const semDado = dados.every((d) => d.valor === null);
+  const mesesComDado = dados.filter((d) => d.valor !== null).length;
+  const semDado = mesesComDado === 0;
+  const baseInsuficiente = !semDado && (mesesComDado < 3 || (cobertura !== undefined && cobertura < 50));
   // rótulos só quando há espaço: séries curtas evitam sobreposição de números
   const mostrarRotulos = dados.length <= 8;
+
+  const unidadeTexto =
+    unidade ?? (formato === "moeda" ? "R$ (reais)" : formato === "percent" ? "% (percentual)" : "quantidade");
 
   return (
     <div className="rounded-lg border border-border p-3 space-y-2 bg-card/40">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 min-w-0">
           <h4 className="text-[13px] font-semibold truncate">{titulo}</h4>
-          {explicacao && (
+          {(oQueMostra || comoLer) && (
             <UiTooltip delayDuration={200}>
               <TooltipTrigger asChild>
                 <button
@@ -110,20 +121,51 @@ export default function PockEvolucaoCard({
                   <Info className="w-3.5 h-3.5" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[300px] leading-relaxed whitespace-pre-line">
-                {explicacao}
+              <TooltipContent className="text-xs max-w-[320px] leading-relaxed space-y-1.5">
+                {oQueMostra && (
+                  <p>
+                    <span className="font-semibold">O que mostra: </span>
+                    {oQueMostra}
+                  </p>
+                )}
+                <p>
+                  <span className="font-semibold">Unidade: </span>
+                  {unidadeTexto}
+                </p>
+                {derivado && (
+                  <p>
+                    <span className="font-semibold">Como é obtido: </span>
+                    {derivado}
+                  </p>
+                )}
+                {comoLer && (
+                  <p>
+                    <span className="font-semibold">Como ler: </span>
+                    {comoLer}
+                  </p>
+                )}
+                <p>
+                  <span className="font-semibold">Base insuficiente: </span>
+                  meses sem informação ficam vazios e a linha é interrompida; com menos de 3 meses
+                  medidos as comparações de variação podem não aparecer.
+                </p>
               </TooltipContent>
             </UiTooltip>
           )}
-          {derivadoFormula && (
+          {derivado && (
             <UiTooltip delayDuration={200}>
               <TooltipTrigger asChild>
                 <span className="inline-flex items-center gap-1 text-[10px] rounded-full border border-border px-1.5 py-0.5 text-muted-foreground">
                   <Info className="w-2.5 h-2.5" /> derivado
                 </span>
               </TooltipTrigger>
-              <TooltipContent className="text-xs max-w-[260px]">{derivadoFormula}</TooltipContent>
+              <TooltipContent className="text-xs max-w-[260px]">{derivado}</TooltipContent>
             </UiTooltip>
+          )}
+          {baseInsuficiente && (
+            <span className="inline-flex items-center gap-1 text-[10px] rounded-full border border-warn/40 bg-warn/10 px-1.5 py-0.5 text-warn">
+              <AlertTriangle className="w-2.5 h-2.5" /> base insuficiente
+            </span>
           )}
         </div>
         {extra && <span className="text-[11px] text-muted-foreground tnum">{extra}</span>}
@@ -131,7 +173,14 @@ export default function PockEvolucaoCard({
 
       <div className="h-[260px] lg:h-[300px] xl:h-[330px]">
         {semDado ? (
-          <div className="h-full flex items-center justify-center text-xs text-muted-foreground">—</div>
+          <div className="h-full flex flex-col items-center justify-center gap-1 text-center px-4">
+            <AlertTriangle className="w-4 h-4 text-muted-foreground" />
+            <p className="text-xs font-medium">Sem dados suficientes para montar este gráfico</p>
+            <p className="text-[10px] text-muted-foreground max-w-[260px]">
+              Nenhum mês da loja tem informação de {titulo.toLowerCase()} ({unidadeTexto}). Assim que
+              a base for atualizada com esses meses, o gráfico aparece automaticamente.
+            </p>
+          </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={dados} margin={{ top: 24, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="22%">
@@ -200,9 +249,13 @@ export default function PockEvolucaoCard({
       </div>
 
       <p className="text-[10px] text-muted-foreground tnum">
+        {`Unidade: ${unidadeTexto} · `}
         {cobertura !== undefined
-          ? `Cobertura do dado: ${cobertura.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% dos meses · série interrompida onde não há dado`
-          : "Série interrompida onde não há dado"}
+          ? `cobertura do dado: ${cobertura.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% dos meses · `
+          : ""}
+        {baseInsuficiente
+          ? "base insuficiente: poucos meses medidos, leia as variações com cautela"
+          : "série interrompida onde não há dado"}
       </p>
     </div>
   );
