@@ -40,9 +40,6 @@ const fBRL = (v: number) =>
 const fDelta = (v: number) =>
   Number.isFinite(v) ? `${v >= 0 ? "+" : ""}${(v * 100).toFixed(1)}%` : "—";
 
-const fIndice = (v: number) =>
-  Number.isFinite(v) ? v.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : "—";
-
 const fPct = (v: number) =>
   Number.isFinite(v) ? `${v >= 0 ? "+" : ""}${v.toFixed(1)}%` : "—";
 
@@ -107,7 +104,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <h3 className="text-xs lg:text-[13px] font-semibold flex items-center gap-1">
           {titulo}
-          <TooltipInfo text="Barras = mês base, linha = mês de comparação, alinhados pelo dia do mês. No modo Índice 100, o mês comparado vale 100 em cada dia (acumulado) e o mês base aparece como índice relativo: 112 = 12% acima, 88 = 12% abaixo." />
+          <TooltipInfo text="Barras = mês base, linha = mês de comparação, alinhados pelo dia do mês. No modo Variação %, cada barra mostra quanto o acumulado do mês base está acima (+) ou abaixo (−) do mesmo dia do mês comparado; a linha tracejada no zero é a referência, não uma série. A faixa hachurada marca dias que ainda não ocorreram." />
           <NovidadeTip id="gmv-mes-vs-mes" className="ml-1" />
         </h3>
         <div className="flex flex-wrap items-center gap-2">
