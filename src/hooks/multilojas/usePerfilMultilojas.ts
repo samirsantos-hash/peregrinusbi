@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-export type PerfilML = "admin" | "consultor" | "gestor" | "nenhum";
+export type PerfilML = "admin" | "consultor" | "rede" | "gestor" | "nenhum";
 
 export const PERFIS = {
   admin: { nome: "Administrador", escopo: "rede", podeCarregar: true, podeConfigurar: true },
   consultor: { nome: "Consultor", escopo: "rede", podeCarregar: true, podeConfigurar: false },
+  // Consultor com acesso ao cliente piloto (MEGAJU): vê a rede, mas não carrega nem configura.
+  rede: { nome: "Consultor (somente leitura)", escopo: "rede", podeCarregar: false, podeConfigurar: false },
   gestor: { nome: "Gestor Loja Oficial", escopo: "loja", podeCarregar: false, podeConfigurar: false },
   nenhum: { nome: "Sem acesso", escopo: "nenhum", podeCarregar: false, podeConfigurar: false },
 } as const;
@@ -39,9 +41,10 @@ export function usePerfilMultilojas() {
 
     (async () => {
       setLoading(true);
-      const [{ data: roles }, { data: ls }] = await Promise.all([
+      const [{ data: roles }, { data: ls }, { data: podeVerRede }] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", user.id),
         supabase.from("multilojas_loja").select("*").order("nome_publico"),
+        (supabase as any).rpc("ml_pode_ver_rede"),
       ]);
       if (!vivo) return;
 
@@ -49,6 +52,7 @@ export function usePerfilMultilojas() {
       const p: PerfilML = r.includes("admin") ? "admin"
         : r.includes("gerente") ? "consultor"
         : r.includes("gestor_loja") ? "gestor"
+        : podeVerRede === true ? "rede"
         : "nenhum";
 
       const todas = (ls || []) as LojaOficial[];
