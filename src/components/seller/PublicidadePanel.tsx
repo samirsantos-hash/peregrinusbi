@@ -27,6 +27,7 @@ import {
 } from "@/lib/queries/publicidade";
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 import AdsGranularidadePanel from "./AdsGranularidadePanel";
+import AcosTacosChart from "./AcosTacosChart";
 
 type Props = {
   sellerUuid: string;
@@ -182,7 +183,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
             </div>
             <div className="flex gap-2">
               {([
-                ["roas_acos", "ROAS / ACOS / TACOS"],
+                ["roas_acos", "ACOS / TACOS"],
                 ["investimento", "Investimento vs GMV Ads"],
               ] as const).map(([g, label]) => (
                 <button
@@ -201,82 +202,10 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
             </div>
           </div>
 
-          <ResponsiveContainer width="100%" height={300}>
-            {grafico === "roas_acos" ? (
-              <ComposedChart data={m.historico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="mes" tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={(v) => String(v).slice(2)} />
-                <YAxis
-                  yAxisId="roas"
-                  orientation="left"
-                  tickFormatter={(v) => `${Number(v).toFixed(0)}x`}
-                  tick={{ fontSize: 10, fill: "#94a3b8" }}
-                />
-                <YAxis
-                  yAxisId="pct"
-                  orientation="right"
-                  tickFormatter={(v) => `${Number(v).toFixed(0)}%`}
-                  tick={{ fontSize: 10, fill: "#94a3b8" }}
-                />
-                <Tooltip
-                  contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", fontSize: 12 }}
-                  formatter={(value: any, name: any) => {
-                    const v = Number(value);
-                    return [
-                      name === "roas" ? `${v.toFixed(2)}x` : `${v.toFixed(1)}%`,
-                      name === "roas" ? "ROAS" : name === "acos" ? "ACOS" : "TACOS",
-                    ];
-                  }}
-                />
-                <Legend formatter={(n) => (n === "roas" ? "ROAS" : n === "acos" ? "ACOS %" : "TACOS %")} />
-                <ReferenceLine
-                  yAxisId="roas"
-                  y={BENCHMARKS_ADS.roas.critico}
-                  stroke="#DC2626"
-                  strokeDasharray="4 4"
-                  label={{ value: `ROAS mín ${BENCHMARKS_ADS.roas.critico}x`, fontSize: 10, fill: "#DC2626", position: "insideTopLeft" }}
-                />
-                <Line
-                  yAxisId="roas"
-                  type="monotone"
-                  dataKey="roas"
-                  stroke="#3b82f6"
-                  strokeWidth={2}
-                  dot={(props: any) => {
-                    const { cx, cy, payload, index } = props;
-                    if (cx == null || cy == null) return <g key={`r-${index}`} />;
-                    return <circle key={`r-${index}`} cx={cx} cy={cy} r={4} fill={corRoas(payload.roas)} stroke="#0f172a" strokeWidth={1} />;
-                  }}
-                  activeDot={{ r: 6 }}
-                />
-                <Line
-                  yAxisId="pct"
-                  type="monotone"
-                  dataKey="acos"
-                  stroke="#D97706"
-                  strokeWidth={2}
-                  dot={(props: any) => {
-                    const { cx, cy, payload, index } = props;
-                    if (cx == null || cy == null) return <g key={`a-${index}`} />;
-                    return <circle key={`a-${index}`} cx={cx} cy={cy} r={4} fill={corAcos(payload.acos)} stroke="#0f172a" strokeWidth={1} />;
-                  }}
-                  activeDot={{ r: 6 }}
-                />
-                <Line
-                  yAxisId="pct"
-                  type="monotone"
-                  dataKey="tacos"
-                  stroke="#DC2626"
-                  strokeWidth={2}
-                  dot={(props: any) => {
-                    const { cx, cy, payload, index } = props;
-                    if (cx == null || cy == null) return <g key={`t-${index}`} />;
-                    return <circle key={`t-${index}`} cx={cx} cy={cy} r={4} fill={corTacos(payload.tacos)} stroke="#0f172a" strokeWidth={1} />;
-                  }}
-                  activeDot={{ r: 6 }}
-                />
-              </ComposedChart>
-            ) : (
+          {grafico === "roas_acos" ? (
+            <AcosTacosChart pontos={m.historico} />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
               <ComposedChart data={m.historico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
                 <XAxis dataKey="mes" tick={{ fontSize: 10, fill: "#94a3b8" }} tickFormatter={(v) => String(v).slice(2)} />
@@ -300,10 +229,11 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   ))}
                 </Bar>
               </ComposedChart>
-            )}
-          </ResponsiveContainer>
+            </ResponsiveContainer>
+          )}
 
           {/* Legenda de cores por performance ROAS */}
+          {grafico !== "roas_acos" && (
           <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
             <span className="font-semibold uppercase tracking-wider">Cor por ROAS do mês:</span>
             <span className="inline-flex items-center gap-1">
@@ -319,6 +249,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
               <span className="h-2 w-2 rounded-full" style={{ background: "#DC2626" }} /> Crítico (&lt; {BENCHMARKS_ADS.roas.atencao}x)
             </span>
           </div>
+          )}
         </div>
       )}
 
