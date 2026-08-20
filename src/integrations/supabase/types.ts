@@ -2600,6 +2600,7 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
       ml_pode_carregar: { Args: never; Returns: boolean }
+      ml_pode_ver_rede: { Args: never; Returns: boolean }
       qualidade_divergencias: {
         Args: { _mes: string }
         Returns: {
