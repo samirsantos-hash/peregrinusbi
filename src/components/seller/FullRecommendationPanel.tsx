@@ -1,61 +1,45 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ScatterChart,
-  Scatter,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as ReTooltip,
-  ResponsiveContainer,
-  ReferenceLine,
-  Cell,
-} from "recharts";
-import { ChevronDown, ChevronRight, Package2, TrendingUp } from "lucide-react";
+import { ChevronDown, ChevronRight, Package2 } from "lucide-react";
 import {
   getFullRecommendations,
+  FULL_ESTOQUE_MINIMO_DIAS,
   type FullCandidate,
+  type Prioridade,
 } from "@/lib/queries/fullRecommendations";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
 
-const COR_PRIORIDADE: Record<FullCandidate["prioridade"], string> = {
+const COR_PRIORIDADE: Record<Prioridade, string> = {
   alta: "hsl(160, 84%, 39%)",
   media: "hsl(45, 80%, 55%)",
   baixa: "hsl(215, 20%, 45%)",
-  aguardar_estoque: "hsl(215, 25%, 30%)",
-  sem_vendas: "hsl(0, 60%, 45%)",
+  repor_estoque: "hsl(25, 85%, 50%)",
+  sem_movimento: "hsl(0, 60%, 45%)",
+  sem_dado: "hsl(215, 15%, 35%)",
 };
 
-const BADGE_PRIORIDADE: Record<FullCandidate["prioridade"], string> = {
-  alta: "🟢 Alta",
-  media: "🟡 Média",
-  baixa: "⬜ Baixa",
-  aguardar_estoque: "📦 Repor Estoque",
-  sem_vendas: "🚫 Sem vendas",
-};
-
-const COR_CURVA: Record<string, string> = {
-  A: "hsl(160, 84%, 45%)",
-  B: "hsl(199, 100%, 60%)",
-  C: "hsl(45, 80%, 55%)",
-  sem_venda: "hsl(0, 60%, 50%)",
+const BADGE_PRIORIDADE: Record<Prioridade, string> = {
+  alta: "Alta",
+  media: "Média",
+  baixa: "Baixa",
+  repor_estoque: "Repor estoque",
+  sem_movimento: "Sem movimento",
+  sem_dado: "Sem dado",
 };
 
 const fmtBRL = (v: number) =>
-  v.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: 0,
-  });
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+const fmtNum = (v: number | null, casas = 0) =>
+  v === null ? "—" : v.toLocaleString("pt-BR", { maximumFractionDigits: casas });
+
+const GRID = "grid-cols-[1fr_90px_110px_110px_90px_130px_24px]";
 
 type Props = { sellerId: string; custId?: string | number };
 
 const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [filtro, setFiltro] = useState<
-    "todos" | "alta" | "media" | "aguardar_estoque" | "sem_vendas"
-  >("todos");
-  const [mostrarFronteira, setMostrarFronteira] = useState(false);
+  const [filtro, setFiltro] = useState<"todos" | Prioridade>("todos");
 
   const { data: portfolio, isLoading } = useQuery({
     queryKey: ["full-recommendations", sellerId, custId],
@@ -71,22 +55,10 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
       : portfolio.candidatos.filter((c) => c.prioridade === filtro);
   }, [portfolio, filtro]);
 
-  const scatterData = useMemo(
-    () =>
-      (portfolio?.candidatos ?? []).map((c) => ({
-        x: c.sigma * 100,
-        y: c.mu,
-        name: c.item_name,
-        prioridade: c.prioridade,
-        sharpe: c.sharpe,
-      })),
-    [portfolio],
-  );
-
   if (isLoading) {
     return (
       <div className="glass-card p-6 text-center text-xs text-muted-foreground">
-        Calculando portfólio Full…
+        Calculando recomendações de Full…
       </div>
     );
   }
@@ -99,296 +71,135 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
     );
   }
 
-  const recomendados = portfolio.candidatos.filter(
-    (c) => c.prioridade === "alta" || c.prioridade === "media",
-  );
+  const semConversao = portfolio.taxaConversao === null;
 
   return (
     <div className="space-y-4">
       {/* Cabeçalho */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <Package2 className="w-4 h-4 text-neon-blue" />
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              Recomendação de Anúncios para Full
-            </h3>
-            <TooltipInfo text="Modelo de portfólio inspirado em Markowitz (1952). μ = ganho de GMV mensal estimado; σ = risco composto (ruptura + incerteza Poisson); Sharpe = μ/(1+σ)." />
-          </div>
-          <p className="text-[11px] text-muted-foreground mt-1">
-            Maximiza ganho de GMV por risco de ruptura · Uplift estimado +
-            {(portfolio.fullPremiumUsado * 100).toFixed(0)}% para este seller.
-          </p>
-          {portfolio.dataReferencia && (
-            <p className="text-[10px] text-muted-foreground">
-              Base: snapshots de elegibilidade até{" "}
-              {new Date(`${portfolio.dataReferencia}T00:00:00`).toLocaleDateString("pt-BR")} ·
-              janelas móveis de 7, 15 e 30 dias.
-            </p>
-          )}
+      <div>
+        <div className="flex items-center gap-2">
+          <Package2 className="w-4 h-4 text-neon-blue" />
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+            Recomendação de anúncios para Full
+          </h3>
+          <TooltipInfo text={`Base: snapshots de elegibilidade (janela móvel de 7 dias) + base diária de KPIs do seller.
+
+A coluna de tráfego da base de elegibilidade acompanha VISITAS, não pedidos — verificado contra a base diária. Unidades vendidas por anúncio não existem na fonte; são estimadas por visitas × taxa de conversão do seller (dado real da base diária) e sempre marcadas como estimativa.
+
+Janelas de 15 e 30 dias foram removidas: eram reconstruídas por proporção a partir da janela de 7 dias, o que criava falsa tendência.`} />
         </div>
-        <button
-          onClick={() => setMostrarFronteira((v) => !v)}
-          className="text-[11px] px-3 py-1.5 rounded-md border border-border bg-background hover:bg-accent transition-colors"
-        >
-          {mostrarFronteira ? "Ocultar" : "Ver"} Fronteira Eficiente
-        </button>
+        <p className="text-[11px] text-muted-foreground mt-1">
+          {portfolio.dataReferencia && (
+            <>
+              Snapshot de{" "}
+              {new Date(`${portfolio.dataReferencia}T00:00:00`).toLocaleDateString("pt-BR")} ·{" "}
+            </>
+          )}
+          conversão do seller{" "}
+          {portfolio.taxaConversao === null
+            ? "não medida"
+            : `${(portfolio.taxaConversao * 100).toFixed(2)}%`}{" "}
+          · ticket médio{" "}
+          {portfolio.ticketMedio === null ? "não medido" : fmtBRL(portfolio.ticketMedio)}{" "}
+          (base diária, 30 dias).
+        </p>
       </div>
 
-      {/* Cards de portfólio */}
+      {/* Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="glass-card p-4">
+          <p className="metric-label">Visitas na carteira · 7 dias</p>
+          <p className="metric-value mt-1">{portfolio.visitasTotais7d.toLocaleString("pt-BR")}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Dado real da fonte (janela móvel de 7 dias)
+          </p>
+        </div>
+        <div className="glass-card p-4">
+          <p className="metric-label">GMV estimado dos recomendados · 30 dias</p>
+          <p className="metric-value mt-1">{fmtBRL(portfolio.gmvEstimadoRecomendado)}</p>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Estimativa · {portfolio.itensRecomendados} anúncios em Alta/Média
+          </p>
+        </div>
+        <div className="glass-card p-4">
           <p className="metric-label flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> GMV adicional estimado
+            Score de oportunidade
+            <TooltipInfo text="Score de oportunidade (0–100), métrica própria deste painel: percentil do GMV estimado de 30 dias do anúncio dentro da carteira do seller, descontado em até 40% pelo risco de ruptura (exp(−cobertura/30)). Não é Sharpe ratio nem qualquer métrica financeira consagrada." />
           </p>
-          <p className="metric-value emerald-text mt-1">
-            {fmtBRL(portfolio.totalGMVGanho)}
-            <span className="text-xs text-muted-foreground">/mês</span>
-          </p>
+          <p className="metric-value mt-1">0 – 100</p>
           <p className="text-[10px] text-muted-foreground mt-1">
-            {recomendados.length} anúncios no portfólio recomendado
-          </p>
-        </div>
-        <div className="glass-card p-4">
-          <p className="metric-label">Risco médio do portfólio</p>
-          <p className="metric-value text-warning mt-1">
-            {(portfolio.totalRiscoMedio * 100).toFixed(1)}%
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Probabilidade média de ruptura (σ)
-          </p>
-        </div>
-        <div className="glass-card p-4">
-          <p className="metric-label">Índice de Eficiência</p>
-          <p className="metric-value neon-text mt-1">
-            {fmtBRL(portfolio.indiceEficiencia)}
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            Sharpe do portfólio (GMV / risco) · desconto ρ aplicado
+            Ranking relativo dentro desta carteira
           </p>
         </div>
       </div>
 
-      {/* Curva por janela (7/15/30 dias) */}
-      <div className="glass-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Curva de demanda do cust — 7 / 15 / 30 dias
-          </p>
-          <TooltipInfo text="Velocidade média por janela móvel, calculada sobre os snapshots de PEDIDOS_7D. A velocidade usada no modelo é ponderada: 50% janela 7d, 30% 15d, 20% 30d." />
+      {semConversao && (
+        <div className="glass-card p-3 text-[11px] text-warning">
+          Sem taxa de conversão medida na base diária deste seller: unidades vendidas e GMV
+          estimado não podem ser calculados e aparecem como "—". Apenas visitas são exibidas.
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {portfolio.janelas.map((j) => (
-            <div key={j.dias} className="p-3 rounded-md bg-card border border-border">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                Últimos {j.dias} dias
-              </p>
-              <p className="text-sm font-mono tabular-nums text-foreground mt-1">
-                {j.pedidos.toLocaleString("pt-BR")} pedidos
-              </p>
-              <p className="text-[10px] text-muted-foreground">
-                {j.itens_com_venda} MLBs com venda · GMV estimado {fmtBRL(j.gmv_estimado)}
-              </p>
+      )}
+
+      {/* Regras e contagens das classes */}
+      <div className="glass-card p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+          Regras de classificação e contagem
+        </p>
+        <div className="space-y-1.5">
+          {portfolio.classes.map((c) => (
+            <div key={c.chave} className="flex items-start gap-2 text-[11px]">
+              <span
+                className="mt-1 w-2 h-2 rounded-full shrink-0"
+                style={{ background: COR_PRIORIDADE[c.chave] }}
+              />
+              <span className="text-foreground font-medium w-28 shrink-0">{c.label}</span>
+              <span className="font-mono tabular-nums text-muted-foreground w-14 shrink-0">
+                {c.itens} MLBs
+              </span>
+              <span className="text-muted-foreground">{c.regra}</span>
             </div>
           ))}
         </div>
-
-        <div className="mt-4">
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
-            Curva ABC (Pareto sobre GMV estimado de 30 dias)
-          </p>
-          <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-muted/30">
-            {portfolio.curvaAbc
-              .filter((c) => c.itens > 0)
-              .map((c) => (
-                <div
-                  key={c.curva}
-                  style={{
-                    width: `${(c.itens / portfolio.candidatos.length) * 100}%`,
-                    background: COR_CURVA[c.curva],
-                  }}
-                  title={`${c.curva}: ${c.itens} MLBs`}
-                />
-              ))}
-          </div>
-          <div className="flex flex-wrap gap-3 mt-2">
-            {portfolio.curvaAbc.map((c) => (
-              <div key={c.curva} className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ background: COR_CURVA[c.curva] }}
-                />
-                {c.curva === "sem_venda" ? "Sem venda (30d)" : `Curva ${c.curva}`} · {c.itens} MLBs
-                {c.curva !== "sem_venda" && ` · ${(c.share * 100).toFixed(0)}% do GMV`}
-              </div>
-            ))}
-          </div>
-          {portfolio.itensSemVenda > 0 && (
-            <p className="text-[10px] text-destructive mt-2">
-              {portfolio.itensSemVenda} MLBs sem nenhum pedido em 30 dias foram removidos da
-              recomendação de envio ao Full (gerariam armazenagem sem giro).
-            </p>
-          )}
-        </div>
       </div>
-
-      {/* Fronteira eficiente */}
-      {mostrarFronteira && (
-        <div className="glass-card p-5">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground mb-1">
-            Fronteira Eficiente — Ganho vs Risco
-          </h4>
-          <p className="text-[11px] text-muted-foreground mb-3">
-            Pontos no canto superior esquerdo (alto ganho, baixo risco) são ideais.
-            Tamanho proporcional ao Sharpe.
-          </p>
-          <ResponsiveContainer width="100%" height={320}>
-            <ScatterChart margin={{ top: 10, right: 20, bottom: 30, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-              <XAxis
-                type="number"
-                dataKey="x"
-                name="Risco"
-                tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }}
-                tickFormatter={(v) => `${v.toFixed(0)}%`}
-                label={{
-                  value: "Risco σ (%)",
-                  position: "insideBottom",
-                  offset: -15,
-                  fontSize: 10,
-                  fill: "hsl(215, 20%, 55%)",
-                }}
-              />
-              <YAxis
-                type="number"
-                dataKey="y"
-                name="Ganho"
-                tick={{ fontSize: 10, fill: "hsl(215, 20%, 55%)" }}
-                tickFormatter={(v) =>
-                  v >= 1000 ? `R$${(v / 1000).toFixed(0)}k` : `R$${v.toFixed(0)}`
-                }
-              />
-              <ReTooltip
-                cursor={{ strokeDasharray: "3 3" }}
-                content={({ payload }: any) => {
-                  if (!payload?.length) return null;
-                  const d = payload[0].payload;
-                  return (
-                    <div className="glass-card p-2 !bg-card/95 text-[11px] space-y-0.5">
-                      <p className="font-medium text-foreground">
-                        {d.name?.slice(0, 40)}
-                        {d.name?.length > 40 ? "…" : ""}
-                      </p>
-                      <p className="text-emerald">Ganho: {fmtBRL(d.y)}/mês</p>
-                      <p className="text-warning">Risco: {d.x.toFixed(1)}%</p>
-                      <p className="text-neon-blue">Sharpe: {d.sharpe.toFixed(0)}</p>
-                    </div>
-                  );
-                }}
-              />
-              <ReferenceLine
-                x={50}
-                stroke="hsl(0, 70%, 50%)"
-                strokeDasharray="4 4"
-                label={{
-                  value: "Risco alto",
-                  fontSize: 9,
-                  fill: "hsl(0, 70%, 50%)",
-                  position: "top",
-                }}
-              />
-              <Scatter data={scatterData}>
-                {scatterData.map((d, i) => (
-                  <Cell
-                    key={i}
-                    fill={COR_PRIORIDADE[d.prioridade]}
-                    r={d.sharpe > 500 ? 7 : d.sharpe > 150 ? 5 : 3}
-                  />
-                ))}
-              </Scatter>
-            </ScatterChart>
-          </ResponsiveContainer>
-          <div className="flex flex-wrap gap-3 mt-3 justify-center">
-            {Object.entries(BADGE_PRIORIDADE).map(([k, label]) => (
-              <div key={k} className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                <span
-                  className="w-2 h-2 rounded-full"
-                  style={{ background: COR_PRIORIDADE[k as FullCandidate["prioridade"]] }}
-                />
-                {label}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Distribuição por vertical */}
-      {Object.keys(portfolio.distribuicaoVertical).length > 1 && (
-        <div className="glass-card p-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            Diversificação do portfólio
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {Object.entries(portfolio.distribuicaoVertical).map(([v, n]) => (
-              <span
-                key={v}
-                className="text-[11px] px-2 py-1 rounded-md bg-muted/40 text-foreground border border-border"
-              >
-                {v} · {n}
-              </span>
-            ))}
-          </div>
-          <p className="text-[10px] text-muted-foreground mt-2">
-            {Object.keys(portfolio.distribuicaoVertical).length} verticais —
-            correlações &lt; 1 reduzem o risco total vs. concentrar em uma única categoria.
-          </p>
-        </div>
-      )}
 
       {/* Filtros */}
       <div className="flex flex-wrap gap-2">
-        {(["todos", "alta", "media", "aguardar_estoque", "sem_vendas"] as const).map((f) => {
-          const count =
-            f === "todos"
-              ? portfolio.candidatos.length
-              : portfolio.candidatos.filter((c) => c.prioridade === f).length;
-          const label =
-            f === "todos"
-              ? "Todos"
-              : f === "alta"
-                ? "🟢 Alta"
-                : f === "media"
-                  ? "🟡 Média"
-                  : f === "aguardar_estoque"
-                    ? "📦 Repor Estoque"
-                    : "🚫 Sem vendas";
-          const active = filtro === f;
-          return (
-            <button
-              key={f}
-              onClick={() => setFiltro(f)}
-              className={`text-[11px] px-3 py-1.5 rounded-md border transition-colors ${
-                active
-                  ? "bg-primary/10 border-primary text-primary"
-                  : "bg-background border-border text-muted-foreground hover:bg-accent"
-              }`}
-            >
-              {label} <span className="opacity-70">({count})</span>
-            </button>
-          );
-        })}
+        {(["todos", "alta", "media", "repor_estoque", "baixa", "sem_movimento", "sem_dado"] as const).map(
+          (f) => {
+            const count =
+              f === "todos"
+                ? portfolio.candidatos.length
+                : portfolio.candidatos.filter((c) => c.prioridade === f).length;
+            const active = filtro === f;
+            return (
+              <button
+                key={f}
+                onClick={() => setFiltro(f)}
+                className={`text-[11px] px-3 py-1.5 rounded-md border transition-colors ${
+                  active
+                    ? "bg-primary/10 border-primary text-primary"
+                    : "bg-background border-border text-muted-foreground hover:bg-accent"
+                }`}
+              >
+                {f === "todos" ? "Todos" : BADGE_PRIORIDADE[f]}{" "}
+                <span className="opacity-70">({count})</span>
+              </button>
+            );
+          },
+        )}
       </div>
 
       {/* Lista */}
       <div className="glass-card overflow-hidden">
-        <div className="grid grid-cols-[1fr_60px_60px_60px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/20">
+        <div
+          className={`grid ${GRID} gap-2 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/20`}
+        >
           <div>Anúncio</div>
-          <div className="text-right">7d</div>
-          <div className="text-right">15d</div>
-          <div className="text-right">30d</div>
-          <div className="text-right">GMV atual</div>
-          <div className="text-right">GMV c/ Full</div>
-          <div className="text-center">Prioridade</div>
+          <div className="text-right">Visitas 7D</div>
+          <div className="text-right">Un. vendidas 7D (est.)</div>
+          <div className="text-right">GMV 30D (est.)</div>
+          <div className="text-right">Score</div>
+          <div className="text-center">Classificação</div>
           <div />
         </div>
 
@@ -397,35 +208,49 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
             Nenhum anúncio neste filtro.
           </div>
         ) : (
-          candidatosFiltrados.map((item) => {
+          candidatosFiltrados.map((item: FullCandidate) => {
             const isOpen = expanded === item.item_id;
+            const semEstoque = item.estoque === 0 && item.estado !== "sem_dado";
             return (
               <div key={item.item_id} className="border-b border-border last:border-b-0">
                 <button
                   onClick={() => setExpanded(isOpen ? null : item.item_id)}
-                  className="w-full grid grid-cols-[1fr_60px_60px_60px_100px_100px_120px_24px] gap-2 px-3 py-2 text-[11px] hover:bg-muted/30 transition-colors text-left items-center"
+                  className={`w-full grid ${GRID} gap-2 px-3 py-2 text-[11px] hover:bg-muted/30 transition-colors text-left items-center`}
                 >
                   <div className="min-w-0">
                     <p className="truncate text-foreground">{item.item_name || item.item_id}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      Curva {item.curva === "sem_venda" ? "—" : item.curva} · Sharpe{" "}
-                      {item.sharpe.toFixed(0)} · {item.vertical}
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                      {item.vertical}
+                      {semEstoque && (
+                        <span className="px-1.5 py-0.5 rounded bg-warning/15 text-warning">
+                          sem estoque
+                        </span>
+                      )}
+                      {item.estado === "sem_movimento" && (
+                        <span className="px-1.5 py-0.5 rounded bg-destructive/15 text-destructive">
+                          sem venda no período
+                        </span>
+                      )}
+                      {item.estado === "sem_dado" && (
+                        <span className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                          sem dado no período
+                        </span>
+                      )}
                     </p>
                   </div>
                   <div className="text-right font-mono tabular-nums text-foreground">
-                    {item.pedidos_7d}
+                    {item.visitas_7d === null ? "—" : item.visitas_7d.toLocaleString("pt-BR")}
                   </div>
                   <div className="text-right font-mono tabular-nums text-muted-foreground">
-                    {item.pedidos_15d}
+                    {fmtNum(item.unidades_est_7d, 1)}
                   </div>
                   <div className="text-right font-mono tabular-nums text-muted-foreground">
-                    {item.pedidos_30d}
+                    {item.gmv_est_30d === null ? "—" : fmtBRL(item.gmv_est_30d)}
                   </div>
                   <div className="text-right font-mono tabular-nums text-muted-foreground">
-                    {fmtBRL(item.gmv_atual_estimado)}
-                  </div>
-                  <div className="text-right font-mono tabular-nums text-emerald">
-                    {fmtBRL(item.gmv_full_estimado)}
+                    {item.score_oportunidade === null
+                      ? "—"
+                      : item.score_oportunidade.toFixed(0)}
                   </div>
                   <div className="text-center">
                     <span
@@ -451,75 +276,46 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
                   <div className="px-4 py-3 bg-muted/10 space-y-3">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                       {[
-                        { label: "μ (ganho/mês)", value: fmtBRL(item.mu), cor: "hsl(160, 84%, 50%)" },
                         {
-                          label: "σ (risco)",
-                          value: `${(item.sigma * 100).toFixed(1)}%`,
-                          cor: item.sigma > 0.5 ? "hsl(0, 70%, 60%)" : "hsl(45, 80%, 60%)",
+                          label: "Visitas 7D (real)",
+                          value:
+                            item.visitas_7d === null
+                              ? "—"
+                              : item.visitas_7d.toLocaleString("pt-BR"),
                         },
-                        { label: "Sharpe", value: item.sharpe.toFixed(0), cor: "hsl(199, 100%, 60%)" },
                         {
-                          label: "Uplift Full",
-                          value: `+${(item.full_premium * 100).toFixed(0)}%`,
-                          cor: "hsl(280, 80%, 70%)",
+                          label: "Visitas 7D · ~28d antes",
+                          value:
+                            item.visitas_7d_anterior === null
+                              ? "—"
+                              : item.visitas_7d_anterior.toLocaleString("pt-BR"),
+                        },
+                        {
+                          label: "Estoque médio 7D",
+                          value: item.estoque.toLocaleString("pt-BR"),
+                        },
+                        {
+                          label: "Cobertura estimada",
+                          value:
+                            item.cobertura_dias === null
+                              ? "—"
+                              : `${item.cobertura_dias.toFixed(0)} dias`,
                         },
                       ].map((m) => (
                         <div key={m.label} className="p-2 rounded-md bg-card border border-border">
                           <p className="text-[10px] text-muted-foreground">{m.label}</p>
-                          <p className="text-sm font-mono tabular-nums" style={{ color: m.cor }}>
+                          <p className="text-sm font-mono tabular-nums text-foreground">
                             {m.value}
                           </p>
                         </div>
                       ))}
                     </div>
 
-                    <div className="space-y-2">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                        Composição do risco (σ)
-                      </p>
-                      {[
-                        {
-                          label: `Ruptura de estoque (peso 50%)`,
-                          value: item.stockout_risk,
-                          cor: "hsl(0, 70%, 60%)",
-                          tooltip: `e^(-${item.days_of_stock.toFixed(0)}/30)`,
-                        },
-                        {
-                          label: `Incerteza de demanda (peso 30%)`,
-                          value: item.demand_uncertainty,
-                          cor: "hsl(45, 80%, 60%)",
-                          tooltip: `Poisson 1/√(${item.pedidos_30d}+1)`,
-                        },
-                        {
-                          label: `Volatilidade entre janelas (peso 20%)`,
-                          value: item.volatilidade,
-                          cor: "hsl(280, 80%, 70%)",
-                          tooltip: `7d ${item.velocity_7d.toFixed(2)} · 15d ${item.velocity_15d.toFixed(2)} · 30d ${item.velocity_30d.toFixed(2)} un/dia`,
-                        },
-                      ].map((r) => (
-                        <div key={r.label}>
-                          <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
-                            <span>{r.label}</span>
-                            <span className="font-mono">
-                              {(r.value * 100).toFixed(0)}% · {r.tooltip}
-                            </span>
-                          </div>
-                          <div className="h-1.5 rounded bg-muted overflow-hidden">
-                            <div
-                              className="h-full rounded"
-                              style={{
-                                width: `${Math.min(r.value * 100, 100)}%`,
-                                background: r.cor,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
                     <div className="p-3 rounded-md bg-card border-l-2 border-neon-blue">
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                        Ação recomendada
+                        {item.prioridade === "sem_movimento" || item.prioridade === "sem_dado"
+                          ? "Diagnóstico"
+                          : "Ação recomendada"}
                       </p>
                       <p className="text-xs text-foreground">{item.acao}</p>
                       <p className="text-[10px] text-muted-foreground italic mt-1">
@@ -535,9 +331,11 @@ const FullRecommendationPanel = ({ sellerId, custId }: Props) => {
       </div>
 
       <p className="text-[10px] text-muted-foreground italic px-1">
-        Metodologia: portfólio inspirado em Markowitz (1952). μ = ganho de GMV mensal
-        estimado com uplift Full; σ = risco composto (ruptura 60% + incerteza Poisson 40%);
-        Sharpe = μ/(1+σ). Risco do portfólio descontado pela correlação média entre verticais.
+        Método: visitas de 7 dias são o único dado medido por anúncio na fonte. Unidades vendidas
+        e GMV são estimados por visitas × conversão do seller × ticket médio (ambos reais, da base
+        diária de 30 dias) e estão marcados como estimativa. Cobertura mínima considerada para
+        envio ao Full: {FULL_ESTOQUE_MINIMO_DIAS} dias. Nenhum item sem movimento recebe
+        recomendação de compra.
       </p>
     </div>
   );
