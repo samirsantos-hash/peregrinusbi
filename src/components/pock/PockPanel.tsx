@@ -76,7 +76,9 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       fbm: p((m) => (m.tgmvFbm !== null && m.tgmv ? (m.tgmvFbm / m.tgmv) * 100 : null)),
       pads: p((m) => m.invPads),
       cdp: p((m) => (m.cdpTgmv !== null && m.tgmv ? (m.cdpTgmv / m.tgmv) * 100 : null)),
-      clipsLl: p((m) => (m.temClips === null ? null : m.temClips ? 100 : 0)),
+      clipsGmv: p((m) =>
+        m.tgmvClips !== null && m.tgmv ? (m.tgmvClips / m.tgmv) * 100 : null,
+      ),
       clips: p((m) => m.tgmvClips),
     };
   }, [series]);
@@ -259,12 +261,12 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
             explicacao={"Parcela do faturamento originada em campanhas da Central de Promoções (CDP).\nMede a dependência de promoções para vender.\nPenetração muito alta pode indicar margem pressionada; muito baixa indica oportunidade de adesão a campanhas."}
           />
           <PockEvolucaoCard
-            titulo="Penetração de Clips x LL"
-            pontos={pontos.clipsLl}
+            titulo="Penetração de Clips no GMV"
+            pontos={pontos.clipsGmv}
             formato="percent"
-            cobertura={data?.cobertura.temClips}
-            derivadoFormula="Flag SELLERS_CLIPS_PUBLI (booleana, nunca somada): 100% quando o mês tem publicação de clips."
-            explicacao={"Indicador de presença: 100% nos meses em que a loja publicou Clips e 0% nos meses sem publicação.\nÉ uma flag booleana — não representa quantidade de vídeos nem share sobre os anúncios.\nMeses sem a informação aparecem interrompidos na série."}
+            cobertura={data?.cobertura.tgmvClips}
+            derivadoFormula="Penetração Clips = TGMV_LC_CLIPS / TGMV_LC × 100"
+            explicacao={"Parcela do faturamento do mês originada por vendas atribuídas a Clips.\nSubstitui o antigo indicador de presença, que usava a coluna SELLERS_CLIPS_PUBLI — hoje zerada na base e por isso sem série válida.\nMeses sem faturamento ou sem dado de Clips aparecem interrompidos na série."}
           />
           <PockEvolucaoCard
             titulo="Evolução de Clips"
