@@ -129,6 +129,11 @@
     --warn: 32 95% 44%;
     --warn-soft: 14 56% 59%;      /* #D4785A */
     --ok: 160 84% 32%;
+
+    /* Divergente de preço — passo próprio no tema claro */
+    --price-hot: 14 68% 46%;
+    --price-neutral: 220 12% 46%;
+    --price-cool: 210 53% 45%;
     --brand-purple: 233 67% 25%;
     --glass: 0 0% 100%;
     --glass-border: 215 20% 86%;
