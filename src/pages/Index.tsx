@@ -33,6 +33,7 @@ import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import FullRecommendationPanel from "@/components/seller/FullRecommendationPanel";
+import UpliftFullPanel from "@/components/seller/UpliftFullPanel";
 import StockoutRiskPanel from "@/components/dashboard/StockoutRiskPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
@@ -543,6 +544,7 @@ const Index = () => {
                       sellerId={selectedSeller}
                       custId={sellerCustIdMap[selectedSeller]}
                     />
+                    <UpliftFullPanel custId={sellerCustIdMap[selectedSeller]} />
                     <StockoutRiskPanel sellerId={selectedSeller} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">

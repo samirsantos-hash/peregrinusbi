@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      benchmark_uplift_full: {
+        Row: {
+          base_amostra: string
+          conversao_pct: number | null
+          created_at: string
+          data_fonte: string
+          fonte: string
+          modal_origem: string
+          observacao: string | null
+          rotulos_origem: string[]
+          uplift_vendas: number
+          uplift_visitas: number | null
+          usar_em_estimativa: boolean
+        }
+        Insert: {
+          base_amostra: string
+          conversao_pct?: number | null
+          created_at?: string
+          data_fonte: string
+          fonte: string
+          modal_origem: string
+          observacao?: string | null
+          rotulos_origem?: string[]
+          uplift_vendas: number
+          uplift_visitas?: number | null
+          usar_em_estimativa?: boolean
+        }
+        Update: {
+          base_amostra?: string
+          conversao_pct?: number | null
+          created_at?: string
+          data_fonte?: string
+          fonte?: string
+          modal_origem?: string
+          observacao?: string | null
+          rotulos_origem?: string[]
+          uplift_vendas?: number
+          uplift_visitas?: number | null
+          usar_em_estimativa?: boolean
+        }
+        Relationships: []
+      }
       cart_base_vendedores: {
         Row: {
           created_at: string
@@ -527,6 +569,27 @@ export type Database = {
           tim_month_id?: number
           total_investiments_lc?: number | null
           total_rebates_lc?: number | null
+        }
+        Relationships: []
+      }
+      config_estimativa: {
+        Row: {
+          atualizado_em: string
+          chave: string
+          descricao: string
+          valor: number
+        }
+        Insert: {
+          atualizado_em?: string
+          chave: string
+          descricao: string
+          valor: number
+        }
+        Update: {
+          atualizado_em?: string
+          chave?: string
+          descricao?: string
+          valor?: number
         }
         Relationships: []
       }
