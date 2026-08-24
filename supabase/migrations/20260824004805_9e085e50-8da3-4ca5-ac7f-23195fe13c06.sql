@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_fin_ops_acc_comp ON public.fin_operations (account_id, data_competencia);
