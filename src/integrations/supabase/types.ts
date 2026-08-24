@@ -800,6 +800,197 @@ export type Database = {
         }
         Relationships: []
       }
+      fin_costs: {
+        Row: {
+          account_id: string
+          concept_type: string | null
+          cost_operation_id: string | null
+          currency_id: string | null
+          detail_type: string | null
+          gross_amount: number | null
+          id: number
+          ml_cost_id: string | null
+          net_cost: number | null
+          operation_pk: number
+          order_percentage_fee: number | null
+          remaining: number | null
+          tipo: string | null
+          total_discount: number | null
+        }
+        Insert: {
+          account_id: string
+          concept_type?: string | null
+          cost_operation_id?: string | null
+          currency_id?: string | null
+          detail_type?: string | null
+          gross_amount?: number | null
+          id?: number
+          ml_cost_id?: string | null
+          net_cost?: number | null
+          operation_pk: number
+          order_percentage_fee?: number | null
+          remaining?: number | null
+          tipo?: string | null
+          total_discount?: number | null
+        }
+        Update: {
+          account_id?: string
+          concept_type?: string | null
+          cost_operation_id?: string | null
+          currency_id?: string | null
+          detail_type?: string | null
+          gross_amount?: number | null
+          id?: number
+          ml_cost_id?: string | null
+          net_cost?: number | null
+          operation_pk?: number
+          order_percentage_fee?: number | null
+          remaining?: number | null
+          tipo?: string | null
+          total_discount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_costs_operation_pk_fkey"
+            columns: ["operation_pk"]
+            isOneToOne: false
+            referencedRelation: "fin_operations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fin_operations: {
+        Row: {
+          account_id: string
+          buyer_shipping_charge: number | null
+          data_competencia: string
+          gross_price: number | null
+          id: number
+          ingested_at: string | null
+          meli_rebate: number | null
+          ml_item_id: string | null
+          net_costs: number | null
+          operation_date: string
+          operation_id: string
+          operation_type: string
+          pack_id: string | null
+          pending_costs: number | null
+          quantidade: number | null
+          raw_id: number | null
+          sale_price: number | null
+          seller_gross_income: number | null
+          seller_net_income: number | null
+          shipment_id: string | null
+          shipping_cost: number | null
+          shipping_logistic_type: string | null
+          shipping_type: string | null
+          sku: string | null
+          status: string | null
+          tax_withholding_amount: number | null
+          titulo: string | null
+          total_discount: number | null
+          total_income: number | null
+          total_meli_discount: number | null
+          total_order_amount: number | null
+          total_price: number | null
+          total_seller_discount: number | null
+          transparent_meli_discount: number | null
+          unit_price: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          account_id: string
+          buyer_shipping_charge?: number | null
+          data_competencia: string
+          gross_price?: number | null
+          id?: number
+          ingested_at?: string | null
+          meli_rebate?: number | null
+          ml_item_id?: string | null
+          net_costs?: number | null
+          operation_date: string
+          operation_id: string
+          operation_type: string
+          pack_id?: string | null
+          pending_costs?: number | null
+          quantidade?: number | null
+          raw_id?: number | null
+          sale_price?: number | null
+          seller_gross_income?: number | null
+          seller_net_income?: number | null
+          shipment_id?: string | null
+          shipping_cost?: number | null
+          shipping_logistic_type?: string | null
+          shipping_type?: string | null
+          sku?: string | null
+          status?: string | null
+          tax_withholding_amount?: number | null
+          titulo?: string | null
+          total_discount?: number | null
+          total_income?: number | null
+          total_meli_discount?: number | null
+          total_order_amount?: number | null
+          total_price?: number | null
+          total_seller_discount?: number | null
+          transparent_meli_discount?: number | null
+          unit_price?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          account_id?: string
+          buyer_shipping_charge?: number | null
+          data_competencia?: string
+          gross_price?: number | null
+          id?: number
+          ingested_at?: string | null
+          meli_rebate?: number | null
+          ml_item_id?: string | null
+          net_costs?: number | null
+          operation_date?: string
+          operation_id?: string
+          operation_type?: string
+          pack_id?: string | null
+          pending_costs?: number | null
+          quantidade?: number | null
+          raw_id?: number | null
+          sale_price?: number | null
+          seller_gross_income?: number | null
+          seller_net_income?: number | null
+          shipment_id?: string | null
+          shipping_cost?: number | null
+          shipping_logistic_type?: string | null
+          shipping_type?: string | null
+          sku?: string | null
+          status?: string | null
+          tax_withholding_amount?: number | null
+          titulo?: string | null
+          total_discount?: number | null
+          total_income?: number | null
+          total_meli_discount?: number | null
+          total_order_amount?: number | null
+          total_price?: number | null
+          total_seller_discount?: number | null
+          transparent_meli_discount?: number | null
+          unit_price?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fin_operations_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fin_operations_raw_id_fkey"
+            columns: ["raw_id"]
+            isOneToOne: false
+            referencedRelation: "stg_ml_daily_raw"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gm_concessionarias: {
         Row: {
           cidade: string | null
@@ -1283,6 +1474,88 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_seller_bridge"
             referencedColumns: ["seller_uuid"]
+          },
+        ]
+      }
+      ml_accounts: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_sync_daily_at: string | null
+          ml_user_id: number
+          nickname: string | null
+          site_id: string
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_sync_daily_at?: string | null
+          ml_user_id: number
+          nickname?: string | null
+          site_id?: string
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_sync_daily_at?: string | null
+          ml_user_id?: number
+          nickname?: string | null
+          site_id?: string
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_tokens: {
+        Row: {
+          access_token: string
+          account_id: string
+          created_at: string | null
+          expires_at: string
+          id: number
+          is_current: boolean
+          refresh_token: string
+          scope: string | null
+        }
+        Insert: {
+          access_token: string
+          account_id: string
+          created_at?: string | null
+          expires_at: string
+          id?: number
+          is_current?: boolean
+          refresh_token: string
+          scope?: string | null
+        }
+        Update: {
+          access_token?: string
+          account_id?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: number
+          is_current?: boolean
+          refresh_token?: string
+          scope?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_tokens_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -2415,6 +2688,137 @@ export type Database = {
           vs_pm_3pgm_pct?: number | null
           vs_pm_pct?: number | null
           vs_pm_status?: string | null
+        }
+        Relationships: []
+      }
+      stg_ml_daily_raw: {
+        Row: {
+          account_id: string
+          fetched_at: string | null
+          id: number
+          operation_date: string
+          operation_id: string
+          operation_type: string
+          payload: Json
+          payload_hash: string
+          sync_job_id: number | null
+        }
+        Insert: {
+          account_id: string
+          fetched_at?: string | null
+          id?: number
+          operation_date: string
+          operation_id: string
+          operation_type: string
+          payload: Json
+          payload_hash: string
+          sync_job_id?: number | null
+        }
+        Update: {
+          account_id?: string
+          fetched_at?: string | null
+          id?: number
+          operation_date?: string
+          operation_id?: string
+          operation_type?: string
+          payload?: Json
+          payload_hash?: string
+          sync_job_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stg_ml_daily_raw_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stg_ml_daily_raw_job_fk"
+            columns: ["sync_job_id"]
+            isOneToOne: false
+            referencedRelation: "sync_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sync_jobs: {
+        Row: {
+          account_id: string
+          attempts: number | null
+          end_date: string
+          endpoint: string
+          erro: string | null
+          finished_at: string | null
+          id: number
+          offset_atual: number | null
+          registros_gravados: number | null
+          scheduled_at: string | null
+          start_date: string
+          started_at: string | null
+          status: string
+          total_registros: number | null
+          trilha: string
+        }
+        Insert: {
+          account_id: string
+          attempts?: number | null
+          end_date: string
+          endpoint: string
+          erro?: string | null
+          finished_at?: string | null
+          id?: number
+          offset_atual?: number | null
+          registros_gravados?: number | null
+          scheduled_at?: string | null
+          start_date: string
+          started_at?: string | null
+          status?: string
+          total_registros?: number | null
+          trilha: string
+        }
+        Update: {
+          account_id?: string
+          attempts?: number | null
+          end_date?: string
+          endpoint?: string
+          erro?: string | null
+          finished_at?: string | null
+          id?: number
+          offset_atual?: number | null
+          registros_gravados?: number | null
+          scheduled_at?: string | null
+          start_date?: string
+          started_at?: string | null
+          status?: string
+          total_registros?: number | null
+          trilha?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_jobs_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string | null
+          id: string
+          nome: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          nome: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          nome?: string
         }
         Relationships: []
       }
