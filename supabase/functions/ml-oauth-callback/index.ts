@@ -95,7 +95,7 @@ Deno.serve(async (req) => {
           site_id: perfil.site_id ?? p.site_id,
           status: "active",
         },
-        { onConflict: "tenant_id,ml_user_id" },
+        { onConflict: "ml_user_id" },
       )
       .select("id, nickname")
       .single();
