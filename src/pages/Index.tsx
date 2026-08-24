@@ -29,6 +29,7 @@ import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
+import SellerInfoTable from "@/components/dashboard/SellerInfoTable";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
@@ -513,6 +514,10 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
+                    <SellerInfoTable
+                      seller={sellers.find((s) => s.id === selectedSeller) as any}
+                      allKpis={allKpisMonthly as any}
+                    />
                     <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
                   </TabsContent>
                   <TabsContent value="pock" className="mt-0 space-y-5">

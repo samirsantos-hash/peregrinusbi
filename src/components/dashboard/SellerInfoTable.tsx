@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Award, Clock, Layers, Tag, MapPin } from "lucide-react";
+import { Award, Clock, Layers, Tag, MapPin, Globe } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
+import { UF_INFO } from "@/lib/geoBrasil";
 
 function parseLocalDate(dateStr: string): Date {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -27,6 +28,9 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     const months = Math.max(1, Math.round((last.getTime() - first.getTime()) / (30.44 * 24 * 60 * 60 * 1000)));
     tempoPrograma = `${months} ${months === 1 ? "mês" : "meses"}`;
   }
+
+  const uf = (seller.state || "").trim().toUpperCase();
+  const ufInfo = UF_INFO[uf];
 
   const loja = lojas?.find((l) => l.sellerId === seller.id);
   const tierLabels: Record<1 | 2 | 3, string> = {
@@ -71,9 +75,15 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     },
     {
       icon: MapPin,
-      label: "Localização",
-      value: seller.state || "—",
+      label: "Estado (UF)",
+      value: uf ? `${uf}${ufInfo ? ` · ${ufInfo.nome}` : ""}` : "—",
       tooltip: "UF de origem da operação do seller — impacta prazos logísticos e disponibilidade Full.",
+    },
+    {
+      icon: Globe,
+      label: "Região",
+      value: ufInfo?.regiao || "—",
+      tooltip: "Macrorregião do IBGE correspondente à UF do seller (Norte, Nordeste, Centro-Oeste, Sudeste ou Sul).",
     },
   ];
 
