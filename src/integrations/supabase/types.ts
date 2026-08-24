@@ -851,6 +851,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fin_costs_account_fk"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fin_costs_operation_pk_fkey"
             columns: ["operation_pk"]
             isOneToOne: false
