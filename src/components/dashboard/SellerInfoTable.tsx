@@ -71,9 +71,15 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     },
     {
       icon: MapPin,
-      label: "Localização",
-      value: seller.state || "—",
+      label: "Estado (UF)",
+      value: uf ? `${uf}${ufInfo ? ` · ${ufInfo.nome}` : ""}` : "—",
       tooltip: "UF de origem da operação do seller — impacta prazos logísticos e disponibilidade Full.",
+    },
+    {
+      icon: Globe,
+      label: "Região",
+      value: ufInfo?.regiao || "—",
+      tooltip: "Macrorregião do IBGE correspondente à UF do seller (Norte, Nordeste, Centro-Oeste, Sudeste ou Sul).",
     },
   ];
 
