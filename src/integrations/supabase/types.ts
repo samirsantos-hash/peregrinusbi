@@ -1525,6 +1525,29 @@ export type Database = {
           },
         ]
       }
+      ml_refresh_locks: {
+        Row: {
+          account_id: string
+          locked_at: string
+        }
+        Insert: {
+          account_id: string
+          locked_at?: string
+        }
+        Update: {
+          account_id?: string
+          locked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_refresh_locks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_tokens: {
         Row: {
           access_token: string
@@ -3073,9 +3096,21 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      ml_claim_refresh: { Args: { p_account_id: string }; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
       ml_pode_carregar: { Args: never; Returns: boolean }
       ml_pode_ver_rede: { Args: never; Returns: boolean }
+      ml_release_refresh: { Args: { p_account_id: string }; Returns: undefined }
+      ml_store_token: {
+        Args: {
+          p_access: string
+          p_account_id: string
+          p_expires_at: string
+          p_refresh: string
+          p_scope: string
+        }
+        Returns: undefined
+      }
       qualidade_divergencias: {
         Args: { _mes: string }
         Returns: {
