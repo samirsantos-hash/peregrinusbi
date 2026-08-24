@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Award, Clock, Layers, Tag, MapPin } from "lucide-react";
+import { Award, Clock, Layers, Tag, MapPin, Globe } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
+import { UF_INFO } from "@/lib/geoBrasil";
 
 function parseLocalDate(dateStr: string): Date {
   const [y, m, d] = dateStr.split("-").map(Number);
