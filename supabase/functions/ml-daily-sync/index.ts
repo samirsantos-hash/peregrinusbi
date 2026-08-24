@@ -285,7 +285,7 @@ Deno.serve(async (req) => {
                 fetched_at: new Date().toISOString(),
                 sync_job_id: jobId,
               },
-              { onConflict: "payload_hash" },
+              { onConflict: "account_id,operation_type,operation_id,payload_hash" },
             )
             .select("id")
             .maybeSingle();
@@ -293,7 +293,7 @@ Deno.serve(async (req) => {
           const { data: op, error: errOp } = await admin
             .from("fin_operations")
             .upsert(mapOperacao(linha, conta.id, (raw?.id as number) ?? null), {
-              onConflict: "account_id,operation_id,operation_type",
+              onConflict: "account_id,operation_type,operation_id",
             })
             .select("id")
             .single();
