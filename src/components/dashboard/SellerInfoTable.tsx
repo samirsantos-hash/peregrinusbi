@@ -29,6 +29,9 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     tempoPrograma = `${months} ${months === 1 ? "mês" : "meses"}`;
   }
 
+  const uf = (seller.state || "").trim().toUpperCase();
+  const ufInfo = UF_INFO[uf];
+
   const loja = lojas?.find((l) => l.sellerId === seller.id);
   const tierLabels: Record<1 | 2 | 3, string> = {
     1: "Tier 1 · Platinum",
