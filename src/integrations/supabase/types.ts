@@ -863,7 +863,7 @@ export type Database = {
         Row: {
           account_id: string
           buyer_shipping_charge: number | null
-          data_competencia: string
+          data_competencia: string | null
           gross_price: number | null
           id: number
           ingested_at: string | null
@@ -901,7 +901,7 @@ export type Database = {
         Insert: {
           account_id: string
           buyer_shipping_charge?: number | null
-          data_competencia: string
+          data_competencia?: string | null
           gross_price?: number | null
           id?: number
           ingested_at?: string | null
@@ -939,7 +939,7 @@ export type Database = {
         Update: {
           account_id?: string
           buyer_shipping_charge?: number | null
-          data_competencia?: string
+          data_competencia?: string | null
           gross_price?: number | null
           id?: number
           ingested_at?: string | null
