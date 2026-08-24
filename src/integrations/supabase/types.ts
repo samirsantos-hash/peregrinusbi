@@ -3097,10 +3097,12 @@ export type Database = {
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
       ml_claim_refresh: { Args: { p_account_id: string }; Returns: boolean }
+      ml_cron_refresh_tokens: { Args: { p_url: string }; Returns: number }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
       ml_pode_carregar: { Args: never; Returns: boolean }
       ml_pode_ver_rede: { Args: never; Returns: boolean }
       ml_release_refresh: { Args: { p_account_id: string }; Returns: undefined }
+      ml_set_trigger_secret: { Args: { p_value: string }; Returns: undefined }
       ml_store_token: {
         Args: {
           p_access: string
