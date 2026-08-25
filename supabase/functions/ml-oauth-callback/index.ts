@@ -76,7 +76,12 @@ Deno.serve(async (req) => {
       }),
     });
     const tok = await res.json();
-    if (!res.ok) return volta("erro", "falha na troca do codigo");
+    if (!res.ok) {
+      // Só status e o campo `error` do ML — nunca o corpo inteiro (pode conter tokens).
+      console.log("token exchange falhou:", res.status, String(tok?.error ?? "").slice(0, 40));
+      return volta("erro", `token_${res.status}`);
+    }
+
 
     const me = await fetch(ML_ME_URL, {
       headers: { Authorization: `Bearer ${tok.access_token}`, Accept: "application/json" },
