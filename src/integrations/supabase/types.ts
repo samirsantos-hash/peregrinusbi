@@ -3139,6 +3139,20 @@ export type Database = {
         Returns: number
       }
       ml_claim_refresh: { Args: { p_account_id: string }; Returns: boolean }
+      ml_contas_status: {
+        Args: never
+        Returns: {
+          account_id: string
+          jobs_concluidos: number
+          jobs_total: number
+          ml_user_id: number
+          nickname: string
+          site_id: string
+          status: string
+          tem_token: boolean
+          token_expira_em: string
+        }[]
+      }
       ml_cron_refresh_tokens: { Args: { p_url: string }; Returns: number }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
       ml_pode_carregar: { Args: never; Returns: boolean }
