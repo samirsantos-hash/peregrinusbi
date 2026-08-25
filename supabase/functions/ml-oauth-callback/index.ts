@@ -28,12 +28,16 @@ Deno.serve(async (req) => {
   };
 
   const url = new URL(req.url);
+  // Só os NOMES dos parâmetros — `code` é credencial e nunca pode ser logado.
+  console.log("callback params:", [...url.searchParams.keys()]);
+
   const erroML = url.searchParams.get("error");
-  if (erroML) return volta("erro", `autorizacao recusada no Mercado Livre`);
+  if (erroML) return volta("erro", `erro_ml_${erroML.replace(/[^a-z0-9_-]/gi, "")}`);
 
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  if (!code || !state) return volta("erro", "requisicao incompleta");
+  if (!code) return volta("erro", "sem_code");
+  if (!state) return volta("erro", "sem_state");
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
@@ -46,7 +50,18 @@ Deno.serve(async (req) => {
     .gt("expires_at", new Date().toISOString())
     .select("tenant_id, usuario_id, seller_id")
     .maybeSingle();
-  if (!st) return volta("erro", "state invalido ou expirado");
+  if (!st) {
+    // Diferencia desconhecido / já usado / expirado (sem expor o valor do state).
+    const { data: reg } = await admin
+      .from("ml_oauth_states")
+      .select("consumed_at, expires_at")
+      .eq("state", state)
+      .maybeSingle();
+    if (!reg) return volta("erro", "state_desconhecido");
+    if (reg.consumed_at) return volta("erro", "state_ja_usado");
+    return volta("erro", "state_expirado");
+  }
+
 
   try {
     const res = await fetch(ML_TOKEN_URL, {
