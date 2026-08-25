@@ -1525,6 +1525,44 @@ export type Database = {
           },
         ]
       }
+      ml_oauth_states: {
+        Row: {
+          consumed_at: string | null
+          created_at: string
+          expires_at: string
+          seller_id: string | null
+          state: string
+          tenant_id: string
+          usuario_id: string
+        }
+        Insert: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          seller_id?: string | null
+          state: string
+          tenant_id: string
+          usuario_id: string
+        }
+        Update: {
+          consumed_at?: string | null
+          created_at?: string
+          expires_at?: string
+          seller_id?: string | null
+          state?: string
+          tenant_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_oauth_states_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_refresh_locks: {
         Row: {
           account_id: string
@@ -3096,6 +3134,10 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      ml_agendar_backfill: {
+        Args: { p_account_id: string; p_meses?: number }
+        Returns: number
+      }
       ml_claim_refresh: { Args: { p_account_id: string }; Returns: boolean }
       ml_cron_refresh_tokens: { Args: { p_url: string }; Returns: number }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
@@ -3104,6 +3146,16 @@ export type Database = {
       ml_release_refresh: { Args: { p_account_id: string }; Returns: undefined }
       ml_set_trigger_secret: { Args: { p_value: string }; Returns: undefined }
       ml_store_token: {
+        Args: {
+          p_access: string
+          p_account_id: string
+          p_expires_at: string
+          p_refresh: string
+          p_scope: string
+        }
+        Returns: undefined
+      }
+      ml_token_rotacionar: {
         Args: {
           p_access: string
           p_account_id: string
