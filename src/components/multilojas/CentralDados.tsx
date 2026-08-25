@@ -8,6 +8,7 @@ import {
 } from "@/lib/multilojas/persist";
 import { fInt, fBRL, fPct } from "@/lib/multilojas/stats";
 import { useAuth } from "@/hooks/useAuth";
+import MercadoLivrePanel from "./MercadoLivrePanel";
 
 interface Props {
   perfilAdmin: boolean;
@@ -77,6 +78,7 @@ const CentralDados = ({ perfilAdmin, onPublicado }: Props) => {
 
   return (
     <div className="space-y-4">
+      <MercadoLivrePanel />
       <div className="rounded-xl border border-border/50 bg-card/60 p-4 space-y-3">
         <h3 className="text-sm font-semibold">Publicar carga</h3>
         <div className="flex flex-wrap gap-2">
