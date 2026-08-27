@@ -42,7 +42,11 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
   const [newPassword, setNewPassword] = useState("");
   const [creating, setCreating] = useState(false);
   const [createdCreds, setCreatedCreds] = useState<{ email: string; password: string } | null>(null);
+  const [searchUser, setSearchUser] = useState("");
+  const [grantUserIds, setGrantUserIds] = useState<string[]>([]);
+  const [granting, setGranting] = useState(false);
   const { toast } = useToast();
+
 
   useEffect(() => {
     if (!portfolio) return;
