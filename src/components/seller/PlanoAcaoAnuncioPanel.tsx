@@ -293,6 +293,31 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
   const { data: qualities = [], isLoading: loadingQ } = useListingsQuality(sellerId);
   const { data: eligibilities = [], isLoading: loadingE } = useEligibility(sellerId);
 
+  // Taxa de conversão real do seller (Σ tsi / Σ visits) — única ponte possível
+  // entre visitas por anúncio e unidades vendidas.
+  const { data: taxaConversao = null } = useQuery({
+    queryKey: ["taxa-conversao-seller", sellerId],
+    enabled: !!sellerId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("sellers_kpi_daily")
+        .select("visits, tsi")
+        .eq("seller_id", sellerId!)
+        .order("data", { ascending: false })
+        .limit(90);
+      if (error) throw error;
+      let v = 0;
+      let t = 0;
+      for (const r of data ?? []) {
+        v += Number(r.visits) || 0;
+        t += Number(r.tsi) || 0;
+      }
+      return v > 0 && t > 0 ? t / v : null;
+    },
+  });
+
+
+
   const planos = useMemo(() => {
     const todos = montarPlanos(qualities, eligibilities, taxaConversao ?? null);
     const filtrado = filtro === "acoes" ? todos.filter((p) => p.acoes.length > 0) : todos;
