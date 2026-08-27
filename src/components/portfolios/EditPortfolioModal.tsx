@@ -3,7 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Pencil, Search, X, UserCog, Plus, Trash2, UserPlus, Copy } from "lucide-react";
+import { Loader2, Pencil, Search, X, UserCog, Plus, Trash2, UserPlus, Copy, Users } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
