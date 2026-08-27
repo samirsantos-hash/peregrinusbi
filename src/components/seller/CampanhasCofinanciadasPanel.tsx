@@ -379,7 +379,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       </div>
                       <div>
                         <p className="text-[9px] uppercase tracking-wider text-muted-foreground mb-0.5">
-                          Pedidos 7d
+                          Visitas 7d
                         </p>
                         <p className="font-mono tabular-nums text-foreground">
                           {item.pedidos_7d.toFixed(0)}
