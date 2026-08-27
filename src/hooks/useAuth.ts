@@ -25,6 +25,8 @@ export function useAuth() {
   const [isGestorLoja, setIsGestorLoja] = useState(false);
   const [isGerente, setIsGerente] = useState(false);
   const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [tempPasswordExpiresAt, setTempPasswordExpiresAt] = useState<string | null>(null);
+
 
   useEffect(() => {
     let mounted = true;
