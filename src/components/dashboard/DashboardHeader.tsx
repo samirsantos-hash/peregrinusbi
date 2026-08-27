@@ -65,6 +65,8 @@ interface DashboardHeaderProps {
   isRefreshing?: boolean;
   /** Notify parent of period key changes (7, 15, 30, all, custom) */
   onPeriodChange?: (period: string) => void;
+  /** Existe base diária para a seleção atual (falso no consolidado da carteira) */
+  dailyDisponivel?: boolean;
 }
 
 const DashboardHeader = ({
@@ -78,10 +80,13 @@ const DashboardHeader = ({
   onRefresh,
   isRefreshing,
   onPeriodChange,
+  dailyDisponivel = true,
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
+  const [calOpen, setCalOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("");
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
+
   const { playClick } = useSoundFeedback();
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
 
