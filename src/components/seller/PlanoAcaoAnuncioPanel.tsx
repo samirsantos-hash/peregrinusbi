@@ -166,7 +166,18 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
           />
         </td>
         <td className="py-2 px-3 text-right font-mono tabular-nums text-xs">
-          {Math.round(anuncio.pedidos_7d).toLocaleString("pt-BR")}
+          {Math.round(anuncio.visitas_7d).toLocaleString("pt-BR")}
+        </td>
+        <td className="py-2 px-3 text-right font-mono tabular-nums text-xs">
+          {anuncio.unidades_est_7d === null ? (
+            <span className="text-muted-foreground" title="Sem taxa de conversão medida na base diária deste seller">
+              —
+            </span>
+          ) : (
+            <span className="text-muted-foreground">
+              ~{Math.round(anuncio.unidades_est_7d).toLocaleString("pt-BR")}
+            </span>
+          )}
         </td>
         <td className="py-2 px-3 text-right font-mono tabular-nums text-xs">
           {Math.round(anuncio.estoque_7d).toLocaleString("pt-BR")}
@@ -275,7 +286,7 @@ interface Props {
 
 export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
   const [filtro, setFiltro] = useState<"acoes" | "todos">("acoes");
-  const [ordem, setOrdem] = useState<"urgencia" | "pedidos" | "potencial">(
+  const [ordem, setOrdem] = useState<"urgencia" | "visitas" | "potencial">(
     "urgencia",
   );
 
@@ -283,10 +294,10 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
   const { data: eligibilities = [], isLoading: loadingE } = useEligibility(sellerId);
 
   const planos = useMemo(() => {
-    const todos = montarPlanos(qualities, eligibilities);
+    const todos = montarPlanos(qualities, eligibilities, taxaConversao ?? null);
     const filtrado = filtro === "acoes" ? todos.filter((p) => p.acoes.length > 0) : todos;
     return ordenarPlanos(filtrado, ordem).slice(0, 80);
-  }, [qualities, eligibilities, filtro, ordem]);
+  }, [qualities, eligibilities, taxaConversao, filtro, ordem]);
 
   const semQualidade = qualities.length === 0;
   const semElegibilidade = eligibilities.length === 0;
@@ -327,7 +338,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
         <div>
           <h3 className="text-base font-semibold">Pontos a Investigar por Anúncio</h3>
           <p className="text-xs text-muted-foreground">
-            Cruza qualidade do anúncio (LL scores) com vendas, estoque e CDP por MLB
+            Cruza qualidade do anúncio (LL scores) com tráfego, estoque e CDP por MLB
             para apontar o que investigar primeiro. Clique numa linha para abrir o
             detalhamento e entender o porquê de cada ponto.
           </p>
@@ -347,7 +358,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
             className="text-xs rounded px-2 py-1 border border-border bg-card text-foreground"
           >
             <option value="urgencia">Por urgência</option>
-            <option value="pedidos">Por pedidos (7d)</option>
+            <option value="visitas">Por visitas (7d)</option>
             <option value="potencial">Por ganho potencial de score</option>
           </select>
         </div>
@@ -394,7 +405,10 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
                     ? "IPI atual → potencial"
                     : "Potencial estimado"}
                 </th>
-                <th className="text-right py-2 px-3 font-semibold">Pedidos 7d</th>
+                <th className="text-right py-2 px-3 font-semibold">Visitas 7d</th>
+                <th className="text-right py-2 px-3 font-semibold">
+                  Un. vendidas 7d (est.)
+                </th>
                 <th className="text-right py-2 px-3 font-semibold">Estoque</th>
                 <th className="text-center py-2 px-3 font-semibold">CDP</th>
                 <th className="text-left py-2 px-3 font-semibold">Investigar</th>
@@ -421,7 +435,13 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
               Estimativa sem IPI base (dados parciais)
             </span>
             <span className="italic">
-              "Sem dados" = seller_listings_quality não carregado
+              A base de elegibilidade mede VISITAS por anúncio, não pedidos. Unidades
+              vendidas por MLB não existem na fonte: são estimadas por visitas × taxa de
+              conversão do seller
+              {taxaConversao !== null
+                ? ` (${(taxaConversao * 100).toFixed(2)}% na base diária)`
+                : " (não medida — coluna em branco)"}
+              . "Sem dados" = seller_listings_quality não carregado.
             </span>
           </div>
         </div>

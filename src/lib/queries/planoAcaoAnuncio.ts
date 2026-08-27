@@ -33,8 +33,15 @@ export type AnuncioPlano = {
   score_atual: number | null; // avgScore das dimensões LL (null = sem dados de qualidade)
   score_potencial: number | null; // null = sem ganho estimável
 
-  pedidos_7d: number;
+  /**
+   * VISITAS na janela móvel de 7 dias. A coluna `seller_eligibility.pedidos_7d`
+   * NÃO são pedidos — auditado contra sellers_kpi_daily, ela acompanha visitas.
+   * Nunca rotular como venda/pedido na interface.
+   */
+  visitas_7d: number;
   media_tsi_7d: number;
+  /** Unidades vendidas estimadas em 7d = visitas × conversão do seller. */
+  unidades_est_7d: number | null;
   estoque_7d: number;
 
   flag_optin_cdp: boolean;
@@ -59,7 +66,11 @@ export const CATEGORIA_LABEL: Record<AcaoCategoria, string> = {
   experiencia_compra: "Experiência",
 };
 
-function gerarAcoes(ql: ListingQuality, el: EligibilityItem | null): AcaoAnuncio[] {
+function gerarAcoes(
+  ql: ListingQuality,
+  el: EligibilityItem | null,
+  unidadesEst: number | null,
+): AcaoAnuncio[] {
   const acoes: AcaoAnuncio[] = [];
 
   // Ficha técnica
@@ -150,8 +161,13 @@ function gerarAcoes(ql: ListingQuality, el: EligibilityItem | null): AcaoAnuncio
   const fotosOk = ql.llPicturesScore === 0 || ql.llPicturesScore >= 60;
   const tituloOk = ql.llTitleScore === 0 || ql.llTitleScore >= 60;
   const semClip = ql.sellersClipsPubli === 0;
+  // Baixo giro só é avaliável quando há estimativa de unidades vendidas
+  // (visitas × conversão do seller). Sem conversão medida, não afirmamos venda.
   const baixaVenda =
-    el && el.estoqueMedio7d > 5 && el.pedidos7d < Math.max(2, el.estoqueMedio7d * 0.1);
+    el !== null &&
+    unidadesEst !== null &&
+    el.estoqueMedio7d > 5 &&
+    unidadesEst < Math.max(2, el.estoqueMedio7d * 0.1);
 
   if (fotosOk && tituloOk && semClip && baixaVenda) {
     acoes.push({
@@ -159,7 +175,7 @@ function gerarAcoes(ql: ListingQuality, el: EligibilityItem | null): AcaoAnuncio
       categoria: "video",
       prioridade: 2,
       titulo: "Criar clip/vídeo para este anúncio",
-      instrucao: `Item com estoque (${el?.estoqueMedio7d.toFixed(0)} und) mas baixo giro (${el?.pedidos7d} pedidos em 7d), mesmo com fotos e título adequados. Clips pré-qualificam o comprador antes do clique. Estrutura: (1) 3s iniciais com produto resolvendo um problema, (2) demonstração em uso, (3) CTA claro. Duração: 15–30s.`,
+      instrucao: `Item com estoque (${el?.estoqueMedio7d.toFixed(0)} und) mas baixo giro (~${unidadesEst?.toFixed(0)} unidades estimadas em 7d, a partir de ${el?.pedidos7d.toLocaleString("pt-BR")} visitas × conversão do seller), mesmo com fotos e título adequados. Clips pré-qualificam o comprador antes do clique. Estrutura: (1) 3s iniciais com produto resolvendo um problema, (2) demonstração em uso, (3) CTA claro. Duração: 15–30s.`,
       impactoScore: 0,
       icone: "🎬",
     });
@@ -202,14 +218,19 @@ function gerarAcoes(ql: ListingQuality, el: EligibilityItem | null): AcaoAnuncio
     (ql.llPicturesScore === 0 || ql.llPicturesScore >= 70) &&
     (ql.llTitleScore === 0 || ql.llTitleScore >= 70) &&
     (ql.llTechSpecsScore === 0 || ql.llTechSpecsScore >= 70);
-  if (todasOk && el && el.estoqueMedio7d > 10 && el.pedidos7d === 0) {
+  if (
+    todasOk &&
+    el &&
+    el.estoqueMedio7d > 10 &&
+    (unidadesEst !== null ? unidadesEst < 1 : el.pedidos7d === 0)
+  ) {
     acoes.push({
       id: "experiencia",
       categoria: "experiencia_compra",
       prioridade: 2,
       titulo: "Investigar experiência de compra",
       instrucao:
-        "Anúncio adequado em qualidade mas sem pedidos com estoque disponível. Verificar: (1) perguntas não respondidas; (2) avaliações negativas recentes; (3) compatibilidade ambígua — adicionar tabela de compatibilidade explícita; (4) sazonalidade.",
+        "Anúncio adequado em qualidade mas sem venda estimada com estoque disponível. Verificar: (1) perguntas não respondidas; (2) avaliações negativas recentes; (3) compatibilidade ambígua — adicionar tabela de compatibilidade explícita; (4) sazonalidade.",
       impactoScore: 0,
       icone: "🛍️",
     });
@@ -225,6 +246,8 @@ function gerarAcoes(ql: ListingQuality, el: EligibilityItem | null): AcaoAnuncio
 export function montarPlanos(
   qualities: ListingQuality[],
   eligibilities: EligibilityItem[],
+  /** Σ tsi / Σ visits do seller (sellers_kpi_daily). null = sem conversão medida. */
+  taxaConversao: number | null = null,
 ): AnuncioPlano[] {
   // Deduplicar elegibilidade por item_id — uma linha por campanha vira N linhas
   // por MLB. Mantemos a "melhor" campanha: flag_best_promo > pedidos_7d.
@@ -292,7 +315,9 @@ export function montarPlanos(
     .map((ql) => {
     const key = String(ql.itemId).replace(/\D/g, "");
     const el = elMap.get(key) ?? null;
-    const acoes = gerarAcoes(ql, el);
+    const unidadesEst =
+      el && taxaConversao !== null ? el.pedidos7d * taxaConversao : null;
+    const acoes = gerarAcoes(ql, el, unidadesEst);
     const temDadosQualidade = !useFallback;
     const ganhoScore = acoes.reduce((s, a) => s + a.impactoScore, 0);
 
@@ -329,8 +354,9 @@ export function montarPlanos(
       mlbLink: ql.mlbLink,
       score_atual: scoreAtual,
       score_potencial: scorePotencial,
-      pedidos_7d: el?.pedidos7d ?? 0,
+      visitas_7d: el?.pedidos7d ?? 0,
       media_tsi_7d: el?.mediaTsiDiario7d ?? 0,
+      unidades_est_7d: unidadesEst,
       estoque_7d: el?.estoqueMedio7d ?? 0,
       flag_optin_cdp: el?.flagItemSOptin ?? false,
       flag_best_promo: el?.flagBestPromo ?? false,
@@ -345,7 +371,7 @@ export function montarPlanos(
 
 export function ordenarPlanos(
   planos: AnuncioPlano[],
-  ordenarPor: "urgencia" | "pedidos" | "potencial",
+  ordenarPor: "urgencia" | "visitas" | "potencial",
 ): AnuncioPlano[] {
   const ordemUrg: Record<Urgencia, number> = {
     critico: 0,
@@ -354,13 +380,13 @@ export function ordenarPlanos(
     ok: 3,
   };
   return [...planos].sort((a, b) => {
-    if (ordenarPor === "pedidos") return b.pedidos_7d - a.pedidos_7d;
+    if (ordenarPor === "visitas") return b.visitas_7d - a.visitas_7d;
     if (ordenarPor === "potencial") {
       const ga = (a.score_potencial ?? 0) - (a.score_atual ?? 0);
       const gb = (b.score_potencial ?? 0) - (b.score_atual ?? 0);
       return gb - ga;
     }
     if (a.urgencia !== b.urgencia) return ordemUrg[a.urgencia] - ordemUrg[b.urgencia];
-    return b.pedidos_7d - a.pedidos_7d;
+    return b.visitas_7d - a.visitas_7d;
   });
 }
