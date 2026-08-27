@@ -454,7 +454,9 @@ const Index = () => {
               onRefresh={handleRefresh}
               isRefreshing={isRefreshing}
               onPeriodChange={handlePeriodChange}
+              dailyDisponivel={!isConsolidado && hasRealData && allKpisDaily.length > 0}
             />
+
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-start gap-0 lg:gap-4 isolate">
