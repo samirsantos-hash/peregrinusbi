@@ -16,12 +16,32 @@ const formatarRestante = (ms: number) => {
   return `${doisDigitos(horas)}:${doisDigitos(min)}:${doisDigitos(seg)}`;
 };
 
+const traduzirErro = (msg: string) => {
+  const m = msg.toLowerCase();
+  if (m.includes("weak") || m.includes("known to be weak") || m.includes("pwned")) {
+    return "Essa senha é muito comum e já apareceu em vazamentos. Escolha uma senha única (frase com números e símbolos).";
+  }
+  if (m.includes("should be different") || m.includes("same as the old")) {
+    return "A nova senha precisa ser diferente da senha provisória.";
+  }
+  if (m.includes("at least") || m.includes("too short")) {
+    return "A senha é curta demais. Use pelo menos 8 caracteres.";
+  }
+  if (m.includes("current password")) {
+    return "Informe a senha provisória atual no campo acima para confirmar a troca.";
+  }
+  return msg;
+};
+
 const ChangePassword = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [precisaSenhaAtual, setPrecisaSenhaAtual] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [agora, setAgora] = useState(() => Date.now());
-  const { updatePassword, tempPasswordExpiresAt } = useAuth();
+  const { updatePassword, tempPasswordExpiresAt, signOut } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,19 +56,23 @@ const ChangePassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6) {
-      toast({ title: "Senha muito curta", description: "Mínimo 6 caracteres", variant: "destructive" });
+    setErro(null);
+    if (newPassword.length < 8) {
+      setErro("Use pelo menos 8 caracteres.");
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast({ title: "Senhas não conferem", variant: "destructive" });
+      setErro("As senhas não conferem.");
       return;
     }
     setLoading(true);
-    const { error } = await updatePassword(newPassword);
+    const { error } = await updatePassword(newPassword, precisaSenhaAtual ? currentPassword : undefined);
     setLoading(false);
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      const msg = traduzirErro(error.message);
+      if (error.message.toLowerCase().includes("current password")) setPrecisaSenhaAtual(true);
+      setErro(msg);
+      toast({ title: "Não foi possível salvar", description: msg, variant: "destructive" });
       return;
     }
     toast({ title: "Senha alterada com sucesso!" });
@@ -56,6 +80,7 @@ const ChangePassword = () => {
     // (evita o erro "insertBefore" ao remontar as rotas protegidas).
     window.location.replace("/");
   };
+
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -84,19 +109,35 @@ const ChangePassword = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {precisaSenhaAtual && (
+            <div className="space-y-2">
+              <Label>Senha provisória (atual)</Label>
+              <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" />
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Nova Senha</Label>
             <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" required />
+            <p className="text-[11px] text-muted-foreground">
+              Mínimo 8 caracteres. Evite senhas comuns (ex.: 12345678, nome@2026) — elas são bloqueadas por segurança.
+            </p>
           </div>
           <div className="space-y-2">
             <Label>Confirmar Senha</Label>
             <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" required />
           </div>
+          {erro && (
+            <p className="text-xs text-destructive border border-destructive/40 rounded-md px-3 py-2">{erro}</p>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
             Salvar Nova Senha
           </Button>
+          <Button type="button" variant="ghost" className="w-full" onClick={() => void signOut()}>
+            Sair e tentar novamente
+          </Button>
         </form>
+
       </div>
     </div>
   );
