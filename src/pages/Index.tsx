@@ -473,6 +473,12 @@ const Index = () => {
                     loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
                     contexto={dateDebugLabel}
                   />
+                  <AvisoSemOperacao
+                    kpis={displayKpis}
+                    nickname={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
+                    contexto={dateDebugLabel}
+                  />
+
                   <DiagnosticAlerts
                     kpis={displayKpis}
                     fallbackKpis={allKpisMonthly}
