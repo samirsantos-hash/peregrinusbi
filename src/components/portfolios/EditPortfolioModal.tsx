@@ -77,6 +77,13 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
     !sellers.some((s) => s.custId === trimmedSearch) &&
     !selectedCustIds.includes(trimmedSearch);
 
+  const filteredUsers = useMemo(() => {
+    const q = searchUser.trim().toLowerCase();
+    const list = q ? users.filter((u) => u.email.toLowerCase().includes(q)) : users;
+    return [...list].sort((a, b) => a.email.localeCompare(b.email)).slice(0, 100);
+  }, [users, searchUser]);
+
+
   const addSeller = (custId: string) => {
     setSelectedCustIds((prev) => prev.includes(custId) ? prev : [...prev, custId]);
     setSearchSeller("");
