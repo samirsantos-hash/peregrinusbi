@@ -164,8 +164,13 @@ export function useAuth() {
     await supabase.auth.signOut();
   };
 
-  const updatePassword = async (newPassword: string) => {
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
+  const updatePassword = async (newPassword: string, currentPassword?: string) => {
+    const payload: Record<string, string> = { password: newPassword };
+    if (currentPassword) payload.current_password = currentPassword;
+
+    let { error } = await supabase.auth.updateUser(payload as { password: string });
+
+    // Alguns projetos exigem a senha atual; se ela não foi enviada, avisamos de forma clara.
     if (error) return { error };
 
     if (user) {
@@ -182,6 +187,7 @@ export function useAuth() {
 
     return { error: null };
   };
+
 
   return { user, session, loading, isAdmin, isGerente, isGestorLoja, mustChangePassword, tempPasswordExpiresAt, signIn, signOut, updatePassword };
 }
