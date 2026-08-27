@@ -327,7 +327,76 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Concede acesso a usuários JÁ EXISTENTES: mescla os cust_ids da carteira
+    // com a carteira atual de cada usuário (sem criar novo acesso/senha).
+    if (action === "grant_wallet_access") {
+      const { targetUserIds, custIds } = body;
+
+      if (!Array.isArray(targetUserIds) || targetUserIds.length === 0 || !Array.isArray(custIds)) {
+        return new Response(JSON.stringify({ error: "targetUserIds e custIds são obrigatórios" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const novos = custIds.map((c: unknown) => String(c)).filter(Boolean);
+      const resultados: Array<{ userId: string; added: number; total: number }> = [];
+
+      for (const userId of targetUserIds) {
+        const { data: atual } = await adminClient
+          .from("user_access_control")
+          .select("allowed_cust_ids")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        const existentes: string[] = (atual?.allowed_cust_ids as string[] | null) || [];
+        const merged = [...new Set([...existentes, ...novos])];
+        const added = merged.length - existentes.length;
+
+        if (atual) {
+          const { error: updErr } = await adminClient
+            .from("user_access_control")
+            .update({ allowed_cust_ids: merged })
+            .eq("user_id", userId);
+          if (updErr) {
+            return new Response(JSON.stringify({ error: updErr.message }), {
+              status: 400,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        } else {
+          const { data: perfil } = await adminClient
+            .from("profiles")
+            .select("email")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+          const { error: insErr } = await adminClient
+            .from("user_access_control")
+            .insert({
+              user_id: userId,
+              user_email: perfil?.email || "",
+              allowed_cust_ids: merged,
+              must_change_password: false,
+            });
+          if (insErr) {
+            return new Response(JSON.stringify({ error: insErr.message }), {
+              status: 400,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+
+        resultados.push({ userId, added, total: merged.length });
+      }
+
+      return new Response(JSON.stringify({ success: true, resultados }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
+
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
