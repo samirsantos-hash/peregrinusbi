@@ -260,6 +260,55 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
           </div>
 
           <div className="space-y-2">
+            <Label className="flex items-center gap-1.5"><Users className="w-4 h-4" />Dar acesso a usuários já existentes</Label>
+            <p className="text-[11px] text-muted-foreground">
+              Adiciona as {selectedCustIds.length} loja(s) desta carteira à carteira atual do usuário. Não cria novo acesso nem altera a senha.
+            </p>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={searchUser}
+                onChange={(e) => setSearchUser(e.target.value)}
+                placeholder="Buscar usuário por e-mail..."
+                className="pl-9"
+              />
+            </div>
+            <div className="border border-border/50 rounded-md max-h-[180px] overflow-y-auto divide-y divide-border/40">
+              {filteredUsers.length === 0 && (
+                <p className="text-xs text-muted-foreground p-3">Nenhum usuário encontrado.</p>
+              )}
+              {filteredUsers.map((u) => (
+                <label key={u.userId} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent/40">
+                  <Checkbox
+                    checked={grantUserIds.includes(u.userId)}
+                    onCheckedChange={() =>
+                      setGrantUserIds((prev) =>
+                        prev.includes(u.userId) ? prev.filter((id) => id !== u.userId) : [...prev, u.userId]
+                      )
+                    }
+                  />
+                  <span className="text-sm truncate">{u.email}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleGrantAccess}
+                disabled={granting || grantUserIds.length === 0 || selectedCustIds.length === 0}
+              >
+                {granting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Users className="w-4 h-4 mr-2" />}
+                Conceder acesso ({grantUserIds.length})
+              </Button>
+              {grantUserIds.length > 0 && (
+                <Button type="button" size="sm" variant="ghost" onClick={() => setGrantUserIds([])}>Limpar</Button>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Label className="flex items-center gap-1.5"><UserCog className="w-4 h-4" />Designar Administrador</Label>
             <Select value={assignedTo || "__none__"} onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}>
               <SelectTrigger><SelectValue placeholder="Selecione um responsável" /></SelectTrigger>
@@ -275,6 +324,7 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
                 <UserPlus className="w-4 h-4 mr-2" />Criar novo usuário para esta carteira
               </Button>
             )}
+
             {showCreate && (
               <div className="border border-border/50 rounded-md p-3 space-y-3">
                 <div className="flex items-center justify-between">
