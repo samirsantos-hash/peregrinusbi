@@ -83,6 +83,8 @@ export function useAuth() {
         setIsGerente(false);
         setIsGestorLoja(false);
         setMustChangePassword(false);
+        setTempPasswordExpiresAt(null);
+
       } finally {
         if (mounted) setLoading(false);
       }
