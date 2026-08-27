@@ -80,7 +80,7 @@ const Auth = () => {
             Esqueci minha senha
           </Link>
         </div>
-      </motion.div>
+      </div>
     </div>);
 
 };
