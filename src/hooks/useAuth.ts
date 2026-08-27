@@ -25,6 +25,8 @@ export function useAuth() {
   const [isGestorLoja, setIsGestorLoja] = useState(false);
   const [isGerente, setIsGerente] = useState(false);
   const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [tempPasswordExpiresAt, setTempPasswordExpiresAt] = useState<string | null>(null);
+
 
   useEffect(() => {
     let mounted = true;
@@ -39,6 +41,7 @@ export function useAuth() {
         setIsAdmin(false);
         setIsGerente(false);
         setMustChangePassword(false);
+        setTempPasswordExpiresAt(null);
         setLoading(false);
         return;
       }
@@ -64,20 +67,24 @@ export function useAuth() {
 
         const access = accessResult.data;
         if (access) {
-          const expired = access.temp_password_expires_at
-            ? new Date(access.temp_password_expires_at) < new Date()
-            : false;
-          setMustChangePassword(access.must_change_password && !expired);
+          // A validade da senha provisória é apenas informativa (mostra um cronômetro
+          // na tela de troca). Expirar NÃO bloqueia o acesso nem cancela a troca.
+          setMustChangePassword(access.must_change_password);
+          setTempPasswordExpiresAt(access.temp_password_expires_at ?? null);
         } else {
           setMustChangePassword(false);
+          setTempPasswordExpiresAt(null);
         }
       } catch (error) {
         console.error("Falha ao carregar o perfil de acesso", error);
+
         if (!mounted) return;
         setIsAdmin(false);
         setIsGerente(false);
         setIsGestorLoja(false);
         setMustChangePassword(false);
+        setTempPasswordExpiresAt(null);
+
       } finally {
         if (mounted) setLoading(false);
       }
@@ -176,5 +183,5 @@ export function useAuth() {
     return { error: null };
   };
 
-  return { user, session, loading, isAdmin, isGerente, isGestorLoja, mustChangePassword, signIn, signOut, updatePassword };
+  return { user, session, loading, isAdmin, isGerente, isGestorLoja, mustChangePassword, tempPasswordExpiresAt, signIn, signOut, updatePassword };
 }

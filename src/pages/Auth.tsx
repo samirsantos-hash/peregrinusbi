@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.jpeg";
 
@@ -14,16 +13,15 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
-  const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await signIn(email, password);
-    setLoading(false);
 
     if (error) {
+      setLoading(false);
       toast({
         title: "Erro ao entrar",
         description: error.message === "Invalid login credentials" ?
@@ -31,17 +29,16 @@ const Auth = () => {
         error.message,
         variant: "destructive"
       });
-    } else {
-      navigate("/");
     }
+    // Em caso de sucesso NÃO navegamos manualmente: o estado de sessão troca a rota
+    // sozinho. Navegar aqui remontava a árvore no meio da animação e quebrava o DOM
+    // com "insertBefore".
   };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="glass-card p-8 w-full max-w-sm space-y-6">
+      <div className="glass-card p-8 w-full max-w-sm space-y-6 animate-fade-in">
+
 
         <div className="text-center space-y-3">
           <div className="w-24 h-24 mx-auto rounded-xl bg-background/80 border border-border/50 p-3 flex items-center justify-center shadow-lg shadow-primary/10">
@@ -83,7 +80,7 @@ const Auth = () => {
             Esqueci minha senha
           </Link>
         </div>
-      </motion.div>
+      </div>
     </div>);
 
 };
