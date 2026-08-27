@@ -1,5 +1,8 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
+
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import {
