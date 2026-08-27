@@ -109,19 +109,35 @@ const ChangePassword = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {precisaSenhaAtual && (
+            <div className="space-y-2">
+              <Label>Senha provisória (atual)</Label>
+              <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" />
+            </div>
+          )}
           <div className="space-y-2">
             <Label>Nova Senha</Label>
             <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" required />
+            <p className="text-[11px] text-muted-foreground">
+              Mínimo 8 caracteres. Evite senhas comuns (ex.: 12345678, nome@2026) — elas são bloqueadas por segurança.
+            </p>
           </div>
           <div className="space-y-2">
             <Label>Confirmar Senha</Label>
             <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" required />
           </div>
+          {erro && (
+            <p className="text-xs text-destructive border border-destructive/40 rounded-md px-3 py-2">{erro}</p>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
             Salvar Nova Senha
           </Button>
+          <Button type="button" variant="ghost" className="w-full" onClick={() => void signOut()}>
+            Sair e tentar novamente
+          </Button>
         </form>
+
       </div>
     </div>
   );
