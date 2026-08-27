@@ -26,6 +26,16 @@ function subLocalDays(date: Date, days: number): Date {
   return result;
 }
 
+/** YYYY-MM-DD no fuso local (mesma convenção usada nos KPIs). */
+function fmtISO(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function fmtBR(d: Date): string {
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+}
+
+
 interface Seller {
   id: string;
   nickname: string;
