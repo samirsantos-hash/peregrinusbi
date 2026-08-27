@@ -3,7 +3,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Pencil, Search, X, UserCog, Plus, Trash2, UserPlus, Copy } from "lucide-react";
+import { Loader2, Pencil, Search, X, UserCog, Plus, Trash2, UserPlus, Copy, Users } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +42,11 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
   const [newPassword, setNewPassword] = useState("");
   const [creating, setCreating] = useState(false);
   const [createdCreds, setCreatedCreds] = useState<{ email: string; password: string } | null>(null);
+  const [searchUser, setSearchUser] = useState("");
+  const [grantUserIds, setGrantUserIds] = useState<string[]>([]);
+  const [granting, setGranting] = useState(false);
   const { toast } = useToast();
+
 
   useEffect(() => {
     if (!portfolio) return;
@@ -70,6 +76,13 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
     /^\d{4,}$/.test(trimmedSearch) &&
     !sellers.some((s) => s.custId === trimmedSearch) &&
     !selectedCustIds.includes(trimmedSearch);
+
+  const filteredUsers = useMemo(() => {
+    const q = searchUser.trim().toLowerCase();
+    const list = q ? users.filter((u) => u.email.toLowerCase().includes(q)) : users;
+    return [...list].sort((a, b) => a.email.localeCompare(b.email)).slice(0, 100);
+  }, [users, searchUser]);
+
 
   const addSeller = (custId: string) => {
     setSelectedCustIds((prev) => prev.includes(custId) ? prev : [...prev, custId]);
@@ -169,6 +182,29 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
     setCreating(false);
   };
 
+  const handleGrantAccess = async () => {
+    if (grantUserIds.length === 0 || selectedCustIds.length === 0) return;
+    setGranting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "grant_wallet_access", targetUserIds: grantUserIds, custIds: selectedCustIds },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      const total = (data?.resultados || []).reduce((acc: number, r: any) => acc + (r.added || 0), 0);
+      toast({
+        title: `Acesso concedido a ${grantUserIds.length} usuário(s)`,
+        description: `${total} novo(s) vínculo(s) de loja adicionado(s).`,
+      });
+      setGrantUserIds([]);
+    } catch (err: any) {
+      toast({ title: "Erro ao conceder acesso", description: err.message, variant: "destructive" });
+    }
+    setGranting(false);
+  };
+
+
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -260,6 +296,55 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
           </div>
 
           <div className="space-y-2">
+            <Label className="flex items-center gap-1.5"><Users className="w-4 h-4" />Dar acesso a usuários já existentes</Label>
+            <p className="text-[11px] text-muted-foreground">
+              Adiciona as {selectedCustIds.length} loja(s) desta carteira à carteira atual do usuário. Não cria novo acesso nem altera a senha.
+            </p>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                value={searchUser}
+                onChange={(e) => setSearchUser(e.target.value)}
+                placeholder="Buscar usuário por e-mail..."
+                className="pl-9"
+              />
+            </div>
+            <div className="border border-border/50 rounded-md max-h-[180px] overflow-y-auto divide-y divide-border/40">
+              {filteredUsers.length === 0 && (
+                <p className="text-xs text-muted-foreground p-3">Nenhum usuário encontrado.</p>
+              )}
+              {filteredUsers.map((u) => (
+                <label key={u.userId} className="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-accent/40">
+                  <Checkbox
+                    checked={grantUserIds.includes(u.userId)}
+                    onCheckedChange={() =>
+                      setGrantUserIds((prev) =>
+                        prev.includes(u.userId) ? prev.filter((id) => id !== u.userId) : [...prev, u.userId]
+                      )
+                    }
+                  />
+                  <span className="text-sm truncate">{u.email}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleGrantAccess}
+                disabled={granting || grantUserIds.length === 0 || selectedCustIds.length === 0}
+              >
+                {granting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Users className="w-4 h-4 mr-2" />}
+                Conceder acesso ({grantUserIds.length})
+              </Button>
+              {grantUserIds.length > 0 && (
+                <Button type="button" size="sm" variant="ghost" onClick={() => setGrantUserIds([])}>Limpar</Button>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <Label className="flex items-center gap-1.5"><UserCog className="w-4 h-4" />Designar Administrador</Label>
             <Select value={assignedTo || "__none__"} onValueChange={(v) => setAssignedTo(v === "__none__" ? "" : v)}>
               <SelectTrigger><SelectValue placeholder="Selecione um responsável" /></SelectTrigger>
@@ -275,6 +360,7 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
                 <UserPlus className="w-4 h-4 mr-2" />Criar novo usuário para esta carteira
               </Button>
             )}
+
             {showCreate && (
               <div className="border border-border/50 rounded-md p-3 space-y-3">
                 <div className="flex items-center justify-between">
