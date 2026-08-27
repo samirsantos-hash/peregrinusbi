@@ -175,6 +175,29 @@ export default function EditPortfolioModal({ open, onOpenChange, portfolio, sell
     setCreating(false);
   };
 
+  const handleGrantAccess = async () => {
+    if (grantUserIds.length === 0 || selectedCustIds.length === 0) return;
+    setGranting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "grant_wallet_access", targetUserIds: grantUserIds, custIds: selectedCustIds },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      const total = (data?.resultados || []).reduce((acc: number, r: any) => acc + (r.added || 0), 0);
+      toast({
+        title: `Acesso concedido a ${grantUserIds.length} usuário(s)`,
+        description: `${total} novo(s) vínculo(s) de loja adicionado(s).`,
+      });
+      setGrantUserIds([]);
+    } catch (err: any) {
+      toast({ title: "Erro ao conceder acesso", description: err.message, variant: "destructive" });
+    }
+    setGranting(false);
+  };
+
+
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
