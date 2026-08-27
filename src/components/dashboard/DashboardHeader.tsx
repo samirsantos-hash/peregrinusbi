@@ -140,85 +140,80 @@ const DashboardHeader = ({
     { days: 30, value: dailyGmv * 30 * (1 + clampedUplift) },
   ];
 
-  const quickRanges = [
-    { label: "Q1", key: "q1", months: [1, 2, 3] },
-    { label: "Q2", key: "q2", months: [4, 5, 6] },
-    { label: "Q3", key: "q3", months: [7, 8, 9] },
-    { label: "Q4", key: "q4", months: [10, 11, 12] },
-  ];
-
-  // Determine the latest year from data for quarter filtering
-  const latestYear = useMemo(() => {
-    const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
-    if (dates.length === 0) return 2026;
-    const maxDate = dates[dates.length - 1] as string;
-    return parseInt(maxDate.split("-")[0], 10);
+  /* ---------------------------------------------------------------- */
+  /*  Calendário — dias com dado (auditoria)                           */
+  /* ---------------------------------------------------------------- */
+  const diasComDado = useMemo(() => {
+    const set = new Set<string>();
+    for (const k of allKpis as any[]) if (k?.date) set.add(String(k.date).slice(0, 10));
+    return set;
   }, [allKpis]);
 
-  const handleQuickRange = (qr: typeof quickRanges[0]) => {
-    playClick();
-    setActivePeriod(qr.key);
-    onPeriodChange?.(qr.key);
+  /** Registros e dias com dado dentro do intervalo selecionado. */
+  const auditoria = useMemo(() => {
+    if (!dateRange?.from) return { registros: allKpis.length, dias: diasComDado.size, vazio: diasComDado.size === 0 };
+    const from = fmtISO(dateRange.from);
+    const to = fmtISO(dateRange.to ?? dateRange.from);
+    const datas = new Set<string>();
+    let registros = 0;
+    for (const k of allKpis as any[]) {
+      const d = k?.date ? String(k.date).slice(0, 10) : "";
+      if (d && d >= from && d <= to) {
+        registros++;
+        datas.add(d);
+      }
+    }
+    return { registros, dias: datas.size, vazio: registros === 0 };
+  }, [allKpis, dateRange, diasComDado]);
 
-    // Find the best year for this quarter: prefer latestYear, fallback to latestYear-1
-    const startMonth = qr.months[0];
-    const endMonth = qr.months[qr.months.length - 1];
-    
-    const hasDataInYear = (y: number) =>
-      allKpis.some((k: any) => {
-        if (!k.date) return false;
-        const [ky, km] = k.date.split("-").map(Number);
-        return ky === y && km >= startMonth && km <= endMonth;
-      });
-
-    const year = hasDataInYear(latestYear) ? latestYear : latestYear - 1;
-    const from = new Date(year, startMonth - 1, 1);
-    const to = new Date(year, endMonth, 0);
-    onDateRangeChange({ from, to });
+  const aplicarIntervalo = (range: DateRange | undefined) => {
+    onDateRangeChange(range);
+    if (!range?.from) return;
+    const from = range.from;
+    const to = range.to ?? range.from;
+    const span = differenceInDays(to, from) + 1;
+    // Intervalos curtos usam a base diária (quando existe); longos usam a mensal.
+    const key = dailyDisponivel && span <= 92 ? "custom-diario" : "custom";
+    setActivePeriod(key);
+    onPeriodChange?.(key);
   };
 
-  // Trimestres que possuem dado (no ano mais recente ou no anterior)
-  const quartersComDado = useMemo(() => {
-    const set = new Set<string>();
-    for (const qr of quickRanges) {
-      const startMonth = qr.months[0];
-      const endMonth = qr.months[qr.months.length - 1];
-      const has = allKpis.some((k: any) => {
-        if (!k.date) return false;
-        const [ky, km] = String(k.date).split("-").map(Number);
-        return (ky === latestYear || ky === latestYear - 1) && km >= startMonth && km <= endMonth;
-      });
-      if (has) set.add(qr.key);
-    }
-    return set;
-  }, [allKpis, latestYear]);
+  const presets = [
+    { label: "7D", key: "7", dias: 7 },
+    { label: "15D", key: "15", dias: 15 },
+    { label: "30D", key: "30", dias: 30 },
+    { label: "90D", key: "custom-diario", dias: 90 },
+  ];
 
-  // Abre sempre no período mais RECENTE COM DADO
+  const aplicarPreset = (p: { key: string; dias: number }) => {
+    playClick();
+    const from = subLocalDays(anchorDate, p.dias - 1);
+    const key = dailyDisponivel ? p.key : "custom";
+    setActivePeriod(key);
+    onPeriodChange?.(key);
+    onDateRangeChange({ from: from < minDate ? minDate : from, to: anchorDate });
+    setCalOpen(false);
+  };
+
+  const rotuloIntervalo = useMemo(() => {
+    if (!dateRange?.from) return "Selecionar período";
+    const f = fmtBR(dateRange.from);
+    const t = dateRange.to ? fmtBR(dateRange.to) : f;
+    return f === t ? f : `${f} — ${t}`;
+  }, [dateRange]);
+
+  // Abre no período completo disponível (uma única vez)
   const initialized = useRef(false);
   useEffect(() => {
     if (initialized.current) return;
     if (allKpis.length === 0) return;
-    const anchorMonth = anchorDate.getMonth() + 1;
-    const anchorQ = `q${Math.ceil(anchorMonth / 3)}`;
-    const alvo =
-      [...quickRanges].reverse().find((qr) => qr.key === anchorQ && quartersComDado.has(qr.key)) ??
-      [...quickRanges].reverse().find((qr) => quartersComDado.has(qr.key));
-    if (!alvo) return;
     initialized.current = true;
-    setActivePeriod(alvo.key);
-    onPeriodChange?.(alvo.key);
-    const startMonth = alvo.months[0];
-    const endMonth = alvo.months[alvo.months.length - 1];
-    const hasDataInYear = (y: number) =>
-      allKpis.some((k: any) => {
-        if (!k.date) return false;
-        const [ky, km] = String(k.date).split("-").map(Number);
-        return ky === y && km >= startMonth && km <= endMonth;
-      });
-    const year = hasDataInYear(latestYear) ? latestYear : latestYear - 1;
-    onDateRangeChange({ from: new Date(year, startMonth - 1, 1), to: new Date(year, endMonth, 0) });
+    setActivePeriod("all");
+    onPeriodChange?.("all");
+    onDateRangeChange({ from: minDate, to: anchorDate });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allKpis, quartersComDado, anchorDate, latestYear]);
+  }, [allKpis, minDate, anchorDate]);
+
 
   return (
     <motion.div
