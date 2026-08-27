@@ -183,5 +183,5 @@ export function useAuth() {
     return { error: null };
   };
 
-  return { user, session, loading, isAdmin, isGerente, isGestorLoja, mustChangePassword, signIn, signOut, updatePassword };
+  return { user, session, loading, isAdmin, isGerente, isGestorLoja, mustChangePassword, tempPasswordExpiresAt, signIn, signOut, updatePassword };
 }
