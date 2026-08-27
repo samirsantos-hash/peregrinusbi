@@ -118,10 +118,12 @@ const Index = () => {
   // Handle period changes from DashboardHeader
   const handlePeriodChange = useCallback((period: string) => {
     setActivePeriod(period);
-    const useConsolidated = period.startsWith("q") || period === "all";
+    const useConsolidated = period === "all" || period === "custom";
     setGranularity(useConsolidated ? "consolidated" : "daily");
-    setDateRange(undefined);
+    // Seleções vindas do calendário já trazem o intervalo — não limpar.
+    if (!period.startsWith("custom")) setDateRange(undefined);
   }, []);
+
 
   // Clear date range and cache when granularity changes
   const handleGranularityChange = useCallback((val: Granularity) => {
