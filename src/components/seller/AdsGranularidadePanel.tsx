@@ -262,7 +262,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Produtos mais vendidos no período
           </span>
-          <TooltipInfo text="Ranking por pedidos dos últimos 7 dias (base de elegibilidade). O feed do Mercado Livre não quebra o investimento em Ads por item — por isso a coluna de desconto e o status de campanha servem como leitura do esforço promocional por produto." />
+          <TooltipInfo text="Ranking por visitas dos últimos 7 dias (base de elegibilidade — essa coluna mede tráfego por anúncio, não pedidos). O feed do Mercado Livre não quebra o investimento em Ads por item — por isso a coluna de desconto e o status de campanha servem como leitura do esforço promocional por produto." />
         </div>
         <p className="mb-4 text-[11px] text-muted-foreground">
           O investimento em Ads não é exportado por anúncio no feed diário; este ranking mostra os itens que puxam o volume e se estão em campanha.
@@ -289,7 +289,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                     {p.item_name}
                   </a>
                   <span className="font-mono text-xs font-semibold tabular-nums text-foreground">
-                    {p.pedidos_7d.toLocaleString("pt-BR")} ped./7d
+                    {p.pedidos_7d.toLocaleString("pt-BR")} visitas/7d
                   </span>
                 </div>
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary/40">
@@ -299,7 +299,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                   />
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
-                  <span>{p.tsi_dia.toFixed(1)} pedidos/dia</span>
+                  <span>{p.tsi_dia.toFixed(1)} visitas/dia (média)</span>
                   <span>Desconto total: {p.desconto_total.toFixed(1)}%</span>
                   <span
                     className="rounded-full border px-2 py-0.5"
