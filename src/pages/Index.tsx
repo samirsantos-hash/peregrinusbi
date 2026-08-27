@@ -118,10 +118,12 @@ const Index = () => {
   // Handle period changes from DashboardHeader
   const handlePeriodChange = useCallback((period: string) => {
     setActivePeriod(period);
-    const useConsolidated = period.startsWith("q") || period === "all";
+    const useConsolidated = period === "all" || period === "custom";
     setGranularity(useConsolidated ? "consolidated" : "daily");
-    setDateRange(undefined);
+    // Seleções vindas do calendário já trazem o intervalo — não limpar.
+    if (!period.startsWith("custom")) setDateRange(undefined);
   }, []);
+
 
   // Clear date range and cache when granularity changes
   const handleGranularityChange = useCallback((val: Granularity) => {
@@ -452,7 +454,9 @@ const Index = () => {
               onRefresh={handleRefresh}
               isRefreshing={isRefreshing}
               onPeriodChange={handlePeriodChange}
+              dailyDisponivel={!isConsolidado && hasRealData && allKpisDaily.length > 0}
             />
+
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-start gap-0 lg:gap-4 isolate">

@@ -4,12 +4,15 @@ import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy } from "lucide-react";
+import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { ptBR } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
+
 import { useJuniorMode } from "@/hooks/useJuniorMode";
 import { GraduationCap } from "lucide-react";
 
@@ -25,6 +28,16 @@ function subLocalDays(date: Date, days: number): Date {
   const result = new Date(date.getFullYear(), date.getMonth(), date.getDate() - days);
   return result;
 }
+
+/** YYYY-MM-DD no fuso local (mesma convenção usada nos KPIs). */
+function fmtISO(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function fmtBR(d: Date): string {
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+}
+
 
 interface Seller {
   id: string;
@@ -55,6 +68,8 @@ interface DashboardHeaderProps {
   isRefreshing?: boolean;
   /** Notify parent of period key changes (7, 15, 30, all, custom) */
   onPeriodChange?: (period: string) => void;
+  /** Existe base diária para a seleção atual (falso no consolidado da carteira) */
+  dailyDisponivel?: boolean;
 }
 
 const DashboardHeader = ({
@@ -68,10 +83,13 @@ const DashboardHeader = ({
   onRefresh,
   isRefreshing,
   onPeriodChange,
+  dailyDisponivel = true,
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
+  const [calOpen, setCalOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("");
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
+
   const { playClick } = useSoundFeedback();
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
 
@@ -140,85 +158,80 @@ const DashboardHeader = ({
     { days: 30, value: dailyGmv * 30 * (1 + clampedUplift) },
   ];
 
-  const quickRanges = [
-    { label: "Q1", key: "q1", months: [1, 2, 3] },
-    { label: "Q2", key: "q2", months: [4, 5, 6] },
-    { label: "Q3", key: "q3", months: [7, 8, 9] },
-    { label: "Q4", key: "q4", months: [10, 11, 12] },
-  ];
-
-  // Determine the latest year from data for quarter filtering
-  const latestYear = useMemo(() => {
-    const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
-    if (dates.length === 0) return 2026;
-    const maxDate = dates[dates.length - 1] as string;
-    return parseInt(maxDate.split("-")[0], 10);
+  /* ---------------------------------------------------------------- */
+  /*  Calendário — dias com dado (auditoria)                           */
+  /* ---------------------------------------------------------------- */
+  const diasComDado = useMemo(() => {
+    const set = new Set<string>();
+    for (const k of allKpis as any[]) if (k?.date) set.add(String(k.date).slice(0, 10));
+    return set;
   }, [allKpis]);
 
-  const handleQuickRange = (qr: typeof quickRanges[0]) => {
-    playClick();
-    setActivePeriod(qr.key);
-    onPeriodChange?.(qr.key);
+  /** Registros e dias com dado dentro do intervalo selecionado. */
+  const auditoria = useMemo(() => {
+    if (!dateRange?.from) return { registros: allKpis.length, dias: diasComDado.size, vazio: diasComDado.size === 0 };
+    const from = fmtISO(dateRange.from);
+    const to = fmtISO(dateRange.to ?? dateRange.from);
+    const datas = new Set<string>();
+    let registros = 0;
+    for (const k of allKpis as any[]) {
+      const d = k?.date ? String(k.date).slice(0, 10) : "";
+      if (d && d >= from && d <= to) {
+        registros++;
+        datas.add(d);
+      }
+    }
+    return { registros, dias: datas.size, vazio: registros === 0 };
+  }, [allKpis, dateRange, diasComDado]);
 
-    // Find the best year for this quarter: prefer latestYear, fallback to latestYear-1
-    const startMonth = qr.months[0];
-    const endMonth = qr.months[qr.months.length - 1];
-    
-    const hasDataInYear = (y: number) =>
-      allKpis.some((k: any) => {
-        if (!k.date) return false;
-        const [ky, km] = k.date.split("-").map(Number);
-        return ky === y && km >= startMonth && km <= endMonth;
-      });
-
-    const year = hasDataInYear(latestYear) ? latestYear : latestYear - 1;
-    const from = new Date(year, startMonth - 1, 1);
-    const to = new Date(year, endMonth, 0);
-    onDateRangeChange({ from, to });
+  const aplicarIntervalo = (range: DateRange | undefined) => {
+    onDateRangeChange(range);
+    if (!range?.from) return;
+    const from = range.from;
+    const to = range.to ?? range.from;
+    const span = differenceInDays(to, from) + 1;
+    // Intervalos curtos usam a base diária (quando existe); longos usam a mensal.
+    const key = dailyDisponivel && span <= 92 ? "custom-diario" : "custom";
+    setActivePeriod(key);
+    onPeriodChange?.(key);
   };
 
-  // Trimestres que possuem dado (no ano mais recente ou no anterior)
-  const quartersComDado = useMemo(() => {
-    const set = new Set<string>();
-    for (const qr of quickRanges) {
-      const startMonth = qr.months[0];
-      const endMonth = qr.months[qr.months.length - 1];
-      const has = allKpis.some((k: any) => {
-        if (!k.date) return false;
-        const [ky, km] = String(k.date).split("-").map(Number);
-        return (ky === latestYear || ky === latestYear - 1) && km >= startMonth && km <= endMonth;
-      });
-      if (has) set.add(qr.key);
-    }
-    return set;
-  }, [allKpis, latestYear]);
+  const presets = [
+    { label: "7D", key: "7", dias: 7 },
+    { label: "15D", key: "15", dias: 15 },
+    { label: "30D", key: "30", dias: 30 },
+    { label: "90D", key: "custom-diario", dias: 90 },
+  ];
 
-  // Abre sempre no período mais RECENTE COM DADO
+  const aplicarPreset = (p: { key: string; dias: number }) => {
+    playClick();
+    const from = subLocalDays(anchorDate, p.dias - 1);
+    const key = dailyDisponivel ? p.key : "custom";
+    setActivePeriod(key);
+    onPeriodChange?.(key);
+    onDateRangeChange({ from: from < minDate ? minDate : from, to: anchorDate });
+    setCalOpen(false);
+  };
+
+  const rotuloIntervalo = useMemo(() => {
+    if (!dateRange?.from) return "Selecionar período";
+    const f = fmtBR(dateRange.from);
+    const t = dateRange.to ? fmtBR(dateRange.to) : f;
+    return f === t ? f : `${f} — ${t}`;
+  }, [dateRange]);
+
+  // Abre no período completo disponível (uma única vez)
   const initialized = useRef(false);
   useEffect(() => {
     if (initialized.current) return;
     if (allKpis.length === 0) return;
-    const anchorMonth = anchorDate.getMonth() + 1;
-    const anchorQ = `q${Math.ceil(anchorMonth / 3)}`;
-    const alvo =
-      [...quickRanges].reverse().find((qr) => qr.key === anchorQ && quartersComDado.has(qr.key)) ??
-      [...quickRanges].reverse().find((qr) => quartersComDado.has(qr.key));
-    if (!alvo) return;
     initialized.current = true;
-    setActivePeriod(alvo.key);
-    onPeriodChange?.(alvo.key);
-    const startMonth = alvo.months[0];
-    const endMonth = alvo.months[alvo.months.length - 1];
-    const hasDataInYear = (y: number) =>
-      allKpis.some((k: any) => {
-        if (!k.date) return false;
-        const [ky, km] = String(k.date).split("-").map(Number);
-        return ky === y && km >= startMonth && km <= endMonth;
-      });
-    const year = hasDataInYear(latestYear) ? latestYear : latestYear - 1;
-    onDateRangeChange({ from: new Date(year, startMonth - 1, 1), to: new Date(year, endMonth, 0) });
+    setActivePeriod("all");
+    onPeriodChange?.("all");
+    onDateRangeChange({ from: minDate, to: anchorDate });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allKpis, quartersComDado, anchorDate, latestYear]);
+  }, [allKpis, minDate, anchorDate]);
+
 
   return (
     <motion.div
@@ -339,45 +352,84 @@ const DashboardHeader = ({
             </Popover>
           </div>
 
-          {/* Date Range Picker with Quick Periods */}
+          {/* Seleção de período por calendário */}
           <div className="flex flex-wrap items-center gap-2 min-w-0">
-            {/* Quick period buttons */}
-            <div className="flex items-center gap-1 bg-muted/30 rounded-lg p-0.5 border border-border/50">
-              {quickRanges.map((qr) => (
-                <button
-                  key={qr.key}
-                  onClick={() => handleQuickRange(qr)}
-                  disabled={!quartersComDado.has(qr.key)}
-                  title={quartersComDado.has(qr.key) ? undefined : `Sem dados disponíveis para ${qr.label}`}
+            <Popover open={calOpen} onOpenChange={setCalOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
                   className={cn(
-                    "px-2.5 py-1.5 text-[11px] font-medium rounded-md transition-all",
-                    !quartersComDado.has(qr.key) && "opacity-40 cursor-not-allowed",
-                    activePeriod === qr.key
-                      ? "bg-primary/15 text-primary shadow-sm"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    "h-9 justify-start gap-2 glass-card border-glass-border bg-card/60 font-normal text-xs",
+                    auditoria.vazio && "border-destructive/50 text-destructive",
                   )}
+                  title="Selecionar período no calendário"
                 >
-                  {qr.label}
-                </button>
-              ))}
-            </div>
+                  <CalendarIcon className="h-4 w-4 text-neon-blue" />
+                  <span className="tnum">{rotuloIntervalo}</span>
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-card border-glass-border" align="start">
+                <div className="flex flex-wrap items-center gap-1 border-b border-border/50 p-2">
+                  {presets.map((p) => (
+                    <button
+                      key={p.label}
+                      onClick={() => aplicarPreset(p)}
+                      className="px-2 py-1 text-[11px] rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => {
+                      playClick();
+                      setActivePeriod("all");
+                      onPeriodChange?.("all");
+                      onDateRangeChange({ from: minDate, to: anchorDate });
+                      setCalOpen(false);
+                    }}
+                    className={cn(
+                      "px-2 py-1 text-[11px] rounded-md",
+                      activePeriod === "all"
+                        ? "bg-primary/15 text-primary"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                    )}
+                  >
+                    Todo período
+                  </button>
+                </div>
 
-            <button
-              onClick={() => {
-                playClick();
-                setActivePeriod("all");
-                onPeriodChange?.("all");
-                onDateRangeChange({ from: minDate, to: anchorDate });
-              }}
-              className={cn(
-                "px-3 py-1.5 text-[11px] font-medium rounded-md transition-all border",
-                activePeriod === "all"
-                  ? "bg-primary/15 text-primary border-primary/30 shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50 border-border/50"
-              )}
-            >
-              Todo Período
-            </button>
+                <Calendar
+                  mode="range"
+                  defaultMonth={dateRange?.from ?? anchorDate}
+                  selected={dateRange}
+                  onSelect={(r) => aplicarIntervalo(r)}
+                  numberOfMonths={2}
+                  locale={ptBR}
+                  fromDate={minDate}
+                  toDate={anchorDate}
+                  modifiers={{ comDado: (d: Date) => diasComDado.has(fmtISO(d)) }}
+                  modifiersClassNames={{ comDado: "font-semibold text-neon-blue" }}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+
+                <div className="border-t border-border/50 px-3 py-2 text-[11px] text-muted-foreground space-y-0.5">
+                  <div>
+                    Base disponível:{" "}
+                    <span className="text-foreground tnum">
+                      {fmtBR(minDate)} — {fmtBR(anchorDate)}
+                    </span>{" "}
+                    · <span className="tnum">{diasComDado.size}</span> data(s) com dado
+                  </div>
+                  <div className={cn(auditoria.vazio && "text-destructive")}>
+                    Seleção atual: <span className="tnum">{auditoria.registros}</span> registro(s) em{" "}
+                    <span className="tnum">{auditoria.dias}</span> data(s)
+                    {auditoria.vazio && " — nenhum dado neste intervalo"}
+                  </div>
+                  <div>Datas em azul possuem dado carregado para a loja selecionada.</div>
+                </div>
+              </PopoverContent>
+            </Popover>
+
 
             {/* Refresh button */}
             {onRefresh && (
