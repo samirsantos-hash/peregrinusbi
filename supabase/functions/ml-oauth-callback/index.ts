@@ -6,19 +6,20 @@
 // NUNCA logar code, access_token, refresh_token ou client_secret.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireEnv } from "../_shared/env.ts";
 
 // ATENÇÃO: autorização é "mercadolivre.com.br"; token é "mercadolibre.com".
 const ML_TOKEN_URL = "https://api.mercadolibre.com/oauth/token";
 const ML_ME_URL = "https://api.mercadolibre.com/users/me";
 
 Deno.serve(async (req) => {
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const CLIENT_ID = Deno.env.get("ML_CLIENT_ID")!;
-  const CLIENT_SECRET = Deno.env.get("ML_CLIENT_SECRET")!;
+  const SUPABASE_URL = requireEnv("SUPABASE_URL");
+  const SERVICE_ROLE = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+  const CLIENT_ID = requireEnv("ML_CLIENT_ID");
+  const CLIENT_SECRET = requireEnv("ML_CLIENT_SECRET");
   const REDIRECT_URI =
     Deno.env.get("ML_REDIRECT_URI") ?? `${SUPABASE_URL}/functions/v1/ml-oauth-callback`;
-  const APP_URL = (Deno.env.get("APP_URL") ?? "").replace(/\/+$/, "");
+  const APP_URL = (requireEnv("APP_URL")).replace(/\/+$/, "");
 
   const volta = (status: "ok" | "erro", msg?: string) => {
     const destino = new URL(`${APP_URL || SUPABASE_URL}/integracoes`);

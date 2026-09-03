@@ -4,15 +4,16 @@
 // verify_jwt: FALSE. Protegida por segredo compartilhado no header.
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireEnv } from "../_shared/env.ts";
 
 const ML_TOKEN_URL = "https://api.mercadolibre.com/oauth/token";
 
 Deno.serve(async (req) => {
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const CLIENT_ID = Deno.env.get("ML_CLIENT_ID")!;
-  const CLIENT_SECRET = Deno.env.get("ML_CLIENT_SECRET")!;
-  const TRIGGER_SECRET = Deno.env.get("REFRESH_TRIGGER_SECRET")!;
+  const SUPABASE_URL = requireEnv("SUPABASE_URL");
+  const SERVICE_ROLE = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+  const CLIENT_ID = requireEnv("ML_CLIENT_ID");
+  const CLIENT_SECRET = requireEnv("ML_CLIENT_SECRET");
+  const TRIGGER_SECRET = requireEnv("REFRESH_TRIGGER_SECRET");
 
   // 1. Só o cron (que conhece o segredo) pode disparar
   const provided = req.headers.get("x-refresh-secret") ?? "";
