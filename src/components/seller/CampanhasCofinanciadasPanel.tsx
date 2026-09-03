@@ -6,7 +6,7 @@ import TooltipInfo from "@/components/dashboard/TooltipInfo";
 import {
   buildCampanhasCofinanciadas,
   PESO_CAMPANHA,
-  LABEL_CAMPANHA,
+  rotuloCampanha,
   COR_PESO,
 } from "@/lib/queries/campanhasCofinanciadas";
 
@@ -151,7 +151,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                   </div>
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-xs text-foreground truncate">
-                      {LABEL_CAMPANHA[tipo] ?? tipo}
+                      {rotuloCampanha(tipo)}
                     </span>
                     {cofi && (
                       <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 uppercase tracking-wider">
@@ -281,7 +281,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       {item.campaign_id || "—"}
                     </div>
                     <div className="text-[10px] text-muted-foreground truncate">
-                      {LABEL_CAMPANHA[item.campaign_type] ?? item.campaign_type ?? "—"}
+                      {rotuloCampanha(item.campaign_type)}
                     </div>
                   </div>
                   <div className="flex gap-0.5 justify-center">
