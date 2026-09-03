@@ -46,7 +46,8 @@ export const LABEL_CAMPANHA: Record<string, string> = {
   PRENEGOTIATED: "Pré-negociada",
   COMMERCIAL: "Comercial",
   PRICE_MATCHING: "Price Matching",
-  PRICE_MATCHING_MELI_ALL: "Price Matching (ML)",
+  // Promoção bancada/originada pelo Mercado Livre.
+  PRICE_MATCHING_MELI_ALL: "Campanha Meli",
   SMART_COFINANCED: "Smart Cofinanciada",
   TIER_1: "Tier 1",
   TIER_3: "Tier 3",
@@ -54,6 +55,14 @@ export const LABEL_CAMPANHA: Record<string, string> = {
   DOD: "Deal of the Day",
   UNHEALTHY_STOCK: "Estoque Excedente",
 };
+
+/** Rótulo exibido para um tipo de campanha; promoções do Meli aparecem como "Campanha Meli". */
+export function rotuloCampanha(tipo?: string | null): string {
+  if (!tipo) return "—";
+  if (LABEL_CAMPANHA[tipo]) return LABEL_CAMPANHA[tipo];
+  return /MELI|MERCADO_?LIVRE/i.test(tipo) ? "Campanha Meli" : tipo;
+}
+
 
 export const COR_PESO: Record<number, string> = {
   5: "#a78bfa",
