@@ -117,6 +117,13 @@ export default function CppDashboard() {
   const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    try {
+      validarArquivoUpload(file, { extensoes: [".csv"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Arquivo inválido.");
+      e.target.value = "";
+      return;
+    }
     setLoading(true);
     setFileName(file.name);
 
