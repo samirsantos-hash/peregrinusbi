@@ -1,3 +1,4 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { UploadCloud, Loader2, AlertTriangle, CheckCircle2, ShieldCheck, Archive, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";

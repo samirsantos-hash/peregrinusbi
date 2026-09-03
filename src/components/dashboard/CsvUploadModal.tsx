@@ -1,3 +1,4 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Upload, CheckCircle, Loader2, FileWarning, FileText, X } from "lucide-react";

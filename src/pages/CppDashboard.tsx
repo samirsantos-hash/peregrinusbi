@@ -1,3 +1,4 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo, useCallback } from "react";
 import { format } from "date-fns";

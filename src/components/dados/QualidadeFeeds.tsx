@@ -1,3 +1,4 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, Database, Download } from "lucide-react";
