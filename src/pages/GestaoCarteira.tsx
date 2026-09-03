@@ -442,6 +442,7 @@ export default function GestaoCarteira() {
     try {
       const files: { name: string; content: string }[] = [];
       for (const file of Array.from(filesList)) {
+        validarArquivoUpload(file, { extensoes: [".csv"] });
         const content = await file.text();
         files.push({ name: file.name, content });
       }
