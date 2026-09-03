@@ -27,6 +27,7 @@ const UploadPlanilha = ({ onReady }: Props) => {
   const processar = useCallback(async (file: File) => {
     setBusy(true); setErro(null); setRes(null); setPct(0);
     try {
+      validarArquivoUpload(file, { extensoes: [".xlsx", ".xls", ".csv"] });
       const out = await lerPlanilhaML(file, (p, l) => { setPct(p); setLabel(l); });
       if (!out.pedidos.length) throw new Error("Nenhuma linha válida foi encontrada na planilha.");
       setRes(out);
