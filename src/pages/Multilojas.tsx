@@ -1,3 +1,4 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Store, Download, Loader2 } from "lucide-react";
@@ -23,7 +24,6 @@ import {
   forecast, backtest, faixaHHI, fBRL, fShort, fInt, fPct, fDelta,
 } from "@/lib/multilojas/stats";
 import { UF_INFO, POP_TOTAL } from "@/lib/geoBrasil";
-import { linhaCsvSegura } from "@/lib/csvSafe";
 
 /* Paleta 60/30/10 — Navy domina, Blue apoia, Green é acento.
  * Vermelho fica reservado a valores negativos/alertas. */

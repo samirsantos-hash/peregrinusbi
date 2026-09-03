@@ -1,8 +1,8 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, Database, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { linhaCsvSegura } from "@/lib/csvSafe";
 
 /* ═══════ Upload dos arquivos mensais + qualidade dos feeds ═══════
    Nenhum parse de CSV acontece no browser: o arquivo bruto vai para o

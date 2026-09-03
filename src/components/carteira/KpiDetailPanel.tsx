@@ -1,3 +1,4 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, ExternalLink } from "lucide-react";
@@ -13,7 +14,6 @@ import { type KpiId } from "./KpiCard";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import type { MesAgg, SellerCarteira } from "@/lib/insights";
 import {
-import { linhaCsvSegura } from "@/lib/csvSafe";
   insightTGMV, insightSellersAtivos, insightTicketMedio,
   insightQueda, insightCrescimento, insightVencimento,
 } from "@/lib/insights";

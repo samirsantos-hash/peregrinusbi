@@ -1,3 +1,4 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -12,7 +13,6 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TooltipInfo from "./TooltipInfo";
 import { type EligibilityItem } from "@/hooks/useEligibility";
-import { linhaCsvSegura } from "@/lib/csvSafe";
 
 interface OpportunitiesPanelProps {
   items: EligibilityItem[];

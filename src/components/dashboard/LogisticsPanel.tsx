@@ -1,3 +1,4 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -16,7 +17,6 @@ import {
 import { markowitzMinVariance, type AssetSeries } from "@/lib/markowitz";
 import type { EligibilityItem } from "@/hooks/useEligibility";
 import {
-import { linhaCsvSegura } from "@/lib/csvSafe";
   Select,
   SelectContent,
   SelectItem,

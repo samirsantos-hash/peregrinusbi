@@ -1,3 +1,4 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo, useCallback } from "react";
 import { format } from "date-fns";
 import Papa from "papaparse";
@@ -25,7 +26,6 @@ import CppCdpSellerBreakdown from "@/components/dashboard/CppCdpSellerBreakdown"
 import CppVerticalTab from "@/components/dashboard/CppVerticalTab";
 import CppCategoryChart from "@/components/dashboard/CppCategoryChart";
 import CppDailyChart from "@/components/dashboard/CppDailyChart";
-import { linhaCsvSegura } from "@/lib/csvSafe";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
