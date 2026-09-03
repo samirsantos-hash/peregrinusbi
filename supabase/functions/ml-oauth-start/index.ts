@@ -4,6 +4,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { requireEnv } from "../_shared/env.ts";
 
 // ATENÇÃO: autorização usa "mercadolivre.com.br", token usa "mercadolibre.com".
 const AUTH_URL = "https://auth.mercadolivre.com.br/authorization";
@@ -20,10 +21,10 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "use POST" }, 405);
 
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const CLIENT_ID = Deno.env.get("ML_CLIENT_ID")!;
+  const SUPABASE_URL = requireEnv("SUPABASE_URL");
+  const ANON = requireEnv("SUPABASE_ANON_KEY");
+  const SERVICE_ROLE = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
+  const CLIENT_ID = requireEnv("ML_CLIENT_ID");
   const REDIRECT_URI =
     Deno.env.get("ML_REDIRECT_URI") ?? `${SUPABASE_URL}/functions/v1/ml-oauth-callback`;
 

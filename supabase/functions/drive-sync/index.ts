@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { requireEnv } from "../_shared/env.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -118,8 +119,8 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabaseUrl = requireEnv("SUPABASE_URL");
+    const serviceKey = requireEnv("SUPABASE_SERVICE_ROLE_KEY");
     const saJson = Deno.env.get("GOOGLE_SERVICE_ACCOUNT_JSON");
     const folderId = Deno.env.get("GOOGLE_DRIVE_FOLDER_ID");
     if (!saJson) throw new Error("Missing secret GOOGLE_SERVICE_ACCOUNT_JSON");

@@ -1,3 +1,4 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Upload, CheckCircle, Loader2, FileWarning, FileText, X } from "lucide-react";
@@ -78,8 +79,14 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
     const name = file.name;
     const ext = name.substring(name.lastIndexOf(".")).toLowerCase();
 
-    if (!ACCEPTED_EXTENSIONS.includes(ext)) {
-      return { valid: false, safra: "", error: `Formato "${ext}" não suportado. Aceitos: ${ACCEPTED_EXTENSIONS.join(", ")}` };
+    try {
+      validarArquivoUpload(file, { extensoes: ACCEPTED_EXTENSIONS });
+    } catch (e) {
+      return {
+        valid: false,
+        safra: "",
+        error: e instanceof Error ? e.message : `Formato "${ext}" não suportado. Aceitos: ${ACCEPTED_EXTENSIONS.join(", ")}`,
+      };
     }
 
     const pattern = SFTP_PATTERNS[uploadType];

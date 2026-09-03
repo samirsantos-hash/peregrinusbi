@@ -1,3 +1,4 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -191,7 +192,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
   const exportSelected = () => {
     const sel = displayed.filter(i => selectedIds.has(i.id));
     const csvLines = ["CAMPAIGN_ID_BEST;ITEM_ID"];
-    sel.forEach(i => csvLines.push(`${i.campaignIdBest};${i.itemId}`));
+    sel.forEach(i => csvLines.push(linhaCsvSegura([i.campaignIdBest, i.itemId])));
     const blob = new Blob([csvLines.join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

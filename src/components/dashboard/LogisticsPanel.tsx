@@ -1,3 +1,4 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
@@ -327,7 +328,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
       "Justificativa",
     ];
     const lines = markowitzRows.map((r) =>
-      [
+      linhaCsvSegura([
         r.label,
         (r.meanReturn * 100).toFixed(2),
         (r.volatility * 100).toFixed(2),
@@ -340,10 +341,10 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
         isFinite(r.coberturaDias) ? r.coberturaDias.toFixed(1) : "",
         r.shortfall,
         r.ruptura ? "SIM" : "NAO",
-        `"${explicarPeso(r).replace(/"/g, "'")}"`,
-      ].join(";"),
+        explicarPeso(r),
+      ]),
     );
-    const csv = [headers.join(";"), ...lines].join("\n");
+    const csv = [linhaCsvSegura(headers), ...lines].join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

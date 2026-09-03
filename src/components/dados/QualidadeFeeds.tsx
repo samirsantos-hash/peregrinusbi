@@ -1,3 +1,5 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Upload, Loader2, CheckCircle2, AlertTriangle, RefreshCw, Database, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,8 +38,7 @@ const ignoradas = (e: ExecLinha) =>
 
 /** CSV com ; e BOM — abre direto no Excel pt-BR. */
 function baixarCsv(nome: string, cabecalho: string[], linhas: (string | number)[][]) {
-  const esc = (v: string | number) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const txt = [cabecalho, ...linhas].map((l) => l.map(esc).join(";")).join("\r\n");
+  const txt = [cabecalho, ...linhas].map((l) => linhaCsvSegura(l)).join("\r\n");
   const url = URL.createObjectURL(new Blob(["\uFEFF" + txt], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a");
   a.href = url; a.download = nome; a.click();
@@ -82,6 +83,12 @@ const QualidadeFeeds = () => {
   }, [mesSel]);
 
   const enviar = async (file: File) => {
+    try {
+      validarArquivoUpload(file, { extensoes: [".csv", ".txt"] });
+    } catch (e) {
+      setMsg({ tipo: "erro", texto: e instanceof Error ? e.message : "Arquivo inválido." });
+      return;
+    }
     const feed = detectFeed(file.name);
     if (!feed) {
       setMsg({ tipo: "erro", texto: `Nome do arquivo "${file.name}" não identifica o layout. Precisa conter CPP_MENSAL ou CDP_MENSAL.` });

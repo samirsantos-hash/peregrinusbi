@@ -1,3 +1,4 @@
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Download, ExternalLink } from "lucide-react";
@@ -173,7 +174,7 @@ export default function KpiDetailPanel({
         headers = ["Nickname", "TGMV"];
         rows = filteredSellers.slice(0, 100).map((s) => [s.cus_nickname, s.tgmv_lc.toFixed(2)]);
     }
-    const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const csv = [linhaCsvSegura(headers, ","), ...rows.map((r) => linhaCsvSegura(r, ","))].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

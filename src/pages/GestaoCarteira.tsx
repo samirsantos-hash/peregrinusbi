@@ -1,3 +1,5 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -441,6 +443,7 @@ export default function GestaoCarteira() {
     try {
       const files: { name: string; content: string }[] = [];
       for (const file of Array.from(filesList)) {
+        validarArquivoUpload(file, { extensoes: [".csv"] });
         const content = await file.text();
         files.push({ name: file.name, content });
       }
@@ -478,7 +481,7 @@ export default function GestaoCarteira() {
       s.score_final_full.toFixed(1),
       s.dias_expiracao,
     ]);
-    const csv = [headers.join(","), ...csvRows.map((r) => r.join(","))].join("\n");
+    const csv = [linhaCsvSegura(headers, ","), ...csvRows.map((r) => linhaCsvSegura(r, ","))].join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

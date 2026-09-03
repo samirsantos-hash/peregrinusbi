@@ -1,3 +1,4 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { UploadCloud, Loader2, AlertTriangle, CheckCircle2, ShieldCheck, Archive, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -43,6 +44,7 @@ const CentralDados = ({ perfilAdmin, onPublicado }: Props) => {
   const processar = useCallback(async (file: File) => {
     setBusy(true); setErro(null); setOk(null); setPendente(null); setPct(0);
     try {
+      validarArquivoUpload(file, { extensoes: [".xlsx", ".xls", ".csv"] });
       const buf = await file.arrayBuffer();
       const hash = await sha256Hex(buf);
       const dup = await cargaJaExiste(hash);

@@ -1,3 +1,6 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
+import { toast } from "sonner";
+import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo, useCallback } from "react";
 import { format } from "date-fns";
 import Papa from "papaparse";
@@ -116,6 +119,13 @@ export default function CppDashboard() {
   const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    try {
+      validarArquivoUpload(file, { extensoes: [".csv"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Arquivo inválido.");
+      e.target.value = "";
+      return;
+    }
     setLoading(true);
     setFileName(file.name);
 
@@ -218,12 +228,12 @@ export default function CppDashboard() {
   const exportCsv = () => {
     if (!filtered.length) return;
     const cols = TABLE_COLS.map(c => c.key);
-    const header = TABLE_COLS.map(c => c.label).join(";");
-    const rows = filtered.map(r => cols.map(k => {
+    const header = linhaCsvSegura(TABLE_COLS.map(c => c.label));
+    const rows = filtered.map(r => linhaCsvSegura(cols.map(k => {
       const v = r[k];
       if (v === null || v === undefined) return "";
       return typeof v === "number" ? String(v).replace(".", ",") : String(v);
-    }).join(";"));
+    })));
     const csv = [header, ...rows].join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);

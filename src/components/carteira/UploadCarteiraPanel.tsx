@@ -1,3 +1,4 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, Upload, FileSpreadsheet, CheckCircle2, AlertTriangle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -91,8 +92,10 @@ export function UploadCarteiraPanel({ up, master }: { up: CarteiraUpload; master
 
   const handleFile = async (file: File) => {
     setErr(null); setPending(null);
-    if (!file.name.toLowerCase().endsWith(".xlsx")) {
-      setErr("Formato inválido: envie o arquivo diário em .xlsx.");
+    try {
+      validarArquivoUpload(file, { extensoes: [".xlsx"] });
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Formato inválido: envie o arquivo diário em .xlsx.");
       return;
     }
     setBusy(true);

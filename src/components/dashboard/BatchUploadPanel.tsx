@@ -1,3 +1,4 @@
+import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -245,8 +246,10 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
     if (!file) return;
 
     const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
-    if (![".csv", ".xlsx", ".txt", ".zip"].includes(ext)) {
-      updateSlot(key, { status: "error", errorMsg: `Formato "${ext}" não suportado.` });
+    try {
+      validarArquivoUpload(file, { extensoes: [".csv", ".xlsx", ".txt", ".zip"] });
+    } catch (err) {
+      updateSlot(key, { status: "error", errorMsg: err instanceof Error ? err.message : `Formato "${ext}" não suportado.` });
       return;
     }
 
