@@ -13,6 +13,7 @@ import { type KpiId } from "./KpiCard";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import type { MesAgg, SellerCarteira } from "@/lib/insights";
 import {
+import { linhaCsvSegura } from "@/lib/csvSafe";
   insightTGMV, insightSellersAtivos, insightTicketMedio,
   insightQueda, insightCrescimento, insightVencimento,
 } from "@/lib/insights";

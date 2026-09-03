@@ -16,6 +16,7 @@ import {
 import { markowitzMinVariance, type AssetSeries } from "@/lib/markowitz";
 import type { EligibilityItem } from "@/hooks/useEligibility";
 import {
+import { linhaCsvSegura } from "@/lib/csvSafe";
   Select,
   SelectContent,
   SelectItem,

@@ -25,6 +25,7 @@ import CppCdpSellerBreakdown from "@/components/dashboard/CppCdpSellerBreakdown"
 import CppVerticalTab from "@/components/dashboard/CppVerticalTab";
 import CppCategoryChart from "@/components/dashboard/CppCategoryChart";
 import CppDailyChart from "@/components/dashboard/CppDailyChart";
+import { linhaCsvSegura } from "@/lib/csvSafe";
 
 function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";

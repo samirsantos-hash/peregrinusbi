@@ -39,6 +39,7 @@ import GraficoReputacao from "@/components/carteira/GraficoReputacao";
 import CreatePortfolioModal from "@/components/portfolios/CreatePortfolioModal";
 import { usePortfolios } from "@/hooks/usePortfolios";
 import AccessScopeBadge from "@/components/AccessScopeBadge";
+import { linhaCsvSegura } from "@/lib/csvSafe";
 
 // ── Types ──
 interface CppMensalRow {
