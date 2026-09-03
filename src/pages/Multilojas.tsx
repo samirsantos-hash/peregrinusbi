@@ -311,7 +311,7 @@ const Multilojas = () => {
 
   const exportarCsv = () => {
     const cols: (keyof PedidoML)[] = ["id", "dia", "loja", "mlb", "sku", "titulo", "uf", "cidade", "logi", "tipoAnun", "un", "gmv", "tarifa", "freteCusto", "estorno", "liq", "status"];
-    const linhas = [cols.join(";"), ...d.base.map((p) => cols.map((c) => String(p[c] ?? "")).join(";"))];
+    const linhas = [linhaCsvSegura(cols), ...d.base.map((p) => linhaCsvSegura(cols.map((c) => p[c])))];
     const url = URL.createObjectURL(new Blob(["\ufeff" + linhas.join("\n")], { type: "text/csv;charset=utf-8" }));
     const a = document.createElement("a");
     a.href = url; a.download = `multilojas_${d.ini}_${d.fim}.csv`; a.click();
