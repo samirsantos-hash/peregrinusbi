@@ -43,6 +43,7 @@ const CentralDados = ({ perfilAdmin, onPublicado }: Props) => {
   const processar = useCallback(async (file: File) => {
     setBusy(true); setErro(null); setOk(null); setPendente(null); setPct(0);
     try {
+      validarArquivoUpload(file, { extensoes: [".xlsx", ".xls", ".csv"] });
       const buf = await file.arrayBuffer();
       const hash = await sha256Hex(buf);
       const dup = await cargaJaExiste(hash);
