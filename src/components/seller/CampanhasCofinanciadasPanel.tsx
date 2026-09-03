@@ -6,7 +6,6 @@ import TooltipInfo from "@/components/dashboard/TooltipInfo";
 import {
   buildCampanhasCofinanciadas,
   PESO_CAMPANHA,
-  LABEL_CAMPANHA,
   rotuloCampanha,
   COR_PESO,
 } from "@/lib/queries/campanhasCofinanciadas";
