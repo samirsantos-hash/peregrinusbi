@@ -36,8 +36,7 @@ const ignoradas = (e: ExecLinha) =>
 
 /** CSV com ; e BOM — abre direto no Excel pt-BR. */
 function baixarCsv(nome: string, cabecalho: string[], linhas: (string | number)[][]) {
-  const esc = (v: string | number) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const txt = [cabecalho, ...linhas].map((l) => l.map(esc).join(";")).join("\r\n");
+  const txt = [cabecalho, ...linhas].map((l) => linhaCsvSegura(l)).join("\r\n");
   const url = URL.createObjectURL(new Blob(["\uFEFF" + txt], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a");
   a.href = url; a.download = nome; a.click();
