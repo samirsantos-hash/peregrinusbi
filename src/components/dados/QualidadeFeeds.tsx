@@ -82,6 +82,12 @@ const QualidadeFeeds = () => {
   }, [mesSel]);
 
   const enviar = async (file: File) => {
+    try {
+      validarArquivoUpload(file, { extensoes: [".csv", ".txt"] });
+    } catch (e) {
+      setMsg({ tipo: "erro", texto: e instanceof Error ? e.message : "Arquivo inválido." });
+      return;
+    }
     const feed = detectFeed(file.name);
     if (!feed) {
       setMsg({ tipo: "erro", texto: `Nome do arquivo "${file.name}" não identifica o layout. Precisa conter CPP_MENSAL ou CDP_MENSAL.` });
