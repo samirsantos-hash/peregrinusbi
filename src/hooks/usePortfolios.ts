@@ -33,6 +33,10 @@ export interface SellerWithKpi {
   scoreOfertaFinal: number;
   scoreCaracteristicaFinal: number;
   gmvLc: number;
+  /** nº de meses com faturamento observado — usado no encolhimento dos rankings (OS-4) */
+  mesesObservados: number;
+  /** vertical dominante — grupo de referência do prior intravertical (OS-4) */
+  vertical: string | null;
 }
 
 export function usePortfolios() {
@@ -172,7 +176,7 @@ export function usePortfolioData(custIds: string[]) {
       // Get sellers by cust_ids
       const { data: sellersData } = await supabase
         .from("sellers")
-        .select("id, cust_id, nickname, cus_state")
+        .select("id, cust_id, nickname, cus_state, vertical_dominant")
         .in("cust_id", custIds);
 
       if (!sellersData || sellersData.length === 0) {
@@ -192,9 +196,13 @@ export function usePortfolioData(custIds: string[]) {
 
       // Group by seller_id, take latest
       const latestKpi: Record<string, any> = {};
+      const mesesPorSeller: Record<string, number> = {};
       if (kpiData) {
         for (const k of kpiData) {
           if (!latestKpi[k.seller_id]) latestKpi[k.seller_id] = k;
+          if ((Number(k.tgmv_lc) || 0) > 0) {
+            mesesPorSeller[k.seller_id] = (mesesPorSeller[k.seller_id] || 0) + 1;
+          }
         }
       }
 
@@ -220,6 +228,8 @@ export function usePortfolioData(custIds: string[]) {
           scoreOfertaFinal: Number(k.score_oferta_final) || 0,
           scoreCaracteristicaFinal: Number(k.score_caracteristica_final) || 0,
           gmvLc: Number(k.gmv_lc) || 0,
+          mesesObservados: mesesPorSeller[s.id] || 0,
+          vertical: (s as any).vertical_dominant || null,
         };
       });
 
