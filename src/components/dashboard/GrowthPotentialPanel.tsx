@@ -43,6 +43,7 @@ interface GrowthPotentialPanelProps {
   dataGranularity?: "consolidated" | "daily";
   campaign?: SellerCampaign | null;
   benchmark?: VerticalBenchmark | null;
+  sellerId?: string;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
