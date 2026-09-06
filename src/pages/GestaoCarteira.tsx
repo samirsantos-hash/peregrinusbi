@@ -35,6 +35,7 @@ import {
 import { classificarSeller, loadAlertConfig, saveAlertConfig, type AlertConfig, type SellerAlert, type SellerData } from "@/lib/alerts";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import { ingestAllFiles } from "@/lib/carteira-ingest";
+import { resumoCarteira } from "@/lib/carteira/stats";
 import KpiCard, { type KpiId } from "@/components/carteira/KpiCard";
 import KpiDetailPanel from "@/components/carteira/KpiDetailPanel";
 import GraficoReputacao from "@/components/carteira/GraficoReputacao";
