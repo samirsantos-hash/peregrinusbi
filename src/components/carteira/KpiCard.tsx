@@ -11,6 +11,8 @@ export interface KpiCardProps {
   delta?: { pct: number; direcao: "up" | "down" | "flat" };
   sparkline: number[];
   severidade?: "neutro" | "positivo" | "atencao" | "critico";
+  /** procedência do número: estimador usado, faixa e n (regra transversal das OS) */
+  nota?: string;
   selected?: boolean;
   onExpandir: (id: KpiId) => void;
 }
@@ -22,7 +24,7 @@ const SEVER_BORDER: Record<string, string> = {
   critico: "#DC2626",
 };
 
-const KpiCard = ({ id, titulo, valor, delta, sparkline, severidade = "neutro", selected, onExpandir }: KpiCardProps) => {
+const KpiCard = ({ id, titulo, valor, delta, sparkline, severidade = "neutro", nota, selected, onExpandir }: KpiCardProps) => {
   const sparkData = sparkline.map((v, i) => ({ i, v }));
   const sparkColor = severidade === "critico" ? "#DC2626" : severidade === "atencao" ? "#F59E0B" : severidade === "positivo" ? "#16A34A" : "hsl(var(--primary))";
 
@@ -49,6 +51,7 @@ const KpiCard = ({ id, titulo, valor, delta, sparkline, severidade = "neutro", s
           </div>
         )}
       </div>
+      {nota && <p className="mt-1 text-[10px] leading-tight text-muted-foreground">{nota}</p>}
       {delta && (
         <div className={`inline-flex items-center gap-0.5 mt-1 text-[10px] font-medium rounded-full px-1.5 py-0.5 ${
           delta.direcao === "up" ? "bg-green-500/15 text-green-400" :
