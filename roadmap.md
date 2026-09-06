@@ -12,3 +12,6 @@
 ## Blindagem (v2) — pendente
 - [ ] Bloco 7 — signup fechado, MFA para admin, expiração de sessão
 - [ ] Bloco 8 — verificação final (revisão de segurança, teste de vazamento, varredura do bundle)
+
+## Painel admin
+- [x] Alerta de dados desatualizados (somente admin geral) no painel inicial
