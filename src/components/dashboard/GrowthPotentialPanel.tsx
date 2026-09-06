@@ -50,14 +50,23 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="glass-card p-3 !bg-card/95 text-xs space-y-1">
       <p className="font-mono text-muted-foreground">{label}</p>
-      {payload.map((p: any, i: number) =>
-        <p key={i} style={{ color: p.color }} className="font-medium">
-          {p.name}: {typeof p.value === "number" ? fmtBRLCompact(p.value) : p.value}
-        </p>
-      )}
+      {payload.map((p: any, i: number) => {
+        const indexado = typeof p.name === "string" && p.name.includes("Índice");
+        return (
+          <p key={i} style={{ color: p.color }} className="font-medium">
+            {p.name}:{" "}
+            {typeof p.value !== "number"
+              ? "—"
+              : indexado
+              ? `${p.value} (base 100)`
+              : fmtBRLCompact(p.value)}
+          </p>
+        );
+      })}
     </div>
   );
 };
+
 
 const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark }: GrowthPotentialPanelProps) => {
   // Primary source: Efect Rta Vertical from meli_campaigns
