@@ -156,3 +156,47 @@ export function fmtBRLShort(v: number | null | undefined): string {
   if (abs >= 1e3) return `R$ ${(n / 1e3).toFixed(0)} mil`;
   return fmtBRL(n);
 }
+
+// ── OS-2 ────────────────────────────────────────────────────────────────────
+// A média de faturamento descreve uma loja que não existe: a distribuição tem
+// assimetria ~10 e as 5% maiores lojas concentram ~76% do total. A estatística
+// padrão de carteira passa a ser mediana + faixa interquartil; a média continua
+// disponível, mas nunca sozinha.
+export interface ResumoCarteira {
+  n: number;
+  soma: number;
+  media: number;
+  mediana: number;
+  p25: number;
+  p75: number;
+  p90: number;
+  /** true quando n < 5: IQR com amostra mínima engana, exiba os valores individuais */
+  amostraMinima: boolean;
+}
+
+export const N_MINIMO_IQR = 5;
+
+export function resumoCarteira(values: number[]): ResumoCarteira {
+  const arr = sortAsc(values);
+  const n = arr.length;
+  if (n === 0) {
+    return { n: 0, soma: 0, media: 0, mediana: 0, p25: 0, p75: 0, p90: 0, amostraMinima: true };
+  }
+  const soma = arr.reduce((a, b) => a + b, 0);
+  return {
+    n,
+    soma,
+    media: soma / n,
+    mediana: quantile(arr, 0.5),
+    p25: quantile(arr, 0.25),
+    p75: quantile(arr, 0.75),
+    p90: quantile(arr, 0.9),
+    amostraMinima: n < N_MINIMO_IQR,
+  };
+}
+
+/** Separa positivos de não-positivos para eixos logarítmicos (log de ≤ 0 é indefinido). */
+export function separarParaLog<T>(rows: T[], getValue: (t: T) => number): { plotaveis: T[]; omitidos: number } {
+  const plotaveis = rows.filter((r) => Number.isFinite(getValue(r)) && getValue(r) > 0);
+  return { plotaveis, omitidos: rows.length - plotaveis.length };
+}
