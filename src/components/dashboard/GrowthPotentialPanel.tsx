@@ -11,6 +11,7 @@ import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 import type { VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
+import { useCategoryMix } from "@/hooks/useCategoryMix";
 import {
   statusPorDelta,
   corPorDelta,
