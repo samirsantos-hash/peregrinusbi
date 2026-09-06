@@ -10,6 +10,8 @@ import type { SellerTrend } from "@/hooks/usePortfolioTrends";
 import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 import { getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { toast } from "sonner";
+import { flagAtiva } from "@/lib/stats/flags";
+import { shrinkEstimate, type ResultadoEncolhimento } from "@/lib/stats/shrinkage";
 import { Input } from "@/components/ui/input";
 import { useGmConcessionarias } from "@/hooks/useGmConcessionarias";
 
@@ -92,6 +94,7 @@ function getExportRows(data: EnrichedSeller[], trends?: Record<string, SellerTre
       "Faturamento (R$)": s.tgmvLc,
       "Tendência Fat. (%)": t ? Number(t.tgmvTrend.toFixed(1)) : "—",
       ROAS: Number(s.roas.toFixed(1)),
+      "Meses observados (n)": s.mesesObservados,
       "Potência Full (%)": Number(s.potenciaFull.toFixed(1)),
       "Modal Principal": `${s.modalPrincipal.emoji} ${s.modalPrincipal.label}`,
       "% Ads": Number(s.pctAds.toFixed(2)),
@@ -183,7 +186,9 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
       let cmp: number;
-      if (sortKey === "modalPrincipal") {
+      if (sortKey === "roas") {
+        cmp = roasDe(a) - roasDe(b);
+      } else if (sortKey === "modalPrincipal") {
         cmp = a.modalPrincipal.label.localeCompare(b.modalPrincipal.label);
       } else {
         const av = a[sortKey as keyof typeof a];
@@ -194,7 +199,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
       }
       return sortAsc ? cmp : -cmp;
     });
-  }, [filtered, sortKey, sortAsc]);
+  }, [filtered, sortKey, sortAsc, roasShrink]);
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) setSortAsc(!sortAsc);
@@ -409,7 +414,34 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           <TrendArrow value={trend?.tgmvTrend} />
                         </span>
                       </TableCell>
-                      <TableCell className="font-mono text-sm">{s.roas.toFixed(1)}x</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {(() => {
+                          const sh = roasShrink?.get(s.sellerId);
+                          if (!sh) {
+                            return (
+                              <span className="inline-flex items-center gap-1">
+                                {s.roas.toFixed(1)}x
+                                <span className="text-[10px] text-muted-foreground">n={s.mesesObservados}</span>
+                              </span>
+                            );
+                          }
+                          return (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="inline-flex items-center gap-1 cursor-help">
+                                  {sh.valorAjustado.toFixed(1)}x
+                                  <span className="text-[10px] text-muted-foreground">n={sh.n}</span>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
+                                Estimador: encolhimento empírico de Bayes.<br />
+                                Bruto {sh.valorBruto.toFixed(1)}x · {sh.n} {sh.n === 1 ? "mês" : "meses"} · peso do prior {(sh.B * 100).toFixed(0)}%<br />
+                                Prior {sh.prior.toFixed(1)}x ({sh.priorEscopo === "vertical" ? `vertical ${sh.priorRotulo}` : "carteira — vertical pequena demais"})
+                              </TooltipContent>
+                            </Tooltip>
+                          );
+                        })()}
+                      </TableCell>
                       <TableCell>
                         <span className={`font-mono text-sm font-semibold ${potenciaColor}`}>
                           {s.potenciaFull.toFixed(1)}%
