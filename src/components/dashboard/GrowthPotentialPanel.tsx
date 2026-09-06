@@ -559,7 +559,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) =>
-                v >= 1_000_000
+                modoCurva === "indexado"
+                  ? String(v)
+                  : v >= 1_000_000
                   ? `${(v / 1e6).toFixed(1)}M`
                   : v >= 1000
                   ? `${(v / 1000).toFixed(0)}K`
@@ -569,27 +571,31 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
-              dataKey="Benchmark Vertical"
+              dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
               stroke="hsl(40, 95%, 55%)"
               fill="url(#gradBenchmark)"
               strokeWidth={2}
               strokeDasharray="6 3"
+              connectNulls={false}
               animationDuration={800}
               animationEasing="ease-in-out"
             />
             <Area
               type="monotone"
-              dataKey="Seller (Acumulado)"
+              dataKey={modoCurva === "indexado" ? "Seller (Índice)" : "Seller (Acumulado)"}
               stroke={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"}
               fill="url(#gradSellerGrowth)"
               strokeWidth={2.5}
+              connectNulls={false}
               animationDuration={800}
               animationEasing="ease-in-out"
             />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
+        )}
       </div>
+
     </motion.div>
   );
 };
