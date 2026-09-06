@@ -518,7 +518,7 @@ const Index = () => {
                       titulo="GMV mês vs mês (comparação anual)"
                     />
                     <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
-                    <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} />
+                    <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller || undefined} />
                     <TrendAnalysisPanel
                       kpis={displayKpis}
                       dataGranularity={granularity}

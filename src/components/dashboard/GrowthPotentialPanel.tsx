@@ -11,6 +11,7 @@ import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 import type { VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
+import { useCategoryMix } from "@/hooks/useCategoryMix";
 import {
   statusPorDelta,
   corPorDelta,
@@ -43,6 +44,7 @@ interface GrowthPotentialPanelProps {
   dataGranularity?: "consolidated" | "daily";
   campaign?: SellerCampaign | null;
   benchmark?: VerticalBenchmark | null;
+  sellerId?: string;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -68,7 +70,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 
-const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark }: GrowthPotentialPanelProps) => {
+const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark, sellerId }: GrowthPotentialPanelProps) => {
+  const { data: mix } = useCategoryMix(sellerId);
   // Primary source: Efect Rta Vertical from meli_campaigns
   const hasCampaignData = !!campaign && campaign.efectRtaVertical > 0;
   const [modoCurva, setModoCurva] = useState<"acumulado" | "indexado">("acumulado");
@@ -86,6 +89,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
       : fonteBenchmark === "cdp"
       ? "Faturamento CDP do próprio seller (proxy)"
       : "Estimativa derivada do uplift (dado frágil)";
+  // Quando a referência vem de um índice fixo aplicado ao próprio seller,
+  // as curvas são proporcionais (idênticas no modo indexado).
+  const curvaProporcional = fonteBenchmark === "efect_rta";
 
   const {
     chartData,
@@ -535,6 +541,37 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
           )}
         </div>
 
+        {/* Resumo do gap no período */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+          {[
+            { label: "Seller no período", valor: fmtBRLCompact(sellerTotal), cor: "text-foreground" },
+            { label: "Referência da vertical", valor: fmtBRLCompact(benchmarkTotal), cor: "text-amber-400" },
+            {
+              label: "Gap (oportunidade)",
+              valor:
+                benchmarkTotal > 0
+                  ? `${fmtBRLCompact(Math.abs(benchmarkTotal - sellerTotal))} (${(
+                      ((sellerTotal - benchmarkTotal) / benchmarkTotal) * 100
+                    ).toFixed(1)}%)`
+                  : "—",
+              cor: sellerTotal >= benchmarkTotal ? "text-emerald-400" : "text-destructive",
+            },
+          ].map((c) => (
+            <div key={c.label} className="rounded-lg border border-border/50 bg-muted/20 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.label}</p>
+              <p className={`text-sm font-bold font-mono tabular-nums ${c.cor}`}>{c.valor}</p>
+            </div>
+          ))}
+        </div>
+
+        {modoCurva === "indexado" && curvaProporcional && (
+          <div className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-300">
+            A referência da vertical é obtida aplicando um índice fixo ao próprio faturamento do seller.
+            No modo indexado as duas curvas são matematicamente idênticas, então mostramos apenas a do
+            seller — o gap só faz sentido no modo Acumulado (R$).
+          </div>
+        )}
+
         {modoCurva === "indexado" && !baseInfo?.valida ? (
           <div className="flex h-[320px] items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/5 px-6 text-center text-xs text-amber-300">
             Base de cálculo igual a zero nos primeiros pontos da janela — o índice não pode ser calculado
@@ -578,17 +615,19 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               }
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area
-              type="monotone"
-              dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
-              stroke="hsl(40, 95%, 55%)"
-              fill="url(#gradBenchmark)"
-              strokeWidth={2}
-              strokeDasharray="6 3"
-              connectNulls={false}
-              animationDuration={800}
-              animationEasing="ease-in-out"
-            />
+            {!(modoCurva === "indexado" && curvaProporcional) && (
+              <Area
+                type="monotone"
+                dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
+                stroke="hsl(40, 95%, 55%)"
+                fill="url(#gradBenchmark)"
+                strokeWidth={2}
+                strokeDasharray="6 3"
+                connectNulls={false}
+                animationDuration={800}
+                animationEasing="ease-in-out"
+              />
+            )}
             <Area
               type="monotone"
               dataKey={modoCurva === "indexado" ? "Seller (Índice)" : "Seller (Acumulado)"}
@@ -604,6 +643,49 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         </ResponsiveContainer>
         )}
       </div>
+
+      {/* ── Percentual por categoria ─────────────────────────────────────── */}
+      {!!mix?.categorias?.length && (
+        <div className="glass-card p-5">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Percentual por categoria
+            </h3>
+            <TooltipInfo text="Participação de cada categoria no total de anúncios ativos do seller, no snapshot mais recente de anúncios." />
+            <Badge variant="outline" className="text-[10px] font-normal ml-auto">
+              {mix.totalItens.toLocaleString("pt-BR")} itens ativos
+              {mix.data ? ` · ${mix.data.slice(8, 10)}/${mix.data.slice(5, 7)}/${mix.data.slice(0, 4)}` : ""}
+            </Badge>
+          </div>
+
+          <div className="mt-4 space-y-2.5">
+            {mix.categorias.slice(0, 12).map((c) => (
+              <div key={c.categoria}>
+                <div className="flex items-baseline justify-between gap-3 mb-1">
+                  <span className="text-xs text-foreground truncate">{c.categoria}</span>
+                  <span className="text-[11px] font-mono tabular-nums text-muted-foreground shrink-0">
+                    {c.itens.toLocaleString("pt-BR")} itens ·{" "}
+                    <span className="font-bold text-foreground">{c.pct.toFixed(1)}%</span>
+                  </span>
+                </div>
+                <div className="relative w-full h-2 bg-muted/40 rounded-full overflow-hidden">
+                  <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(c.pct, 100)}%` }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+            ))}
+            {mix.categorias.length > 12 && (
+              <p className="text-[10px] text-muted-foreground pt-1">
+                + {mix.categorias.length - 12} categorias com participação menor.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
     </motion.div>
   );
