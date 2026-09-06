@@ -88,8 +88,10 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
       ? `Índice Efect Rta da vertical${verticalRotulo ? ` (${verticalRotulo})` : ""}`
       : fonteBenchmark === "cdp"
       ? "Faturamento CDP do próprio seller (proxy)"
-
       : "Estimativa derivada do uplift (dado frágil)";
+  // Quando a referência vem de um índice fixo aplicado ao próprio seller,
+  // as curvas são proporcionais (idênticas no modo indexado).
+  const curvaProporcional = fonteBenchmark === "efect_rta";
 
   const {
     chartData,
