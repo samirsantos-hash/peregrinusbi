@@ -538,6 +538,37 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
           )}
         </div>
 
+        {/* Resumo do gap no período */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+          {[
+            { label: "Seller no período", valor: fmtBRLCompact(sellerTotal), cor: "text-foreground" },
+            { label: "Referência da vertical", valor: fmtBRLCompact(benchmarkTotal), cor: "text-amber-400" },
+            {
+              label: "Gap (oportunidade)",
+              valor:
+                benchmarkTotal > 0
+                  ? `${fmtBRLCompact(Math.abs(benchmarkTotal - sellerTotal))} (${(
+                      ((sellerTotal - benchmarkTotal) / benchmarkTotal) * 100
+                    ).toFixed(1)}%)`
+                  : "—",
+              cor: sellerTotal >= benchmarkTotal ? "text-emerald-400" : "text-destructive",
+            },
+          ].map((c) => (
+            <div key={c.label} className="rounded-lg border border-border/50 bg-muted/20 p-3">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.label}</p>
+              <p className={`text-sm font-bold font-mono tabular-nums ${c.cor}`}>{c.valor}</p>
+            </div>
+          ))}
+        </div>
+
+        {modoCurva === "indexado" && curvaProporcional && (
+          <div className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-300">
+            A referência da vertical é obtida aplicando um índice fixo ao próprio faturamento do seller.
+            No modo indexado as duas curvas são matematicamente idênticas, então mostramos apenas a do
+            seller — o gap só faz sentido no modo Acumulado (R$).
+          </div>
+        )}
+
         {modoCurva === "indexado" && !baseInfo?.valida ? (
           <div className="flex h-[320px] items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/5 px-6 text-center text-xs text-amber-300">
             Base de cálculo igual a zero nos primeiros pontos da janela — o índice não pode ser calculado
