@@ -1,49 +1,50 @@
-# Precisão de métricas — 7 correções de estimador
+# Correções estatísticas — plano de execução das ordens de serviço
 
-Objetivo: trocar estimadores frágeis por estimadores robustos, sem reescrever a lógica de dados existente. Cada item entra como uma camada nova de cálculo (biblioteca + uso pontual nos painéis), com testes.
+Ordem definida nas OS: **OS-1 → OS-4 → OS-2 → OS-5 → OS-3 → OS-6 → OS-7**. Uma OS por entrega, para isolar qualquer regressão. Nenhuma lógica de dados existente é reescrita: cada OS adiciona uma camada nova e troca apenas o ponto de chamada indicado.
 
-## Ordem de execução (por prioridade)
+## Base comum (entra junto com a OS-1)
 
-### Etapa A — corrige leitura errada hoje
+- `src/lib/stats/robust.ts` (novo): `mediana`, `mad`, `computeRobustZScore(values)`. Falha alto conforme a OS-1: `MAD=0: dispersão nula, use Qn ou IQR`, `amostra insuficiente para z robusto: n=<n>`, filtra `null`/`NaN` registrando quantos foram descartados, e devolve `sem_dado` quando tudo é nulo.
+- `src/lib/stats/config.ts` (novo): limiares ajustáveis sem deploy (3,5 do MAD; 0,05 do FDR; 10 lojas mínimas por vertical) lidos da tabela `config_estimativa` já existente, com constantes de fallback.
+- Flags de reversão em `src/lib/stats/flags.ts`: `ALERTS_USE_ROBUST_Z`, `RANKINGS_USE_SHRINKAGE`.
+- Testes em `src/lib/stats/*.test.ts` cobrindo cada caso de borda que precisa estourar erro.
 
-**A1. Alerta de churn por z-score modificado (MAD)**
-- Nova lib `src/lib/stats/robust.ts`: `mediana`, `mad`, `zModificado` (constante 0,6745), com fallback quando MAD = 0 (usa desvio absoluto médio × 1,253).
-- `src/lib/risk/churnRisk.ts`: trocar `meanSd`/z clássico por mediana+MAD, limiar `|mz| > 3,5` (alta) e `> 3,0` (média), mantendo a mesma interface `ChurnStat`/`ChurnSignal` e o churn absoluto como está.
-- Constantes exportadas e comentadas para calibração futura por vertical.
-- Atualizar `src/lib/risk/riskAggregator.test.ts` e adicionar testes do estimador robusto.
+## OS-1 — Churn por z-score modificado (MAD)
+- `src/lib/risk/churnRisk.ts`: o detector passa a chamar `computeRobustZScore`; o z clássico (`meanSd`) fica intacto e marcado `@deprecated para alertas`.
+- Limiar `|mz| > 3,5`; a interface `ChurnStat`/`ChurnSignal` e o churn absoluto não mudam.
+- Aceite: nenhuma outra tela muda; testes de outlier extremo, de 10 valores idênticos (erro) e de amostra < 8 (erro).
 
-**A2. Encolhimento empírico de Bayes nos rankings**
-- Nova lib `src/lib/stats/shrinkage.ts`: `encolherRazao({ numerador, denominador, n })[]` → prior intravertical (média global só como fallback quando a vertical tem menos de 20 lojas), fator `B = σ²/(σ²+τ²)`, retorno com `valorBruto`, `valorAjustado`, `B`, `n`.
-- Aplicar no ranking de eficiência/ROAS (`EfficiencyPanel`, `RaioXTable`, `PortfolioDetail`) ordenando pelo valor ajustado e exibindo `n` ao lado do valor.
+## OS-4 — Encolhimento empírico de Bayes nos rankings
+- `src/lib/stats/shrinkage.ts` (novo): `shrinkEstimate(values, counts, priorScope)` com prior **intravertical** (mediana do grupo), fallback para carteira quando a vertical tem < 10 lojas — sinalizado na UI.
+- Erros explícitos: `n ausente para loja <id>: encolhimento impossível`, prior indefinido; `τ² = 0` gera log de aviso.
+- Aplicado em: ranking de carteira, troféus (`TrophyCards`), cluster de desempenho (`PerformanceClusterChart`), ROAS/ACOS por loja (`EfficiencyPanel`, `RaioXTable`).
+- `n` visível ao lado de todo valor encolhido; valor bruto permanece no detalhamento.
 
-**A3. Mediana e escala log em faturamento**
-- `src/lib/carteira/stats.ts` já tem `describe`/`quantile`: expor helper `resumoCarteira` (soma, mediana, p25–p75) e usá-lo onde hoje se exibe média de GMV.
-- Eixos de faturamento/investimento nos gráficos de distribuição da carteira passam a `scale="log"` com rótulo indicando escala logarítmica.
-- Faixas de benchmark por percentil (p25/p50/p75/p90) em vez de múltiplos da média.
+## OS-2 — Mediana, IQR e escala logarítmica
+- `src/lib/carteira/stats.ts`: expor mediana e IQR no agregador de carteira; `mean` permanece, exibida ao lado da mediana.
+- Eixos de GMV e investimento em escala log, com contador visível de lojas omitidas por valor ≤ 0 e estado vazio explícito quando a série inteira é não-positiva.
+- Faixas de benchmark por percentil (p25/p50/p75/p90). Com n < 5, exibir valores individuais em vez de faixa.
 
-**A4. Estado tri-valorado (ativo / sem_participacao / sem_dado)**
-- Nova lib `src/lib/stats/estadoMetrica.ts`: `classificarEstado(valor, contexto)` e `apenasAtivos(...)` para excluir ausentes de médias/percentis.
-- Aplicar em `inv_pads` / `tgmv_lc_pads` nos painéis de publicidade e nos KPIs de carteira; exibir "sem participação" e "sem dado" com tratamento visual próprio (badge neutro), nunca como zero.
-- Nos painéis diários de publicidade, mostrar aviso explícito de base indisponível quando a série diária vier 100% nula.
+## OS-5 — Estado tri-valorado
+- `src/lib/stats/estadoMetrica.ts` (novo): `ativo | sem_participacao | sem_dado` derivado na leitura de `inv_pads`, `bpc`, `cdp_tgmv_lc` (sem migração de banco nesta etapa; o estado é calculado no acesso).
+- Agregadores excluem `sem_participacao` e `sem_dado` de média, mediana e percentil; média que receber `sem_dado` lança erro.
+- UI: cinza para "não participa", hachura para "sem dado".
+- Auditoria vinculada: confirmar que `INV_PADS`/`TGMV_LC_PADS` estão vazios no feed diarizado e, sendo o caso, o painel diário de publicidade exibe estado vazio explícito, nunca gráfico zerado.
 
-### Etapa B — eleva o rigor do que já funciona
+## OS-3 — FDR na matriz de correlação
+- `src/lib/correlacao.ts`: acrescentar `pValorPearson(r, n)` e `benjaminiHochberg(pvals, Q)`. Pearson atual permanece.
+- Par com n < 30 vira estado "n insuficiente"; variância nula lança `variância nula em <coluna>: correlação indefinida`; contagem de pares divergente lança erro.
+- `CorrelacaoPanel`, `PairplotMatrix` e `SynergyAnalysisPanel` exibem `r`, `n` e `q` e esmaecem as células reprovadas. Aviso de correlação ≠ causa mantido.
 
-**B1. Controle de FDR (Benjamini-Hochberg) na matriz de correlação**
-- `src/lib/correlacao.ts`: adicionar `pValorPearson(r, n)` (t de Student) e `benjaminiHochberg(pvals, Q)` retornando q-valores e flag de significância.
-- `CorrelacaoPanel`, `PairplotMatrix` e `SynergyAnalysisPanel` passam a exibir `r`, `n` e `q`, esmaecendo células que não passam o FDR.
+## OS-6 — STL nas séries diárias
+- `src/lib/stats/stl.ts` (novo): decomposição com período 7 devolvendo tendência, sazonal e resíduo; MSTL fica fora deste escopo.
+- `Daily7DPanel`: tendência como linha principal, série crua ao fundo; média móvel de 7 dias vira opção. Anomalia passa a ser detectada no resíduo pelo MAD da OS-1.
+- Lacuna de data não é interpolada em silêncio; menos de 2 períodos completos exibe aviso; dia parcial usa a guarda de período parcial já existente; calendário de exceções para datas comerciais.
 
-**B2. Decomposição STL nas séries diárias**
-- Nova lib `src/lib/stats/stl.ts`: STL simplificado (Loess) com período 7, retornando `tendencia`, `sazonal`, `residuo`.
-- `Daily7DPanel`: tendência como linha principal, série crua ao fundo, e detector de anomalia aplicando o critério MAD sobre o resíduo. Média móvel de 7 dias permanece disponível como opção.
+## OS-7 — Indicadores por componente nos radares
+- Escolher um representante do bloco `SCORE_FINAL_FULL` / `PONTUACAO_SOW` / `PONTUACAO_HI` (r ≥ 0,847), documentando no código o r que justifica.
+- Radar só com eixos de blocos distintos e padronizados; menos de 3 eixos válidos vira gráfico de barras.
 
-**B3. Seleção de indicadores por componente nos radares**
-- Documentar os pares redundantes (SCORE_FINAL_FULL × PONTUACAO_SOW; PONTUACAO_HI × SOW) e manter um representante por eixo nos gráficos de radar, movendo os demais para o detalhamento.
-
-### Permanente
-- Todo agregado exibe `n` e a incerteza (faixa interquartil ou intervalo).
-- Cada painel documenta em tooltip qual estimador usou.
-
-## Notas
-- Limiares (3,5 no MAD; Q = 0,05; n mínimo do prior) ficam em constantes nomeadas, para calibração contra casos de churn confirmados.
-- Prior de encolhimento é intravertical, com fallback global.
-- Nenhuma migração de banco; nenhuma alteração em parsers de importação.
+## Fora de escopo
+- Migrações de banco e alteração de parsers de importação.
+- Recalibração dos limiares contra casos reais de churn (fica registrada como pendência antes de produção).
