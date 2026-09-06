@@ -50,7 +50,7 @@ export default function TrophyCards({ sellers }: Props) {
       bg: "bg-yellow-400/10 border-yellow-400/20",
       title: "📦 Máxima Potência no Full",
       seller: logisticsChamp.nickname,
-      detail: `${logisticsPct.toFixed(1)}% Potência Full (TSI_FULL)`,
+      detail: `${logisticsPct.toFixed(1)}% Potência Full (TSI_FULL) · n=${logisticsChamp.mesesObservados}`,
       tooltip: "Mede o aproveitamento do potencial de escala do seller utilizando o ecossistema Fulfillment. Sellers com alta potência no Full possuem maior conversão e relevância no algoritmo.",
     },
     {
@@ -59,7 +59,7 @@ export default function TrophyCards({ sellers }: Props) {
       bg: "bg-emerald-400/10 border-emerald-400/20",
       title: "Maior Tração",
       seller: tractionChamp.nickname,
-      detail: `${tractionPct.toFixed(1)}% de efetividade (TGMV/Meta)`,
+      detail: `${tractionPct.toFixed(1)}% de efetividade (TGMV/Meta) · n=${tractionChamp.mesesObservados}`,
       tooltip: null as string | null,
     },
     {
@@ -68,7 +68,7 @@ export default function TrophyCards({ sellers }: Props) {
       bg: "bg-blue-400/10 border-blue-400/20",
       title: "Excelência em Qualidade",
       seller: qualityChamp.nickname,
-      detail: `${qualityChamp.repCurrentLevel || "N/A"} · Score ${qualityChamp.scoreQualidadeFinal.toFixed(0)}`,
+      detail: `${qualityChamp.repCurrentLevel || "N/A"} · Score ${qualityChamp.scoreQualidadeFinal.toFixed(0)} · n=${qualityChamp.mesesObservados}`,
       tooltip: null as string | null,
     },
     {
@@ -77,7 +77,7 @@ export default function TrophyCards({ sellers }: Props) {
       bg: "bg-purple-400/10 border-purple-400/20",
       title: "Mestre do Ads",
       seller: adsChamp.nickname,
-      detail: `Ratio Ads: ${adsPct.toFixed(2)}% (meta 3%)`,
+      detail: `Ratio Ads: ${adsPct.toFixed(2)}% (meta 3%) · n=${adsChamp.mesesObservados}`,
       tooltip: null as string | null,
     },
   ];
