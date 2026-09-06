@@ -641,6 +641,49 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         )}
       </div>
 
+      {/* ── Percentual por categoria ─────────────────────────────────────── */}
+      {!!mix?.categorias?.length && (
+        <div className="glass-card p-5">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              Percentual por categoria
+            </h3>
+            <TooltipInfo text="Participação de cada categoria no total de anúncios ativos do seller, no snapshot mais recente de anúncios." />
+            <Badge variant="outline" className="text-[10px] font-normal ml-auto">
+              {mix.totalItens.toLocaleString("pt-BR")} itens ativos
+              {mix.data ? ` · ${mix.data.slice(8, 10)}/${mix.data.slice(5, 7)}/${mix.data.slice(0, 4)}` : ""}
+            </Badge>
+          </div>
+
+          <div className="mt-4 space-y-2.5">
+            {mix.categorias.slice(0, 12).map((c) => (
+              <div key={c.categoria}>
+                <div className="flex items-baseline justify-between gap-3 mb-1">
+                  <span className="text-xs text-foreground truncate">{c.categoria}</span>
+                  <span className="text-[11px] font-mono tabular-nums text-muted-foreground shrink-0">
+                    {c.itens.toLocaleString("pt-BR")} itens ·{" "}
+                    <span className="font-bold text-foreground">{c.pct.toFixed(1)}%</span>
+                  </span>
+                </div>
+                <div className="relative w-full h-2 bg-muted/40 rounded-full overflow-hidden">
+                  <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full bg-primary"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(c.pct, 100)}%` }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  />
+                </div>
+              </div>
+            ))}
+            {mix.categorias.length > 12 && (
+              <p className="text-[10px] text-muted-foreground pt-1">
+                + {mix.categorias.length - 12} categorias com participação menor.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
     </motion.div>
   );
 };
