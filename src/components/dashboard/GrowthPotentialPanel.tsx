@@ -612,17 +612,19 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               }
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area
-              type="monotone"
-              dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
-              stroke="hsl(40, 95%, 55%)"
-              fill="url(#gradBenchmark)"
-              strokeWidth={2}
-              strokeDasharray="6 3"
-              connectNulls={false}
-              animationDuration={800}
-              animationEasing="ease-in-out"
-            />
+            {!(modoCurva === "indexado" && curvaProporcional) && (
+              <Area
+                type="monotone"
+                dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
+                stroke="hsl(40, 95%, 55%)"
+                fill="url(#gradBenchmark)"
+                strokeWidth={2}
+                strokeDasharray="6 3"
+                connectNulls={false}
+                animationDuration={800}
+                animationEasing="ease-in-out"
+              />
+            )}
             <Area
               type="monotone"
               dataKey={modoCurva === "indexado" ? "Seller (Índice)" : "Seller (Acumulado)"}
