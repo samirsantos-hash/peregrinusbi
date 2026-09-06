@@ -69,7 +69,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 
-const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark }: GrowthPotentialPanelProps) => {
+const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark, sellerId }: GrowthPotentialPanelProps) => {
+  const { data: mix } = useCategoryMix(sellerId);
   // Primary source: Efect Rta Vertical from meli_campaigns
   const hasCampaignData = !!campaign && campaign.efectRtaVertical > 0;
   const [modoCurva, setModoCurva] = useState<"acumulado" | "indexado">("acumulado");
