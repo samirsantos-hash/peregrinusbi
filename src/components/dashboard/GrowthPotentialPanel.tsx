@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid,
@@ -50,26 +50,51 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return (
     <div className="glass-card p-3 !bg-card/95 text-xs space-y-1">
       <p className="font-mono text-muted-foreground">{label}</p>
-      {payload.map((p: any, i: number) =>
-        <p key={i} style={{ color: p.color }} className="font-medium">
-          {p.name}: {typeof p.value === "number" ? fmtBRLCompact(p.value) : p.value}
-        </p>
-      )}
+      {payload.map((p: any, i: number) => {
+        const indexado = typeof p.name === "string" && p.name.includes("Índice");
+        return (
+          <p key={i} style={{ color: p.color }} className="font-medium">
+            {p.name}:{" "}
+            {typeof p.value !== "number"
+              ? "—"
+              : indexado
+              ? `${p.value} (base 100)`
+              : fmtBRLCompact(p.value)}
+          </p>
+        );
+      })}
     </div>
   );
 };
 
+
 const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark }: GrowthPotentialPanelProps) => {
   // Primary source: Efect Rta Vertical from meli_campaigns
   const hasCampaignData = !!campaign && campaign.efectRtaVertical > 0;
+  const [modoCurva, setModoCurva] = useState<"acumulado" | "indexado">("acumulado");
+
+  // Procedência declarada do benchmark (elo 1 da auditoria)
+  const verticalRotulo = campaign?.verticalPrincipal?.trim() || null;
+  const fonteBenchmark: "efect_rta" | "cdp" | "estimativa" = hasCampaignData
+    ? "efect_rta"
+    : kpis.some((k) => (k.cdpTgmv || 0) > 0)
+    ? "cdp"
+    : "estimativa";
+  const rotuloFonte =
+    fonteBenchmark === "efect_rta"
+      ? `Índice Efect Rta da vertical${verticalRotulo ? ` (${verticalRotulo})` : ""}`
+      : fonteBenchmark === "cdp"
+      ? "Faturamento CDP do próprio seller (proxy)"
+      : "Estimativa derivada do uplift (dado frágil)";
 
   const {
     chartData,
     sellerTotal,
     benchmarkTotal,
+    baseInfo,
   } = useMemo(() => {
     if (kpis.length === 0) {
-      return { chartData: [], sellerTotal: 0, benchmarkTotal: 0 };
+      return { chartData: [], sellerTotal: 0, benchmarkTotal: 0, baseInfo: null as null | { seller: number; bench: number; pontos: number; valida: boolean } };
     }
 
     // If we have campaign data, use efectRtaVertical as the potentialPct directly
@@ -99,6 +124,14 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
 
     const sortedDates = Object.keys(byDate).sort();
 
+    // Base do índice = média dos 3 primeiros pontos (nunca um mês único).
+    const nBase = Math.min(3, sortedDates.length);
+    const baseSeller =
+      sortedDates.slice(0, nBase).reduce((s, d) => s + byDate[d].sellerGmv, 0) / nBase;
+    const baseBench =
+      sortedDates.slice(0, nBase).reduce((s, d) => s + byDate[d].benchmarkGmv, 0) / nBase;
+    const baseValida = baseSeller > 0 && baseBench > 0 && Number.isFinite(baseSeller) && Number.isFinite(baseBench);
+
     let cumSeller = 0;
     let cumBenchmark = 0;
     const data = sortedDates.map((date) => {
@@ -109,6 +142,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         date: label,
         "Seller (Acumulado)": Math.round(cumSeller),
         "Benchmark Vertical": Math.round(cumBenchmark),
+        // Índice base 100 — só calculado quando a base é válida (base 0 nunca vira Infinity)
+        "Seller (Índice)": baseValida ? Math.round((byDate[date].sellerGmv / baseSeller) * 100) : null,
+        "Vertical (Índice)": baseValida ? Math.round((byDate[date].benchmarkGmv / baseBench) * 100) : null,
       };
     });
 
@@ -116,8 +152,10 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
       chartData: data,
       sellerTotal: cumSeller,
       benchmarkTotal: cumBenchmark,
+      baseInfo: { seller: baseSeller, bench: baseBench, pontos: nBase, valida: baseValida },
     };
-  }, [kpis, hasCampaignData, campaign]);
+  }, [kpis, hasCampaignData, campaign, dataGranularity]);
+
 
   // ---------------------------------------------------------------
   // 6 dimensões vs categoria (com índice relativo à mediana ou referência)
@@ -442,23 +480,68 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         </div>
       )}
 
-      {/* Cumulative growth chart */}
+      {/* Cumulative / indexed growth chart */}
       <div className="glass-card p-5">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex flex-wrap items-center gap-2 mb-1">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-            Curva de Crescimento Acumulado: Seller vs Vertical
+            {modoCurva === "acumulado"
+              ? "Faturamento acumulado no período: Seller vs Referência da vertical"
+              : `Evolução indexada — Seller vs Vertical (base 100 = média dos ${baseInfo?.pontos ?? 3} primeiros pontos)`}
           </h3>
           <TooltipInfo text={
             "Como ler este gráfico:\n\n" +
-            "• Curva sólida (azul/verde): faturamento acumulado do SELLER no período. Cada ponto soma o dia/mês atual aos anteriores — ela só cresce.\n" +
-            "• Curva tracejada (amarela): faturamento que o seller TERIA se performasse igual à mediana da vertical (calculado a partir do índice Efect Rta Vertical). É o mesmo período, mesmo mix — só corrigido pelo padrão da categoria.\n\n" +
+            "MODO ACUMULADO (R$): soma o faturamento ponto a ponto — a curva nunca desce, por construção. Serve para dimensionar o gap em reais, NÃO para comparar trajetórias de crescimento.\n\n" +
+            "MODO INDEXADO (base 100): cada ponto é o valor do período dividido pela média dos 3 primeiros pontos da janela. Pode subir e descer, e é a leitura correta de crescimento. A base é uma média (não um mês único) justamente para não inflar a curva com um mês atípico.\n\n" +
+            "Curva tracejada (amarela) = referência da vertical, derivada da fonte declarada abaixo do título. Ela NÃO é hoje uma coorte fixa de sellers da vertical — é reconstruída a partir do índice da categoria aplicado ao próprio seller.\n\n" +
             "Como interpretar o gap:\n" +
-            "• Seller ACIMA do benchmark ⇒ ganho de market share, o algoritmo do ML tende a devolver mais exposição orgânica.\n" +
-            "• Seller ABAIXO ⇒ receita não capturada dentro da própria vertical; a distância vertical em R$ é o tamanho aproximado da oportunidade.\n" +
-            "• Curvas divergindo ao longo do tempo ⇒ tendência (perda ou ganho estrutural). Curvas paralelas ⇒ posição estável vs categoria.\n\n" +
-            "Para agir: abra as dimensões acima e comece pela mais fraca (Reputação/Tempo de Resposta ⇒ Share Full ⇒ Conversão ⇒ ROAS/ACOS)."
+            "• Seller ACIMA da referência ⇒ ganho de share dentro da categoria.\n" +
+            "• Seller ABAIXO ⇒ receita não capturada; no modo acumulado a distância vertical em R$ é o tamanho aproximado da oportunidade.\n" +
+            "• Curvas divergindo ⇒ tendência estrutural. Curvas paralelas ⇒ posição estável.\n\n" +
+            "Para agir: comece pela dimensão mais fraca acima (Reputação ⇒ Share Full ⇒ Conversão ⇒ ROAS/ACOS)."
           } />
+          <div className="ml-auto flex rounded-md border border-border overflow-hidden">
+            {(["acumulado", "indexado"] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => setModoCurva(m)}
+                className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                  modoCurva === m ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {m === "acumulado" ? "Acumulado (R$)" : "Indexado (100)"}
+              </button>
+            ))}
+          </div>
         </div>
+
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <Badge variant="outline" className="text-[10px] font-normal">
+            Referência: {rotuloFonte}
+          </Badge>
+          {!verticalRotulo && (
+            <Badge variant="outline" className="text-[10px] font-normal border-amber-500/40 text-amber-400">
+              Vertical não identificada para este seller
+            </Badge>
+          )}
+          {fonteBenchmark === "estimativa" && (
+            <Badge variant="outline" className="text-[10px] font-normal border-amber-500/40 text-amber-400">
+              Curva da vertical é estimativa, não dado de mercado
+            </Badge>
+          )}
+          {modoCurva === "indexado" && baseInfo?.valida && (
+            <Badge variant="outline" className="text-[10px] font-normal">
+              Base: {fmtBRLCompact(baseInfo.seller)} (média de {baseInfo.pontos} pontos)
+            </Badge>
+          )}
+        </div>
+
+        {modoCurva === "indexado" && !baseInfo?.valida ? (
+          <div className="flex h-[320px] items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/5 px-6 text-center text-xs text-amber-300">
+            Base de cálculo igual a zero nos primeiros pontos da janela — o índice não pode ser calculado
+            (divisão por zero). Use o modo Acumulado (R$) ou amplie o período.
+          </div>
+        ) : (
+
         <ResponsiveContainer width="100%" height={320}>
           <AreaChart data={chartData}>
             <defs>
@@ -485,7 +568,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) =>
-                v >= 1_000_000
+                modoCurva === "indexado"
+                  ? String(v)
+                  : v >= 1_000_000
                   ? `${(v / 1e6).toFixed(1)}M`
                   : v >= 1000
                   ? `${(v / 1000).toFixed(0)}K`
@@ -495,27 +580,31 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
             <Tooltip content={<CustomTooltip />} />
             <Area
               type="monotone"
-              dataKey="Benchmark Vertical"
+              dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
               stroke="hsl(40, 95%, 55%)"
               fill="url(#gradBenchmark)"
               strokeWidth={2}
               strokeDasharray="6 3"
+              connectNulls={false}
               animationDuration={800}
               animationEasing="ease-in-out"
             />
             <Area
               type="monotone"
-              dataKey="Seller (Acumulado)"
+              dataKey={modoCurva === "indexado" ? "Seller (Índice)" : "Seller (Acumulado)"}
               stroke={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"}
               fill="url(#gradSellerGrowth)"
               strokeWidth={2.5}
+              connectNulls={false}
               animationDuration={800}
               animationEasing="ease-in-out"
             />
             <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
+        )}
       </div>
+
     </motion.div>
   );
 };
