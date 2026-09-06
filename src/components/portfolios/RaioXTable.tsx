@@ -120,6 +120,25 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
 
   const enriched = useMemo(() => enrichRows(sellers), [sellers]);
 
+  /**
+   * OS-4 — ROAS encolhido (empirical Bayes). Ranking bruto premia amostra pequena;
+   * o valor ajustado é puxado ao prior intravertical conforme o nº de meses da loja.
+   * Lojas sem histórico mensal não são encolhidas: ficam com o valor bruto e n = 0.
+   */
+  const roasShrink = useMemo(() => {
+    if (!flagAtiva("RANKINGS_USE_SHRINKAGE")) return null;
+    const itens = enriched
+      .filter((s) => s.invPads > 0 && s.mesesObservados > 0)
+      .map((s) => ({ id: s.sellerId, valor: s.roas, n: s.mesesObservados, vertical: s.vertical }));
+    if (itens.length < 3) return null;
+    const out = new Map<string, ResultadoEncolhimento>();
+    for (const r of shrinkEstimate(itens)) out.set(r.id, r);
+    return out;
+  }, [enriched]);
+
+  const roasDe = (s: EnrichedSeller) => roasShrink?.get(s.sellerId)?.valorAjustado ?? s.roas;
+
+
   const filtered = useMemo(() => {
     let list = enriched;
     switch (filter) {
