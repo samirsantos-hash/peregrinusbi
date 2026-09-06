@@ -62,14 +62,30 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark }: GrowthPotentialPanelProps) => {
   // Primary source: Efect Rta Vertical from meli_campaigns
   const hasCampaignData = !!campaign && campaign.efectRtaVertical > 0;
+  const [modoCurva, setModoCurva] = useState<"acumulado" | "indexado">("acumulado");
+
+  // Procedência declarada do benchmark (elo 1 da auditoria)
+  const verticalRotulo = campaign?.verticalPrincipal?.trim() || null;
+  const fonteBenchmark: "efect_rta" | "cdp" | "estimativa" = hasCampaignData
+    ? "efect_rta"
+    : kpis.some((k) => (k.cdpTgmv || 0) > 0)
+    ? "cdp"
+    : "estimativa";
+  const rotuloFonte =
+    fonteBenchmark === "efect_rta"
+      ? `Índice Efect Rta da vertical${verticalRotulo ? ` (${verticalRotulo})` : ""}`
+      : fonteBenchmark === "cdp"
+      ? "Faturamento CDP do próprio seller (proxy)"
+      : "Estimativa derivada do uplift (dado frágil)";
 
   const {
     chartData,
     sellerTotal,
     benchmarkTotal,
+    baseInfo,
   } = useMemo(() => {
     if (kpis.length === 0) {
-      return { chartData: [], sellerTotal: 0, benchmarkTotal: 0 };
+      return { chartData: [], sellerTotal: 0, benchmarkTotal: 0, baseInfo: null as null | { seller: number; bench: number; pontos: number; valida: boolean } };
     }
 
     // If we have campaign data, use efectRtaVertical as the potentialPct directly
@@ -99,6 +115,14 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
 
     const sortedDates = Object.keys(byDate).sort();
 
+    // Base do índice = média dos 3 primeiros pontos (nunca um mês único).
+    const nBase = Math.min(3, sortedDates.length);
+    const baseSeller =
+      sortedDates.slice(0, nBase).reduce((s, d) => s + byDate[d].sellerGmv, 0) / nBase;
+    const baseBench =
+      sortedDates.slice(0, nBase).reduce((s, d) => s + byDate[d].benchmarkGmv, 0) / nBase;
+    const baseValida = baseSeller > 0 && baseBench > 0 && Number.isFinite(baseSeller) && Number.isFinite(baseBench);
+
     let cumSeller = 0;
     let cumBenchmark = 0;
     const data = sortedDates.map((date) => {
@@ -109,6 +133,9 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         date: label,
         "Seller (Acumulado)": Math.round(cumSeller),
         "Benchmark Vertical": Math.round(cumBenchmark),
+        // Índice base 100 — só calculado quando a base é válida (base 0 nunca vira Infinity)
+        "Seller (Índice)": baseValida ? Math.round((byDate[date].sellerGmv / baseSeller) * 100) : null,
+        "Vertical (Índice)": baseValida ? Math.round((byDate[date].benchmarkGmv / baseBench) * 100) : null,
       };
     });
 
@@ -116,8 +143,10 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
       chartData: data,
       sellerTotal: cumSeller,
       benchmarkTotal: cumBenchmark,
+      baseInfo: { seller: baseSeller, bench: baseBench, pontos: nBase, valida: baseValida },
     };
-  }, [kpis, hasCampaignData, campaign]);
+  }, [kpis, hasCampaignData, campaign, dataGranularity]);
+
 
   // ---------------------------------------------------------------
   // 6 dimensões vs categoria (com índice relativo à mediana ou referência)
