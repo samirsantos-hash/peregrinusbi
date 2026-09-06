@@ -31,13 +31,15 @@ describe("shrinkEstimate", () => {
     expect(maduro.B).toBeCloseTo(0.125, 2);
   });
 
-  it("loja de amostra mínima não lidera o ranking ajustado", () => {
+  it("amostra pequena perde posição para amostra grande de valor próximo", () => {
     const r = shrinkEstimate([
       ...base,
-      { id: "outlier", valor: 202, n: 1, vertical: "AUTO" },
-      { id: "solido", valor: 40, n: 12, vertical: "AUTO" },
+      { id: "instavel", valor: 42, n: 1, vertical: "AUTO" },
+      { id: "solido", valor: 38, n: 12, vertical: "AUTO" },
     ]).sort((a, b) => b.valorAjustado - a.valorAjustado);
     expect(r[0].id).toBe("solido");
+    const instavel = r.find((x) => x.id === "instavel")!;
+    expect(instavel.valorAjustado).toBeLessThan(instavel.valorBruto);
   });
 
   it("cai para o prior da carteira quando a vertical é pequena", () => {
