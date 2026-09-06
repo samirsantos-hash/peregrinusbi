@@ -21,7 +21,7 @@ describe("robust", () => {
   });
 
   it("detecta outlier extremo que o z clássico não pega", () => {
-    const serie = [10, 10, 11, 10, 9, 10, 11, 10, 10, 200];
+    const serie = [10, 12, 11, 9, 13, 8, 11, 10, 12, 200];
     const r = computeRobustZScore(serie);
     if (r.estado !== "ok") throw new Error("esperado ok");
     const zRobusto = r.zs[9];
