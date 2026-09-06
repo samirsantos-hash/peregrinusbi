@@ -11,8 +11,8 @@ const bpcModel: BpcThresholdModel = {
 };
 
 const churnStats: Record<string, ChurnStat> = {
-  AUTO: { vertical: "AUTO", n: 100, meanDelta: 0, sdDelta: 0.2 },
-  __GLOBAL__: { vertical: "__GLOBAL__", n: 500, meanDelta: 0, sdDelta: 0.2 },
+  AUTO: { vertical: "AUTO", n: 100, meanDelta: 0, sdDelta: 0.2, medianDelta: 0, madDelta: 0.05 },
+  __GLOBAL__: { vertical: "__GLOBAL__", n: 500, meanDelta: 0, sdDelta: 0.2, medianDelta: 0, madDelta: 0.05 },
 };
 
 function make(overrides: Partial<RiskSellerInput> = {}): RiskSellerInput {
@@ -65,7 +65,7 @@ describe("aggregateRisk", () => {
     expect(r[0].signals.some((s) => s.kind === "churn_absoluto")).toBe(true);
   });
 
-  it("z-score <= -1.5 = alta (queda anômala)", () => {
+  it("z robusto <= -3.5 = alta (queda anômala)", () => {
     const r = aggregateRisk(
       [make({ triplet: { sellerId: "s1", current: 1000, closed: 2000, prior: 10000 } })],
       bpcModel,
@@ -75,9 +75,9 @@ describe("aggregateRisk", () => {
     expect(r[0].signals.some((s) => s.kind === "churn_relativo" && s.severity === "alta")).toBe(true);
   });
 
-  it("z-score entre -1 e -1.5 = media", () => {
+  it("z robusto entre -3.0 e -3.5 = media", () => {
     const r = aggregateRisk(
-      [make({ triplet: { sellerId: "s1", current: 7500, closed: 7500, prior: 10000 } })],
+      [make({ triplet: { sellerId: "s1", current: 7630, closed: 7630, prior: 10000 } })],
       bpcModel,
       churnStats,
     );

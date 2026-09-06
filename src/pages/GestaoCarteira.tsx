@@ -35,6 +35,7 @@ import {
 import { classificarSeller, loadAlertConfig, saveAlertConfig, type AlertConfig, type SellerAlert, type SellerData } from "@/lib/alerts";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 import { ingestAllFiles } from "@/lib/carteira-ingest";
+import { resumoCarteira } from "@/lib/carteira/stats";
 import KpiCard, { type KpiId } from "@/components/carteira/KpiCard";
 import KpiDetailPanel from "@/components/carteira/KpiDetailPanel";
 import GraficoReputacao from "@/components/carteira/GraficoReputacao";
@@ -295,13 +296,15 @@ export default function GestaoCarteira() {
     const emCrescimento = filteredSellers.filter((r) => r.alerts.some((a) => a.tipo === "CRESCIMENTO_3M" || a.tipo === "CRESCIMENTO_MOM")).length;
     const riscoVenc = filteredSellers.filter((r) => r.alerts.some((a) => a.tipo === "VENCIMENTO_PROXIMO" || a.tipo === "VENCIDO")).length;
     const ticket = activeCount > 0 ? totalTgmv / activeCount : 0;
+    // OS-2: mediana + IQR como estatística padrão; a média fica ao lado, nunca sozinha.
+    const distribuicao = resumoCarteira(filteredSellers.filter((r) => r.tgmv_lc > 0).map((r) => r.tgmv_lc));
 
     // delta from previous month
     const prevSellers = cppData.filter((r) => r.tim_month_id === prevMonth);
     const prevTgmv = prevSellers.reduce((s, r) => s + (r.tgmv_lc ?? 0), 0);
     const deltaPct = prevTgmv > 0 ? ((totalTgmv - prevTgmv) / prevTgmv) * 100 : 0;
 
-    return { totalTgmv, activeCount, emQueda, emCrescimento, riscoVenc, ticket, deltaPct };
+    return { totalTgmv, activeCount, emQueda, emCrescimento, riscoVenc, ticket, deltaPct, distribuicao };
   }, [filteredSellers, cppData, prevMonth]);
 
   // Sparkline builders
@@ -650,7 +653,15 @@ export default function GestaoCarteira() {
           <KpiCard id="sellers_ativos" titulo="Sellers Ativos" valor={String(kpis.activeCount)}
             sparkline={sparkData.sellers_ativos} severidade={severidades.sellers_ativos}
             selected={kpiSelecionado === "sellers_ativos"} onExpandir={setKpiSelecionado} />
-          <KpiCard id="ticket_medio" titulo="Ticket Médio" valor={fmtBRL(kpis.ticket)}
+          <KpiCard id="ticket_medio" titulo="Faturamento por loja (mediana)"
+            valor={fmtBRL(kpis.distribuicao.mediana)}
+            nota={
+              kpis.distribuicao.n === 0
+                ? "sem lojas com faturamento no período"
+                : kpis.distribuicao.amostraMinima
+                  ? `n=${kpis.distribuicao.n} · amostra mínima, faixa não exibida · média ${fmtBRL(kpis.distribuicao.media)}`
+                  : `n=${kpis.distribuicao.n} · p25–p75 ${fmtBRL(kpis.distribuicao.p25)}–${fmtBRL(kpis.distribuicao.p75)} · média ${fmtBRL(kpis.distribuicao.media)}`
+            }
             sparkline={sparkData.ticket_medio} severidade={severidades.ticket_medio}
             selected={kpiSelecionado === "ticket_medio"} onExpandir={setKpiSelecionado} />
           <KpiCard id="queda" titulo="Em Queda" valor={String(kpis.emQueda)}

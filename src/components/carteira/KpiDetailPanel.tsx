@@ -419,13 +419,18 @@ function TicketMedioChart({ sellers }: { sellers: EnrichedSeller[] }) {
       <div className="w-[140px] space-y-2 text-[11px]">
         <p className="font-medium text-muted-foreground">Estatísticas</p>
         <div className="space-y-1">
-          <Row label="Média" value={fmtCompact(stats.mean)} />
           <Row label="Mediana" value={fmtCompact(stats.median)} />
+          <Row label="IQR (p25–p75)" value={`${fmtCompact(stats.p25)}–${fmtCompact(stats.p75)}`} />
+          <Row label="Média (assimétrica)" value={fmtCompact(stats.mean)} />
           <Row label="P25" value={fmtCompact(stats.p25)} />
           <Row label="P75" value={fmtCompact(stats.p75)} />
           <Row label="P90" value={fmtCompact(stats.p90)} />
           <Row label="Gini" value={`${(stats.gini * 100).toFixed(0)}%`} />
+          <Row label="n" value={String(values.length)} />
         </div>
+        <p className="text-[10px] leading-tight text-muted-foreground pt-1">
+          Distribuição fortemente assimétrica: a mediana é o valor de referência; a média é puxada pelas maiores lojas.
+        </p>
       </div>
     </div>
   );
