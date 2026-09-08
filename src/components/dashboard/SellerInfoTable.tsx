@@ -63,7 +63,7 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     tempoPrograma = `${months} ${months === 1 ? "mês" : "meses"}`;
   }
 
-  const uf = (seller.state || "").trim().toUpperCase();
+  const uf = (estado).trim().toUpperCase();
   const ufInfo = UF_INFO[uf];
 
   const loja = lojas?.find((l) => l.sellerId === seller.id);
@@ -98,13 +98,13 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     {
       icon: Layers,
       label: "Segmentação",
-      value: seller.cluster || "—",
+      value: cluster || "—",
       tooltip: "Cluster estratégico do seller (Emerging, Core, Mature) — define as metas e benchmarks aplicados.",
     },
     {
       icon: Tag,
       label: "Sub Categoria",
-      value: seller.subCluster || "—",
+      value: subCluster || "—",
       tooltip: "Subclassificação dentro do cluster principal — usada para comparações intra-vertical.",
     },
     {
