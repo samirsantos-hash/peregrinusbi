@@ -1,8 +1,10 @@
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { Award, Clock, Layers, Tag, MapPin, Globe } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
 import { UF_INFO } from "@/lib/geoBrasil";
+import { supabase } from "@/integrations/supabase/client";
 
 function parseLocalDate(dateStr: string): Date {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -10,14 +12,46 @@ function parseLocalDate(dateStr: string): Date {
 }
 
 interface Props {
-  seller?: { id?: string; cluster?: string; subCluster?: string; state?: string } | null;
+  seller?: { id?: string; custId?: string; cluster?: string; subCluster?: string; state?: string } | null;
   allKpis: { date?: string }[];
+}
+
+/** Complemento cadastral: quando a tabela de lojas está sem cluster/UF, busca o último mês do CPP. */
+function useCadastroComplementar(custId?: string, precisa?: boolean) {
+  return useQuery({
+    queryKey: ["seller-cadastro-complementar", custId],
+    enabled: Boolean(custId) && Boolean(precisa),
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cpp_mensal")
+        .select("cluster_seller, sub_cluster_seller, cus_state, tim_month_id")
+        .eq("cust_id_text", String(custId))
+        .order("tim_month_id", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data ?? null;
+    },
+  });
 }
 
 const SellerInfoTable = ({ seller, allKpis }: Props) => {
   const { data: lojas } = useClassificacaoLojas();
+  const faltando = !seller?.cluster || !seller?.subCluster || !seller?.state;
+  const { data: extra } = useCadastroComplementar(seller?.custId, faltando);
 
-  if (!seller) return null;
+  if (!seller) {
+    return (
+      <div className="glass-card p-3 text-[11px] text-muted-foreground">
+        Selecione uma loja no topo da página para ver as informações cadastrais.
+      </div>
+    );
+  }
+
+  const cluster = seller.cluster || extra?.cluster_seller || "";
+  const subCluster = seller.subCluster || extra?.sub_cluster_seller || "";
+  const estado = seller.state || extra?.cus_state || "";
 
   const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort() as string[];
 
