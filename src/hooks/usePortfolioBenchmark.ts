@@ -12,9 +12,18 @@ export interface VerticalStats {
   totalInv: number;
   totalTgmvPads: number;
   totalTgmv: number;
+  /** mediana do investimento (sellers da vertical) */
+  medianInv: number;
+  medianRoas: number;
+  medianAcos: number;
+  medianTacos: number;
+  /** @deprecated use medianInv */
   avgInv: number;
+  /** @deprecated use medianRoas */
   avgRoas: number;
+  /** @deprecated use medianAcos */
   avgAcos: number;
+  /** @deprecated use medianTacos */
   avgTacos: number;
   /** estatística completa: agregado (razão dos totais), mediana e dispersão */
   stats: EstatisticaRazoes;
@@ -24,9 +33,17 @@ export interface PortfolioBenchmark {
   verticals: VerticalStats[];
   portfolio: {
     totalSellers: number;
+    medianInv: number;
+    medianRoas: number;
+    medianAcos: number;
+    medianTacos: number;
+    /** @deprecated use medianInv */
     avgInv: number;
+    /** @deprecated use medianRoas */
     avgRoas: number;
+    /** @deprecated use medianAcos */
     avgAcos: number;
+    /** @deprecated use medianTacos */
     avgTacos: number;
   };
   /** carteira inteira — agregados como razão dos totais + dispersão */
@@ -114,10 +131,17 @@ export function usePortfolioBenchmark() {
             const totalTgmvPads = sellers.reduce((s, e) => s + e.tgmvPads, 0);
             const totalTgmv = sellers.reduce((s, e) => s + e.tgmv, 0);
 
-            const invValues = sellers.map(e => e.inv);
-            const roasValues = sellers.filter(e => e.inv > 0).map(e => e.tgmvPads / e.inv);
-            const acosValues = sellers.filter(e => e.tgmvPads > 0).map(e => (e.inv / e.tgmvPads) * 100);
-            const tacosValues = sellers.filter(e => e.tgmv > 0).map(e => (e.inv / e.tgmv) * 100);
+            // Mediana: apenas sellers com inv > 0 (alinhado a ratioStats)
+            const comInv = sellers.filter((e) => e.inv > 0);
+            const invValues = comInv.map((e) => e.inv);
+            const roasValues = comInv.map((e) => e.tgmvPads / e.inv);
+            const acosValues = comInv.filter((e) => e.tgmvPads > 0).map((e) => (e.inv / e.tgmvPads) * 100);
+            const tacosValues = comInv.filter((e) => e.tgmv > 0).map((e) => (e.inv / e.tgmv) * 100);
+
+            const medianInv = median(invValues);
+            const medianRoas = median(roasValues);
+            const medianAcos = median(acosValues);
+            const medianTacos = median(tacosValues);
 
             return {
               vertical,
@@ -125,10 +149,14 @@ export function usePortfolioBenchmark() {
               totalInv,
               totalTgmvPads,
               totalTgmv,
-              avgInv: median(invValues),
-              avgRoas: median(roasValues),
-              avgAcos: median(acosValues),
-              avgTacos: median(tacosValues),
+              medianInv,
+              medianRoas,
+              medianAcos,
+              medianTacos,
+              avgInv: medianInv,
+              avgRoas: medianRoas,
+              avgAcos: medianAcos,
+              avgTacos: medianTacos,
               stats: calcularEstatisticaRazoes(sellers as UnidadeRazao[]),
             };
           })
@@ -136,19 +164,29 @@ export function usePortfolioBenchmark() {
 
         // Portfolio totals
         const allSellers = Object.values(sellerAgg);
-        const pInvValues = allSellers.map(e => e.inv);
-        const pRoasValues = allSellers.filter(e => e.inv > 0).map(e => e.tgmvPads / e.inv);
-        const pAcosValues = allSellers.filter(e => e.tgmvPads > 0).map(e => (e.inv / e.tgmvPads) * 100);
-        const pTacosValues = allSellers.filter(e => e.tgmv > 0).map(e => (e.inv / e.tgmv) * 100);
+        const pComInv = allSellers.filter((e) => e.inv > 0);
+        const pInvValues = pComInv.map((e) => e.inv);
+        const pRoasValues = pComInv.map((e) => e.tgmvPads / e.inv);
+        const pAcosValues = pComInv.filter((e) => e.tgmvPads > 0).map((e) => (e.inv / e.tgmvPads) * 100);
+        const pTacosValues = pComInv.filter((e) => e.tgmv > 0).map((e) => (e.inv / e.tgmv) * 100);
+
+        const pMedianInv = median(pInvValues);
+        const pMedianRoas = median(pRoasValues);
+        const pMedianAcos = median(pAcosValues);
+        const pMedianTacos = median(pTacosValues);
 
         setData({
           verticals,
           portfolio: {
             totalSellers: allSellers.length,
-            avgInv: median(pInvValues),
-            avgRoas: median(pRoasValues),
-            avgAcos: median(pAcosValues),
-            avgTacos: median(pTacosValues),
+            medianInv: pMedianInv,
+            medianRoas: pMedianRoas,
+            medianAcos: pMedianAcos,
+            medianTacos: pMedianTacos,
+            avgInv: pMedianInv,
+            avgRoas: pMedianRoas,
+            avgAcos: pMedianAcos,
+            avgTacos: pMedianTacos,
           },
           stats: calcularEstatisticaRazoes(allSellers as UnidadeRazao[]),
         });

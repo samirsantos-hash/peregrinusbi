@@ -10,6 +10,8 @@ export interface SellerKPI {
   gmv: number;
   tsi: number;
   pads: number;
+  tgmv: number;
+  tgmvPads: number;
   roas: number;
   acos: number;
   tacos: number;
@@ -61,6 +63,10 @@ const generateTimeSeriesData = (days: number, sellerId: string): SellerKPI[] => 
     for (const product of products) {
       const baseGmv = 1500 + Math.random() * 3000;
       const baseRoas = 1.5 + Math.random() * 4;
+      const adsInvestment = Math.round(baseGmv / baseRoas);
+      // tgmvPads coerente: ROAS = tgmvPads / adsInvestment
+      const tgmvPads = Math.round(adsInvestment * baseRoas);
+      const tgmv = Math.round(baseGmv);
       const scorePhoto = Math.floor(40 + Math.random() * 60);
       const scoreTitle = Math.floor(45 + Math.random() * 55);
       const sellerPrice = 50 + Math.random() * 200;
@@ -69,15 +75,17 @@ const generateTimeSeriesData = (days: number, sellerId: string): SellerKPI[] => 
       data.push({
         sellerId,
         date: date.toISOString().split("T")[0],
-        gmv: Math.round(baseGmv),
+        gmv: tgmv,
         tsi: Math.round(baseGmv * 0.85),
         pads: Math.floor(10 + Math.random() * 50),
+        tgmv,
+        tgmvPads,
         roas: Math.round(baseRoas * 100) / 100,
-        acos: Math.round((1 / baseRoas) * 10000) / 100,
-        tacos: Math.round((Math.random() * 15 + 5) * 100) / 100,
+        acos: Math.round((adsInvestment / tgmvPads) * 10000) / 100,
+        tacos: Math.round((adsInvestment / tgmv) * 10000) / 100,
         cpa: Math.round((10 + Math.random() * 30) * 100) / 100,
-        adsInvestment: Math.round(baseGmv / baseRoas),
-        revenue: Math.round(baseGmv),
+        adsInvestment,
+        revenue: tgmv,
         scorePhoto,
         scoreTitle,
         visits: Math.floor(100 + Math.random() * 2000),
@@ -105,23 +113,17 @@ const generateTimeSeriesData = (days: number, sellerId: string): SellerKPI[] => 
 };
 
 export const sellerKPIs: Record<string, SellerKPI[]> = {
-  "1": generateTimeSeriesData(30, "1"),
-  "2": generateTimeSeriesData(30, "2"),
-  "3": generateTimeSeriesData(30, "3"),
-  "4": generateTimeSeriesData(30, "4"),
+  "1": generateTimeSeriesData(60, "1"),
+  "2": generateTimeSeriesData(60, "2"),
+  "3": generateTimeSeriesData(60, "3"),
+  "4": generateTimeSeriesData(60, "4"),
 };
 
 export const getDiagnostic = (kpi: SellerKPI) => {
-  const alerts: { icon: string; label: string; severity: "critical" | "warning" | "success" }[] = [];
-
-  if (kpi.scorePhoto < 70) alerts.push({ icon: "📸", label: "Melhorar Fotos", severity: "critical" });
-  if (kpi.scoreTitle < 70) alerts.push({ icon: "❌", label: "Ajustar SEO", severity: "critical" });
+  const alerts: { icon: string; label: string; severity: string }[] = [];
+  if (kpi.scorePhoto < 70) alerts.push({ icon: "📷", label: "Melhorar Fotos", severity: "warning" });
+  if (kpi.scoreTitle < 70) alerts.push({ icon: "✏️", label: "Revisar Título", severity: "warning" });
   if (kpi.roas < 2) alerts.push({ icon: "💸", label: "Revisar Verba Ads", severity: "warning" });
-
-  const gap = ((kpi.sellerPrice - kpi.minPriceRival) / kpi.minPriceRival) * 100;
-  if (gap > 5) alerts.push({ icon: "💰", label: "Preço não Competitivo", severity: "warning" });
-
-  if (alerts.length === 0) alerts.push({ icon: "🏆", label: "Anúncio Campeão", severity: "success" });
-
+  if (kpi.visitsExpensive > kpi.visits * 0.3) alerts.push({ icon: "💰", label: "Preço Acima do Rival", severity: "critical" });
   return alerts;
 };

@@ -11,11 +11,13 @@ import { startOfWeek, format, parseISO, getDaysInMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { fmtBRL, fmtBRLCompact, fmtNum, formatChartDate } from "@/utils/formatters";
 import { detectPartialMonths } from "@/utils/partialPeriodGuard";
+import { calculateRoas } from "@/lib/ratioStats";
 
 interface KpiLike {
   date: string;
   gmv: number;
   tgmv: number;
+  tgmvPads?: number;
   adsInvestment: number;
   roas: number;
   tsi: number;
@@ -37,7 +39,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   const gmv = payload.find((p: any) => p.dataKey === "gmv")?.value ?? 0;
   const ads = payload.find((p: any) => p.dataKey === "ads")?.value ?? 0;
   const roas = payload.find((p: any) => p.dataKey === "roas")?.value ?? 0;
-  const tgmvAds = payload.find((p: any) => p.dataKey === "tgmvAds")?.value;
+  const tgmvPads = payload.find((p: any) => p.dataKey === "tgmvPads")?.value;
 
   return (
     <div className="glass-card p-4 !bg-card/95 text-xs space-y-2 min-w-[200px]">
@@ -55,11 +57,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
              {fmtBRL(ads)}
            </span>
         </div>
-        {tgmvAds !== undefined &&
+        {tgmvPads !== undefined &&
         <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Vendas via Ads</span>
              <span className="font-mono font-semibold" style={{ color: "hsl(160, 84%, 39%)" }}>
-               {fmtBRL(tgmvAds)}
+               {fmtBRL(tgmvPads)}
              </span>
           </div>
         }
@@ -96,15 +98,14 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
 
   const axisLabel = dataGranularity === "consolidated" ? "Meses" : "Dias";
 
-  // Aggregate by date
+  // Aggregate by date — ROAS via razão dos totais (Σ tgmvPads / Σ ads)
   const byDate = useMemo(() => {
-    const map: Record<string, {date: string;gmv: number;ads: number;tgmvAds: number;roas: number;tsi: number;count: number;}> = {};
+    const map: Record<string, {date: string;gmv: number;ads: number;tgmvPads: number;tsi: number;count: number;}> = {};
     for (const k of kpis) {
-      if (!map[k.date]) map[k.date] = { date: k.date, gmv: 0, ads: 0, tgmvAds: 0, roas: 0, tsi: 0, count: 0 };
+      if (!map[k.date]) map[k.date] = { date: k.date, gmv: 0, ads: 0, tgmvPads: 0, tsi: 0, count: 0 };
       map[k.date].gmv += k.gmv;
       map[k.date].ads += k.adsInvestment;
-      map[k.date].tgmvAds += k.tgmv; // tgmv as proxy for ads-driven revenue
-      map[k.date].roas += k.roas;
+      map[k.date].tgmvPads += k.tgmvPads ?? 0;
       map[k.date].tsi += k.tsi;
       map[k.date].count++;
     }
@@ -145,9 +146,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
     const f = proRata.factor;
     last.gmv = last.gmv * f;
     last.ads = last.ads * f;
-    last.tgmvAds = last.tgmvAds * f;
-    // ROAS recomputado dos totais projetados, não escalado direto
-    last.roas = last.ads > 0 ? (last.tgmvAds / last.ads) * (last.count || 1) : last.roas;
+    last.tgmvPads = last.tgmvPads * f;
     return clone;
   }, [filteredData, proRata.factor]);
 
@@ -158,25 +157,23 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
           label: formatChartDate(d.date, dataGranularity),
           gmv: Math.round(d.gmv),
           ads: Math.round(d.ads),
-          tgmvAds: Math.round(d.tgmvAds),
-          roas: d.count > 0 ? Math.round(d.roas / d.count * 100) / 100 : 0
+          tgmvPads: Math.round(d.tgmvPads),
+          roas: calculateRoas(d.tgmvPads, d.ads) ?? 0,
         };
       });
     }
 
-    // Week grouping
-    const weeks: Record<string, {label: string;gmv: number;ads: number;tgmvAds: number;roas: number;count: number;}> = {};
+    // Week grouping — razão dos totais da semana
+    const weeks: Record<string, {label: string;gmv: number;ads: number;tgmvPads: number;}> = {};
     for (const d of filteredData) {
       const parsed = parseISO(d.date);
       const weekStart = startOfWeek(parsed, { locale: ptBR });
       const key = format(weekStart, "yyyy-MM-dd");
       const weekLabel = `Sem ${format(weekStart, "dd/MM")}`;
-      if (!weeks[key]) weeks[key] = { label: weekLabel, gmv: 0, ads: 0, tgmvAds: 0, roas: 0, count: 0 };
+      if (!weeks[key]) weeks[key] = { label: weekLabel, gmv: 0, ads: 0, tgmvPads: 0 };
       weeks[key].gmv += d.gmv;
       weeks[key].ads += d.ads;
-      weeks[key].tgmvAds += d.tgmvAds;
-      weeks[key].roas += d.roas;
-      weeks[key].count += d.count;
+      weeks[key].tgmvPads += d.tgmvPads;
     }
     return Object.entries(weeks).
     sort(([a], [b]) => a.localeCompare(b)).
@@ -184,32 +181,32 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
       label: w.label,
       gmv: Math.round(w.gmv),
       ads: Math.round(w.ads),
-      tgmvAds: Math.round(w.tgmvAds),
-      roas: w.count > 0 ? Math.round(w.roas / w.count * 100) / 100 : 0
+      tgmvPads: Math.round(w.tgmvPads),
+      roas: calculateRoas(w.tgmvPads, w.ads) ?? 0,
     }));
-  }, [filteredData, granularity]);
+  }, [filteredData, granularity, dataGranularity]);
 
   // Insights calculations
   const insights = useMemo(() => {
+    const totalGmv = filteredDataAdjusted.reduce((s, d) => s + d.gmv, 0);
+    const totalAds = filteredDataAdjusted.reduce((s, d) => s + d.ads, 0);
+    const totalTgmvPads = filteredDataAdjusted.reduce((s, d) => s + d.tgmvPads, 0);
+    const avgRoas = calculateRoas(totalTgmvPads, totalAds) ?? 0;
+
     if (filteredDataAdjusted.length < 2) {
       return {
         efficiency: null,
         correlation: null,
         correlationLabel: "Dados insuficientes",
         correlationColor: "text-muted-foreground",
-        totalGmv: filteredDataAdjusted.reduce((s, d) => s + d.gmv, 0),
-        totalAds: filteredDataAdjusted.reduce((s, d) => s + d.ads, 0),
-        avgRoas: filteredDataAdjusted.length > 0 ?
-        filteredDataAdjusted.reduce((s, d) => s + d.roas / d.count, 0) / filteredDataAdjusted.length :
-        0
+        totalGmv,
+        totalAds,
+        avgRoas,
       };
     }
 
     const gmvs = filteredDataAdjusted.map((d) => d.gmv);
     const adss = filteredDataAdjusted.map((d) => d.ads);
-    const totalGmv = gmvs.reduce((a, b) => a + b, 0);
-    const totalAds = adss.reduce((a, b) => a + b, 0);
-    const avgRoas = filteredDataAdjusted.reduce((s, d) => s + d.roas / d.count, 0) / filteredDataAdjusted.length;
 
     // Efficiency of scale: marginal GMV per marginal Ads R$
     const gmvDelta = gmvs[gmvs.length - 1] - gmvs[0];
@@ -401,9 +398,9 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
             </div>
 
             <div className="space-y-4">
-              {/* ROAS médio */}
+              {/* ROAS agregado */}
               <div>
-                <p className="text-[11px] text-muted-foreground mb-1">ROAS Médio do Período</p>
+                <p className="text-[11px] text-muted-foreground mb-1">ROAS Agregado do Período</p>
                  <p className={`text-2xl font-mono font-bold ${insights.avgRoas >= 2 ? "emerald-text" : "critical-text"}`}>
                    {fmtNum(insights.avgRoas)}x
                  </p>

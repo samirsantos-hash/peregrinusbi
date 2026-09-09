@@ -135,7 +135,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
 
   const byDate = kpis.reduce<Record<string, { date: string; gmv: number; adsInvestment: number; tgmvPads: number; tgmv: number; count: number }>>((acc, k) => {
     if (!acc[k.date]) acc[k.date] = { date: k.date, gmv: 0, adsInvestment: 0, tgmvPads: 0, tgmv: 0, count: 0 };
-    acc[k.date].gmv += k.revenue;
+    acc[k.date].gmv += k.tgmv || k.revenue || 0;
     acc[k.date].adsInvestment += k.adsInvestment;
     acc[k.date].tgmvPads += k.tgmvPads || 0;
     acc[k.date].tgmv += k.tgmv || 0;
@@ -153,17 +153,17 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     }));
   }, [allDates, dataGranularity]);
 
-  // Weighted ROAS/ACOS/TACOS per date (not simple average)
+  // Weighted ROAS/ACOS/TACOS per date (not simple average); TACOS usa TGMV_LC
   const roasData = useMemo(() => {
     return allDates.map((d) => ({
       date: formatChartDate(d.date, dataGranularity),
       ROAS: d.adsInvestment > 0 ? Math.round((d.tgmvPads / d.adsInvestment) * 100) / 100 : 0,
       ACOS: d.tgmvPads > 0 ? Math.round((d.adsInvestment / d.tgmvPads) * 10000) / 100 : 0,
-      TACOS: d.gmv > 0 ? Math.round((d.adsInvestment / d.gmv) * 10000) / 100 : 0,
+      TACOS: d.tgmv > 0 ? Math.round((d.adsInvestment / d.tgmv) * 10000) / 100 : 0,
     }));
   }, [allDates, dataGranularity]);
 
-  const totalGmv = kpis.reduce((s, k) => s + k.revenue, 0);
+  const totalGmv = kpis.reduce((s, k) => s + (k.tgmv || k.revenue || 0), 0);
   const totalAds = kpis.reduce((s, k) => s + k.adsInvestment, 0);
   // Weighted metrics from totals (not simple averages)
   const totalTgmvPadsForMetrics = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
@@ -188,12 +188,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     const alerts: { icon: string; text: string; severity: "success" | "warning" | "critical" }[] = [];
     if (!campaign) return alerts;
 
-    // ACOS vs vertical benchmark
-    if (benchmark && benchmark.avgAcos > 0 && avgAcos > 0) {
-      if (avgAcos < benchmark.avgAcos) {
+    // ACOS vs vertical benchmark (mediana)
+    if (benchmark && benchmark.medianAcos > 0 && avgAcos > 0) {
+      if (avgAcos < benchmark.medianAcos) {
         alerts.push({
           icon: "🟢",
-          text: `Escala Segura: Seu ACOS (${avgAcos.toFixed(1)}%) está abaixo do mercado (${benchmark.avgAcos.toFixed(1)}%). Pode aumentar o investimento em 20% para ganhar share.`,
+          text: `Escala Segura: Seu ACOS (${avgAcos.toFixed(1)}%) está abaixo do mercado (${benchmark.medianAcos.toFixed(1)}%). Pode aumentar o investimento em 20% para ganhar share.`,
           severity: "success",
         });
       }
@@ -232,7 +232,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     if (!benchmark) return [];
     return [
       { name: "Seu Investimento", value: Math.round(totalAds) },
-      { name: "Média da Categoria", value: Math.round(benchmark.avgInvestment) },
+      { name: "Mediana da Vertical", value: Math.round(benchmark.medianInvestment) },
     ];
   }, [benchmark, totalAds]);
 
@@ -242,17 +242,17 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       {
         metric: "ROAS (x)",
         "Seu Desempenho": Math.round(avgRoas * 100) / 100,
-        "Média da Categoria": Math.round(benchmark.avgRoas * 100) / 100,
+        "Mediana da Vertical": Math.round(benchmark.medianRoas * 100) / 100,
       },
       {
         metric: "ACOS (%)",
         "Seu Desempenho": Math.round(avgAcos * 100) / 100,
-        "Média da Categoria": Math.round(benchmark.avgAcos * 100) / 100,
+        "Mediana da Vertical": Math.round(benchmark.medianAcos * 100) / 100,
       },
       {
         metric: "TACOS (%)",
         "Seu Desempenho": Math.round(avgTacos * 100) / 100,
-        "Média da Categoria": Math.round(benchmark.avgTacos * 100) / 100,
+        "Mediana da Vertical": Math.round(benchmark.medianTacos * 100) / 100,
       },
     ];
   }, [benchmark, avgRoas, avgAcos, avgTacos]);
@@ -274,7 +274,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       value: fmtNum(avgRoas, 2),
       color: cls(roasClass),
       tooltip: `TGMV_LC_PADS / INV_PADS. ${thresholdNote(roasStat)}`.trim(),
-      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgRoas.toFixed(2)}x` : null,
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianRoas.toFixed(2)}x` : null,
       algoKey: "roas" as const,
     },
     {
@@ -282,7 +282,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       value: `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
       color: cls(acosClass),
       tooltip: `(INV_PADS / TGMV_LC_PADS) × 100. Quanto menor, mais eficiente. ${thresholdNote(acosStat)}`.trim(),
-      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgAcos.toFixed(2)}%` : null,
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianAcos.toFixed(2)}%` : null,
       algoKey: "acos" as const,
     },
     {
@@ -290,7 +290,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       value: `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
       color: cls(tacosClass),
       tooltip: `(INV_PADS / TGMV_LC) × 100. Termômetro real da saúde do negócio. ${thresholdNote(tacosStat)}`.trim(),
-      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.avgTacos.toFixed(2)}%` : null,
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianTacos.toFixed(2)}%` : null,
       algoKey: "tacos" as const,
     },
     {
@@ -322,7 +322,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       value: fmtBRLCompact(totalAds),
       color: "text-muted-foreground",
       tooltip: "Total investido em campanhas de Product Ads no período.",
-      benchmarkText: benchmark ? `Média da categoria: ${fmtBRLCompact(benchmark.avgInvestment)}` : null,
+      benchmarkText: benchmark ? `Mediana da vertical: ${fmtBRLCompact(benchmark.medianInvestment)}` : null,
       algoKey: undefined,
     },
   ];
@@ -455,7 +455,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
           <div className="glass-card p-5">
             <div className="flex items-center gap-2 mb-4">
               <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-                Desempenho vs. Média de Mercado
+                Desempenho vs. Mediana de Mercado
               </h3>
               <TooltipInfo text={`Comparativo com ${benchmark.sellersCount} sellers da vertical ${verticalName}.`} />
             </div>
@@ -466,7 +466,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
                 <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
                 <Tooltip content={<BenchmarkBarTooltip />} />
                 <Bar dataKey="Seu Desempenho" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                <Bar dataKey="Média da Categoria" fill="hsl(174, 60%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Bar dataKey="Mediana da Vertical" fill="hsl(174, 60%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
                 <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
               </BarChart>
             </ResponsiveContainer>

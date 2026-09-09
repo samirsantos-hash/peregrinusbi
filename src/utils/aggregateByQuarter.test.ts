@@ -5,21 +5,27 @@ type Row = {
   date: string;
   gmv?: number;
   tgmv?: number;
+  tgmvPads?: number;
   adsInvestment?: number;
   roas?: number;
   productName?: string;
   productId?: string;
 };
 
-const mk = (date: string, gmv: number, roas = 0): Row => ({
-  date,
-  gmv,
-  tgmv: gmv,
-  adsInvestment: gmv / 10,
-  roas,
-  productName: "p",
-  productId: "id",
-});
+/** Helper: ads = gmv/10; tgmvPads = roas * ads when roas given. */
+const mk = (date: string, gmv: number, roas = 0): Row => {
+  const adsInvestment = gmv / 10;
+  return {
+    date,
+    gmv,
+    tgmv: gmv,
+    adsInvestment,
+    tgmvPads: roas > 0 ? roas * adsInvestment : 0,
+    roas,
+    productName: "p",
+    productId: "id",
+  };
+};
 
 describe("aggregateKpisByQuarter", () => {
   it("returns empty array for empty input", () => {
@@ -76,7 +82,9 @@ describe("aggregateKpisByQuarter", () => {
     expect(dates).toEqual(["2025-01-01", "2026-01-01", "2026-10-01"]);
   });
 
-  it("returns sums for additive fields and averages for ratio fields", () => {
+  it("computes ROAS as ratio of totals, not mean of ratios", () => {
+    // Jan: inv=10, pads=20 → roas 2; Feb: inv=30, pads=120 → roas 4
+    // Mean of ratios = 3; ratio of totals = 140/40 = 3.5
     const out = aggregateKpisByQuarter([
       mk("2026-01-10", 100, 2),
       mk("2026-02-10", 300, 4),
@@ -84,7 +92,8 @@ describe("aggregateKpisByQuarter", () => {
     expect(out).toHaveLength(1);
     expect(out[0].gmv).toBe(400);
     expect(out[0].adsInvestment).toBe(40);
-    expect((out[0] as any).roas).toBe(3); // average of 2 and 4
+    expect((out[0] as any).tgmvPads).toBe(140);
+    expect((out[0] as any).roas).toBe(3.5);
   });
 
   it("ignores rows without a date", () => {

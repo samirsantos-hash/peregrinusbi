@@ -9,12 +9,56 @@
  * ROAS -35,5%, ACOS +204%, TACOS +135%).
  * A mediana das razões é usada apenas para descrever o "seller típico",
  * sempre rotulada como mediana.
+ *
+ * Denominador inválido ou zero → null (nunca 0 silencioso).
+ * TACOS usa sempre TGMV_LC, nunca GMV_LC.
  */
 
 export interface UnidadeRazao {
   inv: number;
   tgmvPads: number;
   tgmv: number;
+}
+
+/** ROAS = receita Ads / investimento. */
+export function calculateRoas(
+  totalAdsRevenue: number,
+  totalInvestment: number,
+): number | null {
+  if (!Number.isFinite(totalAdsRevenue) || !Number.isFinite(totalInvestment)) return null;
+  if (!(totalInvestment > 0)) return null;
+  return totalAdsRevenue / totalInvestment;
+}
+
+/** ACOS (%) = investimento / receita Ads × 100. */
+export function calculateAcos(
+  totalInvestment: number,
+  totalAdsRevenue: number,
+): number | null {
+  if (!Number.isFinite(totalInvestment) || !Number.isFinite(totalAdsRevenue)) return null;
+  if (!(totalAdsRevenue > 0)) return null;
+  return (totalInvestment / totalAdsRevenue) * 100;
+}
+
+/** TACOS (%) = investimento / TGMV_LC × 100. */
+export function calculateTacos(
+  totalInvestment: number,
+  totalRevenue: number,
+): number | null {
+  if (!Number.isFinite(totalInvestment) || !Number.isFinite(totalRevenue)) return null;
+  if (!(totalRevenue > 0)) return null;
+  return (totalInvestment / totalRevenue) * 100;
+}
+
+/** Soma campos numéricos de um conjunto de linhas (null/NaN → 0 na soma). */
+export function sumField<T>(
+  items: T[],
+  pick: (item: T) => number | null | undefined,
+): number {
+  return items.reduce((s, item) => {
+    const n = Number(pick(item));
+    return s + (Number.isFinite(n) ? n : 0);
+  }, 0);
 }
 
 export function mediana(values: number[]): number | null {
@@ -111,9 +155,9 @@ export function calcularEstatisticaRazoes(unidades: UnidadeRazao[]): Estatistica
     totalTgmvPads,
     totalTgmv,
 
-    roasAgregado: totalInv > 0 ? totalTgmvPads / totalInv : null,
-    acosAgregado: totalTgmvPads > 0 ? (totalInv / totalTgmvPads) * 100 : null,
-    tacosAgregado: totalTgmv > 0 ? (totalInv / totalTgmv) * 100 : null,
+    roasAgregado: calculateRoas(totalTgmvPads, totalInv),
+    acosAgregado: calculateAcos(totalInv, totalTgmvPads),
+    tacosAgregado: calculateTacos(totalInv, totalTgmv),
 
     roasMediana: mediana(distRoas),
     acosMediana: mediana(distAcos),

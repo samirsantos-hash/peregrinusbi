@@ -1,7 +1,9 @@
 /**
  * Aggregates KPI records into quarterly (Q1-Q4) buckets.
  * Q1: Jan-Mar, Q2: Apr-Jun, Q3: Jul-Sep, Q4: Oct-Dec
+ * ROAS/ACOS/TACOS = razão dos totais (nunca média de razões).
  */
+import { calculateAcos, calculateRoas, calculateTacos } from "@/lib/ratioStats";
 
 function getQuarterKey(dateStr: string): string {
   const [y, m] = dateStr.split("-").map(Number);
@@ -25,9 +27,9 @@ const sumFields = [
   "sellersClipsPubli", "visitasClips", "siClips", "ordersClips", "tgmvLcClips",
 ];
 
-// Ratio / score fields (averaged)
+// Score / rate fields (averaged) — never ROAS/ACOS/TACOS
 const avgFields = [
-  "roas", "acos", "tacos", "cpa",
+  "cpa",
   "scorePhoto", "scoreTitle", "scoreOferta", "scoreCaracteristica",
   "scoreFull", "scorePads",
   "llPicturesScore", "llTitleScore", "llTechSpecsScore", "llDescriptionScore",
@@ -62,7 +64,7 @@ export function aggregateKpisByQuarter<T extends Record<string, any>>(kpis: T[])
     base.id = `agg-${qKey}`;
 
     for (const field of sumFields) {
-      if (field in base) {
+      if (field in base || items.some((k: any) => field in k)) {
         base[field] = items.reduce((s: number, k: any) => s + (Number(k[field]) || 0), 0);
       }
     }
@@ -75,6 +77,14 @@ export function aggregateKpisByQuarter<T extends Record<string, any>>(kpis: T[])
           : 0;
       }
     }
+
+    // ROAS/ACOS/TACOS = razão dos totais (nunca média de razões)
+    const inv = Number(base.adsInvestment) || 0;
+    const pads = Number(base.tgmvPads) || 0;
+    const tgmv = Number(base.tgmv) || Number(base.revenue) || 0;
+    base.roas = calculateRoas(pads, inv) ?? 0;
+    base.acos = calculateAcos(inv, pads) ?? 0;
+    base.tacos = calculateTacos(inv, tgmv) ?? 0;
 
     // Keep string fields from most recent item
     const latest = items.sort((a: any, b: any) => (a.date || "").localeCompare(b.date || ""))[items.length - 1];

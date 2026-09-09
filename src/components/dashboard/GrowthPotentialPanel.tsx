@@ -210,23 +210,23 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
       });
     }
 
-    // 2. ROAS — usa benchmark.avgRoas como mediana real da vertical
-    if (benchmark?.avgRoas && benchmark.avgRoas > 0) {
+    // 2. ROAS — mediana da vertical (sellers com inv > 0)
+    if (benchmark?.medianRoas && benchmark.medianRoas > 0) {
       list.push({
         id: "roas", label: "ROAS",
-        valorSeller: sellerRoas, medianaVertical: benchmark.avgRoas,
-        indice: (sellerRoas / benchmark.avgRoas) * 100,
+        valorSeller: sellerRoas, medianaVertical: benchmark.medianRoas,
+        indice: (sellerRoas / benchmark.medianRoas) * 100,
         unidade: "x", sentido: "maior_melhor", fonte: "vertical",
         tooltipKey: "roas",
       });
     }
 
-    // 3. ACOS — menor é melhor; benchmark.avgAcos é mediana da vertical
-    if (benchmark?.avgAcos && benchmark.avgAcos > 0 && sellerAcos > 0) {
+    // 3. ACOS — menor é melhor; mediana da vertical
+    if (benchmark?.medianAcos && benchmark.medianAcos > 0 && sellerAcos > 0) {
       list.push({
         id: "acos", label: "ACOS",
-        valorSeller: sellerAcos, medianaVertical: benchmark.avgAcos,
-        indice: (sellerAcos / benchmark.avgAcos) * 100,
+        valorSeller: sellerAcos, medianaVertical: benchmark.medianAcos,
+        indice: (sellerAcos / benchmark.medianAcos) * 100,
         unidade: "%", sentido: "menor_melhor", fonte: "vertical",
         tooltipKey: "acos",
       });

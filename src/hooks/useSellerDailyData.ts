@@ -13,9 +13,10 @@ function transformDailyKpi(row: any, sellerNickname: string): SellerKPI {
   const scorePhoto = Number(row.score_photo) || 0;
   const scoreTitle = Number(row.score_title) || 0;
 
+  // ROAS/ACOS/TACOS: mesmas bases do fluxo mensal (TACOS = inv / tgmv_lc)
   const roas = invPads > 0 ? tgmvPads / invPads : 0;
   const acos = tgmvPads > 0 ? (invPads / tgmvPads) * 100 : 0;
-  const tacos = gmv > 0 ? (invPads / gmv) * 100 : 0;
+  const tacos = tgmv > 0 ? (invPads / tgmv) * 100 : 0;
   const cpa = tsiPads > 0 ? invPads / tsiPads : 0;
 
   // Logistic mix share — based on GMV (tgmv_lc_full = FBM column).
@@ -32,7 +33,7 @@ function transformDailyKpi(row: any, sellerNickname: string): SellerKPI {
     tsi: Number(row.tsi) || 0,
     tgmv,
     tgmvPads,
-    revenue: gmv,
+    revenue: tgmv, // alinhado ao mensal: TACOS e painéis usam TGMV_LC
     adsInvestment: invPads,
     roas: Math.round(roas * 100) / 100,
     acos: Math.round(acos * 100) / 100,

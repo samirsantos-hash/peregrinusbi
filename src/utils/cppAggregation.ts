@@ -366,17 +366,17 @@ export function aggregateSellers(rows: CppRow[]): CppAggregationResult {
   }
   dailyRoas.sort((a, b) => a.date.localeCompare(b.date));
 
-  const dowSums: Record<number, { total: number; count: number }> = {};
-  for (let i = 0; i < 7; i++) dowSums[i] = { total: 0, count: 0 };
+  // DOW benchmark = razão dos totais do dia da semana (nunca média de ROAS diários)
+  const dowSums: Record<number, { tgmvPads: number; invPads: number }> = {};
+  for (let i = 0; i < 7; i++) dowSums[i] = { tgmvPads: 0, invPads: 0 };
   for (const d of dailyRoas) {
-    if (d.roas !== null) {
-      dowSums[d.dow].total += d.roas;
-      dowSums[d.dow].count += 1;
-    }
+    dowSums[d.dow].tgmvPads += d.tgmvPads;
+    dowSums[d.dow].invPads += d.invPads;
   }
   const dowBenchmark: Record<number, number> = {};
   for (let i = 0; i < 7; i++) {
-    dowBenchmark[i] = dowSums[i].count > 0 ? dowSums[i].total / dowSums[i].count : 0;
+    const { tgmvPads, invPads } = dowSums[i];
+    dowBenchmark[i] = invPads > 0 ? tgmvPads / invPads : 0;
   }
 
   const results: ConsolidatedSeller[] = [];

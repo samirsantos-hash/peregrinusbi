@@ -5,9 +5,19 @@ import { type SellerCampaign } from "@/hooks/useMeliCampaigns";
 export interface VerticalBenchmark {
   vertical: string;
   sellersCount: number;
+  /** mediana do investimento por seller (não média) */
+  medianInvestment: number;
+  /** mediana das razões por seller com inv > 0 */
+  medianRoas: number;
+  medianAcos: number;
+  medianTacos: number;
+  /** @deprecated use medianInvestment */
   avgInvestment: number;
+  /** @deprecated use medianRoas */
   avgRoas: number;
+  /** @deprecated use medianAcos */
   avgAcos: number;
+  /** @deprecated use medianTacos */
   avgTacos: number;
   totalInvestment: number;
   totalTgmvPads: number;
@@ -92,19 +102,29 @@ export function useVerticalBenchmark(campaign: SellerCampaign | null) {
         const totalTgmvPads = sellerData.reduce((s, e) => s + e.tgmvPads, 0);
         const totalTgmv = sellerData.reduce((s, e) => s + e.tgmv, 0);
 
-        // Use median for per-seller metrics
-        const invValues = sellerData.map(e => e.inv);
-        const roasValues = sellerData.filter(e => e.inv > 0).map(e => e.tgmvPads / e.inv);
-        const acosValues = sellerData.filter(e => e.tgmvPads > 0).map(e => (e.inv / e.tgmvPads) * 100);
-        const tacosValues = sellerData.filter(e => e.tgmv > 0).map(e => (e.inv / e.tgmv) * 100);
+        // Mediana das razões — apenas sellers com investimento > 0 (alinhado a ratioStats)
+        const comInv = sellerData.filter((e) => e.inv > 0);
+        const invValues = comInv.map((e) => e.inv);
+        const roasValues = comInv.map((e) => e.tgmvPads / e.inv);
+        const acosValues = comInv.filter((e) => e.tgmvPads > 0).map((e) => (e.inv / e.tgmvPads) * 100);
+        const tacosValues = comInv.filter((e) => e.tgmv > 0).map((e) => (e.inv / e.tgmv) * 100);
+
+        const medianInvestment = median(invValues);
+        const medianRoas = median(roasValues);
+        const medianAcos = median(acosValues);
+        const medianTacos = median(tacosValues);
 
         setBenchmark({
           vertical,
           sellersCount: sellerData.length,
-          avgInvestment: median(invValues),
-          avgRoas: median(roasValues),
-          avgAcos: median(acosValues),
-          avgTacos: median(tacosValues),
+          medianInvestment,
+          medianRoas,
+          medianAcos,
+          medianTacos,
+          avgInvestment: medianInvestment,
+          avgRoas: medianRoas,
+          avgAcos: medianAcos,
+          avgTacos: medianTacos,
           totalInvestment: totalInv,
           totalTgmvPads,
           totalTgmv,

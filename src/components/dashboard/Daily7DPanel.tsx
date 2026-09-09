@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { DateRange } from "react-day-picker";
+import { calculateRoas } from "@/lib/ratioStats";
 
 /* ────────────────────────────── tipos & config ────────────────────────────── */
 
@@ -237,14 +238,26 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
     return (slope / media) * 100 * 7;
   }, [serie, diasComDados]);
 
-  /** acumulado */
+  /** acumulado — aditivos somam; ROAS = razão acumulada dos totais */
   const acumulado = useMemo(() => {
+    if (kpiAtivo === "roas") {
+      let sumInv = 0;
+      let sumPads = 0;
+      return datasJanela.map((date) => {
+        const k = porData.get(date);
+        if (k) {
+          sumInv += Number(k.adsInvestment) || 0;
+          sumPads += Number(k.tgmvPads) || 0;
+        }
+        return { date, acumulado: calculateRoas(sumPads, sumInv) };
+      });
+    }
     let soma = 0;
     return serie.map((p) => {
       if (p.valor !== null) soma += p.valor;
       return { date: p.date, acumulado: soma };
     });
-  }, [serie]);
+  }, [serie, kpiAtivo, datasJanela, porData]);
 
   const totalAcumulado = acumulado.length ? acumulado[acumulado.length - 1].acumulado : 0;
 
@@ -325,9 +338,22 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
             const c = KPI_CONFIG[key];
             const valores = datasJanela.map((d) => valorDe(d, key));
             const validos = valores.filter((v): v is number => v !== null);
-            const total = c.aditivo
-              ? validos.reduce((s, v) => s + v, 0)
-              : validos.length ? validos.reduce((s, v) => s + v, 0) / validos.length : 0;
+            let total: number | null;
+            if (key === "roas") {
+              let sumInv = 0;
+              let sumPads = 0;
+              for (const d of datasJanela) {
+                const k = porData.get(d);
+                if (!k) continue;
+                sumInv += Number(k.adsInvestment) || 0;
+                sumPads += Number(k.tgmvPads) || 0;
+              }
+              total = calculateRoas(sumPads, sumInv);
+            } else if (c.aditivo) {
+              total = validos.reduce((s, v) => s + v, 0);
+            } else {
+              total = validos.length ? validos.reduce((s, v) => s + v, 0) / validos.length : 0;
+            }
             const ativo = kpiAtivo === key;
             return (
               <button
@@ -344,7 +370,8 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
               >
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                   <span>{c.label}</span>
-                  {!c.aditivo && <span className="normal-case tracking-normal text-[9px]">· média</span>}
+                  {key === "roas" && <span className="normal-case tracking-normal text-[9px]">· agregado</span>}
+                  {!c.aditivo && key !== "roas" && <span className="normal-case tracking-normal text-[9px]">· média</span>}
                 </div>
                 <div className="text-base font-semibold tnum lnum mt-1 text-foreground">
                   {fmtKpi(total, c.format, true)}

@@ -320,7 +320,8 @@ const Index = () => {
   // Indicadores agregados para o Guia do Consultor (junior banners)
   const dadosJunior = useMemo(() => {
     const latest = [...displayKpis].sort((a: any, b: any) => String(b.date).localeCompare(String(a.date)))[0] || {};
-    const totalGmv = displayKpis.reduce((s: number, k: any) => s + (Number(k?.gmv) || Number(k?.revenue) || 0), 0);
+    // TACOS canônico: Σ inv_pads / Σ tgmv_lc (não gmv_lc)
+    const totalGmv = displayKpis.reduce((s: number, k: any) => s + (Number(k?.tgmv) || Number(k?.revenue) || 0), 0);
     const totalAds = displayKpis.reduce((s: number, k: any) => s + (Number(k?.adsInvestment) || 0), 0);
     const tacos = totalGmv > 0 ? (totalAds / totalGmv) * 100 : 0;
     const itensSemOptin = (eligibilityItems || []).filter((it: any) => it?.elegivel && !it?.optin).length;

@@ -1,8 +1,10 @@
 /**
  * Aggregates daily KPI records into monthly buckets.
- * Sums additive metrics; averages ratio metrics.
+ * Sums additive metrics; recomputes ROAS/ACOS/TACOS as ratios of totals;
+ * averages remaining score/ratio fields.
  */
 import { monthKey as getMonthKey } from "@/lib/dates";
+import { calculateAcos, calculateRoas, calculateTacos } from "@/lib/ratioStats";
 import { detectPartialMonths } from "./partialPeriodGuard";
 
 export function aggregateKpisByMonth<T extends Record<string, any>>(kpis: T[]): T[] {
@@ -19,15 +21,15 @@ export function aggregateKpisByMonth<T extends Record<string, any>>(kpis: T[]): 
 
   // Additive fields (summed)
   const sumFields = [
-    "gmv", "tsi", "tgmv", "revenue", "adsInvestment",
+    "gmv", "tsi", "tgmv", "tgmvPads", "revenue", "adsInvestment",
     "visits", "visitsExpensive", "visitsMatch", "visitsCheaper",
     "tgmvFull", "tgmvFlex", "cdpTgmv",
     "sellersClipsPubli", "visitasClips", "siClips", "ordersClips", "tgmvLcClips",
   ];
 
-  // Ratio / score fields (averaged)
+  // Score / rate fields (averaged) — never ROAS/ACOS/TACOS
   const avgFields = [
-    "roas", "acos", "tacos", "cpa",
+    "cpa",
     "scorePhoto", "scoreTitle", "scoreOferta", "scoreCaracteristica",
     "scoreFull", "scorePads",
     "llPicturesScore", "llTitleScore", "llTechSpecsScore", "llDescriptionScore",
@@ -50,7 +52,7 @@ export function aggregateKpisByMonth<T extends Record<string, any>>(kpis: T[]): 
     base.id = `agg-${monthKey}`;
 
     for (const field of sumFields) {
-      if (field in base) {
+      if (field in base || items.some((k: any) => field in k)) {
         base[field] = items.reduce((s: number, k: any) => s + (Number(k[field]) || 0), 0);
       }
     }
@@ -63,6 +65,14 @@ export function aggregateKpisByMonth<T extends Record<string, any>>(kpis: T[]): 
           : 0;
       }
     }
+
+    // ROAS/ACOS/TACOS = razão dos totais (nunca média de razões)
+    const inv = Number(base.adsInvestment) || 0;
+    const pads = Number(base.tgmvPads) || 0;
+    const tgmv = Number(base.tgmv) || Number(base.revenue) || 0;
+    base.roas = calculateRoas(pads, inv) ?? 0;
+    base.acos = calculateAcos(inv, pads) ?? 0;
+    base.tacos = calculateTacos(inv, tgmv) ?? 0;
 
     // Keep string fields from most recent item
     const latest = items.sort((a: any, b: any) => (a.date || "").localeCompare(b.date || ""))[items.length - 1];

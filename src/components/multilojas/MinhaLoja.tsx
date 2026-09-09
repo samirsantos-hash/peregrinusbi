@@ -4,7 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
 import type { PedidoML } from "@/lib/multilojas/parse";
 import { fBRL, fInt, fPct } from "@/lib/multilojas/stats";
+import { calculateAcos, calculateTacos } from "@/lib/ratioStats";
 import type { LojaOficial } from "@/hooks/multilojas/usePerfilMultilojas";
+
+const fPctPts = (v: number | null | undefined) =>
+  v == null || !Number.isFinite(v)
+    ? "—"
+    : `${v.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
 
 interface Props {
   loja: LojaOficial | null;
@@ -126,8 +132,9 @@ const MinhaLoja = ({ loja, lojasDisponiveis, onTrocarLoja, pedidos, ini, fim }: 
     return { dias: comuns.size, gmvVendas, gmvFeed: feed.tgmv, div: feed.tgmv ? (gmvVendas - feed.tgmv) / feed.tgmv : NaN };
   }, [feed, vendas]);
 
-  const acos = feed && feed.tgmvPads ? feed.invPads / feed.tgmvPads : NaN;
-  const tacos = feed && feed.tgmv ? feed.invPads / feed.tgmv : NaN;
+  // ACOS/TACOS em pontos percentuais (mesma unidade de ratioStats)
+  const acos = feed ? calculateAcos(feed.invPads, feed.tgmvPads) : null;
+  const tacos = feed ? calculateTacos(feed.invPads, feed.tgmv) : null;
   const conv = feed && feed.visitas ? feed.tsi / feed.visitas : NaN;
   const compBase = feed ? feed.match + feed.cheaper + feed.expensive : 0;
   const shareFull = feed && feed.tgmv ? feed.full / feed.tgmv : NaN;
@@ -135,7 +142,7 @@ const MinhaLoja = ({ loja, lojasDisponiveis, onTrocarLoja, pedidos, ini, fim }: 
   const alertas: string[] = [];
   if (loja && !contaId) alertas.push("Loja sem vínculo com a conta de vendedor — todo o bloco de marketplace fica indisponível.");
   if (recon && Math.abs(recon.div) > 0.10) alertas.push(`Divergência de faturamento de ${fPct(recon.div)} entre Vendas e Performance na janela comum — verifique o recorte de data ou o vínculo de conta.`);
-  if (Number.isFinite(acos) && acos > 0.15) alertas.push(`ACOS de ${fPct(acos)} acima do teto de 15%.`);
+  if (acos != null && acos > 15) alertas.push(`ACOS de ${fPctPts(acos)} acima do teto de 15%.`);
   if (Number.isFinite(conv) && conv < 0.008) alertas.push(`Conversão de ${fPct(conv)} abaixo de 0,8%.`);
   if (compBase && feed && feed.expensive / compBase > 0.35) alertas.push(`${fPct(feed.expensive / compBase)} das visitas comparadas veem a loja mais cara que o concorrente.`);
   if (Number.isFinite(shareFull) && shareFull < 0.30) alertas.push(`Penetração no Full de ${fPct(shareFull)} abaixo de 30%.`);
@@ -206,10 +213,10 @@ const MinhaLoja = ({ loja, lojasDisponiveis, onTrocarLoja, pedidos, ini, fim }: 
           <Bloco titulo="Publicidade" origem="Performance">
             <Kpi label="Investimento PADS" value={fBRL(feed?.invPads || 0)} indisponivel={feed ? undefined : semFeed} />
             <Kpi label="GMV por PADS" value={fBRL(feed?.tgmvPads || 0)} indisponivel={feed ? undefined : semFeed} />
-            <Kpi label="ACOS" value={fPct(acos)} indisponivel={feed ? undefined : semFeed}
-              hint="Investimento ÷ GMV gerado pela mídia. Teto de referência: 15%." />
-            <Kpi label="TACOS" value={fPct(tacos)} indisponivel={feed ? undefined : semFeed}
-              hint="Investimento ÷ GMV total da operação." />
+            <Kpi label="ACOS" value={fPctPts(acos)} indisponivel={feed ? undefined : semFeed}
+              hint="Investimento ÷ GMV gerado pela mídia (pontos percentuais). Teto de referência: 15%." />
+            <Kpi label="TACOS" value={fPctPts(tacos)} indisponivel={feed ? undefined : semFeed}
+              hint="Investimento ÷ TGMV total da operação (pontos percentuais)." />
           </Bloco>
 
           <Bloco titulo="Audiência e competitividade" origem="Performance">

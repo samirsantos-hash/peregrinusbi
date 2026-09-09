@@ -25,6 +25,8 @@ export type PontoAds = {
   tacos: number;
   inv: number;
   gmv_ads: number;
+  /** ROAS canônico (gmv_ads / inv); se ausente, recalculado dos totais */
+  roas?: number;
 };
 
 const META_TACOS = 3;
@@ -59,13 +61,19 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
         const semDado = !(p.inv > 0) && !(p.gmv_ads > 0);
         const acos = semDado || !Number.isFinite(p.acos) || p.acos <= 0 ? null : p.acos;
         const tacos = semDado || !Number.isFinite(p.tacos) || p.tacos <= 0 ? null : p.tacos;
+        const roasFromTotals =
+          p.inv > 0 && Number.isFinite(p.gmv_ads) ? p.gmv_ads / p.inv : null;
+        const roas =
+          p.roas != null && Number.isFinite(p.roas) && p.roas > 0
+            ? p.roas
+            : roasFromTotals;
         return {
           mes: p.mes,
           label: rotuloMes(p.mes),
           acos,
           tacos,
           share: acos && tacos ? (tacos / acos) * 100 : null,
-          roas: acos ? 100 / acos : null,
+          roas,
         };
       }),
     [pontos],

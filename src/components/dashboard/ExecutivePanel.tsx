@@ -104,7 +104,7 @@ const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: Exe
         : "Existe um gap entre a performance atual e o potencial da categoria. Invista em visibilidade e competitividade.",
     },
     { label: "Nota de Saúde da Operação", value: avgSaude > 0 ? avgSaude.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) : "—", icon: Activity, color: avgSaude >= 70 ? "emerald-text" : avgSaude >= 50 ? "warning-text" : "critical-text", tooltip: "Média ponderada de preço, qualidade de fotos, descrições e logística." },
-    { label: "ROAS Médio", value: avgRoas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), icon: DollarSign, color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Retorno sobre investimento em Ads. Acima de 2x é considerado saudável." },
+    { label: "ROAS Agregado", value: avgRoas.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }), icon: DollarSign, color: avgRoas >= 2 ? "emerald-text" : "critical-text", tooltip: "Razão dos totais: Σ TGMV_LC_PADS / Σ INV_PADS. Acima de 2x é considerado saudável." },
     { label: "Índice de Atrasos no Envio", value: avgDelayed > 0 ? `${(avgDelayed * 100).toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%` : "—", icon: Clock, color: avgDelayed <= 0.05 ? "emerald-text" : "critical-text", tooltip: "Percentual de envios atrasados. Abaixo de 5% é considerado saudável para manter reputação." },
   ];
 
