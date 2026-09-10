@@ -192,7 +192,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
 
           <XAxis
             dataKey="label"
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+            tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             interval={xInterval}
@@ -205,7 +205,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
           <YAxis
             yAxisId="left"
             domain={yDomain}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+            tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}
@@ -216,7 +216,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             yAxisId="right"
             orientation="right"
             domain={yDomainAds}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+            tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}

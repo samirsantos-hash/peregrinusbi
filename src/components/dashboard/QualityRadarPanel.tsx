@@ -287,12 +287,12 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                 <PolarGrid stroke="hsl(215,25%,16%)" strokeOpacity={0.6} />
                 <PolarAngleAxis
                   dataKey="dimension"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                  tick={{ fill: "hsl(var(--axis))", fontSize: 11 }} />
                 
                 <PolarRadiusAxis
                   angle={90}
                   domain={[0, 100]}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={{ fill: "hsl(var(--axis))", fontSize: 10 }}
                   axisLine={false} />
                 
                 <Radar

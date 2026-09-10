@@ -49,11 +49,11 @@ export default function CppRoasChart({ dailyRoas, dowBenchmark }: Props) {
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                 tickFormatter={formatDate}
               />
               <YAxis
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                 tickFormatter={(v) => `${v}x`}
               />
               <Tooltip

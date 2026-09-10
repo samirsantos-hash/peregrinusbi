@@ -311,10 +311,10 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
                   <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                   <XAxis
                     dataKey="date"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                    tick={{ fill: "hsl(var(--axis))", fontSize: 9 }}
                     tickFormatter={v => { const p = v.split("-"); return `${p[2]}/${p[1]}`; }}
                   />
-                  <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }} />
+                  <YAxis tick={{ fill: "hsl(var(--axis))", fontSize: 9 }} />
                   <ChartTooltip
                     contentStyle={{
                       backgroundColor: "hsl(var(--card))",

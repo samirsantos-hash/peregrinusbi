@@ -66,7 +66,7 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="rotulo"
-              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
               tickLine={false}
               axisLine={false}
               interval="preserveStartEnd"
@@ -74,7 +74,7 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
             />
             <YAxis
               domain={[Math.max(0, min - folga), Math.min(100, max + folga)]}
-              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
               tickLine={false}
               axisLine={false}
               width={38}
@@ -84,7 +84,7 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
               stroke="hsl(var(--muted-foreground))"
               strokeDasharray="4 4"
               strokeWidth={1}
-              label={{ value: `meta ${meta}`, position: "right", fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+              label={{ value: `meta ${meta}`, position: "right", fontSize: 9, fill: "hsl(var(--axis))" }}
             />
             <Tooltip
               contentStyle={{

@@ -315,11 +315,11 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                       <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                       <XAxis
                         dataKey="date"
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                        tick={{ fill: "hsl(var(--axis))", fontSize: 9 }}
                         tickFormatter={(v) => formatChartDate(v, dataGranularity)}
                       />
                       <YAxis
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                        tick={{ fill: "hsl(var(--axis))", fontSize: 9 }}
                         domain={[
                           (dataMin: number) => Math.max(0, dataMin - 0.5),
                           (dataMax: number) => Math.max(dataMax + 0.5, m.atencao + 1),

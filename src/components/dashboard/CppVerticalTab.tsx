@@ -568,12 +568,12 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                       <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                       <XAxis
                         dataKey="date"
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                        tick={{ fill: "hsl(var(--axis))", fontSize: 9 }}
                         tickFormatter={v => { const p = v.split("-"); return `${p[2]}/${p[1]}`; }}
                       />
                       <YAxis
                         yAxisId="left"
-                        tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                        tick={{ fill: "hsl(var(--axis))", fontSize: 9 }}
                         tickFormatter={v => fmtCompact(v)}
                       />
                       {/* Use dual axis if scale difference is > 10x */}
@@ -585,7 +585,7 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                           <YAxis
                             yAxisId="right"
                             orientation="right"
-                            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
+                            tick={{ fill: "hsl(var(--axis))", fontSize: 9 }}
                             tickFormatter={v => fmtCompact(v)}
                           />
                         ) : null;

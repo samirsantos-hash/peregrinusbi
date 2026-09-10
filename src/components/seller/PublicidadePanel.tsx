@@ -208,8 +208,8 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
             <ResponsiveContainer width="100%" height={300}>
               <ComposedChart data={m.historico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => String(v).slice(2)} />
-                <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => String(v).slice(2)} />
+                <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
                 <Tooltip
                   contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
                   formatter={(value: any, name: any) => [

@@ -239,7 +239,7 @@ export default function PockEvolucaoCard({
                   <LabelList
                     dataKey="valor"
                     position="top"
-                    style={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }}
+                    style={{ fontSize: 9, fill: "hsl(var(--axis))" }}
                     formatter={(v: any) => (v == null ? "" : fmt(v, formato))}
                   />
                 )}
