@@ -17,6 +17,7 @@ import {
   insightTGMV, insightSellersAtivos, insightTicketMedio,
   insightQueda, insightCrescimento, insightVencimento,
 } from "@/lib/insights";
+import { CHART_SERIES_2, CHART_ATTENTION_TEXT, CHART_OK, CHART_PRICE_HOT, CHART_CRIT, CHART_SERIES_4, CHART_ATTENTION, CHART_OK_SOFT, CHART_MUTED } from "@/lib/chartTheme";
 
 // ── Formatters ──
 const fmtBRL = (v: number) =>
@@ -275,8 +276,8 @@ function TgmvChart({ data }: { data: MesAgg[] }) {
           <XAxis dataKey="mes" tick={{ fontSize: 11  }} />
           <YAxis tickFormatter={fmtCompact} />
           <Tooltip formatter={(v: number) => fmtBRL(v)} contentStyle={TT_STYLE} />
-          <Area type="monotone" dataKey="tgmv" fill="hsl(217 91% 60% / 0.15)" stroke="hsl(217 91% 60%)" strokeWidth={2} name="TGMV" />
-          <Line type="monotone" dataKey="mm3" stroke="#F59E0B" strokeWidth={2} strokeDasharray="6 3" dot={false} name="MM 3M" />
+          <Area type="monotone" dataKey="tgmv" fill="hsl(var(--series-2) / 0.15)" stroke={CHART_SERIES_2} strokeWidth={2} name="TGMV" />
+          <Line type="monotone" dataKey="mm3" stroke={CHART_ATTENTION_TEXT} strokeWidth={2} strokeDasharray="6 3" dot={false} name="MM 3M" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -324,8 +325,8 @@ function SellersAtivosChart({ data }: { data: MesAgg[] }) {
           <YAxis yAxisId="right" orientation="right" tickFormatter={fmtCompact} />
           <Tooltip contentStyle={TT_STYLE} formatter={(v: number, name: string) => [name === "ticket" ? fmtBRL(v) : v, name === "ticket" ? "Ticket Médio" : "Ativos"]} />
           <Legend />
-          <Bar yAxisId="left" dataKey="ativos" fill="#16A34A" radius={[4, 4, 0, 0]} name="Ativos" />
-          <Line yAxisId="right" type="monotone" dataKey="ticket" stroke="#F97316" strokeWidth={2} dot={{ r: 3 }} name="Ticket Médio" />
+          <Bar yAxisId="left" dataKey="ativos" fill={CHART_OK} radius={[4, 4, 0, 0]} name="Ativos" />
+          <Line yAxisId="right" type="monotone" dataKey="ticket" stroke={CHART_PRICE_HOT} strokeWidth={2} dot={{ r: 3 }} name="Ticket Médio" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -412,7 +413,7 @@ function TicketMedioChart({ sellers }: { sellers: EnrichedSeller[] }) {
             <XAxis dataKey="label" tick={{ fontSize: 11  }} />
             <YAxis />
             <Tooltip contentStyle={TT_STYLE} />
-            <Bar dataKey="count" fill="hsl(217 91% 60%)" radius={[4, 4, 0, 0]} name="Sellers" />
+            <Bar dataKey="count" fill={CHART_SERIES_2} radius={[4, 4, 0, 0]} name="Sellers" />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -487,7 +488,7 @@ function QuedaWaterfall({ sellers, onClickSeller }: { sellers: any[]; onClickSel
     name: s.cus_nickname,
     perda: s.perda,
     pct: s.vs_pm_pct,
-    fill: s.alerts.some((a: any) => a.tipo === "CRITICO") ? "#7F1D1D" : s.alerts.some((a: any) => a.tipo === "QUEDA_3M") ? "#DC2626" : "#F97316",
+    fill: s.alerts.some((a: any) => a.tipo === "CRITICO") ? CHART_CRIT : s.alerts.some((a: any) => a.tipo === "QUEDA_3M") ? CHART_CRIT : CHART_PRICE_HOT,
     seller: s,
   }));
 
@@ -539,7 +540,7 @@ function CrescimentoChart({ sellers, onClickSeller }: { sellers: any[]; onClickS
       name: s.cus_nickname,
       delta_rs: s.delta_rs,
       delta_pct: deltaPct,
-      fill: deltaPct > 100 ? "#D4AF37" : deltaPct > 50 ? "#16A34A" : "#86EFAC",
+      fill: deltaPct > 100 ? CHART_ATTENTION : deltaPct > 50 ? CHART_OK : CHART_OK_SOFT,
       seller: s,
     };
   });
@@ -556,7 +557,7 @@ function CrescimentoChart({ sellers, onClickSeller }: { sellers: any[]; onClickS
           <Bar yAxisId="left" dataKey="delta_rs" radius={[4, 4, 0, 0]} name="Δ R$" cursor="pointer" onClick={(d: any) => d?.seller && onClickSeller(d.seller)}>
             {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
           </Bar>
-          <Scatter yAxisId="right" dataKey="delta_pct" fill="#FDE68A" name="Δ %" />
+          <Scatter yAxisId="right" dataKey="delta_pct" fill={CHART_SERIES_4} name="Δ %" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -594,7 +595,7 @@ function VencimentoTimeline({ sellers, onClickSeller }: { sellers: any[]; onClic
     dias: s.dias_expiracao,
     tgmv: s.tgmv_lc,
     name: s.cus_nickname,
-    fill: s.dias_expiracao < 0 ? "#7F1D1D" : s.dias_expiracao <= 7 ? "#DC2626" : s.dias_expiracao <= 30 ? "#F97316" : s.dias_expiracao <= 60 ? "#F59E0B" : "#6B7280",
+    fill: s.dias_expiracao < 0 ? CHART_CRIT : s.dias_expiracao <= 7 ? CHART_CRIT : s.dias_expiracao <= 30 ? CHART_PRICE_HOT : s.dias_expiracao <= 60 ? CHART_ATTENTION_TEXT : CHART_MUTED,
     seller: s,
   }));
 
@@ -607,7 +608,7 @@ function VencimentoTimeline({ sellers, onClickSeller }: { sellers: any[]; onClic
           <YAxis type="number" dataKey="tgmv" name="TGMV" tickFormatter={fmtCompact} />
           <ZAxis type="number" dataKey="tgmv" range={[40, 400]} />
           <Tooltip contentStyle={TT_STYLE} formatter={(v: number, name: string) => [name === "TGMV" ? fmtBRL(v) : `${v} dias`, name]} />
-          <ReferenceLine x={0} stroke="#DC2626" strokeWidth={2} label={{ value: "Hoje", fill: "#DC2626", fontSize: 11  }} />
+          <ReferenceLine x={0} stroke={CHART_CRIT} strokeWidth={2} label={{ value: "Hoje", fill: CHART_CRIT, fontSize: 11  }} />
           <ReferenceLine x={7} stroke="hsl(var(--border))" strokeDasharray="4 4" />
           <ReferenceLine x={30} stroke="hsl(var(--border))" strokeDasharray="4 4" />
           <Scatter data={data} cursor="pointer" onClick={(d: any) => d?.seller && onClickSeller(d.seller)}>

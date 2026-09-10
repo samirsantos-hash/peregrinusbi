@@ -20,6 +20,7 @@ import {
   slopeUltimosN,
   type MetricaReputacao,
 } from "@/lib/reputationStatus";
+import { CHART_OK, CHART_ATTENTION_TEXT, CHART_CRIT, CHART_MUTED, CHART_GRID_STROKE, chartTooltipContentStyle } from "@/lib/chartTheme";
 
 interface KpiLike {
   date: string;
@@ -60,21 +61,21 @@ const SEVERITY_CONFIG: Record<Severity, { emoji: string; bg: string; border: str
     bg: "bg-emerald/10",
     border: "border-emerald/30",
     text: "text-emerald",
-    glow: "shadow-[0_0_12px_hsl(160,84%,39%,0.3)]",
+    glow: "shadow-[0_0_12px_hsl(var(--ok) / 0.3)]",
   },
   yellow: {
     emoji: "🟡",
     bg: "bg-warning/10",
     border: "border-warning/30",
     text: "text-warning",
-    glow: "shadow-[0_0_12px_hsl(40,95%,55%,0.3)]",
+    glow: "shadow-[0_0_12px_hsl(var(--attention-text) / 0.3)]",
   },
   red: {
     emoji: "🔴",
     bg: "bg-destructive/10",
     border: "border-destructive/30",
     text: "text-destructive",
-    glow: "shadow-[0_0_12px_hsl(0,84%,60%,0.3)]",
+    glow: "shadow-[0_0_12px_hsl(var(--crit) / 0.3)]",
   },
 };
 
@@ -274,15 +275,15 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
           {mini.map((m) => {
             // Cor da linha baseada no valor ATUAL (positivo = verde, negativo = vermelho)
             const corAtual =
-              m.valor >= m.critico ? "#DC2626" : m.valor >= m.atencao ? "#D97706" : "#16A34A";
+              m.valor >= m.critico ? CHART_CRIT : m.valor >= m.atencao ? CHART_ATTENTION_TEXT : CHART_OK;
             // Cor da tendência (seta): subindo é ruim (vermelho), descendo é bom (verde)
             const corTendencia =
-              m.slope > 0.05 ? "#DC2626" : m.slope < -0.05 ? "#16A34A" : "#94A3B8";
+              m.slope > 0.05 ? CHART_CRIT : m.slope < -0.05 ? CHART_OK : CHART_MUTED;
             const tendenciaLabel =
               m.slope > 0.05 ? "↑ Piorando" : m.slope < -0.05 ? "↓ Melhorando" : "→ Estável";
             // Cor por ponto, segundo o valor de cada dia
             const dotColor = (v: number) =>
-              v >= m.critico ? "#DC2626" : v >= m.atencao ? "#D97706" : "#16A34A";
+              v >= m.critico ? CHART_CRIT : v >= m.atencao ? CHART_ATTENTION_TEXT : CHART_OK;
             return (
               <div key={m.key} className="glass-card p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -307,12 +308,12 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                     <LineChart data={trendData} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
                       <defs>
                         <linearGradient id={`grad-${m.key}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#DC2626" stopOpacity={0.9} />
-                          <stop offset={`${Math.min(100, (m.critico / Math.max(m.critico * 1.5, m.valor + 1)) * 100)}%`} stopColor="#D97706" stopOpacity={0.9} />
-                          <stop offset="100%" stopColor="#16A34A" stopOpacity={0.9} />
+                          <stop offset="0%" stopColor={CHART_CRIT} stopOpacity={0.9} />
+                          <stop offset={`${Math.min(100, (m.critico / Math.max(m.critico * 1.5, m.valor + 1)) * 100)}%`} stopColor={CHART_ATTENTION_TEXT} stopOpacity={0.9} />
+                          <stop offset="100%" stopColor={CHART_OK} stopOpacity={0.9} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE}  />
                       <XAxis
                         dataKey="date"
                         tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}
@@ -328,47 +329,42 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                         width={48}
                       />
                       <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                          fontSize: "11px",
-                        }}
+                        contentStyle={chartTooltipContentStyle}
                         formatter={(value: number) => [`${value.toFixed(2)}%`, m.label]}
                       />
                       {/* Zonas de risco */}
                       <ReferenceArea
                         y1={0}
                         y2={m.atencao}
-                        fill="#16A34A"
+                        fill={CHART_OK}
                         fillOpacity={0.08}
                         ifOverflow="extendDomain"
                       />
                       <ReferenceArea
                         y1={m.atencao}
                         y2={m.critico}
-                        fill="#D97706"
+                        fill={CHART_ATTENTION_TEXT}
                         fillOpacity={0.12}
                         ifOverflow="extendDomain"
                       />
                       <ReferenceArea
                         y1={m.critico}
                         y2={1e6}
-                        fill="#DC2626"
+                        fill={CHART_CRIT}
                         fillOpacity={0.15}
                         ifOverflow="extendDomain"
                       />
                       <ReferenceLine
                         y={m.atencao}
-                        stroke="#D97706"
+                        stroke={CHART_ATTENTION_TEXT}
                         strokeDasharray="4 3"
-                        label={{ value: `${m.atencao}%`, position: "right", fill: "#D97706", fontSize: 9 }}
+                        label={{ value: `${m.atencao}%`, position: "right", fill: CHART_ATTENTION_TEXT, fontSize: 9 }}
                       />
                       <ReferenceLine
                         y={m.critico}
-                        stroke="#DC2626"
+                        stroke={CHART_CRIT}
                         strokeDasharray="4 3"
-                        label={{ value: `${m.critico}%`, position: "right", fill: "#DC2626", fontSize: 9 }}
+                        label={{ value: `${m.critico}%`, position: "right", fill: CHART_CRIT, fontSize: 9 }}
                       />
                       <Line
                         type="monotone"
@@ -401,15 +397,15 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                 <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "#16A34A" }} />
+                      <span className="w-2 h-2 rounded-full" style={{ background: CHART_OK }} />
                       OK
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "#D97706" }} />
+                      <span className="w-2 h-2 rounded-full" style={{ background: CHART_ATTENTION_TEXT }} />
                       Atenção
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "#DC2626" }} />
+                      <span className="w-2 h-2 rounded-full" style={{ background: CHART_CRIT }} />
                       Crítico
                     </span>
                   </div>

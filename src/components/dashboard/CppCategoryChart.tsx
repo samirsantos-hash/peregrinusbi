@@ -9,6 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TrendingUp, TrendingDown, BarChart3, Users, Target } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { type CppRow, parseBrNumber, cleanCustId } from "@/utils/cppAggregation";
+import { CHART_SERIES_2, CHART_SERIES_3 } from "@/lib/chartTheme";
 
 // Fallback benchmarks by DOM1
 const DOM1_BENCHMARKS: Record<string, { n: number; gmv: number; roas: number; conv: number }> = {
@@ -296,7 +297,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
                   type="monotone"
                   dataKey="sellerGmv"
                   name="Este seller"
-                  stroke="#1D9E75"
+                  stroke={CHART_SERIES_2}
                   strokeWidth={2.5}
                   dot={chartData.length <= 7 ? { r: 4 } : false}
                   activeDot={{ r: 5 }}
@@ -306,7 +307,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
                   type="monotone"
                   dataKey="medianGmv"
                   name={`Mediana ${activeCat.length > 20 ? activeCat.slice(0, 18) + "…" : activeCat}`}
-                  stroke="#E24B4A"
+                  stroke={CHART_SERIES_3}
                   strokeWidth={1.5}
                   strokeDasharray="6 3"
                   dot={false}

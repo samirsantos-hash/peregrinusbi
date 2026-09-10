@@ -15,7 +15,24 @@ import {
 } from "recharts";
 import "./carteira.css";
 
-const NAVY = "#16233F", GOLD = "#C9A227", STEEL = "#5B7396", GREEN = "#2E7D5B", RED = "#B23A48";
+import {
+  AXIS_TICK_FONT_SIZE,
+  CHART_ATTENTION_TEXT,
+  CHART_AXIS_STROKE,
+  CHART_CRIT,
+  CHART_GRID_STROKE,
+  CHART_OK,
+  CHART_SERIES_1,
+  CHART_SERIES_3,
+  CHART_SERIES_4,
+} from "@/lib/chartTheme";
+
+/** Paleta local → tokens do sistema (Etapa B). */
+const NAVY = CHART_SERIES_1;
+const GOLD = CHART_ATTENTION_TEXT;
+const STEEL = CHART_SERIES_3;
+const GREEN = CHART_OK;
+const RED = CHART_CRIT;
 
 /* ═══════════════ UI primitives ═══════════════ */
 const SectionHead = ({ n, title, note }: { n: string; title: string; note?: string }) => (
@@ -276,7 +293,7 @@ function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
           <div style={{ width: "100%", height: 340 }}>
             <ResponsiveContainer>
               <ComposedChart data={catRows} margin={{ top: 8, right: 24, bottom: 60, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 <XAxis dataKey="cat" tick={{ fontSize: 9 }} angle={-35} textAnchor="end" interval={0} height={70} />
                 <YAxis yAxisId="l" tick={{ fontSize: 11  }} tickFormatter={(v) => fmtInt(v)} />
                 <YAxis yAxisId="r" orientation="right" domain={[0, 100]} tick={{ fontSize: 11  }} tickFormatter={(v) => `${v}%`} />
@@ -338,7 +355,7 @@ function Ritmo({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
         <div style={{ width: "100%", height: 340 }}>
           <ResponsiveContainer>
             <ComposedChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={Math.max(0, Math.floor(rows.length / 18))} />
               <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
               <Tooltip formatter={(v: any, n: any) => [brl(v), n]} labelFormatter={(l) => `Dia ${l}`} />
@@ -362,7 +379,7 @@ function Ritmo({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
         <div style={{ width: "100%", height: 260 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={Math.max(0, Math.floor(rows.length / 18))} />
               <YAxis tick={{ fontSize: 11  }} tickFormatter={(v) => `${v.toFixed(0)}%`} />
               <Tooltip formatter={(v: any) => `${Number(v).toFixed(1)}% vs mediana`} />
@@ -477,7 +494,7 @@ function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
         <div style={{ width: "100%", height: 340 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis dataKey="regiao" tick={{ fontSize: 11  }} />
               <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtInt} />
               <Tooltip formatter={(v: any) => fmtInt(Number(v))} />
@@ -526,7 +543,7 @@ function TicketUF({ ag }: { ag: Agg }) {
         <div style={{ width: "100%", height: 340 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis dataKey="uf" tick={{ fontSize: 11  }} />
               <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
               <Tooltip formatter={(v: any) => brl(v)} />
@@ -570,7 +587,7 @@ function Tracionadores({ ag }: { ag: Agg }) {
         <div style={{ width: "100%", height: Math.max(320, rows.length * 26) }}>
           <ResponsiveContainer>
             <BarChart data={rows} layout="vertical" margin={{ left: 120, right: 24 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis type="number" tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
               <YAxis type="category" dataKey="nick" tick={{ fontSize: 11  }} width={115} />
               <Tooltip formatter={(v: any) => brl(v)} />
@@ -614,7 +631,7 @@ function Trafego({ ag }: { ag: Agg }) {
         <div style={{ width: "100%", height: 360 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 80, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis dataKey="nick" tick={{ fontSize: 9 }} angle={-45} textAnchor="end" interval={0} height={90} />
               <YAxis tick={{ fontSize: 11  }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
               <Tooltip formatter={(v: any, n: any) => (n === "Conversão" ? `${Number(v).toFixed(2)}%` : fmtInt(Number(v)))} />
@@ -710,7 +727,7 @@ function Pads({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
           <div style={{ width: "100%", height: 280 }}>
             <ResponsiveContainer>
               <BarChart data={faixas}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 <XAxis dataKey="faixa" tick={{ fontSize: 11  }} />
                 <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtInt} />
                 <Tooltip formatter={(v: any) => fmtInt(Number(v))} />
@@ -740,7 +757,7 @@ function Pads({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
         <div style={{ width: "100%", height: 260 }}>
           <ResponsiveContainer>
             <BarChart data={mecanicas} layout="vertical" margin={{ left: 110 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis type="number" tick={{ fontSize: 11  }} tickFormatter={fmtInt} />
               <YAxis type="category" dataKey="tipo" tick={{ fontSize: 11  }} width={105} />
               <Tooltip formatter={(v: any) => fmtInt(Number(v))} />
@@ -828,7 +845,7 @@ function Estatistica({ ag }: { ag: Agg }) {
           <div style={{ width: "100%", height: 320 }}>
             <ResponsiveContainer>
               <ComposedChart data={bins} margin={{ top: 8, right: 16, bottom: 40, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 <XAxis dataKey="label" tick={{ fontSize: 9 }} angle={-35} textAnchor="end" height={55} interval={1} />
                 <YAxis tick={{ fontSize: 11  }} />
                 <Tooltip formatter={(val: any, n: any) => [Number(val).toFixed(1), n]} />
@@ -853,7 +870,7 @@ function Estatistica({ ag }: { ag: Agg }) {
           <div style={{ width: "100%", height: 320 }}>
             <ResponsiveContainer>
               <ComposedChart data={trend} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={Math.max(0, Math.floor(trend.length / 14))} />
                 <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
                 <Tooltip formatter={(val: any) => brl(val)} />
@@ -886,10 +903,10 @@ const GRANT_FILTERS = [
 ] as const;
 
 function grantColor(d: number) {
-  if (d < 0) return "#7A1F2B";
+  if (d < 0) return CHART_CRIT;
   if (d <= 15) return RED;
-  if (d <= 30) return "#D9822B";
-  if (d <= 60) return "#E0B93C";
+  if (d <= 30) return CHART_ATTENTION_TEXT;
+  if (d <= 60) return CHART_SERIES_4;
   return GREEN;
 }
 
@@ -953,7 +970,7 @@ function Grant({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
         <div style={{ width: "100%", height: Math.max(320, chart.length * 20) }}>
           <ResponsiveContainer>
             <BarChart data={chart} layout="vertical" margin={{ left: 130, right: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis type="number" tick={{ fontSize: 11  }} />
               <YAxis type="category" dataKey="nick" tick={{ fontSize: 9 }} width={125} />
               <Tooltip formatter={(v: any) => `${Number(v)} dias`} />
@@ -1009,7 +1026,7 @@ function Grant({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
         <div style={{ width: "100%", height: 240 }}>
           <ResponsiveContainer>
             <BarChart data={semGrantRegiao}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis dataKey="regiao" tick={{ fontSize: 11  }} />
               <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
               <Tooltip formatter={(v: any) => brl(v)} />
@@ -1152,14 +1169,14 @@ function LojaALoja({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
             <div style={{ width: "100%", height: 240 }}>
               <ResponsiveContainer>
                 <ComposedChart data={daily} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2A3A5E" />
-                  <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#A9BAD8" }} interval={Math.max(0, Math.floor(daily.length / 12))} />
-                  <YAxis tick={{ fontSize: 9, fill: "#A9BAD8" }} tickFormatter={fmtBRLShort} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                  <XAxis dataKey="label" tick={{ fontSize: 9, fill: CHART_AXIS_STROKE }} interval={Math.max(0, Math.floor(daily.length / 12))} />
+                  <YAxis tick={{ fontSize: 9, fill: CHART_AXIS_STROKE }} tickFormatter={fmtBRLShort} />
                   <Tooltip formatter={(v: any) => brl(v)} />
                   <Line type="monotone" dataKey="gmv" name="GMV diário" stroke={GOLD} strokeWidth={2} dot={false} />
-                  <ReferenceLine y={sSel.median} stroke="#fff" strokeDasharray="5 4" label={{ value: "Mediana da loja", fill: "#fff", fontSize: 9, position: "insideTopRight" }} />
-                  <ReferenceLine y={sSel.q1} stroke="#A9BAD8" strokeDasharray="2 3" />
-                  <ReferenceLine y={sSel.q3} stroke="#A9BAD8" strokeDasharray="2 3" />
+                  <ReferenceLine y={sSel.median} stroke={CHART_AXIS_STROKE} strokeDasharray="5 4" label={{ value: "Mediana da loja", fill: CHART_AXIS_STROKE, fontSize: 9, position: "insideTopRight" }} />
+                  <ReferenceLine y={sSel.q1} stroke={CHART_AXIS_STROKE} strokeDasharray="2 3" />
+                  <ReferenceLine y={sSel.q3} stroke={CHART_AXIS_STROKE} strokeDasharray="2 3" />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>

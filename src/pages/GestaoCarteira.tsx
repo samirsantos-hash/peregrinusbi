@@ -42,6 +42,24 @@ import GraficoReputacao from "@/components/carteira/GraficoReputacao";
 import CreatePortfolioModal from "@/components/portfolios/CreatePortfolioModal";
 import { usePortfolios } from "@/hooks/usePortfolios";
 import AccessScopeBadge from "@/components/AccessScopeBadge";
+import {
+  CHART_ATTENTION,
+  CHART_ATTENTION_TEXT,
+  CHART_BORDER,
+  CHART_CRIT,
+  CHART_GRID_STROKE,
+  CHART_MUTED,
+  CHART_OK,
+  CHART_ON_COLOR,
+  CHART_PRIMARY,
+  CHART_SERIES_1,
+  CHART_SERIES_2,
+  CHART_SERIES_3,
+  CHART_SERIES_4,
+  CHART_SERIES_5,
+  chartAxisTick,
+  chartTooltipContentStyle,
+} from "@/lib/chartTheme";
 
 // ── Types ──
 interface CppMensalRow {
@@ -97,11 +115,19 @@ const fmtCompact = (v: number) =>
   new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(v);
 
 const MEDAL_COLORS: Record<string, string> = {
-  PLATINUM: "#1F4E79",
-  GOLD: "#D4AF37",
-  SILVER: "#9CA3AF",
-  BRONZE: "#CD7F32",
+  PLATINUM: CHART_SERIES_1,
+  GOLD: CHART_ATTENTION,
+  SILVER: CHART_MUTED,
+  BRONZE: CHART_ATTENTION_TEXT,
 };
+
+const SERIES_PALETTE = [
+  CHART_SERIES_1,
+  CHART_SERIES_2,
+  CHART_SERIES_3,
+  CHART_SERIES_4,
+  CHART_SERIES_5,
+] as const;
 
 // ── Data fetching ──
 function useCppMensal() {
@@ -815,17 +841,17 @@ export default function GestaoCarteira() {
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={top20} layout="vertical" margin={{ left: 80 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                     <XAxis type="number" tickFormatter={(v) => fmtCompact(v)} />
                     <YAxis
                       type="category"
                       dataKey="cus_nickname"
-                      tick={{ fontSize: 11  }}
+                      tick={chartAxisTick}
                       width={80}
                     />
                     <Tooltip
                       formatter={(v: number) => fmtBRL(v)}
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                      contentStyle={chartTooltipContentStyle}
                     />
                     <Bar
                       dataKey="tgmv_lc"
@@ -839,7 +865,7 @@ export default function GestaoCarteira() {
                       {top20.map((s, i) => (
                         <Cell
                           key={i}
-                          fill={MEDAL_COLORS[s.nivel_solucion] || "hsl(var(--primary))"}
+                          fill={MEDAL_COLORS[s.nivel_solucion] || CHART_PRIMARY}
                         />
                       ))}
                     </Bar>
@@ -867,19 +893,19 @@ export default function GestaoCarteira() {
                       { label: "M", ...Object.fromEntries(nmvTrail.map((s) => [s.cus_nickname, s.nmv_lc])) },
                     ]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                     <XAxis dataKey="label" />
                     <YAxis tickFormatter={(v) => fmtCompact(v)} />
                     <Tooltip
                       formatter={(v: number) => fmtBRL(v)}
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                      contentStyle={chartTooltipContentStyle}
                     />
                     {nmvTrail.map((s, i) => (
                       <Line
                         key={s.cust_id}
                         type="monotone"
                         dataKey={s.cus_nickname}
-                        stroke={`hsl(${(i * 36) % 360} 70% 55%)`}
+                        stroke={SERIES_PALETTE[i % SERIES_PALETTE.length]}
                         strokeWidth={2}
                         dot={{ r: 3 }}
                       />
@@ -902,7 +928,7 @@ export default function GestaoCarteira() {
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={cdpComposition}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                     <XAxis
                       dataKey="tim_month_id"
                       tickFormatter={(v) => `${String(v).slice(4)}/${String(v).slice(2, 4)}`}
@@ -910,19 +936,19 @@ export default function GestaoCarteira() {
                     <YAxis tickFormatter={(v) => fmtCompact(v)} />
                     <Tooltip
                       formatter={(v: number, name: string) => [fmtBRL(v), name]}
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                      contentStyle={chartTooltipContentStyle}
                     />
                     <Legend />
                     {[
-                      { key: "regular", color: "#3B82F6" },
-                      { key: "cupom", color: "#8B5CF6" },
-                      { key: "lightning", color: "#F59E0B" },
-                      { key: "dod", color: "#EF4444" },
-                      { key: "dxb", color: "#10B981" },
-                      { key: "tiers", color: "#6366F1" },
-                      { key: "pre_acordo", color: "#EC4899" },
-                      { key: "automatic", color: "#14B8A6" },
-                      { key: "custom_seller", color: "#F97316" },
+                      { key: "regular", color: CHART_SERIES_1 },
+                      { key: "cupom", color: CHART_SERIES_2 },
+                      { key: "lightning", color: CHART_SERIES_3 },
+                      { key: "dod", color: CHART_SERIES_4 },
+                      { key: "dxb", color: CHART_SERIES_5 },
+                      { key: "tiers", color: CHART_SERIES_1 },
+                      { key: "pre_acordo", color: CHART_SERIES_2 },
+                      { key: "automatic", color: CHART_SERIES_3 },
+                      { key: "custom_seller", color: CHART_SERIES_4 },
                     ].map(({ key, color }) => (
                       <Bar key={key} dataKey={key} stackId="a" fill={color} />
                     ))}
@@ -948,7 +974,7 @@ export default function GestaoCarteira() {
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <ScatterChart>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                     <XAxis
                       type="number"
                       dataKey="inv"
@@ -964,7 +990,7 @@ export default function GestaoCarteira() {
                     <ZAxis type="number" dataKey="meses" range={[30, 200]} />
                     <Tooltip
                       formatter={(v: number) => fmtBRL(v)}
-                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }}
+                      contentStyle={chartTooltipContentStyle}
                     />
                     <Scatter
                       data={filteredSellers.slice(0, 100).map((s) => ({
@@ -973,10 +999,10 @@ export default function GestaoCarteira() {
                         meses: s.meses_no_programa,
                         name: s.cus_nickname,
                         color: s.alerts.some((a) => a.tipo.startsWith("QUEDA"))
-                          ? "#EF4444"
+                          ? CHART_CRIT
                           : s.alerts.some((a) => a.tipo.startsWith("CRESCIMENTO"))
-                          ? "#10B981"
-                          : "#6B7280",
+                          ? CHART_OK
+                          : CHART_MUTED,
                       }))}
                     >
                       {filteredSellers.slice(0, 100).map((s, i) => (
@@ -984,10 +1010,10 @@ export default function GestaoCarteira() {
                           key={i}
                           fill={
                             s.alerts.some((a) => a.tipo.startsWith("QUEDA"))
-                              ? "#EF4444"
+                              ? CHART_CRIT
                               : s.alerts.some((a) => a.tipo.startsWith("CRESCIMENTO"))
-                              ? "#10B981"
-                              : "#6B7280"
+                              ? CHART_OK
+                              : CHART_MUTED
                           }
                           fillOpacity={0.7}
                         />
@@ -1011,13 +1037,13 @@ export default function GestaoCarteira() {
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={funnel} layout="vertical" margin={{ left: 100 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                     <XAxis type="number" />
-                    <YAxis type="category" dataKey="etapa" tick={{ fontSize: 11  }} width={100} />
-                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }} />
-                    <Bar dataKey="valor" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]}>
+                    <YAxis type="category" dataKey="etapa" tick={chartAxisTick} width={100} />
+                    <Tooltip contentStyle={chartTooltipContentStyle} />
+                    <Bar dataKey="valor" fill={CHART_PRIMARY} radius={[0, 4, 4, 0]}>
                       {funnel.map((_, i) => (
-                        <Cell key={i} fill={`hsl(${210 + i * 20} 70% ${55 - i * 5}%)`} />
+                        <Cell key={i} fill={SERIES_PALETTE[i % SERIES_PALETTE.length]} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -1044,20 +1070,20 @@ export default function GestaoCarteira() {
                     layout="vertical"
                     margin={{ left: 120 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                    <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                     <XAxis type="number" />
                     <YAxis
                       type="category"
                       dataKey="cluster"
-                      tick={{ fontSize: 11  }}
+                      tick={chartAxisTick}
                       width={120}
                       tickFormatter={(v, i) => {
                         const item = heatmapData.sort((a, b) => b.itens - a.itens)[i];
                         return item ? `${item.cluster?.slice(0, 10)} | ${item.vertical?.slice(0, 10)}` : v;
                       }}
                     />
-                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }} />
-                    <Bar dataKey="itens" fill="hsl(210 70% 50%)" radius={[0, 4, 4, 0]} />
+                    <Tooltip contentStyle={chartTooltipContentStyle} />
+                    <Bar dataKey="itens" fill={CHART_SERIES_2} radius={[0, 4, 4, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -1114,7 +1140,7 @@ export default function GestaoCarteira() {
                         {s.worstAlert ? (
                           <Badge
                             className="text-[10px]"
-                            style={{ background: s.worstAlert.cor, color: "#fff" }}
+                            style={{ background: s.worstAlert.cor, color: CHART_ON_COLOR }}
                           >
                             {s.worstAlert.tipo.replace(/_/g, " ")}
                           </Badge>
@@ -1139,7 +1165,7 @@ export default function GestaoCarteira() {
                         <Badge
                           variant="outline"
                           className="text-[10px]"
-                          style={{ borderColor: MEDAL_COLORS[s.nivel_solucion] || "hsl(var(--border))" }}
+                          style={{ borderColor: MEDAL_COLORS[s.nivel_solucion] || CHART_BORDER }}
                         >
                           {s.nivel_solucion}
                         </Badge>
@@ -1196,7 +1222,7 @@ export default function GestaoCarteira() {
                 <DrawerTitle className="flex items-center gap-2 flex-wrap">
                   {drawerSeller.cus_nickname}
                   <Badge variant="outline" className="text-xs">{drawerSeller.cust_id}</Badge>
-                  <Badge style={{ background: MEDAL_COLORS[drawerSeller.nivel_solucion] || "hsl(var(--primary))", color: "#fff" }} className="text-xs">
+                  <Badge style={{ background: MEDAL_COLORS[drawerSeller.nivel_solucion] || CHART_PRIMARY, color: CHART_ON_COLOR }} className="text-xs">
                     {drawerSeller.nivel_solucion}
                   </Badge>
                   <Badge variant="outline" className="text-xs">{drawerSeller.cluster_seller}</Badge>
@@ -1247,7 +1273,7 @@ export default function GestaoCarteira() {
                     ]}>
                       <XAxis dataKey="label" />
                       <YAxis tickFormatter={(v) => fmtCompact(v)} />
-                      <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="value" fill={CHART_PRIMARY} radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
