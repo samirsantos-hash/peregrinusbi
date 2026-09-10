@@ -44,7 +44,7 @@ function useCadastroComplementar(custId?: string, precisa?: boolean) {
       const base = await supabase
         .from("cart_base_vendedores")
         .select("cus_state")
-        .eq("cust_id", id)
+        .eq("cust_id", Number(id))
         .limit(1)
         .maybeSingle();
 
