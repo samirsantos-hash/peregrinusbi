@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { CHART_OK, CHART_ATTENTION_TEXT, CHART_CRIT, CHART_PRIMARY } from "@/lib/chartTheme";
 
 export type KpiId = "tgmv" | "sellers_ativos" | "ticket_medio" | "queda" | "crescimento" | "vencimento";
 
@@ -19,14 +20,14 @@ export interface KpiCardProps {
 
 const SEVER_BORDER: Record<string, string> = {
   neutro: "hsl(var(--border))",
-  positivo: "#16A34A",
-  atencao: "#F59E0B",
-  critico: "#DC2626",
+  positivo: CHART_OK,
+  atencao: CHART_ATTENTION_TEXT,
+  critico: CHART_CRIT,
 };
 
 const KpiCard = ({ id, titulo, valor, delta, sparkline, severidade = "neutro", nota, selected, onExpandir }: KpiCardProps) => {
   const sparkData = sparkline.map((v, i) => ({ i, v }));
-  const sparkColor = severidade === "critico" ? "#DC2626" : severidade === "atencao" ? "#F59E0B" : severidade === "positivo" ? "#16A34A" : "hsl(var(--primary))";
+  const sparkColor = severidade === "critico" ? CHART_CRIT : severidade === "atencao" ? CHART_ATTENTION_TEXT : severidade === "positivo" ? CHART_OK : CHART_PRIMARY;
 
   return (
     <motion.button
