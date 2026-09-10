@@ -215,7 +215,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
             </linearGradient>
           </defs>
 
-          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border) / 0.3)" />
+          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--grid))" />
 
           <XAxis
             dataKey="label"
@@ -226,7 +226,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
 
           <YAxis
             domain={yDomain}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}

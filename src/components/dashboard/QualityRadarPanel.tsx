@@ -292,7 +292,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                 <PolarRadiusAxis
                   angle={90}
                   domain={[0, 100]}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                   axisLine={false} />
                 
                 <Radar

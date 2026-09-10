@@ -166,17 +166,17 @@ const FacetChart = ({
           <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
           <XAxis
             type="number" dataKey="x" name={xVar.label}
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
+            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
             axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-            label={{ value: xVar.label, position: "bottom", offset: 10, fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
+            label={{ value: xVar.label, position: "bottom", offset: 10, fill: "hsl(215, 20%, 55%)", fontSize: 11  }}
             domain={["auto", "auto"]}
           />
           <YAxis
             type="number" dataKey="y" name={yVar.label}
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
+            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
             axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
             tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
-            label={{ value: yVar.label, angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 10 }}
+            label={{ value: yVar.label, angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11  }}
           />
           <ZAxis type="number" dataKey="z" range={[50, 400]} name={sizeVar.label} />
           <Tooltip

@@ -308,7 +308,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 angle={chartData.length > 8 ? -45 : 0}
                 textAnchor={chartData.length > 8 ? "end" : "middle"}
                 height={chartData.length > 8 ? 50 : 30}
-                label={{ value: `Eixo X: ${axisLabel}`, position: "insideBottomRight", offset: 0, fill: "hsl(215, 20%, 55%)", fontSize: 10 }} />
+                label={{ value: `Eixo X: ${axisLabel}`, position: "insideBottomRight", offset: 0, fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
               
                 <YAxis
                 yAxisId="left"

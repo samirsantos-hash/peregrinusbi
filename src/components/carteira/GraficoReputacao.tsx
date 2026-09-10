@@ -365,17 +365,17 @@ export default function GraficoReputacao() {
                     <stop offset="100%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
                 <XAxis
                   dataKey="mesLabel"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                   interval={0}
                   angle={-45}
                   textAnchor="end"
                   height={50}
                 />
                 <YAxis
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                   tickFormatter={(v: number) => `${(v * 100).toFixed(1)}%`}
                   domain={[0, yMax]}
                 />

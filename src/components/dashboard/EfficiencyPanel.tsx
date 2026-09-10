@@ -460,7 +460,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkInvestmentData} barCategoryGap="30%">
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-                <XAxis dataKey="name" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+                <XAxis dataKey="name" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
                 <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>

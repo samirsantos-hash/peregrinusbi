@@ -234,13 +234,13 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
 
       <ResponsiveContainer width="100%" height={300}>
         <ComposedChart data={plot} margin={{ top: 12, right: 78, bottom: 0, left: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.4} />
-          <XAxis dataKey="label" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
           <YAxis
             domain={[0, teto]}
             allowDataOverflow
             tickFormatter={(v) => `${Number(v).toFixed(0)}%`}
-            tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
           />
           <Tooltip
             contentStyle={{

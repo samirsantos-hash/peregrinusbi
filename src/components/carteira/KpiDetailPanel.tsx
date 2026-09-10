@@ -271,8 +271,8 @@ function TgmvChart({ data }: { data: MesAgg[] }) {
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-          <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+          <XAxis dataKey="mes" tick={{ fontSize: 11  }} />
           <YAxis tickFormatter={fmtCompact} />
           <Tooltip formatter={(v: number) => fmtBRL(v)} contentStyle={TT_STYLE} />
           <Area type="monotone" dataKey="tgmv" fill="hsl(217 91% 60% / 0.15)" stroke="hsl(217 91% 60%)" strokeWidth={2} name="TGMV" />
@@ -318,8 +318,8 @@ function SellersAtivosChart({ data }: { data: MesAgg[] }) {
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-          <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+          <XAxis dataKey="mes" tick={{ fontSize: 11  }} />
           <YAxis yAxisId="left" />
           <YAxis yAxisId="right" orientation="right" tickFormatter={fmtCompact} />
           <Tooltip contentStyle={TT_STYLE} formatter={(v: number, name: string) => [name === "ticket" ? fmtBRL(v) : v, name === "ticket" ? "Ticket Médio" : "Ativos"]} />
@@ -408,8 +408,8 @@ function TicketMedioChart({ sellers }: { sellers: EnrichedSeller[] }) {
       <div className="flex-1">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={bins}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+            <XAxis dataKey="label" tick={{ fontSize: 11  }} />
             <YAxis />
             <Tooltip contentStyle={TT_STYLE} />
             <Bar dataKey="count" fill="hsl(217 91% 60%)" radius={[4, 4, 0, 0]} name="Sellers" />
@@ -495,9 +495,9 @@ function QuedaWaterfall({ sellers, onClickSeller }: { sellers: any[]; onClickSel
     <div className="h-[400px] overflow-x-auto">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ left: 90, right: 60 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
           <XAxis type="number" tickFormatter={fmtCompact} />
-          <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={90} />
+          <YAxis type="category" dataKey="name" tick={{ fontSize: 11  }} width={90} />
           <Tooltip formatter={(v: number) => fmtBRL(v)} contentStyle={TT_STYLE} />
           <Bar dataKey="perda" radius={[0, 4, 4, 0]} name="Perda R$" cursor="pointer" onClick={(d: any) => d?.seller && onClickSeller(d.seller)}>
             {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
@@ -548,7 +548,7 @@ function CrescimentoChart({ sellers, onClickSeller }: { sellers: any[]; onClickS
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
           <XAxis dataKey="name" tick={{ fontSize: 9 }} angle={-30} textAnchor="end" height={60} />
           <YAxis yAxisId="left" tickFormatter={fmtCompact} />
           <YAxis yAxisId="right" orientation="right" unit="%" />
@@ -602,12 +602,12 @@ function VencimentoTimeline({ sellers, onClickSeller }: { sellers: any[]; onClic
     <div className="h-[400px]">
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ bottom: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-          <XAxis type="number" dataKey="dias" name="Dias" label={{ value: "Dias até vencimento", position: "bottom", fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+          <XAxis type="number" dataKey="dias" name="Dias" label={{ value: "Dias até vencimento", position: "bottom", fontSize: 11  }} />
           <YAxis type="number" dataKey="tgmv" name="TGMV" tickFormatter={fmtCompact} />
           <ZAxis type="number" dataKey="tgmv" range={[40, 400]} />
           <Tooltip contentStyle={TT_STYLE} formatter={(v: number, name: string) => [name === "TGMV" ? fmtBRL(v) : `${v} dias`, name]} />
-          <ReferenceLine x={0} stroke="#DC2626" strokeWidth={2} label={{ value: "Hoje", fill: "#DC2626", fontSize: 10 }} />
+          <ReferenceLine x={0} stroke="#DC2626" strokeWidth={2} label={{ value: "Hoje", fill: "#DC2626", fontSize: 11  }} />
           <ReferenceLine x={7} stroke="hsl(var(--border))" strokeDasharray="4 4" />
           <ReferenceLine x={30} stroke="hsl(var(--border))" strokeDasharray="4 4" />
           <Scatter data={data} cursor="pointer" onClick={(d: any) => d?.seller && onClickSeller(d.seller)}>

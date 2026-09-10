@@ -48,6 +48,22 @@
     --chart-4: 40 95% 55%;
     --chart-5: 0 84% 60%;
 
+    /*
+     * Sistema de gráficos — Etapa A (rampa / grade / eixo / atenção).
+     * Mesmos HSL em claro e escuro nesta etapa; calibração escura = pendência §6.3.
+     * series-4 (#8FB4E8) é extensão documentada do manual.
+     * Azul Claro (series-3) ≥3:1 como série; NÃO usar como texto.
+     */
+    --series-1: 240 100% 25%;  /* Navy #000080 */
+    --series-2: 215  81% 43%;  /* Azul Peregrinus #155EC4 */
+    --series-3: 215  71% 54%;  /* Azul Claro #367CDD */
+    --series-4: 214  60% 74%;  /* Azul Claro suave — extensão */
+    --series-5: 215  40% 85%;  /* Névoa #C9D6E8 */
+    --grid: 215 40% 85%;       /* Névoa cheia, sem alpha */
+    --axis: 215 20% 35%;       /* Grafite — eixo e rótulos */
+    --attention: 40 87% 42%;      /* #C98A0E — só preenchimento de área */
+    --attention-text: 40 87% 32%; /* #99690B — 4,79:1 texto/ícone/linha */
+
     --neon-blue: 210 53% 60%;
     --neon-blue-glow: 210 53% 70%;
     --emerald: 167 60% 45%;
@@ -118,6 +134,17 @@
     --chart-3: 167 60% 39%;
     --chart-4: 32 95% 44%;
     --chart-5: 0 72% 50%;
+
+    /* Mesma rampa da especificação (tema claro / superfícies Branco·Gelo) */
+    --series-1: 240 100% 25%;
+    --series-2: 215  81% 43%;
+    --series-3: 215  71% 54%;
+    --series-4: 214  60% 74%;
+    --series-5: 215  40% 85%;
+    --grid: 215 40% 85%;
+    --axis: 215 20% 35%;
+    --attention: 40 87% 42%;
+    --attention-text: 40 87% 32%;
 
     --neon-blue: 210 53% 45%;
     --neon-blue-glow: 210 53% 55%;
@@ -191,7 +218,8 @@
   }
 
   .warning-text {
-    color: hsl(var(--warning));
+    /* Texto/ícone: variante escura ≥4,5:1. Fill de área continua em --warning/--attention. */
+    color: hsl(var(--attention-text));
   }
 
   .neon-border {

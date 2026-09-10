@@ -278,8 +278,8 @@ function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
               <ComposedChart data={catRows} margin={{ top: 8, right: 24, bottom: 60, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
                 <XAxis dataKey="cat" tick={{ fontSize: 9 }} angle={-35} textAnchor="end" interval={0} height={70} />
-                <YAxis yAxisId="l" tick={{ fontSize: 10 }} tickFormatter={(v) => fmtInt(v)} />
-                <YAxis yAxisId="r" orientation="right" domain={[0, 100]} tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}%`} />
+                <YAxis yAxisId="l" tick={{ fontSize: 11  }} tickFormatter={(v) => fmtInt(v)} />
+                <YAxis yAxisId="r" orientation="right" domain={[0, 100]} tick={{ fontSize: 11  }} tickFormatter={(v) => `${v}%`} />
                 <Tooltip formatter={(v: any, n: any) => (n === "% acumulado" ? `${Number(v).toFixed(1)}%` : fmtInt(Number(v)))} />
                 <Legend />
                 <Bar yAxisId="l" dataKey="itens" name="Anúncios" fill={NAVY} cursor="pointer"
@@ -340,7 +340,7 @@ function Ritmo({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
             <ComposedChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
               <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={Math.max(0, Math.floor(rows.length / 18))} />
-              <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtBRLShort} />
+              <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
               <Tooltip formatter={(v: any, n: any) => [brl(v), n]} labelFormatter={(l) => `Dia ${l}`} />
               <Legend />
               <Area type="monotone" dataKey="q1" stackId="iqr" stroke="none" fill="transparent" name=" " legendType="none" />
@@ -364,7 +364,7 @@ function Ritmo({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
               <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={Math.max(0, Math.floor(rows.length / 18))} />
-              <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(0)}%`} />
+              <YAxis tick={{ fontSize: 11  }} tickFormatter={(v) => `${v.toFixed(0)}%`} />
               <Tooltip formatter={(v: any) => `${Number(v).toFixed(1)}% vs mediana`} />
               <ReferenceLine y={0} stroke={NAVY} />
               <Bar dataKey="desvio" name="Desvio vs mediana">
@@ -478,8 +478,8 @@ function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
-              <XAxis dataKey="regiao" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtInt} />
+              <XAxis dataKey="regiao" tick={{ fontSize: 11  }} />
+              <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtInt} />
               <Tooltip formatter={(v: any) => fmtInt(Number(v))} />
               <Legend />
               {cats.map((c, i) => (
@@ -527,8 +527,8 @@ function TicketUF({ ag }: { ag: Agg }) {
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
-              <XAxis dataKey="uf" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtBRLShort} />
+              <XAxis dataKey="uf" tick={{ fontSize: 11  }} />
+              <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
               <Tooltip formatter={(v: any) => brl(v)} />
               <Bar dataKey="ticket" name="Ticket médio" cursor="pointer"
                 onClick={(d: any) => d?.uf && set({ uf: d.uf })}>
@@ -571,8 +571,8 @@ function Tracionadores({ ag }: { ag: Agg }) {
           <ResponsiveContainer>
             <BarChart data={rows} layout="vertical" margin={{ left: 120, right: 24 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
-              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={fmtBRLShort} />
-              <YAxis type="category" dataKey="nick" tick={{ fontSize: 10 }} width={115} />
+              <XAxis type="number" tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
+              <YAxis type="category" dataKey="nick" tick={{ fontSize: 11  }} width={115} />
               <Tooltip formatter={(v: any) => brl(v)} />
               <ReferenceLine x={0} stroke={NAVY} />
               <Bar dataKey="delta" name="Δ GMV" cursor="pointer"
@@ -616,13 +616,13 @@ function Trafego({ ag }: { ag: Agg }) {
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 80, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
               <XAxis dataKey="nick" tick={{ fontSize: 9 }} angle={-45} textAnchor="end" interval={0} height={90} />
-              <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
+              <YAxis tick={{ fontSize: 11  }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
               <Tooltip formatter={(v: any, n: any) => (n === "Conversão" ? `${Number(v).toFixed(2)}%` : fmtInt(Number(v)))} />
               <Bar dataKey="conv" name="Conversão" cursor="pointer"
                 onClick={(d: any) => d?.id && set({ sellerId: d.id })}>
                 {rows.map((r, i) => <Cell key={i} fill={r.conv >= s.median ? NAVY : RED} />)}
               </Bar>
-              <ReferenceLine y={s.median} stroke={GOLD} strokeDasharray="5 4" label={{ value: "Mediana", position: "insideTopRight", fill: GOLD, fontSize: 10 }} />
+              <ReferenceLine y={s.median} stroke={GOLD} strokeDasharray="5 4" label={{ value: "Mediana", position: "insideTopRight", fill: GOLD, fontSize: 11  }} />
               <ReferenceLine y={s.q1} stroke={GOLD} strokeDasharray="2 3" />
               <ReferenceLine y={s.q3} stroke={GOLD} strokeDasharray="2 3" />
             </BarChart>
@@ -711,8 +711,8 @@ function Pads({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
             <ResponsiveContainer>
               <BarChart data={faixas}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
-                <XAxis dataKey="faixa" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtInt} />
+                <XAxis dataKey="faixa" tick={{ fontSize: 11  }} />
+                <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtInt} />
                 <Tooltip formatter={(v: any) => fmtInt(Number(v))} />
                 <Bar dataKey="itens" name="Itens" fill={NAVY} />
               </BarChart>
@@ -741,8 +741,8 @@ function Pads({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
           <ResponsiveContainer>
             <BarChart data={mecanicas} layout="vertical" margin={{ left: 110 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
-              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={fmtInt} />
-              <YAxis type="category" dataKey="tipo" tick={{ fontSize: 10 }} width={105} />
+              <XAxis type="number" tick={{ fontSize: 11  }} tickFormatter={fmtInt} />
+              <YAxis type="category" dataKey="tipo" tick={{ fontSize: 11  }} width={105} />
               <Tooltip formatter={(v: any) => fmtInt(Number(v))} />
               <Bar dataKey="itens" name="Itens" fill={GOLD} />
             </BarChart>
@@ -830,7 +830,7 @@ function Estatistica({ ag }: { ag: Agg }) {
               <ComposedChart data={bins} margin={{ top: 8, right: 16, bottom: 40, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
                 <XAxis dataKey="label" tick={{ fontSize: 9 }} angle={-35} textAnchor="end" height={55} interval={1} />
-                <YAxis tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 11  }} />
                 <Tooltip formatter={(val: any, n: any) => [Number(val).toFixed(1), n]} />
                 <Bar dataKey="count" name="Lojas" fill={NAVY} />
                 <Line type="monotone" dataKey="normal" name="Normal teórica" stroke={GOLD} strokeWidth={2} dot={false} />
@@ -855,7 +855,7 @@ function Estatistica({ ag }: { ag: Agg }) {
               <ComposedChart data={trend} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
                 <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={Math.max(0, Math.floor(trend.length / 14))} />
-                <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtBRLShort} />
+                <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
                 <Tooltip formatter={(val: any) => brl(val)} />
                 <Legend />
                 <Line type="monotone" dataKey="gmv" name="GMV" stroke={NAVY} strokeWidth={2} dot={false} />
@@ -954,7 +954,7 @@ function Grant({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
           <ResponsiveContainer>
             <BarChart data={chart} layout="vertical" margin={{ left: 130, right: 20 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
-              <XAxis type="number" tick={{ fontSize: 10 }} />
+              <XAxis type="number" tick={{ fontSize: 11  }} />
               <YAxis type="category" dataKey="nick" tick={{ fontSize: 9 }} width={125} />
               <Tooltip formatter={(v: any) => `${Number(v)} dias`} />
               <ReferenceLine x={30} stroke={NAVY} strokeDasharray="4 4" />
@@ -1010,8 +1010,8 @@ function Grant({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
           <ResponsiveContainer>
             <BarChart data={semGrantRegiao}>
               <CartesianGrid strokeDasharray="3 3" stroke="#DDE2EC" />
-              <XAxis dataKey="regiao" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} tickFormatter={fmtBRLShort} />
+              <XAxis dataKey="regiao" tick={{ fontSize: 11  }} />
+              <YAxis tick={{ fontSize: 11  }} tickFormatter={fmtBRLShort} />
               <Tooltip formatter={(v: any) => brl(v)} />
               <Bar dataKey="gmv" name="GMV sem grant" fill={GOLD} />
             </BarChart>
