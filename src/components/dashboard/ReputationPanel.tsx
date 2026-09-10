@@ -293,7 +293,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                   <div className="flex items-center gap-2">
                     <span
                       className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-                      style={{ color: corTendencia, background: `${corTendencia}1A` }}
+                      style={{ color: corTendencia, background: `color-mix(in srgb, ${corTendencia} 12%, transparent)` }}
                     >
                       {tendenciaLabel}
                     </span>

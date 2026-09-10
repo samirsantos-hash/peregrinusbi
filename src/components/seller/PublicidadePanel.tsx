@@ -343,7 +343,7 @@ function KpiCard({
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{titulo}</span>
         <span
           className="rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-          style={{ borderColor: cor, color: cor, background: `${cor}1a` }}
+          style={{ borderColor: cor, color: cor, background: `color-mix(in srgb, ${cor} 12%, transparent)` }}
         >
           {badge}
         </span>
