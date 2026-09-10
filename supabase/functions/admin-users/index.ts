@@ -157,10 +157,19 @@ Deno.serve(async (req) => {
         });
       }
 
-      console.log(`User ${reused ? "reused" : "created"}: ${newUser.user.id}, setting password in auth...`);
+      const newUserId = newUser?.user?.id;
+      if (!newUserId) {
+        console.error("Create user error: resposta sem usuário");
+        return new Response(JSON.stringify({ error: "Não foi possível criar ou localizar o usuário." }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      console.log(`User ${reused ? "reused" : "created"}: ${newUserId}, setting password in auth...`);
 
       // Force-set the password again to ensure it matches exactly
-      const { error: updatePwErr } = await adminClient.auth.admin.updateUserById(newUser.user.id, {
+      const { error: updatePwErr } = await adminClient.auth.admin.updateUserById(newUserId, {
         password: tempPassword,
       });
 

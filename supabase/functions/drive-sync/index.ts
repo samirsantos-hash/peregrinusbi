@@ -44,7 +44,7 @@ async function getAccessToken(sa: { client_email: string; private_key: string })
   const unsigned = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(claim))}`;
   const key = await crypto.subtle.importKey(
     "pkcs8",
-    pemToDer(sa.private_key),
+    pemToDer(sa.private_key) as unknown as BufferSource,
     { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
     false,
     ["sign"],
