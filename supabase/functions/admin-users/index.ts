@@ -180,11 +180,11 @@ Deno.serve(async (req) => {
       // Add user role (ignore duplicates)
       await adminClient
         .from("user_roles")
-        .upsert({ user_id: newUser.user.id, role: userRole }, { onConflict: "user_id,role" });
+        .upsert({ user_id: newUserId, role: userRole }, { onConflict: "user_id,role" });
 
       // Create/update access control entry
       const accessRow = {
-        user_id: newUser.user.id,
+        user_id: newUserId,
         user_email: email,
         cnpj: cnpj || null,
         allowed_cust_ids: allowedCustIds,
@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
       const { data: existingAccess } = await adminClient
         .from("user_access_control")
         .select("id")
-        .eq("user_id", newUser.user.id)
+        .eq("user_id", newUserId)
         .maybeSingle();
 
       if (existingAccess) {
@@ -206,7 +206,7 @@ Deno.serve(async (req) => {
       console.log(`User ${email} setup complete. Password stored in DB matches Auth.`);
 
       return new Response(
-        JSON.stringify({ success: true, tempPassword, userId: newUser.user.id, reused }),
+        JSON.stringify({ success: true, tempPassword, userId: newUserId, reused }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
