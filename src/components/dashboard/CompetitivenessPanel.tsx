@@ -19,6 +19,7 @@ import MonitoramentoPrecoPanel from "@/components/seller/MonitoramentoPrecoPanel
 import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
+import { CHART_OK, CHART_SERIES_2, CHART_ATTENTION_TEXT, CHART_CRIT, CHART_OK_SOFT } from "@/lib/chartTheme";
 
 const TOOLTIP_BPC =
   "BPC (Buy Price Competitive) compara o preço do seller com rivais quando o ML identifica produto equivalente. " +
@@ -80,10 +81,10 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   if (!d) return null;
 
   const getQuadrant = (x: number, y: number, mx: number, my: number) => {
-    if (x >= mx && y >= my) return { label: "🚀 Investir Agressivamente", color: "hsl(160, 84%, 39%)" };
-    if (x < mx && y >= my) return { label: "🔄 Otimizar Conversão", color: "hsl(199, 100%, 50%)" };
-    if (x >= mx && y < my) return { label: "⚙ Manter Eficiência", color: "hsl(40, 95%, 55%)" };
-    return { label: "⚠ Descontinuar / Liquidar", color: "hsl(0, 84%, 60%)" };
+    if (x >= mx && y >= my) return { label: "🚀 Investir Agressivamente", color: CHART_OK };
+    if (x < mx && y >= my) return { label: "🔄 Otimizar Conversão", color: CHART_SERIES_2 };
+    if (x >= mx && y < my) return { label: "⚙ Manter Eficiência", color: CHART_ATTENTION_TEXT };
+    return { label: "⚠ Descontinuar / Liquidar", color: CHART_CRIT };
   };
 
   const q = getQuadrant(d.forcaCompetitiva, d.atratividade, d.medianX, d.medianY);
@@ -354,19 +355,19 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
   }, [kpis, scatterPeriod]);
 
   const getBubbleColor = (x: number, y: number) => {
-    if (x >= medianX && y >= medianY) return "hsl(160, 84%, 39%)";
-    if (x < medianX && y >= medianY) return "hsl(199, 100%, 50%)";
-    if (x >= medianX && y < medianY) return "hsl(40, 95%, 55%)";
-    return "hsl(0, 84%, 60%)";
+    if (x >= medianX && y >= medianY) return CHART_OK;
+    if (x < medianX && y >= medianY) return CHART_SERIES_2;
+    if (x >= medianX && y < medianY) return CHART_ATTENTION_TEXT;
+    return CHART_CRIT;
   };
 
   // Cor dinâmica para % Mais Caro: <20 verde, 20-30 âmbar, >=30 vermelho
   const pctExpColor =
     monthlyTotals.pctExpensive >= 30
-      ? "hsl(0, 84%, 60%)"
+      ? CHART_CRIT
       : monthlyTotals.pctExpensive >= 20
-      ? "hsl(40, 95%, 55%)"
-      : "hsl(160, 84%, 39%)";
+      ? CHART_ATTENTION_TEXT
+      : CHART_OK;
   const pctExpAlert =
     monthlyTotals.pctExpensive >= 30
       ? "⚠️ Acima de 30% — o ML começa a rebaixar o anúncio"
@@ -447,7 +448,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             {(m as any).alert && (
               <p
                 className="text-[10px] mt-1.5 leading-tight font-medium"
-                style={{ color: (m as any).inlineStyle?.color ?? "hsl(40, 95%, 55%)" }}
+                style={{ color: (m as any).inlineStyle?.color ?? CHART_ATTENTION_TEXT }}
               >
                 {(m as any).alert}
               </p>
@@ -490,7 +491,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Índice de Competitividade de Preço
               </p>
-              <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A' }}>
+              <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? CHART_OK : bpcData.median >= 0.7 ? CHART_OK_SOFT : bpcData.median >= 0.6 ? CHART_ATTENTION_TEXT : CHART_CRIT }}>
                 {bpcData.median.toFixed(3)}
               </p>
               <p className="text-[11px] text-muted-foreground text-center leading-snug">
@@ -500,7 +501,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               </p>
               <span className="status-badge text-[11px]" style={{
                 backgroundColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.1)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.08)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.1)' : 'rgba(226,75,74,0.1)',
-                color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A',
+                color: bpcData.median >= 0.9 ? CHART_OK : bpcData.median >= 0.7 ? CHART_OK_SOFT : bpcData.median >= 0.6 ? CHART_ATTENTION_TEXT : CHART_CRIT,
                 borderColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.3)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.2)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.3)' : 'rgba(226,75,74,0.3)',
               }}>
                 {bpcData.median >= 0.9 ? 'Altamente competitivo' : bpcData.median >= 0.7 ? 'Competitivo' : bpcData.median >= 0.6 ? 'Moderado' : 'Pouco competitivo'}

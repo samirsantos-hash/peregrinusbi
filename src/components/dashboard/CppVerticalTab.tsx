@@ -16,6 +16,7 @@ import {
 } from "@/utils/cppAggregation";
 import { useEligibility } from "@/hooks/useEligibility";
 import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
+import { CHART_OK, CHART_PRICE_NEUTRAL, CHART_CRIT } from "@/lib/chartTheme";
 
 /* ──────────────── CDP SUB-CATEGORY REFERENCE (informativo, sem cortes de classificação) ──────────────── */
 
@@ -432,13 +433,13 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-1">Este seller</p>
                   <div className="flex w-full h-7 rounded overflow-hidden">
-                    <div style={{ width: `${sellerMetrics.priceCheaper}%`, backgroundColor: "#1D9E75" }} className="flex items-center justify-center text-[10px] font-bold text-white">
+                    <div style={{ width: `${sellerMetrics.priceCheaper}%`, backgroundColor: CHART_OK }} className="flex items-center justify-center text-[10px] font-bold text-white">
                       {sellerMetrics.priceCheaper >= 8 ? `${sellerMetrics.priceCheaper.toFixed(1)}%` : ""}
                     </div>
-                    <div style={{ width: `${sellerMetrics.priceMatch}%`, backgroundColor: "#888780" }} className="flex items-center justify-center text-[10px] font-bold text-white">
+                    <div style={{ width: `${sellerMetrics.priceMatch}%`, backgroundColor: CHART_PRICE_NEUTRAL }} className="flex items-center justify-center text-[10px] font-bold text-white">
                       {sellerMetrics.priceMatch! >= 8 ? `${sellerMetrics.priceMatch!.toFixed(1)}%` : ""}
                     </div>
-                    <div style={{ width: `${sellerMetrics.priceExpensive}%`, backgroundColor: "#E24B4A" }} className="flex items-center justify-center text-[10px] font-bold text-white">
+                    <div style={{ width: `${sellerMetrics.priceExpensive}%`, backgroundColor: CHART_CRIT }} className="flex items-center justify-center text-[10px] font-bold text-white">
                       {sellerMetrics.priceExpensive! >= 8 ? `${sellerMetrics.priceExpensive!.toFixed(1)}%` : ""}
                     </div>
                   </div>
@@ -449,13 +450,13 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                   <div>
                     <p className="text-[10px] text-muted-foreground mb-1">Mediana vertical</p>
                     <div className="flex w-full h-7 rounded overflow-hidden">
-                      <div style={{ width: `${bench.priceCheaper}%`, backgroundColor: "#1D9E75" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
+                      <div style={{ width: `${bench.priceCheaper}%`, backgroundColor: CHART_OK }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
                         {bench.priceCheaper >= 8 ? `${bench.priceCheaper.toFixed(1)}%` : ""}
                       </div>
-                      <div style={{ width: `${bench.priceMatch}%`, backgroundColor: "#888780" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
+                      <div style={{ width: `${bench.priceMatch}%`, backgroundColor: CHART_PRICE_NEUTRAL }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
                         {bench.priceMatch >= 8 ? `${bench.priceMatch.toFixed(1)}%` : ""}
                       </div>
-                      <div style={{ width: `${bench.priceExpensive}%`, backgroundColor: "#E24B4A" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
+                      <div style={{ width: `${bench.priceExpensive}%`, backgroundColor: CHART_CRIT }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
                         {bench.priceExpensive >= 8 ? `${bench.priceExpensive.toFixed(1)}%` : ""}
                       </div>
                     </div>
