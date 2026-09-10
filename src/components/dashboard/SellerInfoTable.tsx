@@ -122,26 +122,28 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     {
       icon: Layers,
       label: "Segmentação",
-      value: cluster || "—",
-      tooltip: "Cluster estratégico do seller (Emerging, Core, Mature) — define as metas e benchmarks aplicados.",
+      value: cluster || SEM_CADASTRO,
+      tooltip: cluster && !seller.cluster
+        ? "Cluster estratégico do seller. A base não traz o cluster principal desta loja; exibimos a subclassificação disponível."
+        : "Cluster estratégico do seller (Emerging, Core, Mature) — define as metas e benchmarks aplicados.",
     },
     {
       icon: Tag,
       label: "Sub Categoria",
-      value: subCluster || "—",
+      value: subCluster || SEM_CADASTRO,
       tooltip: "Subclassificação dentro do cluster principal — usada para comparações intra-vertical.",
     },
     {
       icon: MapPin,
       label: "Estado (UF)",
-      value: uf ? `${uf}${ufInfo ? ` · ${ufInfo.nome}` : ""}` : "—",
-      tooltip: "UF de origem da operação do seller — impacta prazos logísticos e disponibilidade Full.",
+      value: uf ? `${uf}${ufInfo ? ` · ${ufInfo.nome}` : ""}` : SEM_CADASTRO,
+      tooltip: "UF de origem da operação do seller — impacta prazos logísticos e disponibilidade Full. Vem do cadastro de lojas; se estiver vazia, a última carga não trouxe a UF desta loja.",
     },
     {
       icon: Globe,
       label: "Região",
-      value: ufInfo?.regiao || "—",
-      tooltip: "Macrorregião do IBGE correspondente à UF do seller (Norte, Nordeste, Centro-Oeste, Sudeste ou Sul).",
+      value: ufInfo?.regiao || SEM_CADASTRO,
+      tooltip: "Macrorregião do IBGE correspondente à UF do seller (Norte, Nordeste, Centro-Oeste, Sudeste ou Sul). Depende da UF estar preenchida.",
     },
   ];
 
