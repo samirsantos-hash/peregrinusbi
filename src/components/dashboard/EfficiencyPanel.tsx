@@ -25,6 +25,7 @@ import {
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
+import { AXIS_TICK_FONT_SIZE, CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface KpiLike {
   date: string;
@@ -459,9 +460,9 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             </div>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkInvestmentData} barCategoryGap="30%">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-                <XAxis dataKey="name" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                <XAxis dataKey="name" tick={chartAxisTick} axisLine={false} />
+                <YAxis tick={chartAxisTick} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
                   {benchmarkInvestmentData.map((_, i) => (
@@ -482,9 +483,9 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             </div>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkRatioData} barGap={4} barCategoryGap="25%">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-                <XAxis dataKey="metric" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                <XAxis dataKey="metric" tick={chartAxisTick} axisLine={false} />
+                <YAxis tick={chartAxisTick} axisLine={false} />
                 <Tooltip content={<BenchmarkBarTooltip />} />
                 <Bar dataKey="Seu Desempenho" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
                 <Bar dataKey="Mediana da Vertical" fill="hsl(174, 60%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
@@ -517,10 +518,10 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
                 <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={chartAxisTick}
               axisLine={false}
               interval="preserveStartEnd"
               angle={allDates.length > 6 ? -45 : 0}
@@ -529,14 +530,14 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             />
             <YAxis
               yAxisId="gmv"
-              tick={{ fill: "hsl(199, 100%, 60%)", fontSize: 11 }}
+              tick={{ fill: "hsl(199, 100%, 60%)", fontSize: AXIS_TICK_FONT_SIZE }}
               axisLine={false}
               tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
             />
             <YAxis
               yAxisId="ads"
               orientation="right"
-              tick={{ fill: "hsl(160, 70%, 50%)", fontSize: 11 }}
+              tick={{ fill: "hsl(160, 70%, 50%)", fontSize: AXIS_TICK_FONT_SIZE }}
               axisLine={false}
               tickFormatter={(v) => `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}K`}
             />
@@ -563,17 +564,17 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         </div>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={roasData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={chartAxisTick}
               axisLine={false}
               interval="preserveStartEnd"
               angle={allDates.length > 6 ? -45 : 0}
               textAnchor={allDates.length > 6 ? "end" : "middle"}
               height={allDates.length > 6 ? 50 : 30}
             />
-            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+            <YAxis tick={chartAxisTick} axisLine={false} />
             <Tooltip content={<RatioTooltip />} />
             <Line type="monotone" dataKey="ROAS" stroke="hsl(199, 100%, 50%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
             <Line type="monotone" dataKey="ACOS" stroke="hsl(280, 80%, 60%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />

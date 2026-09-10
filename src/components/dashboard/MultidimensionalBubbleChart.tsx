@@ -7,6 +7,7 @@ import {
 import { ExternalLink } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
+import { AXIS_TICK_FONT_SIZE, CHART_GRID_STROKE, CHART_AXIS_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface BubbleVariable {
   key: string;
@@ -163,20 +164,20 @@ const FacetChart = ({
       )}
       <ResponsiveContainer width="100%" height={height}>
         <ScatterChart margin={{ top: 10, right: 15, bottom: 35, left: 15 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+          <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
           <XAxis
             type="number" dataKey="x" name={xVar.label}
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-            axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-            label={{ value: xVar.label, position: "bottom", offset: 10, fill: "hsl(215, 20%, 55%)", fontSize: 11  }}
+            tick={chartAxisTick}
+            axisLine={{ stroke: CHART_AXIS_STROKE }}
+            label={{ value: xVar.label, position: "bottom", offset: 10, fill: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE  }}
             domain={["auto", "auto"]}
           />
           <YAxis
             type="number" dataKey="y" name={yVar.label}
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-            axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+            tick={chartAxisTick}
+            axisLine={{ stroke: CHART_AXIS_STROKE }}
             tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
-            label={{ value: yVar.label, angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11  }}
+            label={{ value: yVar.label, angle: -90, position: "insideLeft", fill: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE  }}
           />
           <ZAxis type="number" dataKey="z" range={[50, 400]} name={sizeVar.label} />
           <Tooltip

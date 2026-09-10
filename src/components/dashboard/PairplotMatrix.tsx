@@ -5,6 +5,7 @@ import {
   Bar, BarChart,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
+import { CHART_GRID_STROKE } from "@/lib/chartTheme";
 
 interface PairplotVariable {
   key: string;
@@ -198,7 +199,7 @@ const PairplotMatrix = ({ data, variables, resultVar }: PairplotMatrixProps) => 
                   {cell.type === "scatter" && cell.scatterData && (
                     <ResponsiveContainer width="100%" height="100%">
                       <ScatterChart margin={{ top: 4, right: 4, bottom: 4, left: 4 }}>
-                        <CartesianGrid strokeDasharray="2 2" stroke={CHART_COLORS.grid} strokeOpacity={0.5} />
+                        <CartesianGrid strokeDasharray="2 2" stroke={CHART_GRID_STROKE} />
                         <XAxis type="number" dataKey="x" hide />
                         <YAxis type="number" dataKey="y" hide />
                         <Tooltip content={<CellTooltip />} />

@@ -10,6 +10,7 @@ import { NovidadeTip } from "@/components/novidades/novidades";
 import {
   agruparPorMes, construirSerie, resumirComparacao, diagnosticarJanela, type PontoDiario,
 } from "@/lib/gmvMesVsMes";
+import { chartAxisTick } from "@/lib/chartTheme";
 
 export type { PontoDiario };
 
@@ -164,9 +165,9 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
             </pattern>
           </defs>
           <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-          <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={8} />
+          <XAxis dataKey="dia" tick={chartAxisTick} minTickGap={8} />
           <YAxis
-            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+            tick={chartAxisTick}
             tickFormatter={modo === "variacao" ? (v: number) => fPct(v) : fShort}
             width={62}
             domain={dominioVariacao}

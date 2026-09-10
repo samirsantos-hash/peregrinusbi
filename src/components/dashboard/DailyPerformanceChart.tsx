@@ -5,6 +5,7 @@ import {
 } from "recharts";
 import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
 import TooltipInfo from "./TooltipInfo";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface DailyKpi {
   date: string;
@@ -188,11 +189,11 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             </linearGradient>
           </defs>
 
-          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
 
           <XAxis
             dataKey="label"
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+            tick={chartAxisTick}
             axisLine={false}
             tickLine={false}
             interval={xInterval}
@@ -205,7 +206,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
           <YAxis
             yAxisId="left"
             domain={yDomain}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+            tick={chartAxisTick}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}
@@ -216,7 +217,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             yAxisId="right"
             orientation="right"
             domain={yDomainAds}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+            tick={chartAxisTick}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}

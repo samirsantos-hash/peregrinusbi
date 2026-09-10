@@ -1,5 +1,6 @@
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { PontoBbf } from "@/lib/qualityIndex";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 const fmt1 = (v: number) => v.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 
@@ -63,10 +64,10 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
       <div className="h-[160px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={dados} margin={{ top: 6, right: 10, bottom: 0, left: -18 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
             <XAxis
               dataKey="rotulo"
-              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
+              tick={chartAxisTick}
               tickLine={false}
               axisLine={false}
               interval="preserveStartEnd"
@@ -74,7 +75,7 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
             />
             <YAxis
               domain={[Math.max(0, min - folga), Math.min(100, max + folga)]}
-              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
+              tick={chartAxisTick}
               tickLine={false}
               axisLine={false}
               width={38}

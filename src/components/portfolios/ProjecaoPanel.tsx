@@ -17,6 +17,7 @@ import {
 import { useCrescimentoMensal } from "@/hooks/useCrescimentoMensal";
 import { forecastHibrido, inclinacaoLog, classificarTendencia } from "@/lib/forecast";
 import { withMovingAverage } from "@/utils/movingAverage";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 function fmtBRL(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -127,9 +128,9 @@ export default function ProjecaoPanel({ custIds, portfolioName }: Props) {
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={chartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
-                  <XAxis dataKey="mes" tick={{ fontSize: 11  }} />
-                  <YAxis tick={{ fontSize: 11  }} tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                  <XAxis dataKey="mes" tick={chartAxisTick} />
+                  <YAxis tick={chartAxisTick} tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)} />
                   <Tooltip
                     contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
                     formatter={(v: any, name: any) => [typeof v === "number" ? fmtBRL(v) : v, name]}

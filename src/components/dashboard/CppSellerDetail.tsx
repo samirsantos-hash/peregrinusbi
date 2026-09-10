@@ -17,6 +17,7 @@ import {
   computePeriodComparison, computeDowBreakdown, cleanCustId, parseBrNumber, getDailySeries,
 } from "@/utils/cppAggregation";
 import CppDailyChart from "@/components/dashboard/CppDailyChart";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 // DOW benchmarks (whole portfolio)
 const DOW_BENCHMARKS: Record<number, { roas: number; gmvMedio: number }> = {
@@ -223,9 +224,9 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dowData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
-                <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                <XAxis dataKey="label" tick={chartAxisTick} />
+                <YAxis tick={chartAxisTick} />
                 <Tooltip content={<CustomDowTooltip />} />
                 <Bar dataKey="tsi" radius={[4, 4, 0, 0]}>
                   {dowData.map((entry) => {

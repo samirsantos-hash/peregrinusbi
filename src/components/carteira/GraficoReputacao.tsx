@@ -20,6 +20,7 @@ import {
   ResponsiveContainer, Legend, ReferenceLine, RectangleProps,
 } from "recharts";
 import { monthKey, monthRange, monthLabel } from "@/lib/dates";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 // ── Types ──
 type Agg = "pond" | "mediana" | "p90";
@@ -365,17 +366,17 @@ export default function GraficoReputacao() {
                     <stop offset="100%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 <XAxis
                   dataKey="mesLabel"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tick={chartAxisTick}
                   interval={0}
                   angle={-45}
                   textAnchor="end"
                   height={50}
                 />
                 <YAxis
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tick={chartAxisTick}
                   tickFormatter={(v: number) => `${(v * 100).toFixed(1)}%`}
                   domain={[0, yMax]}
                 />

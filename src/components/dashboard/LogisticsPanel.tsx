@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -518,10 +519,10 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                   <stop offset="95%" stopColor="hsl(280, 80%, 60%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={chartAxisTick}
                 axisLine={false}
                 interval="preserveStartEnd"
                 angle={evolutionData.length > 8 ? -45 : 0}
@@ -529,7 +530,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                 height={evolutionData.length > 8 ? 50 : 30}
               />
               <YAxis
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={chartAxisTick}
                 axisLine={false}
                 tickFormatter={(v) => `${v}%`}
                 domain={[0, 100]}

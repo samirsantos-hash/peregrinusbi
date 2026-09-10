@@ -20,6 +20,7 @@ import {
   slopeUltimosN,
   type MetricaReputacao,
 } from "@/lib/reputationStatus";
+import { CHART_GRID_STROKE } from "@/lib/chartTheme";
 
 interface KpiLike {
   date: string;
@@ -312,7 +313,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                           <stop offset="100%" stopColor="#16A34A" stopOpacity={0.9} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                      <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                       <XAxis
                         dataKey="date"
                         tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}

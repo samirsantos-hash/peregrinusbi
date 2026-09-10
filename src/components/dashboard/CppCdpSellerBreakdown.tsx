@@ -8,6 +8,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { type CppRow, cleanCustId, parseBrNumber } from "@/utils/cppAggregation";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface Props {
   custId: string;
@@ -167,10 +168,10 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
             <div className="h-[220px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={daily}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
-                  <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                  <XAxis dataKey="label" tick={chartAxisTick} />
                   <YAxis
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    tick={chartAxisTick}
                     tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
                   />
                   <Tooltip

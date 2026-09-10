@@ -9,6 +9,7 @@ import { withMovingAverage } from "@/utils/movingAverage";
 
 import { monthKey as getMonthKey } from "@/lib/dates";
 import { detectPartialMonths } from "@/utils/partialPeriodGuard";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface QuarterlyKpi {
   date: string;
@@ -215,18 +216,18 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
             </linearGradient>
           </defs>
 
-          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
 
           <XAxis
             dataKey="label"
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }}
+            tick={{ ...chartAxisTick, fontWeight: 600 }}
             axisLine={false}
             tickLine={false}
           />
 
           <YAxis
             domain={yDomain}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+            tick={chartAxisTick}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}

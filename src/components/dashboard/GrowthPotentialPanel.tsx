@@ -19,6 +19,7 @@ import {
   indiceParaDelta,
   type Sentido,
 } from "@/lib/verticalStatus";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface KpiLike {
   date: string;
@@ -591,10 +592,10 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                 <stop offset="95%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={chartAxisTick}
               axisLine={false}
               interval="preserveStartEnd"
               angle={chartData.length > 8 ? -45 : 0}
@@ -602,7 +603,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               height={chartData.length > 8 ? 50 : 30}
             />
             <YAxis
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={chartAxisTick}
               axisLine={false}
               tickFormatter={(v) =>
                 modoCurva === "indexado"

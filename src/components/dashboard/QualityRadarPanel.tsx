@@ -11,6 +11,7 @@ import {
   Legend } from
 "recharts";
 import { Shield, Video, TrendingUp, Zap } from "lucide-react";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -284,15 +285,15 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
                     <stop offset="100%" stopColor={engajamentoColor} stopOpacity={0.08} />
                   </linearGradient>
                 </defs>
-                <PolarGrid stroke="hsl(215,25%,16%)" strokeOpacity={0.6} />
+                <PolarGrid stroke={CHART_GRID_STROKE} />
                 <PolarAngleAxis
                   dataKey="dimension"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                  tick={chartAxisTick} />
                 
                 <PolarRadiusAxis
                   angle={90}
                   domain={[0, 100]}
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tick={chartAxisTick}
                   axisLine={false} />
                 
                 <Radar
