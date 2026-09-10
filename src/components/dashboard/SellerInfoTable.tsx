@@ -16,25 +16,48 @@ interface Props {
   allKpis: { date?: string }[];
 }
 
-/** Complemento cadastral: quando a tabela de lojas está sem cluster/UF, busca o último mês do CPP. */
+/** Complemento cadastral: busca o registro mais recente da loja em outras bases quando faltam cluster/UF. */
 function useCadastroComplementar(custId?: string, precisa?: boolean) {
   return useQuery({
     queryKey: ["seller-cadastro-complementar", custId],
     enabled: Boolean(custId) && Boolean(precisa),
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
-      const { data, error } = await supabase
+      const id = String(custId);
+
+      const cpp = await supabase
         .from("cpp_mensal")
         .select("cluster_seller, sub_cluster_seller, cus_state, tim_month_id")
-        .eq("cust_id_text", String(custId))
+        .eq("cust_id_text", id)
         .order("tim_month_id", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (error) throw error;
-      return data ?? null;
+
+      const gm = await supabase
+        .from("gm_live_listings")
+        .select("cluster_seller, sub_cluster_seller, cus_state, data")
+        .eq("cust_id_text", id)
+        .order("data", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const base = await supabase
+        .from("cart_base_vendedores")
+        .select("cus_state")
+        .eq("cust_id", id)
+        .limit(1)
+        .maybeSingle();
+
+      return {
+        cluster: cpp.data?.cluster_seller || gm.data?.cluster_seller || "",
+        subCluster: cpp.data?.sub_cluster_seller || gm.data?.sub_cluster_seller || "",
+        state: cpp.data?.cus_state || gm.data?.cus_state || base.data?.cus_state || "",
+      };
     },
   });
 }
+
+const SEM_CADASTRO = "Não informado na base";
 
 const SellerInfoTable = ({ seller, allKpis }: Props) => {
   const { data: lojas } = useClassificacaoLojas();
@@ -49,9 +72,10 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     );
   }
 
-  const cluster = seller.cluster || extra?.cluster_seller || "";
-  const subCluster = seller.subCluster || extra?.sub_cluster_seller || "";
-  const estado = seller.state || extra?.cus_state || "";
+  const subCluster = seller.subCluster || extra?.subCluster || "";
+  // Quando a base não traz o cluster principal, a subclassificação é a única segmentação disponível.
+  const cluster = seller.cluster || extra?.cluster || subCluster || "";
+  const estado = seller.state || extra?.state || "";
 
   const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort() as string[];
 
