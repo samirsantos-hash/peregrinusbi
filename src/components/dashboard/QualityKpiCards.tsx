@@ -40,9 +40,9 @@ function normalizeScore(value: number): number {
 
 /** Semaphore color and label */
 function getSemaphore(score: number): { label: string; color: string; bgClass: string; textClass: string } {
-  if (score <= 33) return { label: "Crítico", color: "#E24B4A", bgClass: "bg-[#E24B4A]", textClass: "text-[#E24B4A]" };
-  if (score <= 66) return { label: "Em desenvolvimento", color: "#BA7517", bgClass: "bg-[#BA7517]", textClass: "text-[#BA7517]" };
-  return { label: "Saudável", color: "#1D9E75", bgClass: "bg-[#1D9E75]", textClass: "text-[#1D9E75]" };
+  if (score <= 33) return { label: "Crítico", color: "hsl(var(--crit))", bgClass: "bg-[hsl(var(--crit))]", textClass: "text-[hsl(var(--crit))]" };
+  if (score <= 66) return { label: "Em desenvolvimento", color: "hsl(var(--attention-text))", bgClass: "bg-[hsl(var(--attention-text))]", textClass: "text-[hsl(var(--attention-text))]" };
+  return { label: "Saudável", color: "hsl(var(--emerald))", bgClass: "bg-[hsl(var(--emerald))]", textClass: "text-[hsl(var(--emerald))]" };
 }
 
 /** Correction badge vs reference */

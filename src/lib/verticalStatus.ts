@@ -24,42 +24,42 @@ function fmtDelta(delta: number): string {
 export function statusPorDelta(delta: number): StatusDelta {
   if (delta >= 50) return {
     label: "Líder de Categoria",
-    cor: "#16A34A", bg: "#F0FDF4",
+    cor: "hsl(var(--ok))", bg: "hsl(var(--muted))",
     borderClass: "border-emerald/30", textClass: "text-emerald", bgClass: "bg-emerald/5",
     interpretacao: `O seller está ${fmtDelta(delta)} — liderança consolidada na categoria.`,
     acaoSugerida: "Proteger a posição. Testar otimização de margem com cautela: subir preço 3–5% nos SKUs menos elásticos e monitorar conversão por 14 dias antes de escalar.",
   };
   if (delta >= 30) return {
     label: "Performance Excedente",
-    cor: "#22C55E", bg: "#F0FDF4",
+    cor: "hsl(var(--ok))", bg: "hsl(var(--muted))",
     borderClass: "border-emerald/30", textClass: "text-emerald", bgClass: "bg-emerald/5",
     interpretacao: `O seller está ${fmtDelta(delta)} — vantagem competitiva real na categoria.`,
     acaoSugerida: "Momento de escalar: aumentar verba de Ads nos SKUs campeões e ampliar catálogo. Não reduzir descontos ainda — a vantagem pode ser frágil.",
   };
   if (delta >= 10) return {
     label: "Acima da Média",
-    cor: "#65A30D", bg: "#F7FEE7",
+    cor: "hsl(var(--ok))", bg: "hsl(var(--muted))",
     borderClass: "border-lime-500/30", textClass: "text-lime-500", bgClass: "bg-lime-500/5",
     interpretacao: `O seller está ${fmtDelta(delta)} — levemente à frente, sem vantagem estrutural. Um único competidor melhorando pode reverter.`,
     acaoSugerida: "Consolidar: identificar qual dimensão está puxando o índice para baixo e reforçá-la. Não é momento de relaxar descontos ou reduzir CDP.",
   };
   if (delta >= -10) return {
     label: "Na Média da Categoria",
-    cor: "#D97706", bg: "#FFFBEB",
+    cor: "hsl(var(--attention-text))", bg: "hsl(var(--muted))",
     borderClass: "border-warning/30", textClass: "text-warning", bgClass: "bg-warning/5",
     interpretacao: `O seller está ${fmtDelta(delta)} — empate técnico com os pares diretos.`,
     acaoSugerida: "Identificar a dimensão mais fraca e focar nela. GMV médio com Full baixo? Migrar para Full antes de escalar Ads.",
   };
   if (delta >= -30) return {
     label: "Gap de Vendas",
-    cor: "#EA580C", bg: "#FFF7ED",
+    cor: "hsl(var(--attention-text))", bg: "hsl(var(--muted))",
     borderClass: "border-orange-500/30", textClass: "text-orange-500", bgClass: "bg-orange-500/5",
     interpretacao: `O seller está ${fmtDelta(delta)} — desvantagem em relação aos concorrentes diretos.`,
     acaoSugerida: "Diagnóstico urgente: verificar as 2 dimensões com maior gap negativo e atacá-las antes de qualquer outra ação.",
   };
   return {
     label: "Potencial de Recuperação",
-    cor: "#DC2626", bg: "#FEF2F2",
+    cor: "hsl(var(--crit))", bg: "hsl(var(--muted))",
     borderClass: "border-destructive/30", textClass: "text-destructive", bgClass: "bg-destructive/5",
     interpretacao: `O seller está ${fmtDelta(delta)} — desempenho significativamente abaixo da categoria.`,
     acaoSugerida: "Ação urgente: revisar reputação, Full%, IPI e CDP em sequência. Ads ineficientes até corrigir o orgânico.",
@@ -67,11 +67,11 @@ export function statusPorDelta(delta: number): StatusDelta {
 }
 
 export function corPorDelta(delta: number): string {
-  if (delta >= 30)  return "#16A34A";
-  if (delta >= 10)  return "#65A30D";
-  if (delta >= -10) return "#D97706";
-  if (delta >= -30) return "#EA580C";
-  return "#DC2626";
+  if (delta >= 30)  return "hsl(var(--ok))";
+  if (delta >= 10)  return "hsl(var(--ok))";
+  if (delta >= -10) return "hsl(var(--attention-text))";
+  if (delta >= -30) return "hsl(var(--attention-text))";
+  return "hsl(var(--crit))";
 }
 
 export function labelPorDelta(delta: number): string {

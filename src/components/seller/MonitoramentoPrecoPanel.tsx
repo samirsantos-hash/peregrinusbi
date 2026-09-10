@@ -210,9 +210,9 @@ function detectarAnuncios(
 }
 
 const SEV_CFG: Record<Severidade, { cor: string; bg: string; borda: string; label: string }> = {
-  alta:  { cor: "#DC2626", bg: "rgba(220,38,38,0.06)",  borda: "rgba(220,38,38,0.35)",  label: "Alta" },
-  media: { cor: "#D97706", bg: "rgba(217,119,6,0.06)",  borda: "rgba(217,119,6,0.35)",  label: "Média" },
-  baixa: { cor: "#22D3EE", bg: "rgba(34,211,238,0.06)", borda: "rgba(34,211,238,0.35)", label: "Baixa" },
+  alta:  { cor: "hsl(var(--crit))", bg: "hsl(var(--crit) / 0.06)",  borda: "hsl(var(--crit) / 0.35)",  label: "Alta" },
+  media: { cor: "hsl(var(--attention-text))", bg: "hsl(var(--attention-text) / 0.06)",  borda: "hsl(var(--attention-text) / 0.35)",  label: "Média" },
+  baixa: { cor: "hsl(var(--series-3))", bg: "hsl(var(--series-3) / 0.06)", borda: "hsl(var(--series-3) / 0.35)", label: "Baixa" },
 };
 
 function ItemRow({ a }: { a: AnuncioFlag }) {
@@ -249,10 +249,10 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
                   a.pctVsMediaPedidos === null
                     ? "hsl(215, 20%, 65%)"
                     : a.pctVsMediaPedidos >= 0
-                    ? "#16A34A"
+                    ? "hsl(var(--ok))"
                     : a.pctVsMediaPedidos > -50
-                    ? "#D97706"
-                    : "#DC2626",
+                    ? "hsl(var(--attention-text))"
+                    : "hsl(var(--crit))",
               }}
             >
               {a.pedidos7d}

@@ -274,15 +274,15 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
           {mini.map((m) => {
             // Cor da linha baseada no valor ATUAL (positivo = verde, negativo = vermelho)
             const corAtual =
-              m.valor >= m.critico ? "#DC2626" : m.valor >= m.atencao ? "#D97706" : "#16A34A";
+              m.valor >= m.critico ? "hsl(var(--crit))" : m.valor >= m.atencao ? "hsl(var(--attention-text))" : "hsl(var(--ok))";
             // Cor da tendência (seta): subindo é ruim (vermelho), descendo é bom (verde)
             const corTendencia =
-              m.slope > 0.05 ? "#DC2626" : m.slope < -0.05 ? "#16A34A" : "#94A3B8";
+              m.slope > 0.05 ? "hsl(var(--crit))" : m.slope < -0.05 ? "hsl(var(--ok))" : "hsl(var(--muted-foreground))";
             const tendenciaLabel =
               m.slope > 0.05 ? "↑ Piorando" : m.slope < -0.05 ? "↓ Melhorando" : "→ Estável";
             // Cor por ponto, segundo o valor de cada dia
             const dotColor = (v: number) =>
-              v >= m.critico ? "#DC2626" : v >= m.atencao ? "#D97706" : "#16A34A";
+              v >= m.critico ? "hsl(var(--crit))" : v >= m.atencao ? "hsl(var(--attention-text))" : "hsl(var(--ok))";
             return (
               <div key={m.key} className="glass-card p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -293,7 +293,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                   <div className="flex items-center gap-2">
                     <span
                       className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-                      style={{ color: corTendencia, background: `${corTendencia}1A` }}
+                      style={{ color: corTendencia, background: `color-mix(in srgb, ${corTendencia} 12%, transparent)` }}
                     >
                       {tendenciaLabel}
                     </span>
@@ -307,9 +307,9 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                     <LineChart data={trendData} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
                       <defs>
                         <linearGradient id={`grad-${m.key}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#DC2626" stopOpacity={0.9} />
-                          <stop offset={`${Math.min(100, (m.critico / Math.max(m.critico * 1.5, m.valor + 1)) * 100)}%`} stopColor="#D97706" stopOpacity={0.9} />
-                          <stop offset="100%" stopColor="#16A34A" stopOpacity={0.9} />
+                          <stop offset="0%" stopColor="hsl(var(--crit))" stopOpacity={0.9} />
+                          <stop offset={`${Math.min(100, (m.critico / Math.max(m.critico * 1.5, m.valor + 1)) * 100)}%`} stopColor="hsl(var(--attention-text))" stopOpacity={0.9} />
+                          <stop offset="100%" stopColor="hsl(var(--ok))" stopOpacity={0.9} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
@@ -340,35 +340,35 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                       <ReferenceArea
                         y1={0}
                         y2={m.atencao}
-                        fill="#16A34A"
+                        fill="hsl(var(--ok))"
                         fillOpacity={0.08}
                         ifOverflow="extendDomain"
                       />
                       <ReferenceArea
                         y1={m.atencao}
                         y2={m.critico}
-                        fill="#D97706"
+                        fill="hsl(var(--attention-text))"
                         fillOpacity={0.12}
                         ifOverflow="extendDomain"
                       />
                       <ReferenceArea
                         y1={m.critico}
                         y2={1e6}
-                        fill="#DC2626"
+                        fill="hsl(var(--crit))"
                         fillOpacity={0.15}
                         ifOverflow="extendDomain"
                       />
                       <ReferenceLine
                         y={m.atencao}
-                        stroke="#D97706"
+                        stroke="hsl(var(--attention-text))"
                         strokeDasharray="4 3"
-                        label={{ value: `${m.atencao}%`, position: "right", fill: "#D97706", fontSize: 9 }}
+                        label={{ value: `${m.atencao}%`, position: "right", fill: "hsl(var(--attention-text))", fontSize: 9 }}
                       />
                       <ReferenceLine
                         y={m.critico}
-                        stroke="#DC2626"
+                        stroke="hsl(var(--crit))"
                         strokeDasharray="4 3"
-                        label={{ value: `${m.critico}%`, position: "right", fill: "#DC2626", fontSize: 9 }}
+                        label={{ value: `${m.critico}%`, position: "right", fill: "hsl(var(--crit))", fontSize: 9 }}
                       />
                       <Line
                         type="monotone"
@@ -401,15 +401,15 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                 <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "#16A34A" }} />
+                      <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--ok))" }} />
                       OK
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "#D97706" }} />
+                      <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--attention-text))" }} />
                       Atenção
                     </span>
                     <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "#DC2626" }} />
+                      <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--crit))" }} />
                       Crítico
                     </span>
                   </div>

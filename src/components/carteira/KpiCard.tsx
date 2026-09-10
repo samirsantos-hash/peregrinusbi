@@ -19,14 +19,14 @@ export interface KpiCardProps {
 
 const SEVER_BORDER: Record<string, string> = {
   neutro: "hsl(var(--border))",
-  positivo: "#16A34A",
-  atencao: "#F59E0B",
-  critico: "#DC2626",
+  positivo: "hsl(var(--ok))",
+  atencao: "hsl(var(--attention-text))",
+  critico: "hsl(var(--crit))",
 };
 
 const KpiCard = ({ id, titulo, valor, delta, sparkline, severidade = "neutro", nota, selected, onExpandir }: KpiCardProps) => {
   const sparkData = sparkline.map((v, i) => ({ i, v }));
-  const sparkColor = severidade === "critico" ? "#DC2626" : severidade === "atencao" ? "#F59E0B" : severidade === "positivo" ? "#16A34A" : "hsl(var(--primary))";
+  const sparkColor = severidade === "critico" ? "hsl(var(--crit))" : severidade === "atencao" ? "hsl(var(--attention-text))" : severidade === "positivo" ? "hsl(var(--ok))" : "hsl(var(--primary))";
 
   return (
     <motion.button

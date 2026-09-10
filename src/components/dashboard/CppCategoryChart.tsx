@@ -296,7 +296,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
                   type="monotone"
                   dataKey="sellerGmv"
                   name="Este seller"
-                  stroke="#1D9E75"
+                  stroke="hsl(var(--emerald))"
                   strokeWidth={2.5}
                   dot={chartData.length <= 7 ? { r: 4 } : false}
                   activeDot={{ r: 5 }}
@@ -306,7 +306,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
                   type="monotone"
                   dataKey="medianGmv"
                   name={`Mediana ${activeCat.length > 20 ? activeCat.slice(0, 18) + "…" : activeCat}`}
-                  stroke="#E24B4A"
+                  stroke="hsl(var(--crit))"
                   strokeWidth={1.5}
                   strokeDasharray="6 3"
                   dot={false}

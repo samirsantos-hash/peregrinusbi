@@ -191,9 +191,9 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   onClick={() => setGrafico(g)}
                   className="rounded-lg border px-3 py-1.5 text-xs transition-colors"
                   style={{
-                    background: grafico === g ? "#1e293b" : "transparent",
-                    borderColor: grafico === g ? "#3b82f6" : "#1e293b",
-                    color: grafico === g ? "#93c5fd" : "#94a3b8",
+                    background: grafico === g ? "hsl(var(--border))" : "transparent",
+                    borderColor: grafico === g ? "hsl(var(--series-2))" : "hsl(var(--border))",
+                    color: grafico === g ? "hsl(var(--series-4))" : "hsl(var(--muted-foreground))",
                   }}
                 >
                   {label}
@@ -208,22 +208,22 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
             <ResponsiveContainer width="100%" height={300}>
               <ComposedChart data={m.historico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#94a3b8" }} tickFormatter={(v) => String(v).slice(2)} />
-                <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 11, fill: "#94a3b8" }} />
+                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => String(v).slice(2)} />
+                <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
                 <Tooltip
-                  contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", fontSize: 12 }}
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
                   formatter={(value: any, name: any) => [
                     fmtBRL(Number(value)),
                     name === "inv" ? "Investimento" : "GMV via Ads",
                   ]}
                 />
                 <Legend formatter={(n) => (n === "inv" ? "Investimento" : "GMV via Ads")} />
-                <Bar dataKey="inv" fill="#3b82f6">
+                <Bar dataKey="inv" fill="hsl(var(--series-2))">
                   {m.historico.map((d, i) => (
                     <Cell key={`inv-${i}`} fill={corRoas(d.roas)} fillOpacity={0.55} />
                   ))}
                 </Bar>
-                <Bar dataKey="gmv_ads" fill="#16A34A">
+                <Bar dataKey="gmv_ads" fill="hsl(var(--ok))">
                   {m.historico.map((d, i) => (
                     <Cell key={`gmv-${i}`} fill={corRoas(d.roas)} />
                   ))}
@@ -237,16 +237,16 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
             <span className="font-semibold uppercase tracking-wider">Cor por ROAS do mês:</span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#16A34A" }} /> Excelente (≥ {BENCHMARKS_ADS.roas.excelente}x)
+              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--ok))" }} /> Excelente (≥ {BENCHMARKS_ADS.roas.excelente}x)
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#4ade80" }} /> Bom (≥ {BENCHMARKS_ADS.roas.bom}x)
+              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--emerald-glow))" }} /> Bom (≥ {BENCHMARKS_ADS.roas.bom}x)
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#D97706" }} /> Atenção (≥ {BENCHMARKS_ADS.roas.atencao}x)
+              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--attention-text))" }} /> Atenção (≥ {BENCHMARKS_ADS.roas.atencao}x)
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#DC2626" }} /> Crítico (&lt; {BENCHMARKS_ADS.roas.atencao}x)
+              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--crit))" }} /> Crítico (&lt; {BENCHMARKS_ADS.roas.atencao}x)
             </span>
           </div>
           )}
@@ -282,14 +282,14 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                 key={margem}
                 className="rounded-lg border p-4"
                 style={{
-                  borderColor: ok ? "rgba(22,163,74,0.4)" : "rgba(220,38,38,0.4)",
-                  background: ok ? "rgba(22,163,74,0.05)" : "rgba(220,38,38,0.05)",
+                  borderColor: ok ? "hsl(var(--ok) / 0.4)" : "hsl(var(--crit) / 0.4)",
+                  background: ok ? "hsl(var(--ok) / 0.05)" : "hsl(var(--crit) / 0.05)",
                 }}
               >
                 <div className="text-xs text-muted-foreground">{label}</div>
                 <div
                   className="mt-1 font-mono text-2xl font-semibold tabular-nums"
-                  style={{ color: ok ? "#16A34A" : "#DC2626" }}
+                  style={{ color: ok ? "hsl(var(--ok))" : "hsl(var(--crit))" }}
                 >
                   {margemLiquida.toFixed(1)}%
                 </div>
@@ -308,9 +308,9 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
 };
 
 function corScoreCustom(v: number, ok: number, warn: number): string {
-  if (v >= ok) return "#16A34A";
-  if (v >= warn) return "#D97706";
-  return "#DC2626";
+  if (v >= ok) return "hsl(var(--ok))";
+  if (v >= warn) return "hsl(var(--attention-text))";
+  return "hsl(var(--crit))";
 }
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -343,7 +343,7 @@ function KpiCard({
         <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{titulo}</span>
         <span
           className="rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-          style={{ borderColor: cor, color: cor, background: `${cor}1a` }}
+          style={{ borderColor: cor, color: cor, background: `color-mix(in srgb, ${cor} 12%, transparent)` }}
         >
           {badge}
         </span>

@@ -97,7 +97,7 @@ const;
 const GROUP_META = {
   tecnico: { label: "Técnico", color: "hsl(var(--neon-blue))" },
   comercial: { label: "Comercial", color: "hsl(var(--emerald))" },
-  engajamento: { label: "Engajamento", color: "#00E676" }
+  engajamento: { label: "Engajamento", color: "hsl(var(--emerald-glow))" }
 };
 
 /* ------------------------------------------------------------------ */
@@ -202,7 +202,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
   const lowScores = radarData.filter((d) => d._value > 0 && d._value < 70);
 
   /* Engagement layer color changes to neon green when clips are active */
-  const engajamentoColor = hasClipsActive ? "#00E676" : "hsl(var(--warning))";
+  const engajamentoColor = hasClipsActive ? "hsl(var(--emerald-glow))" : "hsl(var(--warning))";
 
   /* ---------- Custom Tooltip ---------- */
   const CustomTooltip = ({ active, payload }: any) => {
@@ -336,9 +336,9 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
               transition={{ delay: 0.3 }}
               className="rounded-xl p-4 border"
               style={{
-                borderColor: hasClipsActive ? "#00E67640" : "hsl(var(--border))",
+                borderColor: hasClipsActive ? "hsl(var(--emerald-glow))40" : "hsl(var(--border))",
                 background: hasClipsActive ?
-                "linear-gradient(135deg, rgba(0,230,118,0.08), rgba(0,230,118,0.02))" :
+                "linear-gradient(135deg, hsl(var(--emerald-glow) / 0.08), hsl(var(--emerald-glow) / 0.02))" :
                 "hsl(var(--card))"
               }}>
               
@@ -361,7 +361,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
               </div>
               {hasClipsActive &&
               <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-              style={{ background: "#00E67620", color: "#00E676" }}>
+              style={{ background: "hsl(var(--emerald-glow))20", color: "hsl(var(--emerald-glow))" }}>
                   <Video className="w-3 h-3" /> Clips Ativo
                 </div>
               }
