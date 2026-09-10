@@ -65,13 +65,13 @@
     --price-neutral: 220 15% 66%; /* #9AA3B5 */
     --price-cool: 210 53% 60%;    /* #4E8AC9 */
     /* Sistema de gráficos — rampa ordenada, grade e eixo */
-    --series-1: 240 100% 62%;
-    --series-2: 215 81% 60%;
-    --series-3: 215 71% 68%;
-    --series-4: 214 60% 78%;
-    --series-5: 215 40% 85%;
-    --grid: 215 25% 30%;
-    --axis: 215 20% 62%;
+    --series-1: 215 92% 64%;
+    --series-2: 168 72% 48%;
+    --series-3: 38 94% 60%;
+    --series-4: 276 72% 70%;
+    --series-5: 340 72% 64%;
+    --grid: 215 25% 24%;
+    --axis: 215 25% 74%;
     --attention: 40 87% 52%;
     --attention-text: 40 87% 62%;
 
@@ -146,13 +146,13 @@
     --price-neutral: 220 12% 46%;
     --price-cool: 210 53% 45%;
     /* Sistema de gráficos — rampa ordenada, grade e eixo */
-    --series-1: 240 100% 25%;
-    --series-2: 215 81% 43%;
-    --series-3: 215 71% 54%;
-    --series-4: 214 55% 56%;
-    --series-5: 215 30% 40%;
-    --grid: 215 40% 85%;
-    --axis: 215 20% 35%;
+    --series-1: 220 88% 40%;
+    --series-2: 172 80% 26%;
+    --series-3: 30 92% 36%;
+    --series-4: 272 62% 46%;
+    --series-5: 340 72% 42%;
+    --grid: 215 32% 88%;
+    --axis: 215 22% 32%;
     --attention: 40 87% 42%;       /* #C98A0E — manual, só preenchimento */
     --attention-text: 40 87% 32%;  /* #99690B — 4,79:1, texto e linha */
 
@@ -312,8 +312,20 @@
     color: hsl(var(--foreground)) !important;
   }
 
+  .recharts-legend-wrapper {
+    padding-top: 8px;
+  }
+
+  .recharts-legend-item {
+    margin-right: 14px !important;
+  }
+
   .recharts-cartesian-axis-tick-value {
     fill: hsl(var(--axis));
+  }
+
+  .recharts-cartesian-axis-tick text {
+    dominant-baseline: middle;
   }
 
   .recharts-cartesian-axis-line,
@@ -324,6 +336,16 @@
   .recharts-polar-angle-axis-tick-value,
   .recharts-polar-radius-axis-tick-value {
     fill: hsl(var(--axis));
+  }
+
+  /* respiro entre a grade e as séries */
+  .recharts-cartesian-grid line {
+    stroke: hsl(var(--grid));
+    stroke-opacity: 0.85;
+  }
+
+  .recharts-surface {
+    overflow: visible;
   }
 
   .recharts-reference-line line {
