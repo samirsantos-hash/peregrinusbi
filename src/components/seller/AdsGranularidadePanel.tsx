@@ -165,20 +165,20 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={serie} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#94a3b8" }} interval="preserveStartEnd" />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} interval="preserveStartEnd" />
               <YAxis
                 yAxisId="brl"
                 tickFormatter={(v) => fmtBRLCompact(Number(v))}
-                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
               />
               <YAxis
                 yAxisId="sec"
                 orientation="right"
                 tickFormatter={(v) => (metrica === "roas" ? `${Number(v).toFixed(0)}x` : `${Number(v).toFixed(0)}%`)}
-                tick={{ fontSize: 11, fill: "#94a3b8" }}
+                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
               />
               <Tooltip
-                contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", fontSize: 12 }}
+                contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
                 formatter={(value: any, name: any) => {
                   const v = Number(value);
                   if (name === "inv") return [fmtBRL(v), "Investimento"];
@@ -198,14 +198,14 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                   <Cell key={i} fill={corRoas(b.roas)} fillOpacity={0.6} />
                 ))}
               </Bar>
-              <Bar yAxisId="brl" dataKey="gmv_ads" name="gmv_ads" fill="#4E8AC9" fillOpacity={0.35} />
+              <Bar yAxisId="brl" dataKey="gmv_ads" name="gmv_ads" fill="hsl(var(--series-2))" fillOpacity={0.35} />
               {metrica !== "inv" && (
                 <Line
                   yAxisId="sec"
                   type="monotone"
                   dataKey={metrica}
                   name={metrica}
-                  stroke={metrica === "roas" ? "#29A084" : metrica === "acos" ? "#D97706" : "#DC2626"}
+                  stroke={metrica === "roas" ? "hsl(var(--emerald))" : metrica === "acos" ? "hsl(var(--attention-text))" : "hsl(var(--crit))"}
                   strokeWidth={2}
                   dot={false}
                 />
@@ -304,8 +304,8 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                   <span
                     className="rounded-full border px-2 py-0.5"
                     style={{
-                      borderColor: p.em_campanha ? "#29A084" : "#D97706",
-                      color: p.em_campanha ? "#29A084" : "#D97706",
+                      borderColor: p.em_campanha ? "hsl(var(--emerald))" : "hsl(var(--attention-text))",
+                      color: p.em_campanha ? "hsl(var(--emerald))" : "hsl(var(--attention-text))",
                     }}
                   >
                     {p.em_campanha ? "Em campanha" : "Fora de campanha"}

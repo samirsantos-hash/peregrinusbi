@@ -15,7 +15,7 @@ import {
 } from "recharts";
 import "./carteira.css";
 
-const NAVY = "#16233F", GOLD = "#C9A227", STEEL = "#5B7396", GREEN = "#2E7D5B", RED = "#B23A48";
+const NAVY = "hsl(var(--card))", GOLD = "#C9A227", STEEL = "hsl(var(--muted-foreground))", GREEN = "hsl(var(--emerald))", RED = "hsl(var(--crit))";
 
 /* ═══════════════ UI primitives ═══════════════ */
 const SectionHead = ({ n, title, note }: { n: string; title: string; note?: string }) => (
@@ -886,9 +886,9 @@ const GRANT_FILTERS = [
 ] as const;
 
 function grantColor(d: number) {
-  if (d < 0) return "#7A1F2B";
+  if (d < 0) return "hsl(var(--crit))";
   if (d <= 15) return RED;
-  if (d <= 30) return "#D9822B";
+  if (d <= 30) return "hsl(var(--attention-text))";
   if (d <= 60) return "#E0B93C";
   return GREEN;
 }
@@ -1153,13 +1153,13 @@ function LojaALoja({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
               <ResponsiveContainer>
                 <ComposedChart data={daily} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
                   <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                  <XAxis dataKey="label" tick={{ fontSize: 9, fill: "#A9BAD8" }} interval={Math.max(0, Math.floor(daily.length / 12))} />
-                  <YAxis tick={{ fontSize: 9, fill: "#A9BAD8" }} tickFormatter={fmtBRLShort} />
+                  <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--series-5))" }} interval={Math.max(0, Math.floor(daily.length / 12))} />
+                  <YAxis tick={{ fontSize: 9, fill: "hsl(var(--series-5))" }} tickFormatter={fmtBRLShort} />
                   <Tooltip formatter={(v: any) => brl(v)} />
                   <Line type="monotone" dataKey="gmv" name="GMV diário" stroke={GOLD} strokeWidth={2} dot={false} />
                   <ReferenceLine y={sSel.median} stroke="#fff" strokeDasharray="5 4" label={{ value: "Mediana da loja", fill: "#fff", fontSize: 9, position: "insideTopRight" }} />
-                  <ReferenceLine y={sSel.q1} stroke="#A9BAD8" strokeDasharray="2 3" />
-                  <ReferenceLine y={sSel.q3} stroke="#A9BAD8" strokeDasharray="2 3" />
+                  <ReferenceLine y={sSel.q1} stroke="hsl(var(--series-5))" strokeDasharray="2 3" />
+                  <ReferenceLine y={sSel.q3} stroke="hsl(var(--series-5))" strokeDasharray="2 3" />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>

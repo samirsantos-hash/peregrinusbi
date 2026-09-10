@@ -490,7 +490,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Índice de Competitividade de Preço
               </p>
-              <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A' }}>
+              <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? 'hsl(var(--emerald))' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text))' : 'hsl(var(--crit))' }}>
                 {bpcData.median.toFixed(3)}
               </p>
               <p className="text-[11px] text-muted-foreground text-center leading-snug">
@@ -500,7 +500,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               </p>
               <span className="status-badge text-[11px]" style={{
                 backgroundColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.1)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.08)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.1)' : 'rgba(226,75,74,0.1)',
-                color: bpcData.median >= 0.9 ? '#1D9E75' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? '#BA7517' : '#E24B4A',
+                color: bpcData.median >= 0.9 ? 'hsl(var(--emerald))' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text))' : 'hsl(var(--crit))',
                 borderColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.3)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.2)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.3)' : 'rgba(226,75,74,0.3)',
               }}>
                 {bpcData.median >= 0.9 ? 'Altamente competitivo' : bpcData.median >= 0.7 ? 'Competitivo' : bpcData.median >= 0.6 ? 'Moderado' : 'Pouco competitivo'}

@@ -39,17 +39,17 @@ export function statusReputacao(
 
   const configs: Record<StatusUrgencia, { cor: string; bg: string; texto: string }> = {
     ok: {
-      cor: "#16A34A",
+      cor: "hsl(var(--ok))",
       bg: "rgba(22,163,74,0.08)",
       texto: `✓ Dentro do limite${tendencia}`,
     },
     atencao: {
-      cor: "#D97706",
+      cor: "hsl(var(--attention-text))",
       bg: "rgba(217,119,6,0.10)",
       texto: `⚠ Atenção${tendencia} — meta máxima: ${atencao}%`,
     },
     critico: {
-      cor: "#DC2626",
+      cor: "hsl(var(--crit))",
       bg: "rgba(220,38,38,0.10)",
       texto: `🚨 Crítico${tendencia} — risco de rebaixamento`,
     },
@@ -60,9 +60,9 @@ export function statusReputacao(
 
 /** Cor da linha do gráfico conforme tendência + sentido (menor é melhor). */
 export function corLinhaTendencia(slope: number): string {
-  if (slope > 0.05) return "#DC2626"; // piorando
-  if (slope < -0.05) return "#16A34A"; // melhorando
-  return "#F59E0B"; // estável
+  if (slope > 0.05) return "hsl(var(--crit))"; // piorando
+  if (slope < -0.05) return "hsl(var(--ok))"; // melhorando
+  return "hsl(var(--attention-text))"; // estável
 }
 
 export function slopeUltimosN(serie: number[], n = 3): number {

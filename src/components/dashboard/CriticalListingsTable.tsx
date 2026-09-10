@@ -87,7 +87,7 @@ const CriticalListingsTable = ({ listings }: CriticalListingsTableProps) => {
             variant="outline"
             size="sm"
             onClick={() => setShowClipsOnly(!showClipsOnly)}
-            className={`text-xs gap-1.5 ${showClipsOnly ? "border-[#00E676]/40 text-[#00E676]" : ""}`}
+            className={`text-xs gap-1.5 ${showClipsOnly ? "border-[hsl(var(--emerald-glow))]/40 text-[hsl(var(--emerald-glow))]" : ""}`}
           >
             <Video className="w-3.5 h-3.5" />
             {showClipsOnly ? "Com Clips" : "Filtrar Clips"}
@@ -147,7 +147,7 @@ const CriticalListingsTable = ({ listings }: CriticalListingsTableProps) => {
                       href={listing.mlbLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 font-mono font-medium text-[#4DD0E1] hover:text-[#80DEEA] transition-colors"
+                      className="inline-flex items-center gap-1.5 font-mono font-medium text-[hsl(var(--series-3))] hover:text-[hsl(var(--series-4))] transition-colors"
                     >
                       MLB{listing.itemId.replace(/\D/g, "")}
                       <ExternalLink className="w-3 h-3 opacity-60" />
@@ -186,7 +186,7 @@ const CriticalListingsTable = ({ listings }: CriticalListingsTableProps) => {
                     {listing.sellersClipsPubli > 0 ? (
                       <span
                         className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-semibold"
-                        style={{ background: "#00E67620", color: "#00E676" }}
+                        style={{ background: "hsl(var(--emerald-glow))20", color: "hsl(var(--emerald-glow))" }}
                       >
                         <Video className="w-3 h-3" />
                       </span>

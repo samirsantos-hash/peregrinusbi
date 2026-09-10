@@ -145,7 +145,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       <div
                         key={i}
                         className="w-1.5 h-3 rounded-sm"
-                        style={{ background: i < peso ? cor : "#1e293b" }}
+                        style={{ background: i < peso ? cor : "hsl(var(--border))" }}
                       />
                     ))}
                   </div>
@@ -202,9 +202,9 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
               onClick={() => setFiltro(f)}
               className="text-xs px-3 py-1.5 rounded-lg border transition-colors"
               style={{
-                background: active ? "#1e293b" : "transparent",
-                borderColor: active ? "#3b82f6" : "#1e293b",
-                color: active ? "#93c5fd" : "#94a3b8",
+                background: active ? "hsl(var(--border))" : "transparent",
+                borderColor: active ? "hsl(var(--series-2))" : "hsl(var(--border))",
+                color: active ? "hsl(var(--series-4))" : "hsl(var(--muted-foreground))",
               }}
             >
               {label}
@@ -221,7 +221,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar item ou código da campanha…"
             className="text-xs pl-8 pr-3 py-1.5 rounded-lg border bg-card/60"
-            style={{ borderColor: "#1e293b", color: "#cbd5e1", minWidth: 240 }}
+            style={{ borderColor: "hsl(var(--border))", color: "hsl(var(--muted-foreground))", minWidth: 240 }}
           />
         </div>
       </div>
@@ -289,7 +289,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       <div
                         key={i}
                         className="w-1.5 h-3 rounded-sm"
-                        style={{ background: i < item.peso_algo ? cor : "#1e293b" }}
+                        style={{ background: i < item.peso_algo ? cor : "hsl(var(--border))" }}
                       />
                     ))}
                   </div>
@@ -341,7 +341,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                                 ? (item.discount_seller / item.discount_total) * 100
                                 : 100
                             }%`,
-                            background: "#ef4444",
+                            background: "hsl(var(--crit))",
                           }}
                           title={`Seller: ${item.discount_seller.toFixed(1)}%`}
                         />
@@ -349,7 +349,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                           <div
                             style={{
                               width: `${(item.discount_ml / item.discount_total) * 100}%`,
-                              background: "#22d3ee",
+                              background: "hsl(var(--series-3))",
                             }}
                             title={`ML: ${item.discount_ml.toFixed(1)}%`}
                           />

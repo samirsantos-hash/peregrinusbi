@@ -12,15 +12,15 @@ interface Props {
 
 // REP_CURRENT_LEVEL mapping
 const LEVEL_CONFIG: Record<string, { label: string; color: string; group: "healthy" | "warning" | "critical" | "newbie" }> = {
-  green:          { label: "Verde",          color: "#1D9E75", group: "healthy" },
-  green_platinum: { label: "Verde Platinum", color: "#0F6E56", group: "healthy" },
-  green_gold:     { label: "Verde Gold",     color: "#27500A", group: "healthy" },
-  green_silver:   { label: "Verde Silver",   color: "#639922", group: "healthy" },
-  light_green:    { label: "Verde Claro",    color: "#9FE1CB", group: "healthy" },
-  yellow:         { label: "Amarelo",        color: "#BA7517", group: "warning" },
-  orange:         { label: "Laranja",        color: "#D85A30", group: "critical" },
-  red:            { label: "Vermelho",       color: "#E24B4A", group: "critical" },
-  newbie:         { label: "Novato",         color: "#888780", group: "newbie" },
+  green:          { label: "Verde",          color: "hsl(var(--emerald))", group: "healthy" },
+  green_platinum: { label: "Verde Platinum", color: "hsl(var(--emerald))", group: "healthy" },
+  green_gold:     { label: "Verde Gold",     color: "hsl(var(--ok))", group: "healthy" },
+  green_silver:   { label: "Verde Silver",   color: "hsl(var(--ok))", group: "healthy" },
+  light_green:    { label: "Verde Claro",    color: "hsl(var(--emerald-glow))", group: "healthy" },
+  yellow:         { label: "Amarelo",        color: "hsl(var(--attention-text))", group: "warning" },
+  orange:         { label: "Laranja",        color: "hsl(var(--attention-text))", group: "critical" },
+  red:            { label: "Vermelho",       color: "hsl(var(--crit))", group: "critical" },
+  newbie:         { label: "Novato",         color: "hsl(var(--muted-foreground))", group: "newbie" },
 };
 
 interface RateConfig {
@@ -106,9 +106,9 @@ export default function CppReputationAlert({ data, selectedSeller }: Props) {
         {delayedAbove2 > 0 && (
           <div
             className="flex items-center gap-3 p-4 rounded-xl border text-sm"
-            style={{ background: "#FCEBEB", borderColor: "#E24B4A", color: "#A32D2D" }}
+            style={{ background: "hsl(var(--muted))", borderColor: "hsl(var(--crit))", color: "hsl(var(--crit))" }}
           >
-            <ShieldAlert className="w-5 h-5 shrink-0" style={{ color: "#E24B4A" }} />
+            <ShieldAlert className="w-5 h-5 shrink-0" style={{ color: "hsl(var(--crit))" }} />
             <div>
               <p className="font-semibold">
                 {delayedAbove2} sellers com atraso de entrega acima do limite — impacto direto no posicionamento orgânico
@@ -130,10 +130,10 @@ export default function CppReputationAlert({ data, selectedSeller }: Props) {
           {/* Group bars */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
-              { label: "Saudável", count: groupSummary.healthy, color: "#1D9E75" },
-              { label: "Atenção", count: groupSummary.warning, color: "#BA7517" },
-              { label: "Crítico", count: groupSummary.critical, color: "#E24B4A" },
-              { label: "Novato", count: groupSummary.newbie, color: "#888780" },
+              { label: "Saudável", count: groupSummary.healthy, color: "hsl(var(--emerald))" },
+              { label: "Atenção", count: groupSummary.warning, color: "hsl(var(--attention-text))" },
+              { label: "Crítico", count: groupSummary.critical, color: "hsl(var(--crit))" },
+              { label: "Novato", count: groupSummary.newbie, color: "hsl(var(--muted-foreground))" },
               { label: "Sem dados", count: groupSummary.noData, color: "hsl(var(--muted-foreground))" },
             ].map(g => {
               const pct = data.length > 0 ? ((g.count / data.length) * 100) : 0;

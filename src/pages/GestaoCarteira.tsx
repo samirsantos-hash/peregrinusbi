@@ -97,9 +97,9 @@ const fmtCompact = (v: number) =>
   new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(v);
 
 const MEDAL_COLORS: Record<string, string> = {
-  PLATINUM: "#1F4E79",
+  PLATINUM: "hsl(var(--series-1))",
   GOLD: "#D4AF37",
-  SILVER: "#9CA3AF",
+  SILVER: "hsl(var(--muted-foreground))",
   BRONZE: "#CD7F32",
 };
 
@@ -914,15 +914,15 @@ export default function GestaoCarteira() {
                     />
                     <Legend />
                     {[
-                      { key: "regular", color: "#3B82F6" },
-                      { key: "cupom", color: "#8B5CF6" },
-                      { key: "lightning", color: "#F59E0B" },
-                      { key: "dod", color: "#EF4444" },
-                      { key: "dxb", color: "#10B981" },
-                      { key: "tiers", color: "#6366F1" },
-                      { key: "pre_acordo", color: "#EC4899" },
-                      { key: "automatic", color: "#14B8A6" },
-                      { key: "custom_seller", color: "#F97316" },
+                      { key: "regular", color: "hsl(var(--series-2))" },
+                      { key: "cupom", color: "hsl(var(--series-1))" },
+                      { key: "lightning", color: "hsl(var(--attention-text))" },
+                      { key: "dod", color: "hsl(var(--crit))" },
+                      { key: "dxb", color: "hsl(var(--emerald))" },
+                      { key: "tiers", color: "hsl(var(--series-1))" },
+                      { key: "pre_acordo", color: "hsl(var(--series-1))" },
+                      { key: "automatic", color: "hsl(var(--emerald))" },
+                      { key: "custom_seller", color: "hsl(var(--attention-text))" },
                     ].map(({ key, color }) => (
                       <Bar key={key} dataKey={key} stackId="a" fill={color} />
                     ))}
@@ -973,10 +973,10 @@ export default function GestaoCarteira() {
                         meses: s.meses_no_programa,
                         name: s.cus_nickname,
                         color: s.alerts.some((a) => a.tipo.startsWith("QUEDA"))
-                          ? "#EF4444"
+                          ? "hsl(var(--crit))"
                           : s.alerts.some((a) => a.tipo.startsWith("CRESCIMENTO"))
-                          ? "#10B981"
-                          : "#6B7280",
+                          ? "hsl(var(--emerald))"
+                          : "hsl(var(--muted-foreground))",
                       }))}
                     >
                       {filteredSellers.slice(0, 100).map((s, i) => (
@@ -984,10 +984,10 @@ export default function GestaoCarteira() {
                           key={i}
                           fill={
                             s.alerts.some((a) => a.tipo.startsWith("QUEDA"))
-                              ? "#EF4444"
+                              ? "hsl(var(--crit))"
                               : s.alerts.some((a) => a.tipo.startsWith("CRESCIMENTO"))
-                              ? "#10B981"
-                              : "#6B7280"
+                              ? "hsl(var(--emerald))"
+                              : "hsl(var(--muted-foreground))"
                           }
                           fillOpacity={0.7}
                         />

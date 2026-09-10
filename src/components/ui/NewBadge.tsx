@@ -45,7 +45,7 @@ const NewBadge = ({ featureKey, tooltip = "Nova funcionalidade", className }: Ne
           <span
             aria-label="Funcionalidade nova"
             className={cn(
-              "inline-flex items-center justify-center h-4 px-1.5 ml-2 rounded-full text-[10px] font-semibold tracking-wide bg-[#3B82F6] text-white align-middle",
+              "inline-flex items-center justify-center h-4 px-1.5 ml-2 rounded-full text-[10px] font-semibold tracking-wide bg-[hsl(var(--series-2))] text-white align-middle",
               pulse && !reduceMotion && "animate-pulse",
               className,
             )}

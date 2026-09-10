@@ -158,40 +158,40 @@ export async function getPublicidadeMetricas(
 // ── Helpers de cor por performance ────────────────────────────────────
 export function corRoas(v: number): string {
   return v >= BENCHMARKS_ADS.roas.excelente
-    ? "#16A34A"
+    ? "hsl(var(--ok))"
     : v >= BENCHMARKS_ADS.roas.bom
-      ? "#4ade80"
+      ? "hsl(var(--emerald-glow))"
       : v >= BENCHMARKS_ADS.roas.atencao
-        ? "#D97706"
-        : "#DC2626";
+        ? "hsl(var(--attention-text))"
+        : "hsl(var(--crit))";
 }
 
 export function corAcos(v: number): string {
   return v <= BENCHMARKS_ADS.acos.excelente
-    ? "#16A34A"
+    ? "hsl(var(--ok))"
     : v <= BENCHMARKS_ADS.acos.bom
-      ? "#4ade80"
+      ? "hsl(var(--emerald-glow))"
       : v <= BENCHMARKS_ADS.acos.atencao
-        ? "#D97706"
-        : "#DC2626";
+        ? "hsl(var(--attention-text))"
+        : "hsl(var(--crit))";
 }
 
 export function corTacos(v: number): string {
   return v <= BENCHMARKS_ADS.tacos.excelente
-    ? "#16A34A"
+    ? "hsl(var(--ok))"
     : v <= BENCHMARKS_ADS.tacos.bom
-      ? "#4ade80"
+      ? "hsl(var(--emerald-glow))"
       : v <= BENCHMARKS_ADS.tacos.atencao
-        ? "#D97706"
-        : "#DC2626";
+        ? "hsl(var(--attention-text))"
+        : "hsl(var(--crit))";
 }
 
 export function corScore(v: number): string {
   return v >= BENCHMARKS_ADS.scorePads.bom
-    ? "#16A34A"
+    ? "hsl(var(--ok))"
     : v >= BENCHMARKS_ADS.scorePads.atencao
-      ? "#D97706"
-      : "#DC2626";
+      ? "hsl(var(--attention-text))"
+      : "hsl(var(--crit))";
 }
 
 export function classRoas(v: number): string {

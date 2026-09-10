@@ -65,11 +65,11 @@ export function rotuloCampanha(tipo?: string | null): string {
 
 
 export const COR_PESO: Record<number, string> = {
-  5: "#a78bfa",
-  4: "#818cf8",
-  3: "#22d3ee",
-  2: "#94a3b8",
-  1: "#475569",
+  5: "hsl(var(--series-1))",
+  4: "hsl(var(--series-2))",
+  3: "hsl(var(--series-3))",
+  2: "hsl(var(--muted-foreground))",
+  1: "hsl(var(--series-5))",
 };
 
 /**

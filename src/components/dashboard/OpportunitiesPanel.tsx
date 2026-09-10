@@ -386,7 +386,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
                     <td className="py-1.5 px-1.5 max-w-[200px]">
                       <div className="flex items-center gap-1">
                         {mlbLink ? (
-                          <a href={mlbLink} target="_blank" rel="noopener noreferrer" className="text-[#4DD0E1] hover:underline truncate font-medium text-[11px] flex items-center gap-0.5">
+                          <a href={mlbLink} target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--series-3))] hover:underline truncate font-medium text-[11px] flex items-center gap-0.5">
                             {(item.itemName || item.itemId).slice(0, 40)}
                             <ExternalLink className="w-2.5 h-2.5 flex-shrink-0" />
                           </a>

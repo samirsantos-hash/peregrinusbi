@@ -276,7 +276,7 @@ function TgmvChart({ data }: { data: MesAgg[] }) {
           <YAxis tickFormatter={fmtCompact} />
           <Tooltip formatter={(v: number) => fmtBRL(v)} contentStyle={TT_STYLE} />
           <Area type="monotone" dataKey="tgmv" fill="hsl(217 91% 60% / 0.15)" stroke="hsl(217 91% 60%)" strokeWidth={2} name="TGMV" />
-          <Line type="monotone" dataKey="mm3" stroke="#F59E0B" strokeWidth={2} strokeDasharray="6 3" dot={false} name="MM 3M" />
+          <Line type="monotone" dataKey="mm3" stroke="hsl(var(--attention-text))" strokeWidth={2} strokeDasharray="6 3" dot={false} name="MM 3M" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -324,8 +324,8 @@ function SellersAtivosChart({ data }: { data: MesAgg[] }) {
           <YAxis yAxisId="right" orientation="right" tickFormatter={fmtCompact} />
           <Tooltip contentStyle={TT_STYLE} formatter={(v: number, name: string) => [name === "ticket" ? fmtBRL(v) : v, name === "ticket" ? "Ticket Médio" : "Ativos"]} />
           <Legend />
-          <Bar yAxisId="left" dataKey="ativos" fill="#16A34A" radius={[4, 4, 0, 0]} name="Ativos" />
-          <Line yAxisId="right" type="monotone" dataKey="ticket" stroke="#F97316" strokeWidth={2} dot={{ r: 3 }} name="Ticket Médio" />
+          <Bar yAxisId="left" dataKey="ativos" fill="hsl(var(--ok))" radius={[4, 4, 0, 0]} name="Ativos" />
+          <Line yAxisId="right" type="monotone" dataKey="ticket" stroke="hsl(var(--attention-text))" strokeWidth={2} dot={{ r: 3 }} name="Ticket Médio" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -487,7 +487,7 @@ function QuedaWaterfall({ sellers, onClickSeller }: { sellers: any[]; onClickSel
     name: s.cus_nickname,
     perda: s.perda,
     pct: s.vs_pm_pct,
-    fill: s.alerts.some((a: any) => a.tipo === "CRITICO") ? "#7F1D1D" : s.alerts.some((a: any) => a.tipo === "QUEDA_3M") ? "#DC2626" : "#F97316",
+    fill: s.alerts.some((a: any) => a.tipo === "CRITICO") ? "hsl(var(--crit))" : s.alerts.some((a: any) => a.tipo === "QUEDA_3M") ? "hsl(var(--crit))" : "hsl(var(--attention-text))",
     seller: s,
   }));
 
@@ -539,7 +539,7 @@ function CrescimentoChart({ sellers, onClickSeller }: { sellers: any[]; onClickS
       name: s.cus_nickname,
       delta_rs: s.delta_rs,
       delta_pct: deltaPct,
-      fill: deltaPct > 100 ? "#D4AF37" : deltaPct > 50 ? "#16A34A" : "#86EFAC",
+      fill: deltaPct > 100 ? "#D4AF37" : deltaPct > 50 ? "hsl(var(--ok))" : "hsl(var(--emerald-glow))",
       seller: s,
     };
   });
@@ -556,7 +556,7 @@ function CrescimentoChart({ sellers, onClickSeller }: { sellers: any[]; onClickS
           <Bar yAxisId="left" dataKey="delta_rs" radius={[4, 4, 0, 0]} name="Δ R$" cursor="pointer" onClick={(d: any) => d?.seller && onClickSeller(d.seller)}>
             {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
           </Bar>
-          <Scatter yAxisId="right" dataKey="delta_pct" fill="#FDE68A" name="Δ %" />
+          <Scatter yAxisId="right" dataKey="delta_pct" fill="hsl(var(--warn-soft))" name="Δ %" />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
@@ -594,7 +594,7 @@ function VencimentoTimeline({ sellers, onClickSeller }: { sellers: any[]; onClic
     dias: s.dias_expiracao,
     tgmv: s.tgmv_lc,
     name: s.cus_nickname,
-    fill: s.dias_expiracao < 0 ? "#7F1D1D" : s.dias_expiracao <= 7 ? "#DC2626" : s.dias_expiracao <= 30 ? "#F97316" : s.dias_expiracao <= 60 ? "#F59E0B" : "#6B7280",
+    fill: s.dias_expiracao < 0 ? "hsl(var(--crit))" : s.dias_expiracao <= 7 ? "hsl(var(--crit))" : s.dias_expiracao <= 30 ? "hsl(var(--attention-text))" : s.dias_expiracao <= 60 ? "hsl(var(--attention-text))" : "hsl(var(--muted-foreground))",
     seller: s,
   }));
 
@@ -607,7 +607,7 @@ function VencimentoTimeline({ sellers, onClickSeller }: { sellers: any[]; onClic
           <YAxis type="number" dataKey="tgmv" name="TGMV" tickFormatter={fmtCompact} />
           <ZAxis type="number" dataKey="tgmv" range={[40, 400]} />
           <Tooltip contentStyle={TT_STYLE} formatter={(v: number, name: string) => [name === "TGMV" ? fmtBRL(v) : `${v} dias`, name]} />
-          <ReferenceLine x={0} stroke="#DC2626" strokeWidth={2} label={{ value: "Hoje", fill: "#DC2626", fontSize: 11 }} />
+          <ReferenceLine x={0} stroke="hsl(var(--crit))" strokeWidth={2} label={{ value: "Hoje", fill: "hsl(var(--crit))", fontSize: 11 }} />
           <ReferenceLine x={7} stroke="hsl(var(--border))" strokeDasharray="4 4" />
           <ReferenceLine x={30} stroke="hsl(var(--border))" strokeDasharray="4 4" />
           <Scatter data={data} cursor="pointer" onClick={(d: any) => d?.seller && onClickSeller(d.seller)}>
