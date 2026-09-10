@@ -5,7 +5,7 @@ import {
   CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   ZAxis, ReferenceLine, Cell, LineChart, Line, Area, AreaChart,
 } from "recharts";
-import { TrendingDown, TrendingUp, AlertTriangle, DollarSign } from "lucide-react";
+import { TrendingDown, TrendingUp, AlertTriangle, Eye, Scale } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import PairplotMatrix from "./PairplotMatrix";
@@ -20,7 +20,14 @@ import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
 
-const TOOLTIP_BPC = "BPC (Buy Price Competitive) é o sistema do Mercado Livre que compara automaticamente o preço do seller com o dos concorrentes quando há produtos equivalentes no catálogo. Essa comparação não ocorre em todas as visitas — apenas quando o ML identifica um rival direto. Por isso, as porcentagens de competitividade são calculadas apenas sobre as visitas onde a comparação foi ativada.";
+const TOOLTIP_BPC =
+  "BPC (Buy Price Competitive) compara o preço do seller com rivais quando o ML identifica produto equivalente. " +
+  "As % de mais barato / igual / mais caro usam a soma das três colunas BPC como denominador (composição = 100%). " +
+  "Essas colunas (visits_match / expensive / cheaper) não são contagem de visitas — não divida nem some contra VISITAS.";
+
+const RESSALVA_VOLUME_BPC =
+  "Volume absoluto das colunas BPC não é contagem de visitas (valores podem ser decimais e somar acima de VISITAS). " +
+  "Use só as % de composição; o card de visitas mostra VISITAS reais.";
 
 interface KpiLike {
   date: string;
@@ -125,7 +132,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       pctMatch: totalPriceBands > 0 ? (totalMatch / totalPriceBands) * 100 : 0,
       pctCheaper: totalPriceBands > 0 ? (totalCheaper / totalPriceBands) * 100 : 0,
       indiceCompetitividade: totalPriceBands > 0 ? ((totalMatch + totalCheaper) / totalPriceBands) * 100 : 0,
-      coberturaComparacao: totalVisitsMonthly > 0 ? (totalPriceBands / totalVisitsMonthly) * 100 : 0,
+      // NÃO calcular cobertura = totalPriceBands / visitas: unidades incompatíveis
     };
   }, [latestMonthlyKpis, kpis]);
 
@@ -402,9 +409,9 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
           {
             label: "% Preço Igual (rivais)",
             value: `${fmtNum(monthlyTotals.pctMatch, 1)}%`,
-            icon: DollarSign,
+            icon: Scale,
             color: "neon-text",
-            tooltip: "% das comparações de preço onde seu preço estava no mesmo nível do rival. Denominador = total de comparações BPC.",
+            tooltip: "% das comparações de preço onde seu preço estava no mesmo nível do rival. Denominador = soma das três colunas BPC (composição), não total de visitas.",
           },
           {
             label: "% Mais Caro (rivais)",
@@ -416,11 +423,11 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             inlineStyle: { color: pctExpColor },
           },
           {
-            label: "Visitas em comparação",
-            value: monthlyTotals.totalPriceBands.toLocaleString("pt-BR"),
-            icon: DollarSign,
+            label: "Visitas totais",
+            value: Math.round(monthlyTotals.totalVisitsMonthly).toLocaleString("pt-BR"),
+            icon: Eye,
             color: "neon-text",
-            tooltip: `De ${monthlyTotals.totalVisitsMonthly.toLocaleString("pt-BR")} visitas totais, ${fmtNum(monthlyTotals.coberturaComparacao, 0)}% ativaram a comparação BPC. ${TOOLTIP_BPC}`,
+            tooltip: `Contagem real de VISITAS no período. ${RESSALVA_VOLUME_BPC} ${TOOLTIP_BPC}`,
           },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
