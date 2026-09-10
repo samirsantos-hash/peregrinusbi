@@ -338,7 +338,7 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
               style={{
                 borderColor: hasClipsActive ? "hsl(var(--emerald-glow))40" : "hsl(var(--border))",
                 background: hasClipsActive ?
-                "linear-gradient(135deg, rgba(0,230,118,0.08), rgba(0,230,118,0.02))" :
+                "linear-gradient(135deg, hsl(var(--emerald-glow) / 0.08), hsl(var(--emerald-glow) / 0.02))" :
                 "hsl(var(--card))"
               }}>
               

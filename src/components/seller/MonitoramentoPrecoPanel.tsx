@@ -210,9 +210,9 @@ function detectarAnuncios(
 }
 
 const SEV_CFG: Record<Severidade, { cor: string; bg: string; borda: string; label: string }> = {
-  alta:  { cor: "hsl(var(--crit))", bg: "rgba(220,38,38,0.06)",  borda: "rgba(220,38,38,0.35)",  label: "Alta" },
-  media: { cor: "hsl(var(--attention-text))", bg: "rgba(217,119,6,0.06)",  borda: "rgba(217,119,6,0.35)",  label: "Média" },
-  baixa: { cor: "hsl(var(--series-3))", bg: "rgba(34,211,238,0.06)", borda: "rgba(34,211,238,0.35)", label: "Baixa" },
+  alta:  { cor: "hsl(var(--crit))", bg: "hsl(var(--crit) / 0.06)",  borda: "hsl(var(--crit) / 0.35)",  label: "Alta" },
+  media: { cor: "hsl(var(--attention-text))", bg: "hsl(var(--attention-text) / 0.06)",  borda: "hsl(var(--attention-text) / 0.35)",  label: "Média" },
+  baixa: { cor: "hsl(var(--series-3))", bg: "hsl(var(--series-3) / 0.06)", borda: "hsl(var(--series-3) / 0.35)", label: "Baixa" },
 };
 
 function ItemRow({ a }: { a: AnuncioFlag }) {

@@ -214,7 +214,7 @@ export default function CppReputationAlert({ data, selectedSeller }: Props) {
                           </span>
                           <span
                             className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${styles.text}`}
-                            style={{ background: sev === "green" ? "rgba(29,158,117,0.15)" : sev === "amber" ? "rgba(186,117,23,0.15)" : "rgba(226,75,74,0.15)" }}
+                            style={{ background: sev === "green" ? "hsl(var(--emerald) / 0.15)" : sev === "amber" ? "hsl(var(--attention-text) / 0.15)" : "hsl(var(--crit) / 0.15)" }}
                           >
                             {styles.label}
                             {rawPct > 20 ? " ▲" : ""}

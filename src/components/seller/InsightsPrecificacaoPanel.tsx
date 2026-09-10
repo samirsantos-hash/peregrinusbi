@@ -6,10 +6,10 @@ const TIPO_CFG: Record<
   InsightPreco["tipo"],
   { cor: string; bg: string; borda: string; icone: string; label: string }
 > = {
-  alerta:       { cor: "hsl(var(--crit))", bg: "rgba(220,38,38,0.06)",  borda: "rgba(220,38,38,0.35)",  icone: "🚨", label: "Alerta" },
-  investigar:   { cor: "hsl(var(--attention-text))", bg: "rgba(217,119,6,0.06)",  borda: "rgba(217,119,6,0.35)",  icone: "🔍", label: "Investigar" },
-  oportunidade: { cor: "hsl(var(--series-3))", bg: "rgba(34,211,238,0.06)", borda: "rgba(34,211,238,0.35)", icone: "💡", label: "Oportunidade" },
-  tendencia:    { cor: "hsl(var(--ok))", bg: "rgba(22,163,74,0.06)",  borda: "rgba(22,163,74,0.35)",  icone: "📈", label: "Tendência" },
+  alerta:       { cor: "hsl(var(--crit))", bg: "hsl(var(--crit) / 0.06)",  borda: "hsl(var(--crit) / 0.35)",  icone: "🚨", label: "Alerta" },
+  investigar:   { cor: "hsl(var(--attention-text))", bg: "hsl(var(--attention-text) / 0.06)",  borda: "hsl(var(--attention-text) / 0.35)",  icone: "🔍", label: "Investigar" },
+  oportunidade: { cor: "hsl(var(--series-3))", bg: "hsl(var(--series-3) / 0.06)", borda: "hsl(var(--series-3) / 0.35)", icone: "💡", label: "Oportunidade" },
+  tendencia:    { cor: "hsl(var(--ok))", bg: "hsl(var(--ok) / 0.06)",  borda: "hsl(var(--ok) / 0.35)",  icone: "📈", label: "Tendência" },
 };
 
 function InsightCard({ insight, defaultAberto = false }: { insight: InsightPreco; defaultAberto?: boolean }) {
