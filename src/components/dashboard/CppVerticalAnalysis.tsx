@@ -308,7 +308,7 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dailyChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                  <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                   <XAxis
                     dataKey="date"
                     tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}

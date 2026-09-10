@@ -591,7 +591,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                 <stop offset="95%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+            <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}

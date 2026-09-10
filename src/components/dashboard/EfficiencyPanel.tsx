@@ -459,8 +459,8 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             </div>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkInvestmentData} barCategoryGap="30%">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-                <XAxis dataKey="name" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+                <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
+                <XAxis dataKey="name" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
                 <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
@@ -482,7 +482,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             </div>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkRatioData} barGap={4} barCategoryGap="25%">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+                <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                 <XAxis dataKey="metric" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
                 <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
                 <Tooltip content={<BenchmarkBarTooltip />} />
@@ -517,7 +517,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
                 <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+            <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
@@ -563,7 +563,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         </div>
         <ResponsiveContainer width="100%" height={260}>
           <LineChart data={roasData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+            <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}

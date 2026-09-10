@@ -267,16 +267,16 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                 <XAxis
                   dataKey="date"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                   axisLine={false}
                   interval="preserveStartEnd"
                 />
                 <YAxis
                   yAxisId="left"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                   axisLine={false}
                   tickFormatter={(v) => fmtCompact(v)}
                 />
@@ -284,7 +284,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
                   <YAxis
                     yAxisId="right"
                     orientation="right"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
                     axisLine={false}
                     tickFormatter={(v) => fmtCompact(v)}
                   />

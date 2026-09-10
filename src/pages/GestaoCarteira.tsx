@@ -815,7 +815,7 @@ export default function GestaoCarteira() {
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={top20} layout="vertical" margin={{ left: 80 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                     <XAxis type="number" tickFormatter={(v) => fmtCompact(v)} />
                     <YAxis
                       type="category"
@@ -867,7 +867,7 @@ export default function GestaoCarteira() {
                       { label: "M", ...Object.fromEntries(nmvTrail.map((s) => [s.cus_nickname, s.nmv_lc])) },
                     ]}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                     <XAxis dataKey="label" />
                     <YAxis tickFormatter={(v) => fmtCompact(v)} />
                     <Tooltip
@@ -902,7 +902,7 @@ export default function GestaoCarteira() {
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={cdpComposition}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                     <XAxis
                       dataKey="tim_month_id"
                       tickFormatter={(v) => `${String(v).slice(4)}/${String(v).slice(2, 4)}`}
@@ -948,7 +948,7 @@ export default function GestaoCarteira() {
               <div className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <ScatterChart>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                     <XAxis
                       type="number"
                       dataKey="inv"
@@ -1011,7 +1011,7 @@ export default function GestaoCarteira() {
               <div className="h-[250px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={funnel} layout="vertical" margin={{ left: 100 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                     <XAxis type="number" />
                     <YAxis type="category" dataKey="etapa" tick={{ fontSize: 11 }} width={100} />
                     <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))" }} />
@@ -1044,12 +1044,12 @@ export default function GestaoCarteira() {
                     layout="vertical"
                     margin={{ left: 120 }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+                    <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                     <XAxis type="number" />
                     <YAxis
                       type="category"
                       dataKey="cluster"
-                      tick={{ fontSize: 10 }}
+                      tick={{ fontSize: 11 }}
                       width={120}
                       tickFormatter={(v, i) => {
                         const item = heatmapData.sort((a, b) => b.itens - a.itens)[i];

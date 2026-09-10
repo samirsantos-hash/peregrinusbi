@@ -188,11 +188,11 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             </linearGradient>
           </defs>
 
-          <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="hsl(var(--border) / 0.3)" />
+          <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
 
           <XAxis
             dataKey="label"
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             interval={xInterval}
@@ -205,7 +205,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
           <YAxis
             yAxisId="left"
             domain={yDomain}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}
@@ -216,7 +216,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             yAxisId="right"
             orientation="right"
             domain={yDomainAds}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}

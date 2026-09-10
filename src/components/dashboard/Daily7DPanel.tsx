@@ -137,7 +137,7 @@ function rotuloFinal(texto: string, total: number, cor: string) {
     if (props.index !== total - 1) return <g />;
     if (props.x === undefined || props.y === undefined || props.value === null) return <g />;
     return (
-      <text x={props.x + 6} y={props.y} dy={4} fontSize={10} fill={cor}>
+      <text x={props.x + 6} y={props.y} dy={4} fontSize={11} fill={cor}>
         {texto}
       </text>
     );
@@ -460,7 +460,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
           <ResponsiveContainer width="100%" height="100%">
             {modo === "diario" ? (
               <ComposedChart data={serie} margin={{ top: 8, right: 56, bottom: 0, left: 0 }}>
-                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
+                <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                 <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
                 <YAxis
                   tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
@@ -551,7 +551,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                     <stop offset="100%" stopColor="hsl(var(--brand-blue))" stopOpacity={0.2} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
+                <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                 <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
                 <YAxis
                   tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
@@ -584,13 +584,13 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
               </ComposedChart>
             ) : (
               <LineChart data={dadosComparacao} margin={{ top: 8, right: 64, bottom: 0, left: 0 }}>
-                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
+                <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                 <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
                 <YAxis
                   tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                   width={72}
                   stroke={COR_GRID}
-                  label={{ value: "Índice (base 100)", angle: -90, position: "insideLeft", fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  label={{ value: "Índice (base 100)", angle: -90, position: "insideLeft", fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
                 />
                 <ReferenceLine y={100} stroke={COR_GRID} strokeWidth={1} />
                 <Tooltip
@@ -629,7 +629,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                       if (props.index !== dadosComparacao.length - 1) return <g key={`l-${k}-${props.index}`} />;
                       if (props.x === undefined || props.y === undefined) return <g key={`l-${k}-x`} />;
                       return (
-                        <text key={`l-${k}`} x={props.x + 6} y={props.y} dy={4} fontSize={10} fill="hsl(var(--muted-foreground))">
+                        <text key={`l-${k}`} x={props.x + 6} y={props.y} dy={4} fontSize={11} fill="hsl(var(--muted-foreground))">
                           {KPI_CONFIG[k].label}
                         </text>
                       );

@@ -298,7 +298,7 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
               <line x1="0" y1="0" x2="0" y2="6" stroke={AXIS} strokeWidth={2} strokeOpacity={0.55} />
             </pattern>
           </defs>
-          <CartesianGrid stroke={GRID} strokeWidth={1} vertical={false} />
+          <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
           <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 11 }} tickLine={false} stroke={GRID} />
           <YAxis
             domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fill: AXIS, fontSize: 11 }}
