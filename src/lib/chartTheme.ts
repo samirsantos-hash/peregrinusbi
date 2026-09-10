@@ -25,9 +25,11 @@ export const CHART_CARD_FILL = "hsl(var(--card))";
 export const CHART_BORDER = "hsl(var(--border))";
 
 /** Rampa de série (dado, não juízo). */
+export const CHART_SERIES_1 = "hsl(var(--series-1))";
 export const CHART_SERIES_2 = "hsl(var(--series-2))";
 export const CHART_SERIES_3 = "hsl(var(--series-3))";
 export const CHART_SERIES_4 = "hsl(var(--series-4))";
+export const CHART_SERIES_5 = "hsl(var(--series-5))";
 
 /** Semáforo / juízo — texto, ícone, linha fina, marcador. */
 export const CHART_OK = "hsl(var(--ok))";
