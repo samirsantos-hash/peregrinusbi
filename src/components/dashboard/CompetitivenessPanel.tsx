@@ -500,9 +500,9 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
                 ({fmtNum(monthlyTotals.pctMatch, 1)}% mesmo preço + {fmtNum(monthlyTotals.pctCheaper, 1)}% mais barato)
               </p>
               <span className="status-badge text-[11px]" style={{
-                backgroundColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.1)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.08)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.1)' : 'rgba(226,75,74,0.1)',
+                backgroundColor: bpcData.median >= 0.9 ? 'hsl(var(--ok) / 0.1)' : bpcData.median >= 0.7 ? 'hsl(var(--emerald) / 0.08)' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text) / 0.1)' : 'hsl(var(--crit) / 0.1)',
                 color: bpcData.median >= 0.9 ? CHART_OK : bpcData.median >= 0.7 ? CHART_OK_SOFT : bpcData.median >= 0.6 ? CHART_ATTENTION_TEXT : CHART_CRIT,
-                borderColor: bpcData.median >= 0.9 ? 'rgba(29,158,117,0.3)' : bpcData.median >= 0.7 ? 'rgba(29,158,117,0.2)' : bpcData.median >= 0.6 ? 'rgba(186,117,23,0.3)' : 'rgba(226,75,74,0.3)',
+                borderColor: bpcData.median >= 0.9 ? 'hsl(var(--ok) / 0.3)' : bpcData.median >= 0.7 ? 'hsl(var(--emerald) / 0.2)' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text) / 0.3)' : 'hsl(var(--crit) / 0.3)',
               }}>
                 {bpcData.median >= 0.9 ? 'Altamente competitivo' : bpcData.median >= 0.7 ? 'Competitivo' : bpcData.median >= 0.6 ? 'Moderado' : 'Pouco competitivo'}
               </span>
