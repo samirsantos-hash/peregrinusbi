@@ -12,6 +12,11 @@ import { getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { toast } from "sonner";
 import { flagAtiva } from "@/lib/stats/flags";
 import { shrinkEstimate, type ResultadoEncolhimento } from "@/lib/stats/shrinkage";
+import {
+  classificarInvestimento,
+  classNameEstado,
+  formatarComEstado,
+} from "@/lib/estadoMetrica";
 import { Input } from "@/components/ui/input";
 import { useGmConcessionarias } from "@/hooks/useGmConcessionarias";
 
@@ -85,15 +90,25 @@ function enrichRows(sellers: SellerWithKpi[]): EnrichedSeller[] {
   });
 }
 
-function getExportRows(data: EnrichedSeller[], trends?: Record<string, SellerTrend>) {
+function getExportRows(
+  data: EnrichedSeller[],
+  trends?: Record<string, SellerTrend>,
+  roasShrink?: Map<string, ResultadoEncolhimento> | null,
+) {
   return data.map((s) => {
     const t = trends?.[s.sellerId];
+    const sh = roasShrink?.get(s.sellerId);
+    const estado = classificarInvestimento(s.invPads);
+    const roasCol = estado !== "valor"
+      ? formatarComEstado(estado, "")
+      : Number((sh?.valorAjustado ?? s.roas).toFixed(1));
     return {
       Seller: s.nickname,
       Medalha: getMedalStyle(s.repCurrentLevel).label,
       "Faturamento (R$)": s.tgmvLc,
       "Tendência Fat. (%)": t ? Number(t.tgmvTrend.toFixed(1)) : "—",
-      ROAS: Number(s.roas.toFixed(1)),
+      [sh ? "ROAS ajustado" : "ROAS"]: roasCol,
+      "ROAS bruto": estado === "valor" ? Number(s.roas.toFixed(1)) : formatarComEstado(estado, ""),
       "Meses observados (n)": s.mesesObservados,
       "Potência Full (%)": Number(s.potenciaFull.toFixed(1)),
       "Modal Principal": `${s.modalPrincipal.emoji} ${s.modalPrincipal.label}`,
@@ -208,7 +223,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
 
   const handleExportExcel = async () => {
     const XLSX = await import("xlsx");
-    const rows = getExportRows(sorted, trends);
+    const rows = getExportRows(sorted, trends, roasShrink);
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Raio-X");
@@ -225,7 +240,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
     doc.setFontSize(9);
     doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 14, 24);
 
-    const rows = getExportRows(sorted, trends);
+    const rows = getExportRows(sorted, trends, roasShrink);
     const headers = Object.keys(rows[0] || {});
     const body = rows.map((r) => headers.map((h) => String((r as any)[h] ?? "")));
 
@@ -321,7 +336,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                 {temGm && <TableHead className="whitespace-nowrap">Praça</TableHead>}
                 <SortHeader label="Medalha" k="repCurrentLevel" />
                 <SortHeader label="Faturamento" k="tgmvLc" />
-                <SortHeader label="ROAS" k="roas" />
+                <SortHeader label={roasShrink ? "ROAS ajustado" : "ROAS"} k="roas" />
                 <SortHeader label="Potência Full" k="potenciaFull" />
                 <SortHeader label="Modal Principal" k="modalPrincipal" />
                 <SortHeader label="% Ads" k="pctAds" />
@@ -416,6 +431,14 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                       </TableCell>
                       <TableCell className="font-mono text-sm">
                         {(() => {
+                          const estado = classificarInvestimento(s.invPads);
+                          if (estado !== "valor") {
+                            return (
+                              <span className={`text-xs ${classNameEstado(estado)}`}>
+                                {formatarComEstado(estado, "")}
+                              </span>
+                            );
+                          }
                           const sh = roasShrink?.get(s.sellerId);
                           if (!sh) {
                             return (
@@ -431,10 +454,11 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                                 <span className="inline-flex items-center gap-1 cursor-help">
                                   {sh.valorAjustado.toFixed(1)}x
                                   <span className="text-[10px] text-muted-foreground">n={sh.n}</span>
+                                  <span className="text-[9px] uppercase tracking-wide text-muted-foreground/80">aj.</span>
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
-                                Estimador: encolhimento empírico de Bayes.<br />
+                                Estimador: ROAS ajustado (encolhimento empírico de Bayes).<br />
                                 Bruto {sh.valorBruto.toFixed(1)}x · {sh.n} {sh.n === 1 ? "mês" : "meses"} · peso do prior {(sh.B * 100).toFixed(0)}%<br />
                                 Prior {sh.prior.toFixed(1)}x ({sh.priorEscopo === "vertical" ? `vertical ${sh.priorRotulo}` : "carteira — vertical pequena demais"})
                               </TooltipContent>

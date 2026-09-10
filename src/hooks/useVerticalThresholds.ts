@@ -7,6 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
  *
  * Métricas cobertas: conversão (%), ROAS (x), ACOS (%), TACOS (%).
  * As bandas usam z = 1,2816 (percentil 10/90 sob normalidade).
+ *
+ * NOTA: bandas de limiar precisam da *distribuição* por seller (média ± σ).
+ * Isso é distinto do agregado canônico (razão dos totais em ratioStats).
+ * ROAS/ACOS/TACOS entram na distribuição só com inv_pads > 0.
  */
 
 export const VT_Z = 1.2816;
@@ -156,16 +160,17 @@ export function useVerticalThresholds(): VerticalThresholdsModel {
             const roas = tgmvPads / inv;
             global.roas.push(roas);
             if (bucket) bucket.roas.push(roas);
-          }
-          if (tgmvPads > 0) {
-            const acos = (inv / tgmvPads) * 100;
-            global.acos.push(acos);
-            if (bucket) bucket.acos.push(acos);
-          }
-          if (tgmv > 0) {
-            const tacos = (inv / tgmv) * 100;
-            global.tacos.push(tacos);
-            if (bucket) bucket.tacos.push(tacos);
+            // ACOS/TACOS: mesma base de sellers com investimento (alinhado a ratioStats)
+            if (tgmvPads > 0) {
+              const acos = (inv / tgmvPads) * 100;
+              global.acos.push(acos);
+              if (bucket) bucket.acos.push(acos);
+            }
+            if (tgmv > 0) {
+              const tacos = (inv / tgmv) * 100;
+              global.tacos.push(tacos);
+              if (bucket) bucket.tacos.push(tacos);
+            }
           }
           const e = efectMap[r.seller_id];
           if (e !== undefined && e > 0) {

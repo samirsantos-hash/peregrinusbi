@@ -17,6 +17,11 @@ import CategoryBenchmarkPanel from "./CategoryBenchmarkPanel";
 import { usePortfolioBenchmark } from "@/hooks/usePortfolioBenchmark";
 import { useClusterBenchmark } from "@/hooks/useClusterBenchmark";
 import { useVerticalThresholds, vtStatFor, classifyVsThreshold } from "@/hooks/useVerticalThresholds";
+import {
+  classificarInvestimento,
+  classNameEstado,
+  formatarComEstado,
+} from "@/lib/estadoMetrica";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
@@ -154,12 +159,17 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
   }, [allDates, dataGranularity]);
 
   // Weighted ROAS/ACOS/TACOS per date (not simple average); TACOS usa TGMV_LC
+  // Sem investimento → null (gap no gráfico), nunca 0 fingindo desempenho péssimo
   const roasData = useMemo(() => {
     return allDates.map((d) => ({
       date: formatChartDate(d.date, dataGranularity),
-      ROAS: d.adsInvestment > 0 ? Math.round((d.tgmvPads / d.adsInvestment) * 100) / 100 : 0,
-      ACOS: d.tgmvPads > 0 ? Math.round((d.adsInvestment / d.tgmvPads) * 10000) / 100 : 0,
-      TACOS: d.tgmv > 0 ? Math.round((d.adsInvestment / d.tgmv) * 10000) / 100 : 0,
+      ROAS: d.adsInvestment > 0 ? Math.round((d.tgmvPads / d.adsInvestment) * 100) / 100 : null,
+      ACOS: d.adsInvestment > 0 && d.tgmvPads > 0
+        ? Math.round((d.adsInvestment / d.tgmvPads) * 10000) / 100
+        : null,
+      TACOS: d.adsInvestment > 0 && d.tgmv > 0
+        ? Math.round((d.adsInvestment / d.tgmv) * 10000) / 100
+        : null,
     }));
   }, [allDates, dataGranularity]);
 
@@ -257,6 +267,17 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     ];
   }, [benchmark, avgRoas, avgAcos, avgTacos]);
 
+  const adsEstado = classificarInvestimento(totalAds);
+  const roasDisplay = formatarComEstado(adsEstado, fmtNum(avgRoas, 2));
+  const acosDisplay = formatarComEstado(
+    adsEstado,
+    `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
+  );
+  const tacosDisplay = formatarComEstado(
+    adsEstado,
+    `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
+  );
+
   const verticalName = campaign?.verticalPrincipal || "—";
 
   // Build metrics with benchmark sub-text
@@ -270,26 +291,26 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       algoKey: "gmv" as const,
     },
     {
-      label: "ROAS Médio",
-      value: fmtNum(avgRoas, 2),
-      color: cls(roasClass),
-      tooltip: `TGMV_LC_PADS / INV_PADS. ${thresholdNote(roasStat)}`.trim(),
+      label: "ROAS Agregado",
+      value: roasDisplay,
+      color: adsEstado === "valor" ? cls(roasClass) : classNameEstado(adsEstado),
+      tooltip: `Razão dos totais: Σ TGMV_LC_PADS / Σ INV_PADS. ${thresholdNote(roasStat)}`.trim(),
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianRoas.toFixed(2)}x` : null,
       algoKey: "roas" as const,
     },
     {
-      label: "ACOS Médio",
-      value: `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
-      color: cls(acosClass),
-      tooltip: `(INV_PADS / TGMV_LC_PADS) × 100. Quanto menor, mais eficiente. ${thresholdNote(acosStat)}`.trim(),
+      label: "ACOS Agregado",
+      value: acosDisplay,
+      color: adsEstado === "valor" ? cls(acosClass) : classNameEstado(adsEstado),
+      tooltip: `Razão dos totais: (Σ INV_PADS / Σ TGMV_LC_PADS) × 100. ${thresholdNote(acosStat)}`.trim(),
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianAcos.toFixed(2)}%` : null,
       algoKey: "acos" as const,
     },
     {
-      label: "TACOS Médio",
-      value: `${avgTacos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
-      color: cls(tacosClass),
-      tooltip: `(INV_PADS / TGMV_LC) × 100. Termômetro real da saúde do negócio. ${thresholdNote(tacosStat)}`.trim(),
+      label: "TACOS Agregado",
+      value: tacosDisplay,
+      color: adsEstado === "valor" ? cls(tacosClass) : classNameEstado(adsEstado),
+      tooltip: `Razão dos totais: (Σ INV_PADS / Σ TGMV_LC) × 100. ${thresholdNote(tacosStat)}`.trim(),
       benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianTacos.toFixed(2)}%` : null,
       algoKey: "tacos" as const,
     },
@@ -303,8 +324,8 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     },
     {
       label: "ROI",
-      value: `${roi.toFixed(1)}%`,
-      color: roi > 0 ? "emerald-text" : "critical-text",
+      value: adsEstado === "valor" ? `${roi.toFixed(1)}%` : formatarComEstado(adsEstado, ""),
+      color: adsEstado !== "valor" ? classNameEstado(adsEstado) : roi > 0 ? "emerald-text" : "critical-text",
       tooltip: "(TGMV_LC_PADS − INV_PADS) / INV_PADS × 100.",
       benchmarkText: null,
       algoKey: undefined,
@@ -357,7 +378,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       {campaign && (
         <div className="glass-card p-4 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Média da sua Categoria</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mediana da sua Vertical</span>
             {campaign.verticalPrincipal && (
               <Badge variant="outline" className="text-xs">{campaign.verticalPrincipal}</Badge>
             )}
