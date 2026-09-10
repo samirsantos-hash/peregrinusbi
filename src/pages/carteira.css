@@ -1,5 +1,5 @@
 /* Design system local da aba Carteira — navy/dourado/aço */
-.cart-page { min-height: 100vh; background: #F5F6F8; color: #16233F; font-family: Inter, system-ui, sans-serif; }
+.cart-page { min-height: 100vh; background: #F5F6F8; color: #16233F; font-family: "DM Sans", system-ui, sans-serif; }
 .cart-header { background: #16233F; color: #fff; padding: 20px 24px; border-bottom: 4px solid #C9A227; }
 .cart-header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
 .cart-header h1 { font-family: "Saira Condensed", "Barlow Condensed", sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; margin: 0; text-transform: uppercase; }
@@ -72,7 +72,7 @@
 
 .cart-statband { background: #16233F; color: #fff; border-radius: 8px; padding: 12px 16px; margin: 12px 0; border-left: 4px solid #C9A227; }
 .cart-statband-nums { display: flex; flex-wrap: wrap; gap: 18px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13px; font-variant-numeric: tabular-nums; }
-.cart-statband-nums i { display: block; font-style: normal; font-family: Inter, sans-serif; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #A9BAD8; }
+.cart-statband-nums i { display: block; font-style: normal; font-family: "DM Sans", sans-serif; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: #A9BAD8; }
 .cart-statband-nums .gold { color: #C9A227; }
 .cart-statband p { margin: 10px 0 0; font-size: 12px; color: #D8E0EE; line-height: 1.5; }
 
