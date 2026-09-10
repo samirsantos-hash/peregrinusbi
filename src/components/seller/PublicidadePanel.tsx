@@ -28,6 +28,20 @@ import {
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 import AdsGranularidadePanel from "./AdsGranularidadePanel";
 import AcosTacosChart from "./AcosTacosChart";
+import {
+  CHART_ATTENTION_TEXT,
+  CHART_AXIS_STROKE,
+  CHART_BORDER,
+  CHART_CRIT,
+  CHART_GRID_STROKE,
+  CHART_OK,
+  CHART_OK_SOFT,
+  CHART_SERIES_2,
+  CHART_SERIES_3,
+  CHART_SERIES_4,
+  chartAxisTick,
+  chartTooltipContentStyle,
+} from "@/lib/chartTheme";
 
 type Props = {
   sellerUuid: string;
@@ -191,9 +205,9 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   onClick={() => setGrafico(g)}
                   className="rounded-lg border px-3 py-1.5 text-xs transition-colors"
                   style={{
-                    background: grafico === g ? "#1e293b" : "transparent",
-                    borderColor: grafico === g ? "#3b82f6" : "#1e293b",
-                    color: grafico === g ? "#93c5fd" : "#94a3b8",
+                    background: grafico === g ? CHART_BORDER : "transparent",
+                    borderColor: grafico === g ? CHART_SERIES_2 : CHART_BORDER,
+                    color: grafico === g ? CHART_SERIES_4 : CHART_AXIS_STROKE,
                   }}
                 >
                   {label}
@@ -207,23 +221,23 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           ) : (
             <ResponsiveContainer width="100%" height={300}>
               <ComposedChart data={m.historico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "#94a3b8"  }} tickFormatter={(v) => String(v).slice(2)} />
-                <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 11, fill: "#94a3b8"  }} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                <XAxis dataKey="mes" tick={chartAxisTick} tickFormatter={(v) => String(v).slice(2)} />
+                <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={chartAxisTick} />
                 <Tooltip
-                  contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", fontSize: 12 }}
+                  contentStyle={chartTooltipContentStyle}
                   formatter={(value: any, name: any) => [
                     fmtBRL(Number(value)),
                     name === "inv" ? "Investimento" : "GMV via Ads",
                   ]}
                 />
                 <Legend formatter={(n) => (n === "inv" ? "Investimento" : "GMV via Ads")} />
-                <Bar dataKey="inv" fill="#3b82f6">
+                <Bar dataKey="inv" fill={CHART_SERIES_2}>
                   {m.historico.map((d, i) => (
                     <Cell key={`inv-${i}`} fill={corRoas(d.roas)} fillOpacity={0.55} />
                   ))}
                 </Bar>
-                <Bar dataKey="gmv_ads" fill="#16A34A">
+                <Bar dataKey="gmv_ads" fill={CHART_SERIES_3}>
                   {m.historico.map((d, i) => (
                     <Cell key={`gmv-${i}`} fill={corRoas(d.roas)} />
                   ))}
@@ -237,16 +251,16 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
             <span className="font-semibold uppercase tracking-wider">Cor por ROAS do mês:</span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#16A34A" }} /> Excelente (≥ {BENCHMARKS_ADS.roas.excelente}x)
+              <span className="h-2 w-2 rounded-full" style={{ background: CHART_OK }} /> Excelente (≥ {BENCHMARKS_ADS.roas.excelente}x)
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#4ade80" }} /> Bom (≥ {BENCHMARKS_ADS.roas.bom}x)
+              <span className="h-2 w-2 rounded-full" style={{ background: CHART_OK_SOFT }} /> Bom (≥ {BENCHMARKS_ADS.roas.bom}x)
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#D97706" }} /> Atenção (≥ {BENCHMARKS_ADS.roas.atencao}x)
+              <span className="h-2 w-2 rounded-full" style={{ background: CHART_ATTENTION_TEXT }} /> Atenção (≥ {BENCHMARKS_ADS.roas.atencao}x)
             </span>
             <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "#DC2626" }} /> Crítico (&lt; {BENCHMARKS_ADS.roas.atencao}x)
+              <span className="h-2 w-2 rounded-full" style={{ background: CHART_CRIT }} /> Crítico (&lt; {BENCHMARKS_ADS.roas.atencao}x)
             </span>
           </div>
           )}
@@ -282,14 +296,14 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                 key={margem}
                 className="rounded-lg border p-4"
                 style={{
-                  borderColor: ok ? "rgba(22,163,74,0.4)" : "rgba(220,38,38,0.4)",
-                  background: ok ? "rgba(22,163,74,0.05)" : "rgba(220,38,38,0.05)",
+                  borderColor: ok ? "hsl(var(--ok) / 0.4)" : "hsl(var(--crit) / 0.4)",
+                  background: ok ? "hsl(var(--ok) / 0.05)" : "hsl(var(--crit) / 0.05)",
                 }}
               >
                 <div className="text-xs text-muted-foreground">{label}</div>
                 <div
                   className="mt-1 font-mono text-2xl font-semibold tabular-nums"
-                  style={{ color: ok ? "#16A34A" : "#DC2626" }}
+                  style={{ color: ok ? CHART_OK : CHART_CRIT }}
                 >
                   {margemLiquida.toFixed(1)}%
                 </div>
@@ -308,9 +322,9 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
 };
 
 function corScoreCustom(v: number, ok: number, warn: number): string {
-  if (v >= ok) return "#16A34A";
-  if (v >= warn) return "#D97706";
-  return "#DC2626";
+  if (v >= ok) return CHART_OK;
+  if (v >= warn) return CHART_ATTENTION_TEXT;
+  return CHART_CRIT;
 }
 
 function Row({ label, value }: { label: string; value: string }) {

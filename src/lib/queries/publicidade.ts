@@ -1,4 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  CHART_ATTENTION_TEXT,
+  CHART_CRIT,
+  CHART_OK,
+  CHART_OK_SOFT,
+} from "@/lib/chartTheme";
 
 export type PublicidadeMetricas = {
   // Período selecionado (agregado a partir de sellers_kpi_daily)
@@ -155,43 +161,43 @@ export async function getPublicidadeMetricas(
   };
 }
 
-// ── Helpers de cor por performance ────────────────────────────────────
+// ── Helpers de cor por performance (tokens — juízo, não série) ────────
 export function corRoas(v: number): string {
   return v >= BENCHMARKS_ADS.roas.excelente
-    ? "#16A34A"
+    ? CHART_OK
     : v >= BENCHMARKS_ADS.roas.bom
-      ? "#4ade80"
+      ? CHART_OK_SOFT
       : v >= BENCHMARKS_ADS.roas.atencao
-        ? "#D97706"
-        : "#DC2626";
+        ? CHART_ATTENTION_TEXT
+        : CHART_CRIT;
 }
 
 export function corAcos(v: number): string {
   return v <= BENCHMARKS_ADS.acos.excelente
-    ? "#16A34A"
+    ? CHART_OK
     : v <= BENCHMARKS_ADS.acos.bom
-      ? "#4ade80"
+      ? CHART_OK_SOFT
       : v <= BENCHMARKS_ADS.acos.atencao
-        ? "#D97706"
-        : "#DC2626";
+        ? CHART_ATTENTION_TEXT
+        : CHART_CRIT;
 }
 
 export function corTacos(v: number): string {
   return v <= BENCHMARKS_ADS.tacos.excelente
-    ? "#16A34A"
+    ? CHART_OK
     : v <= BENCHMARKS_ADS.tacos.bom
-      ? "#4ade80"
+      ? CHART_OK_SOFT
       : v <= BENCHMARKS_ADS.tacos.atencao
-        ? "#D97706"
-        : "#DC2626";
+        ? CHART_ATTENTION_TEXT
+        : CHART_CRIT;
 }
 
 export function corScore(v: number): string {
   return v >= BENCHMARKS_ADS.scorePads.bom
-    ? "#16A34A"
+    ? CHART_OK
     : v >= BENCHMARKS_ADS.scorePads.atencao
-      ? "#D97706"
-      : "#DC2626";
+      ? CHART_ATTENTION_TEXT
+      : CHART_CRIT;
 }
 
 export function classRoas(v: number): string {
