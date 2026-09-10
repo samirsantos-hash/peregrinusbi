@@ -15,6 +15,6 @@ jobs:
           bun-version: latest
       - run: bun install --frozen-lockfile
       - name: Testes unitários e snapshots de casos extremos
-        run: bunx vitest run --ci
+        run: bunx vitest run --reporter=default --reporter=github-actions
       - name: Build
         run: bun run build
