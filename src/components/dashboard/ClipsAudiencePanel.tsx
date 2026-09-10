@@ -780,10 +780,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={chartData} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
-              <YAxis yAxisId="left" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Visitas Clips", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 10 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Faturamento (R$)", angle: 90, position: "insideRight", fill: "hsl(215, 20%, 55%)", fontSize: 10 }} />
+              <YAxis yAxisId="left" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Visitas Clips", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Faturamento (R$)", angle: 90, position: "insideRight", fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
               <Tooltip content={<ComboTooltipContent />} />
               <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
               <Bar yAxisId="left" dataKey="visitasClips" name="Visitas Clips" fill="hsl(var(--neon-blue))" fillOpacity={0.7} radius={[4, 4, 0, 0]} barSize={32} />
@@ -805,7 +805,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={conversionSeries} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
               <YAxis
                 tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}

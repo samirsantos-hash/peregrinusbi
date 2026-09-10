@@ -63,10 +63,10 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
       <div className="h-[160px]">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={dados} margin={{ top: 6, right: 10, bottom: 0, left: -18 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+            <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="rotulo"
-              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
               tickLine={false}
               axisLine={false}
               interval="preserveStartEnd"
@@ -74,7 +74,7 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
             />
             <YAxis
               domain={[Math.max(0, min - folga), Math.min(100, max + folga)]}
-              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+              tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
               tickLine={false}
               axisLine={false}
               width={38}

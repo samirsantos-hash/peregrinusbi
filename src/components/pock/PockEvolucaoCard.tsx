@@ -186,10 +186,10 @@ export default function PockEvolucaoCard({
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={dados} margin={{ top: 24, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="22%">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis
                 dataKey="mes"
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 11 }}
                 interval="preserveStartEnd"
                 minTickGap={14}
                 angle={-35}
@@ -199,7 +199,7 @@ export default function PockEvolucaoCard({
               />
               <YAxis
                 yAxisId="v"
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 11 }}
                 width={46}
                 tickCount={5}
                 tickFormatter={(v) =>
@@ -213,7 +213,7 @@ export default function PockEvolucaoCard({
               <YAxis
                 yAxisId="p"
                 orientation="right"
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 11 }}
                 width={40}
                 tickCount={5}
                 tickFormatter={(v) => `${v}%`}
@@ -230,7 +230,7 @@ export default function PockEvolucaoCard({
                     : [fmt(v, formato), name]
                 }
               />
-              <Legend wrapperStyle={{ fontSize: 10, paddingTop: 2 }} iconSize={8} />
+              <Legend wrapperStyle={{ fontSize: 11, paddingTop: 2 }} iconSize={8} />
               {temAnoAnterior && (
                 <Bar yAxisId="v" dataKey="anoAnterior" name="Ano anterior" fill="hsl(var(--brand-blue))" fillOpacity={0.3} radius={[3, 3, 0, 0]} maxBarSize={18} />
               )}

@@ -199,7 +199,7 @@ const ElasticityAdsChart = ({ kpis }: Props) => {
 
         <ResponsiveContainer width="100%" height={420}>
           <ScatterChart key={period} margin={{ top: 20, right: 30, bottom: 40, left: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+            <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               type="number"
               dataKey="elasticity"

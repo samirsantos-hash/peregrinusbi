@@ -565,7 +565,7 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                 <div className="h-[220px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={dailyChart}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                      <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                       <XAxis
                         dataKey="date"
                         tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}

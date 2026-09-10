@@ -163,7 +163,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
               <line x1="0" y1="0" x2="0" y2="6" stroke="hsl(var(--muted-foreground))" strokeOpacity={0.35} strokeWidth={1.5} />
             </pattern>
           </defs>
-          <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
+          <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
           <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={8} />
           <YAxis
             tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
@@ -217,7 +217,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
               stroke="none"
               ifOverflow="extendDomain"
             >
-              <Label value="não ocorrido" position="insideTop" fill="hsl(var(--muted-foreground))" fontSize={10} />
+              <Label value="não ocorrido" position="insideTop" fill="hsl(var(--muted-foreground))" fontSize={11} />
             </ReferenceArea>
           )}
           {modo === "variacao" && (
@@ -226,7 +226,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
                 value={`${rotuloMes(mesB || "")} = base`}
                 position="right"
                 fill="hsl(var(--muted-foreground))"
-                fontSize={10}
+                fontSize={11}
               />
             </ReferenceLine>
           )}

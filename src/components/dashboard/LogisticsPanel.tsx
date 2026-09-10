@@ -518,7 +518,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                   <stop offset="95%" stopColor="hsl(280, 80%, 60%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+              <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis
                 dataKey="date"
                 tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
