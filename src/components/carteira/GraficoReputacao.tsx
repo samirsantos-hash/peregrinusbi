@@ -20,6 +20,7 @@ import {
   ResponsiveContainer, Legend, ReferenceLine, RectangleProps,
 } from "recharts";
 import { monthKey, monthRange, monthLabel } from "@/lib/dates";
+import { CHART_ATTENTION_TEXT, CHART_CRIT, CHART_GRID_STROKE } from "@/lib/chartTheme";
 
 // ── Types ──
 type Agg = "pond" | "mediana" | "p90";
@@ -361,11 +362,11 @@ export default function GraficoReputacao() {
                 <defs>
                   {/* Red zone above claims target */}
                   <linearGradient id="repZoneClaims" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.08} />
-                    <stop offset="100%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0} />
+                    <stop offset="0%" stopColor={CHART_CRIT} stopOpacity={0.08} />
+                    <stop offset="100%" stopColor={CHART_CRIT} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 <XAxis
                   dataKey="mesLabel"
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
@@ -407,10 +408,10 @@ export default function GraficoReputacao() {
                   type="linear"
                   dataKey="claims"
                   name="🟡 Reclamações"
-                  stroke="hsl(40, 95%, 55%)"
+                  stroke={CHART_ATTENTION_TEXT}
                   strokeWidth={2}
                   connectNulls={false}
-                  dot={{ r: 4, fill: "hsl(40, 95%, 55%)", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: CHART_ATTENTION_TEXT, strokeWidth: 0 }}
                   activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
                 />
                 {/* Delays line */}
@@ -418,10 +419,10 @@ export default function GraficoReputacao() {
                   type="linear"
                   dataKey="atrasos"
                   name="🔴 Atrasos HT"
-                  stroke="hsl(0, 84%, 60%)"
+                  stroke={CHART_CRIT}
                   strokeWidth={2}
                   connectNulls={false}
-                  dot={{ r: 4, fill: "hsl(0, 84%, 60%)", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: CHART_CRIT, strokeWidth: 0 }}
                   activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
                 />
               </LineChart>
