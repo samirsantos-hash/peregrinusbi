@@ -34,8 +34,16 @@ export const CHART_SERIES_5 = "hsl(var(--series-5))";
 /** Semáforo / juízo — texto, ícone, linha fina, marcador. */
 export const CHART_OK = "hsl(var(--ok))";
 export const CHART_OK_SOFT = "hsl(var(--emerald))";
+export const CHART_ATTENTION = "hsl(var(--attention))";
 export const CHART_ATTENTION_TEXT = "hsl(var(--attention-text))";
 export const CHART_CRIT = "hsl(var(--crit))";
+export const CHART_MUTED = "hsl(var(--muted-foreground))";
+export const CHART_ON_COLOR = "hsl(var(--primary-foreground))";
+export const CHART_PRIMARY = "hsl(var(--primary))";
+export const CHART_BRAND_PURPLE = "hsl(var(--brand-purple))";
+export const CHART_PRICE_HOT = "hsl(var(--price-hot))";
+export const CHART_PRICE_COOL = "hsl(var(--price-cool))";
+export const CHART_PRICE_NEUTRAL = "hsl(var(--price-neutral))";
 
 /** Props padrão de tick de eixo (Recharts). */
 export const chartAxisTick = {
