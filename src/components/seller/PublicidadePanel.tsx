@@ -282,8 +282,8 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                 key={margem}
                 className="rounded-lg border p-4"
                 style={{
-                  borderColor: ok ? "rgba(22,163,74,0.4)" : "rgba(220,38,38,0.4)",
-                  background: ok ? "rgba(22,163,74,0.05)" : "rgba(220,38,38,0.05)",
+                  borderColor: ok ? "hsl(var(--ok) / 0.4)" : "hsl(var(--crit) / 0.4)",
+                  background: ok ? "hsl(var(--ok) / 0.05)" : "hsl(var(--crit) / 0.05)",
                 }}
               >
                 <div className="text-xs text-muted-foreground">{label}</div>
