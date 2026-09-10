@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { EligibilityItem } from "@/hooks/useEligibility";
 import type { ListingQuality } from "@/hooks/useListingsQuality";
+import { AXIS_TICK_FONT_SIZE, CHART_GRID_STROKE, CHART_AXIS_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface ClipsAudiencePanelProps {
   kpis: SellerKPI[];
@@ -780,12 +781,12 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           </div>
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={chartData} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-              <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
-              <YAxis yAxisId="left" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Visitas Clips", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11  }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Faturamento (R$)", angle: 90, position: "insideRight", fill: "hsl(215, 20%, 55%)", fontSize: 11  }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+              <XAxis dataKey="date" tick={chartAxisTick} axisLine={{ stroke: CHART_AXIS_STROKE }} />
+              <YAxis yAxisId="left" tick={chartAxisTick} axisLine={{ stroke: CHART_AXIS_STROKE }} tickFormatter={(v) => fmt(v)} label={{ value: "Visitas Clips", angle: -90, position: "insideLeft", fill: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE  }} />
+              <YAxis yAxisId="right" orientation="right" tick={chartAxisTick} axisLine={{ stroke: CHART_AXIS_STROKE }} tickFormatter={(v) => fmt(v)} label={{ value: "Faturamento (R$)", angle: 90, position: "insideRight", fill: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE  }} />
               <Tooltip content={<ComboTooltipContent />} />
-              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
+              <Legend wrapperStyle={{ fontSize: AXIS_TICK_FONT_SIZE, color: CHART_AXIS_STROKE }} />
               <Bar yAxisId="left" dataKey="visitasClips" name="Visitas Clips" fill="hsl(var(--neon-blue))" fillOpacity={0.7} radius={[4, 4, 0, 0]} barSize={32} />
               <Line yAxisId="right" type="monotone" dataKey="tgmvClips" name="Faturamento Clips" stroke="hsl(var(--warning))" strokeWidth={2.5} dot={{ fill: "hsl(var(--warning))", r: 4 }} activeDot={{ r: 6 }} />
             </ComposedChart>
@@ -805,11 +806,11 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           </div>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={conversionSeries} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-              <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+              <XAxis dataKey="date" tick={chartAxisTick} axisLine={{ stroke: CHART_AXIS_STROKE }} />
               <YAxis
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+                tick={chartAxisTick}
+                axisLine={{ stroke: CHART_AXIS_STROKE }}
                 tickFormatter={(v) => `${Number(v).toFixed(1)}%`}
                 domain={["auto", "auto"]}
               />
@@ -817,7 +818,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                 contentStyle={{ background: "hsl(var(--card) / 0.95)", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
                 formatter={(v: any) => `${Number(v).toFixed(2)}%`}
               />
-              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
+              <Legend wrapperStyle={{ fontSize: AXIS_TICK_FONT_SIZE, color: CHART_AXIS_STROKE }} />
               <Line type="monotone" dataKey="convGeral" name="Conversão Geral" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
               <Line type="monotone" dataKey="convClips" name="Conversão Clips" stroke="hsl(var(--emerald))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
             </LineChart>

@@ -5,6 +5,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
 import type { DailyRoasPoint } from "@/utils/cppAggregation";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 const DOW_NAMES = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
@@ -46,14 +47,14 @@ export default function CppRoasChart({ dailyRoas, dowBenchmark }: Props) {
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={chartAxisTick}
                 tickFormatter={formatDate}
               />
               <YAxis
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={chartAxisTick}
                 tickFormatter={(v) => `${v}x`}
               />
               <Tooltip

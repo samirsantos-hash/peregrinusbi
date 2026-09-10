@@ -17,6 +17,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 export type Formato = "moeda" | "numero" | "percent";
 
@@ -186,10 +187,10 @@ export default function PockEvolucaoCard({
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={dados} margin={{ top: 24, right: 8, left: 0, bottom: 0 }} barGap={2} barCategoryGap="22%">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis
                 dataKey="mes"
-                tick={{ fontSize: 11  }}
+                tick={chartAxisTick}
                 interval="preserveStartEnd"
                 minTickGap={14}
                 angle={-35}
@@ -199,7 +200,7 @@ export default function PockEvolucaoCard({
               />
               <YAxis
                 yAxisId="v"
-                tick={{ fontSize: 11  }}
+                tick={chartAxisTick}
                 width={46}
                 tickCount={5}
                 tickFormatter={(v) =>
@@ -213,7 +214,7 @@ export default function PockEvolucaoCard({
               <YAxis
                 yAxisId="p"
                 orientation="right"
-                tick={{ fontSize: 11  }}
+                tick={chartAxisTick}
                 width={40}
                 tickCount={5}
                 tickFormatter={(v) => `${v}%`}

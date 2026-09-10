@@ -22,6 +22,7 @@ import {
 import { corRoas } from "@/lib/queries/publicidade";
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 type Props = {
   sellerUuid: string;
@@ -164,18 +165,18 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
         ) : (
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={serie} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "#94a3b8"  }} interval="preserveStartEnd" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+              <XAxis dataKey="label" tick={chartAxisTick} interval="preserveStartEnd" />
               <YAxis
                 yAxisId="brl"
                 tickFormatter={(v) => fmtBRLCompact(Number(v))}
-                tick={{ fontSize: 11, fill: "#94a3b8"  }}
+                tick={chartAxisTick}
               />
               <YAxis
                 yAxisId="sec"
                 orientation="right"
                 tickFormatter={(v) => (metrica === "roas" ? `${Number(v).toFixed(0)}x` : `${Number(v).toFixed(0)}%`)}
-                tick={{ fontSize: 11, fill: "#94a3b8"  }}
+                tick={chartAxisTick}
               />
               <Tooltip
                 contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", fontSize: 12 }}

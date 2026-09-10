@@ -19,6 +19,7 @@ import {
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { DateRange } from "react-day-picker";
 import { calculateRoas } from "@/lib/ratioStats";
+import { AXIS_TICK_FONT_SIZE, CHART_GRID_STROKE, CHART_AXIS_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 /* ────────────────────────────── tipos & config ────────────────────────────── */
 
@@ -37,7 +38,6 @@ const COR_SERIE = "hsl(var(--brand-blue))";
 const COR_ANTERIOR = "hsl(var(--muted-foreground) / 0.45)";
 const COR_MM7 = "hsl(var(--brand-purple))";
 const COR_TERCEIRA = "hsl(var(--text-muted))";
-const COR_GRID = "hsl(var(--border))";
 
 interface Daily7DPanelProps {
   dailyKpis: SellerKPI[];
@@ -460,17 +460,17 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
           <ResponsiveContainer width="100%" height="100%">
             {modo === "diario" ? (
               <ComposedChart data={serie} margin={{ top: 8, right: 56, bottom: 0, left: 0 }}>
-                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
-                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} stroke={COR_GRID} />
+                <CartesianGrid stroke={CHART_GRID_STROKE} strokeWidth={1} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={chartAxisTick} stroke={CHART_GRID_STROKE} />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
+                  tick={chartAxisTick}
                   tickFormatter={yFmt}
                   width={72}
-                  stroke={COR_GRID}
+                  stroke={CHART_GRID_STROKE}
                   domain={cfg.format === "currency" ? [0, "auto"] : ["auto", "auto"]}
                 />
                 <Tooltip
-                  cursor={{ stroke: COR_GRID, strokeWidth: 1 }}
+                  cursor={{ stroke: CHART_GRID_STROKE, strokeWidth: 1 }}
                   content={({ active, payload, label }: any) => {
                     if (!active || !payload?.length) return null;
                     const p = payload[0]?.payload;
@@ -551,17 +551,17 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                     <stop offset="100%" stopColor="hsl(var(--brand-blue))" stopOpacity={0.2} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
-                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} stroke={COR_GRID} />
+                <CartesianGrid stroke={CHART_GRID_STROKE} strokeWidth={1} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={chartAxisTick} stroke={CHART_GRID_STROKE} />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
+                  tick={chartAxisTick}
                   tickFormatter={yFmt}
                   width={72}
-                  stroke={COR_GRID}
+                  stroke={CHART_GRID_STROKE}
                   domain={[0, "auto"]}
                 />
                 <Tooltip
-                  cursor={{ stroke: COR_GRID, strokeWidth: 1 }}
+                  cursor={{ stroke: CHART_GRID_STROKE, strokeWidth: 1 }}
                   content={({ active, payload, label }: any) => {
                     if (!active || !payload?.length) return null;
                     return (
@@ -584,17 +584,17 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
               </ComposedChart>
             ) : (
               <LineChart data={dadosComparacao} margin={{ top: 8, right: 64, bottom: 0, left: 0 }}>
-                <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
-                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} stroke={COR_GRID} />
+                <CartesianGrid stroke={CHART_GRID_STROKE} strokeWidth={1} vertical={false} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={chartAxisTick} stroke={CHART_GRID_STROKE} />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
+                  tick={chartAxisTick}
                   width={72}
-                  stroke={COR_GRID}
-                  label={{ value: "Índice (base 100)", angle: -90, position: "insideLeft", fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
+                  stroke={CHART_GRID_STROKE}
+                  label={{ value: "Índice (base 100)", angle: -90, position: "insideLeft", fontSize: AXIS_TICK_FONT_SIZE, fill: CHART_AXIS_STROKE  }}
                 />
-                <ReferenceLine y={100} stroke={COR_GRID} strokeWidth={1} />
+                <ReferenceLine y={100} stroke={CHART_GRID_STROKE} strokeWidth={1} />
                 <Tooltip
-                  cursor={{ stroke: COR_GRID, strokeWidth: 1 }}
+                  cursor={{ stroke: CHART_GRID_STROKE, strokeWidth: 1 }}
                   content={({ active, payload, label }: any) => {
                     if (!active || !payload?.length) return null;
                     return (

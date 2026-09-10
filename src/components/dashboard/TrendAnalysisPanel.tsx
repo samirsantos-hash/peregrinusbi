@@ -12,6 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { fmtBRL, fmtBRLCompact, fmtNum, formatChartDate } from "@/utils/formatters";
 import { detectPartialMonths } from "@/utils/partialPeriodGuard";
 import { calculateRoas } from "@/lib/ratioStats";
+import { AXIS_TICK_FONT_SIZE, CHART_GRID_STROKE, CHART_AXIS_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface KpiLike {
   date: string;
@@ -298,10 +299,10 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                     <stop offset="100%" stopColor="hsl(199, 100%, 35%)" stopOpacity={0.4} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} vertical={false} />
                 <XAxis
                 dataKey="label"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={chartAxisTick}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
@@ -312,7 +313,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
               
                 <YAxis
                 yAxisId="left"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={chartAxisTick}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
@@ -321,7 +322,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 <YAxis
                 yAxisId="right"
                 orientation="right"
-                tick={{ fill: "hsl(40, 95%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(40, 95%, 55%)", fontSize: AXIS_TICK_FONT_SIZE }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
@@ -329,7 +330,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
               
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(215, 25%, 14%, 0.3)" }} />
                 <Legend
-                wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11, paddingTop: 8 }}
+                wrapperStyle={{ color: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE, paddingTop: 8 }}
                 iconType="circle"
                 iconSize={8} />
               

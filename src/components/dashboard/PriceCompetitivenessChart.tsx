@@ -6,6 +6,7 @@ import {
 import { Table as TableIcon, ExternalLink } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { fmtBRL, formatChartDate } from "@/utils/formatters";
+import { CHART_GRID_STROKE, CHART_AXIS_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 /* Escala DIVERGENTE: quente = caro (ruim) · neutro = equivalente · frio = barato (bom).
  * Verde e vermelho são cores de status reservadas e não aparecem aqui. */
@@ -13,8 +14,6 @@ const HOT = "hsl(var(--price-hot))";
 const NEUTRAL = "hsl(var(--price-neutral))";
 const COOL = "hsl(var(--price-cool))";
 const SURFACE = "hsl(var(--card))";
-const GRID = "hsl(var(--border))";
-const AXIS = "hsl(var(--muted-foreground))";
 
 const LIMITE_CARO = 30;
 /* Margem direita reservada só para rótulos — mantém a área de plotagem limpa. */
@@ -295,14 +294,14 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
           <defs>
             <pattern id="hachuraMes" width={6} height={6} patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
               <rect width="6" height="6" fill="transparent" />
-              <line x1="0" y1="0" x2="0" y2="6" stroke={AXIS} strokeWidth={2} strokeOpacity={0.55} />
+              <line x1="0" y1="0" x2="0" y2="6" stroke={CHART_AXIS_STROKE} strokeWidth={2} strokeOpacity={0.55} />
             </pattern>
           </defs>
-          <CartesianGrid stroke={GRID} strokeWidth={1} vertical={false} />
-          <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 11 }} tickLine={false} stroke={GRID} />
+          <CartesianGrid stroke={CHART_GRID_STROKE} strokeWidth={1} vertical={false} />
+          <XAxis dataKey="label" tick={chartAxisTick} tickLine={false} stroke={CHART_GRID_STROKE} />
           <YAxis
-            domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fill: AXIS, fontSize: 11 }}
-            tickLine={false} stroke={GRID} tickFormatter={(v) => `${v}%`}
+            domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={chartAxisTick}
+            tickLine={false} stroke={CHART_GRID_STROKE} tickFormatter={(v) => `${v}%`}
           />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: GRID }} />
           <Legend wrapperStyle={{ color: AXIS, fontSize: 12 }} />
@@ -350,7 +349,7 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
             <defs>
               <pattern id="hachuraVolume" width={6} height={6} patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
                 <rect width="6" height="6" fill="transparent" />
-                <line x1="0" y1="0" x2="0" y2="6" stroke={AXIS} strokeWidth={2} strokeOpacity={0.55} />
+                <line x1="0" y1="0" x2="0" y2="6" stroke={CHART_AXIS_STROKE} strokeWidth={2} strokeOpacity={0.55} />
               </pattern>
             </defs>
           </BarChart>

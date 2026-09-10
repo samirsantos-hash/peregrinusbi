@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, Brush,
 } from "recharts";
 import type { DailySeriesPoint } from "@/utils/cppAggregation";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 type Metric = "gmv" | "tsi" | "roas";
 
@@ -94,15 +95,15 @@ export default function CppDailyChart({ data, title = "Evolução Diária" }: Pr
                   <stop offset="95%" stopColor={cfg.color} stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+              <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
               <XAxis
                 dataKey="date"
                 tickFormatter={fmtDateLabel}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={chartAxisTick}
                 padding={isSingleDay ? { left: 50, right: 50 } : undefined}
               />
               <YAxis
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={chartAxisTick}
                 tickFormatter={(v) => metric === "gmv" ? fmtCompact(v) : metric === "roas" ? `${v.toFixed(0)}x` : fmtNum(v)}
                 width={60}
               />

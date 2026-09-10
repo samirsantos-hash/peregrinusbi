@@ -13,6 +13,7 @@ import {
 } from "@/utils/cppAggregation";
 import { format } from "date-fns";
 import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
+import { CHART_GRID_STROKE } from "@/lib/chartTheme";
 
 function findVertical(rawRows: CppRow[], custId: string): string | null {
   for (const r of rawRows) {
@@ -308,7 +309,7 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={dailyChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                   <XAxis
                     dataKey="date"
                     tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 9 }}

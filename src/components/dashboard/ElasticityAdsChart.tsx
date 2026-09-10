@@ -9,6 +9,7 @@ import { fmtBRLCompact, fmtNum } from "@/utils/formatters";
 import TooltipInfo from "./TooltipInfo";
 import PeriodSelector from "./PeriodSelector";
 import { useState } from "react";
+import { AXIS_TICK_FONT_SIZE, CHART_GRID_STROKE, CHART_AXIS_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface KpiLike {
   date: string;
@@ -199,24 +200,24 @@ const ElasticityAdsChart = ({ kpis }: Props) => {
 
         <ResponsiveContainer width="100%" height={420}>
           <ScatterChart key={period} margin={{ top: 20, right: 30, bottom: 40, left: 20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
+            <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
             <XAxis
               type="number"
               dataKey="elasticity"
               name="Elasticidade"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-              axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-              label={{ value: "Elasticidade (Sensibilidade Ads) →", position: "bottom", offset: 15, fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={chartAxisTick}
+              axisLine={{ stroke: CHART_AXIS_STROKE }}
+              label={{ value: "Elasticidade (Sensibilidade Ads) →", position: "bottom", offset: 15, fill: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE }}
               domain={["auto", "auto"]}
             />
             <YAxis
               type="number"
               dataKey="salesVolume"
               name="Volume de Vendas"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-              axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+              tick={chartAxisTick}
+              axisLine={{ stroke: CHART_AXIS_STROKE }}
               tickFormatter={(v) => v >= 1_000_000 ? `${(v / 1e6).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
-              label={{ value: "Volume de Vendas (GMV) ↑", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              label={{ value: "Volume de Vendas (GMV) ↑", angle: -90, position: "insideLeft", fill: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE }}
             />
             <ZAxis type="number" dataKey="salesVolume" range={[100, 600]} />
             <ReferenceLine

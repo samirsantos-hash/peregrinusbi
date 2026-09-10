@@ -15,6 +15,7 @@ import { type ClusterBenchmarkResult, getPercentileBadge } from "@/hooks/useClus
 import { Loader2, TrendingUp, Users, Target, BarChart3, Award } from "lucide-react";
 import { CONVERSION_MARKET_BAND } from "@/lib/marketBands";
 import { percentilDoValor, reconciliarAcos } from "@/lib/ratioStats";
+import { AXIS_TICK_FONT_SIZE, CHART_GRID_STROKE, CHART_AXIS_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 interface Props {
   portfolioBenchmark: PortfolioBenchmark | null;
@@ -334,16 +335,16 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             </div>
             <ResponsiveContainer width="100%" height={280}>
               <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
-                <PolarGrid stroke="hsl(215, 25%, 20%)" />
+                <PolarGrid stroke={CHART_GRID_STROKE} />
                 <PolarAngleAxis
                   dataKey="metric"
-                  tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                  tick={chartAxisTick}
                 />
                 <PolarRadiusAxis tick={false} axisLine={false} domain={[0, 100]} />
                 <Radar name="Seller" dataKey="Seller" stroke="hsl(199, 100%, 50%)" fill="hsl(199, 100%, 50%)" fillOpacity={0.25} strokeWidth={2} />
                 <Radar name={verticalKey} dataKey={verticalKey} stroke="hsl(160, 84%, 39%)" fill="hsl(160, 84%, 39%)" fillOpacity={0.15} strokeWidth={2} />
                 <Radar name="Carteira" dataKey="Carteira" stroke="hsl(40, 95%, 55%)" fill="hsl(40, 95%, 55%)" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 4" />
-                <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11 }} />
+                <Legend wrapperStyle={{ color: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE }} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -367,11 +368,11 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
                 ]}
                 barCategoryGap="25%"
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
-                <XAxis dataKey="kpi" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
+                <XAxis dataKey="kpi" tick={chartAxisTick} axisLine={false} />
+                <YAxis tick={chartAxisTick} axisLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11 }} />
+                <Legend wrapperStyle={{ color: CHART_AXIS_STROKE, fontSize: AXIS_TICK_FONT_SIZE }} />
                 <Bar dataKey="Seller" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 <Bar dataKey={verticalKey} fill="hsl(160, 84%, 39%)" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 <Bar dataKey="Carteira" fill="hsl(40, 95%, 55%)" radius={[4, 4, 0, 0]} maxBarSize={40} fillOpacity={0.6} />

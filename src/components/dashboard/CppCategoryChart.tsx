@@ -9,6 +9,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { TrendingUp, TrendingDown, BarChart3, Users, Target } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { type CppRow, parseBrNumber, cleanCustId } from "@/utils/cppAggregation";
+import { CHART_GRID_STROKE, chartAxisTick } from "@/lib/chartTheme";
 
 // Fallback benchmarks by DOM1
 const DOM1_BENCHMARKS: Record<string, { n: number; gmv: number; roas: number; conv: number }> = {
@@ -267,16 +268,16 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
           <div className="h-[260px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID_STROKE} />
                 <XAxis
                   dataKey="date"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tick={chartAxisTick}
                   axisLine={false}
                   interval="preserveStartEnd"
                 />
                 <YAxis
                   yAxisId="left"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tick={chartAxisTick}
                   axisLine={false}
                   tickFormatter={(v) => fmtCompact(v)}
                 />
@@ -284,7 +285,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
                   <YAxis
                     yAxisId="right"
                     orientation="right"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    tick={chartAxisTick}
                     axisLine={false}
                     tickFormatter={(v) => fmtCompact(v)}
                   />
