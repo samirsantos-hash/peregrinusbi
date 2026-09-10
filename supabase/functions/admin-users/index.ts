@@ -157,10 +157,19 @@ Deno.serve(async (req) => {
         });
       }
 
-      console.log(`User ${reused ? "reused" : "created"}: ${newUser.user.id}, setting password in auth...`);
+      const newUserId = newUser?.user?.id;
+      if (!newUserId) {
+        console.error("Create user error: resposta sem usuário");
+        return new Response(JSON.stringify({ error: "Não foi possível criar ou localizar o usuário." }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      console.log(`User ${reused ? "reused" : "created"}: ${newUserId}, setting password in auth...`);
 
       // Force-set the password again to ensure it matches exactly
-      const { error: updatePwErr } = await adminClient.auth.admin.updateUserById(newUser.user.id, {
+      const { error: updatePwErr } = await adminClient.auth.admin.updateUserById(newUserId, {
         password: tempPassword,
       });
 
@@ -171,11 +180,11 @@ Deno.serve(async (req) => {
       // Add user role (ignore duplicates)
       await adminClient
         .from("user_roles")
-        .upsert({ user_id: newUser.user.id, role: userRole }, { onConflict: "user_id,role" });
+        .upsert({ user_id: newUserId, role: userRole }, { onConflict: "user_id,role" });
 
       // Create/update access control entry
       const accessRow = {
-        user_id: newUser.user.id,
+        user_id: newUserId,
         user_email: email,
         cnpj: cnpj || null,
         allowed_cust_ids: allowedCustIds,
@@ -185,7 +194,7 @@ Deno.serve(async (req) => {
       const { data: existingAccess } = await adminClient
         .from("user_access_control")
         .select("id")
-        .eq("user_id", newUser.user.id)
+        .eq("user_id", newUserId)
         .maybeSingle();
 
       if (existingAccess) {
@@ -197,7 +206,7 @@ Deno.serve(async (req) => {
       console.log(`User ${email} setup complete. Password stored in DB matches Auth.`);
 
       return new Response(
-        JSON.stringify({ success: true, tempPassword, userId: newUser.user.id, reused }),
+        JSON.stringify({ success: true, tempPassword, userId: newUserId, reused }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
