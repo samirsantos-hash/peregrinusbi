@@ -164,9 +164,9 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
             </pattern>
           </defs>
           <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-          <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={8} />
+          <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} minTickGap={8} />
           <YAxis
-            tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+            tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
             tickFormatter={modo === "variacao" ? (v: number) => fPct(v) : fShort}
             width={62}
             domain={dominioVariacao}

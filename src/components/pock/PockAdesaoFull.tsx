@@ -143,7 +143,7 @@ export default function PockAdesaoFull({ dados, coberturaFbm, meta = null }: Pro
                   y={meta}
                   stroke="hsl(var(--muted-foreground))"
                   strokeDasharray="4 3"
-                  label={{ value: `meta ${meta}%`, position: "right", fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  label={{ value: `meta ${meta}%`, position: "right", fontSize: 11, fill: "hsl(var(--axis))" }}
                 />
               )}
               <Line

@@ -98,11 +98,11 @@ export default function CppDailyChart({ data, title = "Evolução Diária" }: Pr
               <XAxis
                 dataKey="date"
                 tickFormatter={fmtDateLabel}
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                 padding={isSingleDay ? { left: 50, right: 50 } : undefined}
               />
               <YAxis
-                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                 tickFormatter={(v) => metric === "gmv" ? fmtCompact(v) : metric === "roas" ? `${v.toFixed(0)}x` : fmtNum(v)}
                 width={60}
               />

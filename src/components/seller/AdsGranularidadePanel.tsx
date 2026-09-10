@@ -165,17 +165,17 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={serie} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} interval="preserveStartEnd" />
+              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} interval="preserveStartEnd" />
               <YAxis
                 yAxisId="brl"
                 tickFormatter={(v) => fmtBRLCompact(Number(v))}
-                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
               />
               <YAxis
                 yAxisId="sec"
                 orientation="right"
                 tickFormatter={(v) => (metrica === "roas" ? `${Number(v).toFixed(0)}x` : `${Number(v).toFixed(0)}%`)}
-                tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
               />
               <Tooltip
                 contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}

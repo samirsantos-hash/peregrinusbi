@@ -70,7 +70,7 @@
     --series-3: 215 71% 68%;
     --series-4: 214 60% 78%;
     --series-5: 215 40% 85%;
-    --grid: 215 25% 22%;
+    --grid: 215 25% 30%;
     --axis: 215 20% 62%;
     --attention: 40 87% 52%;
     --attention-text: 40 87% 62%;
@@ -149,8 +149,8 @@
     --series-1: 240 100% 25%;
     --series-2: 215 81% 43%;
     --series-3: 215 71% 54%;
-    --series-4: 214 60% 74%;
-    --series-5: 215 40% 85%;
+    --series-4: 214 55% 56%;
+    --series-5: 215 30% 40%;
     --grid: 215 40% 85%;
     --axis: 215 20% 35%;
     --attention: 40 87% 42%;       /* #C98A0E — manual, só preenchimento */
@@ -281,5 +281,52 @@
 
   body {
     margin-bottom: 180px;
+  }
+}
+
+/* ── Sistema de gráficos: contraste de tooltip, legenda e eixos ──────────── */
+@layer components {
+  .recharts-default-tooltip {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    border-radius: 8px !important;
+    color: hsl(var(--foreground)) !important;
+    box-shadow: 0 4px 16px hsl(0 0% 0% / 0.25);
+  }
+
+  .recharts-tooltip-label {
+    color: hsl(var(--foreground)) !important;
+    font-weight: 600;
+  }
+
+  /* O quadrado colorido continua identificando a série; o texto vai para
+     a cor de primeiro plano para garantir >= 4,5:1 nos dois temas. */
+  .recharts-tooltip-item,
+  .recharts-tooltip-item-name,
+  .recharts-tooltip-item-value,
+  .recharts-tooltip-item-separator {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .recharts-legend-item-text {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .recharts-cartesian-axis-tick-value {
+    fill: hsl(var(--axis));
+  }
+
+  .recharts-cartesian-axis-line,
+  .recharts-cartesian-axis-tick-line {
+    stroke: hsl(var(--axis) / 0.6);
+  }
+
+  .recharts-polar-angle-axis-tick-value,
+  .recharts-polar-radius-axis-tick-value {
+    fill: hsl(var(--axis));
+  }
+
+  .recharts-reference-line line {
+    stroke-opacity: 0.9;
   }
 }

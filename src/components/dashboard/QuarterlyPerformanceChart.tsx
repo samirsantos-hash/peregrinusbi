@@ -219,14 +219,14 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
 
           <XAxis
             dataKey="label"
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }}
+            tick={{ fill: "hsl(var(--axis))", fontSize: 11, fontWeight: 600 }}
             axisLine={false}
             tickLine={false}
           />
 
           <YAxis
             domain={yDomain}
-            tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+            tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}

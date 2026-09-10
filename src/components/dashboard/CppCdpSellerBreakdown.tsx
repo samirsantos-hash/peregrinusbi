@@ -168,9 +168,9 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={daily}>
                   <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                  <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                  <XAxis dataKey="label" tick={{ fill: "hsl(var(--axis))", fontSize: 11 }} />
                   <YAxis
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                     tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
                   />
                   <Tooltip

@@ -368,14 +368,14 @@ export default function GraficoReputacao() {
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                 <XAxis
                   dataKey="mesLabel"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                   interval={0}
                   angle={-45}
                   textAnchor="end"
                   height={50}
                 />
                 <YAxis
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                   tickFormatter={(v: number) => `${(v * 100).toFixed(1)}%`}
                   domain={[0, yMax]}
                 />
