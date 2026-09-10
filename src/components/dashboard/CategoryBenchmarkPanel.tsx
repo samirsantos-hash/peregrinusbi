@@ -369,7 +369,7 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 25%, 14%)" />
                 <XAxis dataKey="kpi" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 10 }} axisLine={false} />
+                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11 }} />
                 <Bar dataKey="Seller" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={40} />

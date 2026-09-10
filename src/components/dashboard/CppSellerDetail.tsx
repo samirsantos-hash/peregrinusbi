@@ -223,9 +223,9 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
           <div className="h-[200px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dowData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.3} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
                 <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
                 <Tooltip content={<CustomDowTooltip />} />
                 <Bar dataKey="tsi" radius={[4, 4, 0, 0]}>
                   {dowData.map((entry) => {

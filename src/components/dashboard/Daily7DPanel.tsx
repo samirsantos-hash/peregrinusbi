@@ -461,9 +461,9 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
             {modo === "diario" ? (
               <ComposedChart data={serie} margin={{ top: 8, right: 56, bottom: 0, left: 0 }}>
                 <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
-                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} stroke={COR_GRID} />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
                   tickFormatter={yFmt}
                   width={72}
                   stroke={COR_GRID}
@@ -552,9 +552,9 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
-                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} stroke={COR_GRID} />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
                   tickFormatter={yFmt}
                   width={72}
                   stroke={COR_GRID}
@@ -585,12 +585,12 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
             ) : (
               <LineChart data={dadosComparacao} margin={{ top: 8, right: 64, bottom: 0, left: 0 }}>
                 <CartesianGrid stroke={COR_GRID} strokeWidth={1} vertical={false} />
-                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} stroke={COR_GRID} />
+                <XAxis dataKey="date" tickFormatter={ddMM} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} stroke={COR_GRID} />
                 <YAxis
-                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
                   width={72}
                   stroke={COR_GRID}
-                  label={{ value: "Índice (base 100)", angle: -90, position: "insideLeft", fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
+                  label={{ value: "Índice (base 100)", angle: -90, position: "insideLeft", fontSize: 11, fill: "hsl(var(--muted-foreground))"  }}
                 />
                 <ReferenceLine y={100} stroke={COR_GRID} strokeWidth={1} />
                 <Tooltip

@@ -472,9 +472,9 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
       <Card title="GMV diário com MM7 e MM28">
         <ResponsiveContainer width="100%" height={260}>
           <ComposedChart data={d.serie.map((s, i) => ({ ...s, mm7: mm7[i], mm28: mm28[i] }))}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={30} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} minTickGap={30} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
             <Bar dataKey="gmv" name="GMV" fill={COLORS[0]} opacity={0.5} />
@@ -493,9 +493,9 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
         <Card title="Cascata do resultado">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={cascata}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="nome" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} height={50} textAnchor="end" />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="nome" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} interval={0} angle={-20} height={50} textAnchor="end" />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
               <Bar dataKey="v" name="Valor">
                 {cascata.map((c, i) => <Cell key={i} fill={c.v >= 0 ? COLORS[2] : COLORS[4]} />)}
@@ -519,9 +519,9 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
         <Card title="Margem líquida por loja" hint="Verde ≥ 72% · âmbar ≥ 68% · vermelho abaixo. Como o take é padronizado, diferença de margem é mix logístico, devolução ou estorno.">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={porLoja} layout="vertical" margin={{ left: 60 }}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-              <YAxis type="category" dataKey="loja" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={100} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <YAxis type="category" dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} width={100} />
               <Tooltip formatter={(v: number) => fPct(v)} />
               <Bar dataKey="margem" name="Margem">
                 {porLoja.map((l, i) => <Cell key={i} fill={l.margem >= 0.72 ? COLORS[2] : l.margem >= 0.68 ? COLORS[1] : COLORS[4]} />)}
@@ -533,9 +533,9 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
         <Card title="Índice de sazonalidade semanal" hint="GMV médio do dia ÷ GMV médio geral. Comparar dias sem dessazonalizar produz conclusão errada.">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={dowMedia}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="dow" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="dow" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
               <Tooltip formatter={(v: number) => v.toFixed(2)} />
               <ReferenceLine y={1} stroke={COLORS[3]} strokeDasharray="4 4" />
               <Bar dataKey="idx" name="Índice" fill={COLORS[1]} />
@@ -547,9 +547,9 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
       <Card title="Curva acumulada de contribuição">
         <ResponsiveContainer width="100%" height={200}>
           <AreaChart data={curva}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis dataKey="loja" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} domain={[0, 1]} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} domain={[0, 1]} />
             <Tooltip formatter={(v: number) => fPct(v)} />
             <Area dataKey="acum" name="Acumulado" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.25} />
           </AreaChart>
@@ -681,9 +681,9 @@ const Lojas = ({ d }: { d: Ctx }) => {
         <Card title="Score de saúde composto" hint="Média de 8 eixos normalizados por z-score contra a rede, reescalados 0–100. Devolução e custo de frete têm o sinal invertido — em todos os eixos maior é melhor.">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={score} layout="vertical" margin={{ left: 60 }}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis type="category" dataKey="loja" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={100} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis type="category" dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} width={100} />
               <Tooltip formatter={(v: number) => v.toFixed(1)} />
               <Bar dataKey="score" name="Score" fill={COLORS[0]} />
             </BarChart>
@@ -693,9 +693,9 @@ const Lojas = ({ d }: { d: Ctx }) => {
         <Card title="Escala × rentabilidade" hint="X = GMV em log10, Y = margem líquida, tamanho = pedidos.">
           <ResponsiveContainer width="100%" height={240}>
             <ScatterChart>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis type="number" dataKey="x" name="log10 GMV" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis type="number" dataKey="y" name="Margem" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis type="number" dataKey="x" name="log10 GMV" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis type="number" dataKey="y" name="Margem" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
               <ZAxis type="number" dataKey="z" range={[60, 400]} />
               <Tooltip formatter={(v: number, n: string) => (n === "Margem" ? fPct(v) : v.toFixed(2))} />
               <Scatter data={lojas.map((l) => ({ x: Math.log10(Math.max(1, l.gmv)), y: l.margem, z: l.pedidos, loja: l.loja }))} fill={COLORS[1]} />
@@ -707,9 +707,9 @@ const Lojas = ({ d }: { d: Ctx }) => {
       <Card title="Trajetórias de GMV em MM7">
         <ResponsiveContainer width="100%" height={240}>
           <ComposedChart data={trajetorias}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={30} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} minTickGap={30} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
             {mmPorLoja.map((m, i) => (
@@ -722,9 +722,9 @@ const Lojas = ({ d }: { d: Ctx }) => {
       <Card title="Decomposição do crescimento" hint="Efeito volume = Δpedidos × ticket anterior. Efeito ticket/mix = Δticket × pedidos atuais. A soma reconstrói a variação de GMV.">
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={decomp}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis dataKey="loja" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
             <Bar dataKey="volume" name="Efeito volume" stackId="a" fill={COLORS[0]} />
@@ -789,9 +789,9 @@ const Series = ({ d }: { d: Ctx }) => {
       <Card title="Nível: GMV diário, MM7, MM28 e tendência">
         <ResponsiveContainer width="100%" height={260}>
           <ComposedChart data={linha}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={30} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} minTickGap={30} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
             <Bar dataKey="gmv" name="GMV" fill={COLORS[0]} opacity={0.4} />
@@ -805,9 +805,9 @@ const Series = ({ d }: { d: Ctx }) => {
       <Card title="Derivadas: velocidade sobre aceleração" hint="A 2ª derivada muda de sinal antes de a série virar — use-a como alerta antecedente, não como enfeite.">
         <ResponsiveContainer width="100%" height={240}>
           <ComposedChart data={linha}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={30} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} minTickGap={30} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <ReferenceLine y={0} stroke={COLORS[3]} />
             <Bar dataKey="acel" name="Aceleração">
@@ -822,9 +822,9 @@ const Series = ({ d }: { d: Ctx }) => {
         <Card title="Decomposição aditiva" hint={`Força sazonal ${dec.forcaSaz.toFixed(2)} · força de tendência ${dec.forcaTend.toFixed(2)}.`}>
           <ResponsiveContainer width="100%" height={220}>
             <ComposedChart data={linha}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={30} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} minTickGap={30} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
               <Line dataKey="dsz" name="Dessazonalizado" stroke={COLORS[0]} dot={false} connectNulls />
@@ -836,9 +836,9 @@ const Series = ({ d }: { d: Ctx }) => {
         <Card title="CUSUM dos z-scores" hint="Inflexões prolongadas marcam quebra estrutural de regime.">
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={linha}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={30} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} minTickGap={30} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
               <Tooltip formatter={(v: number) => v.toFixed(1)} />
               <ReferenceLine y={0} stroke={COLORS[3]} />
               <Area dataKey="cusum" name="CUSUM" stroke={COLORS[5]} fill={COLORS[5]} fillOpacity={0.2} />
@@ -849,9 +849,9 @@ const Series = ({ d }: { d: Ctx }) => {
         <Card title="Curva intradiária">
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={horas}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="hora" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={2} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="hora" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} interval={2} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
               <Bar dataKey="gmv" name="GMV" fill={COLORS[0]} />
             </BarChart>
@@ -925,9 +925,9 @@ const Projecao = ({ d }: { d: Ctx }) => {
       <Card title="Projeção com banda de 95%" hint="Dessazonalização robusta (mediana dos desvios contra MM7 centrada) + Holt com tendência amortecida. Parâmetros calibrados por walk-forward: janela 28, φ 0,70, α 0,10, β 0,05.">
         <ResponsiveContainer width="100%" height={280}>
           <ComposedChart data={chart}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} minTickGap={30} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} minTickGap={30} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
             <Area dataKey="hi" name="IC 95% sup." stroke="none" fill={COLORS[0]} fillOpacity={0.12} />
@@ -961,9 +961,9 @@ const Projecao = ({ d }: { d: Ctx }) => {
         </p>
         <ResponsiveContainer width="100%" height={220}>
           <ScatterChart>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis type="number" dataKey="x" name="GMV mídia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
-            <YAxis type="number" dataKey="y" name="GMV total" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis type="number" dataKey="x" name="GMV mídia" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
+            <YAxis type="number" dataKey="y" name="GMV total" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Scatter data={y.map((v, i) => ({ x: adsDia[i], y: v }))} fill={COLORS[0]} />
           </ScatterChart>
@@ -1028,10 +1028,10 @@ const Concentracao = ({ d }: { d: Ctx }) => {
         <Card title="Pareto dos 40 maiores anúncios">
           <ResponsiveContainer width="100%" height={250}>
             <ComposedChart data={pareto}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
               <XAxis dataKey="mlb" tick={{ fontSize: 8 }} interval={3} />
-              <YAxis yAxisId="l" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
-              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} domain={[0, 1]} />
+              <YAxis yAxisId="l" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
+              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} domain={[0, 1]} />
               <Tooltip formatter={(v: number, n: string) => (n === "Acumulado" ? fPct(v) : fBRL(v))} />
               <Bar yAxisId="l" dataKey="gmv" name="GMV" fill={COLORS[0]} />
               <Line yAxisId="r" dataKey="acum" name="Acumulado" stroke={COLORS[1]} dot={false} strokeWidth={2} />
@@ -1042,9 +1042,9 @@ const Concentracao = ({ d }: { d: Ctx }) => {
         <Card title="Curva de Lorenz por anúncio">
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={lorenz}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="x" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="x" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
               <Area dataKey="y" name="Lorenz" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.2} />
               <Line dataKey="ref" name="Igualdade" stroke={COLORS[3]} dot={false} strokeDasharray="4 4" />
@@ -1055,9 +1055,9 @@ const Concentracao = ({ d }: { d: Ctx }) => {
         <Card title="Teste de estresse: perda se os top anúncios saírem do ar">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={estresse}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="n" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="n" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
               <Bar dataKey="perda" name="Perda de GMV" fill={COLORS[4]} />
             </BarChart>
@@ -1067,9 +1067,9 @@ const Concentracao = ({ d }: { d: Ctx }) => {
         <Card title="HHI intra-loja" hint="Loja que vende bem apoiada em pouca coisa.">
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={intra} layout="vertical" margin={{ left: 60 }}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis type="category" dataKey="loja" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} width={100} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis type="category" dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} width={100} />
               <Tooltip formatter={(v: number) => fInt(v)} />
               <Bar dataKey="hhi" name="HHI" fill={COLORS[5]} />
             </BarChart>
@@ -1135,9 +1135,9 @@ const Geografia = ({ d }: { d: Ctx }) => {
         <Card title="População × GMV">
           <ResponsiveContainer width="100%" height={240}>
             <ScatterChart>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis type="number" dataKey="pop" name="População (mi)" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis type="number" dataKey="gmv" name="GMV" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis type="number" dataKey="pop" name="População (mi)" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis type="number" dataKey="gmv" name="GMV" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number, n: string) => (n === "GMV" ? fBRL(v) : v.toFixed(1))} />
               <Scatter data={ufs} fill={COLORS[0]} />
             </ScatterChart>
@@ -1147,9 +1147,9 @@ const Geografia = ({ d }: { d: Ctx }) => {
         <Card title="Consolidação por macrorregião">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={regioes}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="regiao" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="regiao" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
               <Bar dataKey="gmv" name="GMV" fill={COLORS[1]} />
             </BarChart>
@@ -1280,9 +1280,9 @@ const Clientes = ({ d }: { d: Ctx }) => {
         <Card title="Concentração por decil de cliente">
           <ResponsiveContainer width="100%" height={220}>
             <ComposedChart data={decis}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="decil" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="decil" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
               <Bar dataKey="share" name="Share" fill={COLORS[0]} />
               <Line dataKey="acum" name="Acumulado" stroke={COLORS[1]} dot={false} strokeWidth={2} />
@@ -1293,9 +1293,9 @@ const Clientes = ({ d }: { d: Ctx }) => {
         <Card title="Distribuição de frequência de compra">
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={freq}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="faixa" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fInt(v)} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="faixa" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fInt(v)} />
               <Tooltip formatter={(v: number) => fInt(v)} />
               <Bar dataKey="n" name="Clientes" fill={COLORS[3]} />
             </BarChart>
@@ -1357,10 +1357,10 @@ const Operacao = ({ d }: { d: Ctx }) => {
         <Card title="Economia de cada modal">
           <ResponsiveContainer width="100%" height={240}>
             <ComposedChart data={modais}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="modal" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-15} height={50} textAnchor="end" />
-              <YAxis yAxisId="l" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
-              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="modal" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} interval={0} angle={-15} height={50} textAnchor="end" />
+              <YAxis yAxisId="l" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
+              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
               <Bar yAxisId="l" dataKey="ticket" name="Ticket" fill={COLORS[0]} />
@@ -1373,9 +1373,9 @@ const Operacao = ({ d }: { d: Ctx }) => {
         <Card title="Mix logístico por loja">
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={mixLoja}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-              <XAxis dataKey="loja" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+              <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+              <XAxis dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
               <Legend wrapperStyle={{ fontSize: 9 }} />
               {modais.slice(0, 6).map((m, i) => (
@@ -1461,9 +1461,9 @@ const Publicidade = ({ d }: { d: Ctx }) => {
       <Card title="Pago × orgânico">
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={comp}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeOpacity={0.35} vertical={false} />
-            <XAxis dataKey="m" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => fShort(v)} />
+            <CartesianGrid stroke="hsl(var(--grid))" vertical={false} />
+            <XAxis dataKey="m" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))"  }} tickFormatter={(v) => fShort(v)} />
             <Tooltip />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
             <Bar dataKey="pago" name="Pago" fill={COLORS[1]} />

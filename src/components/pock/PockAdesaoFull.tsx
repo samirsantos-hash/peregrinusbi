@@ -98,11 +98,11 @@ export default function PockAdesaoFull({ dados, coberturaFbm, meta = null }: Pro
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={linhas} margin={{ top: 20, right: 40, left: 0, bottom: 0 }} stackOffset="expand">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="mes" tick={{ fontSize: 10 }} interval="preserveStartEnd" minTickGap={14} angle={-35} textAnchor="end" height={40} tickMargin={4} />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--grid))" />
+              <XAxis dataKey="mes" tick={{ fontSize: 11  }} interval="preserveStartEnd" minTickGap={14} angle={-35} textAnchor="end" height={40} tickMargin={4} />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fontSize: 10 }}
+                tick={{ fontSize: 11  }}
                 width={40}
                 tickCount={5}
                 tickFormatter={(v) => `${v}%`}
