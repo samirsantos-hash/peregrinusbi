@@ -335,7 +335,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                 {temGm && <TableHead className="whitespace-nowrap">Responsável</TableHead>}
                 {temGm && <TableHead className="whitespace-nowrap">Praça</TableHead>}
                 <SortHeader label="Medalha" k="repCurrentLevel" />
-                <SortHeader label="Faturamento" k="tgmvLc" />
+                <SortHeader label="Faturamento (30d)" k="tgmvLc" />
                 <SortHeader label={roasShrink ? "ROAS ajustado" : "ROAS"} k="roas" />
                 <SortHeader label="Potência Full" k="potenciaFull" />
                 <SortHeader label="Modal Principal" k="modalPrincipal" />
