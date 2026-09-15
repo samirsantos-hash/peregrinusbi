@@ -187,7 +187,7 @@ export function usePortfolioData(custIds: string[]) {
 
       const sellerIds = sellersData.map((s) => s.id);
 
-      // Get latest KPI for each seller (most recent data)
+      // Get latest KPI for each seller (most recent data) — base cadastral/scores
       const { data: kpiData } = await supabase
         .from("sellers_kpi")
         .select("*")
@@ -206,8 +206,61 @@ export function usePortfolioData(custIds: string[]) {
         }
       }
 
+      // ── Janela móvel de 30 dias (base diária) ────────────────────────
+      // Referência = último dia disponível na base diária destes sellers.
+      const { data: maxRow } = await supabase
+        .from("sellers_kpi_daily")
+        .select("data")
+        .in("seller_id", sellerIds)
+        .order("data", { ascending: false })
+        .limit(1);
+
+      const soma30: Record<string, any> = {};
+      const fimJanela = maxRow?.[0]?.data as string | undefined;
+      if (fimJanela) {
+        const fim = new Date(`${fimJanela}T00:00:00Z`);
+        const ini = new Date(fim.getTime() - 29 * 86400000);
+        const iniStr = ini.toISOString().slice(0, 10);
+
+        const PAGE = 1000;
+        for (let offset = 0; ; offset += PAGE) {
+          const { data: page } = await supabase
+            .from("sellers_kpi_daily")
+            .select(
+              "seller_id, tgmv_lc, f_tgmv_lc, tsi, f_tsi, tsi_flex, tgmv_lc_full, tgmv_lc_flex, inv_pads, tgmv_lc_pads, gmv_lc",
+            )
+            .in("seller_id", sellerIds)
+            .gte("data", iniStr)
+            .lte("data", fimJanela)
+            .range(offset, offset + PAGE - 1);
+
+          if (!page || page.length === 0) break;
+          for (const r of page as any[]) {
+            const acc = (soma30[r.seller_id] ||= {
+              tgmv_lc: 0,
+              f_tgmv_lc: 0,
+              tsi: 0,
+              f_tsi: 0,
+              tsi_flex: 0,
+              tgmv_lc_full: 0,
+              tgmv_lc_flex: 0,
+              inv_pads: 0,
+              tgmv_lc_pads: 0,
+              gmv_lc: 0,
+            });
+            for (const key of Object.keys(acc)) {
+              acc[key] += Number(r[key]) || 0;
+            }
+          }
+          if (page.length < PAGE) break;
+        }
+      }
+
       const merged: SellerWithKpi[] = sellersData.map((s) => {
         const k = latestKpi[s.id] || {};
+        // Fluxo (faturamento, itens, ads) vem da janela de 30 dias quando há base diária;
+        // senão cai para o último mês disponível.
+        const f = soma30[s.id] || k;
         const nick = (s.nickname || "").trim();
         return {
           sellerId: s.id,
@@ -215,19 +268,19 @@ export function usePortfolioData(custIds: string[]) {
           nickname: nick || `Loja ${s.cust_id}`,
           cusState: s.cus_state,
           repCurrentLevel: k.rep_current_level || null,
-          tgmvLc: Number(k.tgmv_lc) || 0,
-          fTgmvLc: Number(k.f_tgmv_lc) || 0,
-          tsi: Number(k.tsi) || 0,
-          tsiFlex: Number(k.tsi_flex) || 0,
-          fTsi: Number(k.f_tsi) || 0,
-          tgmvLcFull: Number(k.tgmv_lc_full) || 0,
-          tgmvLcFlex: Number(k.tgmv_lc_flex) || 0,
-          invPads: Number(k.inv_pads) || 0,
-          tgmvLcPads: Number(k.tgmv_lc_pads) || 0,
+          tgmvLc: Number(f.tgmv_lc) || 0,
+          fTgmvLc: Number(f.f_tgmv_lc) || 0,
+          tsi: Number(f.tsi) || 0,
+          tsiFlex: Number(f.tsi_flex) || 0,
+          fTsi: Number(f.f_tsi) || 0,
+          tgmvLcFull: Number(f.tgmv_lc_full) || 0,
+          tgmvLcFlex: Number(f.tgmv_lc_flex) || 0,
+          invPads: Number(f.inv_pads) || 0,
+          tgmvLcPads: Number(f.tgmv_lc_pads) || 0,
           scoreQualidadeFinal: Number(k.score_qualidade_final) || 0,
           scoreOfertaFinal: Number(k.score_oferta_final) || 0,
           scoreCaracteristicaFinal: Number(k.score_caracteristica_final) || 0,
-          gmvLc: Number(k.gmv_lc) || 0,
+          gmvLc: Number(f.gmv_lc) || 0,
           mesesObservados: mesesPorSeller[s.id] || 0,
           vertical: (s as any).vertical_dominant || null,
         };
