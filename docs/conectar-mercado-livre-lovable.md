@@ -70,9 +70,34 @@ Cadastre:
 | `ML_CLIENT_SECRET` | sim | Secret Key do DevCenter |
 | `APP_URL` | sim | URL pública do app, **sem** barra no fim. Ex.: `https://peregrinus-com-br.lovable.app` |
 | `ML_REDIRECT_URI` | só se não for o padrão | A mesma URI registrada no DevCenter |
-| `REFRESH_TRIGGER_SECRET` | sim, para renovar token | String longa aleatória (cron de `ml-token-refresh`) |
+| `REFRESH_TRIGGER_SECRET` | sim, para renovar token | Senha que **você gera** (não vem do Mercado Livre). Ver abaixo. |
 
 `SUPABASE_URL`, `SUPABASE_ANON_KEY` e `SUPABASE_SERVICE_ROLE_KEY` o Lovable/Supabase já injeta. Não recrie com prefixo `VITE_` no lugar desses.
+
+### Como criar o `REFRESH_TRIGGER_SECRET`
+
+Não existe um painel do Mercado Livre nem do Lovable que entregue esse valor. É uma **senha sua**, só para o cron conseguir chamar `ml-token-refresh` / `ml-daily-sync` (essas funções não usam JWT; quem conhece o header `x-refresh-secret` pode dispará-las).
+
+Gere uma vez no terminal:
+
+```sh
+openssl rand -hex 32
+```
+
+O comando imprime 64 caracteres hexadecimais, por exemplo `a3f1…` (o seu será outro). Guarde em um gerenciador de senhas.
+
+Use **o mesmo valor** em dois lugares:
+
+1. **Cloud → Secrets** do Lovable (ou Edge Functions → Secrets no Supabase), nome `REFRESH_TRIGGER_SECRET`.
+2. No job/cron, header `x-refresh-secret` com esse valor. Se o cron for o `pg_cron` deste repo, grave também no Vault:
+
+```sql
+select public.ml_set_trigger_secret('cole_aqui_o_mesmo_valor');
+```
+
+Essa função SQL só roda com `service_role` (SQL Editor do Supabase como postgres, ou uma Edge Function). Não rode no app logado como usuário comum.
+
+Não reuse o `ML_CLIENT_SECRET`. Se perder o valor, gere outro, atualize o secret da função **e** o Vault/cron no mesmo instante; senão o cron recebe `403`.
 
 Depois de salvar, **publique de novo** as Edge Functions se o painel não recarregar os secrets sozinho.
 
@@ -160,7 +185,7 @@ Logs: Lovable **Cloud → Logs / Edge functions**, ou Supabase → Edge Function
 
 - [ ] App criado no DevCenter com redirect `…/functions/v1/ml-oauth-callback`
 - [ ] PKCE desligado
-- [ ] Secrets: `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `APP_URL`
+- [ ] Secrets: `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `APP_URL`, `REFRESH_TRIGGER_SECRET` (gerado com `openssl rand -hex 32`)
 - [ ] Funções ML publicadas
 - [ ] App Lovable publicado na mesma origem de `APP_URL`
 - [ ] Super admin conectou em `/integracoes`
