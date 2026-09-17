@@ -20,3 +20,21 @@ verify_jwt = false
 
 [functions.drive-sync]
 verify_jwt = false
+
+# Mercado Livre — OAuth e sincronização.
+# ml-oauth-start exige o JWT do usuário (valida super_admin no servidor).
+[functions.ml-oauth-start]
+verify_jwt = true
+
+# ml-oauth-callback é público: o navegador do usuário chega aqui vindo do
+# Mercado Livre, sem Authorization. A proteção é o state de uso único.
+[functions.ml-oauth-callback]
+verify_jwt = false
+
+# ml-token-refresh e ml-daily-sync são acionadas por cron/backoffice e
+# protegidas pelo segredo compartilhado no header x-refresh-secret.
+[functions.ml-token-refresh]
+verify_jwt = false
+
+[functions.ml-daily-sync]
+verify_jwt = false

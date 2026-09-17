@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu, Plug } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import NewBadge from "@/components/ui/NewBadge";
 import {
@@ -413,6 +413,12 @@ const Index = () => {
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2 px-2 sm:px-3">
                 <Settings className="w-4 h-4" />
                 <span className="hidden sm:inline">{isGerente && !isAdmin ? "Carteiras" : "Admin"}</span>
+              </Button>
+            }
+            {isAdmin &&
+              <Button variant="outline" size="sm" onClick={() => navigate("/integracoes")} className="gap-2 px-2 sm:px-3">
+                <Plug className="w-4 h-4" />
+                <span className="hidden sm:inline">Integrações</span>
               </Button>
             }
             <AlertDialog>
