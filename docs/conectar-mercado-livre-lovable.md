@@ -78,13 +78,21 @@ Cadastre:
 
 Não existe um painel do Mercado Livre nem do Lovable que entregue esse valor. É uma **senha sua**, só para o cron conseguir chamar `ml-token-refresh` / `ml-daily-sync` (essas funções não usam JWT; quem conhece o header `x-refresh-secret` pode dispará-las).
 
-Gere uma vez no terminal:
+Gere uma vez. No **Windows PowerShell** (não precisa de OpenSSL):
+
+```powershell
+$bytes = New-Object byte[] 32
+[System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+($bytes | ForEach-Object { $_.ToString('x2') }) -join ''
+```
+
+No macOS/Linux, ou no Git Bash do Windows se o OpenSSL estiver instalado:
 
 ```sh
 openssl rand -hex 32
 ```
 
-O comando imprime 64 caracteres hexadecimais, por exemplo `a3f1…` (o seu será outro). Guarde em um gerenciador de senhas.
+O comando imprime 64 caracteres hexadecimais, por exemplo `a3f1…` (o seu será outro). Copie a linha inteira e guarde em um gerenciador de senhas. Não cole essa senha no chat.
 
 Use **o mesmo valor** em dois lugares:
 
@@ -185,7 +193,7 @@ Logs: Lovable **Cloud → Logs / Edge functions**, ou Supabase → Edge Function
 
 - [ ] App criado no DevCenter com redirect `…/functions/v1/ml-oauth-callback`
 - [ ] PKCE desligado
-- [ ] Secrets: `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `APP_URL`, `REFRESH_TRIGGER_SECRET` (gerado com `openssl rand -hex 32`)
+- [ ] Secrets: `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `APP_URL`, `REFRESH_TRIGGER_SECRET` (gerado no PowerShell ou com OpenSSL)
 - [ ] Funções ML publicadas
 - [ ] App Lovable publicado na mesma origem de `APP_URL`
 - [ ] Super admin conectou em `/integracoes`
