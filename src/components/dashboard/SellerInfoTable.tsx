@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Award, Clock, Layers, Tag, MapPin, Globe } from "lucide-react";
+import { Award, Clock, Layers, Tag, MapPin, Globe, UserRound } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
 import { UF_INFO } from "@/lib/geoBrasil";
@@ -48,14 +48,45 @@ function useCadastroComplementar(custId?: string, precisa?: boolean) {
         .limit(1)
         .maybeSingle();
 
+      // Cadastro principal das lojas — é onde a classificação fica preenchida hoje.
+      const sel = await supabase
+        .from("sellers")
+        .select("cluster_seller, sub_cluster_seller, cus_state")
+        .eq("cust_id", id)
+        .limit(1)
+        .maybeSingle();
+
       return {
-        cluster: cpp.data?.cluster_seller || gm.data?.cluster_seller || "",
-        subCluster: cpp.data?.sub_cluster_seller || gm.data?.sub_cluster_seller || "",
-        state: cpp.data?.cus_state || gm.data?.cus_state || base.data?.cus_state || "",
+        cluster: cpp.data?.cluster_seller || gm.data?.cluster_seller || sel.data?.cluster_seller || "",
+        subCluster:
+          cpp.data?.sub_cluster_seller || gm.data?.sub_cluster_seller || sel.data?.sub_cluster_seller || "",
+        state: cpp.data?.cus_state || gm.data?.cus_state || base.data?.cus_state || sel.data?.cus_state || "",
       };
     },
   });
 }
+
+/** Rótulos em português para o perfil/classificação da conta. */
+const PERFIL_LABEL: Record<string, string> = {
+  newbie: "Newbie (conta nova)",
+  "starter/newbie": "Starter / Newbie",
+  "in professionalization": "Em profissionalização",
+  emerging: "Emerging (em crescimento)",
+  core: "Core (consolidada)",
+  mature: "Mature (madura)",
+  crownjewels: "Crown Jewels (destaque)",
+  melipro: "MeliPro",
+  seasonal: "Sazonal",
+  stall: "Estagnada",
+  churn: "Churn (em queda)",
+  hobbyseller: "Hobby Seller",
+  nkob: "NKOB (novo negócio)",
+};
+
+function rotuloPerfil(valor: string): string {
+  return PERFIL_LABEL[valor.trim().toLowerCase()] || valor;
+}
+
 
 const SEM_CADASTRO = "Não informado na base";
 
@@ -120,17 +151,25 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
       tooltip: "Meses decorridos desde o primeiro registro de KPI do seller no programa Peregrinus.",
     },
     {
+      icon: UserRound,
+      label: "Perfil da conta",
+      value: cluster ? rotuloPerfil(cluster) : subCluster ? rotuloPerfil(subCluster) : SEM_CADASTRO,
+      tooltip:
+        "Perfil de maturidade da conta no Mercado Livre (Newbie, Em profissionalização, Emerging, Core, Mature, etc.).",
+    },
+    {
       icon: Layers,
       label: "Segmentação",
-      value: cluster || SEM_CADASTRO,
+      value: cluster ? rotuloPerfil(cluster) : SEM_CADASTRO,
       tooltip: cluster && !seller.cluster
         ? "Cluster estratégico do seller. A base não traz o cluster principal desta loja; exibimos a subclassificação disponível."
         : "Cluster estratégico do seller (Emerging, Core, Mature) — define as metas e benchmarks aplicados.",
     },
+
     {
       icon: Tag,
       label: "Sub Categoria",
-      value: subCluster || SEM_CADASTRO,
+      value: subCluster ? rotuloPerfil(subCluster) : SEM_CADASTRO,
       tooltip: "Subclassificação dentro do cluster principal — usada para comparações intra-vertical.",
     },
     {
