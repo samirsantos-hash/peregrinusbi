@@ -169,7 +169,7 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
     {
       icon: Tag,
       label: "Sub Categoria",
-      value: subCluster || SEM_CADASTRO,
+      value: subCluster ? rotuloPerfil(subCluster) : SEM_CADASTRO,
       tooltip: "Subclassificação dentro do cluster principal — usada para comparações intra-vertical.",
     },
     {
