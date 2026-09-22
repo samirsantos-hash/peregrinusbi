@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Award, Clock, Layers, Tag, MapPin, Globe } from "lucide-react";
+import { Award, Clock, Layers, Tag, MapPin, Globe, UserRound } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { useClassificacaoLojas } from "@/hooks/useClassificacaoLojas";
 import { UF_INFO } from "@/lib/geoBrasil";
@@ -151,13 +151,21 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
       tooltip: "Meses decorridos desde o primeiro registro de KPI do seller no programa Peregrinus.",
     },
     {
+      icon: UserRound,
+      label: "Perfil da conta",
+      value: cluster ? rotuloPerfil(cluster) : subCluster ? rotuloPerfil(subCluster) : SEM_CADASTRO,
+      tooltip:
+        "Perfil de maturidade da conta no Mercado Livre (Newbie, Em profissionalização, Emerging, Core, Mature, etc.).",
+    },
+    {
       icon: Layers,
       label: "Segmentação",
-      value: cluster || SEM_CADASTRO,
+      value: cluster ? rotuloPerfil(cluster) : SEM_CADASTRO,
       tooltip: cluster && !seller.cluster
         ? "Cluster estratégico do seller. A base não traz o cluster principal desta loja; exibimos a subclassificação disponível."
         : "Cluster estratégico do seller (Emerging, Core, Mature) — define as metas e benchmarks aplicados.",
     },
+
     {
       icon: Tag,
       label: "Sub Categoria",
