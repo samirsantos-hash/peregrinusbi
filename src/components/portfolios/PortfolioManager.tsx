@@ -6,6 +6,7 @@ import { Loader2, FolderPlus, Folder, Trash2, Calendar, Pencil, RefreshCw } from
 import { usePortfolios, type Portfolio } from "@/hooks/usePortfolios";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import CreatePortfolioModal from "./CreatePortfolioModal";
 import EditPortfolioModal from "./EditPortfolioModal";
 import PortfolioDetail from "./PortfolioDetail";

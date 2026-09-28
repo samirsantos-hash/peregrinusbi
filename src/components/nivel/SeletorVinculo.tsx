@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import ListaFilhos from "./ListaFilhos";
 import type { ItemFilho } from "@/lib/navegacao/tipos";
 import type { StatusOkr } from "@/types/programas";

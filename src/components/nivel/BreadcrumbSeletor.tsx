@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useNavegarPreservando } from "@/contexts/ContextoNavegacao";
 import { usePerfilNavegacao } from "@/hooks/nivel/usePerfilNavegacao";

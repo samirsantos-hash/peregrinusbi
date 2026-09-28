@@ -3,6 +3,7 @@ import { Loader2, Save, Link2, AlertTriangle, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { norm } from "@/lib/multilojas/parse";
 import type { LojaOficial } from "@/hooks/multilojas/usePerfilMultilojas";
 

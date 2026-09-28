@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useContextoNavegacao } from "@/contexts/ContextoNavegacao";
 import { mesParaId, ordenarPorUrgencia, statusPorMeta, type ItemFilho } from "@/lib/navegacao/tipos";
 import type { StatusOkr } from "@/types/programas";

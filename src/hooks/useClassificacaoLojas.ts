@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { monthKey, monthKeyFromTimMonthId } from "@/lib/dates";
 import { classificarCrescimento, type ClassificacaoSust } from "@/lib/sustentabilidade";
 import { decompor } from "@/lib/decomposicao";
