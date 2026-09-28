@@ -34,6 +34,7 @@ import GuardaNivel from "./components/nivel/GuardaNivel";
 import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 import RodapeInstitucional from "./components/RodapeInstitucional";
+import AlertaInatividade from "./components/AlertaInatividade";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -120,6 +121,7 @@ const App = () => (
             <ContextoNavegacaoProvider>
               <AppRoutes />
               <NotificationsBell />
+              <AlertaInatividade />
             </ContextoNavegacaoProvider>
           </BrowserRouter>
         </JuniorModeProvider>
