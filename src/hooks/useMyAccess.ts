@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useAuth } from "@/hooks/useAuth";
 
 export interface AllowedSeller {
@@ -42,10 +43,14 @@ export function useMyAccess() {
       const custIds = (acc?.allowed_cust_ids || []) as string[];
 
       // 2) Nicknames das lojas visíveis via RLS.
-      const { data: sellers } = await supabase
-        .from("sellers")
-        .select("cust_id, nickname")
-        .order("nickname", { ascending: true });
+      const { data: sellers } = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("sellers")
+          .select("cust_id, nickname")
+          .order("nickname", { ascending: true })
+          .order("cust_id")
+          .range(from, to)
+      );
 
       if (!mounted) return;
       const list: AllowedSeller[] = (sellers || []).map((s: any) => ({

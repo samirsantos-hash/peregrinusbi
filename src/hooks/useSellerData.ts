@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 export interface Seller {
   id: string;
@@ -180,11 +181,14 @@ export function useSellers() {
   return useQuery({
     queryKey: ["sellers"],
     queryFn: async (): Promise<Seller[]> => {
-      const { data, error } = await supabase
-        .from("sellers")
-        .select("id, nickname, cust_id, cluster_seller, sub_cluster_seller, cus_state")
-        .order("nickname")
-        .range(0, 4999);
+      const { data, error } = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("sellers")
+          .select("id, nickname, cust_id, cluster_seller, sub_cluster_seller, cus_state")
+          .order("nickname")
+          .order("id")
+          .range(from, to)
+      );
 
       if (error) throw error;
       if (!data || data.length === 0) return [];

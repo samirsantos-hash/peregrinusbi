@@ -3,6 +3,7 @@ import { Loader2, Save, Link2, AlertTriangle, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { norm } from "@/lib/multilojas/parse";
 import type { LojaOficial } from "@/hooks/multilojas/usePerfilMultilojas";
 
@@ -47,7 +48,9 @@ const CadastroLojas = () => {
   /** Importa as contas de vendedor conhecidas do Peregrinus para o catálogo do módulo. */
   const sincronizarContas = async () => {
     setErro(null); setMsg(null);
-    const { data: sellers, error } = await supabase.from("sellers").select("cust_id, nickname, cluster_seller, sub_cluster_seller, cus_state");
+    const { data: sellers, error } = await fetchAllRows<any>((from, to) =>
+      supabase.from("sellers").select("cust_id, nickname, cluster_seller, sub_cluster_seller, cus_state").order("id").range(from, to)
+    );
     if (error) { setErro(error.message); return; }
     const linhas = (sellers || []).map((s) => ({
       cust_id: String(s.cust_id), nickname: s.nickname,

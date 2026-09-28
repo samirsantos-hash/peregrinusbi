@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store, Folder, KeyRound } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import BatchUploadPanel from "@/components/dashboard/BatchUploadPanel";
@@ -97,7 +98,9 @@ const Admin = () => {
   const loadData = async () => {
     setLoading(true);
     const [sellersRes, usersRes, logsRes, rolesRes] = await Promise.all([
-      supabase.from("sellers").select("id, nickname, cust_id").order("nickname").range(0, 4999),
+      fetchAllRows<any>((from, to) =>
+        supabase.from("sellers").select("id, nickname, cust_id").order("nickname").order("id").range(from, to)
+      ),
       supabase.from("user_access_control").select("*").order("created_at", { ascending: false }),
       supabase.from("upload_logs").select("*").order("uploaded_at", { ascending: false }).limit(50),
       supabase.from("user_roles").select("user_id, role"),

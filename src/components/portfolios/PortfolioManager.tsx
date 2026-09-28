@@ -6,6 +6,7 @@ import { Loader2, FolderPlus, Folder, Trash2, Calendar, Pencil, RefreshCw } from
 import { usePortfolios, type Portfolio } from "@/hooks/usePortfolios";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import CreatePortfolioModal from "./CreatePortfolioModal";
 import EditPortfolioModal from "./EditPortfolioModal";
 import PortfolioDetail from "./PortfolioDetail";
@@ -27,13 +28,11 @@ export default function PortfolioManager() {
   const { toast } = useToast();
 
   const loadSellers = useCallback(() => {
-    supabase
-      .from("sellers")
-      .select("id, nickname, cust_id")
-      .order("nickname")
-      .then(({ data }) => {
-        if (data) setSellers(data.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.cust_id })));
-      });
+    fetchAllRows<{ id: string; nickname: string; cust_id: string }>((from, to) =>
+      supabase.from("sellers").select("id, nickname, cust_id").order("nickname").order("id").range(from, to)
+    ).then(({ data }) => {
+      if (data) setSellers(data.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.cust_id })));
+    });
   }, []);
 
   useEffect(() => { loadSellers(); }, [loadSellers]);
