@@ -50,26 +50,16 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-  // consumo atômico do state
-  const { data: st } = await admin
+  // Valida primeiro, mas só consome depois que o Mercado Livre troca o code.
+  // Assim, uma indisponibilidade externa não inutiliza o state antes da hora.
+  const { data: stateInicial } = await admin
     .from("ml_oauth_states")
-    .update({ consumed_at: new Date().toISOString() })
+    .select("consumed_at, expires_at")
     .eq("state", state)
-    .is("consumed_at", null)
-    .gt("expires_at", new Date().toISOString())
-    .select("tenant_id, usuario_id, seller_id")
     .maybeSingle();
-  if (!st) {
-    // Diferencia desconhecido / já usado / expirado (sem expor o valor do state).
-    const { data: reg } = await admin
-      .from("ml_oauth_states")
-      .select("consumed_at, expires_at")
-      .eq("state", state)
-      .maybeSingle();
-    if (!reg) return volta("erro", "state_desconhecido");
-    if (reg.consumed_at) return volta("erro", "state_ja_usado");
-    return volta("erro", "state_expirado");
-  }
+  if (!stateInicial) return volta("erro", "state_desconhecido");
+  if (stateInicial.consumed_at) return volta("erro", "state_ja_usado");
+  if (new Date(stateInicial.expires_at).getTime() <= Date.now()) return volta("erro", "state_expirado");
 
 
   try {
@@ -90,6 +80,17 @@ Deno.serve(async (req) => {
       console.log("token exchange falhou:", res.status, String(tok?.error ?? "").slice(0, 40));
       return volta("erro", `token_${res.status}`);
     }
+
+    // Consumo atômico depois da troca bem-sucedida; impede processamento duplo.
+    const { data: st } = await admin
+      .from("ml_oauth_states")
+      .update({ consumed_at: new Date().toISOString() })
+      .eq("state", state)
+      .is("consumed_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .select("tenant_id, usuario_id, seller_id")
+      .maybeSingle();
+    if (!st) return volta("erro", "state_ja_usado");
 
 
     const me = await fetchMercadoLivre(ML_ME_URL, {
