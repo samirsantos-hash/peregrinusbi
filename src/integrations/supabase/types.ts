@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      alerta_inatividade_ciente: {
+        Row: {
+          ciente_em: string
+          destinatario_id: string
+          id: string
+          ultimo_acesso: string | null
+          usuario_inativo_id: string
+        }
+        Insert: {
+          ciente_em?: string
+          destinatario_id: string
+          id?: string
+          ultimo_acesso?: string | null
+          usuario_inativo_id: string
+        }
+        Update: {
+          ciente_em?: string
+          destinatario_id?: string
+          id?: string
+          ultimo_acesso?: string | null
+          usuario_inativo_id?: string
+        }
+        Relationships: []
+      }
+      alerta_inatividade_destinatarios: {
+        Row: {
+          email_prefixo: string
+        }
+        Insert: {
+          email_prefixo: string
+        }
+        Update: {
+          email_prefixo?: string
+        }
+        Relationships: []
+      }
       benchmark_uplift_full: {
         Row: {
           base_amostra: string
@@ -3165,6 +3201,15 @@ export type Database = {
       }
     }
     Functions: {
+      alertas_inatividade_pendentes: {
+        Args: never
+        Returns: {
+          dias: number
+          email: string
+          ultimo_acesso: string
+          user_id: string
+        }[]
+      }
       get_allowed_cust_ids: { Args: never; Returns: string[] }
       get_data_coverage: {
         Args: never
