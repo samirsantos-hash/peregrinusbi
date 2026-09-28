@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "../_shared/env.ts";
+import { fetchAllSellers } from "../_shared/sellers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -83,10 +84,7 @@ Deno.serve(async (req) => {
     }
 
     // Get seller IDs from DB up front
-    const { data: sellerRows, error: sellerErr } = await supabase
-      .from("sellers")
-      .select("id, cust_id");
-    if (sellerErr) throw new Error(`Seller fetch error: ${sellerErr.message}`);
+    const sellerRows = await fetchAllSellers(supabase);
 
     const sellerIdMap = new Map<string, string>();
     for (const s of sellerRows || []) {
