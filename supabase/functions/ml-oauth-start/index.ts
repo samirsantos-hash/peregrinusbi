@@ -95,6 +95,19 @@ Deno.serve(async (req) => {
   }
   if (!tenantId) return json({ error: "tenant não encontrado" }, 404);
 
+  // Gera convite Peregrinus para enviar ao lojista (válido 7 dias, uso único).
+  if (corpo.criar_convite) {
+    const rotulo = corpo.rotulo == null ? null : String(corpo.rotulo).trim().slice(0, 80) || null;
+    const token = gerarState();
+    const { data: conv, error } = await admin
+      .from("ml_convites")
+      .insert({ token, tenant_id: tenantId, criado_por: userId, rotulo })
+      .select("token, expires_at")
+      .single();
+    if (error || !conv) return json({ error: "falha ao criar o convite" }, 500);
+    return json({ token: conv.token, expira_em: conv.expires_at });
+  }
+
   const sellerBruto = corpo.seller_id == null ? null : String(corpo.seller_id);
   const seller_id = sellerBruto && /^[0-9a-f-]{36}$/i.test(sellerBruto) ? sellerBruto : null;
 
@@ -107,11 +120,5 @@ Deno.serve(async (req) => {
   });
   if (errState) return json({ error: "falha ao registrar o pedido de autorização" }, 500);
 
-  const url = new URL(AUTH_URL);
-  url.searchParams.set("response_type", "code");
-  url.searchParams.set("client_id", CLIENT_ID);
-  url.searchParams.set("redirect_uri", REDIRECT_URI);
-  url.searchParams.set("state", state);
-
-  return json({ url: url.toString(), expira_em_min: 10 });
+  return json({ url: montarUrl(state), expira_em_min: 10 });
 });

@@ -29,8 +29,11 @@ Deno.serve(async (req) => {
     Deno.env.get("ML_REDIRECT_URI") ?? `${SUPABASE_URL}/functions/v1/ml-oauth-callback`;
   const APP_URL = (requireEnv("APP_URL")).replace(/\/+$/, "");
 
+  let conviteToken: string | null = null;
   const volta = (status: "ok" | "erro", msg?: string) => {
-    const destino = new URL(`${APP_URL || SUPABASE_URL}/integracoes`);
+    // Lojista convidado não tem login: volta para a página pública da marca.
+    const caminho = conviteToken ? `/conectar/${conviteToken}` : "/integracoes";
+    const destino = new URL(`${APP_URL || SUPABASE_URL}${caminho}`);
     destino.searchParams.set("status", status);
     if (msg) destino.searchParams.set("msg", msg);
     return new Response(null, { status: 302, headers: { Location: destino.toString() } });
@@ -40,23 +43,25 @@ Deno.serve(async (req) => {
   // Só os NOMES dos parâmetros — `code` é credencial e nunca pode ser logado.
   console.log("callback params:", [...url.searchParams.keys()]);
 
-  const erroML = url.searchParams.get("error");
-  if (erroML) return volta("erro", `erro_ml_${erroML.replace(/[^a-z0-9_-]/gi, "")}`);
-
+  const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
-  if (!code) return volta("erro", "sem_code");
-  if (!state) return volta("erro", "sem_state");
-
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
   // Valida primeiro, mas só consome depois que o Mercado Livre troca o code.
   // Assim, uma indisponibilidade externa não inutiliza o state antes da hora.
-  const { data: stateInicial } = await admin
-    .from("ml_oauth_states")
-    .select("consumed_at, expires_at")
-    .eq("state", state)
-    .maybeSingle();
+  const { data: stateInicial } = state
+    ? await admin
+        .from("ml_oauth_states")
+        .select("consumed_at, expires_at, convite_token")
+        .eq("state", state)
+        .maybeSingle()
+    : { data: null };
+  conviteToken = stateInicial?.convite_token ?? null;
+
+  const erroML = url.searchParams.get("error");
+  if (erroML) return volta("erro", `erro_ml_${erroML.replace(/[^a-z0-9_-]/gi, "")}`);
+  if (!code) return volta("erro", "sem_code");
+  if (!state) return volta("erro", "sem_state");
   if (!stateInicial) return volta("erro", "state_desconhecido");
   if (stateInicial.consumed_at) return volta("erro", "state_ja_usado");
   if (new Date(stateInicial.expires_at).getTime() <= Date.now()) return volta("erro", "state_expirado");
