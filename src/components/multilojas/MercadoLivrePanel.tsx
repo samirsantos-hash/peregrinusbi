@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Convites sempre apontam para o site publicado: o endereço de pré-visualização exige login no Lovable.
+const LINK_PUBLICO = "https://ecomperegrinus.com.br";
+
 interface ContaML {
   account_id: string;
   ml_user_id: number;
@@ -48,7 +51,7 @@ const MercadoLivrePanel = () => {
     setGerando(false);
     const token = (data as { token?: string } | null)?.token;
     if (error || !token) { toast.error("Não foi possível gerar o convite."); return; }
-    setConvite(`${window.location.origin}/conectar/${token}`);
+    setConvite(`${LINK_PUBLICO}/conectar/${token}`);
   };
 
   const textoWhats = (link: string) =>
