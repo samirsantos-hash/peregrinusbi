@@ -11,6 +11,14 @@ import { requireEnv } from "../_shared/env.ts";
 // ATENÇÃO: autorização é "mercadolivre.com.br"; token é "mercadolibre.com".
 const ML_TOKEN_URL = "https://api.mercadolibre.com/oauth/token";
 const ML_ME_URL = "https://api.mercadolibre.com/users/me";
+const ML_REQUEST_TIMEOUT_MS = 10_000;
+
+declare const EdgeRuntime: {
+  waitUntil(promise: Promise<unknown>): void;
+};
+
+const fetchMercadoLivre = (url: string, init: RequestInit) =>
+  fetch(url, { ...init, signal: AbortSignal.timeout(ML_REQUEST_TIMEOUT_MS) });
 
 Deno.serve(async (req) => {
   const SUPABASE_URL = requireEnv("SUPABASE_URL");
@@ -65,7 +73,7 @@ Deno.serve(async (req) => {
 
 
   try {
-    const res = await fetch(ML_TOKEN_URL, {
+    const res = await fetchMercadoLivre(ML_TOKEN_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
       body: new URLSearchParams({
@@ -84,7 +92,7 @@ Deno.serve(async (req) => {
     }
 
 
-    const me = await fetch(ML_ME_URL, {
+    const me = await fetchMercadoLivre(ML_ME_URL, {
       headers: { Authorization: `Bearer ${tok.access_token}`, Accept: "application/json" },
     });
     const perfil = me.ok ? await me.json() : {};
@@ -117,10 +125,21 @@ Deno.serve(async (req) => {
     });
     if (errTok) return volta("erro", "falha ao gravar a autorizacao");
 
-    await admin.rpc("ml_agendar_backfill", { p_account_id: conta.id, p_meses: 12 });
+    // O histórico não faz parte da autorização: agenda em segundo plano para
+    // que o navegador receba o redirect antes do limite do gateway.
+    EdgeRuntime.waitUntil(
+      admin
+        .rpc("ml_agendar_backfill", { p_account_id: conta.id, p_meses: 12 })
+        .then(({ error }) => {
+          if (error) console.error("falha ao agendar backfill:", error.message);
+        }),
+    );
 
     return volta("ok");
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      return volta("erro", "mercado livre demorou para responder");
+    }
     return volta("erro", "erro inesperado ao conectar");
   }
 });
