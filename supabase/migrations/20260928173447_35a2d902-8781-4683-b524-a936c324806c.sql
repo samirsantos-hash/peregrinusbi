@@ -1,0 +1,2 @@
+REVOKE EXECUTE ON FUNCTION public.alertas_inatividade_pendentes() FROM PUBLIC, anon;
+CREATE POLICY "no client access" ON public.alerta_inatividade_destinatarios FOR SELECT TO authenticated USING (false);
