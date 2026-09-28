@@ -141,6 +141,14 @@ Deno.serve(async (req) => {
         }),
     );
 
+    if (conviteToken) {
+      await admin
+        .from("ml_convites")
+        .update({ usado_em: new Date().toISOString(), ml_user_id: mlUserId })
+        .eq("token", conviteToken)
+        .is("usado_em", null);
+    }
+
     return volta("ok");
   } catch (error) {
     if (error instanceof DOMException && error.name === "TimeoutError") {
