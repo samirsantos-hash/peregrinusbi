@@ -18,6 +18,8 @@ import DataVerifierPanel from "@/components/dashboard/DataVerifierPanel";
 import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import PortfolioManager from "@/components/portfolios/PortfolioManager";
 import TokensDeAcessoTab from "@/components/admin/TokensDeAcessoTab";
+import MercadoLivrePanel from "@/components/multilojas/MercadoLivrePanel";
+import { Link2 } from "lucide-react";
 import { format } from "date-fns";
 import { cn, getEdgeFunctionErrorMessage } from "@/lib/utils";
 
@@ -297,6 +299,12 @@ const Admin = () => {
                 Tokens de Acesso
               </TabsTrigger>
             )}
+            {isAdmin && (
+              <TabsTrigger value="integracoes" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+                <Link2 className="w-4 h-4" />
+                Integrações
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="users" className="mt-5 space-y-6">
@@ -553,6 +561,29 @@ const Admin = () => {
           {isAdmin && (
             <TabsContent value="tokens" className="mt-5">
               <TokensDeAcessoTab />
+            </TabsContent>
+          )}
+
+          {isAdmin && (
+            <TabsContent value="integracoes" className="mt-5 space-y-4">
+              <Card className="bg-card/60 border-border/50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">Como convidar uma loja (Integração Peregrinus)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ol className="list-decimal pl-5 space-y-1.5 text-xs text-muted-foreground">
+                    <li>No quadro <b>Convite Peregrinus para o lojista</b>, escreva o nome da loja.</li>
+                    <li>Clique em <b>Gerar convite</b> e depois em <b>Copiar</b> ou <b>Enviar por WhatsApp</b>.</li>
+                    <li>O lojista abre o link, vê a página da Peregrinus e clica em <b>Autorizar conexão Peregrinus</b>.</li>
+                    <li>Ele entra no Mercado Livre com a <b>conta principal da loja</b> (colaborador não consegue autorizar) e clica em <b>Permitir</b>.</li>
+                    <li>A loja aparece aqui como <b>Conectada</b>, e o histórico de 12 meses é importado em segundo plano.</li>
+                  </ol>
+                  <p className="mt-3 text-[11px] text-muted-foreground">
+                    Cada convite vale 7 dias e funciona uma vez só. Se expirar, gere outro. Para conectar você mesmo, use o botão <b>Conectar conta Mercado Livre</b>.
+                  </p>
+                </CardContent>
+              </Card>
+              <MercadoLivrePanel />
             </TabsContent>
           )}
         </Tabs>
