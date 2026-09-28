@@ -28,6 +28,50 @@ Deno.serve(async (req) => {
   const REDIRECT_URI =
     Deno.env.get("ML_REDIRECT_URI") ?? `${SUPABASE_URL}/functions/v1/ml-oauth-callback`;
 
+  let corpo: Record<string, unknown> = {};
+  try {
+    corpo = (await req.json()) as Record<string, unknown>;
+  } catch {
+    corpo = {};
+  }
+
+  const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+  const montarUrl = (state: string) => {
+    const url = new URL(AUTH_URL);
+    url.searchParams.set("response_type", "code");
+    url.searchParams.set("client_id", CLIENT_ID);
+    url.searchParams.set("redirect_uri", REDIRECT_URI);
+    url.searchParams.set("state", state);
+    return url.toString();
+  };
+
+  // Fluxo público por convite: o lojista não tem login no painel.
+  // O token do convite é a credencial; uso único e com validade.
+  if (corpo.convite != null) {
+    const token = String(corpo.convite);
+    if (!/^[0-9a-f]{40,128}$/i.test(token)) return json({ error: "convite inválido" }, 400);
+    const { data: conv } = await admin
+      .from("ml_convites")
+      .select("token, tenant_id, criado_por, rotulo, expires_at, usado_em")
+      .eq("token", token)
+      .maybeSingle();
+    if (!conv) return json({ error: "convite não encontrado" }, 404);
+    if (conv.usado_em) return json({ error: "este convite já foi usado", usado: true }, 410);
+    if (new Date(conv.expires_at).getTime() <= Date.now()) return json({ error: "convite expirado" }, 410);
+    if (corpo.apenas_consultar) return json({ rotulo: conv.rotulo, expira_em: conv.expires_at });
+
+    const state = gerarState();
+    const { error } = await admin.from("ml_oauth_states").insert({
+      state,
+      tenant_id: conv.tenant_id,
+      usuario_id: conv.criado_por,
+      convite_token: conv.token,
+    });
+    if (error) return json({ error: "falha ao registrar o pedido de autorização" }, 500);
+    return json({ url: montarUrl(state) });
+  }
+
   const authHeader = req.headers.get("Authorization") ?? "";
   if (!authHeader.startsWith("Bearer ")) return json({ error: "Unauthorized" }, 401);
 
@@ -36,16 +80,8 @@ Deno.serve(async (req) => {
   if (errClaims || !claims?.claims?.sub) return json({ error: "Unauthorized" }, 401);
   const userId = String(claims.claims.sub);
 
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
   const { data: ehSuper } = await admin.rpc("has_role", { _user_id: userId, _role: "super_admin" });
   if (!ehSuper) return json({ error: "apenas super_admin pode conectar contas" }, 403);
-
-  let corpo: Record<string, unknown> = {};
-  try {
-    corpo = (await req.json()) as Record<string, unknown>;
-  } catch {
-    corpo = {};
-  }
 
   // Nunca confie no body: o tenant é resolvido/validado no servidor.
   const pedido = corpo.tenant_id == null ? null : String(corpo.tenant_id);
@@ -59,6 +95,19 @@ Deno.serve(async (req) => {
   }
   if (!tenantId) return json({ error: "tenant não encontrado" }, 404);
 
+  // Gera convite Peregrinus para enviar ao lojista (válido 7 dias, uso único).
+  if (corpo.criar_convite) {
+    const rotulo = corpo.rotulo == null ? null : String(corpo.rotulo).trim().slice(0, 80) || null;
+    const token = gerarState();
+    const { data: conv, error } = await admin
+      .from("ml_convites")
+      .insert({ token, tenant_id: tenantId, criado_por: userId, rotulo })
+      .select("token, expires_at")
+      .single();
+    if (error || !conv) return json({ error: "falha ao criar o convite" }, 500);
+    return json({ token: conv.token, expira_em: conv.expires_at });
+  }
+
   const sellerBruto = corpo.seller_id == null ? null : String(corpo.seller_id);
   const seller_id = sellerBruto && /^[0-9a-f-]{36}$/i.test(sellerBruto) ? sellerBruto : null;
 
@@ -71,11 +120,5 @@ Deno.serve(async (req) => {
   });
   if (errState) return json({ error: "falha ao registrar o pedido de autorização" }, 500);
 
-  const url = new URL(AUTH_URL);
-  url.searchParams.set("response_type", "code");
-  url.searchParams.set("client_id", CLIENT_ID);
-  url.searchParams.set("redirect_uri", REDIRECT_URI);
-  url.searchParams.set("state", state);
-
-  return json({ url: url.toString(), expira_em_min: 10 });
+  return json({ url: montarUrl(state), expira_em_min: 10 });
 });

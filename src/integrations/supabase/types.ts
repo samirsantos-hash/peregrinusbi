@@ -1525,9 +1525,51 @@ export type Database = {
           },
         ]
       }
+      ml_convites: {
+        Row: {
+          created_at: string
+          criado_por: string
+          expires_at: string
+          ml_user_id: number | null
+          rotulo: string | null
+          tenant_id: string
+          token: string
+          usado_em: string | null
+        }
+        Insert: {
+          created_at?: string
+          criado_por: string
+          expires_at?: string
+          ml_user_id?: number | null
+          rotulo?: string | null
+          tenant_id: string
+          token: string
+          usado_em?: string | null
+        }
+        Update: {
+          created_at?: string
+          criado_por?: string
+          expires_at?: string
+          ml_user_id?: number | null
+          rotulo?: string | null
+          tenant_id?: string
+          token?: string
+          usado_em?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_convites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_oauth_states: {
         Row: {
           consumed_at: string | null
+          convite_token: string | null
           created_at: string
           expires_at: string
           seller_id: string | null
@@ -1537,6 +1579,7 @@ export type Database = {
         }
         Insert: {
           consumed_at?: string | null
+          convite_token?: string | null
           created_at?: string
           expires_at?: string
           seller_id?: string | null
@@ -1546,6 +1589,7 @@ export type Database = {
         }
         Update: {
           consumed_at?: string | null
+          convite_token?: string | null
           created_at?: string
           expires_at?: string
           seller_id?: string | null
@@ -1554,6 +1598,13 @@ export type Database = {
           usuario_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ml_oauth_states_convite_token_fkey"
+            columns: ["convite_token"]
+            isOneToOne: false
+            referencedRelation: "ml_convites"
+            referencedColumns: ["token"]
+          },
           {
             foreignKeyName: "ml_oauth_states_tenant_id_fkey"
             columns: ["tenant_id"]
