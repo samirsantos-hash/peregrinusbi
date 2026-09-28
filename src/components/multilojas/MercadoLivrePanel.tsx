@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link2, Loader2, RefreshCw, AlertTriangle } from "lucide-react";
+import { Link2, Loader2, RefreshCw, AlertTriangle, Send, Copy } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -35,6 +36,23 @@ const MercadoLivrePanel = () => {
   const [contas, setContas] = useState<ContaML[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [conectando, setConectando] = useState(false);
+  const [rotulo, setRotulo] = useState("");
+  const [convite, setConvite] = useState<string | null>(null);
+  const [gerando, setGerando] = useState(false);
+
+  const gerarConvite = async () => {
+    setGerando(true);
+    const { data, error } = await supabase.functions.invoke("ml-oauth-start", {
+      body: { criar_convite: true, rotulo: rotulo || null },
+    });
+    setGerando(false);
+    const token = (data as { token?: string } | null)?.token;
+    if (error || !token) { toast.error("Não foi possível gerar o convite."); return; }
+    setConvite(`${window.location.origin}/conectar/${token}`);
+  };
+
+  const textoWhats = (link: string) =>
+    encodeURIComponent(`Olá! Para ativar a Integração Peregrinus com sua loja do Mercado Livre, acesse o link abaixo e clique em "Autorizar conexão Peregrinus" (válido por 7 dias, uso único):\n${link}`);
 
   const carregar = useCallback(async () => {
     setCarregando(true);
@@ -135,6 +153,28 @@ const MercadoLivrePanel = () => {
         {conectando ? <Loader2 className="w-4 h-4 animate-spin" /> : <Link2 className="w-4 h-4" />}
         Conectar conta Mercado Livre
       </Button>
+      <div className="rounded-lg border border-border/40 p-3 space-y-2">
+        <p className="text-xs font-medium">Convite Peregrinus para o lojista</p>
+        <div className="flex gap-2">
+          <Input value={rotulo} onChange={(e) => setRotulo(e.target.value)} placeholder="Nome da loja (aparece no convite)" className="h-8 text-xs" />
+          <Button size="sm" variant="secondary" className="gap-1" onClick={gerarConvite} disabled={gerando}>
+            {gerando ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />} Gerar convite
+          </Button>
+        </div>
+        {convite && (
+          <div className="space-y-2">
+            <Input readOnly value={convite} className="h-8 text-[11px]" onFocus={(e) => e.target.select()} />
+            <div className="flex gap-2">
+              <Button size="sm" variant="ghost" className="gap-1 text-[11px]" onClick={() => { navigator.clipboard.writeText(convite); toast.success("Link copiado."); }}>
+                <Copy className="w-3 h-3" /> Copiar
+              </Button>
+              <Button size="sm" variant="ghost" className="text-[11px]" asChild>
+                <a href={`https://wa.me/?text=${textoWhats(convite)}`} target="_blank" rel="noreferrer">Enviar por WhatsApp</a>
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
       <p className="flex items-start gap-2 text-[11px] text-muted-foreground">
         <AlertTriangle className="w-3.5 h-3.5 mt-px shrink-0" />
         Faça login no Mercado Livre com a conta principal da loja. Contas de colaborador não conseguem autorizar.

@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import ConectarConvite from "./pages/ConectarConvite";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { SoundProvider } from "@/hooks/useSoundFeedback";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -85,6 +86,7 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/setup" element={<Setup />} />
+      <Route path="/conectar/:token" element={<ConectarConvite />} />
       <Route path="/change-password" element={user ? <ChangePassword /> : <Navigate to="/auth" replace />} />
       {/* Entrada única: "/" abre o painel direto, no consolidado da carteira do usuário. */}
       <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
