@@ -11,6 +11,14 @@ import { requireEnv } from "../_shared/env.ts";
 // ATENÇÃO: autorização é "mercadolivre.com.br"; token é "mercadolibre.com".
 const ML_TOKEN_URL = "https://api.mercadolibre.com/oauth/token";
 const ML_ME_URL = "https://api.mercadolibre.com/users/me";
+const ML_REQUEST_TIMEOUT_MS = 10_000;
+
+declare const EdgeRuntime: {
+  waitUntil(promise: Promise<unknown>): void;
+};
+
+const fetchMercadoLivre = (url: string, init: RequestInit) =>
+  fetch(url, { ...init, signal: AbortSignal.timeout(ML_REQUEST_TIMEOUT_MS) });
 
 Deno.serve(async (req) => {
   const SUPABASE_URL = requireEnv("SUPABASE_URL");
@@ -42,30 +50,20 @@ Deno.serve(async (req) => {
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-  // consumo atômico do state
-  const { data: st } = await admin
+  // Valida primeiro, mas só consome depois que o Mercado Livre troca o code.
+  // Assim, uma indisponibilidade externa não inutiliza o state antes da hora.
+  const { data: stateInicial } = await admin
     .from("ml_oauth_states")
-    .update({ consumed_at: new Date().toISOString() })
+    .select("consumed_at, expires_at")
     .eq("state", state)
-    .is("consumed_at", null)
-    .gt("expires_at", new Date().toISOString())
-    .select("tenant_id, usuario_id, seller_id")
     .maybeSingle();
-  if (!st) {
-    // Diferencia desconhecido / já usado / expirado (sem expor o valor do state).
-    const { data: reg } = await admin
-      .from("ml_oauth_states")
-      .select("consumed_at, expires_at")
-      .eq("state", state)
-      .maybeSingle();
-    if (!reg) return volta("erro", "state_desconhecido");
-    if (reg.consumed_at) return volta("erro", "state_ja_usado");
-    return volta("erro", "state_expirado");
-  }
+  if (!stateInicial) return volta("erro", "state_desconhecido");
+  if (stateInicial.consumed_at) return volta("erro", "state_ja_usado");
+  if (new Date(stateInicial.expires_at).getTime() <= Date.now()) return volta("erro", "state_expirado");
 
 
   try {
-    const res = await fetch(ML_TOKEN_URL, {
+    const res = await fetchMercadoLivre(ML_TOKEN_URL, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
       body: new URLSearchParams({
@@ -83,8 +81,19 @@ Deno.serve(async (req) => {
       return volta("erro", `token_${res.status}`);
     }
 
+    // Consumo atômico depois da troca bem-sucedida; impede processamento duplo.
+    const { data: st } = await admin
+      .from("ml_oauth_states")
+      .update({ consumed_at: new Date().toISOString() })
+      .eq("state", state)
+      .is("consumed_at", null)
+      .gt("expires_at", new Date().toISOString())
+      .select("tenant_id, usuario_id, seller_id")
+      .maybeSingle();
+    if (!st) return volta("erro", "state_ja_usado");
 
-    const me = await fetch(ML_ME_URL, {
+
+    const me = await fetchMercadoLivre(ML_ME_URL, {
       headers: { Authorization: `Bearer ${tok.access_token}`, Accept: "application/json" },
     });
     const perfil = me.ok ? await me.json() : {};
@@ -117,10 +126,21 @@ Deno.serve(async (req) => {
     });
     if (errTok) return volta("erro", "falha ao gravar a autorizacao");
 
-    await admin.rpc("ml_agendar_backfill", { p_account_id: conta.id, p_meses: 12 });
+    // O histórico não faz parte da autorização: agenda em segundo plano para
+    // que o navegador receba o redirect antes do limite do gateway.
+    EdgeRuntime.waitUntil(
+      admin
+        .rpc("ml_agendar_backfill", { p_account_id: conta.id, p_meses: 12 })
+        .then(({ error }) => {
+          if (error) console.error("falha ao agendar backfill:", error.message);
+        }),
+    );
 
     return volta("ok");
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      return volta("erro", "mercado livre demorou para responder");
+    }
     return volta("erro", "erro inesperado ao conectar");
   }
 });
