@@ -27,13 +27,11 @@ export default function PortfolioManager() {
   const { toast } = useToast();
 
   const loadSellers = useCallback(() => {
-    supabase
-      .from("sellers")
-      .select("id, nickname, cust_id")
-      .order("nickname")
-      .then(({ data }) => {
-        if (data) setSellers(data.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.cust_id })));
-      });
+    fetchAllRows<{ id: string; nickname: string; cust_id: string }>((from, to) =>
+      supabase.from("sellers").select("id, nickname, cust_id").order("nickname").order("id").range(from, to)
+    ).then(({ data }) => {
+      if (data) setSellers(data.map((s) => ({ id: s.id, nickname: s.nickname, custId: s.cust_id })));
+    });
   }, []);
 
   useEffect(() => { loadSellers(); }, [loadSellers]);

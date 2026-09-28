@@ -43,8 +43,10 @@ function useIrmaos(cfg: SegmentoBreadcrumb["irmaos"], aberto: boolean) {
         return (data || []).map((g) => ({ id: g.id, nome: g.nome, status: "sem_dado" as StatusOkr, destino: `/grupos/${g.id}` }));
       }
       if (cfg.tipo === "lojas") {
-        const q = supabase.from("sellers").select("id, nickname, grupo_id").order("nickname");
-        const { data } = cfg.grupoId ? await q.eq("grupo_id", cfg.grupoId) : await q;
+        const { data } = await fetchAllRows<{ id: string; nickname: string; grupo_id: string | null }>((from, to) => {
+          const q = supabase.from("sellers").select("id, nickname, grupo_id");
+          return (cfg.grupoId ? q.eq("grupo_id", cfg.grupoId) : q).order("nickname").order("id").range(from, to);
+        });
         const lojas = data || [];
         const { data: kpis } = await supabase
           .from("sellers_kpi")

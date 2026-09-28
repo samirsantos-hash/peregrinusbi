@@ -95,9 +95,13 @@ export function useClassificacaoLojas() {
     queryKey: ["classificacao-lojas"],
     queryFn: async (): Promise<LojaClassificada[]> => {
       // 1) sellers metadata
-      const { data: sellers, error: sErr } = await supabase
-        .from("sellers")
-        .select("id, cust_id, nickname, cluster_seller, sub_cluster_seller");
+      const { data: sellers, error: sErr } = await fetchAllRows<any>((from, to) =>
+        supabase
+          .from("sellers")
+          .select("id, cust_id, nickname, cluster_seller, sub_cluster_seller")
+          .order("id")
+          .range(from, to)
+      );
       if (sErr) throw sErr;
       const meta = new Map(
         (sellers ?? []).map((s: any) => {

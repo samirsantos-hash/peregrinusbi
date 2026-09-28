@@ -41,7 +41,9 @@ export default function SeletorVinculo({ perfil, nivel }: { perfil: Perfil; nive
       }
 
       const [{ data: lojas }, { data: kpis }] = await Promise.all([
-        supabase.from("sellers").select("id, nickname").order("nickname"),
+        fetchAllRows<{ id: string; nickname: string }>((from, to) =>
+          supabase.from("sellers").select("id, nickname").order("nickname").order("id").range(from, to)
+        ),
         supabase
           .from("sellers_kpi")
           .select("seller_id, data, tgmv_lc, rep_current_level")

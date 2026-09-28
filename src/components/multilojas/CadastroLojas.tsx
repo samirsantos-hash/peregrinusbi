@@ -47,7 +47,9 @@ const CadastroLojas = () => {
   /** Importa as contas de vendedor conhecidas do Peregrinus para o catálogo do módulo. */
   const sincronizarContas = async () => {
     setErro(null); setMsg(null);
-    const { data: sellers, error } = await supabase.from("sellers").select("cust_id, nickname, cluster_seller, sub_cluster_seller, cus_state");
+    const { data: sellers, error } = await fetchAllRows<any>((from, to) =>
+      supabase.from("sellers").select("cust_id, nickname, cluster_seller, sub_cluster_seller, cus_state").order("id").range(from, to)
+    );
     if (error) { setErro(error.message); return; }
     const linhas = (sellers || []).map((s) => ({
       cust_id: String(s.cust_id), nickname: s.nickname,

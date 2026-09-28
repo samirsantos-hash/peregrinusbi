@@ -59,7 +59,9 @@ export function useNivel0() {
     queryFn: async () => {
       const [{ data: grupos }, { data: lojas }] = await Promise.all([
         supabase.from("grupos").select("id, nome").eq("ativo", true).order("nome"),
-        supabase.from("sellers").select("id, nickname, grupo_id"),
+        fetchAllRows<{ id: string; nickname: string; grupo_id: string | null }>((from, to) =>
+          supabase.from("sellers").select("id, nickname, grupo_id").order("id").range(from, to)
+        ),
       ]);
       const todasLojas = lojas || [];
       const kpis = await carregarKpis(todasLojas.map((l) => l.id), ini, fim);

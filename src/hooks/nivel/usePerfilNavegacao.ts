@@ -31,7 +31,9 @@ export function usePerfilNavegacao() {
     queryFn: async () => {
       const [{ data: grupos }, { data: lojas }, { data: carteiras }] = await Promise.all([
         supabase.from("grupos").select("id, dono_user_id, ativo").eq("ativo", true),
-        supabase.from("sellers").select("id").order("nickname"),
+        fetchAllRows<{ id: string }>((from, to) =>
+          supabase.from("sellers").select("id").order("nickname").order("id").range(from, to)
+        ),
         supabase.from("portfolios").select("id").eq("assigned_to", user!.id),
       ]);
 
