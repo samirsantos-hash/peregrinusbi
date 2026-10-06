@@ -55,8 +55,8 @@ const QualityIndexDrawer = ({ aberto, onOpenChange, loja, score, origem, diverge
             </p>
             <p className="text-[11px] text-muted-foreground">
               {origem === "fonte"
-                ? "Valor lido de SCORE_FINAL_BBF na fonte."
-                : "Coluna SCORE_FINAL_BBF ausente na base servida ao painel — valor reconstruído pelos três blocos."}
+                ? "Valor oficial informado na base."
+                : "Valor calculado pelos três blocos de qualidade."}
             </p>
             {divergencia != null && divergencia > 0.01 && (
               <p className="flex items-center gap-1.5 text-[11px] text-warn">

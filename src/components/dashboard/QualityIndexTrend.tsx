@@ -111,7 +111,7 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
       </div>
 
       <p className="text-[11px] text-muted-foreground leading-snug">
-        Linha do SCORE_FINAL_BBF por período com dado medido. Serve de base comparativa: registre o valor de hoje
+        Linha do Quality Index por período com dado medido. Serve de base comparativa: registre o valor de hoje
         antes de aplicar as correções e acompanhe o deslocamento da curva depois.
       </p>
     </div>

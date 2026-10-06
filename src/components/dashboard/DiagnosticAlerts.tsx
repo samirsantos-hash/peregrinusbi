@@ -259,8 +259,8 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         meta: "meta: 80–100",
         estado: qualidade == null ? "sem_dado" : qualidade >= 80 ? "ok" : qualidade >= 60 ? "atencao" : "critico",
         derivado: qualidadeFallback
-          ? "SCORE_FINAL_BBF do último mês fechado — a base diária não traz esses scores."
-          : "SCORE_FINAL_BBF do período exibido.",
+          ? "Valor do último mês fechado — a base diária não traz esses scores."
+          : "Valor do período exibido.",
         contexto: contextoQualidade,
         onAbrir: qualidade != null ? () => setQualidadeDrawer(true) : undefined,
         ajuda: `${TEXTO_AJUDA_QUALITY} Referência: mediana da carteira ${
