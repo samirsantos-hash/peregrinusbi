@@ -1,3 +1,4 @@
+import CarteiraNaSecao from "@/components/carteira/deepdive/CarteiraNaSecao";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -505,6 +506,7 @@ const Index = () => {
                   transition={{ duration: 0.15 }}
                   className="mt-0">
                   <TabsContent value="executive" className="mt-0 space-y-6">
+                    {isConsolidado && <CarteiraNaSecao secao="executive" />}
                     <NovidadesPrompt />
                     <JuniorActionBanner abaId="executive" dados={dadosJunior} />
                     <Daily7DPanel
@@ -528,6 +530,7 @@ const Index = () => {
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
+                    {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     <SellerInfoTable
                       seller={sellers.find((s) => s.id === selectedSeller) as any}
@@ -545,10 +548,12 @@ const Index = () => {
                     />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0 space-y-5">
+                    {isConsolidado && <CarteiraNaSecao secao="competitiveness" />}
                     <JuniorActionBanner abaId="competitiveness" dados={dadosJunior} />
                     <CompetitivenessPanel kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />
                   </TabsContent>
                   <TabsContent value="publicidade" className="mt-0 space-y-5">
+                    {isConsolidado && <CarteiraNaSecao secao="publicidade" />}
                     <PublicidadePanel
                       sellerUuid={selectedSeller}
                       custId={sellerCustIdMap[selectedSeller]}
@@ -558,6 +563,7 @@ const Index = () => {
                     />
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0 space-y-5">
+                    {isConsolidado && <CarteiraNaSecao secao="logistics" />}
                     <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} eligibilityItems={eligibilityItems || []} />
                     <FullRecommendationPanel
@@ -611,9 +617,11 @@ const Index = () => {
                     <CriticalListingsTable listings={listingsQuality || []} />
                   </TabsContent>
                   <TabsContent value="clips" className="mt-0">
+                    {isConsolidado && <CarteiraNaSecao secao="clips" />}
                     <ClipsAudiencePanel kpis={displayKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} dataGranularity={granularity} />
                   </TabsContent>
                   <TabsContent value="opportunities" className="mt-0 space-y-5">
+                    {isConsolidado && <CarteiraNaSecao secao="opportunities" />}
                     <JuniorActionBanner abaId="opportunities" dados={dadosJunior} />
                     <CampanhasCofinanciadasPanel items={eligibilityItems || []} />
                     <OpportunitiesPanel items={eligibilityItems || []} />
@@ -629,6 +637,7 @@ const Index = () => {
                     <CorrelacaoPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="alertas-riscos" className="mt-0">
+                    {isConsolidado && <CarteiraNaSecao secao="alertas-riscos" />}
                     <SellerRiskPanel />
                   </TabsContent>
                 </motion.div>
