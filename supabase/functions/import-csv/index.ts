@@ -187,8 +187,8 @@ Deno.serve(async (req) => {
       // Clean custId (remove .0 or ,0 suffix from BR format)
       const cleanCustId = custId.replace(/[.,]0$/, "");
 
-      const fIn = iFechaIn >= 0 ? parseValidDate(cols[iFechaIn] || "") : null;
-      const fOut = iFechaOut >= 0 ? parseValidDate(cols[iFechaOut] || "") : null;
+      const fIn = iFechaIn >= 0 ? (parseValidDate(cols[iFechaIn] || "") || null) : null;
+      const fOut = iFechaOut >= 0 ? (parseValidDate(cols[iFechaOut] || "") || null) : null;
       const prevS = sellerMap.get(cleanCustId);
       if (prevS) {
         if (fIn && (!prevS.fechaIn || fIn > prevS.fechaIn)) prevS.fechaIn = fIn;
