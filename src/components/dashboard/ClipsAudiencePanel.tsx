@@ -718,7 +718,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           label="Faturamento Clips"
           value={fmtBRL(totals.tgmvClips)}
           sub={`${fmt(totals.siClips)} itens · ${fmt(totals.ordersClips)} pedidos via clip`}
-          tooltip="Receita atribuída a Clips no período. 'Itens' = (unidades vendidas) e 'pedidos' = — são bases diferentes e não devem ser confundidos com a quantidade de vídeos publicados."
+          tooltip="Receita atribuída a Clips no período. 'Itens' são unidades vendidas e 'pedidos' são pedidos — são bases diferentes e não devem ser confundidos com a quantidade de vídeos publicados."
           accentClass="text-warning"
         />
         <MetricCard
