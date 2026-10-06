@@ -3,7 +3,7 @@ import { LIMIARES } from "@/config/limiaresCarteira";
 import { alavancas, ticket, variacao, possivelMudancaMix, type Totais, type Janelas } from "@/lib/carteiraDeepDive/calculo";
 import { brl, int, pct, dataBR, Delta, HACHURA } from "./fmt";
 
-export interface ContagemCarteira { ativas: number; comVenda: number; ociosas: number; entrando: number | null; saindo: number | null }
+export interface ContagemCarteira { ativas: number | null; comVenda: number | null; ociosas: number | null; entrando: number | null; saindo: number | null }
 
 interface Props {
   janelas: Janelas;
@@ -56,7 +56,7 @@ export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtua
     { rotulo: "Faturamento", valor: brl(atual.gmv), delta: variacao(atual.gmv, anterior.gmv), ano: brl(anoAnterior.linhas ? anoAnterior.gmv : null) },
     { rotulo: "Itens vendidos", valor: int(atual.itens), delta: dItens, ano: int(anoAnterior.linhas ? anoAnterior.itens : null), nota: mix ? "Ticket subiu junto: possível mudança de mix" : undefined },
     { rotulo: "Ticket médio", valor: brl(tA), delta: dTicket, ano: brl(tY) },
-    { rotulo: "Pedidos", valor: int(pedidos), delta: null, ano: "—", nota: "Total do mês na planilha mensal; sem recorte por dia, então sem comparação" },
+    { rotulo: "Pedidos", valor: pedidos === null ? "Sem dado" : int(pedidos), delta: null, ano: "—", nota: pedidos === null ? "A planilha mensal não traz pedidos deste mês" : "Total do mês na planilha mensal; sem recorte por dia, então sem comparação" },
     { rotulo: "Visitas", valor: int(atual.visitas), delta: variacao(atual.visitas, anterior.visitas), ano: int(anoAnterior.linhas ? anoAnterior.visitas : null) },
   ];
   const carteira: Linha[] = [

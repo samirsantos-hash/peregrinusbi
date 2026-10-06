@@ -16,6 +16,8 @@ import { dataBR } from "@/components/carteira/deepdive/fmt";
 const MESES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
 function contar(mapa: Map<string, Totais>, ids: Set<string>): Omit<ContagemCarteira, "entrando" | "saindo"> {
+  // Janela sem nenhuma linha carregada = sem dado (diferente de zero lojas).
+  if (mapa.size === 0) return { ativas: null, comVenda: null, ociosas: null };
   let ativas = 0, comVenda = 0, ociosas = 0;
   for (const id of ids) {
     const t = mapa.get(id);
