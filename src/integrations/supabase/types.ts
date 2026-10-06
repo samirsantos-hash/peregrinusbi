@@ -2391,6 +2391,8 @@ export type Database = {
           created_at: string
           cus_state: string | null
           cust_id: string
+          fecha_in: string | null
+          fecha_out: string | null
           grupo_id: string | null
           id: string
           nickname: string
@@ -2402,6 +2404,8 @@ export type Database = {
           created_at?: string
           cus_state?: string | null
           cust_id: string
+          fecha_in?: string | null
+          fecha_out?: string | null
           grupo_id?: string | null
           id?: string
           nickname: string
@@ -2413,6 +2417,8 @@ export type Database = {
           created_at?: string
           cus_state?: string | null
           cust_id?: string
+          fecha_in?: string | null
+          fecha_out?: string | null
           grupo_id?: string | null
           id?: string
           nickname?: string
@@ -2473,6 +2479,7 @@ export type Database = {
           tgmv_lc_flex: number | null
           tgmv_lc_full: number | null
           tgmv_lc_pads: number | null
+          tgmv_orders: number | null
           tim_month_id: number | null
           tsi: number | null
           tsi_flex: number | null
@@ -2527,6 +2534,7 @@ export type Database = {
           tgmv_lc_flex?: number | null
           tgmv_lc_full?: number | null
           tgmv_lc_pads?: number | null
+          tgmv_orders?: number | null
           tim_month_id?: number | null
           tsi?: number | null
           tsi_flex?: number | null
@@ -2581,6 +2589,7 @@ export type Database = {
           tgmv_lc_flex?: number | null
           tgmv_lc_full?: number | null
           tgmv_lc_pads?: number | null
+          tgmv_orders?: number | null
           tim_month_id?: number | null
           tsi?: number | null
           tsi_flex?: number | null

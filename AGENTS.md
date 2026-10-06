@@ -4,3 +4,4 @@
 
 - Listas completas de lojas no frontend usam `fetchAllRows` (src/lib/fetchAllRows.ts) com ordem estável; o servidor corta em 1000 linhas e lojas além disso sumiam das buscas.
 - A revisão de planilhas com IA (Admin → Revisão IA) detecta inconsistências com regras determinísticas no navegador (src/lib/revisaoPlanilha.ts) e envia só os alertas à função `revisar-planilha` (só admin) para o modelo resumir; o modelo nunca inventa achados nem grava dados.
+- A visão Deep Dive da carteira (`/carteira/visao`) calcula tudo em funções puras em src/lib/carteiraDeepDive/calculo.ts sobre vendas diárias, comparando sempre a mesma janela de dias; os limites ficam só em src/config/limiaresCarteira.ts.
