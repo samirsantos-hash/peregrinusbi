@@ -169,9 +169,12 @@ Deno.serve(async (req) => {
     const iItemId = colIdx("ITE_ITEM_ID");
     // BPC
     const iBpc = colIdx("BPC");
+    const iOrders = colIdx("TGMV_ORDERS");
+    const iFechaIn = colIdx("fecha_in");
+    const iFechaOut = colIdx("fecha_out");
 
     // Process rows - collect unique sellers first
-    const sellerMap = new Map<string, { nickname: string; cluster: string; subCluster: string; state: string }>();
+    const sellerMap = new Map<string, { nickname: string; cluster: string; subCluster: string; state: string; fechaIn: string | null; fechaOut: string | null }>();
     const rows: string[][] = [];
 
     for (let i = 1; i < lines.length; i++) {
@@ -184,12 +187,21 @@ Deno.serve(async (req) => {
       // Clean custId (remove .0 or ,0 suffix from BR format)
       const cleanCustId = custId.replace(/[.,]0$/, "");
 
+      const fIn = iFechaIn >= 0 ? parseValidDate(cols[iFechaIn] || "") : null;
+      const fOut = iFechaOut >= 0 ? parseValidDate(cols[iFechaOut] || "") : null;
+      const prevS = sellerMap.get(cleanCustId);
+      if (prevS) {
+        if (fIn && (!prevS.fechaIn || fIn > prevS.fechaIn)) prevS.fechaIn = fIn;
+        if (fOut && (!prevS.fechaOut || fOut > prevS.fechaOut)) prevS.fechaOut = fOut;
+      }
       if (!sellerMap.has(cleanCustId)) {
         sellerMap.set(cleanCustId, {
           nickname: cols[iNickname]?.trim() || "",
           cluster: cols[iCluster]?.trim() || "",
           subCluster: cols[iSubCluster]?.trim() || "",
           state: cols[iState]?.trim() || "",
+          fechaIn: fIn,
+          fechaOut: fOut,
         });
       }
       rows.push(cols);
@@ -202,6 +214,8 @@ Deno.serve(async (req) => {
       cluster_seller: s.cluster || null,
       sub_cluster_seller: s.subCluster || null,
       cus_state: s.state || null,
+      ...(iFechaIn >= 0 ? { fecha_in: s.fechaIn } : {}),
+      ...(iFechaOut >= 0 ? { fecha_out: s.fechaOut } : {}),
     }));
 
     // Insert sellers in batches
@@ -283,6 +297,7 @@ Deno.serve(async (req) => {
         si_clips: iSiClips >= 0 ? safeClipsValue(cols[iSiClips] || "0") : 0,
         orders_clips: iOrdersClips >= 0 ? safeClipsValue(cols[iOrdersClips] || "0") : 0,
         tgmv_lc_clips: iTgmvClips >= 0 ? parseBrNumber(cols[iTgmvClips] || "0") : 0,
+        tgmv_orders: iOrders >= 0 && cols[iOrders]?.trim() ? parseBrNumber(cols[iOrders]) : null,
         bpc: iBpc >= 0 && cols[iBpc]?.trim() ? parseBrNumber(cols[iBpc]) : null,
       };
     }).filter(Boolean);
