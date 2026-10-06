@@ -24,7 +24,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import SecaoHeader from "@/components/dashboard/SecaoHeader";
 import AvisoSemOperacao from "@/components/dashboard/AvisoSemOperacao";
-import AvisoDadosDesatualizados from "@/components/dashboard/AvisoDadosDesatualizados";
 
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
 import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
@@ -478,7 +477,6 @@ const Index = () => {
                     loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
                     contexto={dateDebugLabel}
                   />
-                  <AvisoDadosDesatualizados />
                   <AvisoSemOperacao
                     kpis={displayKpis}
                     nickname={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
