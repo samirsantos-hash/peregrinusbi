@@ -10,6 +10,11 @@ interface Props {
   atual: Totais; anterior: Totais; anoAnterior: Totais;
   cAtual: ContagemCarteira; cAnterior: ContagemCarteira; cAno: ContagemCarteira;
   pedidos: number | null;
+  /** quais grupos mostrar; padrão: todos */
+  volume?: boolean;
+  carteira?: boolean;
+  /** chaves das alavancas a mostrar (full, flex, ads, promocao, competitividade, clips, afiliados) */
+  alavancasVisiveis?: string[];
 }
 
 interface Linha { rotulo: string; valor: string; delta: number | null; ano: string; nota?: string; julgamento?: { ok: boolean; texto: string } }
@@ -44,7 +49,7 @@ function Bloco({ titulo, linhas }: { titulo: string; linhas: Linha[] }) {
   );
 }
 
-export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtual, cAnterior, cAno, pedidos }: Props) {
+export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtual, cAnterior, cAno, pedidos, volume: mostraVolume = true, carteira: mostraCarteira = true, alavancasVisiveis }: Props) {
   const tA = ticket(atual), tP = ticket(anterior), tY = ticket(anoAnterior);
   const dItens = variacao(atual.itens, anterior.itens);
   const dTicket = variacao(tA, tP);
@@ -71,15 +76,16 @@ export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtua
     nota: `vs mês ant.: ${difPp(aA[k], aP[k]) === null ? "—" : `${(difPp(aA[k], aP[k])! * 100).toFixed(1).replace(".", ",")} p.p.`}${meta ? "" : " · sem meta definida"}`,
     julgamento: meta && aA[k] !== null ? { ok: aA[k]! >= meta.min, texto: meta.rotulo } : undefined,
   });
-  const alav: Linha[] = [
-    lev("% Full", "full", LIMIARES.full),
-    lev("% Flex", "flex"),
-    lev("% Ads", "ads", LIMIARES.ads),
-    lev("% Promoção", "promocao", LIMIARES.promocao),
-    lev("Competitividade de preço", "competitividade", LIMIARES.competitividade),
-    lev("% Clips", "clips"),
-    { rotulo: "% Afiliados", valor: "Sem dado", delta: null, ano: "—", nota: "Nenhum arquivo enviado traz afiliados" },
+  const todasAlav: [string, Linha][] = [
+    ["full", lev("% Full", "full", LIMIARES.full)],
+    ["flex", lev("% Flex", "flex")],
+    ["ads", lev("% Ads", "ads", LIMIARES.ads)],
+    ["promocao", lev("% Promoção", "promocao", LIMIARES.promocao)],
+    ["competitividade", lev("Competitividade de preço", "competitividade", LIMIARES.competitividade)],
+    ["clips", lev("% Clips", "clips")],
+    ["afiliados", { rotulo: "% Afiliados", valor: "Sem dado", delta: null, ano: "—", nota: "Nenhum arquivo enviado traz afiliados" }],
   ];
+  const alav = todasAlav.filter(([k]) => !alavancasVisiveis || alavancasVisiveis.includes(k)).map(([, l]) => l);
 
   return (
     <div className="space-y-4">
@@ -93,15 +99,15 @@ export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtua
           Comparação na mesma janela: {dataBR(janelas.atual.ini)}–{dataBR(janelas.atual.fim)} vs {dataBR(janelas.anterior.ini)}–{dataBR(janelas.anterior.fim)} ({janelas.anterior.dias} dias) · ano anterior {dataBR(janelas.anoAnterior.ini)}–{dataBR(janelas.anoAnterior.fim)}
         </span>
       </div>
-      {mix && (
+      {mostraVolume && mix && (
         <p className="flex items-start gap-2 text-xs rounded-md border border-[hsl(var(--attention-text))]/40 p-2 text-[hsl(var(--attention-text))]">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           Os itens vendidos caíram {pct(dItens)} e o ticket médio subiu {pct(dTicket)}. Isso pode ser mudança de mix, não queda de demanda.
         </p>
       )}
-      <Bloco titulo="Volume" linhas={volume} />
-      <Bloco titulo="Carteira" linhas={carteira} />
-      <Bloco titulo="Alavancas" linhas={alav} />
+      {mostraVolume && <Bloco titulo="Volume" linhas={volume} />}
+      {mostraCarteira && <Bloco titulo="Carteira" linhas={carteira} />}
+      {alav.length > 0 && <Bloco titulo="Alavancas" linhas={alav} />}
     </div>
   );
 }
