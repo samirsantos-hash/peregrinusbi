@@ -1,5 +1,7 @@
+import { Link } from "react-router-dom";
 import NivelLayout from "@/components/nivel/NivelLayout";
 import ListaFilhos from "@/components/nivel/ListaFilhos";
+import { Button } from "@/components/ui/button";
 import { useNivel0 } from "@/hooks/nivel/useNivelDados";
 
 const brl = (v: number | null) =>
@@ -12,6 +14,7 @@ export default function N0Carteira() {
     <NivelLayout
       nivel={0}
       breadcrumb={[{ nivel: 0, rotulo: "Carteira", destino: "/carteira" }]}
+      acoesTopo={<Button asChild size="sm" variant="outline"><Link to="/carteira/visao">Visão Deep Dive</Link></Button>}
       heroi={{ valor: String(data?.heroi ?? "—"), rotulo: "contas em risco hoje" }}
       kpis={[
         { rotulo: "Grupos", valor: String(data?.kpis.grupos ?? "—") },

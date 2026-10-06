@@ -25,6 +25,7 @@ import Carteira from "./pages/Carteira";
 import Multilojas from "./pages/Multilojas";
 import Integracoes from "./pages/Integracoes";
 import N0Carteira from "./pages/nivel/N0Carteira";
+import CarteiraDeepDive from "./pages/CarteiraDeepDive";
 import N1Grupo from "./pages/nivel/N1Grupo";
 import N2Loja from "./pages/nivel/N2Loja";
 import N3Programas from "./pages/nivel/N3Programas";
@@ -96,6 +97,7 @@ const AppRoutes = () => {
       <Route path="/gestao-carteira" element={<ProtectedRoute><GestaoCarteira /></ProtectedRoute>} />
       <Route path="/carteira-dados" element={<ProtectedRoute><Carteira /></ProtectedRoute>} />
       <Route path="/carteira" element={<ProtectedRoute><GuardaNivel nivel={0}><N0Carteira /></GuardaNivel></ProtectedRoute>} />
+      <Route path="/carteira/visao" element={<ProtectedRoute><GuardaNivel nivel={0}><CarteiraDeepDive /></GuardaNivel></ProtectedRoute>} />
       <Route path="/grupos/:grupoId" element={<ProtectedRoute><GuardaNivel nivel={1}><N1Grupo /></GuardaNivel></ProtectedRoute>} />
       <Route path="/lojas/:lojaId" element={<ProtectedRoute><GuardaNivel nivel={2}><N2Loja /></GuardaNivel></ProtectedRoute>} />
       <Route path="/lojas/:lojaId/programas/:programaId/categorias/:categoriaId" element={<ProtectedRoute><GuardaNivel nivel={4}><N4Categoria /></GuardaNivel></ProtectedRoute>} />
