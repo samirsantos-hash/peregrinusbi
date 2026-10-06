@@ -64,7 +64,7 @@ export default function PockRateBar({ rotulo, valor, limite, maximo = 0.2, fonte
       </div>
       <p className="text-[10px] text-muted-foreground">
         Limite em <span style={{ color: "hsl(var(--crit))" }}>vermelho</span>: {fmtPct(limite)}
-        {fonte ? ` · ${fonte}` : ""}
+        
       </p>
     </div>
   );

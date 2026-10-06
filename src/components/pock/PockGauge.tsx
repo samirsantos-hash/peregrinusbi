@@ -72,9 +72,7 @@ export default function PockGauge({ valor, rotulo, fonte }: Props) {
         <Icon className="w-3 h-3 shrink-0" />
         <span className={cn("min-w-0 break-words", valor === null && "text-muted-foreground")}>{meta.rotulo}</span>
       </span>
-      {fonte && (
-        <span className="mt-auto w-full break-all text-[9px] lg:text-[10px] leading-tight text-muted-foreground">{fonte}</span>
-      )}
+      {null}
     </div>
   );
 }

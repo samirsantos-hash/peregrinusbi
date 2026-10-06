@@ -162,7 +162,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
               </span>
             </div>
             <p className="text-[11px] text-muted-foreground mt-2">
-              GRUPO_ACAO não disponível na camada agregada — nenhum texto é gerado sem a fonte.
+              Recomendação ainda não disponível para esta loja.
             </p>
           </div>
         </div>

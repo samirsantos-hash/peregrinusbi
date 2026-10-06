@@ -38,7 +38,7 @@ export default function N1Grupo() {
           }}
         />
       }
-      confianca="Fonte: sellers_kpi (mensal) · gap = TGMV_LC − F_TGMV_LC"
+      confianca="Base mensal · gap = faturamento − meta do plano"
       carregando={isLoading}
       erro={error ? "Não foi possível carregar o grupo." : null}
     />

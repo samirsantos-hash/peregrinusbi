@@ -30,7 +30,7 @@ export default function N0Carteira() {
           }}
         />
       }
-      confianca="Fonte: sellers_kpi (mensal) · meta = F_TGMV_LC · grupos definidos em cadastro"
+      confianca="Base mensal · meta do plano · grupos definidos em cadastro"
       carregando={isLoading}
       erro={error ? "Não foi possível carregar a carteira." : null}
     />

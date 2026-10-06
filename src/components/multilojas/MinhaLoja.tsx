@@ -197,12 +197,12 @@ const MinhaLoja = ({ loja, lojasDisponiveis, onTrocarLoja, pedidos, ini, fim }: 
             <Kpi label="Itens vendidos (TSI)" value={fInt(feed?.tsi || 0)} indisponivel={feed ? undefined : semFeed} />
             <Kpi label="GMV" value={fBRL(feed?.gmv || 0)} indisponivel={feed ? undefined : semFeed} />
             <Kpi label="Meta CPP (F_TGMV)" value={fBRL(feed?.fTgmv || 0)} indisponivel={feed ? undefined : semFeed}
-              hint="F_TGMV_LC é a meta do plano CPP, não uma métrica de logística." />
+              hint="Meta do plano CPP, não uma métrica de logística." />
           </Bloco>
 
           <Bloco titulo="Logística" origem="Performance">
             <Kpi label="Share Full" value={fPct(shareFull)} indisponivel={feed ? undefined : semFeed}
-              hint="TGMV_LC_FULL ÷ TGMV_LC. O resíduo inclui Flex, Agência, Correios e Places, não separáveis nesta base." />
+              hint="Faturamento Full ÷ faturamento total. O resíduo inclui Flex, Agência, Correios e Places, não separáveis nesta base." />
             <Kpi label="GMV Full" value={fBRL(feed?.full || 0)} indisponivel={feed ? undefined : semFeed} />
             <Kpi label="GMV Flex" value={fBRL(feed?.flex || 0)} indisponivel={feed ? undefined : semFeed} />
             <Kpi label="Outros modais" value={fBRL(Math.max(0, (feed?.tgmv || 0) - (feed?.full || 0) - (feed?.flex || 0)))}
