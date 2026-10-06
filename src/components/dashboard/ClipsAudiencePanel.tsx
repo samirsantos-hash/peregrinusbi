@@ -710,7 +710,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               ? `${fmt(totals.clipsPubli)} clips publicados · ${videoPctSafe.toFixed(1)}% da audiência`
               : `Clips publicados: n/d · ${videoPctSafe.toFixed(1)}% da audiência`
           }
-          tooltip="Total de visitas geradas por vídeos curtos (Clips) do seller. A contagem de clips publicados só aparece quando a base traz a coluna SELLERS_CLIPS_PUBLI preenchida — quando exibe 'n/d', o dado não foi informado na carga e não deve ser lido como zero."
+          tooltip="Total de visitas geradas por vídeos curtos (Clips) do seller. A contagem de clips publicados só aparece quando a base traz a coluna preenchida — quando exibe 'n/d', o dado não foi informado na carga e não deve ser lido como zero."
           accentClass="text-emerald"
         />
         <MetricCard
@@ -718,7 +718,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           label="Faturamento Clips"
           value={fmtBRL(totals.tgmvClips)}
           sub={`${fmt(totals.siClips)} itens · ${fmt(totals.ordersClips)} pedidos via clip`}
-          tooltip="Receita atribuída a Clips no período (TGMV_LC_CLIPS). 'Itens' = SI_CLIPS (unidades vendidas) e 'pedidos' = ORDERS_CLIPS — são bases diferentes e não devem ser confundidos com a quantidade de vídeos publicados."
+          tooltip="Receita atribuída a Clips no período. 'Itens' = (unidades vendidas) e 'pedidos' = — são bases diferentes e não devem ser confundidos com a quantidade de vídeos publicados."
           accentClass="text-warning"
         />
         <MetricCard
