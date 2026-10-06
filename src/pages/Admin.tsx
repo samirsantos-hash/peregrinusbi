@@ -20,7 +20,8 @@ import UserWalletSheet from "@/components/dashboard/UserWalletSheet";
 import PortfolioManager from "@/components/portfolios/PortfolioManager";
 import TokensDeAcessoTab from "@/components/admin/TokensDeAcessoTab";
 import MercadoLivrePanel from "@/components/multilojas/MercadoLivrePanel";
-import { Link2 } from "lucide-react";
+import { Link2, Sparkles } from "lucide-react";
+import RevisaoPlanilhaIA from "@/components/admin/RevisaoPlanilhaIA";
 import { format } from "date-fns";
 import { cn, getEdgeFunctionErrorMessage } from "@/lib/utils";
 
@@ -303,6 +304,12 @@ const Admin = () => {
               </TabsTrigger>
             )}
             {isAdmin && (
+              <TabsTrigger value="revisao-ia" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+                <Sparkles className="w-4 h-4" />
+                Revisão IA
+              </TabsTrigger>
+            )}
+            {isAdmin && (
               <TabsTrigger value="integracoes" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Link2 className="w-4 h-4" />
                 Integrações
@@ -564,6 +571,12 @@ const Admin = () => {
           {isAdmin && (
             <TabsContent value="tokens" className="mt-5">
               <TokensDeAcessoTab />
+            </TabsContent>
+          )}
+
+          {isAdmin && (
+            <TabsContent value="revisao-ia" className="mt-5 space-y-4">
+              <RevisaoPlanilhaIA />
             </TabsContent>
           )}
 
