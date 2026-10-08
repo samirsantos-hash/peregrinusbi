@@ -70,6 +70,8 @@ interface DashboardHeaderProps {
   onPeriodChange?: (period: string) => void;
   /** Existe base diária para a seleção atual (falso no consolidado da carteira) */
   dailyDisponivel?: boolean;
+  /** Base para o calendário (mensal + diária); padrão = allKpis */
+  calendarKpis?: any[];
 }
 
 const DashboardHeader = ({
@@ -84,6 +86,7 @@ const DashboardHeader = ({
   isRefreshing,
   onPeriodChange,
   dailyDisponivel = true,
+  calendarKpis,
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
   const [calOpen, setCalOpen] = useState(false);
@@ -94,8 +97,9 @@ const DashboardHeader = ({
   const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
+  const baseCal = calendarKpis && calendarKpis.length > 0 ? calendarKpis : allKpis;
   const { anchorDate, minDate, availableDays } = useMemo(() => {
-    const dates = allKpis.map((k: any) => k.date).filter(Boolean).sort();
+    const dates = baseCal.map((k: any) => k.date).filter(Boolean).sort();
     if (dates.length === 0) {
       return { anchorDate: new Date(), minDate: new Date("2020-01-01"), availableDays: 0 };
     }
@@ -106,7 +110,7 @@ const DashboardHeader = ({
     const min = parseLocalDate(minStr);
     const days = differenceInDays(anchor, min);
     return { anchorDate: anchor, minDate: min, availableDays: days };
-  }, [allKpis]);
+  }, [baseCal]);
 
   const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
 
@@ -163,9 +167,9 @@ const DashboardHeader = ({
   /* ---------------------------------------------------------------- */
   const diasComDado = useMemo(() => {
     const set = new Set<string>();
-    for (const k of allKpis as any[]) if (k?.date) set.add(String(k.date).slice(0, 10));
+    for (const k of baseCal as any[]) if (k?.date) set.add(String(k.date).slice(0, 10));
     return set;
-  }, [allKpis]);
+  }, [baseCal]);
 
   /** Registros e dias com dado dentro do intervalo selecionado. */
   const auditoria = useMemo(() => {
