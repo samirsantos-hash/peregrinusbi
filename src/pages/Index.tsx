@@ -230,6 +230,8 @@ const Index = () => {
     return [];
   }, [hasRealData, dbDailyKpis, isConsolidado]);
 
+  const calendarKpis = useMemo(() => [...allKpisMonthly, ...allKpisDaily], [allKpisMonthly, allKpisDaily]);
+
   // Quarter periods and "all" use consolidated (monthly) data
   const isDailyPeriod = !activePeriod.startsWith("q") && activePeriod !== "all" && activePeriod !== "custom";
   const allKpis: any[] = useMemo(() => {
@@ -454,6 +456,7 @@ const Index = () => {
               dateRange={dateRange}
               onDateRangeChange={setDateRange}
               allKpis={allKpis}
+              calendarKpis={calendarKpis}
               filteredKpis={filteredKpis}
               onRefresh={handleRefresh}
               isRefreshing={isRefreshing}
