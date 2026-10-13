@@ -17,6 +17,92 @@
     --ec-laranja: 26 77% 44%;    /* #C4631A */
     --ec-amarelo: 54 100% 50%;   /* #FFE500 — só preenchimento */
 
+    --background: var(--ec-surface);
+    --foreground: var(--ec-ink);
+    --card: var(--ec-surface);
+    --card-foreground: var(--ec-ink);
+    --popover: var(--ec-surface);
+    --popover-foreground: var(--ec-ink);
+    --primary: var(--ec-verde);
+    --primary-foreground: 0 0% 100%;
+    --secondary: var(--ec-surface-2);
+    --secondary-foreground: var(--ec-ink);
+    --muted: var(--ec-surface-2);
+    --muted-foreground: var(--ec-text-sec);
+    --accent: var(--ec-surface-2);
+    --accent-foreground: var(--ec-ink);
+    --destructive: var(--ec-vermelho);
+    --destructive-foreground: 0 0% 100%;
+    --border: var(--ec-line);
+    --input: var(--ec-line);
+    --ring: var(--ec-verde);
+    --radius: 0.5rem;
+
+    /* Aliases legados → paleta Peregrinus (verde é o único destaque) */
+    --surface-alt: var(--ec-surface-2);
+    --text-muted: var(--ec-text-sec);
+    --brand-navy: var(--ec-ink);
+    --brand-blue: var(--ec-verde-txt);
+    --brand-accent: var(--ec-verde);
+    --brand-purple: var(--ec-ink);
+    --neon-blue: var(--ec-verde-txt);
+    --neon-blue-glow: var(--ec-verde);
+    --emerald: var(--ec-verde-txt);
+    --emerald-glow: var(--ec-verde);
+    --warning: var(--ec-ambar);
+    --glass: var(--ec-surface);
+    --glass-border: var(--ec-line);
+
+    /* Faixas de status: vermelho · laranja · âmbar · verde */
+    --crit: var(--ec-vermelho);
+    --warn: var(--ec-laranja);
+    --warn-soft: var(--ec-ambar);
+    --ok: var(--ec-verde-txt);
+    --attention: var(--ec-amarelo);
+    --attention-text: var(--ec-ambar);
+
+    /* Preço: caro · neutro · barato */
+    --price-hot: var(--ec-laranja);
+    --price-neutral: var(--ec-text-sec);
+    --price-cool: var(--ec-verde-txt);
+
+    /* Gráficos: uma série em verde, demais em cinza (cores próprias, nunca opacidade) */
+    --chart-1: var(--ec-verde);
+    --chart-2: 60 2% 55%;
+    --chart-3: 60 2% 72%;
+    --chart-4: var(--ec-ink);
+    --chart-5: var(--ec-laranja);
+    --series-1: var(--ec-verde);
+    --series-2: 60 2% 45%;
+    --series-3: 60 2% 68%;
+    --series-4: var(--ec-ink);
+    --series-5: var(--ec-laranja);
+    --grid: var(--ec-line);
+    --axis: var(--ec-text-sec);
+
+    --sidebar-background: var(--ec-surface-2);
+    --sidebar-foreground: var(--ec-ink);
+    --sidebar-primary: var(--ec-verde);
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: var(--ec-line);
+    --sidebar-accent-foreground: var(--ec-ink);
+    --sidebar-border: var(--ec-line);
+    --sidebar-ring: var(--ec-verde);
+  }
+
+  .dark {
+    --ec-ink: 0 0% 4%;           /* #0A0A0A */
+    --ec-text-sec: 60 2% 35%;    /* #5C5C58 */
+    --ec-line: 60 4% 89%;        /* #E4E4E2 */
+    --ec-surface: 0 0% 100%;     /* #FFFFFF */
+    --ec-surface-2: 60 9% 96%;   /* #F5F5F3 */
+    --ec-verde: 156 79% 37%;     /* #14A86C */
+    --ec-verde-txt: 156 79% 28%; /* #0F8052 */
+    --ec-vermelho: 6 86% 45%;    /* #D62410 */
+    --ec-ambar: 54 100% 30%;     /* #998900 */
+    --ec-laranja: 26 77% 44%;    /* #C4631A */
+    --ec-amarelo: 54 100% 50%;   /* #FFE500 — só preenchimento */
+
     --background: 222 84% 5%;
     --foreground: 210 40% 96%;
 
@@ -102,86 +188,7 @@
     --sidebar-ring: 210 53% 60%;
   }
 
-  .light {
-    --background: var(--ec-surface);
-    --foreground: var(--ec-ink);
-
-    --card: var(--ec-surface);
-    --card-foreground: var(--ec-ink);
-
-    --popover: var(--ec-surface);
-    --popover-foreground: var(--ec-ink);
-
-    --primary: var(--ec-verde);
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: var(--ec-surface-2);
-    --secondary-foreground: var(--ec-ink);
-
-    --muted: var(--ec-surface-2);
-    --muted-foreground: var(--ec-text-sec);
-
-    --surface-alt: 210 40% 94%;
-    --text-muted: 215 16% 40%;
-    --brand-navy: 233 67% 25%;
-    --brand-blue: 210 53% 45%;
-    --brand-accent: 167 60% 39%;
-
-    --accent: var(--ec-verde);
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: var(--ec-vermelho);
-    --destructive-foreground: 0 0% 100%;
-
-    --border: var(--ec-line);
-    --input: var(--ec-line);
-    --ring: var(--ec-verde);
-
-    --chart-1: var(--ec-verde);
-    --chart-2: var(--ec-text-sec);
-    --chart-3: var(--ec-line);
-    --chart-4: 32 95% 44%;
-    --chart-5: 0 72% 50%;
-
-    --neon-blue: 210 53% 45%;
-    --neon-blue-glow: 210 53% 55%;
-    --emerald: 167 60% 39%;
-    --emerald-glow: 167 60% 48%;
-    --warning: 32 95% 44%;
-
-    --crit: 0 72% 50%;
-    --warn: 32 95% 44%;
-    --warn-soft: 14 56% 59%;      /* #D4785A */
-    --ok: 160 84% 32%;
-
-    /* Divergente de preço — passo próprio no tema claro */
-    --price-hot: 14 68% 46%;
-    --price-neutral: 220 12% 46%;
-    --price-cool: 210 53% 45%;
-    /* Sistema de gráficos — rampa ordenada, grade e eixo */
-    --series-1: 220 88% 40%;
-    --series-2: 172 80% 26%;
-    --series-3: 30 92% 36%;
-    --series-4: 272 62% 46%;
-    --series-5: 340 72% 42%;
-    --grid: 215 32% 88%;
-    --axis: 215 22% 32%;
-    --attention: 40 87% 42%;       /* #C98A0E — manual, só preenchimento */
-    --attention-text: 40 87% 32%;  /* #99690B — 4,79:1, texto e linha */
-
-    --brand-purple: 233 67% 25%;
-    --glass: 0 0% 100%;
-    --glass-border: 215 20% 86%;
-
-    --sidebar-background: 210 40% 96%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 233 67% 25%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 92%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 215 20% 86%;
-    --sidebar-ring: 233 67% 25%;
-  }
+}
 }
 
 @layer base {
