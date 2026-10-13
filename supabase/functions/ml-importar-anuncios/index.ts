@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
     const db = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
     const token = await appToken();
-    const H = { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(15_000) };
+    const H = () => ({ headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(15_000) });
     const resultado: any[] = [];
 
     for (const cust of ids) {
@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
         const lote = lista.slice(i, i + 20).join(",");
         let r: Response | null = null;
         for (let t = 0; t < 3; t++) {
-          r = await fetch(`https://api.mercadolibre.com/items?ids=${lote}&attributes=id,title,price,original_price,available_quantity,sold_quantity,status,shipping,permalink,thumbnail,seller_id`, H);
+          r = await fetch(`https://api.mercadolibre.com/items?ids=${lote}&attributes=id,title,price,original_price,available_quantity,sold_quantity,status,shipping,permalink,thumbnail,seller_id`, H());
           if (r.status !== 429) break;
           await espera(500 * (t + 1));
         }
