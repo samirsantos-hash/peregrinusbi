@@ -1,3 +1,4 @@
+import { brlCurto } from "@/lib/format";
 import { useMemo, useState, useEffect } from "react";
 import {
   ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis,
@@ -29,10 +30,7 @@ const rotuloMes = (k: string) => {
   return `${MESES[Number(m) - 1]}/${a}`;
 };
 
-const fShort = (v: number) =>
-  Math.abs(v) >= 1_000_000 ? `R$ ${(v / 1_000_000).toFixed(1)}M`
-    : Math.abs(v) >= 1_000 ? `R$ ${(v / 1_000).toFixed(1)}k`
-      : `R$ ${v.toFixed(0)}`;
+const fShort = (v: number) => brlCurto(v);
 
 const fBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });

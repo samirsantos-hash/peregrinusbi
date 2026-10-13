@@ -1,3 +1,4 @@
+import { brlCurto, numCurto } from "@/lib/format";
 import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { toast } from "sonner";
 import { linhaCsvSegura } from "@/lib/csvSafe";
@@ -50,10 +51,7 @@ function fmtNum(v: number | null): string {
   return Math.round(v).toLocaleString("pt-BR");
 }
 function fmtCompact(v: number | null): string {
-  if (v === null || v === undefined) return "—";
-  if (Math.abs(v) >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(v) >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}K`;
-  return fmtCurrency(v);
+  return brlCurto(v);
 }
 
 function priorityBadge(score: number | null) {

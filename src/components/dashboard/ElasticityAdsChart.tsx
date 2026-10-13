@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -215,7 +216,7 @@ const ElasticityAdsChart = ({ kpis }: Props) => {
               name="Volume de Vendas"
               tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
               axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-              tickFormatter={(v) => v >= 1_000_000 ? `${(v / 1e6).toFixed(1)}M` : v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
+              tickFormatter={(v) => numCurto(v)}
               label={{ value: "Volume de Vendas (GMV) ↑", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
             />
             <ZAxis type="number" dataKey="salesVolume" range={[100, 600]} />

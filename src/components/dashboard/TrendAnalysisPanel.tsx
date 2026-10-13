@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -315,7 +316,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                tickFormatter={(v) => numCurto(v)}
                 width={55} />
               
                 <YAxis
@@ -324,7 +325,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 tick={{ fill: "hsl(40, 95%, 55%)", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                tickFormatter={(v) => numCurto(v)}
                 width={55} />
               
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(215, 25%, 14%, 0.3)" }} />

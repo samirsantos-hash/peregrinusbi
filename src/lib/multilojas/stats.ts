@@ -1,3 +1,4 @@
+import { brlCurto } from "@/lib/format";
 /* Estatística própria do módulo Multilojas — sem dependência nova. */
 
 export const sum = (a: number[]) => a.reduce((s, v) => s + v, 0);
@@ -194,12 +195,7 @@ export const fBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 export const fBRL2 = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
-export const fShort = (v: number) => {
-  const a = Math.abs(v);
-  if (a >= 1e6) return `R$ ${(v / 1e6).toFixed(2)}M`;
-  if (a >= 1e3) return `R$ ${(v / 1e3).toFixed(1)}k`;
-  return fBRL(v);
-};
+export const fShort = (v: number) => brlCurto(v);
 export const fInt = (v: number) => Math.round(v).toLocaleString("pt-BR");
 export const fPct = (v: number, d = 1) => `${(v * 100).toFixed(d)}%`;
 export const fDelta = (v: number, d = 1) => `${v >= 0 ? "+" : ""}${(v * 100).toFixed(d)}%`;

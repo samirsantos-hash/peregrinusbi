@@ -1,3 +1,4 @@
+import { brlCurto, numCurto } from "@/lib/format";
 import { useMemo, type ReactNode } from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,10 +53,8 @@ function fmtPct1(v: number | null): string {
   if (v === null) return "—";
   return `${v.toFixed(1)}%`;
 }
-function fmtCompact(v: number): string {
-  if (Math.abs(v) >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(v) >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}K`;
-  return fmtCurrency(v);
+function fmtCompact(v: number | null): string {
+  return brlCurto(v);
 }
 
 function DeltaBadge({ value }: { value: number | null }) {

@@ -1,3 +1,4 @@
+import { brlCurto, numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,10 +20,8 @@ interface Props {
 function fmtCurrency(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
-function fmtCompact(v: number): string {
-  if (Math.abs(v) >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(v) >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}K`;
-  return fmtCurrency(v);
+function fmtCompact(v: number | null): string {
+  return brlCurto(v);
 }
 function fmtPct(v: number | null): string {
   if (v === null) return "—";
@@ -171,7 +170,7 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
                   <XAxis dataKey="label" tick={{ fill: "hsl(var(--axis))", fontSize: 11 }} />
                   <YAxis
                     tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
-                    tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
+                    tickFormatter={(v: number) => numCurto(v)}
                   />
                   <Tooltip
                     contentStyle={{

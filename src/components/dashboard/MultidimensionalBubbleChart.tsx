@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis,
@@ -175,7 +176,7 @@ const FacetChart = ({
             type="number" dataKey="y" name={yVar.label}
             tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
             axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-            tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
+            tickFormatter={(v) => numCurto(v)}
             label={{ value: yVar.label, angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
           />
           <ZAxis type="number" dataKey="z" range={[50, 400]} name={sizeVar.label} />

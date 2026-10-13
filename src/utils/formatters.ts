@@ -1,7 +1,8 @@
 /**
  * Camada de compatibilidade: delega tudo para src/lib/format.ts (fonte única).
  */
-import { brl, brlCurto, numCurto, delta, pctFracao, nf2 } from "./formattersImpl";
+import { brl, brlCurto, numCurto, delta, pctFracao, num } from "@/lib/format";
+const nf2 = (v: number, casas: number) => num(v, casas);
 
 /** R$ 1.041,00 */
 export const fmtBRL = (value: number): string => brl(value, true);

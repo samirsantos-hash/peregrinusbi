@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -531,14 +532,14 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
               yAxisId="gmv"
               tick={{ fill: "hsl(199, 100%, 60%)", fontSize: 11 }}
               axisLine={false}
-              tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+              tickFormatter={(v) => numCurto(v)}
             />
             <YAxis
               yAxisId="ads"
               orientation="right"
               tick={{ fill: "hsl(160, 70%, 50%)", fontSize: 11 }}
               axisLine={false}
-              tickFormatter={(v) => `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}K`}
+              tickFormatter={(v) => numCurto(v)}
             />
             <Tooltip content={<CustomTooltip />} />
             <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
