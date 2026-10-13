@@ -62,7 +62,7 @@ function DeltaBadge({ value }: { value: number | null }) {
   const isPos = value >= 0;
   return (
     <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-semibold",
-      isPos ? "text-emerald-400" : "text-destructive")}>
+      isPos ? "text-ok" : "text-destructive")}>
       {isPos ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
       {isPos ? "+" : ""}{value.toFixed(1).replace(".", ",")}%
     </span>
@@ -166,8 +166,8 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
     { label: "Unidades vendidas", value: fmtNum(c.tsi), delta: deltas.tsi, icon: ShoppingCart, color: "text-chart-3" },
     { label: "Visitas", value: fmtNum(c.visitas), delta: deltas.visitas, icon: Eye, color: "text-chart-4" },
     { label: "Preço médio/unidade", value: c.precoMedio !== null ? `R$ ${c.precoMedio.toFixed(2).replace(".", ",")}` : "—", delta: deltas.precoMedio, icon: DollarSign, color: "text-secondary" },
-    { label: "Conversão", value: fmtPct1(c.txConversao), delta: deltas.txConversao, icon: TrendingUp, color: "text-emerald-400" },
-    { label: "ROAS", value: c.roas !== null ? `${c.roas.toFixed(1).replace(".", ",")}x` : "—", delta: deltas.roas, icon: ArrowUpDown, color: "text-amber-400" },
+    { label: "Conversão", value: fmtPct1(c.txConversao), delta: deltas.txConversao, icon: TrendingUp, color: "text-ok" },
+    { label: "ROAS", value: c.roas !== null ? `${c.roas.toFixed(1).replace(".", ",")}x` : "—", delta: deltas.roas, icon: ArrowUpDown, color: "text-ec-ambar" },
   ];
 
   const maxTsi = Math.max(...dowData.map(d => d.tsi), 1);

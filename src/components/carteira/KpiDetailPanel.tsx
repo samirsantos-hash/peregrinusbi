@@ -299,7 +299,7 @@ function TgmvTable({ sellers }: { sellers: EnrichedSeller[] }) {
           <span className="flex-1 truncate font-medium">{s.cus_nickname}</span>
           <span className="tabular-nums text-muted-foreground">{s.pctTotal.toFixed(1).replace(".", ",")}%</span>
           <span className="tabular-nums">{fmtCompact(s.tgmv_lc)}</span>
-          <button onClick={() => abrirSellerNoMeli(s.cust_id, s.cus_nickname)} className="text-primary hover:text-blue-400">
+          <button onClick={() => abrirSellerNoMeli(s.cust_id, s.cus_nickname)} className="text-primary hover:text-ec-verde-txt">
             <ExternalLink className="w-3 h-3" />
           </button>
         </div>
@@ -346,7 +346,7 @@ function AtivosTable({ sellers, months, cppData }: { sellers: any[]; months: num
   return (
     <div className="space-y-3">
       <div>
-        <p className="text-xs font-medium text-green-400 mb-1">Novos ({novos.length})</p>
+        <p className="text-xs font-medium text-ok mb-1">Novos ({novos.length})</p>
         {novos.slice(0, 5).map((s: any) => (
           <div key={s.cust_id} className="text-[11px] flex justify-between py-0.5">
             <span className="truncate">{s.cus_nickname}</span>
@@ -355,7 +355,7 @@ function AtivosTable({ sellers, months, cppData }: { sellers: any[]; months: num
         ))}
       </div>
       <div>
-        <p className="text-xs font-medium text-red-400 mb-1">Inativaram ({inativos.length})</p>
+        <p className="text-xs font-medium text-crit mb-1">Inativaram ({inativos.length})</p>
         {inativos.map((s) => (
           <div key={s.cus_cust_id_sel} className="text-[11px] flex items-center justify-between py-0.5">
             <span className="truncate">{s.cus_nickname}</span>
@@ -516,7 +516,7 @@ function QuedaTable({ sellers }: { sellers: any[] }) {
         <div key={s.cust_id} className="flex items-center gap-1 text-[11px] py-1 border-b border-border/30">
           <span className="w-5 text-muted-foreground">{i + 1}.</span>
           <span className="flex-1 truncate font-medium">{s.cus_nickname}</span>
-          <span className="tabular-nums text-red-400">-{fmtCompact(s.perda)}</span>
+          <span className="tabular-nums text-crit">-{fmtCompact(s.perda)}</span>
           <span className="tabular-nums text-muted-foreground w-12 text-right">{fmtPct(s.vs_pm_pct)}</span>
           <span className="tabular-nums text-muted-foreground w-8 text-right">{s.dias_expiracao}d</span>
           <button onClick={() => abrirSellerNoMeli(s.cust_id, s.cus_nickname)} className="text-primary"><ExternalLink className="w-3 h-3" /></button>
@@ -574,7 +574,7 @@ function CrescimentoTable({ sellers }: { sellers: any[] }) {
           <div key={s.cust_id} className="flex items-center gap-1 text-[11px] py-0.5">
             <span className="w-4 text-muted-foreground">{i + 1}.</span>
             <span className="flex-1 truncate">{s.cus_nickname}</span>
-            <Badge className="text-[9px] bg-yellow-600/20 text-yellow-400 border-0">+{pct.toFixed(0).replace(".", ",")}%</Badge>
+            <Badge className="text-[9px] bg-ec-amarelo/20 text-ec-ambar border-0">+{pct.toFixed(0).replace(".", ",")}%</Badge>
             <button onClick={() => abrirSellerNoMeli(s.cust_id, s.cus_nickname)} className="text-primary"><ExternalLink className="w-3 h-3" /></button>
           </div>
         );

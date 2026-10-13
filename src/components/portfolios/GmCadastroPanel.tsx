@@ -186,7 +186,7 @@ export default function GmCadastroPanel({ custIds, sellers = [] }: Props) {
                       variant="outline"
                       className={
                         r.status.toLowerCase() === "ativa"
-                          ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px]"
+                          ? "bg-ec-verde/15 text-ok border-ec-verde/30 text-[10px]"
                           : "bg-muted/30 text-muted-foreground border-border text-[10px]"
                       }
                     >
@@ -203,7 +203,7 @@ export default function GmCadastroPanel({ custIds, sellers = [] }: Props) {
                       variant="outline"
                       className={
                         r.divisao === "Norte"
-                          ? "bg-sky-500/15 text-sky-400 border-sky-500/30 text-[10px]"
+                          ? "bg-ec-verde/15 text-ec-verde-txt border-ec-verde/30 text-[10px]"
                           : "bg-primary/15 text-primary border-primary/30 text-[10px]"
                       }
                     >

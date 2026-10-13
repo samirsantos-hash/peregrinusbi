@@ -196,7 +196,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
                 </Badge>
                 <span className="text-xs font-mono">{campaign.efectRtaVertical.toFixed(0).replace(".", ",")}%</span>
                 {subAprov && (
-                  <Badge className="text-[10px] bg-amber-500/20 text-amber-300 border-amber-500/30 border">
+                  <Badge className="text-[10px] bg-ec-ambar/20 text-ec-ambar border-ec-ambar/30 border">
                     ⚡ Subaproveitamento
                   </Badge>
                 )}

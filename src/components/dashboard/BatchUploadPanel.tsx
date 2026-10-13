@@ -160,7 +160,7 @@ const SLOTS: SlotConfig[] = [
     title: "Campanhas (Vertical)",
     description: "Efetividade, conversão e vertical principal (melicampaigns_detail).",
     icon: Megaphone,
-    colorClass: "text-violet-400",
+    colorClass: "text-foreground",
     functionName: "import-meli-campaigns",
     sftpPattern: /campaign|melicampaign/i,
   },

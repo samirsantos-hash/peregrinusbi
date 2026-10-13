@@ -146,7 +146,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
             {fDelta(variacao)}
           </div>
           <div
-            className={`text-[9px] leading-tight mt-0.5 ${diagnostico.causa === "confirmada" ? "text-muted-foreground" : "text-amber-500"}`}
+            className={`text-[9px] leading-tight mt-0.5 ${diagnostico.causa === "confirmada" ? "text-muted-foreground" : "text-ec-ambar"}`}
           >
             {diagnostico.texto}
           </div>

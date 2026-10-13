@@ -192,7 +192,7 @@ const DIAG_ORDER: Record<Diagnostico, number> = {
 
 const GIRO_CONFIG: Record<StatusGiro, { emoji: string; label: string; cls: string; title: string }> = {
   parado: { emoji: "🔴", label: "Parado", cls: "bg-destructive/10 text-destructive", title: "Nenhum pedido esta semana" },
-  lento: { emoji: "🟠", label: "Lento", cls: "bg-orange-500/10 text-orange-500", title: "Mais de 60 dias de estoque" },
+  lento: { emoji: "🟠", label: "Lento", cls: "bg-ec-laranja/10 text-ec-laranja", title: "Mais de 60 dias de estoque" },
   normal: { emoji: "🟡", label: "Normal", cls: "bg-warning/10 text-warning", title: "15 a 60 dias de estoque" },
   girando: { emoji: "🟢", label: "Girando", cls: "bg-emerald/10 text-emerald", title: "Menos de 15 dias — monitorar reposição" },
 };
@@ -323,7 +323,7 @@ function ResumoOportunidades({ itens }: { itens: MLBPerformance[] }) {
 
   const cards = [
     { label: "Gap de qualidade", valor: qualidade, color: "text-destructive", desc: "score ou ficha a corrigir" },
-    { label: "Sem visibilidade", valor: visib, color: "text-orange-500", desc: "itens sem CDP e vendas baixas" },
+    { label: "Sem visibilidade", valor: visib, color: "text-ec-laranja", desc: "itens sem CDP e vendas baixas" },
     { label: "Estoque parado", valor: parado, color: "text-warning", desc: "itens com capital imobilizado" },
     { label: "Un. sem girar", valor: Math.round(unParadas), color: "text-muted-foreground", desc: "itens parados ou lentos" },
   ];

@@ -234,7 +234,7 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
         <div className="lg:col-span-1 space-y-4">
           <div className="space-y-3">
             <h3 className="text-sm font-bold flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <AlertTriangle className="w-4 h-4 text-ec-ambar" />
               Radar de Oportunidades
             </h3>
             <AlertMatrix sellers={filteredSellers} trends={trends} campaigns={campaigns} />

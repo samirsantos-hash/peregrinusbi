@@ -158,7 +158,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
       label: "Outros modais",
       value: `${shareAgenciaGmv.toFixed(1).replace(".", ",")}%`,
       icon: Mail,
-      color: "text-purple-400",
+      color: "text-foreground",
       desc: `GMV: ${fmtBRLCompact(totalTgmvAgencia)}`,
       tooltip: "Share de GMV residual (TGMV_LC - Full - Flex). Inclui Agência, Correios e Places, entre outros modais — não separáveis no CSV diário. Menor priorização no algoritmo MELI vs Full.",
       isEmpty: totalTgmvAgencia === 0,
@@ -376,7 +376,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             transition={{ delay: i * 0.1 }}
             className={`glass-card p-4 text-center ${item.isEmpty ? "opacity-40" : ""}`}
           >
-            <item.icon className={`w-6 h-6 mx-auto mb-2 ${item.color === "neon-text" ? "text-neon-blue" : item.color === "emerald-text" ? "text-emerald" : "text-purple-400"}`} />
+            <item.icon className={`w-6 h-6 mx-auto mb-2 ${item.color === "neon-text" ? "text-neon-blue" : item.color === "emerald-text" ? "text-emerald" : "text-foreground"}`} />
             <p className={`metric-value ${item.color}`}>{item.value}</p>
             <div className="flex items-center justify-center gap-1 mt-1">
               <p className="metric-label">{item.label}</p>

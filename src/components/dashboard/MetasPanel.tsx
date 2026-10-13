@@ -33,8 +33,8 @@ function corAtingimento(pct: number | null, inverso = false): string {
   if (pct == null) return "bg-muted/30 text-muted-foreground border-muted/40";
   const ok = inverso ? pct <= 100 : pct >= 100;
   const meio = inverso ? pct <= 130 : pct >= 80;
-  if (ok) return "bg-emerald-500/15 text-emerald-500 border-emerald-500/30";
-  if (meio) return "bg-amber-500/15 text-amber-500 border-amber-500/30";
+  if (ok) return "bg-ec-verde/15 text-ok border-ec-verde/30";
+  if (meio) return "bg-ec-ambar/15 text-ec-ambar border-ec-ambar/30";
   return "bg-destructive/15 text-destructive border-destructive/30";
 }
 

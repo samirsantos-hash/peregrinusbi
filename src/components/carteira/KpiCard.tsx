@@ -54,8 +54,8 @@ const KpiCard = ({ id, titulo, valor, delta, sparkline, severidade = "neutro", n
       {nota && <p className="mt-1 text-[10px] leading-tight text-muted-foreground">{nota}</p>}
       {delta && (
         <div className={`inline-flex items-center gap-0.5 mt-1 text-[10px] font-medium rounded-full px-1.5 py-0.5 ${
-          delta.direcao === "up" ? "bg-green-500/15 text-green-400" :
-          delta.direcao === "down" ? "bg-red-500/15 text-red-400" :
+          delta.direcao === "up" ? "bg-ec-verde/15 text-ok" :
+          delta.direcao === "down" ? "bg-ec-vermelho/15 text-crit" :
           "bg-muted text-muted-foreground"
         }`}>
           {delta.direcao === "up" ? <TrendingUp className="w-3 h-3" /> : delta.direcao === "down" ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}

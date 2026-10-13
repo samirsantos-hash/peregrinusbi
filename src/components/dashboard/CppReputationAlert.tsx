@@ -58,8 +58,8 @@ function rateSeverity(pct: number, cfg: RateConfig): "green" | "amber" | "red" {
 }
 
 const SEV_STYLES = {
-  green: { bg: "bg-emerald-500", text: "text-emerald-400", label: "OK" },
-  amber: { bg: "bg-amber-500", text: "text-amber-400", label: "Alerta" },
+  green: { bg: "bg-ec-verde", text: "text-ok", label: "OK" },
+  amber: { bg: "bg-ec-ambar", text: "text-ec-ambar", label: "Alerta" },
   red:   { bg: "bg-destructive", text: "text-destructive", label: "Crítico" },
 };
 
@@ -121,7 +121,7 @@ export default function CppReputationAlert({ data, selectedSeller }: Props) {
         {/* Level Distribution Summary */}
         <div className="glass-card p-4 space-y-3">
           <div className="flex items-center gap-2 mb-2">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <ShieldCheck className="w-4 h-4 text-ok" />
             <span className="text-xs font-semibold uppercase tracking-wider text-foreground">
               Distribuição de Reputação — {data.length} sellers
             </span>

@@ -53,7 +53,7 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
       {badge ? (
         <span
           className={cn(
-            "ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-crit text-white text-[10px] font-semibold tabular-nums inline-flex items-center justify-center",
+            "ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-crit text-primary-foreground text-[10px] font-semibold tabular-nums inline-flex items-center justify-center",
             recolhida && "absolute -top-0.5 right-1 ml-0",
           )}
         >

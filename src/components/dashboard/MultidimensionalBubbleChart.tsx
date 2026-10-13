@@ -80,7 +80,7 @@ const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel,
         {sizeLabel}: <span className="text-foreground font-mono">R$ {d.sizeVal?.toLocaleString("pt-BR")}</span>
       </p>
       <p className="text-muted-foreground mt-1">
-        Elasticidade: <span className={`font-mono font-medium ${d.elasticity < -1 ? "text-emerald-400" : d.elasticity < 0 ? "text-amber-400" : "text-destructive"}`}>
+        Elasticidade: <span className={`font-mono font-medium ${d.elasticity < -1 ? "text-ok" : d.elasticity < 0 ? "text-ec-ambar" : "text-destructive"}`}>
           {d.elasticity?.toFixed(2)}
         </span>
       </p>
@@ -89,7 +89,7 @@ const BubbleTooltip = ({ active, payload, xLabel, yLabel, colorLabel, sizeLabel,
           href={`https://lista.mercadolivre.com.br/_CustId_${custId}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 mt-1 text-primary hover:text-blue-400 hover:underline transition-colors text-[11px] font-medium"
+          className="inline-flex items-center gap-1 mt-1 text-primary hover:text-ec-verde-txt hover:underline transition-colors text-[11px] font-medium"
           onClick={(e) => e.stopPropagation()}
         >
           Ir para a Loja <ExternalLink className="w-3 h-3" />

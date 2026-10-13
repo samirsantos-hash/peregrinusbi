@@ -79,8 +79,8 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="glass-card p-4 border-l-4 border-l-emerald-500">
           <div className="flex items-center gap-2 mb-1">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <p className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">
+            <CheckCircle2 className="w-4 h-4 text-ok" />
+            <p className="text-[10px] font-semibold text-ok uppercase tracking-wider">
               Cofinanciadas com opt-in
             </p>
           </div>
@@ -94,8 +94,8 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
 
         <div className="glass-card p-4 border-l-4 border-l-amber-500">
           <div className="flex items-center gap-2 mb-1">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
-            <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider">
+            <AlertTriangle className="w-4 h-4 text-ec-ambar" />
+            <p className="text-[10px] font-semibold text-ec-ambar uppercase tracking-wider">
               Cofinanciadas SEM opt-in
             </p>
           </div>
@@ -109,8 +109,8 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
 
         <div className="glass-card p-4 border-l-4 border-l-sky-500">
           <div className="flex items-center gap-2 mb-1">
-            <RefreshCw className="w-4 h-4 text-sky-400" />
-            <p className="text-[10px] font-semibold text-sky-400 uppercase tracking-wider">
+            <RefreshCw className="w-4 h-4 text-ec-verde-txt" />
+            <p className="text-[10px] font-semibold text-ec-verde-txt uppercase tracking-wider">
               Pode trocar por campanha melhor
             </p>
           </div>
@@ -154,7 +154,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       {rotuloCampanha(tipo)}
                     </span>
                     {cofi && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 uppercase tracking-wider">
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-ec-verde/15 text-ec-verde-txt border border-ec-verde/30 uppercase tracking-wider">
                         ML cofinancia
                       </span>
                     )}
@@ -165,9 +165,9 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                   <div className="text-[11px] font-mono tabular-nums whitespace-nowrap">
                     {cofi ? (
                       <>
-                        <span className="text-red-400">Seller {stats.seller_medio.toFixed(1).replace(".", ",")}%</span>
+                        <span className="text-crit">Seller {stats.seller_medio.toFixed(1).replace(".", ",")}%</span>
                         <span className="text-muted-foreground"> + </span>
-                        <span className="text-cyan-300">ML {stats.ml_medio.toFixed(1).replace(".", ",")}%</span>
+                        <span className="text-ec-verde-txt">ML {stats.ml_medio.toFixed(1).replace(".", ",")}%</span>
                         <span className="text-muted-foreground"> = </span>
                         <span className="text-foreground font-semibold">
                           {(stats.seller_medio + stats.ml_medio).toFixed(1).replace(".", ",")}%
@@ -270,7 +270,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] text-muted-foreground">{item.vertical}</span>
                       {item.pode_melhorar && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 border border-sky-500/30">
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-ec-verde/15 text-ec-verde-txt border border-ec-verde/30">
                           🔄 campanha melhor disponível
                         </span>
                       )}
@@ -293,12 +293,12 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       />
                     ))}
                   </div>
-                  <div className="text-right font-mono tabular-nums text-red-400">
+                  <div className="text-right font-mono tabular-nums text-crit">
                     {item.discount_seller.toFixed(1).replace(".", ",")}%
                   </div>
                   <div className="text-right font-mono tabular-nums">
                     {item.discount_ml > 0 ? (
-                      <span className="text-cyan-300">+{item.discount_ml.toFixed(1).replace(".", ",")}%</span>
+                      <span className="text-ec-verde-txt">+{item.discount_ml.toFixed(1).replace(".", ",")}%</span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
@@ -308,18 +308,18 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       {item.discount_total.toFixed(1).replace(".", ",")}%
                     </div>
                     {item.discount_ml > 0 && (
-                      <div className="text-[9px] text-cyan-400">
+                      <div className="text-[9px] text-ec-verde-txt">
                         ML banca {item.pct_ml.toFixed(0).replace(".", ",")}%
                       </div>
                     )}
                   </div>
                   <div className="text-center">
                     {item.optin ? (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-ec-verde/15 text-ok border border-ec-verde/30">
                         ✓ Ativo
                       </span>
                     ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                      <span className="text-[10px] px-2 py-0.5 rounded bg-ec-ambar/15 text-ec-ambar border border-ec-ambar/30">
                         ⚠ Pendente
                       </span>
                     )}
@@ -333,7 +333,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
                         Composição do desconto
                       </p>
-                      <div className="flex h-3 rounded overflow-hidden bg-slate-800">
+                      <div className="flex h-3 rounded overflow-hidden bg-muted">
                         <div
                           style={{
                             width: `${
@@ -356,11 +356,11 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                         )}
                       </div>
                       <div className="flex gap-3 mt-1.5 text-[10px] font-mono tabular-nums">
-                        <span className="text-red-400">
+                        <span className="text-crit">
                           Seller: {item.discount_seller.toFixed(1).replace(".", ",")}%
                         </span>
                         {item.discount_ml > 0 && (
-                          <span className="text-cyan-300">
+                          <span className="text-ec-verde-txt">
                             ML: {item.discount_ml.toFixed(1).replace(".", ",")}%
                           </span>
                         )}
@@ -396,8 +396,8 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                     </div>
 
                     {item.pode_melhorar && (
-                      <div className="p-2 rounded border border-sky-500/30 bg-sky-500/5">
-                        <p className="text-[11px] text-sky-300 flex items-start gap-2">
+                      <div className="p-2 rounded border border-ec-verde/30 bg-ec-verde/5">
+                        <p className="text-[11px] text-ec-verde-txt flex items-start gap-2">
                           <RefreshCw className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                           <span>
                             Existe campanha melhor disponível —{" "}
@@ -410,8 +410,8 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                     )}
 
                     {!item.optin && item.cofinanciada && (
-                      <div className="p-2 rounded border border-amber-500/30 bg-amber-500/5">
-                        <p className="text-[11px] text-amber-300 flex items-start gap-2">
+                      <div className="p-2 rounded border border-ec-ambar/30 bg-ec-ambar/5">
+                        <p className="text-[11px] text-ec-ambar flex items-start gap-2">
                           <Tag className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                           <span>
                             Este anúncio está elegível a uma campanha cofinanciada mas{" "}

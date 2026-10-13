@@ -46,8 +46,8 @@ export default function TrophyCards({ sellers }: Props) {
   const trophies = [
     {
       icon: Trophy,
-      color: "text-yellow-400",
-      bg: "bg-yellow-400/10 border-yellow-400/20",
+      color: "text-ec-ambar",
+      bg: "bg-ec-amarelo/10 border-ec-amarelo/20",
       title: "📦 Máxima Potência no Full",
       seller: logisticsChamp.nickname,
       detail: `${logisticsPct.toFixed(1).replace(".", ",")}% Potência Full (TSI_FULL) · n=${logisticsChamp.mesesObservados}`,
@@ -55,8 +55,8 @@ export default function TrophyCards({ sellers }: Props) {
     },
     {
       icon: Rocket,
-      color: "text-emerald-400",
-      bg: "bg-emerald-400/10 border-emerald-400/20",
+      color: "text-ok",
+      bg: "bg-ec-verde/10 border-ec-verde/20",
       title: "Maior Tração",
       seller: tractionChamp.nickname,
       detail: `${tractionPct.toFixed(1).replace(".", ",")}% de efetividade (TGMV/Meta) · n=${tractionChamp.mesesObservados}`,
@@ -64,8 +64,8 @@ export default function TrophyCards({ sellers }: Props) {
     },
     {
       icon: Star,
-      color: "text-blue-400",
-      bg: "bg-blue-400/10 border-blue-400/20",
+      color: "text-ec-verde-txt",
+      bg: "bg-ec-verde/10 border-ec-verde/20",
       title: "Excelência em Qualidade",
       seller: qualityChamp.nickname,
       detail: `${qualityChamp.repCurrentLevel || "N/A"} · Score ${qualityChamp.scoreQualidadeFinal.toFixed(0)} · n=${qualityChamp.mesesObservados}`,
@@ -73,8 +73,8 @@ export default function TrophyCards({ sellers }: Props) {
     },
     {
       icon: Target,
-      color: "text-purple-400",
-      bg: "bg-purple-400/10 border-purple-400/20",
+      color: "text-foreground",
+      bg: "bg-ec-ink/10 border-ec-ink/20",
       title: "Mestre do Ads",
       seller: adsChamp.nickname,
       detail: `Ratio Ads: ${adsPct.toFixed(2).replace(".", ",")}% (meta 3%) · n=${adsChamp.mesesObservados}`,

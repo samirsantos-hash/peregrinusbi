@@ -334,8 +334,8 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
     const positive = invertPositive ? isBelow : isAbove;
     const negative = invertPositive ? isAbove : isBelow;
 
-    if (positive) return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">Acima</Badge>;
-    if (negative) return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">Abaixo</Badge>;
+    if (positive) return <Badge className="bg-ec-verde/20 text-ok border-ec-verde/30 text-[10px]">Acima</Badge>;
+    if (negative) return <Badge className="bg-ec-ambar/20 text-ec-ambar border-ec-ambar/30 text-[10px]">Abaixo</Badge>;
     return <Badge className="bg-muted text-muted-foreground text-[10px]">Na média</Badge>;
   }
 
@@ -431,13 +431,13 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                 <div>
                   <p className="text-[10px] text-muted-foreground mb-1">Este seller</p>
                   <div className="flex w-full h-7 rounded overflow-hidden">
-                    <div style={{ width: `${sellerMetrics.priceCheaper}%`, backgroundColor: "hsl(var(--emerald))" }} className="flex items-center justify-center text-[10px] font-bold text-white">
+                    <div style={{ width: `${sellerMetrics.priceCheaper}%`, backgroundColor: "hsl(var(--emerald))" }} className="flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                       {sellerMetrics.priceCheaper >= 8 ? `${sellerMetrics.priceCheaper.toFixed(1).replace(".", ",")}%` : ""}
                     </div>
-                    <div style={{ width: `${sellerMetrics.priceMatch}%`, backgroundColor: "hsl(var(--muted-foreground))" }} className="flex items-center justify-center text-[10px] font-bold text-white">
+                    <div style={{ width: `${sellerMetrics.priceMatch}%`, backgroundColor: "hsl(var(--muted-foreground))" }} className="flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                       {sellerMetrics.priceMatch! >= 8 ? `${sellerMetrics.priceMatch!.toFixed(1).replace(".", ",")}%` : ""}
                     </div>
-                    <div style={{ width: `${sellerMetrics.priceExpensive}%`, backgroundColor: "hsl(var(--crit))" }} className="flex items-center justify-center text-[10px] font-bold text-white">
+                    <div style={{ width: `${sellerMetrics.priceExpensive}%`, backgroundColor: "hsl(var(--crit))" }} className="flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                       {sellerMetrics.priceExpensive! >= 8 ? `${sellerMetrics.priceExpensive!.toFixed(1).replace(".", ",")}%` : ""}
                     </div>
                   </div>
@@ -448,13 +448,13 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                   <div>
                     <p className="text-[10px] text-muted-foreground mb-1">Mediana vertical</p>
                     <div className="flex w-full h-7 rounded overflow-hidden">
-                      <div style={{ width: `${bench.priceCheaper}%`, backgroundColor: "hsl(var(--emerald))" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
+                      <div style={{ width: `${bench.priceCheaper}%`, backgroundColor: "hsl(var(--emerald))" }} className="flex items-center justify-center text-[10px] font-bold text-primary-foreground opacity-70">
                         {bench.priceCheaper >= 8 ? `${bench.priceCheaper.toFixed(1).replace(".", ",")}%` : ""}
                       </div>
-                      <div style={{ width: `${bench.priceMatch}%`, backgroundColor: "hsl(var(--muted-foreground))" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
+                      <div style={{ width: `${bench.priceMatch}%`, backgroundColor: "hsl(var(--muted-foreground))" }} className="flex items-center justify-center text-[10px] font-bold text-primary-foreground opacity-70">
                         {bench.priceMatch >= 8 ? `${bench.priceMatch.toFixed(1).replace(".", ",")}%` : ""}
                       </div>
-                      <div style={{ width: `${bench.priceExpensive}%`, backgroundColor: "hsl(var(--crit))" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
+                      <div style={{ width: `${bench.priceExpensive}%`, backgroundColor: "hsl(var(--crit))" }} className="flex items-center justify-center text-[10px] font-bold text-primary-foreground opacity-70">
                         {bench.priceExpensive >= 8 ? `${bench.priceExpensive.toFixed(1).replace(".", ",")}%` : ""}
                       </div>
                     </div>
@@ -532,7 +532,7 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                         <TableCell className="text-xs text-center">
                           <div className="flex items-center justify-center gap-1">
                             {statusBadge(row.sv, row.mv)}
-                            <span className={cn("text-[10px]", row.sv !== null && row.mv > 0 && ((row.sv - row.mv) / row.mv) >= 0 ? "text-emerald-400" : "text-destructive")}>
+                            <span className={cn("text-[10px]", row.sv !== null && row.mv > 0 && ((row.sv - row.mv) / row.mv) >= 0 ? "text-ok" : "text-destructive")}>
                               {deltaText(row.sv, row.mv)}
                             </span>
                           </div>
@@ -546,7 +546,7 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
           )}
 
           {!bench && (
-            <p className="text-[10px] text-amber-400">
+            <p className="text-[10px] text-ec-ambar">
               <AlertTriangle className="w-3 h-3 inline mr-1" />
               Amostra insuficiente de peers no período (n&lt;3) — sem benchmark de vertical disponível.
             </p>

@@ -230,7 +230,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
     <Card className="bg-card border-border">
       <CardContent className="p-5 space-y-4">
         <div className="flex items-center gap-2 flex-wrap">
-          <BarChart3 className="h-5 w-5 text-emerald-400" />
+          <BarChart3 className="h-5 w-5 text-ok" />
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Seller vs Categoria
           </h3>
@@ -253,7 +253,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
             <ToggleGroupItem
               key={c.dom1}
               value={c.dom1}
-              className="text-[10px] px-2.5 py-1 h-6 data-[state=on]:bg-emerald-500/20 data-[state=on]:text-emerald-400 data-[state=on]:border-emerald-500/30 rounded-full border border-border/50"
+              className="text-[10px] px-2.5 py-1 h-6 data-[state=on]:bg-ec-verde/20 data-[state=on]:text-ok data-[state=on]:border-ec-verde/30 rounded-full border border-border/50"
             >
               {c.dom1.length > 22 ? c.dom1.slice(0, 20) + "…" : c.dom1}
               <span className="ml-1 opacity-60">({c.itens})</span>
@@ -356,7 +356,7 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
                     <span className="text-sm font-bold font-mono text-foreground">{card.seller}</span>
                     <span className="text-[10px] text-muted-foreground">vs {card.bench}</span>
                   </div>
-                  <span className={`text-[10px] font-semibold ${card.delta.positive ? "text-emerald-400" : "text-destructive"}`}>
+                  <span className={`text-[10px] font-semibold ${card.delta.positive ? "text-ok" : "text-destructive"}`}>
                     {card.delta.text}
                   </span>
                 </div>

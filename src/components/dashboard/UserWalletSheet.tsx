@@ -242,7 +242,7 @@ const UserWalletSheet = ({
             {bulkResult && (
               <div className="space-y-1.5 text-xs">
                 {bulkResult.matched > 0 && (
-                  <div className="flex items-center gap-1.5 text-emerald-400">
+                  <div className="flex items-center gap-1.5 text-ok">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
                     <span>{bulkResult.matched} Seller(s) identificado(s) e adicionado(s) à seleção.</span>
                   </div>
@@ -263,7 +263,7 @@ const UserWalletSheet = ({
                   </div>
                 )}
                 {bulkResult.notFound.length > 0 && (
-                  <div className="flex items-start gap-1.5 text-amber-400">
+                  <div className="flex items-start gap-1.5 text-ec-ambar">
                     <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                     <span>
                       Atenção: Os seguintes IDs não foram encontrados:{" "}

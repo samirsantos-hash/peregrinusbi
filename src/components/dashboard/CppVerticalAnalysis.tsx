@@ -218,7 +218,7 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
           <CardContent>
             <div className="flex w-full h-8 rounded-lg overflow-hidden">
               <div
-                className="bg-emerald-500/70 flex items-center justify-center text-[10px] font-bold text-foreground"
+                className="bg-ec-verde/70 flex items-center justify-center text-[10px] font-bold text-foreground"
                 style={{ width: `${pricePositioning.cheaper}%` }}
               >
                 {pricePositioning.cheaper >= 8 ? `${pricePositioning.cheaper.toFixed(0).replace(".", ",")}%` : ""}
@@ -279,7 +279,7 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
                     <TableCell className="text-xs text-right">
                       {r.delta !== null ? (
                         <span className={cn("inline-flex items-center gap-0.5 font-semibold",
-                          r.delta >= 0 ? "text-emerald-400" : "text-destructive")}>
+                          r.delta >= 0 ? "text-ok" : "text-destructive")}>
                           {r.delta >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
                           {r.delta >= 0 ? "+" : ""}{r.delta.toFixed(1).replace(".", ",")}%
                         </span>

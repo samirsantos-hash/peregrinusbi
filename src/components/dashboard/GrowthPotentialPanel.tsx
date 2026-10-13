@@ -464,11 +464,11 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
 
       {/* ── Alerta da dimensão mais fraca ────────────────────────────────── */}
       {dimensaoMaisFraca && indiceParaDelta(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido) < -10 && (
-        <div className="glass-card p-4 border border-orange-500/30 bg-orange-500/5">
+        <div className="glass-card p-4 border border-ec-laranja/30 bg-ec-laranja/5">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-4 h-4 text-ec-laranja shrink-0 mt-0.5" />
             <p className="text-xs text-foreground">
-              <span className="font-semibold text-orange-500">
+              <span className="font-semibold text-ec-laranja">
                 ⚠️ Dimensão mais fraca: {dimensaoMaisFraca.label}
               </span>{" "}
               <span className="font-mono">
@@ -526,12 +526,12 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
             Referência: {rotuloFonte}
           </Badge>
           {!verticalRotulo && (
-            <Badge variant="outline" className="text-[10px] font-normal border-amber-500/40 text-amber-400">
+            <Badge variant="outline" className="text-[10px] font-normal border-ec-ambar/40 text-ec-ambar">
               Vertical não identificada para este seller
             </Badge>
           )}
           {fonteBenchmark === "estimativa" && (
-            <Badge variant="outline" className="text-[10px] font-normal border-amber-500/40 text-amber-400">
+            <Badge variant="outline" className="text-[10px] font-normal border-ec-ambar/40 text-ec-ambar">
               Curva da vertical é estimativa, não dado de mercado
             </Badge>
           )}
@@ -546,7 +546,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
           {[
             { label: "Seller no período", valor: fmtBRLCompact(sellerTotal), cor: "text-foreground" },
-            { label: "Referência da vertical", valor: fmtBRLCompact(benchmarkTotal), cor: "text-amber-400" },
+            { label: "Referência da vertical", valor: fmtBRLCompact(benchmarkTotal), cor: "text-ec-ambar" },
             {
               label: "Gap (oportunidade)",
               valor:
@@ -555,7 +555,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                       ((sellerTotal - benchmarkTotal) / benchmarkTotal) * 100
                     ).toFixed(1).replace(".", ",")}%)`
                   : "—",
-              cor: sellerTotal >= benchmarkTotal ? "text-emerald-400" : "text-destructive",
+              cor: sellerTotal >= benchmarkTotal ? "text-ok" : "text-destructive",
             },
           ].map((c) => (
             <div key={c.label} className="rounded-lg border border-border/50 bg-muted/20 p-3">
@@ -566,7 +566,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         </div>
 
         {modoCurva === "indexado" && curvaProporcional && (
-          <div className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-300">
+          <div className="mb-3 rounded-md border border-ec-ambar/30 bg-ec-ambar/5 px-3 py-2 text-[11px] text-ec-ambar">
             A referência da vertical é obtida aplicando um índice fixo ao próprio faturamento do seller.
             No modo indexado as duas curvas são matematicamente idênticas, então mostramos apenas a do
             seller — o gap só faz sentido no modo Acumulado (R$).
@@ -574,7 +574,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         )}
 
         {modoCurva === "indexado" && !baseInfo?.valida ? (
-          <div className="flex h-[320px] items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/5 px-6 text-center text-xs text-amber-300">
+          <div className="flex h-[320px] items-center justify-center rounded-md border border-ec-ambar/30 bg-ec-ambar/5 px-6 text-center text-xs text-ec-ambar">
             Base de cálculo igual a zero nos primeiros pontos da janela — o índice não pode ser calculado
             (divisão por zero). Use o modo Acumulado (R$) ou amplie o período.
           </div>

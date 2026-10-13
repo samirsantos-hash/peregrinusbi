@@ -76,13 +76,13 @@ function ScoreBar({
       <div className="flex items-center gap-2 min-w-[160px]">
         <div className="relative flex-1 h-2 rounded-full bg-muted/30 overflow-hidden">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-cyan-700/60"
+            className="absolute inset-y-0 left-0 rounded-full bg-ec-verde/60"
             style={{ width: `${p}%` }}
           />
         </div>
         <div className="text-[11px] font-mono tabular-nums whitespace-nowrap shrink-0">
           <span className="text-muted-foreground">?</span>
-          <span className="text-cyan-400"> → +{p.toFixed(0).replace(".", ",")}pp</span>
+          <span className="text-ec-verde-txt"> → +{p.toFixed(0).replace(".", ",")}pp</span>
         </div>
       </div>
     );
@@ -107,7 +107,7 @@ function ScoreBar({
         />
         {ganho > 0 && (
           <div
-            className="absolute inset-y-0 bg-cyan-400/50 rounded-r-full"
+            className="absolute inset-y-0 bg-ec-verde/50 rounded-r-full"
             style={{ left: `${a}%`, width: `${ganho}%` }}
           />
         )}
@@ -115,7 +115,7 @@ function ScoreBar({
       <div className="text-[11px] font-mono tabular-nums whitespace-nowrap shrink-0">
         <span className={corTxt}>{a.toFixed(0).replace(".", ",")}%</span>
         {ganho > 0 && (
-          <span className="text-cyan-400"> → {p.toFixed(0).replace(".", ",")}%</span>
+          <span className="text-ec-verde-txt"> → {p.toFixed(0).replace(".", ",")}%</span>
         )}
       </div>
     </div>
@@ -236,7 +236,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
                   {anuncio.score_potencial !== null &&
                     anuncio.score_atual !== null &&
                     anuncio.score_potencial > anuncio.score_atual && (
-                    <span className="text-[11px] text-cyan-400 font-mono">
+                    <span className="text-[11px] text-ec-verde-txt font-mono">
                       Score potencial: {anuncio.score_potencial.toFixed(0).replace(".", ",")}% (+
                       {(anuncio.score_potencial - anuncio.score_atual).toFixed(0).replace(".", ",")}pp)
                     </span>
@@ -257,7 +257,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <span className="text-xs font-semibold">{acao.titulo}</span>
                         {acao.impactoScore > 0 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-400/10 border border-cyan-400/40 text-cyan-400 font-mono">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-ec-verde/10 border border-ec-verde/40 text-ec-verde-txt font-mono">
                             +{acao.impactoScore}pp score
                           </span>
                         )}
@@ -455,11 +455,11 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
               IPI atual (verde ≥70 / âmbar ≥50 / vermelho &lt;50)
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block w-3 h-2 rounded-sm bg-cyan-400/55" />
+              <span className="inline-block w-3 h-2 rounded-sm bg-ec-verde/55" />
               Ganho potencial ao corrigir os gaps
             </span>
             <span className="flex items-center gap-1">
-              <span className="inline-block w-3 h-2 rounded-sm bg-cyan-700/60" />
+              <span className="inline-block w-3 h-2 rounded-sm bg-ec-verde/60" />
               Estimativa sem IPI base (dados parciais)
             </span>
             <span className="italic">

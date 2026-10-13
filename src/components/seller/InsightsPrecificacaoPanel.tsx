@@ -25,7 +25,7 @@ function InsightCard({ insight, defaultAberto = false }: { insight: InsightPreco
     >
       <button
         onClick={() => setAberto((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-white/[0.02] transition-colors"
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-background/[0.02] transition-colors"
       >
         <span className="text-2xl leading-none">{cfg.icone}</span>
         <div className="flex-1 min-w-0">

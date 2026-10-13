@@ -227,7 +227,7 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
     >
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.02] transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-background/[0.02] transition-colors"
       >
         <span
           className="status-badge text-[10px] uppercase tracking-wide flex-shrink-0"
