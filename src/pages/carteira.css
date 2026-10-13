@@ -2,7 +2,7 @@
 .cart-page { min-height: 100vh; background: #F5F6F8; color: #16233F; font-family: "DM Sans", system-ui, sans-serif; }
 .cart-header { background: #16233F; color: #fff; padding: 20px 24px; border-bottom: 4px solid #C9A227; }
 .cart-header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
-.cart-header h1 { font-family: "Saira Condensed", "Barlow Condensed", sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; margin: 0; text-transform: uppercase; }
+.cart-header h1 { font-family: "DM Sans", Arial, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 0.5px; margin: 0; text-transform: uppercase; }
 .cart-header p { font-size: 12px; color: #C9A227; margin: 2px 0 0; }
 .cart-back { color: #fff !important; }
 .cart-back:hover { background: rgba(255,255,255,0.1) !important; }
@@ -22,7 +22,7 @@
 
 .cart-card { background: #fff; border-radius: 8px; border-top: 4px solid #C9A227; box-shadow: 0 1px 3px rgba(22,35,63,0.06); overflow: hidden; }
 .cart-card-head { padding: 14px 18px 8px; border-bottom: 1px solid #F1F1F1; }
-.cart-card-head h3 { font-family: "Saira Condensed", sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; color: #16233F; margin: 0; }
+.cart-card-head h3 { font-family: "DM Sans", Arial, sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; color: #16233F; margin: 0; }
 .cart-card-head p { font-size: 11px; color: #5B7396; margin: 4px 0 0; }
 .cart-card-body { padding: 14px 18px 18px; }
 
@@ -62,7 +62,7 @@
 /* ── v2 · reestruturação ───────────────────────────── */
 .cart-sec-head { display: flex; align-items: baseline; gap: 10px; margin: 4px 0 14px; }
 .cart-sec-n { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; color: #C9A227; font-weight: 700; letter-spacing: 1px; }
-.cart-sec-head h2 { font-family: "Saira Condensed", "Barlow Condensed", sans-serif; font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #16233F; margin: 0; }
+.cart-sec-head h2 { font-family: "DM Sans", Arial, sans-serif; font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: #16233F; margin: 0; }
 .cart-sec-note { font-size: 11px; color: #5B7396; }
 
 .cart-tabnav { max-width: 1400px; margin: 0 auto; display: flex; gap: 2px; overflow-x: auto; background: #fff; border: 1px solid #E5E7EB; border-radius: 8px; padding: 4px; }
@@ -111,7 +111,7 @@
 
 .cart-ficha { margin-top: 16px; background: #16233F; border-radius: 8px; overflow: hidden; border-top: 4px solid #C9A227; }
 .cart-ficha-head { display: flex; align-items: baseline; gap: 12px; padding: 14px 18px; color: #fff; }
-.cart-ficha-head h3 { font-family: "Saira Condensed", sans-serif; font-size: 20px; text-transform: uppercase; margin: 0; }
+.cart-ficha-head h3 { font-family: "DM Sans", Arial, sans-serif; font-size: 20px; text-transform: uppercase; margin: 0; }
 .cart-ficha-head span { font-size: 11px; color: #A9BAD8; }
 .cart-ficha-head button { margin-left: auto; font-size: 11px; color: #C9A227; background: none; border: 1px solid #C9A227; border-radius: 6px; padding: 3px 10px; cursor: pointer; }
 .cart-ficha-body { padding: 8px 18px 20px; }

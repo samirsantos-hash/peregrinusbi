@@ -11,7 +11,7 @@ export default function RodapeInstitucional() {
   return (
     <footer
       className="rodape-institucional border-t border-muted/15 bg-transparent px-6 py-3 text-left text-[11px] font-normal leading-[1.5] text-muted-alt"
-      style={{ fontFamily: "'DM Sans', 'Inter', sans-serif" }}
+      style={{ fontFamily: "'DM Sans', Arial, sans-serif" }}
     >
       <p>
         Copyright © 2017–{anoFinal}. ECOM CONSULT. CNPJ n.º 35.581.459/0001-00 · Av. Antônio Vieira do

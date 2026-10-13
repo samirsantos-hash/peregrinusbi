@@ -4,6 +4,19 @@
 
 @layer base {
   :root {
+    /* Sistema de Design Peregrinus — paleta base (HSL) */
+    --ec-ink: 0 0% 4%;           /* #0A0A0A */
+    --ec-text-sec: 60 2% 35%;    /* #5C5C58 */
+    --ec-line: 60 4% 89%;        /* #E4E4E2 */
+    --ec-surface: 0 0% 100%;     /* #FFFFFF */
+    --ec-surface-2: 60 9% 96%;   /* #F5F5F3 */
+    --ec-verde: 156 79% 37%;     /* #14A86C */
+    --ec-verde-txt: 156 79% 28%; /* #0F8052 */
+    --ec-vermelho: 6 86% 45%;    /* #D62410 */
+    --ec-ambar: 54 100% 30%;     /* #998900 */
+    --ec-laranja: 26 77% 44%;    /* #C4631A */
+    --ec-amarelo: 54 100% 50%;   /* #FFE500 — só preenchimento */
+
     --background: 222 84% 5%;
     --foreground: 210 40% 96%;
 
@@ -13,7 +26,7 @@
     --popover: 222 47% 8%;
     --popover-foreground: 210 40% 96%;
 
-    --primary: 210 53% 55%;
+    --primary: var(--ec-verde);
     --primary-foreground: 222 84% 5%;
 
     --secondary: 167 60% 39%;
@@ -30,21 +43,21 @@
     --brand-blue: 210 53% 60%;
     --brand-accent: 167 60% 45%;
 
-    --accent: 167 60% 39%;
+    --accent: var(--ec-verde);
     --accent-foreground: 222 84% 5%;
 
-    --destructive: 0 84% 60%;
+    --destructive: var(--ec-vermelho);
     --destructive-foreground: 210 40% 98%;
 
     --border: 215 25% 16%;
     --input: 215 25% 16%;
-    --ring: 210 53% 55%;
+    --ring: var(--ec-verde);
 
     --radius: 0.75rem;
 
-    --chart-1: 210 53% 60%;
-    --chart-2: 233 67% 62%;
-    --chart-3: 167 60% 45%;
+    --chart-1: var(--ec-verde);
+    --chart-2: 215 20% 55%;
+    --chart-3: 215 25% 24%;
     --chart-4: 40 95% 55%;
     --chart-5: 0 84% 60%;
 
@@ -90,23 +103,23 @@
   }
 
   .light {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: var(--ec-surface);
+    --foreground: var(--ec-ink);
 
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card: var(--ec-surface);
+    --card-foreground: var(--ec-ink);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover: var(--ec-surface);
+    --popover-foreground: var(--ec-ink);
 
-    --primary: 233 67% 25%;
+    --primary: var(--ec-verde);
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 45% 55%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: var(--ec-surface-2);
+    --secondary-foreground: var(--ec-ink);
 
-    --muted: 210 40% 94%;
-    --muted-foreground: 215 16% 40%;
+    --muted: var(--ec-surface-2);
+    --muted-foreground: var(--ec-text-sec);
 
     --surface-alt: 210 40% 94%;
     --text-muted: 215 16% 40%;
@@ -114,19 +127,19 @@
     --brand-blue: 210 53% 45%;
     --brand-accent: 167 60% 39%;
 
-    --accent: 167 60% 39%;
+    --accent: var(--ec-verde);
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 72% 50%;
+    --destructive: var(--ec-vermelho);
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 20% 86%;
-    --input: 215 20% 86%;
-    --ring: 233 67% 25%;
+    --border: var(--ec-line);
+    --input: var(--ec-line);
+    --ring: var(--ec-verde);
 
-    --chart-1: 210 53% 45%;
-    --chart-2: 233 67% 25%;
-    --chart-3: 167 60% 39%;
+    --chart-1: var(--ec-verde);
+    --chart-2: var(--ec-text-sec);
+    --chart-3: var(--ec-line);
     --chart-4: 32 95% 44%;
     --chart-5: 0 72% 50%;
 
@@ -178,11 +191,12 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'DM Sans', Arial, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Saira Condensed', 'DM Sans', system-ui, sans-serif;
+    font-family: 'DM Sans', Arial, sans-serif;
+    letter-spacing: -0.02em;
   }
 
   code, .font-mono {
