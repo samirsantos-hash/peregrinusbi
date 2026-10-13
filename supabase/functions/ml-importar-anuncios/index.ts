@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
         if (!r || !r.ok) { console.error("items", cust, r?.status, await r?.text()); recusados += 20; continue; }
         for (const it of await r.json() as any[]) {
           const b = it.body;
-          if (it.code !== 200 || !b) { recusados++; continue; }
+          if (it.code !== 200 || !b) { if (recusados < 2) console.error("item recusado", it.code, JSON.stringify(b).slice(0, 300)); recusados++; continue; }
           if (String(b.seller_id) !== cust) continue;
           linhas.push({
             item_id: b.id, cust_id: cust, titulo: b.title, preco: b.price, preco_original: b.original_price,
