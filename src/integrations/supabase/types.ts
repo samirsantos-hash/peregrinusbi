@@ -1561,6 +1561,54 @@ export type Database = {
           },
         ]
       }
+      ml_anuncios: {
+        Row: {
+          atualizado_em: string
+          cust_id: string
+          estoque: number | null
+          foto: string | null
+          frete_gratis: boolean | null
+          is_full: boolean | null
+          item_id: string
+          link: string | null
+          preco: number | null
+          preco_original: number | null
+          status: string | null
+          titulo: string | null
+          vendidos: number | null
+        }
+        Insert: {
+          atualizado_em?: string
+          cust_id: string
+          estoque?: number | null
+          foto?: string | null
+          frete_gratis?: boolean | null
+          is_full?: boolean | null
+          item_id: string
+          link?: string | null
+          preco?: number | null
+          preco_original?: number | null
+          status?: string | null
+          titulo?: string | null
+          vendidos?: number | null
+        }
+        Update: {
+          atualizado_em?: string
+          cust_id?: string
+          estoque?: number | null
+          foto?: string | null
+          frete_gratis?: boolean | null
+          is_full?: boolean | null
+          item_id?: string
+          link?: string | null
+          preco?: number | null
+          preco_original?: number | null
+          status?: string | null
+          titulo?: string | null
+          vendidos?: number | null
+        }
+        Relationships: []
+      }
       ml_convites: {
         Row: {
           created_at: string
