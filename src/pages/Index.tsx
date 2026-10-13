@@ -487,12 +487,15 @@ const Index = () => {
                     contexto={dateDebugLabel}
                   />
 
-                  <DiagnosticAlerts
-                    kpis={displayKpis}
-                    fallbackKpis={allKpisMonthly}
-                    sellerCustIdMap={sellerCustIdMap}
-                    seller={sellers.find((s) => s.id === selectedSeller) || null}
-                  />
+                  {/* Diagnóstico só no Resumo — não se repete em todas as abas */}
+                  {activeTab === "executive" && (
+                    <DiagnosticAlerts
+                      kpis={displayKpis}
+                      fallbackKpis={allKpisMonthly}
+                      sellerCustIdMap={sellerCustIdMap}
+                      seller={sellers.find((s) => s.id === selectedSeller) || null}
+                    />
+                  )}
                   <div className="lg:hidden mb-3">
                     <Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}>
                       <Menu className="w-4 h-4" />

@@ -115,7 +115,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
     if (weekendVisits > weekdayVisits * 0.6) {
       insightList.push({
         type: "positive",
-        text: `O tráfego de fim de semana representa ${((weekendVisits / (weekendVisits + weekdayVisits)) * 100).toFixed(0)}% do total. Mantenha campanhas ativas no sábado e domingo.`,
+        text: `O tráfego de fim de semana representa ${((weekendVisits / (weekendVisits + weekdayVisits)) * 100).toFixed(0).replace(".", ",")}% do total. Mantenha campanhas ativas no sábado e domingo.`,
       });
     }
 
@@ -127,7 +127,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
     if (totalVisits > 0 && nightVisits / totalVisits > 0.25) {
       insightList.push({
         type: "critical",
-        text: `${((nightVisits / totalVisits) * 100).toFixed(0)}% das visitas ocorrem após as 20h. Garanta que o estoque e o atendimento estejam preparados para o horário noturno.`,
+        text: `${((nightVisits / totalVisits) * 100).toFixed(0).replace(".", ",")}% das visitas ocorrem após as 20h. Garanta que o estoque e o atendimento estejam preparados para o horário noturno.`,
       });
     }
 
@@ -143,7 +143,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
 
   // Gray/blue → Orange/fire color scale
   const getHeatColor = (val: number): string => {
-    if (maxVal === 0) return "hsl(215, 15%, 20%)";
+    if (maxVal === 0) return "hsl(var(--ec-text-sec))";
     const ratio = Math.max(0, Math.min(1, val / maxVal));
     if (ratio < 0.3) {
       // Dark gray-blue
@@ -218,7 +218,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
                         animate={{ opacity: 1 }}
                         transition={{ delay: (dayIdx * 24 + hour) * 0.001 }}
                         className={`flex-1 h-7 rounded-[2px] relative group cursor-default flex items-center justify-center ${
-                          isTop3 ? "ring-1 ring-amber-400/80" : ""
+                          isTop3 ? "ring-1 ring-ec-ambar/80" : ""
                         }`}
                         style={{
                           backgroundColor: getHeatColor(cell.visits),
@@ -226,7 +226,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
                         }}
                       >
                         {isTop3 && (
-                          <Star className="w-3 h-3 text-amber-400 fill-amber-400 drop-shadow-sm" />
+                          <Star className="w-3 h-3 text-ec-ambar fill-ec-ambar drop-shadow-sm" />
                         )}
                         {/* Tooltip on hover */}
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-20 glass-card !bg-card/95 px-3 py-2 text-[10px] whitespace-nowrap rounded space-y-0.5">
@@ -256,7 +256,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
               </div>
               <span className="text-[10px] text-muted-foreground">Alto</span>
               <span className="text-[10px] text-muted-foreground ml-2 flex items-center gap-1">
-                <Star className="w-3 h-3 text-amber-400 fill-amber-400" /> Horário Nobre
+                <Star className="w-3 h-3 text-ec-ambar fill-ec-ambar" /> Horário Nobre
               </span>
             </div>
           </div>
@@ -284,14 +284,14 @@ const TrafficHeatmap = ({ kpis }: Props) => {
             transition={{ delay: i * 0.15 }}
             className={`flex gap-3 items-start p-3 rounded-lg border ${
               ins.type === "positive"
-                ? "border-emerald-500/30 bg-emerald-500/5"
-                : "border-amber-500/30 bg-amber-500/5"
+                ? "border-ec-verde/30 bg-ec-verde/5"
+                : "border-ec-ambar/30 bg-ec-ambar/5"
             }`}
           >
             {ins.type === "positive" ? (
-              <Lightbulb className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <Lightbulb className="w-4 h-4 text-ok shrink-0 mt-0.5" />
             ) : (
-              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <AlertTriangle className="w-4 h-4 text-ec-ambar shrink-0 mt-0.5" />
             )}
             <p className="text-xs leading-relaxed text-foreground/90">{ins.text}</p>
           </motion.div>

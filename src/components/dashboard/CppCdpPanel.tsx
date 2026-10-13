@@ -1,3 +1,4 @@
+import { brlCurto, numCurto } from "@/lib/format";
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,18 +17,16 @@ function fmtCurrency(v: number | null): string {
   if (v === null || v === undefined) return "—";
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
-function fmtCompact(v: number): string {
-  if (Math.abs(v) >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(v) >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}K`;
-  return fmtCurrency(v);
+function fmtCompact(v: number | null): string {
+  return brlCurto(v);
 }
 function fmtPct(v: number | null): string {
   if (v === null || v === undefined) return "—";
-  return `${v.toFixed(1)}%`;
+  return `${v.toFixed(1).replace(".", ",")}%`;
 }
 function fmtRoas(v: number | null): string {
   if (v === null || v === undefined) return "—";
-  return `${v.toFixed(1)}x`;
+  return `${v.toFixed(1).replace(".", ",")}x`;
 }
 function fmtNum(v: number): string {
   return Math.round(v).toLocaleString("pt-BR");
@@ -123,9 +122,9 @@ export default function CppCdpPanel({ data, onSelectSeller }: Props) {
   const actionBadge = (action: string) => {
     switch (action) {
       case "Ativar CDP": return <Badge className="bg-destructive/20 text-destructive border-destructive/30 text-[10px]">{action}</Badge>;
-      case "Expandir Opt-in": return <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">{action}</Badge>;
-      case "Otimizar ROAS": return <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-[10px]">{action}</Badge>;
-      default: return <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">{action}</Badge>;
+      case "Expandir Opt-in": return <Badge className="bg-ec-ambar/20 text-ec-ambar border-ec-ambar/30 text-[10px]">{action}</Badge>;
+      case "Otimizar ROAS": return <Badge className="bg-ec-verde/20 text-ec-verde-txt border-ec-verde/30 text-[10px]">{action}</Badge>;
+      default: return <Badge className="bg-ec-verde/20 text-ok border-ec-verde/30 text-[10px]">{action}</Badge>;
     }
   };
 
@@ -158,7 +157,7 @@ export default function CppCdpPanel({ data, onSelectSeller }: Props) {
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <div className="flex items-center gap-1.5 mb-1">
-              <Target className="w-3.5 h-3.5 text-amber-400" />
+              <Target className="w-3.5 h-3.5 text-ec-ambar" />
               <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Gap Potencial</span>
             </div>
             <p className="text-xl font-bold font-mono text-foreground">{fmtCompact(totals.totalGap)}</p>
@@ -235,13 +234,13 @@ export default function CppCdpPanel({ data, onSelectSeller }: Props) {
                   </TableCell>
                   <TableCell className="text-right font-mono text-xs">{fmtCurrency(row.cdpTgmv)}</TableCell>
                   <TableCell className="text-right font-mono text-xs">{fmtPct(row.shareCdp)}</TableCell>
-                  <TableCell className={cn("text-right font-mono text-xs", row.cdpRoas !== null && row.cdpRoas < 3 ? "text-destructive" : row.cdpRoas !== null && row.cdpRoas > 8 ? "text-emerald-400" : "")}>
+                  <TableCell className={cn("text-right font-mono text-xs", row.cdpRoas !== null && row.cdpRoas < 3 ? "text-destructive" : row.cdpRoas !== null && row.cdpRoas > 8 ? "text-ok" : "")}>
                     {fmtRoas(row.cdpRoas)}
                   </TableCell>
                   <TableCell className="text-right font-mono text-xs">{fmtCurrency(row.gap)}</TableCell>
                   <TableCell className="text-right font-mono text-xs">{fmtNum(row.itemsOptin)}</TableCell>
                   <TableCell className="text-right font-mono text-xs">
-                    <span className={cn(row.scoreCdp < 40 ? "text-destructive" : row.scoreCdp > 70 ? "text-emerald-400" : "text-amber-400")}>
+                    <span className={cn(row.scoreCdp < 40 ? "text-destructive" : row.scoreCdp > 70 ? "text-ok" : "text-ec-ambar")}>
                       {row.scoreCdp.toFixed(0)}
                     </span>
                   </TableCell>

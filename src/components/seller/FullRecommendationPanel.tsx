@@ -10,12 +10,12 @@ import {
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
 
 const COR_PRIORIDADE: Record<Prioridade, string> = {
-  alta: "hsl(160, 84%, 39%)",
-  media: "hsl(45, 80%, 55%)",
-  baixa: "hsl(215, 20%, 45%)",
-  repor_estoque: "hsl(25, 85%, 50%)",
-  sem_movimento: "hsl(0, 60%, 45%)",
-  sem_dado: "hsl(215, 15%, 35%)",
+  alta: "hsl(var(--ok))",
+  media: "hsl(var(--ec-ambar))",
+  baixa: "hsl(var(--ec-text-sec))",
+  repor_estoque: "hsl(var(--ec-laranja))",
+  sem_movimento: "hsl(var(--ec-vermelho))",
+  sem_dado: "hsl(var(--ec-text-sec))",
 };
 
 const BADGE_PRIORIDADE: Record<Prioridade, string> = {
@@ -98,7 +98,7 @@ Janelas de 15 e 30 dias foram removidas: eram reconstruídas por proporção a p
           conversão do seller{" "}
           {portfolio.taxaConversao === null
             ? "não medida"
-            : `${(portfolio.taxaConversao * 100).toFixed(2)}%`}{" "}
+            : `${(portfolio.taxaConversao * 100).toFixed(2).replace(".", ",")}%`}{" "}
           · ticket médio{" "}
           {portfolio.ticketMedio === null ? "não medido" : fmtBRL(portfolio.ticketMedio)}{" "}
           (base diária, 30 dias).

@@ -31,17 +31,17 @@ function fmtBRL(v: number): string {
 
 function getMedalStyle(level: string | null): { label: string; className: string } {
   const l = (level || "").toLowerCase();
-  if (l.includes("platinum")) return { label: "Platinum", className: "bg-slate-500/20 text-slate-300 border-slate-500/30" };
-  if (l.includes("gold")) return { label: "Gold", className: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" };
-  if (l.includes("silver")) return { label: "Silver", className: "bg-gray-400/20 text-gray-300 border-gray-400/30" };
-  if (l.includes("leader") || l.includes("líder")) return { label: "Líder", className: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" };
+  if (l.includes("platinum")) return { label: "Platinum", className: "bg-muted/20 text-muted-foreground border-border" };
+  if (l.includes("gold")) return { label: "Gold", className: "bg-ec-amarelo/20 text-ec-ambar border-ec-amarelo/30" };
+  if (l.includes("silver")) return { label: "Silver", className: "bg-muted/20 text-muted-foreground border-border" };
+  if (l.includes("leader") || l.includes("líder")) return { label: "Líder", className: "bg-ec-verde/20 text-ok border-ec-verde/30" };
   return { label: level || "—", className: "bg-muted/30 text-muted-foreground border-border" };
 }
 
 function getModalPrincipal(tsi: number, fTsi: number, tsiFlex: number): { label: string; emoji: string; className: string } {
   const tsiOther = Math.max(0, tsi - fTsi - tsiFlex);
-  if (fTsi >= tsiFlex && fTsi >= tsiOther) return { label: "FULL", emoji: "⚡", className: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30" };
-  if (tsiFlex >= fTsi && tsiFlex >= tsiOther) return { label: "FLEX", emoji: "🏍️", className: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" };
+  if (fTsi >= tsiFlex && fTsi >= tsiOther) return { label: "FULL", emoji: "⚡", className: "bg-ec-amarelo/20 text-ec-ambar border-ec-amarelo/30" };
+  if (tsiFlex >= fTsi && tsiFlex >= tsiOther) return { label: "FLEX", emoji: "🏍️", className: "bg-ec-verde/20 text-ok border-ec-verde/30" };
   return { label: "AGÊNCIA / CROSS", emoji: "📦", className: "bg-muted/30 text-muted-foreground border-border" };
 }
 
@@ -57,7 +57,7 @@ interface Props {
 
 function TrendArrow({ value }: { value: number | undefined }) {
   if (value === undefined) return null;
-  if (value > 0) return <TrendingUp className="w-3 h-3 text-emerald-400 shrink-0" />;
+  if (value > 0) return <TrendingUp className="w-3 h-3 text-ok shrink-0" />;
   if (value < 0) return <TrendingDown className="w-3 h-3 text-destructive shrink-0" />;
   return null;
 }
@@ -358,7 +358,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                   const medal = getMedalStyle(s.repCurrentLevel);
                   const trend = trends?.[s.sellerId];
                   const cad = byCustId.get(String(s.custId))?.[0];
-                  const potenciaColor = s.potenciaFull >= 70 ? "text-emerald-400" : s.potenciaFull >= 40 ? "text-yellow-400" : "text-red-400";
+                  const potenciaColor = s.potenciaFull >= 70 ? "text-ok" : s.potenciaFull >= 40 ? "text-ec-ambar" : "text-crit";
                   return (
                     <TableRow key={s.custId}>
                       <TableCell className="font-medium text-sm">
@@ -386,7 +386,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                                 variant="outline"
                                 className={
                                   cad.divisao === "Norte"
-                                    ? "bg-sky-500/15 text-sky-400 border-sky-500/30 text-[10px]"
+                                    ? "bg-ec-verde/15 text-ec-verde-txt border-ec-verde/30 text-[10px]"
                                     : "bg-primary/15 text-primary border-primary/30 text-[10px]"
                                 }
                               >
@@ -402,7 +402,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                                 variant="outline"
                                 className={
                                   cad.status.toLowerCase() === "ativa"
-                                    ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 text-[10px]"
+                                    ? "bg-ec-verde/15 text-ok border-ec-verde/30 text-[10px]"
                                     : "bg-muted/30 text-muted-foreground border-border text-[10px]"
                                 }
                               >
@@ -443,7 +443,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           if (!sh) {
                             return (
                               <span className="inline-flex items-center gap-1">
-                                {s.roas.toFixed(1)}x
+                                {s.roas.toFixed(1).replace(".", ",")}x
                                 <span className="text-[10px] text-muted-foreground">n={s.mesesObservados}</span>
                               </span>
                             );
@@ -452,15 +452,15 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span className="inline-flex items-center gap-1 cursor-help">
-                                  {sh.valorAjustado.toFixed(1)}x
+                                  {sh.valorAjustado.toFixed(1).replace(".", ",")}x
                                   <span className="text-[10px] text-muted-foreground">n={sh.n}</span>
                                   <span className="text-[9px] uppercase tracking-wide text-muted-foreground/80">aj.</span>
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
                                 Estimador: ROAS ajustado (encolhimento empírico de Bayes).<br />
-                                Bruto {sh.valorBruto.toFixed(1)}x · {sh.n} {sh.n === 1 ? "mês" : "meses"} · peso do prior {(sh.B * 100).toFixed(0)}%<br />
-                                Prior {sh.prior.toFixed(1)}x ({sh.priorEscopo === "vertical" ? `vertical ${sh.priorRotulo}` : "carteira — vertical pequena demais"})
+                                Bruto {sh.valorBruto.toFixed(1).replace(".", ",")}x · {sh.n} {sh.n === 1 ? "mês" : "meses"} · peso do prior {(sh.B * 100).toFixed(0).replace(".", ",")}%<br />
+                                Prior {sh.prior.toFixed(1).replace(".", ",")}x ({sh.priorEscopo === "vertical" ? `vertical ${sh.priorRotulo}` : "carteira — vertical pequena demais"})
                               </TooltipContent>
                             </Tooltip>
                           );
@@ -468,7 +468,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                       </TableCell>
                       <TableCell>
                         <span className={`font-mono text-sm font-semibold ${potenciaColor}`}>
-                          {s.potenciaFull.toFixed(1)}%
+                          {s.potenciaFull.toFixed(1).replace(".", ",")}%
                         </span>
                       </TableCell>
                       <TableCell>
@@ -478,7 +478,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                       </TableCell>
                       <TableCell className="font-mono text-sm">
                         <span className="inline-flex items-center gap-1.5">
-                          {s.pctAds.toFixed(2)}%
+                          {s.pctAds.toFixed(2).replace(".", ",")}%
                           <TrendArrow value={trend?.adsTrend} />
                         </span>
                       </TableCell>
@@ -507,8 +507,8 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                               </TooltipTrigger>
                               <TooltipContent className="max-w-[220px] text-xs">
                                 <p className="font-semibold">{campaign.verticalPrincipal || "N/A"}</p>
-                                <p>Efetividade: {campaign.efectRtaVertical.toFixed(0)}%</p>
-                                <p>Conv. Vertical: {campaign.taxaConversaoVertical.toFixed(2)}%</p>
+                                <p>Efetividade: {campaign.efectRtaVertical.toFixed(0).replace(".", ",")}%</p>
+                                <p>Conv. Vertical: {campaign.taxaConversaoVertical.toFixed(2).replace(".", ",")}%</p>
                               </TooltipContent>
                             </Tooltip>
                           );
@@ -543,7 +543,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           {s.alertQuality && (
                             <Tooltip>
                               <TooltipTrigger>
-                                <Camera className="w-3.5 h-3.5 text-red-400" />
+                                <Camera className="w-3.5 h-3.5 text-crit" />
                               </TooltipTrigger>
                               <TooltipContent>📸 Catálogo com score baixo</TooltipContent>
                             </Tooltip>
@@ -551,7 +551,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           {s.alertHighAds && (
                             <Tooltip>
                               <TooltipTrigger>
-                                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                                <AlertTriangle className="w-3.5 h-3.5 text-ec-ambar" />
                               </TooltipTrigger>
                               <TooltipContent>⚠️ Vazamento de Margem (Ads {'>'} 5%)</TooltipContent>
                             </Tooltip>
@@ -559,7 +559,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           {s.alertPromo && (
                             <Tooltip>
                               <TooltipTrigger>
-                                <Zap className="w-3.5 h-3.5 text-violet-400" />
+                                <Zap className="w-3.5 h-3.5 text-foreground" />
                               </TooltipTrigger>
                               <TooltipContent>⚡ Fora da Central de Promoções</TooltipContent>
                             </Tooltip>
@@ -567,7 +567,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           {s.alertKit && (
                             <Tooltip>
                               <TooltipTrigger>
-                                <ShoppingCart className="w-3.5 h-3.5 text-cyan-400" />
+                                <ShoppingCart className="w-3.5 h-3.5 text-ec-verde-txt" />
                               </TooltipTrigger>
                               <TooltipContent>🛒 Ticket baixo — oportunidade de KIT</TooltipContent>
                             </Tooltip>

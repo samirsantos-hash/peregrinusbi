@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -99,8 +100,8 @@ const BenchmarkBarTooltip = ({ active, payload, label }: any) => {
             ? label === "Investimento Mensal"
               ? fmtBRLCompact(p.value)
               : label === "ROAS (x)"
-                ? `${p.value.toFixed(2)}x`
-                : `${p.value.toFixed(2)}%`
+                ? `${p.value.toFixed(2).replace(".", ",")}x`
+                : `${p.value.toFixed(2).replace(".", ",")}%`
             : p.value}
         </p>
       ))}
@@ -189,7 +190,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
   // ROI weighted: (Sum_TGMV_LC_PADS - Sum_INV_PADS) / Sum_INV_PADS * 100
   const totalTgmvPads = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
   const roi = totalAds > 0 ? ((totalTgmvPads - totalAds) / totalAds) * 100 : 0;
-  if (roi > 1000) console.warn(`[EfficiencyPanel] ROI=${roi.toFixed(1)}% — verificar integridade de INV_PADS e TGMV_LC_PADS`);
+  if (roi > 1000) console.warn(`[EfficiencyPanel] ROI=${roi.toFixed(1).replace(".", ",")}% — verificar integridade de INV_PADS e TGMV_LC_PADS`);
   const totalVisits = kpis.reduce((s, k) => s + (k.visits || 0), 0);
   const cpcProxy = totalVisits > 0 ? totalAds / totalVisits : 0;
 
@@ -203,7 +204,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       if (avgAcos < benchmark.medianAcos) {
         alerts.push({
           icon: "🟢",
-          text: `Escala Segura: Seu ACOS (${avgAcos.toFixed(1)}%) está abaixo do mercado (${benchmark.medianAcos.toFixed(1)}%). Pode aumentar o investimento em 20% para ganhar share.`,
+          text: `Escala Segura: Seu ACOS (${avgAcos.toFixed(1).replace(".", ",")}%) está abaixo do mercado (${benchmark.medianAcos.toFixed(1).replace(".", ",")}%). Pode aumentar o investimento em 20% para ganhar share.`,
           severity: "success",
         });
       }
@@ -212,7 +213,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     if (avgTacos > 10) {
       alerts.push({
         icon: "🔴",
-        text: `Alerta de Margem: TACOS ${avgTacos.toFixed(1)}% está consumindo muito do faturamento total. Revisar negativação de palavras e campanhas.`,
+        text: `Alerta de Margem: TACOS ${avgTacos.toFixed(1).replace(".", ",")}% está consumindo muito do faturamento total. Revisar negativação de palavras e campanhas.`,
         severity: "critical",
       });
     }
@@ -221,7 +222,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     if (totalVisits > 0 && totalCheaper / totalVisits > 0.5 && campaign.efectRtaVertical < 70) {
       alerts.push({
         icon: "⚠️",
-        text: `Erro de Algoritmo: Preço baixo (${((totalCheaper / totalVisits) * 100).toFixed(0)}% cheaper) não está gerando ranking. Efetividade ${campaign.efectRtaVertical.toFixed(0)}%. Problema provável de SEO ou Logística.`,
+        text: `Erro de Algoritmo: Preço baixo (${((totalCheaper / totalVisits) * 100).toFixed(0).replace(".", ",")}% cheaper) não está gerando ranking. Efetividade ${campaign.efectRtaVertical.toFixed(0).replace(".", ",")}%. Problema provável de SEO ou Logística.`,
         severity: "warning",
       });
     }
@@ -229,7 +230,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     if (campaign.efectRtaVertical > 100 && totalGmv > 0 && (totalAds / totalGmv) * 100 < 1.5) {
       alerts.push({
         icon: "📈",
-        text: `Subaproveitamento de Escala: Efetividade ${campaign.efectRtaVertical.toFixed(0)}% mas Ads é apenas ${((totalAds / totalGmv) * 100).toFixed(1)}% do faturamento. Aumente para sufocar concorrência.`,
+        text: `Subaproveitamento de Escala: Efetividade ${campaign.efectRtaVertical.toFixed(0).replace(".", ",")}% mas Ads é apenas ${((totalAds / totalGmv) * 100).toFixed(1).replace(".", ",")}% do faturamento. Aumente para sufocar concorrência.`,
         severity: "success",
       });
     }
@@ -295,7 +296,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       value: roasDisplay,
       color: adsEstado === "valor" ? cls(roasClass) : classNameEstado(adsEstado),
       tooltip: `Razão dos totais: Σ TGMV_LC_PADS / Σ INV_PADS. ${thresholdNote(roasStat)}`.trim(),
-      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianRoas.toFixed(2)}x` : null,
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianRoas.toFixed(2).replace(".", ",")}x` : null,
       algoKey: "roas" as const,
     },
     {
@@ -303,7 +304,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       value: acosDisplay,
       color: adsEstado === "valor" ? cls(acosClass) : classNameEstado(adsEstado),
       tooltip: `Razão dos totais: (Σ INV_PADS / Σ TGMV_LC_PADS) × 100. ${thresholdNote(acosStat)}`.trim(),
-      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianAcos.toFixed(2)}%` : null,
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianAcos.toFixed(2).replace(".", ",")}%` : null,
       algoKey: "acos" as const,
     },
     {
@@ -311,7 +312,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       value: tacosDisplay,
       color: adsEstado === "valor" ? cls(tacosClass) : classNameEstado(adsEstado),
       tooltip: `Razão dos totais: (Σ INV_PADS / Σ TGMV_LC) × 100. ${thresholdNote(tacosStat)}`.trim(),
-      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianTacos.toFixed(2)}%` : null,
+      benchmarkText: benchmark ? `Mercado (${verticalName}): ${benchmark.medianTacos.toFixed(2).replace(".", ",")}%` : null,
       algoKey: "tacos" as const,
     },
     {
@@ -324,7 +325,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
     },
     {
       label: "ROI",
-      value: adsEstado === "valor" ? `${roi.toFixed(1)}%` : formatarComEstado(adsEstado, ""),
+      value: adsEstado === "valor" ? `${roi.toFixed(1).replace(".", ",")}%` : formatarComEstado(adsEstado, ""),
       color: adsEstado !== "valor" ? classNameEstado(adsEstado) : roi > 0 ? "emerald-text" : "critical-text",
       tooltip: "(TGMV_LC_PADS − INV_PADS) / INV_PADS × 100.",
       benchmarkText: null,
@@ -397,7 +398,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
                 classifyVsThreshold(campaign.efectRtaVertical, efectStat, +1) === "bad" ? "text-destructive" :
                 "text-neon-blue"
               }`}>
-                {campaign.efectRtaVertical.toFixed(1)}%
+                {campaign.efectRtaVertical.toFixed(1).replace(".", ",")}%
               </span>
             </div>
             <div>
@@ -405,7 +406,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
                 Conv. Vertical
                 <TooltipInfo text={CONVERSION_MARKET_BAND} />:
               </span>{" "}
-              <span className="font-bold">{campaign.taxaConversaoVertical.toFixed(2)}%</span>
+              <span className="font-bold">{campaign.taxaConversaoVertical.toFixed(2).replace(".", ",")}%</span>
             </div>
             <Badge className={getEffectivenessBadge(campaign.efectRtaVertical, efectStat).className}>
               {getEffectivenessBadge(campaign.efectRtaVertical, efectStat).label}
@@ -460,12 +461,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkInvestmentData} barCategoryGap="30%">
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="name" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
+                <XAxis dataKey="name" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
+                <YAxis tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
                   {benchmarkInvestmentData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "hsl(199, 100%, 50%)" : "hsl(174, 60%, 50%)"} />
+                    <Cell key={i} fill={i === 0 ? "hsl(var(--ec-verde))" : "hsl(var(--ok))"} />
                   ))}
                 </Bar>
               </BarChart>
@@ -483,12 +484,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkRatioData} barGap={4} barCategoryGap="25%">
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="metric" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+                <XAxis dataKey="metric" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
+                <YAxis tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
                 <Tooltip content={<BenchmarkBarTooltip />} />
-                <Bar dataKey="Seu Desempenho" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                <Bar dataKey="Mediana da Vertical" fill="hsl(174, 60%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+                <Bar dataKey="Seu Desempenho" fill="hsl(var(--ec-verde))" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Bar dataKey="Mediana da Vertical" fill="hsl(var(--ok))" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -509,18 +510,18 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
           <AreaChart data={adsData}>
             <defs>
               <linearGradient id="gradBlueEff" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradEmeraldEff" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--ok))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--ok))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
               angle={allDates.length > 6 ? -45 : 0}
@@ -529,21 +530,21 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             />
             <YAxis
               yAxisId="gmv"
-              tick={{ fill: "hsl(199, 100%, 60%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-verde))", fontSize: 11 }}
               axisLine={false}
-              tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+              tickFormatter={(v) => numCurto(v)}
             />
             <YAxis
               yAxisId="ads"
               orientation="right"
-              tick={{ fill: "hsl(160, 70%, 50%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ok))", fontSize: 11 }}
               axisLine={false}
-              tickFormatter={(v) => `${(v / 1000).toFixed(v >= 10000 ? 0 : 1)}K`}
+              tickFormatter={(v) => numCurto(v)}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Area yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(var(--ec-verde))" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(var(--ok))" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
         <p className="mt-2 text-[11px] text-muted-foreground">
@@ -566,19 +567,19 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
               angle={allDates.length > 6 ? -45 : 0}
               textAnchor={allDates.length > 6 ? "end" : "middle"}
               height={allDates.length > 6 ? 50 : 30}
             />
-            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+            <YAxis tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
             <Tooltip content={<RatioTooltip />} />
-            <Line type="monotone" dataKey="ROAS" stroke="hsl(199, 100%, 50%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
-            <Line type="monotone" dataKey="ACOS" stroke="hsl(280, 80%, 60%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
-            <Line type="monotone" dataKey="TACOS" stroke="hsl(40, 95%, 55%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
-            <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            <Line type="monotone" dataKey="ROAS" stroke="hsl(var(--ec-verde))" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
+            <Line type="monotone" dataKey="ACOS" stroke="hsl(var(--series-3))" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
+            <Line type="monotone" dataKey="TACOS" stroke="hsl(var(--ec-ambar))" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
+            <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

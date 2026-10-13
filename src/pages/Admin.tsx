@@ -62,8 +62,8 @@ const UPLOAD_TYPE_LABELS: Record<string, { label: string; color: string }> = {
   cpp_diarizada: { label: "CPP Diarizada", color: "bg-primary/10 text-primary" },
   live_listings: { label: "Live Listings", color: "bg-emerald/10 text-emerald" },
   elegibilidade: { label: "Elegibilidade", color: "bg-warning/10 text-warning" },
-  elegibilidade_diarizada: { label: "Eleg. Diarizada", color: "bg-orange-500/10 text-orange-400" },
-  meli_campaigns: { label: "Campanhas", color: "bg-violet-500/10 text-violet-400" },
+  elegibilidade_diarizada: { label: "Eleg. Diarizada", color: "bg-ec-laranja/10 text-ec-laranja" },
+  meli_campaigns: { label: "Campanhas", color: "bg-ec-ink/10 text-foreground" },
 };
 
 const STATUS_BADGE: Record<string, { label: string; color: string }> = {
@@ -609,7 +609,7 @@ const Admin = () => {
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-emerald-500" />
+                <CheckCircle className="w-5 h-5 text-ok" />
                 Senha Provisória Gerada
               </AlertDialogTitle>
               <AlertDialogDescription asChild>

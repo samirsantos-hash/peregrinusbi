@@ -53,7 +53,7 @@ export default function N5Anuncio() {
           />
         </div>
       }
-      confianca="Fonte: seller_listings_quality (scores) e seller_eligibility (promoções) · último dia disponível"
+      confianca="Fonte: qualidade por anúncio e elegibilidade de promoções · último dia disponível"
       carregando={isLoading}
       erro={error ? "Não foi possível carregar o anúncio." : null}
     />

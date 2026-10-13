@@ -108,9 +108,9 @@ const getActionBadge = (action: string) => {
   if (lower.includes("optin") || lower.includes("s/ optin"))
     return { className: "bg-destructive/15 text-destructive border-destructive/30", label: "Item s/ Optin" };
   if (lower.includes("desconto") || lower.includes("atrativo"))
-    return { className: "bg-amber-500/15 text-amber-400 border-amber-500/30", label: "Melhorar desconto" };
+    return { className: "bg-ec-ambar/15 text-ec-ambar border-ec-ambar/30", label: "Melhorar desconto" };
   if (lower.includes("campanha"))
-    return { className: "bg-purple-500/15 text-purple-400 border-purple-500/30", label: action };
+    return { className: "bg-ec-ink/15 text-foreground border-ec-ink/30", label: action };
   return { className: "bg-muted/30 text-muted-foreground border-border", label: action || "—" };
 };
 
@@ -237,8 +237,8 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.06 }} className="glass-card p-4 border-l-4 border-l-amber-500">
             <div className="flex items-center gap-2 mb-1">
-              <Tag className="w-4 h-4 text-amber-400" />
-              <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Melhorar desconto</p>
+              <Tag className="w-4 h-4 text-ec-ambar" />
+              <p className="text-xs font-semibold text-ec-ambar uppercase tracking-wider">Melhorar desconto</p>
             </div>
             <p className="text-2xl font-bold font-mono text-foreground">{profileCards.card2Count}</p>
             <p className="text-[10px] text-muted-foreground mt-1">Itens com desconto abaixo do potencial</p>
@@ -247,13 +247,13 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
           {profileCards.bestProduct && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-card p-4 border-l-4 border-l-emerald-500">
               <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <p className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Produto prioritário</p>
+                <TrendingUp className="w-4 h-4 text-ok" />
+                <p className="text-xs font-semibold text-ok uppercase tracking-wider">Produto prioritário</p>
               </div>
               <p className="text-sm font-medium text-foreground truncate">{profileCards.bestProduct.itemName || profileCards.bestProduct.itemId}</p>
               <div className="flex gap-3 mt-1 text-[10px] text-muted-foreground">
                 <span>{profileCards.bestProduct.pedidos7d} pedidos</span>
-                <span>Gap: {profileCards.bestProduct.gapDesconto > 0 ? `+${profileCards.bestProduct.gapDesconto.toFixed(1)}%` : "—"}</span>
+                <span>Gap: {profileCards.bestProduct.gapDesconto > 0 ? `+${profileCards.bestProduct.gapDesconto.toFixed(1).replace(".", ",")}%` : "—"}</span>
                 <span>Score: {profileCards.bestProduct.score.toFixed(0)}</span>
               </div>
             </motion.div>
@@ -291,7 +291,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
             <ToggleGroupItem value="sem_optin" className="text-[10px] px-2 py-0.5 h-6 rounded-full data-[state=on]:bg-destructive/20 data-[state=on]:text-destructive">
               Sem optin
             </ToggleGroupItem>
-            <ToggleGroupItem value="melhorar_desconto" className="text-[10px] px-2 py-0.5 h-6 rounded-full data-[state=on]:bg-amber-500/20 data-[state=on]:text-amber-400">
+            <ToggleGroupItem value="melhorar_desconto" className="text-[10px] px-2 py-0.5 h-6 rounded-full data-[state=on]:bg-ec-ambar/20 data-[state=on]:text-ec-ambar">
               Melhorar desconto
             </ToggleGroupItem>
           </ToggleGroup>
@@ -316,7 +316,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
 
           <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={copyItemIds} className="gap-1.5 text-xs h-7">
-              {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <CheckCircle className="w-3.5 h-3.5 text-ok" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? "Copiado!" : "Copiar IDs"}
             </Button>
             {selectedIds.size > 0 && (
@@ -405,18 +405,18 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
                       {fmtCampaignType(item.campaignType)}
                     </td>
                     <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
-                      {item.discountSellerPct > 0 ? `${(item.discountSellerPct / 10).toFixed(1)}%` : "—"}
+                      {item.discountSellerPct > 0 ? `${(item.discountSellerPct / 10).toFixed(1).replace(".", ",")}%` : "—"}
                     </td>
                     <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
-                      {item.discountTotal > 0 ? `${(item.discountTotal / 10).toFixed(1)}%` : "—"}
+                      {item.discountTotal > 0 ? `${(item.discountTotal / 10).toFixed(1).replace(".", ",")}%` : "—"}
                     </td>
                     <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
                       {item.gapDesconto > 0 ? (
-                        <span className="text-emerald-400">+{(item.gapDesconto / 10).toFixed(1)}%</span>
+                        <span className="text-ok">+{(item.gapDesconto / 10).toFixed(1).replace(".", ",")}%</span>
                       ) : item.gapDesconto === 0 ? (
                         <span className="text-muted-foreground">—</span>
                       ) : (
-                        <span className="text-destructive">{(item.gapDesconto / 10).toFixed(1)}%</span>
+                        <span className="text-destructive">{(item.gapDesconto / 10).toFixed(1).replace(".", ",")}%</span>
                       )}
                     </td>
                     <td className="text-right py-1.5 px-1.5 font-mono text-[11px] font-medium">
@@ -429,7 +429,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
                       {item.estoqueMedio7d > 0 ? item.estoqueMedio7d.toLocaleString("pt-BR") : "—"}
                     </td>
                     <td className="text-center py-1.5 px-1.5">
-                      {item.flagBestPromo ? <Star className="w-3.5 h-3.5 text-amber-400 mx-auto" fill="currentColor" /> : <span className="text-muted-foreground text-[10px]">—</span>}
+                      {item.flagBestPromo ? <Star className="w-3.5 h-3.5 text-ec-ambar mx-auto" fill="currentColor" /> : <span className="text-muted-foreground text-[10px]">—</span>}
                     </td>
                   </motion.tr>
                 );

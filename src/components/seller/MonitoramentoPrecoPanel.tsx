@@ -105,12 +105,12 @@ function detectarAnuncios(
 
     // ── Sinais com 2+ meses ──────────────────────────────────────────────
     if (queda >= 10) {
-      motivos.push(`Score de preço caiu ${queda.toFixed(0)}pp (${precoAnt}→${precoAtual})`);
+      motivos.push(`Score de preço caiu ${queda.toFixed(0).replace(".", ",")}pp (${precoAnt}→${precoAtual})`);
       severidade = "alta";
       acao =
         "Revisar preço com urgência — queda forte no índice de competitividade. Comparar com os 3 primeiros resultados da busca no ML.";
     } else if (queda >= 5) {
-      motivos.push(`Score de preço caiu ${queda.toFixed(0)}pp (${precoAnt}→${precoAtual})`);
+      motivos.push(`Score de preço caiu ${queda.toFixed(0).replace(".", ",")}pp (${precoAnt}→${precoAtual})`);
       severidade = "media";
       if (!acao)
         acao =
@@ -227,7 +227,7 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
     >
       <button
         onClick={() => setOpen((v) => !v)}
-        className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-white/[0.02] transition-colors"
+        className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-background/[0.02] transition-colors"
       >
         <span
           className="status-badge text-[10px] uppercase tracking-wide flex-shrink-0"
@@ -247,7 +247,7 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
               style={{
                 color:
                   a.pctVsMediaPedidos === null
-                    ? "hsl(215, 20%, 65%)"
+                    ? "hsl(var(--ec-text-sec))"
                     : a.pctVsMediaPedidos >= 0
                     ? "hsl(var(--ok))"
                     : a.pctVsMediaPedidos > -50
@@ -259,7 +259,7 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
               {a.pctVsMediaPedidos !== null && (
                 <span className="text-[10px] ml-1 font-normal">
                   {a.pctVsMediaPedidos >= 0 ? "+" : ""}
-                  {a.pctVsMediaPedidos.toFixed(0)}%
+                  {a.pctVsMediaPedidos.toFixed(0).replace(".", ",")}%
                 </span>
               )}
             </p>

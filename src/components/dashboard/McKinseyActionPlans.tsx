@@ -114,7 +114,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                          <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scoreOfertaFinal, 0)}</td>
                         <td className="text-right py-2 px-3 font-mono">{fmtNum(r.scorePhoto, 0)}</td>
                         <td className="text-center py-2 px-3">
-                          <a href={r.mlbUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:text-blue-400 transition-colors">
+                          <a href={r.mlbUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:text-ec-verde-txt transition-colors">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </td>
@@ -135,22 +135,22 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
 
         {/* 🔍 Ajuste de SEO */}
         {seoRows.length > 0 && (
-          <AccordionItem value="seo" className="border border-amber-500/20 rounded-lg bg-amber-500/5 px-1">
+          <AccordionItem value="seo" className="border border-ec-ambar/20 rounded-lg bg-ec-ambar/5 px-1">
             <AccordionTrigger className="hover:no-underline px-3">
               <div className="flex items-center gap-2 text-sm font-semibold">
-                <Search className="w-4 h-4 text-amber-500" />
-                <span className="text-amber-500">🔍 Ajuste de SEO: Melhorar Atratividade</span>
+                <Search className="w-4 h-4 text-ec-ambar" />
+                <span className="text-ec-ambar">🔍 Ajuste de SEO: Melhorar Atratividade</span>
                 <span className="ml-2 text-xs font-normal text-muted-foreground">({seoRows.length} item{seoRows.length > 1 ? "s" : ""})</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="px-3 pb-4">
-              <p className="text-xs text-amber-500/80 mb-3 italic">
+              <p className="text-xs text-ec-ambar mb-3 italic">
                 💡 Você tem o produto e o preço, mas o cliente não te encontra. Melhore o título e as palavras-chave (SEO).
               </p>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-amber-500/20">
+                    <tr className="border-b border-ec-ambar/20">
                       <th className="text-left py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Item ID</th>
                       <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Score Título</th>
                       <th className="text-right py-2 px-3 text-xs uppercase tracking-wider text-muted-foreground font-medium">Score Fotos</th>
@@ -162,7 +162,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                   </thead>
                   <tbody>
                     {seoRows.map((r, idx) => (
-                      <motion.tr key={r.itemId} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.03 }} className="border-b border-border/30 hover:bg-amber-500/5 transition-colors">
+                      <motion.tr key={r.itemId} initial={{ opacity: 0, x: -5 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.03 }} className="border-b border-border/30 hover:bg-ec-ambar/5 transition-colors">
                         <td className="py-2 px-3 font-mono font-medium text-xs">{r.itemId}</td>
                         <td className="text-right py-2 px-3 font-mono">
                           <span className={r.llTitleScore < 70 ? "text-destructive" : "text-emerald"}>{fmtNum(r.llTitleScore, 0)}</span>
@@ -178,7 +178,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                         </td>
                         <td className="py-2 px-3 text-xs text-muted-foreground max-w-[180px] truncate">{r.issues.join(", ") || "—"}</td>
                         <td className="text-center py-2 px-3">
-                          <a href={r.mlbUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:text-blue-400 transition-colors">
+                          <a href={r.mlbUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:text-ec-verde-txt transition-colors">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </td>
@@ -188,7 +188,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                 </table>
               </div>
               <div className="mt-3 flex justify-end">
-                <Button variant="outline" size="sm" className="gap-2 text-xs border-amber-500/30 text-amber-500 hover:bg-amber-500/10" onClick={() => copyToWhatsApp("Ajuste de SEO: Melhorar Atratividade", seoRows, "seo")}>
+                <Button variant="outline" size="sm" className="gap-2 text-xs border-ec-ambar/30 text-ec-ambar hover:bg-ec-ambar/10" onClick={() => copyToWhatsApp("Ajuste de SEO: Melhorar Atratividade", seoRows, "seo")}>
                   <Copy className="w-3.5 h-3.5" />
                   Copiar para WhatsApp
                 </Button>
@@ -236,7 +236,7 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
                         </td>
                         <td className="py-2 px-3 text-xs text-muted-foreground max-w-[180px] truncate">{r.issues.join(", ") || "—"}</td>
                         <td className="text-center py-2 px-3">
-                          <a href={r.mlbUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:text-blue-400 transition-colors">
+                          <a href={r.mlbUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-primary hover:text-ec-verde-txt transition-colors">
                             <ExternalLink className="w-3.5 h-3.5" />
                           </a>
                         </td>

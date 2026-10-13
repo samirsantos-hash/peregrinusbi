@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -304,8 +305,8 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
 
   const formatValor = (v: number, u: Dimensao["unidade"]) => {
     if (u === "R$") return fmtBRLCompact(v);
-    if (u === "%") return `${v.toFixed(1)}%`;
-    if (u === "x") return `${v.toFixed(2)}x`;
+    if (u === "%") return `${v.toFixed(1).replace(".", ",")}%`;
+    if (u === "x") return `${v.toFixed(2).replace(".", ",")}x`;
     return `${v.toFixed(1)} pts`;
   };
 
@@ -426,7 +427,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                         className="font-mono font-bold tabular-nums"
                         style={{ color: cor }}
                       >
-                        {delta >= 0 ? "+" : ""}{delta.toFixed(0)}%
+                        {delta >= 0 ? "+" : ""}{delta.toFixed(0).replace(".", ",")}%
                       </span>
                       <span className="text-[10px]" style={{ color: cor }}>
                         {lbl}
@@ -463,15 +464,15 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
 
       {/* ── Alerta da dimensão mais fraca ────────────────────────────────── */}
       {dimensaoMaisFraca && indiceParaDelta(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido) < -10 && (
-        <div className="glass-card p-4 border border-orange-500/30 bg-orange-500/5">
+        <div className="glass-card p-4 border border-ec-laranja/30 bg-ec-laranja/5">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+            <AlertTriangle className="w-4 h-4 text-ec-laranja shrink-0 mt-0.5" />
             <p className="text-xs text-foreground">
-              <span className="font-semibold text-orange-500">
+              <span className="font-semibold text-ec-laranja">
                 ⚠️ Dimensão mais fraca: {dimensaoMaisFraca.label}
               </span>{" "}
               <span className="font-mono">
-                ({indiceParaDelta(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido).toFixed(0)}% vs mediana)
+                ({indiceParaDelta(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido).toFixed(0).replace(".", ",")}% vs mediana)
               </span>.{" "}
               <span className="text-muted-foreground">
                 {dimensaoMaisFraca.id === "full_pct" && "Sellers da categoria operam com mais Full em média — desvantagem logística direta no algoritmo."}
@@ -525,12 +526,12 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
             Referência: {rotuloFonte}
           </Badge>
           {!verticalRotulo && (
-            <Badge variant="outline" className="text-[10px] font-normal border-amber-500/40 text-amber-400">
+            <Badge variant="outline" className="text-[10px] font-normal border-ec-ambar/40 text-ec-ambar">
               Vertical não identificada para este seller
             </Badge>
           )}
           {fonteBenchmark === "estimativa" && (
-            <Badge variant="outline" className="text-[10px] font-normal border-amber-500/40 text-amber-400">
+            <Badge variant="outline" className="text-[10px] font-normal border-ec-ambar/40 text-ec-ambar">
               Curva da vertical é estimativa, não dado de mercado
             </Badge>
           )}
@@ -545,16 +546,16 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
           {[
             { label: "Seller no período", valor: fmtBRLCompact(sellerTotal), cor: "text-foreground" },
-            { label: "Referência da vertical", valor: fmtBRLCompact(benchmarkTotal), cor: "text-amber-400" },
+            { label: "Referência da vertical", valor: fmtBRLCompact(benchmarkTotal), cor: "text-ec-ambar" },
             {
               label: "Gap (oportunidade)",
               valor:
                 benchmarkTotal > 0
                   ? `${fmtBRLCompact(Math.abs(benchmarkTotal - sellerTotal))} (${(
                       ((sellerTotal - benchmarkTotal) / benchmarkTotal) * 100
-                    ).toFixed(1)}%)`
+                    ).toFixed(1).replace(".", ",")}%)`
                   : "—",
-              cor: sellerTotal >= benchmarkTotal ? "text-emerald-400" : "text-destructive",
+              cor: sellerTotal >= benchmarkTotal ? "text-ok" : "text-destructive",
             },
           ].map((c) => (
             <div key={c.label} className="rounded-lg border border-border/50 bg-muted/20 p-3">
@@ -565,7 +566,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         </div>
 
         {modoCurva === "indexado" && curvaProporcional && (
-          <div className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-300">
+          <div className="mb-3 rounded-md border border-ec-ambar/30 bg-ec-ambar/5 px-3 py-2 text-[11px] text-ec-ambar">
             A referência da vertical é obtida aplicando um índice fixo ao próprio faturamento do seller.
             No modo indexado as duas curvas são matematicamente idênticas, então mostramos apenas a do
             seller — o gap só faz sentido no modo Acumulado (R$).
@@ -573,7 +574,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
         )}
 
         {modoCurva === "indexado" && !baseInfo?.valida ? (
-          <div className="flex h-[320px] items-center justify-center rounded-md border border-amber-500/30 bg-amber-500/5 px-6 text-center text-xs text-amber-300">
+          <div className="flex h-[320px] items-center justify-center rounded-md border border-ec-ambar/30 bg-ec-ambar/5 px-6 text-center text-xs text-ec-ambar">
             Base de cálculo igual a zero nos primeiros pontos da janela — o índice não pode ser calculado
             (divisão por zero). Use o modo Acumulado (R$) ou amplie o período.
           </div>
@@ -583,18 +584,18 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="gradSellerGrowth" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"} stopOpacity={0} />
+                <stop offset="5%" stopColor={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"} stopOpacity={0.3} />
+                <stop offset="95%" stopColor={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradBenchmark" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--ec-ambar))" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="hsl(var(--ec-ambar))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
               angle={chartData.length > 8 ? -45 : 0}
@@ -602,16 +603,12 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               height={chartData.length > 8 ? 50 : 30}
             />
             <YAxis
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) =>
                 modoCurva === "indexado"
                   ? String(v)
-                  : v >= 1_000_000
-                  ? `${(v / 1e6).toFixed(1)}M`
-                  : v >= 1000
-                  ? `${(v / 1000).toFixed(0)}K`
-                  : String(v)
+                  : numCurto(v)
               }
             />
             <Tooltip content={<CustomTooltip />} />
@@ -619,7 +616,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               <Area
                 type="monotone"
                 dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
-                stroke="hsl(40, 95%, 55%)"
+                stroke="hsl(var(--ec-ambar))"
                 fill="url(#gradBenchmark)"
                 strokeWidth={2}
                 strokeDasharray="6 3"
@@ -631,14 +628,14 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
             <Area
               type="monotone"
               dataKey={modoCurva === "indexado" ? "Seller (Índice)" : "Seller (Acumulado)"}
-              stroke={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"}
+              stroke={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"}
               fill="url(#gradSellerGrowth)"
               strokeWidth={2.5}
               connectNulls={false}
               animationDuration={800}
               animationEasing="ease-in-out"
             />
-            <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
         )}
@@ -665,7 +662,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                   <span className="text-xs text-foreground truncate">{c.categoria}</span>
                   <span className="text-[11px] font-mono tabular-nums text-muted-foreground shrink-0">
                     {c.itens.toLocaleString("pt-BR")} itens ·{" "}
-                    <span className="font-bold text-foreground">{c.pct.toFixed(1)}%</span>
+                    <span className="font-bold text-foreground">{c.pct.toFixed(1).replace(".", ",")}%</span>
                   </span>
                 </div>
                 <div className="relative w-full h-2 bg-muted/40 rounded-full overflow-hidden">

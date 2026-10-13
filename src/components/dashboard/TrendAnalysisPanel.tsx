@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import {
@@ -47,20 +48,20 @@ const CustomTooltip = ({ active, payload, label }: any) => {
       <div className="space-y-1.5">
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Faturamento Bruto</span>
-           <span className="font-mono font-semibold" style={{ color: "hsl(199, 100%, 50%)" }}>
+           <span className="font-mono font-semibold" style={{ color: "hsl(var(--ec-verde))" }}>
              {fmtBRL(gmv)}
            </span>
         </div>
         <div className="flex justify-between items-center">
           <span className="text-muted-foreground">Investimento Ads</span>
-           <span className="font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
+           <span className="font-mono font-semibold" style={{ color: "hsl(var(--ec-ambar))" }}>
              {fmtBRL(ads)}
            </span>
         </div>
         {tgmvPads !== undefined &&
         <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Vendas via Ads</span>
-             <span className="font-mono font-semibold" style={{ color: "hsl(160, 84%, 39%)" }}>
+             <span className="font-mono font-semibold" style={{ color: "hsl(var(--ok))" }}>
                {fmtBRL(tgmvPads)}
              </span>
           </div>
@@ -294,42 +295,42 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
               <ComposedChart data={chartData} key={`trend-${granularity}`}>
                 <defs>
                   <linearGradient id="gradGmvBar" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(199, 100%, 55%)" stopOpacity={0.9} />
-                    <stop offset="100%" stopColor="hsl(199, 100%, 35%)" stopOpacity={0.4} />
+                    <stop offset="0%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.9} />
+                    <stop offset="100%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.4} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                 <XAxis
                 dataKey="label"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
                 angle={chartData.length > 8 ? -45 : 0}
                 textAnchor={chartData.length > 8 ? "end" : "middle"}
                 height={chartData.length > 8 ? 50 : 30}
-                label={{ value: `Eixo X: ${axisLabel}`, position: "insideBottomRight", offset: 0, fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
+                label={{ value: `Eixo X: ${axisLabel}`, position: "insideBottomRight", offset: 0, fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} />
               
                 <YAxis
                 yAxisId="left"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                tickFormatter={(v) => numCurto(v)}
                 width={55} />
               
                 <YAxis
                 yAxisId="right"
                 orientation="right"
-                tick={{ fill: "hsl(40, 95%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--ec-ambar))", fontSize: 11 }}
                 axisLine={false}
                 tickLine={false}
-                tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`}
+                tickFormatter={(v) => numCurto(v)}
                 width={55} />
               
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: "hsl(215, 25%, 14%, 0.3)" }} />
                 <Legend
-                wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11, paddingTop: 8 }}
+                wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 11, paddingTop: 8 }}
                 iconType="circle"
                 iconSize={8} />
               
@@ -348,10 +349,10 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 type="monotone"
                 dataKey="ads"
                 name="Investimento Ads"
-                stroke="hsl(40, 95%, 55%)"
+                stroke="hsl(var(--ec-ambar))"
                 strokeWidth={2.5}
-                dot={{ r: 3, fill: "hsl(40, 95%, 55%)", strokeWidth: 0 }}
-                activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(40, 95%, 65%)" }}
+                dot={{ r: 3, fill: "hsl(var(--ec-ambar))", strokeWidth: 0 }}
+                activeDot={{ r: 5, strokeWidth: 2, stroke: "hsl(var(--ec-ambar))" }}
                 animationDuration={800}
                 animationEasing="ease-in-out" />
               
@@ -360,10 +361,10 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 type="monotone"
                 dataKey="roas"
                 name="ROAS"
-                stroke="hsl(280, 80%, 60%)"
+                stroke="hsl(var(--series-3))"
                 strokeWidth={2}
                 strokeDasharray="6 3"
-                dot={{ r: 3, fill: "hsl(280, 80%, 60%)", strokeWidth: 0 }}
+                dot={{ r: 3, fill: "hsl(var(--series-3))", strokeWidth: 0 }}
                 activeDot={{ r: 5 }}
                 animationDuration={800}
                 animationEasing="ease-in-out" />
@@ -390,7 +391,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 <Badge
                   variant="outline"
                   className="text-[9px] px-1.5 py-0 font-normal border-warning/40 text-warning ml-auto"
-                  title={`Pro-rata do último mês: ${proRata.diasComDados}d de ${proRata.diasNoMes}d (fator ${proRata.factor.toFixed(2)}x)`}
+                  title={`Pro-rata do último mês: ${proRata.diasComDados}d de ${proRata.diasNoMes}d (fator ${proRata.factor.toFixed(2).replace(".", ",")}x)`}
                 >
                   Último mês projetado
                 </Badge>
@@ -416,7 +417,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 </div>
                 <div>
                   <p className="text-[11px] text-muted-foreground mb-0.5">Total Investido</p>
-                   <p className="text-sm font-mono font-semibold" style={{ color: "hsl(40, 95%, 55%)" }}>
+                   <p className="text-sm font-mono font-semibold" style={{ color: "hsl(var(--ec-ambar))" }}>
                      {fmtBRLCompact(insights.totalAds)}
                    </p>
                 </div>
@@ -436,8 +437,8 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                   "bg-destructive/10 critical-text"}`
                   }>
                       {insights.totalAds <= insights.totalGmv * 0.03 ?
-                    `${(insights.totalAds / (insights.totalGmv * 0.03) * 100).toFixed(0)}% utilizado` :
-                    `${((insights.totalAds - insights.totalGmv * 0.03) / (insights.totalGmv * 0.03) * 100).toFixed(0)}% acima`
+                    `${(insights.totalAds / (insights.totalGmv * 0.03) * 100).toFixed(0).replace(".", ",")}% utilizado` :
+                    `${((insights.totalAds - insights.totalGmv * 0.03) / (insights.totalGmv * 0.03) * 100).toFixed(0).replace(".", ",")}% acima`
                     }
                     </span>
                   }
@@ -473,7 +474,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                   Para cada <span className="font-mono font-semibold neon-text">R$ 1,00</span> investido a mais em Ads, o Faturamento Bruto
                   {insights.efficiency >= 0 ? " cresceu " : " caiu "}
                   <span className={`font-mono font-bold ${insights.efficiency >= 1 ? "emerald-text" : "critical-text"}`}>
-                    {Math.abs(insights.efficiency).toFixed(1)}x
+                    {Math.abs(insights.efficiency).toFixed(1).replace(".", ",")}x
                   </span>
                 </p>
                 <div className="flex items-center gap-1.5">

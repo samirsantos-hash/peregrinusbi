@@ -92,7 +92,7 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
       label: "Taxa de Cancelamento",
       score: getCancellationScore(avgCancellations),
       icon: Award,
-      tooltip: `Taxa média de cancelamento: ${avgCancellations.toFixed(1)}%. Verde: ≤2% | Amarelo: 2-5% | Vermelho: >5%.`,
+      tooltip: `Taxa média de cancelamento: ${avgCancellations.toFixed(1).replace(".", ",")}%. Verde: ≤2% | Amarelo: 2-5% | Vermelho: >5%.`,
       isRate: true,
       rateValue: avgCancellations,
     },
@@ -117,7 +117,7 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
           <GaugeChart value={Math.round(avgTitle)} label="Título" color="emerald" />
     <div className="flex flex-col items-center">
               <span className={`text-2xl font-bold font-mono ${avgCancellations <= 2 ? "text-emerald" : avgCancellations <= 5 ? "text-warning" : "text-destructive"}`}>
-                {avgCancellations.toFixed(1)}%
+                {avgCancellations.toFixed(1).replace(".", ",")}%
               </span>
               <span className="text-xs text-muted-foreground mt-1">Taxa de Cancelamento</span>
             </div>
@@ -155,7 +155,7 @@ const AuditPanel = ({ kpis }: AuditPanelProps) => {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`font-mono font-bold text-lg ${(item as any).isRate ? ((item as any).rateValue <= 2 ? "text-emerald" : (item as any).rateValue <= 5 ? "text-warning" : "text-destructive") : status.color}`}>
-                      {(item as any).isRate ? `${(item as any).rateValue.toFixed(1)}%` : (item.score > 0 ? item.score.toFixed(0) : "—")}
+                      {(item as any).isRate ? `${(item as any).rateValue.toFixed(1).replace(".", ",")}%` : (item.score > 0 ? item.score.toFixed(0) : "—")}
                     </span>
                     <span className={`status-badge text-[11px] ${
                       status.label === "Excelente" ? "bg-emerald/10 text-emerald border-emerald/20" :

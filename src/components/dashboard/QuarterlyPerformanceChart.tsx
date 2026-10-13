@@ -206,12 +206,12 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
         <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="gradGmv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+              <stop offset="0%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="gradTgmv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+              <stop offset="0%" stopColor="hsl(var(--ok))" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="hsl(var(--ok))" stopOpacity={0} />
             </linearGradient>
           </defs>
 
@@ -239,7 +239,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
             type="monotone"
             dataKey="gmv"
             name="Faturamento Bruto"
-            stroke="hsl(199, 100%, 50%)"
+            stroke="hsl(var(--ec-verde))"
             strokeWidth={2.5}
             fill="url(#gradGmv)"
             dot={false}
@@ -252,7 +252,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
             type="monotone"
             dataKey="tgmv"
             name="Faturamento Realizado"
-            stroke="hsl(160, 84%, 39%)"
+            stroke="hsl(var(--ok))"
             strokeWidth={2.5}
             fill="url(#gradTgmv)"
             dot={false}
@@ -265,7 +265,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
             type="monotone"
             dataKey="ma3gmv"
             name="MM3 Bruto"
-            stroke="hsl(199, 70%, 70%)"
+            stroke="hsl(var(--ec-verde))"
             strokeWidth={1.5}
             strokeDasharray="4 2"
             dot={false}
@@ -277,7 +277,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
             type="monotone"
             dataKey="ma3tgmv"
             name="MM3 Realizado"
-            stroke="hsl(160, 60%, 65%)"
+            stroke="hsl(var(--ok))"
             strokeWidth={1.5}
             strokeDasharray="4 2"
             dot={false}

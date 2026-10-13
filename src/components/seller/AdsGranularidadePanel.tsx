@@ -131,7 +131,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
       {/* ── Resumo do recorte ────────────────────────────────────────── */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Mini titulo="Investimento no recorte" valor={fmtBRL(totais.inv)} />
-        <Mini titulo="ROAS ponderado" valor={`${totais.roas.toFixed(2)}x`} cor={corRoas(totais.roas)} />
+        <Mini titulo="ROAS ponderado" valor={`${totais.roas.toFixed(2).replace(".", ",")}x`} cor={corRoas(totais.roas)} />
         <Mini
           titulo="Média por período ativo"
           valor={fmtBRL(totais.medioPorPeriodo)}
@@ -141,10 +141,10 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
           titulo="Melhor / pior período"
           valor={
             totais.melhor
-              ? `${totais.melhor.label} · ${totais.melhor.roas.toFixed(1)}x`
+              ? `${totais.melhor.label} · ${totais.melhor.roas.toFixed(1).replace(".", ",")}x`
               : "—"
           }
-          rodape={totais.pior ? `pior: ${totais.pior.label} · ${totais.pior.roas.toFixed(1)}x` : undefined}
+          rodape={totais.pior ? `pior: ${totais.pior.label} · ${totais.pior.roas.toFixed(1).replace(".", ",")}x` : undefined}
         />
       </div>
 
@@ -174,7 +174,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
               <YAxis
                 yAxisId="sec"
                 orientation="right"
-                tickFormatter={(v) => (metrica === "roas" ? `${Number(v).toFixed(0)}x` : `${Number(v).toFixed(0)}%`)}
+                tickFormatter={(v) => (metrica === "roas" ? `${Number(v).toFixed(0).replace(".", ",")}x` : `${Number(v).toFixed(0).replace(".", ",")}%`)}
                 tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
               />
               <Tooltip
@@ -183,9 +183,9 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                   const v = Number(value);
                   if (name === "inv") return [fmtBRL(v), "Investimento"];
                   if (name === "gmv_ads") return [fmtBRL(v), "GMV via Ads"];
-                  if (name === "roas") return [`${v.toFixed(2)}x`, "ROAS"];
-                  if (name === "acos") return [`${v.toFixed(1)}%`, "ACOS"];
-                  return [`${v.toFixed(1)}%`, "TACOS"];
+                  if (name === "roas") return [`${v.toFixed(2).replace(".", ",")}x`, "ROAS"];
+                  if (name === "acos") return [`${v.toFixed(1).replace(".", ",")}%`, "ACOS"];
+                  return [`${v.toFixed(1).replace(".", ",")}%`, "TACOS"];
                 }}
               />
               <Legend
@@ -245,10 +245,10 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                     <td className="px-3 py-2 text-right font-mono tabular-nums">{fmtBRL(b.gmv_ads)}</td>
                     <td className="px-3 py-2 text-right font-mono tabular-nums">{b.tsi_ads.toLocaleString("pt-BR")}</td>
                     <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums" style={{ color: corRoas(b.roas) }}>
-                      {b.roas.toFixed(2)}x
+                      {b.roas.toFixed(2).replace(".", ",")}x
                     </td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.acos.toFixed(1)}%</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.tacos.toFixed(1)}%</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.acos.toFixed(1).replace(".", ",")}%</td>
+                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.tacos.toFixed(1).replace(".", ",")}%</td>
                   </tr>
                 ))}
             </tbody>
@@ -300,7 +300,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
                   <span>{p.tsi_dia.toFixed(1)} visitas/dia (média)</span>
-                  <span>Desconto total: {p.desconto_total.toFixed(1)}%</span>
+                  <span>Desconto total: {p.desconto_total.toFixed(1).replace(".", ",")}%</span>
                   <span
                     className="rounded-full border px-2 py-0.5"
                     style={{

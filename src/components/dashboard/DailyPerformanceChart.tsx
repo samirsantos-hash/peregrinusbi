@@ -111,7 +111,7 @@ function ChartTooltipContent({ active, payload }: any) {
       <p className="font-mono text-muted-foreground font-semibold">📅 {fullDate}</p>
       <p className="text-neon-blue font-medium">💰 Faturamento: {fmtBRL(row.tgmv)}</p>
       <p className="text-warning font-medium">📣 Ads: {fmtBRL(row.ads)}</p>
-      <p className="text-emerald-400 font-medium">📦 Unidades Vendidas: {row.tsi.toLocaleString("pt-BR")}</p>
+      <p className="text-ok font-medium">📦 Unidades Vendidas: {row.tsi.toLocaleString("pt-BR")}</p>
       {row.ma7tgmv != null && (
         <div className="border-t border-border/30 pt-1.5 mt-1.5 space-y-1">
           <p className="text-muted-foreground font-medium">📈 MM7 Faturamento: {fmtBRL(row.ma7tgmv)}</p>
@@ -183,8 +183,8 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
         <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="gradTgmv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.15} />
-              <stop offset="100%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+              <stop offset="0%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.15} />
+              <stop offset="100%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
             </linearGradient>
           </defs>
 
@@ -231,11 +231,11 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             type="monotone"
             dataKey="tgmv"
             name="Faturamento (R$)"
-            stroke="hsl(199, 100%, 50%)"
+            stroke="hsl(var(--ec-verde))"
             strokeWidth={2.5}
             fill="url(#gradTgmv)"
-            dot={isSinglePoint ? { r: 6, fill: "hsl(199, 100%, 50%)", strokeWidth: 2, stroke: "hsl(199, 100%, 70%)" } : false}
-            activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(199, 100%, 50%)" }}
+            dot={isSinglePoint ? { r: 6, fill: "hsl(var(--ec-verde))", strokeWidth: 2, stroke: "hsl(var(--ec-verde))" } : false}
+            activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--ec-verde))" }}
             animationDuration={800}
             hide={hidden.has("tgmv")}
           />
@@ -261,7 +261,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             type="monotone"
             dataKey="ma7tgmv"
             name="MM7 Faturamento"
-            stroke="hsl(199, 70%, 70%)"
+            stroke="hsl(var(--ec-verde))"
             strokeWidth={1.5}
             strokeDasharray="4 2"
             dot={false}
@@ -293,7 +293,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             type="monotone"
             dataKey="ma7tsi"
             name="MM7 Unidades"
-            stroke="hsl(160, 60%, 60%)"
+            stroke="hsl(var(--ok))"
             strokeWidth={1.5}
             strokeDasharray="4 2"
             dot={false}
@@ -309,7 +309,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             type="monotone"
             dataKey="tsi"
             name="Unidades Vendidas"
-            stroke="hsl(160, 84%, 39%)"
+            stroke="hsl(var(--ok))"
             strokeWidth={2.5}
             dot={false}
             activeDot={{ r: 5, strokeWidth: 2 }}

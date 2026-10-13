@@ -83,7 +83,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           titulo="ROAS"
-          valor={`${m.roas.toFixed(2)}x`}
+          valor={`${m.roas.toFixed(2).replace(".", ",")}x`}
           cor={corRoas(m.roas)}
           badge={classRoas(m.roas)}
           descricao="Retorno sobre investimento em Ads"
@@ -94,7 +94,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
         />
         <KpiCard
           titulo="ACOS"
-          valor={`${m.acos.toFixed(1)}%`}
+          valor={`${m.acos.toFixed(1).replace(".", ",")}%`}
           cor={corAcos(m.acos)}
           badge={classAcos(m.acos)}
           descricao="Custo de Ads sobre GMV de Ads"
@@ -105,7 +105,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
         />
         <KpiCard
           titulo="TACOS"
-          valor={`${m.tacos.toFixed(1)}%`}
+          valor={`${m.tacos.toFixed(1).replace(".", ",")}%`}
           cor={corTacos(m.tacos)}
           badge={classTacos(m.tacos)}
           descricao="Custo de Ads sobre GMV total da loja"
@@ -125,7 +125,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
               label="Pedidos via Ads · Ticket médio"
               value={`${m.tsi_pads.toLocaleString("pt-BR")} ped. · ${fmtBRL(m.ticket_medio)}`}
             />
-            <Row label="% GMV via Ads" value={`${m.pct_gmv_ads.toFixed(1)}%`} />
+            <Row label="% GMV via Ads" value={`${m.pct_gmv_ads.toFixed(1).replace(".", ",")}%`} />
           </div>
         </div>
       </div>
@@ -291,7 +291,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   className="mt-1 font-mono text-2xl font-semibold tabular-nums"
                   style={{ color: ok ? "hsl(var(--ok))" : "hsl(var(--crit))" }}
                 >
-                  {margemLiquida.toFixed(1)}%
+                  {margemLiquida.toFixed(1).replace(".", ",")}%
                 </div>
                 <div className="text-[11px] text-muted-foreground">margem líquida após Ads</div>
               </div>
@@ -299,7 +299,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           })}
         </div>
         <div className="mt-3 text-xs text-muted-foreground">
-          TACOS atual: <span className="font-mono tabular-nums">{m.tacos.toFixed(1)}%</span> do GMV total consumido por Ads.
+          TACOS atual: <span className="font-mono tabular-nums">{m.tacos.toFixed(1).replace(".", ",")}%</span> do GMV total consumido por Ads.
           Margem líquida = margem bruta estimada − TACOS.
         </div>
       </div>

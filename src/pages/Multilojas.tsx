@@ -520,7 +520,7 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={porLoja} layout="vertical" margin={{ left: 60 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <YAxis type="category" dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} width={100} />
               <Tooltip formatter={(v: number) => fPct(v)} />
               <Bar dataKey="margem" name="Margem">
@@ -549,7 +549,7 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
           <AreaChart data={curva}>
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
-            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} domain={[0, 1]} />
+            <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} domain={[0, 1]} />
             <Tooltip formatter={(v: number) => fPct(v)} />
             <Area dataKey="acum" name="Acumulado" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.25} />
           </AreaChart>
@@ -695,7 +695,7 @@ const Lojas = ({ d }: { d: Ctx }) => {
             <ScatterChart>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis type="number" dataKey="x" name="log10 GMV" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
-              <YAxis type="number" dataKey="y" name="Margem" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <YAxis type="number" dataKey="y" name="Margem" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <ZAxis type="number" dataKey="z" range={[60, 400]} />
               <Tooltip formatter={(v: number, n: string) => (n === "Margem" ? fPct(v) : v.toFixed(2))} />
               <Scatter data={lojas.map((l) => ({ x: Math.log10(Math.max(1, l.gmv)), y: l.margem, z: l.pedidos, loja: l.loja }))} fill={COLORS[1]} />
@@ -1031,7 +1031,7 @@ const Concentracao = ({ d }: { d: Ctx }) => {
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis dataKey="mlb" tick={{ fontSize: 8 }} interval={3} />
               <YAxis yAxisId="l" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
-              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} domain={[0, 1]} />
+              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} domain={[0, 1]} />
               <Tooltip formatter={(v: number, n: string) => (n === "Acumulado" ? fPct(v) : fBRL(v))} />
               <Bar yAxisId="l" dataKey="gmv" name="GMV" fill={COLORS[0]} />
               <Line yAxisId="r" dataKey="acum" name="Acumulado" stroke={COLORS[1]} dot={false} strokeWidth={2} />
@@ -1043,8 +1043,8 @@ const Concentracao = ({ d }: { d: Ctx }) => {
           <ResponsiveContainer width="100%" height={250}>
             <AreaChart data={lorenz}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis dataKey="x" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <XAxis dataKey="x" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
               <Area dataKey="y" name="Lorenz" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.2} />
               <Line dataKey="ref" name="Igualdade" stroke={COLORS[3]} dot={false} strokeDasharray="4 4" />
@@ -1057,7 +1057,7 @@ const Concentracao = ({ d }: { d: Ctx }) => {
             <BarChart data={estresse}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis dataKey="n" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
               <Bar dataKey="perda" name="Perda de GMV" fill={COLORS[4]} />
             </BarChart>
@@ -1282,7 +1282,7 @@ const Clientes = ({ d }: { d: Ctx }) => {
             <ComposedChart data={decis}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis dataKey="decil" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
               <Bar dataKey="share" name="Share" fill={COLORS[0]} />
               <Line dataKey="acum" name="Acumulado" stroke={COLORS[1]} dot={false} strokeWidth={2} />
@@ -1360,7 +1360,7 @@ const Operacao = ({ d }: { d: Ctx }) => {
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis dataKey="modal" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} interval={0} angle={-15} height={50} textAnchor="end" />
               <YAxis yAxisId="l" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
-              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+              <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
               <Bar yAxisId="l" dataKey="ticket" name="Ticket" fill={COLORS[0]} />

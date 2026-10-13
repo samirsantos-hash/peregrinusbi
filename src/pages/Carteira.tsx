@@ -50,7 +50,7 @@ const StatBand = ({ s, fmt, phrase }: { s: DescriptiveStats; fmt: (n: number) =>
       <span><i>Média</i>{fmt(s.mean)}</span>
       <span className="gold"><i>Mediana</i>{fmt(s.median)}</span>
       <span><i>σ</i>{fmt(s.sd)}</span>
-      <span><i>CV</i>{(s.cv * 100).toFixed(1)}%</span>
+      <span><i>CV</i>{(s.cv * 100).toFixed(1).replace(".", ",")}%</span>
       <span><i>Assimetria</i>{s.skewness.toFixed(2)}</span>
     </div>
     <p>{phrase}</p>
@@ -63,8 +63,8 @@ function skewPhrase(s: DescriptiveStats, unidade: string) {
     return `Distribuição fortemente assimétrica à direita: poucos casos puxam a média (${unidade}). Use a mediana como referência de ${unidade} típico.`;
   if (s.skewness < -1)
     return `Distribuição assimétrica à esquerda: a cauda baixa domina — a média subestima a maioria dos casos.`;
-  if (s.cv > 0.6) return `Dispersão alta (CV ${(s.cv * 100).toFixed(0)}%): o comportamento não é homogêneo; trabalhe por faixas, não pela média.`;
-  return `Distribuição comportada (CV ${(s.cv * 100).toFixed(0)}%): média e mediana são próximas e representam bem o conjunto.`;
+  if (s.cv > 0.6) return `Dispersão alta (CV ${(s.cv * 100).toFixed(0).replace(".", ",")}%): o comportamento não é homogêneo; trabalhe por faixas, não pela média.`;
+  return `Distribuição comportada (CV ${(s.cv * 100).toFixed(0).replace(".", ",")}%): média e mediana são próximas e representam bem o conjunto.`;
 }
 
 /* Sort helper */
@@ -280,7 +280,7 @@ function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
                 <XAxis dataKey="cat" tick={{ fontSize: 9 }} angle={-35} textAnchor="end" interval={0} height={70} />
                 <YAxis yAxisId="l" tick={{ fontSize: 11 }} tickFormatter={(v) => fmtInt(v)} />
                 <YAxis yAxisId="r" orientation="right" domain={[0, 100]} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
-                <Tooltip formatter={(v: any, n: any) => (n === "% acumulado" ? `${Number(v).toFixed(1)}%` : fmtInt(Number(v)))} />
+                <Tooltip formatter={(v: any, n: any) => (n === "% acumulado" ? `${Number(v).toFixed(1).replace(".", ",")}%` : fmtInt(Number(v)))} />
                 <Legend />
                 <Bar yAxisId="l" dataKey="itens" name="Anúncios" fill={NAVY} cursor="pointer"
                   onClick={(d: any) => d?.cat && set({ categoria: d.cat })} />
@@ -291,7 +291,7 @@ function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
           </div>
           <Reading>
             As 3 primeiras categorias respondem por {catRows.slice(0, 3).reduce((s, r) => s + r.itens, 0) > 0
-              ? `${(catRows[2]?.acum ?? catRows[catRows.length - 1]?.acum ?? 0).toFixed(0)}%` : "—"} do sortimento exposto.
+              ? `${(catRows[2]?.acum ?? catRows[catRows.length - 1]?.acum ?? 0).toFixed(0).replace(".", ",")}%` : "—"} do sortimento exposto.
             Concentração alta significa que qualquer perda de ranking nessas categorias derruba o GMV da rede inteira.
           </Reading>
         </Card>
@@ -364,8 +364,8 @@ function Ritmo({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 0, left: 0 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis dataKey="label" tick={{ fontSize: 9 }} interval={Math.max(0, Math.floor(rows.length / 18))} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v.toFixed(0)}%`} />
-              <Tooltip formatter={(v: any) => `${Number(v).toFixed(1)}% vs mediana`} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v.toFixed(0).replace(".", ",")}%`} />
+              <Tooltip formatter={(v: any) => `${Number(v).toFixed(1).replace(".", ",")}% vs mediana`} />
               <ReferenceLine y={0} stroke={NAVY} />
               <Bar dataKey="desvio" name="Desvio vs mediana">
                 {rows.map((r, i) => <Cell key={i} fill={r.desvio >= 0 ? GREEN : RED} />)}
@@ -431,7 +431,7 @@ function CurvaA({ ag }: { ag: Agg }) {
                   <td className="right mono">{fmtInt(r.item.tsi)}</td>
                   <td className="right mono">{fmtBRL(r.item.ticket)}</td>
                   <td className="right mono">{fmtPct(gmvUf > 0 ? r.value / gmvUf : 0)}</td>
-                  <td className="right mono">{(r.cumPct * 100).toFixed(1)}%</td>
+                  <td className="right mono">{(r.cumPct * 100).toFixed(1).replace(".", ",")}%</td>
                   <td><span className={`cart-badge cart-badge-${r.klass.toLowerCase()}`}>{r.klass}</span></td>
                 </tr>
               ))}
@@ -606,18 +606,18 @@ function Trafego({ ag }: { ag: Agg }) {
       <div className="cart-kpi-cluster">
         <Kpi label="Visitas" value={fmtInt(ag.totalVisitas)} />
         <Kpi label="Unidades" value={fmtInt(ag.totalTsi)} />
-        <Kpi label="Conversão ponderada" value={`${(convPond * 100).toFixed(2)}%`} hint="TSI ÷ visitas da carteira" />
-        <Kpi label="Mediana entre lojas" value={`${s.median.toFixed(2)}%`} hint={`Q1–Q3 ${s.q1.toFixed(2)}%–${s.q3.toFixed(2)}%`} />
+        <Kpi label="Conversão ponderada" value={`${(convPond * 100).toFixed(2).replace(".", ",")}%`} hint="TSI ÷ visitas da carteira" />
+        <Kpi label="Mediana entre lojas" value={`${s.median.toFixed(2).replace(".", ",")}%`} hint={`Q1–Q3 ${s.q1.toFixed(2).replace(".", ",")}%–${s.q3.toFixed(2).replace(".", ",")}%`} />
       </div>
-      <StatBand s={s} fmt={(n) => `${n.toFixed(2)}%`} phrase={skewPhrase(s, "conversão por loja")} />
+      <StatBand s={s} fmt={(n) => `${n.toFixed(2).replace(".", ",")}%`} phrase={skewPhrase(s, "conversão por loja")} />
       <Card title="Conversão por loja (40 maiores em GMV)" subtitle="Clique em uma barra para filtrar a aba pela loja · referência de mercado: <2% baixa · ~3% média · >3,5% ótima">
         <div style={{ width: "100%", height: 360 }}>
           <ResponsiveContainer>
             <BarChart data={rows} margin={{ top: 8, right: 20, bottom: 80, left: 0 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis dataKey="nick" tick={{ fontSize: 9 }} angle={-45} textAnchor="end" interval={0} height={90} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v.toFixed(1)}%`} />
-              <Tooltip formatter={(v: any, n: any) => (n === "Conversão" ? `${Number(v).toFixed(2)}%` : fmtInt(Number(v)))} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${v.toFixed(1).replace(".", ",")}%`} />
+              <Tooltip formatter={(v: any, n: any) => (n === "Conversão" ? `${Number(v).toFixed(2).replace(".", ",")}%` : fmtInt(Number(v)))} />
               <Bar dataKey="conv" name="Conversão" cursor="pointer"
                 onClick={(d: any) => d?.id && set({ sellerId: d.id })}>
                 {rows.map((r, i) => <Cell key={i} fill={r.conv >= s.median ? NAVY : RED} />)}
@@ -698,7 +698,7 @@ function Pads({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
       <div className="cart-kpi-cluster">
         <Kpi label="Vendedores participantes" value={fmtInt(porSeller.filter((r) => r.produtos > 0).length)} />
         <Kpi label="Produtos elegíveis" value={fmtInt(totalProd)} />
-        <Kpi label="Desconto médio" value={`${descMedio.toFixed(2)}%`} />
+        <Kpi label="Desconto médio" value={`${descMedio.toFixed(2).replace(".", ",")}%`} />
         <Kpi label="Pedidos (7D)" value={fmtInt(totalPedidos)} />
         <Kpi label="Co-financiamento Mercado Livre" value={fmtBRL(totalCofin)} hint="parte do investimento bancada pelo ML" />
         <Kpi label="Itens com opt-in" value={fmtPct(elig.length ? optIn / elig.length : 0)} />
@@ -769,7 +769,7 @@ function Pads({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
                 <tr key={r.custId}>
                   <td>{r.nick}</td><td className="mono">{r.custId}</td><td>{r.uf}</td>
                   <td className="right mono">{fmtInt(r.produtos)}</td>
-                  <td className="right mono">{r.desconto.toFixed(2)}%</td>
+                  <td className="right mono">{r.desconto.toFixed(2).replace(".", ",")}%</td>
                   <td className="right mono">{fmtInt(r.pedidos)}</td>
                   <td className="right mono">{r.tsiDiario.toFixed(1)}</td>
                   <td className="right mono">{fmtBRL(r.cofin)}</td>
@@ -798,7 +798,7 @@ function Estatistica({ ag }: { ag: Agg }) {
   const conf: Record<VarKey, { label: string; get: (s: any) => number; fmt: (n: number) => string }> = {
     gmv: { label: "GMV por loja", get: (s) => s.gmv, fmt: fmtBRLShort },
     ticket: { label: "Ticket por loja", get: (s) => s.ticket, fmt: fmtBRL },
-    conv: { label: "Conversão por loja (%)", get: (s) => s.conv * 100, fmt: (n) => `${n.toFixed(2)}%` },
+    conv: { label: "Conversão por loja (%)", get: (s) => s.conv * 100, fmt: (n) => `${n.toFixed(2).replace(".", ",")}%` },
   };
   const c = conf[v];
   const vals = ag.ativos.map(c.get).filter((n) => n > 0);
@@ -842,7 +842,7 @@ function Estatistica({ ag }: { ag: Agg }) {
             <span className="cart-stat-lbl">Média</span><span className="cart-stat-val">{c.fmt(s.mean)}</span>
             <span className="cart-stat-lbl">Mediana</span><span className="cart-stat-val">{c.fmt(s.median)}</span>
             <span className="cart-stat-lbl">σ</span><span className="cart-stat-val">{c.fmt(s.sd)}</span>
-            <span className="cart-stat-lbl">CV</span><span className="cart-stat-val">{(s.cv * 100).toFixed(1)}%</span>
+            <span className="cart-stat-lbl">CV</span><span className="cart-stat-val">{(s.cv * 100).toFixed(1).replace(".", ",")}%</span>
             <span className="cart-stat-lbl">Assimetria</span><span className="cart-stat-val">{s.skewness.toFixed(2)}</span>
             <span className="cart-stat-lbl">Q1–Q3</span><span className="cart-stat-val">{c.fmt(s.q1)} – {c.fmt(s.q3)}</span>
           </div>
@@ -1144,7 +1144,7 @@ function LojaALoja({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
             <Kpi label="GMV" value={fmtBRL(selSeller.gmv)} />
             <Kpi label="Unidades" value={fmtInt(selSeller.tsi)} />
             <Kpi label="Ticket" value={fmtBRL(selSeller.ticket)} />
-            <Kpi label="Conversão" value={`${(selSeller.conv * 100).toFixed(2)}%`} />
+            <Kpi label="Conversão" value={`${(selSeller.conv * 100).toFixed(2).replace(".", ",")}%`} />
             <Kpi label="Δ período" value={fmtBRL(selSeller.delta)} hint={fmtPct(selSeller.deltaPct)} />
             <Kpi label="Anúncios" value={fmtInt(selSeller.anuncios)} />
           </div>

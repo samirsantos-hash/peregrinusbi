@@ -51,7 +51,7 @@ const fmtBRLCompact = (v: number) =>
 const fmtBRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v || 0);
 const fmtInt = (v: number) => new Intl.NumberFormat("pt-BR").format(Math.round(v || 0));
-const fmtRoas = (v: number) => `${(v || 0).toFixed(2)}x`;
+const fmtRoas = (v: number) => `${(v || 0).toFixed(2).replace(".", ",")}x`;
 
 function fmtKpi(v: number | null, formato: "currency" | "number" | "roas", compact = false): string {
   if (v === null || v === undefined || !Number.isFinite(v)) return "—";
@@ -281,7 +281,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
 
   const yFmt = (v: number) =>
     cfg.format === "currency" ? fmtBRLCompact(v) :
-    cfg.format === "roas" ? `${v.toFixed(1)}x` :
+    cfg.format === "roas" ? `${v.toFixed(1).replace(".", ",")}x` :
     new Intl.NumberFormat("pt-BR", { notation: "compact" }).format(v);
 
   function toggleComparado(k: KpiKey) {

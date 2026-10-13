@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -107,8 +108,8 @@ export default function ProjecaoPanel({ custIds, portfolioName }: Props) {
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Último Mês</p>
                 <p className="text-lg font-bold tabular-nums">{ultimo ? fmtBRL(ultimo.receita) : "—"}</p>
                 {mom != null && (
-                  <p className={`text-xs ${mom >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-                    {mom >= 0 ? "+" : ""}{mom.toFixed(1)}% MoM
+                  <p className={`text-xs ${mom >= 0 ? "text-ok" : "text-crit"}`}>
+                    {mom >= 0 ? "+" : ""}{mom.toFixed(1).replace(".", ",")}% MoM
                   </p>
                 )}
               </div>
@@ -129,7 +130,7 @@ export default function ProjecaoPanel({ custIds, portfolioName }: Props) {
                 <ComposedChart data={chartData} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
                   <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                   <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : `${v}`)} />
+                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => numCurto(v)} />
                   <Tooltip
                     contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
                     formatter={(v: any, name: any) => [typeof v === "number" ? fmtBRL(v) : v, name]}

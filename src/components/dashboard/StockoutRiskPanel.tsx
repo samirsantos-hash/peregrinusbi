@@ -55,8 +55,8 @@ function dedupeByMlb(items: EligibilityItem[]): EligibilityItem[] {
 
 const sevColor: Record<Row["severidade"], string> = {
   critical: "bg-destructive/15 text-destructive border-destructive/30",
-  warn: "bg-amber-500/15 text-amber-400 border-amber-500/30",
-  ok: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30",
+  warn: "bg-ec-ambar/15 text-ec-ambar border-ec-ambar/30",
+  ok: "bg-ec-verde/10 text-ok border-ec-verde/30",
 };
 
 const sevLabel: Record<Row["severidade"], string> = {
@@ -100,7 +100,7 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
         onClick={() => doCopy(key, buildText())}
         className="gap-1.5 text-xs h-7"
       >
-        {active ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+        {active ? <CheckCircle className="w-3.5 h-3.5 text-ok" /> : <Copy className="w-3.5 h-3.5" />}
         {active ? "Copiado" : label}
       </Button>
     );
@@ -145,7 +145,7 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
             <p className="text-[11px] text-muted-foreground mt-1">
               {rows.length} itens com venda 7d ·
               {" "}<span className="text-destructive font-medium">{criticalCount} ruptura</span> ·
-              {" "}<span className="text-amber-400 font-medium">{warnCount} baixa cobertura</span>
+              {" "}<span className="text-ec-ambar font-medium">{warnCount} baixa cobertura</span>
             </p>
           </div>
 
@@ -238,7 +238,7 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
                   key={r.id}
                   className={`border-b border-border/20 transition-colors ${
                     isCopied
-                      ? "bg-emerald-500/10 ring-1 ring-inset ring-emerald-500/40"
+                      ? "bg-ec-verde/10 ring-1 ring-inset ring-ec-verde/40"
                       : "hover:bg-muted/20"
                   }`}
                 >
@@ -253,7 +253,7 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
                         className="text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {copied === `row-${r.id}`
-                          ? <CheckCircle className="w-3 h-3 text-emerald-400" />
+                          ? <CheckCircle className="w-3 h-3 text-ok" />
                           : <Copy className="w-3 h-3" />}
                       </button>
                     </span>
@@ -267,7 +267,7 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
                   </td>
                   <td className={`py-1.5 px-2 text-right tabular-nums font-medium ${
                     r.severidade === "critical" ? "text-destructive" :
-                    r.severidade === "warn" ? "text-amber-400" : "text-emerald-400"
+                    r.severidade === "warn" ? "text-ec-ambar" : "text-ok"
                   }`}>
                     {r.coberturaDias >= 999 ? "∞" : `${r.coberturaDias.toFixed(1)}d`}
                   </td>

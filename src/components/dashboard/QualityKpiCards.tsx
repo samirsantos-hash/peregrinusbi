@@ -51,7 +51,7 @@ function CorrectionBadge({ value, refKey }: { value: number; refKey: string }) {
   if (ref === undefined || value === 0) return null;
   const delta = value - ref;
   if (delta > 5) {
-    return <span className="text-[10px] font-semibold text-emerald-400 ml-1">▲ +{delta.toFixed(0)} pts</span>;
+    return <span className="text-[10px] font-semibold text-ok ml-1">▲ +{delta.toFixed(0)} pts</span>;
   }
   if (delta < -5) {
     return <span className="text-[10px] font-semibold text-destructive ml-1">▼ {delta.toFixed(0)} pts</span>;
@@ -200,7 +200,7 @@ const QualityKpiCards = ({
               {card.noFullMessage ? (
                 <div className="space-y-1">
                   <span className="text-xs text-muted-foreground italic">{card.noFullMessage}</span>
-                  <p className="text-[10px] text-amber-400">Ação: ativar itens no Mercado Envios Full</p>
+                  <p className="text-[10px] text-ec-ambar">Ação: ativar itens no Mercado Envios Full</p>
                 </div>
               ) : (
                 <>

@@ -1,3 +1,4 @@
+import { brlCurto, numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -87,10 +88,8 @@ interface Props {
 function fmtCurrency(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
-function fmtCompact(v: number): string {
-  if (Math.abs(v) >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(v) >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}K`;
-  return fmtCurrency(v);
+function fmtCompact(v: number | null): string {
+  return brlCurto(v);
 }
 
 export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDate }: Props) {
@@ -162,15 +161,15 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
     },
     {
       label: "ROAS",
-      seller: sellerMetrics.roas !== null ? `${sellerMetrics.roas.toFixed(1)}x` : "—",
-      median: `${benchmark.roas.toFixed(1)}x`,
+      seller: sellerMetrics.roas !== null ? `${sellerMetrics.roas.toFixed(1).replace(".", ",")}x` : "—",
+      median: `${benchmark.roas.toFixed(1).replace(".", ",")}x`,
       delta: benchmark.roas > 0 && sellerMetrics.roas !== null ? ((sellerMetrics.roas - benchmark.roas) / benchmark.roas) * 100 : null,
       tooltip: null,
     },
     {
       label: "Taxa conversão",
-      seller: sellerMetrics.txConversao !== null ? `${sellerMetrics.txConversao.toFixed(1)}%` : "—",
-      median: `${benchmark.conv.toFixed(1)}%`,
+      seller: sellerMetrics.txConversao !== null ? `${sellerMetrics.txConversao.toFixed(1).replace(".", ",")}%` : "—",
+      median: `${benchmark.conv.toFixed(1).replace(".", ",")}%`,
       delta: benchmark.conv > 0 && sellerMetrics.txConversao !== null ? ((sellerMetrics.txConversao - benchmark.conv) / benchmark.conv) * 100 : null,
       tooltip: CONVERSION_MARKET_BAND,
     },
@@ -207,9 +206,9 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
                     <TooltipTrigger><Info className="w-3 h-3" /></TooltipTrigger>
                     <TooltipContent className="text-xs">
                       <p>Benchmark {vertical}:</p>
-                      <p>Mais barato: {priceBench.cheaper.toFixed(1)}%</p>
-                      <p>Mesmo preço: {priceBench.match.toFixed(1)}%</p>
-                      <p>Mais caro: {priceBench.expensive.toFixed(1)}%</p>
+                      <p>Mais barato: {priceBench.cheaper.toFixed(1).replace(".", ",")}%</p>
+                      <p>Mesmo preço: {priceBench.match.toFixed(1).replace(".", ",")}%</p>
+                      <p>Mais caro: {priceBench.expensive.toFixed(1).replace(".", ",")}%</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -219,22 +218,22 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
           <CardContent>
             <div className="flex w-full h-8 rounded-lg overflow-hidden">
               <div
-                className="bg-emerald-500/70 flex items-center justify-center text-[10px] font-bold text-foreground"
+                className="bg-ec-verde/70 flex items-center justify-center text-[10px] font-bold text-foreground"
                 style={{ width: `${pricePositioning.cheaper}%` }}
               >
-                {pricePositioning.cheaper >= 8 ? `${pricePositioning.cheaper.toFixed(0)}%` : ""}
+                {pricePositioning.cheaper >= 8 ? `${pricePositioning.cheaper.toFixed(0).replace(".", ",")}%` : ""}
               </div>
               <div
                 className="bg-muted flex items-center justify-center text-[10px] font-bold text-foreground"
                 style={{ width: `${pricePositioning.match}%` }}
               >
-                {pricePositioning.match >= 8 ? `${pricePositioning.match.toFixed(0)}%` : ""}
+                {pricePositioning.match >= 8 ? `${pricePositioning.match.toFixed(0).replace(".", ",")}%` : ""}
               </div>
               <div
                 className="bg-destructive/60 flex items-center justify-center text-[10px] font-bold text-foreground"
                 style={{ width: `${pricePositioning.expensive}%` }}
               >
-                {pricePositioning.expensive >= 8 ? `${pricePositioning.expensive.toFixed(0)}%` : ""}
+                {pricePositioning.expensive >= 8 ? `${pricePositioning.expensive.toFixed(0).replace(".", ",")}%` : ""}
               </div>
             </div>
             <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
@@ -280,9 +279,9 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
                     <TableCell className="text-xs text-right">
                       {r.delta !== null ? (
                         <span className={cn("inline-flex items-center gap-0.5 font-semibold",
-                          r.delta >= 0 ? "text-emerald-400" : "text-destructive")}>
+                          r.delta >= 0 ? "text-ok" : "text-destructive")}>
                           {r.delta >= 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                          {r.delta >= 0 ? "+" : ""}{r.delta.toFixed(1)}%
+                          {r.delta >= 0 ? "+" : ""}{r.delta.toFixed(1).replace(".", ",")}%
                         </span>
                       ) : (
                         <Minus className="w-3 h-3 text-muted-foreground inline" />

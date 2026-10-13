@@ -56,8 +56,8 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
     if (s.tgmvLc >= top20Threshold && trend && (trend.tgmvTrend < -15 || trend.visitsTrend < -15)) {
       alerts.push({
         icon: TrendingDown,
-        color: "text-red-500 bg-red-500/10 border-red-500/20",
-        message: `🚨 Risco de Churn: ${s.nickname} apresenta queda severa (Fat: ${trend.tgmvTrend.toFixed(0)}%, Visitas: ${trend.visitsTrend.toFixed(0)}%). Plano de ação imediato.`,
+        color: "text-crit bg-ec-vermelho/10 border-ec-vermelho/20",
+        message: `🚨 Risco de Churn: ${s.nickname} apresenta queda severa (Fat: ${trend.tgmvTrend.toFixed(0).replace(".", ",")}%, Visitas: ${trend.visitsTrend.toFixed(0).replace(".", ",")}%). Plano de ação imediato.`,
         priority: 0,
       });
     }
@@ -76,8 +76,8 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       if (isHighTraffic && convRate < avgConv * 0.6) {
         alerts.push({
           icon: Search,
-          color: "text-orange-500 bg-orange-500/10 border-orange-500/20",
-          message: `🚨 Queda de Ranking Iminente: ${s.nickname} com alto tráfego mas conversão ${convRate.toFixed(2)}% (média ${avgConv.toFixed(2)}%). O algoritmo irá penalizar. Revise Preço ou Fotos.`,
+          color: "text-ec-laranja bg-ec-laranja/10 border-ec-laranja/20",
+          message: `🚨 Queda de Ranking Iminente: ${s.nickname} com alto tráfego mas conversão ${convRate.toFixed(2).replace(".", ",")}% (média ${avgConv.toFixed(2).replace(".", ",")}%). O algoritmo irá penalizar. Revise Preço ou Fotos.`,
           priority: 1,
         });
       }
@@ -87,7 +87,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
     if (s.scoreQualidadeFinal < 50) {
       alerts.push({
         icon: Camera,
-        color: "text-red-400 bg-red-400/10 border-red-400/20",
+        color: "text-crit bg-ec-vermelho/10 border-ec-vermelho/20",
         message: `📸 Melhorar Fotos: ${s.nickname} com score de catálogo ${s.scoreQualidadeFinal.toFixed(0)} (abaixo de 50).`,
         priority: 2,
       });
@@ -97,8 +97,8 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
     if (s.tgmvLc >= top20Threshold && adsRatio < 1.5) {
       alerts.push({
         icon: TrendingUp,
-        color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-        message: `📈 Subaproveitamento de Escala: ${s.nickname} com Ads em ${adsRatio.toFixed(1)}%. Aumentar para 3% é a estratégia de menor risco para dominar a vertical.`,
+        color: "text-ok bg-ec-verde/10 border-ec-verde/20",
+        message: `📈 Subaproveitamento de Escala: ${s.nickname} com Ads em ${adsRatio.toFixed(1).replace(".", ",")}%. Aumentar para 3% é a estratégia de menor risco para dominar a vertical.`,
         priority: 3,
       });
     }
@@ -107,8 +107,8 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
     if (adsRatio > 5) {
       alerts.push({
         icon: AlertTriangle,
-        color: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-        message: `⚠️ Vazamento de Margem: ${s.nickname} com custo de aquisição alto (Ads ${adsRatio.toFixed(1)}%). Revisar campanhas.`,
+        color: "text-ec-ambar bg-ec-ambar/10 border-ec-ambar/20",
+        message: `⚠️ Vazamento de Margem: ${s.nickname} com custo de aquisição alto (Ads ${adsRatio.toFixed(1).replace(".", ",")}%). Revisar campanhas.`,
         priority: 4,
       });
     }
@@ -117,7 +117,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
     if (s.tgmvLc >= top20Threshold && modal === "AGENCIA") {
       alerts.push({
         icon: Truck,
-        color: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+        color: "text-ec-verde-txt bg-ec-verde/10 border-ec-verde/20",
         message: `Oportunidade Logística: ${s.nickname} tem alto volume preso em Agência. Transição para FULL ou FLEX é mandatória para blindar a conta.`,
         priority: 5,
       });
@@ -127,8 +127,8 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
     if (potenciaFull > 50 && s.scoreOfertaFinal < 30) {
       alerts.push({
         icon: Zap,
-        color: "text-violet-400 bg-violet-400/10 border-violet-400/20",
-        message: `⚠️ Algoritmo: ${s.nickname} com Potência Full ${potenciaFull.toFixed(0)}% mas fora da Central de Promoções (Score Oferta ${s.scoreOfertaFinal.toFixed(0)}). Aceite ofertas oficiais para subir no ranking.`,
+        color: "text-foreground bg-ec-ink/10 border-ec-ink/20",
+        message: `⚠️ Algoritmo: ${s.nickname} com Potência Full ${potenciaFull.toFixed(0).replace(".", ",")}% mas fora da Central de Promoções (Score Oferta ${s.scoreOfertaFinal.toFixed(0)}). Aceite ofertas oficiais para subir no ranking.`,
         priority: 6,
       });
     }
@@ -141,8 +141,8 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       if (campaign.taxaConversaoVertical > 0 && sellerConv > 0 && sellerConv < campaign.taxaConversaoVertical) {
         alerts.push({
           icon: BarChart3,
-          color: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-          message: `🚨 Gargalo de Catálogo: ${s.nickname} com conversão ${sellerConv.toFixed(2)}% abaixo da vertical ${campaign.verticalPrincipal || ""} (${campaign.taxaConversaoVertical.toFixed(2)}%). Revise fotos e títulos.`,
+          color: "text-ec-laranja bg-ec-laranja/10 border-ec-laranja/20",
+          message: `🚨 Gargalo de Catálogo: ${s.nickname} com conversão ${sellerConv.toFixed(2).replace(".", ",")}% abaixo da vertical ${campaign.verticalPrincipal || ""} (${campaign.taxaConversaoVertical.toFixed(2).replace(".", ",")}%). Revise fotos e títulos.`,
           priority: 2,
         });
       }
@@ -151,8 +151,8 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       if (campaign.efectRtaVertical > 100 && adsRatio < 1.5 && s.tgmvLc > 0) {
         alerts.push({
           icon: TrendingUp,
-          color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-          message: `📈 Subaproveitamento de Escala: ${s.nickname} domina a vertical organicamente (Efet. ${campaign.efectRtaVertical.toFixed(0)}%) mas Ads em ${adsRatio.toFixed(1)}%. Aumentar Ads é a estratégia de menor risco.`,
+          color: "text-ok bg-ec-verde/10 border-ec-verde/20",
+          message: `📈 Subaproveitamento de Escala: ${s.nickname} domina a vertical organicamente (Efet. ${campaign.efectRtaVertical.toFixed(0).replace(".", ",")}%) mas Ads em ${adsRatio.toFixed(1).replace(".", ",")}%. Aumentar Ads é a estratégia de menor risco.`,
           priority: 3,
         });
       }
@@ -161,8 +161,8 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       if (campaign.efectRtaVertical > 0 && campaign.efectRtaVertical < 70) {
         alerts.push({
           icon: AlertTriangle,
-          color: "text-red-400 bg-red-400/10 border-red-400/20",
-          message: `⚠️ Abaixo do Mercado: ${s.nickname} com efetividade ${campaign.efectRtaVertical.toFixed(0)}% na vertical ${campaign.verticalPrincipal || ""}. Ação urgente para recuperar ranking.`,
+          color: "text-crit bg-ec-vermelho/10 border-ec-vermelho/20",
+          message: `⚠️ Abaixo do Mercado: ${s.nickname} com efetividade ${campaign.efectRtaVertical.toFixed(0).replace(".", ",")}% na vertical ${campaign.verticalPrincipal || ""}. Ação urgente para recuperar ranking.`,
           priority: 4,
         });
       }
@@ -172,7 +172,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
     if (ticketMedio > 0 && ticketMedio < 50 && s.tsi >= 10) {
       alerts.push({
         icon: ShoppingCart,
-        color: "text-cyan-400 bg-cyan-400/10 border-cyan-400/20",
+        color: "text-ec-verde-txt bg-ec-verde/10 border-ec-verde/20",
         message: `Oportunidade: ${s.nickname} com ticket médio R$${ticketMedio.toFixed(0)}. Crie anúncios em formato KIT para diluir frete e ganhar prioridade no algoritmo.`,
         priority: 8,
       });

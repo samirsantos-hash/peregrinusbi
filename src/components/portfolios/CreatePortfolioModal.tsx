@@ -234,13 +234,13 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
           {parseResult && (
             <div className="space-y-2 text-sm">
               {parseResult.matched.length > 0 && (
-                <div className="flex items-center gap-2 text-emerald-400">
+                <div className="flex items-center gap-2 text-ok">
                   <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>{parseResult.matched.length} Seller(s) identificado(s).</span>
                 </div>
               )}
               {parseResult.notFound.length > 0 && (
-                <div className="flex items-start gap-2 text-amber-400">
+                <div className="flex items-start gap-2 text-ec-ambar">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>
                     Não encontrados: <strong>{parseResult.notFound.join(", ")}</strong>

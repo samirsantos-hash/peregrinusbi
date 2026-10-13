@@ -192,7 +192,7 @@ const DIAG_ORDER: Record<Diagnostico, number> = {
 
 const GIRO_CONFIG: Record<StatusGiro, { emoji: string; label: string; cls: string; title: string }> = {
   parado: { emoji: "🔴", label: "Parado", cls: "bg-destructive/10 text-destructive", title: "Nenhum pedido esta semana" },
-  lento: { emoji: "🟠", label: "Lento", cls: "bg-orange-500/10 text-orange-500", title: "Mais de 60 dias de estoque" },
+  lento: { emoji: "🟠", label: "Lento", cls: "bg-ec-laranja/10 text-ec-laranja", title: "Mais de 60 dias de estoque" },
   normal: { emoji: "🟡", label: "Normal", cls: "bg-warning/10 text-warning", title: "15 a 60 dias de estoque" },
   girando: { emoji: "🟢", label: "Girando", cls: "bg-emerald/10 text-emerald", title: "Menos de 15 dias — monitorar reposição" },
 };
@@ -256,7 +256,7 @@ function ItemRow({ item }: { item: MLBPerformance }) {
         </td>
         <td className="py-2 px-2 text-right text-xs font-mono tabular-nums">{item.estoqueMedio.toFixed(0)}</td>
         <td className={`py-2 px-2 text-right text-xs font-mono tabular-nums ${item.shareEstoqueFull >= 50 ? "text-emerald font-semibold" : "text-muted-foreground"}`}>
-          {item.shareEstoqueFull.toFixed(0)}%
+          {item.shareEstoqueFull.toFixed(0).replace(".", ",")}%
         </td>
         <td className="py-2 px-2 text-right">
           {item.qualityScore !== null ? (
@@ -291,12 +291,12 @@ function ItemRow({ item }: { item: MLBPerformance }) {
                 <p className="text-[11px] text-emerald">✅ Sem gaps identificados.</p>
               )}
               <p className="text-[10px] text-muted-foreground pt-1">
-                Estoque Full: <span className="font-mono tabular-nums">{item.estoqueFull.toFixed(0)} un</span> ({item.shareEstoqueFull.toFixed(0)}%)
+                Estoque Full: <span className="font-mono tabular-nums">{item.estoqueFull.toFixed(0)} un</span> ({item.shareEstoqueFull.toFixed(0).replace(".", ",")}%)
                 {item.diasEstoque !== null && item.diasEstoque < 999 && (
                   <> · Cobertura: <span className="font-mono tabular-nums">{item.diasEstoque} dias</span></>
                 )}
                 {" · "}
-                Desconto seller: <span className="font-mono tabular-nums">{item.descontoSellerPct.toFixed(0)}%</span>
+                Desconto seller: <span className="font-mono tabular-nums">{item.descontoSellerPct.toFixed(0).replace(".", ",")}%</span>
                 {item.qualityScore !== null && (
                   <>
                     {" · "}Fotos <span className="font-mono">{(item.scoreFotos ?? 0).toFixed(0)}</span>
@@ -323,7 +323,7 @@ function ResumoOportunidades({ itens }: { itens: MLBPerformance[] }) {
 
   const cards = [
     { label: "Gap de qualidade", valor: qualidade, color: "text-destructive", desc: "score ou ficha a corrigir" },
-    { label: "Sem visibilidade", valor: visib, color: "text-orange-500", desc: "itens sem CDP e vendas baixas" },
+    { label: "Sem visibilidade", valor: visib, color: "text-ec-laranja", desc: "itens sem CDP e vendas baixas" },
     { label: "Estoque parado", valor: parado, color: "text-warning", desc: "itens com capital imobilizado" },
     { label: "Un. sem girar", valor: Math.round(unParadas), color: "text-muted-foreground", desc: "itens parados ou lentos" },
   ];
@@ -384,7 +384,7 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
             <TooltipInfo text="Diagnóstico por MLB usando dias de estoque (estoque ÷ média diária de vendas) cruzado com qualidade do anúncio." />
           </div>
           <p className="text-[11px] text-muted-foreground mt-1">
-            Baseado em giro (dias de estoque) e qualidade — fonte: <code className="px-1 rounded bg-muted">seller_eligibility</code> + <code className="px-1 rounded bg-muted">seller_listings_quality</code>
+            Baseado em giro (dias de estoque) e qualidade — fonte: elegibilidade de promoções + qualidade por anúncio
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -414,7 +414,7 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
         <p className="text-muted-foreground">
           <span className="font-semibold text-foreground">Como funciona:</span> visitas por anúncio não estão no CSV diarizado.
           O painel usa <span className="font-semibold">dias de estoque</span> (estoque ÷ média diária de vendas) como sinal de giro — mais acionável que taxa de conversão para decisões de reposição e promoção.
-          Quando há linha em <code className="px-1 rounded bg-muted">seller_listings_quality</code>, o score (fotos+título+ficha) refina o diagnóstico.
+          Quando há dado de qualidade do anúncio, o score (fotos+título+ficha) refina o diagnóstico.
         </p>
       </div>
 

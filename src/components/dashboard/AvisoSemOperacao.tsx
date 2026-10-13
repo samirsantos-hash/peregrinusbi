@@ -40,11 +40,11 @@ export default function AvisoSemOperacao({ kpis, nickname, contexto }: Props) {
   return (
     <div
       role="status"
-      className="flex items-start gap-3 rounded-lg border border-amber-500/25 bg-amber-500/[0.08] px-4 py-3"
+      className="flex items-start gap-3 rounded-lg border border-ec-ambar/25 bg-ec-ambar/[0.08] px-4 py-3"
     >
-      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" aria-hidden />
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-ec-ambar" aria-hidden />
       <div className="space-y-1">
-        <p className="text-sm font-semibold text-amber-500">
+        <p className="text-sm font-semibold text-ec-ambar">
           Sem operação no período{nickname ? ` — ${nickname}` : ""}
         </p>
         <p className="text-xs leading-relaxed text-muted-foreground">

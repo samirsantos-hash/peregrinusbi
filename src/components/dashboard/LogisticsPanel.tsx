@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="glass-card p-3 !bg-card/95 text-xs">
-      <p className="font-medium" style={{ color: payload[0].payload.fill }}>{payload[0].name}: {payload[0].value.toFixed(1)}%</p>
+      <p className="font-medium" style={{ color: payload[0].payload.fill }}>{payload[0].name}: {payload[0].value.toFixed(1).replace(".", ",")}%</p>
     </div>
   );
 };
@@ -40,7 +40,7 @@ const EvolutionTooltip = ({ active, payload, label }: any) => {
       <p className="font-mono text-muted-foreground">{label}</p>
       {payload.map((p: any, i: number) => (
         <p key={i} style={{ color: p.color }} className="font-medium">
-          {p.name}: {p.value.toFixed(1)}%
+          {p.name}: {p.value.toFixed(1).replace(".", ",")}%
         </p>
       ))}
     </div>
@@ -64,7 +64,7 @@ interface LogisticsPanelProps {
   eligibilityItems?: EligibilityItem[];
 }
 
-const COLORS = ["hsl(199, 100%, 50%)", "hsl(160, 84%, 39%)", "hsl(280, 80%, 60%)", "hsl(45, 80%, 55%)"];
+const COLORS = ["hsl(var(--ec-verde))", "hsl(var(--ok))", "hsl(var(--series-3))", "hsl(var(--ec-ambar))"];
 
 const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = [] }: LogisticsPanelProps) => {
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
@@ -136,7 +136,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
   const logIcons = [
     {
       label: "Mercado Envios Full",
-      value: `${shareFullGmv.toFixed(1)}%`,
+      value: `${shareFullGmv.toFixed(1).replace(".", ",")}%`,
       icon: Package,
       color: "neon-text",
       desc: `GMV: ${fmtBRLCompact(totalTgmvFull)}`,
@@ -146,7 +146,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
     },
     {
       label: "Flex",
-      value: `${shareFlexGmv.toFixed(1)}%`,
+      value: `${shareFlexGmv.toFixed(1).replace(".", ",")}%`,
       icon: Truck,
       color: "emerald-text",
       desc: `GMV: ${fmtBRLCompact(totalTgmvFlex)}`,
@@ -156,9 +156,9 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
     },
     {
       label: "Outros modais",
-      value: `${shareAgenciaGmv.toFixed(1)}%`,
+      value: `${shareAgenciaGmv.toFixed(1).replace(".", ",")}%`,
       icon: Mail,
-      color: "text-purple-400",
+      color: "text-foreground",
       desc: `GMV: ${fmtBRLCompact(totalTgmvAgencia)}`,
       tooltip: "Share de GMV residual (TGMV_LC - Full - Flex). Inclui Agência, Correios e Places, entre outros modais — não separáveis no CSV diário. Menor priorização no algoritmo MELI vs Full.",
       isEmpty: totalTgmvAgencia === 0,
@@ -376,7 +376,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             transition={{ delay: i * 0.1 }}
             className={`glass-card p-4 text-center ${item.isEmpty ? "opacity-40" : ""}`}
           >
-            <item.icon className={`w-6 h-6 mx-auto mb-2 ${item.color === "neon-text" ? "text-neon-blue" : item.color === "emerald-text" ? "text-emerald" : "text-purple-400"}`} />
+            <item.icon className={`w-6 h-6 mx-auto mb-2 ${item.color === "neon-text" ? "text-neon-blue" : item.color === "emerald-text" ? "text-emerald" : "text-foreground"}`} />
             <p className={`metric-value ${item.color}`}>{item.value}</p>
             <div className="flex items-center justify-center gap-1 mt-1">
               <p className="metric-label">{item.label}</p>
@@ -421,7 +421,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
               {showMigrationInsight ? (
                 <>
                   <p className="text-xs text-muted-foreground">
-                    O share de Full ({shareFullGmv.toFixed(1)}%) está abaixo do ideal (≥ 60%) e há{" "}
+                    O share de Full ({shareFullGmv.toFixed(1).replace(".", ",")}%) está abaixo do ideal (≥ 60%) e há{" "}
                     <span className="font-mono font-bold text-foreground">
                       {fmtBRLCompact(totalTgmvAgencia)}
                     </span>{" "}
@@ -443,7 +443,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                 </>
               ) : (
                 <p className="text-xs text-muted-foreground">
-                  Mix logístico saudável: Full ({shareFullGmv.toFixed(1)}%) acima do limiar do algoritmo.
+                  Mix logístico saudável: Full ({shareFullGmv.toFixed(1).replace(".", ",")}%) acima do limiar do algoritmo.
                   Mantenha a estratégia e monitore SKUs novos para garantir entrada direta no Full.
                 </p>
               )}
@@ -487,7 +487,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             </Pie>
             <Tooltip content={<CustomTooltip />} />
             <Legend
-              formatter={(value) => <span style={{ color: "hsl(215, 20%, 70%)", fontSize: 12 }}>{value}</span>}
+              formatter={(value) => <span style={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }}>{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -506,22 +506,22 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             <AreaChart data={evolutionData}>
               <defs>
                 <linearGradient id="gradFullLog" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gradFlexLog" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--ok))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--ok))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gradAgLog" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(280, 80%, 60%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(280, 80%, 60%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--series-3))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--series-3))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 interval="preserveStartEnd"
                 angle={evolutionData.length > 8 ? -45 : 0}
@@ -529,16 +529,16 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                 height={evolutionData.length > 8 ? 50 : 30}
               />
               <YAxis
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 tickFormatter={(v) => `${v}%`}
                 domain={[0, 100]}
               />
               <Tooltip content={<EvolutionTooltip />} />
-              <Area type="monotone" dataKey="% Full" stroke="hsl(199, 100%, 50%)" fill="url(#gradFullLog)" strokeWidth={2} />
-              <Area type="monotone" dataKey="% Flex" stroke="hsl(160, 84%, 39%)" fill="url(#gradFlexLog)" strokeWidth={2} />
-              <Area type="monotone" dataKey="% Agência" stroke="hsl(280, 80%, 60%)" fill="url(#gradAgLog)" strokeWidth={2} />
-              <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+              <Area type="monotone" dataKey="% Full" stroke="hsl(var(--ec-verde))" fill="url(#gradFullLog)" strokeWidth={2} />
+              <Area type="monotone" dataKey="% Flex" stroke="hsl(var(--ok))" fill="url(#gradFlexLog)" strokeWidth={2} />
+              <Area type="monotone" dataKey="% Agência" stroke="hsl(var(--series-3))" fill="url(#gradAgLog)" strokeWidth={2} />
+              <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -781,10 +781,10 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                               <p className="leading-relaxed">{explicarPeso(r)}</p>
                               <div className="grid grid-cols-2 gap-1 font-mono text-[10px] pt-2 border-t border-border/40">
                                 <span className="text-muted-foreground">Peso ótimo:</span>
-                                <span className="text-right">{pct.toFixed(2)}%</span>
+                                <span className="text-right">{pct.toFixed(2).replace(".", ",")}%</span>
                                 <span className="text-muted-foreground">Capacidade × peso:</span>
                                 <span className="text-right">
-                                  {capacity.toLocaleString("pt-BR")} × {pct.toFixed(2)}% ={" "}
+                                  {capacity.toLocaleString("pt-BR")} × {pct.toFixed(2).replace(".", ",")}% ={" "}
                                   {r.recommendedUnits.toLocaleString("pt-BR")} un.
                                 </span>
                                 <span className="text-muted-foreground">Velocidade diária:</span>
@@ -833,16 +833,16 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                         </div>
                       </td>
                       <td className="py-2 px-2 text-right font-mono tnum">
-                        {(r.meanReturn * 100).toFixed(2)}%
+                        {(r.meanReturn * 100).toFixed(2).replace(".", ",")}%
                       </td>
                       <td className="py-2 px-2 text-right font-mono tnum">
-                        {(r.volatility * 100).toFixed(2)}%
+                        {(r.volatility * 100).toFixed(2).replace(".", ",")}%
                       </td>
                       <td className="py-2 px-2 text-right font-mono tnum text-muted-foreground">
                         {r.sharpe.toFixed(2)}
                       </td>
                       <td className={`py-2 px-2 text-right font-mono tnum font-semibold ${tone}`}>
-                        {pct.toFixed(1)}%
+                        {pct.toFixed(1).replace(".", ",")}%
                       </td>
                       <td className="py-2 px-2 text-right font-mono tnum font-bold text-foreground">
                         {r.recommendedUnits.toLocaleString("pt-BR")}
@@ -865,7 +865,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                   <td className="py-2 pr-3 text-muted-foreground">Total</td>
                   <td colSpan={3}></td>
                   <td className="py-2 px-2 text-right font-mono tnum">
-                    {(markowitzRows.reduce((s, r) => s + r.weight, 0) * 100).toFixed(0)}%
+                    {(markowitzRows.reduce((s, r) => s + r.weight, 0) * 100).toFixed(0).replace(".", ",")}%
                   </td>
                   <td className="py-2 px-2 text-right font-mono tnum">
                     {markowitzRows.reduce((s, r) => s + r.recommendedUnits, 0).toLocaleString("pt-BR")}
@@ -960,11 +960,11 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                                     <>
                                       <span className="text-muted-foreground">σ linha:</span>
                                       <span className="text-right">
-                                        {(rowMeta.volatility * 100).toFixed(2)}%
+                                        {(rowMeta.volatility * 100).toFixed(2).replace(".", ",")}%
                                       </span>
                                       <span className="text-muted-foreground">σ coluna:</span>
                                       <span className="text-right">
-                                        {(colMeta.volatility * 100).toFixed(2)}%
+                                        {(colMeta.volatility * 100).toFixed(2).replace(".", ",")}%
                                       </span>
                                     </>
                                   )}

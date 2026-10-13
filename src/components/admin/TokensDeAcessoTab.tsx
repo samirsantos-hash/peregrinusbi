@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 type StatusFilter = "todos" | "online" | "inativos" | "ausentes";
 
 function getStatus(u: UsuarioComSessoes): { label: string; color: string; key: StatusFilter } {
-  if (u.sessoes_ativas > 0) return { label: "Online", color: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30", key: "online" };
+  if (u.sessoes_ativas > 0) return { label: "Online", color: "bg-ec-verde/15 text-ok border-ec-verde/30", key: "online" };
   if (!u.ultimo_acesso) return { label: "Nunca acessou", color: "bg-muted/50 text-muted-foreground border-border", key: "inativos" };
   const diff = Date.now() - new Date(u.ultimo_acesso).getTime();
   if (diff > 30 * 24 * 3600_000) return { label: "Ausente >30d", color: "bg-destructive/15 text-destructive border-destructive/30", key: "ausentes" };
@@ -81,7 +81,7 @@ export default function TokensDeAcessoTab() {
     <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard icon={<Activity className="w-5 h-5 text-emerald-400" />} label="Ativos agora" value={kpis.ativosAgora} />
+        <KpiCard icon={<Activity className="w-5 h-5 text-ok" />} label="Ativos agora" value={kpis.ativosAgora} />
         <KpiCard icon={<Users className="w-5 h-5 text-neon-blue" />} label="Acessos hoje" value={kpis.acessosHoje} />
         <KpiCard icon={<Clock className="w-5 h-5 text-primary" />} label="Últimos 7 dias" value={kpis.seteDias} />
         <KpiCard icon={<AlertTriangle className="w-5 h-5 text-destructive" />} label="Inativos >30d" value={kpis.inativos30d} />

@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import {
   ResponsiveContainer,
@@ -202,13 +203,7 @@ export default function PockEvolucaoCard({
                 tick={{ fontSize: 11 }}
                 width={46}
                 tickCount={5}
-                tickFormatter={(v) =>
-                  Math.abs(v) >= 1_000_000
-                    ? `${(v / 1_000_000).toFixed(1)}M`
-                    : Math.abs(v) >= 1000
-                      ? `${(v / 1000).toFixed(0)}k`
-                      : `${v}`
-                }
+                tickFormatter={(v) => numCurto(v)}
               />
               <YAxis
                 yAxisId="p"

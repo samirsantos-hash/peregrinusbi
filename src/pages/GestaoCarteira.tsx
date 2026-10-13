@@ -92,7 +92,7 @@ interface EnrichedSeller extends SellerData {
 // ── Formatters ──
 const fmtBRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
-const fmtPct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
+const fmtPct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1).replace(".", ",")}%`;
 const fmtCompact = (v: number) =>
   new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(v);
 
@@ -693,7 +693,7 @@ export default function GestaoCarteira() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-orange-400" />
+              <AlertTriangle className="w-4 h-4 text-ec-laranja" />
               Central de Alertas
             </CardTitle>
           </CardHeader>
@@ -741,7 +741,7 @@ export default function GestaoCarteira() {
                         exit={{ opacity: 0, x: 12 }}
                         transition={{ duration: 0.25, delay: idx * 0.03 }}
                         className={`flex items-center justify-between border rounded-lg p-3 ${
-                          s.alerts.some((a) => a.pulsante) ? "animate-pulse border-red-500/50" : "border-border/50"
+                          s.alerts.some((a) => a.pulsante) ? "animate-pulse border-ec-vermelho/50" : "border-border/50"
                         }`}
                       >
                         <div className="flex-1 min-w-0">
@@ -1025,7 +1025,7 @@ export default function GestaoCarteira() {
               </div>
               {funnel.length > 1 && funnel[0].valor > 0 && (
                 <p className="text-[11px] text-muted-foreground mt-1">
-                  Conversão total: {((funnel[funnel.length - 1].valor / funnel[0].valor) * 100).toFixed(1)}% dos itens elegíveis geraram pedidos.
+                  Conversão total: {((funnel[funnel.length - 1].valor / funnel[0].valor) * 100).toFixed(1).replace(".", ",")}% dos itens elegíveis geraram pedidos.
                 </p>
               )}
             </CardContent>
@@ -1147,12 +1147,12 @@ export default function GestaoCarteira() {
                       <TableCell className="text-xs">{s.h_l}</TableCell>
                       <TableCell className="text-xs">{s.cus_state}</TableCell>
                       <TableCell className="text-right tabular-nums">{fmtCompact(s.tgmv_lc)}</TableCell>
-                      <TableCell className={`text-right tabular-nums ${s.vs_pm_pct >= 0 ? "text-green-400" : "text-red-400"}`}>
+                      <TableCell className={`text-right tabular-nums ${s.vs_pm_pct >= 0 ? "text-ok" : "text-crit"}`}>
                         {fmtPct(s.vs_pm_pct)}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">{s.score_final_full.toFixed(1)}</TableCell>
                       <TableCell className={`text-right tabular-nums ${
-                        s.dias_expiracao < 0 ? "text-red-500" : s.dias_expiracao <= 30 ? "text-orange-400" : ""
+                        s.dias_expiracao < 0 ? "text-crit" : s.dias_expiracao <= 30 ? "text-ec-laranja" : ""
                       }`}>
                         {s.dias_expiracao}
                       </TableCell>
@@ -1213,7 +1213,7 @@ export default function GestaoCarteira() {
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] text-muted-foreground">Δ MoM</p>
-                    <p className={`font-bold tabular-nums text-sm ${drawerSeller.vs_pm_pct >= 0 ? "text-green-400" : "text-red-400"}`}>
+                    <p className={`font-bold tabular-nums text-sm ${drawerSeller.vs_pm_pct >= 0 ? "text-ok" : "text-crit"}`}>
                       {fmtPct(drawerSeller.vs_pm_pct)}
                     </p>
                   </div>
@@ -1231,7 +1231,7 @@ export default function GestaoCarteira() {
                   </div>
                   <div className="text-center">
                     <p className="text-[10px] text-muted-foreground">Dias Exp.</p>
-                    <p className={`font-bold tabular-nums text-sm ${drawerSeller.dias_expiracao < 0 ? "text-red-500" : drawerSeller.dias_expiracao <= 30 ? "text-orange-400" : ""}`}>
+                    <p className={`font-bold tabular-nums text-sm ${drawerSeller.dias_expiracao < 0 ? "text-crit" : drawerSeller.dias_expiracao <= 30 ? "text-ec-laranja" : ""}`}>
                       {drawerSeller.dias_expiracao}
                     </p>
                   </div>

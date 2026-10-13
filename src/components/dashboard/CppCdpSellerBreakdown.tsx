@@ -1,3 +1,4 @@
+import { brlCurto, numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,14 +20,12 @@ interface Props {
 function fmtCurrency(v: number): string {
   return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
 }
-function fmtCompact(v: number): string {
-  if (Math.abs(v) >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
-  if (Math.abs(v) >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}K`;
-  return fmtCurrency(v);
+function fmtCompact(v: number | null): string {
+  return brlCurto(v);
 }
 function fmtPct(v: number | null): string {
   if (v === null) return "—";
-  return `${v.toFixed(1)}%`;
+  return `${v.toFixed(1).replace(".", ",")}%`;
 }
 
 interface DailyCdp {
@@ -127,17 +126,17 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
         <Card className="bg-card border-border">
           <CardContent className="p-3">
             <div className="flex items-center gap-1.5 mb-1">
-              <TrendingUp className="w-3 h-3 text-emerald-400" />
+              <TrendingUp className="w-3 h-3 text-ok" />
               <span className="text-[10px] text-muted-foreground uppercase">ROAS CDP</span>
             </div>
-            <p className="text-lg font-bold font-mono text-foreground">{totals.cdpRoas !== null ? `${totals.cdpRoas.toFixed(1)}x` : "—"}</p>
+            <p className="text-lg font-bold font-mono text-foreground">{totals.cdpRoas !== null ? `${totals.cdpRoas.toFixed(1).replace(".", ",")}x` : "—"}</p>
             <span className="text-[10px] text-muted-foreground">Inv: {fmtCompact(totals.cdpInv)}</span>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-3">
             <div className="flex items-center gap-1.5 mb-1">
-              <DollarSign className="w-3 h-3 text-amber-400" />
+              <DollarSign className="w-3 h-3 text-ec-ambar" />
               <span className="text-[10px] text-muted-foreground uppercase">Rebate</span>
             </div>
             <p className="text-lg font-bold font-mono text-foreground">{fmtCompact(totals.rebate)}</p>
@@ -171,7 +170,7 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
                   <XAxis dataKey="label" tick={{ fill: "hsl(var(--axis))", fontSize: 11 }} />
                   <YAxis
                     tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
-                    tickFormatter={(v: number) => v >= 1000 ? `${(v / 1000).toFixed(0)}K` : String(v)}
+                    tickFormatter={(v: number) => numCurto(v)}
                   />
                   <Tooltip
                     contentStyle={{
@@ -192,7 +191,7 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
                     wrapperStyle={{ fontSize: "10px" }}
                   />
                   <Bar dataKey="cdpGmv" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="rebate" fill="hsl(45, 80%, 55%)" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="rebate" fill="hsl(var(--ec-ambar))" radius={[3, 3, 0, 0]} />
                   <Bar dataKey="semRebate" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} opacity={0.6} />
                 </BarChart>
               </ResponsiveContainer>
@@ -217,7 +216,7 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-amber-400 rounded-full"
+                  className="h-full bg-ec-ambar rounded-full"
                   style={{ width: `${totals.cdpInv > 0 ? (totals.rebate / totals.cdpInv) * 100 : 0}%` }}
                 />
               </div>

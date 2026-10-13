@@ -58,8 +58,8 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-          <TrendingDown className="w-6 h-6 text-emerald-500 text-destructive-foreground" />
+        <div className="w-12 h-12 rounded-xl bg-ec-verde/10 border border-ec-verde/20 flex items-center justify-center shrink-0">
+          <TrendingDown className="w-6 h-6 text-ok text-destructive-foreground" />
         </div>
         <div className="flex-1">
           <p className="text-lg font-bold text-foreground">
@@ -79,7 +79,7 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
           className="bg-muted/30 rounded-lg p-3">
           
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">CPA Médio</p>
-          <p className="text-sm font-bold font-mono text-emerald-500 mt-1">{fmtBRL(best.avgCpa)}</p>
+          <p className="text-sm font-bold font-mono text-ok mt-1">{fmtBRL(best.avgCpa)}</p>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 5 }}

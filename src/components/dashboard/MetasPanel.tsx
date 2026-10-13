@@ -33,8 +33,8 @@ function corAtingimento(pct: number | null, inverso = false): string {
   if (pct == null) return "bg-muted/30 text-muted-foreground border-muted/40";
   const ok = inverso ? pct <= 100 : pct >= 100;
   const meio = inverso ? pct <= 130 : pct >= 80;
-  if (ok) return "bg-emerald-500/15 text-emerald-500 border-emerald-500/30";
-  if (meio) return "bg-amber-500/15 text-amber-500 border-amber-500/30";
+  if (ok) return "bg-ec-verde/15 text-ok border-ec-verde/30";
+  if (meio) return "bg-ec-ambar/15 text-ec-ambar border-ec-ambar/30";
   return "bg-destructive/15 text-destructive border-destructive/30";
 }
 
@@ -210,14 +210,14 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
                       <td className="py-2 pr-3">{fmtBRL(l.realFaturamento)}</td>
                       <td className="py-2 pr-3">
                         <Badge variant="outline" className={corAtingimento(pctFat)}>
-                          {pctFat == null ? "sem meta" : `${pctFat.toFixed(0)}%`}
+                          {pctFat == null ? "sem meta" : `${pctFat.toFixed(0).replace(".", ",")}%`}
                         </Badge>
                       </td>
                       <td className="py-2 pr-3">{l.metaClips == null ? "—" : fmtBRL(l.metaClips)}</td>
                       <td className="py-2 pr-3">{fmtBRL(l.realClips)}</td>
                       <td className="py-2 pr-3">
                         <Badge variant="outline" className={corAtingimento(pctClips)}>
-                          {pctClips == null ? "sem meta" : `${pctClips.toFixed(0)}%`}
+                          {pctClips == null ? "sem meta" : `${pctClips.toFixed(0).replace(".", ",")}%`}
                         </Badge>
                       </td>
                       <td className="py-2 pr-3">{l.metaReposicao == null ? "—" : l.metaReposicao}</td>

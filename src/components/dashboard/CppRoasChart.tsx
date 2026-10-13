@@ -64,7 +64,7 @@ export default function CppRoasChart({ dailyRoas, dowBenchmark }: Props) {
                   fontSize: "12px",
                 }}
                 formatter={(value: number, name: string) => [
-                  `${value?.toFixed(2)}x`,
+                  `${value?.toFixed(2).replace(".", ",")}x`,
                   name === "roas" ? "ROAS Real" : "Referência",
                 ]}
                 labelFormatter={(label) => {

@@ -16,7 +16,7 @@ export default {
       fontFamily: {
         sans: ["DM Sans", "Arial", "sans-serif"],
         display: ["DM Sans", "Arial", "sans-serif"],
-        mono: ["IBM Plex Mono", "ui-monospace", "monospace"],
+        mono: ["DM Sans", "Arial", "sans-serif"], // números em DM Sans com tabular-nums
       },
       colors: {
         border: "hsl(var(--border))",

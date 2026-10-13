@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 
 const MEDALS = [
-  { key: "platinum", label: "Platinum", color: "bg-slate-500/20 text-slate-300 border-slate-500/30 hover:bg-slate-500/30" },
-  { key: "gold", label: "Gold", color: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30 hover:bg-yellow-500/30" },
-  { key: "silver", label: "Silver", color: "bg-gray-400/20 text-gray-300 border-gray-400/30 hover:bg-gray-400/30" },
-  { key: "leader", label: "Líder", color: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/30" },
+  { key: "platinum", label: "Platinum", color: "bg-muted/20 text-muted-foreground border-border hover:bg-muted/30" },
+  { key: "gold", label: "Gold", color: "bg-ec-amarelo/20 text-ec-ambar border-ec-amarelo/30 hover:bg-ec-amarelo/30" },
+  { key: "silver", label: "Silver", color: "bg-muted/20 text-muted-foreground border-border hover:bg-muted/30" },
+  { key: "leader", label: "Líder", color: "bg-ec-verde/20 text-ok border-ec-verde/30 hover:bg-ec-verde/30" },
   { key: "sem_medalha", label: "Sem Medalha", color: "bg-muted/50 text-muted-foreground border-border hover:bg-muted" },
 ];
 

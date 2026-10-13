@@ -239,7 +239,7 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
           <YAxis
             domain={[0, teto]}
             allowDataOverflow
-            tickFormatter={(v) => `${Number(v).toFixed(0)}%`}
+            tickFormatter={(v) => `${Number(v).toFixed(0).replace(".", ",")}%`}
             tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
           />
           <Tooltip

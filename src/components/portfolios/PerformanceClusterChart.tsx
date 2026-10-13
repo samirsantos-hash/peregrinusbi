@@ -105,14 +105,14 @@ export default function PerformanceClusterChart({ sellers, aliases = {} }: Props
                 <TrendingUp className="w-3.5 h-3.5" />
                 {tracionadores.length} Tracionadores
               </div>
-              <div className="text-[11px] text-muted-foreground tabular-nums">{topShare.toFixed(1)}% do GMV</div>
+              <div className="text-[11px] text-muted-foreground tabular-nums">{topShare.toFixed(1).replace(".", ",")}% do GMV</div>
             </div>
             <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-1.5 text-xs">
               <div className="flex items-center gap-1.5 text-destructive font-bold">
                 <TrendingDown className="w-3.5 h-3.5" />
                 {detratores.length} Detratores
               </div>
-              <div className="text-[11px] text-muted-foreground tabular-nums">{botShare.toFixed(1)}% do GMV</div>
+              <div className="text-[11px] text-muted-foreground tabular-nums">{botShare.toFixed(1).replace(".", ",")}% do GMV</div>
             </div>
           </div>
         </div>
@@ -169,9 +169,9 @@ export default function PerformanceClusterChart({ sellers, aliases = {} }: Props
                     <td className="px-3 py-1.5 text-muted-foreground tabular-nums">{d.rank}</td>
                     <td className="px-3 py-1.5 font-medium truncate max-w-[240px]">{d.name}</td>
                     <td className="px-3 py-1.5 text-right tabular-nums">{fmtBRL(d.tgmv)}</td>
-                    <td className="px-3 py-1.5 text-right tabular-nums">{d.share.toFixed(1)}%</td>
+                    <td className="px-3 py-1.5 text-right tabular-nums">{d.share.toFixed(1).replace(".", ",")}%</td>
                     <td className="px-3 py-1.5 text-right tabular-nums text-muted-foreground">
-                      {d.acumulado.toFixed(1)}%
+                      {d.acumulado.toFixed(1).replace(".", ",")}%
                     </td>
                     <td className="px-3 py-1.5 text-right">
                       <span className={`inline-block rounded border px-1.5 py-0.5 text-[10px] font-semibold ${clusterClass(d.cluster)}`}>

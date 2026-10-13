@@ -53,7 +53,7 @@ interface ChartPoint {
 
 function fmtPct(v: number | null | undefined): string {
   if (v == null) return "—";
-  return `${(v * 100).toFixed(2)}%`;
+  return `${(v * 100).toFixed(2).replace(".", ",")}%`;
 }
 
 function fmtPp(curr: number | null, prev: number | null): { text: string; icon: string } {
@@ -62,7 +62,7 @@ function fmtPp(curr: number | null, prev: number | null): { text: string; icon: 
   if (Math.abs(diff) < 0.005) return { text: "→ estável", icon: "→" };
   const sign = diff > 0 ? "+" : "";
   return {
-    text: `${diff > 0 ? "↑" : "↓"} ${sign}${diff.toFixed(2)}pp vs mês anterior`,
+    text: `${diff > 0 ? "↑" : "↓"} ${sign}${diff.toFixed(2).replace(".", ",")}pp vs mês anterior`,
     icon: diff > 0 ? "↑" : "↓",
   };
 }
@@ -116,7 +116,7 @@ function RepTooltip({ active, payload }: any) {
         Sellers analisados: <span className="text-foreground font-mono">{p.nSellersClaims}</span>
       </p>
       <p className="text-muted-foreground">
-        Cobertura: <span className="text-foreground font-mono">{p.coberturaClaims.toFixed(0)}%</span> da carteira
+        Cobertura: <span className="text-foreground font-mono">{p.coberturaClaims.toFixed(0).replace(".", ",")}%</span> da carteira
       </p>
       {lowCov && (
         <p className="text-warning flex items-center gap-1 mt-1">
@@ -316,7 +316,7 @@ export default function GraficoReputacao() {
                           <TableCell className="text-xs text-right font-mono">{r.nClaims}</TableCell>
                           <TableCell className="text-xs text-right font-mono">{r.nAtrasos}</TableCell>
                           <TableCell className={`text-xs text-right font-mono ${r.cobertura < 50 ? "text-destructive" : r.cobertura < 70 ? "text-warning" : ""}`}>
-                            {r.cobertura.toFixed(0)}%
+                            {r.cobertura.toFixed(0).replace(".", ",")}%
                           </TableCell>
                         </TableRow>
                       ))}
@@ -361,8 +361,8 @@ export default function GraficoReputacao() {
                 <defs>
                   {/* Red zone above claims target */}
                   <linearGradient id="repZoneClaims" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.08} />
-                    <stop offset="100%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--ec-vermelho))" stopOpacity={0.08} />
+                    <stop offset="100%" stopColor="hsl(var(--ec-vermelho))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
@@ -376,7 +376,7 @@ export default function GraficoReputacao() {
                 />
                 <YAxis
                   tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
-                  tickFormatter={(v: number) => `${(v * 100).toFixed(1)}%`}
+                  tickFormatter={(v: number) => `${(v * 100).toFixed(1).replace(".", ",")}%`}
                   domain={[0, yMax]}
                 />
                 <Tooltip content={<RepTooltip />} />
@@ -407,10 +407,10 @@ export default function GraficoReputacao() {
                   type="linear"
                   dataKey="claims"
                   name="🟡 Reclamações"
-                  stroke="hsl(40, 95%, 55%)"
+                  stroke="hsl(var(--ec-ambar))"
                   strokeWidth={2}
                   connectNulls={false}
-                  dot={{ r: 4, fill: "hsl(40, 95%, 55%)", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: "hsl(var(--ec-ambar))", strokeWidth: 0 }}
                   activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
                 />
                 {/* Delays line */}
@@ -418,10 +418,10 @@ export default function GraficoReputacao() {
                   type="linear"
                   dataKey="atrasos"
                   name="🔴 Atrasos HT"
-                  stroke="hsl(0, 84%, 60%)"
+                  stroke="hsl(var(--ec-vermelho))"
                   strokeWidth={2}
                   connectNulls={false}
-                  dot={{ r: 4, fill: "hsl(0, 84%, 60%)", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: "hsl(var(--ec-vermelho))", strokeWidth: 0 }}
                   activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
                 />
               </LineChart>

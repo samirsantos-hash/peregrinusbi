@@ -56,7 +56,7 @@ export default function N2Loja() {
         { rotulo: "Itens vendidos (TSI)", valor: data?.kpis.tsi != null ? data.kpis.tsi.toLocaleString("pt-BR") : "—" },
         {
           rotulo: "Taxa de reclamações",
-          valor: data?.kpis.reputacao != null ? `${data.kpis.reputacao.toFixed(2)}%` : "—",
+          valor: data?.kpis.reputacao != null ? `${data.kpis.reputacao.toFixed(2).replace(".", ",")}%` : "—",
         },
         { rotulo: "Score Full", valor: data?.kpis.scoreFull != null ? data.kpis.scoreFull.toFixed(0) : "—" },
         { rotulo: "Gap vs. meta", valor: brl(data?.heroi != null && data?.meta != null ? data.heroi - data.meta : null) },
