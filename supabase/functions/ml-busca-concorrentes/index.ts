@@ -47,31 +47,39 @@ Deno.serve(async (req) => {
     if (termo.length < 2) return json({ error: "Digite ao menos 2 letras." }, 400);
 
     const token = await appToken();
-    if (body.probe) {
-      const out: Record<string, unknown> = {};
-      for (const p of [`/sites/MLB/search?q=${encodeURIComponent(termo)}&limit=2`, `/products/search?status=active&site_id=MLB&q=${encodeURIComponent(termo)}&limit=2`]) {
-        const r = await fetch(`https://api.mercadolibre.com${p}`, { headers: { Authorization: `Bearer ${token}` } });
-        out[p] = { s: r.status, b: (await r.text()).slice(0, 600) };
-      }
-      return json(out);
-    }
+    const H = { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10_000) };
+    // A busca de anúncios (/sites/MLB/search) é bloqueada para aplicativos; usa o catálogo.
     const res = await fetch(
-      `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(termo)}&limit=50`,
-      { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10_000) },
-    );
+      `https://api.mercadolibre.com/products/search?status=active&site_id=MLB&q=${encodeURIComponent(termo)}&limit=12`, H);
     const d = await res.json();
     if (!res.ok) {
-      console.error("busca ML falhou", res.status, d);
-      return json({ error: `O Mercado Livre recusou a busca (${res.status}).` }, 502);
+      console.error("busca catálogo ML falhou", res.status, d);
+      return json({ error: res.status === 429 ? "Muitas buscas seguidas no Mercado Livre. Tente em alguns segundos." : `O Mercado Livre recusou a busca (${res.status}).` }, 502);
     }
-    const itens = (d.results ?? []).map((r: any) => ({
-      id: r.id, titulo: r.title, preco: r.price, preco_original: r.original_price ?? null,
-      vendidos: r.sold_quantity ?? null, link: r.permalink, foto: r.thumbnail,
-      vendedor: r.seller?.nickname ?? null, vendedor_id: r.seller?.id ?? null,
-      full: r.shipping?.logistic_type === "fulfillment", frete_gratis: !!r.shipping?.free_shipping,
-      condicao: r.condition,
+    const produtos = (d.results ?? []) as any[];
+    const ofertas = await Promise.all(produtos.map(async (p) => {
+      const r = await fetch(`https://api.mercadolibre.com/products/${p.id}/items?limit=10`, H);
+      if (!r.ok) return { produto: p, itens: [] as any[], erro: r.status };
+      const j = await r.json();
+      return { produto: p, itens: (j.results ?? []) as any[] };
     }));
-    return json({ total: d.paging?.total ?? itens.length, itens });
+    const vend = new Set<number>();
+    ofertas.forEach((o) => o.itens.forEach((i) => i.seller_id && vend.add(i.seller_id)));
+    const apelidos = new Map<number, string>();
+    await Promise.all([...vend].slice(0, 60).map(async (id) => {
+      const r = await fetch(`https://api.mercadolibre.com/users/${id}`, H);
+      if (r.ok) { const u = await r.json(); if (u.nickname) apelidos.set(id, u.nickname); }
+    }));
+    const itens = ofertas.flatMap((o) => o.itens.map((i) => ({
+      id: i.item_id, produto_id: o.produto.id, titulo: o.produto.name,
+      foto: o.produto.pictures?.[0]?.url ?? null,
+      preco: i.price, preco_original: i.original_price ?? null,
+      vendedor: apelidos.get(i.seller_id) ?? null, vendedor_id: i.seller_id ?? null,
+      full: i.shipping?.logistic_type === "fulfillment", frete_gratis: !!i.shipping?.free_shipping,
+      condicao: i.condition ?? null, link: `https://produto.mercadolivre.com.br/${String(i.item_id).replace(/^MLB/, "MLB-")}`,
+    })));
+    const semOferta = ofertas.filter((o) => o.itens.length === 0).length;
+    return json({ total_catalogo: d.paging?.total ?? produtos.length, produtos: produtos.length, sem_oferta: semOferta, itens });
   } catch (e) {
     console.error(e);
     return json({ error: (e as Error).message }, 500);
