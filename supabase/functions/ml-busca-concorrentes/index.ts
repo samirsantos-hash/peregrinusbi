@@ -41,12 +41,13 @@ Deno.serve(async (req) => {
     const { data: u } = await sb.auth.getUser();
     if (!u?.user) return json({ error: "Faça login para buscar." }, 401);
 
-    const { q } = await req.json().catch(() => ({}));
+    const body = await req.json().catch(() => ({}));
+    const q = body.q;
     const termo = String(q ?? "").trim().slice(0, 120);
     if (termo.length < 2) return json({ error: "Digite ao menos 2 letras." }, 400);
 
     const token = await appToken();
-    if ((await req.clone().json().catch(()=>({}))).probe) {
+    if (body.probe) {
       const out: Record<string, unknown> = {};
       for (const p of [`/sites/MLB/search?q=${encodeURIComponent(termo)}&limit=2`, `/products/search?status=active&site_id=MLB&q=${encodeURIComponent(termo)}&limit=2`]) {
         const r = await fetch(`https://api.mercadolibre.com${p}`, { headers: { Authorization: `Bearer ${token}` } });
