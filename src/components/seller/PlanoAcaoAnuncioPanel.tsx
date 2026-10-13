@@ -354,7 +354,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
         <p>Nenhum dado encontrado para este seller.</p>
         <p className="text-xs">
           Verifique se os arquivos de qualidade por anúncio{" "}
-          e <span className="font-mono">seller_eligibility</span> foram carregados.
+          e de elegibilidade de promoções foram carregados.
         </p>
       </div>
     );
