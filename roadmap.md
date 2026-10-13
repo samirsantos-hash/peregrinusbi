@@ -18,6 +18,7 @@
 
 ## Sistema de Design Peregrinus (13/10)
 - [x] Tokens claros padrão, aliases legados, tipografia, format.ts, componentes ds/, medidores → barras de faixa
-- [ ] Reorganizar cada tela com um número focal (KpiCard ds) e remover diagnóstico repetido por aba
+- [x] Diagnóstico só no Resumo
+- [ ] Reorganizar cada tela com um número focal (KpiCard ds)
 - [ ] Gráficos: período parcial hachurado, ordenação por valor, pizzas >4 fatias → tabela, connectNulls=false
 - [ ] Revisar ~440 toFixed restantes fora de "%"/"x" para format.ts
