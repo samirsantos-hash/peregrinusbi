@@ -15,3 +15,9 @@
 
 ## Painel admin
 - [x] Alerta de dados desatualizados (somente admin geral) no painel inicial
+
+## Sistema de Design Peregrinus (13/10)
+- [x] Tokens claros padrão, aliases legados, tipografia, format.ts, componentes ds/, medidores → barras de faixa
+- [ ] Reorganizar cada tela com um número focal (KpiCard ds) e remover diagnóstico repetido por aba
+- [ ] Gráficos: período parcial hachurado, ordenação por valor, pizzas >4 fatias → tabela, connectNulls=false
+- [ ] Revisar ~440 toFixed restantes fora de "%"/"x" para format.ts
