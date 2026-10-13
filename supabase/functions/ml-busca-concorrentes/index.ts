@@ -57,19 +57,30 @@ Deno.serve(async (req) => {
       return json({ error: res.status === 429 ? "Muitas buscas seguidas no Mercado Livre. Tente em alguns segundos." : `O Mercado Livre recusou a busca (${res.status}).` }, 502);
     }
     const produtos = (d.results ?? []) as any[];
-    const ofertas = await Promise.all(produtos.map(async (p) => {
-      const r = await fetch(`https://api.mercadolibre.com/products/${p.id}/items?limit=10`, H);
-      if (!r.ok) return { produto: p, itens: [] as any[], erro: r.status };
+    const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const pegar = async (url: string) => {
+      for (let t = 0; t < 3; t++) {
+        const r = await fetch(url, H);
+        if (r.status !== 429) return r;
+        await espera(400 * (t + 1));
+      }
+      return await fetch(url, H);
+    };
+    // Sequencial: chamadas em paralelo esbarram no limite de requisições do ML (429).
+    const ofertas: { produto: any; itens: any[] }[] = [];
+    for (const p of produtos) {
+      const r = await pegar(`https://api.mercadolibre.com/products/${p.id}/items?limit=10`);
+      if (!r.ok) { if (r.status !== 404) console.error("ofertas", p.id, r.status); ofertas.push({ produto: p, itens: [] }); continue; }
       const j = await r.json();
-      return { produto: p, itens: (j.results ?? []) as any[] };
-    }));
+      ofertas.push({ produto: p, itens: j.results ?? [] });
+    }
     const vend = new Set<number>();
     ofertas.forEach((o) => o.itens.forEach((i) => i.seller_id && vend.add(i.seller_id)));
     const apelidos = new Map<number, string>();
-    await Promise.all([...vend].slice(0, 60).map(async (id) => {
-      const r = await fetch(`https://api.mercadolibre.com/users/${id}`, H);
+    for (const id of [...vend].slice(0, 40)) {
+      const r = await pegar(`https://api.mercadolibre.com/users/${id}`);
       if (r.ok) { const u = await r.json(); if (u.nickname) apelidos.set(id, u.nickname); }
-    }));
+    }
     const itens = ofertas.flatMap((o) => o.itens.map((i) => ({
       id: i.item_id, produto_id: o.produto.id, titulo: o.produto.name,
       foto: o.produto.pictures?.[0]?.url ?? null,
