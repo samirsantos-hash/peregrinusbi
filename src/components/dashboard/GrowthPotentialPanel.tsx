@@ -1,3 +1,4 @@
+import { numCurto } from "@/lib/format";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -607,11 +608,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               tickFormatter={(v) =>
                 modoCurva === "indexado"
                   ? String(v)
-                  : v >= 1_000_000
-                  ? `${(v / 1e6).toFixed(1)}M`
-                  : v >= 1000
-                  ? `${(v / 1000).toFixed(0)}K`
-                  : String(v)
+                  : numCurto(v)
               }
             />
             <Tooltip content={<CustomTooltip />} />
