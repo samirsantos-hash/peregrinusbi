@@ -46,6 +46,14 @@ Deno.serve(async (req) => {
     if (termo.length < 2) return json({ error: "Digite ao menos 2 letras." }, 400);
 
     const token = await appToken();
+    if ((await req.clone().json().catch(()=>({}))).probe) {
+      const out: Record<string, unknown> = {};
+      for (const p of [`/sites/MLB/search?q=${encodeURIComponent(termo)}&limit=2`, `/products/search?status=active&site_id=MLB&q=${encodeURIComponent(termo)}&limit=2`]) {
+        const r = await fetch(`https://api.mercadolibre.com${p}`, { headers: { Authorization: `Bearer ${token}` } });
+        out[p] = { s: r.status, b: (await r.text()).slice(0, 600) };
+      }
+      return json(out);
+    }
     const res = await fetch(
       `https://api.mercadolibre.com/sites/MLB/search?q=${encodeURIComponent(termo)}&limit=50`,
       { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(10_000) },
