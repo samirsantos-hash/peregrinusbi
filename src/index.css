@@ -201,9 +201,17 @@
     font-family: 'DM Sans', Arial, sans-serif;
   }
 
+  body { font-size: 13px; line-height: 1.45; }
+
   h1, h2, h3, h4, h5, h6 {
     font-family: 'DM Sans', Arial, sans-serif;
     letter-spacing: -0.02em;
+    text-align: left;
+  }
+
+  /* Números dinâmicos sempre tabulares */
+  .tabular-nums, td, th, .font-mono, [data-num] {
+    font-variant-numeric: tabular-nums;
   }
 
   code, .font-mono {
@@ -213,7 +221,8 @@
 
 @layer components {
   .glass-card {
-    @apply bg-card/80 backdrop-blur-xl border border-glass-border rounded-xl;
+    @apply bg-card border border-border rounded-lg;
+    border-width: 0.5px;
   }
 
   .glass-card-highlight {
@@ -241,14 +250,25 @@
     border-color: hsl(var(--brand-blue) / 0.3);
   }
 
+  /* Escala tipográfica Peregrinus */
+  .ds-titulo-pagina { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; color: hsl(var(--ec-ink)); }
+  .ds-numero-focal { font-size: 32px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; font-variant-numeric: tabular-nums; color: hsl(var(--ec-ink)); }
+  .ds-numero-sec { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: hsl(var(--ec-ink)); }
+  .ds-titulo-bloco { font-size: 14px; font-weight: 500; color: hsl(var(--ec-ink)); }
+  .ds-corpo { font-size: 13px; line-height: 1.45; }
+  .ds-rotulo { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.10em; color: hsl(var(--ec-text-sec)); }
+  .ds-nota { font-size: 11px; color: hsl(var(--ec-text-sec)); }
+  .ds-hachura { background-image: repeating-linear-gradient(135deg, hsl(var(--ec-line)) 0 4px, transparent 4px 8px); }
+
   .metric-value {
-    @apply text-3xl font-bold font-mono tracking-tight;
+    @apply text-3xl font-medium tracking-tight;
     letter-spacing: -0.02em;
     font-feature-settings: 'tnum' 1, 'lnum' 1;
   }
 
   .metric-label {
-    @apply text-xs uppercase tracking-widest text-muted-foreground;
+    font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.10em;
+    color: hsl(var(--ec-text-sec));
   }
 
   .status-badge {
@@ -312,7 +332,7 @@
     border: 1px solid hsl(var(--border)) !important;
     border-radius: 8px !important;
     color: hsl(var(--foreground)) !important;
-    box-shadow: 0 4px 16px hsl(0 0% 0% / 0.25);
+    box-shadow: none;
   }
 
   .recharts-tooltip-label {
@@ -360,10 +380,13 @@
   }
 
   /* respiro entre a grade e as séries */
+  /* Grade só horizontal, sólida, 0,5px; tracejado só para meta/média móvel */
   .recharts-cartesian-grid line {
     stroke: hsl(var(--grid));
-    stroke-opacity: 0.85;
+    stroke-width: 0.5px;
+    stroke-dasharray: none;
   }
+  .recharts-cartesian-grid-vertical { display: none; }
 
   .recharts-surface {
     overflow: visible;

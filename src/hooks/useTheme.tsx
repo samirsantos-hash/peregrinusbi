@@ -1,17 +1,17 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 type Theme = "dark" | "light";
-const KEY = "peregrinus_theme";
+const KEY = "peregrinus_theme_v2"; // v2: Sistema de Design abre no claro
 
 const ThemeCtx = createContext<{ theme: Theme; toggle: () => void }>({
-  theme: "dark",
+  theme: "light",
   toggle: () => {},
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "dark";
-    return (localStorage.getItem(KEY) as Theme) || "dark";
+    if (typeof window === "undefined") return "light";
+    return (localStorage.getItem(KEY) as Theme) || "light";
   });
 
   useEffect(() => {
