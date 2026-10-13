@@ -25,7 +25,7 @@ function fmtCompact(v: number | null): string {
 }
 function fmtPct(v: number | null): string {
   if (v === null) return "—";
-  return `${v.toFixed(1)}%`;
+  return `${v.toFixed(1).replace(".", ",")}%`;
 }
 
 interface DailyCdp {
@@ -129,7 +129,7 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
               <TrendingUp className="w-3 h-3 text-emerald-400" />
               <span className="text-[10px] text-muted-foreground uppercase">ROAS CDP</span>
             </div>
-            <p className="text-lg font-bold font-mono text-foreground">{totals.cdpRoas !== null ? `${totals.cdpRoas.toFixed(1)}x` : "—"}</p>
+            <p className="text-lg font-bold font-mono text-foreground">{totals.cdpRoas !== null ? `${totals.cdpRoas.toFixed(1).replace(".", ",")}x` : "—"}</p>
             <span className="text-[10px] text-muted-foreground">Inv: {fmtCompact(totals.cdpInv)}</span>
           </CardContent>
         </Card>

@@ -57,7 +57,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       alerts.push({
         icon: TrendingDown,
         color: "text-red-500 bg-red-500/10 border-red-500/20",
-        message: `🚨 Risco de Churn: ${s.nickname} apresenta queda severa (Fat: ${trend.tgmvTrend.toFixed(0)}%, Visitas: ${trend.visitsTrend.toFixed(0)}%). Plano de ação imediato.`,
+        message: `🚨 Risco de Churn: ${s.nickname} apresenta queda severa (Fat: ${trend.tgmvTrend.toFixed(0).replace(".", ",")}%, Visitas: ${trend.visitsTrend.toFixed(0).replace(".", ",")}%). Plano de ação imediato.`,
         priority: 0,
       });
     }
@@ -77,7 +77,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
         alerts.push({
           icon: Search,
           color: "text-orange-500 bg-orange-500/10 border-orange-500/20",
-          message: `🚨 Queda de Ranking Iminente: ${s.nickname} com alto tráfego mas conversão ${convRate.toFixed(2)}% (média ${avgConv.toFixed(2)}%). O algoritmo irá penalizar. Revise Preço ou Fotos.`,
+          message: `🚨 Queda de Ranking Iminente: ${s.nickname} com alto tráfego mas conversão ${convRate.toFixed(2).replace(".", ",")}% (média ${avgConv.toFixed(2).replace(".", ",")}%). O algoritmo irá penalizar. Revise Preço ou Fotos.`,
           priority: 1,
         });
       }
@@ -98,7 +98,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       alerts.push({
         icon: TrendingUp,
         color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-        message: `📈 Subaproveitamento de Escala: ${s.nickname} com Ads em ${adsRatio.toFixed(1)}%. Aumentar para 3% é a estratégia de menor risco para dominar a vertical.`,
+        message: `📈 Subaproveitamento de Escala: ${s.nickname} com Ads em ${adsRatio.toFixed(1).replace(".", ",")}%. Aumentar para 3% é a estratégia de menor risco para dominar a vertical.`,
         priority: 3,
       });
     }
@@ -108,7 +108,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       alerts.push({
         icon: AlertTriangle,
         color: "text-amber-400 bg-amber-400/10 border-amber-400/20",
-        message: `⚠️ Vazamento de Margem: ${s.nickname} com custo de aquisição alto (Ads ${adsRatio.toFixed(1)}%). Revisar campanhas.`,
+        message: `⚠️ Vazamento de Margem: ${s.nickname} com custo de aquisição alto (Ads ${adsRatio.toFixed(1).replace(".", ",")}%). Revisar campanhas.`,
         priority: 4,
       });
     }
@@ -128,7 +128,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
       alerts.push({
         icon: Zap,
         color: "text-violet-400 bg-violet-400/10 border-violet-400/20",
-        message: `⚠️ Algoritmo: ${s.nickname} com Potência Full ${potenciaFull.toFixed(0)}% mas fora da Central de Promoções (Score Oferta ${s.scoreOfertaFinal.toFixed(0)}). Aceite ofertas oficiais para subir no ranking.`,
+        message: `⚠️ Algoritmo: ${s.nickname} com Potência Full ${potenciaFull.toFixed(0).replace(".", ",")}% mas fora da Central de Promoções (Score Oferta ${s.scoreOfertaFinal.toFixed(0)}). Aceite ofertas oficiais para subir no ranking.`,
         priority: 6,
       });
     }
@@ -142,7 +142,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
         alerts.push({
           icon: BarChart3,
           color: "text-orange-400 bg-orange-400/10 border-orange-400/20",
-          message: `🚨 Gargalo de Catálogo: ${s.nickname} com conversão ${sellerConv.toFixed(2)}% abaixo da vertical ${campaign.verticalPrincipal || ""} (${campaign.taxaConversaoVertical.toFixed(2)}%). Revise fotos e títulos.`,
+          message: `🚨 Gargalo de Catálogo: ${s.nickname} com conversão ${sellerConv.toFixed(2).replace(".", ",")}% abaixo da vertical ${campaign.verticalPrincipal || ""} (${campaign.taxaConversaoVertical.toFixed(2).replace(".", ",")}%). Revise fotos e títulos.`,
           priority: 2,
         });
       }
@@ -152,7 +152,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
         alerts.push({
           icon: TrendingUp,
           color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
-          message: `📈 Subaproveitamento de Escala: ${s.nickname} domina a vertical organicamente (Efet. ${campaign.efectRtaVertical.toFixed(0)}%) mas Ads em ${adsRatio.toFixed(1)}%. Aumentar Ads é a estratégia de menor risco.`,
+          message: `📈 Subaproveitamento de Escala: ${s.nickname} domina a vertical organicamente (Efet. ${campaign.efectRtaVertical.toFixed(0).replace(".", ",")}%) mas Ads em ${adsRatio.toFixed(1).replace(".", ",")}%. Aumentar Ads é a estratégia de menor risco.`,
           priority: 3,
         });
       }
@@ -162,7 +162,7 @@ export default function AlertMatrix({ sellers, trends, campaigns }: Props) {
         alerts.push({
           icon: AlertTriangle,
           color: "text-red-400 bg-red-400/10 border-red-400/20",
-          message: `⚠️ Abaixo do Mercado: ${s.nickname} com efetividade ${campaign.efectRtaVertical.toFixed(0)}% na vertical ${campaign.verticalPrincipal || ""}. Ação urgente para recuperar ranking.`,
+          message: `⚠️ Abaixo do Mercado: ${s.nickname} com efetividade ${campaign.efectRtaVertical.toFixed(0).replace(".", ",")}% na vertical ${campaign.verticalPrincipal || ""}. Ação urgente para recuperar ranking.`,
           priority: 4,
         });
       }

@@ -106,7 +106,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
       {
         label: "Taxa de Reclamações",
         value: lat.repClaimsRate * 100,
-        formatted: `${(lat.repClaimsRate * 100).toFixed(2)}%`,
+        formatted: `${(lat.repClaimsRate * 100).toFixed(2).replace(".", ",")}%`,
         severity: claimsSev,
         description: "Percentual de vendas com reclamações abertas",
         thresholds: "🟢 ≤2% · 🟡 ≤5% · 🔴 >5%",
@@ -117,7 +117,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
       {
         label: "Taxa de Atrasos",
         value: lat.repDelayedRate * 100,
-        formatted: `${(lat.repDelayedRate * 100).toFixed(2)}%`,
+        formatted: `${(lat.repDelayedRate * 100).toFixed(2).replace(".", ",")}%`,
         severity: delaySev,
         description: "Percentual de envios atrasados (handling time)",
         thresholds: "🟢 ≤5% · 🟡 ≤10% · 🔴 >10%",
@@ -128,7 +128,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
       {
         label: "Taxa de Cancelamento",
         value: cancRate,
-        formatted: `${cancRate.toFixed(1)}%`,
+        formatted: `${cancRate.toFixed(1).replace(".", ",")}%`,
         severity: cancSev,
         description: "Percentual de vendas canceladas",
         thresholds: "🟢 ≤2% · 🟡 ≤5% · 🔴 >5%",
@@ -324,7 +324,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                           (dataMin: number) => Math.max(0, dataMin - 0.5),
                           (dataMax: number) => Math.max(dataMax + 0.5, m.atencao + 1),
                         ]}
-                        tickFormatter={(v) => `${Number(v).toFixed(1)}%`}
+                        tickFormatter={(v) => `${Number(v).toFixed(1).replace(".", ",")}%`}
                         width={48}
                       />
                       <Tooltip
@@ -334,7 +334,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                           borderRadius: "8px",
                           fontSize: "11px",
                         }}
-                        formatter={(value: number) => [`${value.toFixed(2)}%`, m.label]}
+                        formatter={(value: number) => [`${value.toFixed(2).replace(".", ",")}%`, m.label]}
                       />
                       {/* Zonas de risco */}
                       <ReferenceArea
@@ -414,7 +414,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                     </span>
                   </div>
                   <span className="font-mono" style={{ color: corAtual }}>
-                    Atual: {m.valor.toFixed(2)}%
+                    Atual: {m.valor.toFixed(2).replace(".", ",")}%
                   </span>
                 </div>
               </div>

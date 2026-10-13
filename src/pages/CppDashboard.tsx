@@ -390,7 +390,7 @@ export default function CppDashboard() {
                 <p className="text-xl font-bold font-mono text-foreground">{fmtCompact(totals.gmv)}</p>
                 {totals.deltas?.tgmv != null && (
                   <span className={cn("text-[10px] font-semibold", totals.deltas.tgmv >= 0 ? "text-emerald-400" : "text-destructive")}>
-                    {totals.deltas.tgmv >= 0 ? "+" : ""}{totals.deltas.tgmv.toFixed(1)}%
+                    {totals.deltas.tgmv >= 0 ? "+" : ""}{totals.deltas.tgmv.toFixed(1).replace(".", ",")}%
                   </span>
                 )}
               </CardContent>
@@ -404,7 +404,7 @@ export default function CppDashboard() {
                 <p className="text-xl font-bold font-mono text-foreground">{fmtNum(totals.tsi)}</p>
                 {totals.deltas?.tsi != null && (
                   <span className={cn("text-[10px] font-semibold", totals.deltas.tsi >= 0 ? "text-emerald-400" : "text-destructive")}>
-                    {totals.deltas.tsi >= 0 ? "+" : ""}{totals.deltas.tsi.toFixed(1)}%
+                    {totals.deltas.tsi >= 0 ? "+" : ""}{totals.deltas.tsi.toFixed(1).replace(".", ",")}%
                   </span>
                 )}
               </CardContent>
@@ -418,7 +418,7 @@ export default function CppDashboard() {
                 <p className="text-xl font-bold font-mono text-foreground">{fmtNum(totals.visitas)}</p>
                 {totals.deltas?.visitas != null && (
                   <span className={cn("text-[10px] font-semibold", totals.deltas.visitas >= 0 ? "text-emerald-400" : "text-destructive")}>
-                    {totals.deltas.visitas >= 0 ? "+" : ""}{totals.deltas.visitas.toFixed(1)}%
+                    {totals.deltas.visitas >= 0 ? "+" : ""}{totals.deltas.visitas.toFixed(1).replace(".", ",")}%
                   </span>
                 )}
               </CardContent>
@@ -429,10 +429,10 @@ export default function CppDashboard() {
                   <TrendingUp className="w-3.5 h-3.5 text-secondary" />
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider">ROAS</span>
                 </div>
-                <p className="text-xl font-bold font-mono text-foreground">{totals.roas != null ? `${totals.roas.toFixed(1)}x` : "—"}</p>
+                <p className="text-xl font-bold font-mono text-foreground">{totals.roas != null ? `${totals.roas.toFixed(1).replace(".", ",")}x` : "—"}</p>
                 {totals.deltas?.roas != null && (
                   <span className={cn("text-[10px] font-semibold", totals.deltas.roas >= 0 ? "text-emerald-400" : "text-destructive")}>
-                    {totals.deltas.roas >= 0 ? "+" : ""}{totals.deltas.roas.toFixed(1)}%
+                    {totals.deltas.roas >= 0 ? "+" : ""}{totals.deltas.roas.toFixed(1).replace(".", ",")}%
                   </span>
                 )}
               </CardContent>
@@ -443,10 +443,10 @@ export default function CppDashboard() {
                   <Percent className="w-3.5 h-3.5 text-emerald-400" />
                   <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Conversão</span>
                 </div>
-                <p className="text-xl font-bold font-mono text-foreground">{totals.txConversao != null ? `${totals.txConversao.toFixed(2)}%` : "—"}</p>
+                <p className="text-xl font-bold font-mono text-foreground">{totals.txConversao != null ? `${totals.txConversao.toFixed(2).replace(".", ",")}%` : "—"}</p>
                 {totals.deltas?.txConversao != null && (
                   <span className={cn("text-[10px] font-semibold", totals.deltas.txConversao >= 0 ? "text-emerald-400" : "text-destructive")}>
-                    {totals.deltas.txConversao >= 0 ? "+" : ""}{totals.deltas.txConversao.toFixed(1)}%
+                    {totals.deltas.txConversao >= 0 ? "+" : ""}{totals.deltas.txConversao.toFixed(1).replace(".", ",")}%
                   </span>
                 )}
               </CardContent>

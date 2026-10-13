@@ -343,7 +343,7 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
     if (sellerVal === null || medianVal === 0) return "—";
     const d = ((sellerVal - medianVal) / medianVal) * 100;
     const sign = d >= 0 ? "+" : "";
-    return `${sign}${d.toFixed(1)}%`;
+    return `${sign}${d.toFixed(1).replace(".", ",")}%`;
   }
 
   return (
@@ -417,9 +417,9 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                         <TooltipTrigger><Info className="w-3 h-3 text-muted-foreground" /></TooltipTrigger>
                         <TooltipContent className="text-xs max-w-xs">
                           <p className="font-semibold mb-1">Benchmark {vertical}</p>
-                          <p>Mais barato: {bench.priceCheaper.toFixed(1)}%</p>
-                          <p>Mesmo preço: {bench.priceMatch.toFixed(1)}%</p>
-                          <p>Mais caro: {bench.priceExpensive.toFixed(1)}%</p>
+                          <p>Mais barato: {bench.priceCheaper.toFixed(1).replace(".", ",")}%</p>
+                          <p>Mesmo preço: {bench.priceMatch.toFixed(1).replace(".", ",")}%</p>
+                          <p>Mais caro: {bench.priceExpensive.toFixed(1).replace(".", ",")}%</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -432,13 +432,13 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                   <p className="text-[10px] text-muted-foreground mb-1">Este seller</p>
                   <div className="flex w-full h-7 rounded overflow-hidden">
                     <div style={{ width: `${sellerMetrics.priceCheaper}%`, backgroundColor: "hsl(var(--emerald))" }} className="flex items-center justify-center text-[10px] font-bold text-white">
-                      {sellerMetrics.priceCheaper >= 8 ? `${sellerMetrics.priceCheaper.toFixed(1)}%` : ""}
+                      {sellerMetrics.priceCheaper >= 8 ? `${sellerMetrics.priceCheaper.toFixed(1).replace(".", ",")}%` : ""}
                     </div>
                     <div style={{ width: `${sellerMetrics.priceMatch}%`, backgroundColor: "hsl(var(--muted-foreground))" }} className="flex items-center justify-center text-[10px] font-bold text-white">
-                      {sellerMetrics.priceMatch! >= 8 ? `${sellerMetrics.priceMatch!.toFixed(1)}%` : ""}
+                      {sellerMetrics.priceMatch! >= 8 ? `${sellerMetrics.priceMatch!.toFixed(1).replace(".", ",")}%` : ""}
                     </div>
                     <div style={{ width: `${sellerMetrics.priceExpensive}%`, backgroundColor: "hsl(var(--crit))" }} className="flex items-center justify-center text-[10px] font-bold text-white">
-                      {sellerMetrics.priceExpensive! >= 8 ? `${sellerMetrics.priceExpensive!.toFixed(1)}%` : ""}
+                      {sellerMetrics.priceExpensive! >= 8 ? `${sellerMetrics.priceExpensive!.toFixed(1).replace(".", ",")}%` : ""}
                     </div>
                   </div>
                 </div>
@@ -449,13 +449,13 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                     <p className="text-[10px] text-muted-foreground mb-1">Mediana vertical</p>
                     <div className="flex w-full h-7 rounded overflow-hidden">
                       <div style={{ width: `${bench.priceCheaper}%`, backgroundColor: "hsl(var(--emerald))" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
-                        {bench.priceCheaper >= 8 ? `${bench.priceCheaper.toFixed(1)}%` : ""}
+                        {bench.priceCheaper >= 8 ? `${bench.priceCheaper.toFixed(1).replace(".", ",")}%` : ""}
                       </div>
                       <div style={{ width: `${bench.priceMatch}%`, backgroundColor: "hsl(var(--muted-foreground))" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
-                        {bench.priceMatch >= 8 ? `${bench.priceMatch.toFixed(1)}%` : ""}
+                        {bench.priceMatch >= 8 ? `${bench.priceMatch.toFixed(1).replace(".", ",")}%` : ""}
                       </div>
                       <div style={{ width: `${bench.priceExpensive}%`, backgroundColor: "hsl(var(--crit))" }} className="flex items-center justify-center text-[10px] font-bold text-white opacity-70">
-                        {bench.priceExpensive >= 8 ? `${bench.priceExpensive.toFixed(1)}%` : ""}
+                        {bench.priceExpensive >= 8 ? `${bench.priceExpensive.toFixed(1).replace(".", ",")}%` : ""}
                       </div>
                     </div>
                   </div>
@@ -469,9 +469,9 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                 {bench && (
                   <p className="text-xs text-muted-foreground mt-1">
                     {sellerMetrics.priceExpensive! > bench.priceExpensive + 5
-                      ? `⚠ Este seller pratica preços acima da média da categoria em ${sellerMetrics.priceExpensive!.toFixed(1)}% das visitas`
+                      ? `⚠ Este seller pratica preços acima da média da categoria em ${sellerMetrics.priceExpensive!.toFixed(1).replace(".", ",")}% das visitas`
                       : sellerMetrics.priceCheaper! > bench.priceCheaper + 5
-                        ? `✓ Este seller é mais competitivo que a média — preço abaixo em ${sellerMetrics.priceCheaper!.toFixed(1)}% das visitas`
+                        ? `✓ Este seller é mais competitivo que a média — preço abaixo em ${sellerMetrics.priceCheaper!.toFixed(1).replace(".", ",")}% das visitas`
                         : "Preço alinhado com a média da vertical"}
                   </p>
                 )}
@@ -508,10 +508,10 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                       { label: "GMV mensal", sv: sellerMetrics.tgmv, mv: bench.gmv, fmt: fmtCompact },
                       { label: "Itens vendidos", sv: sellerMetrics.tsi, mv: bench.tsi, fmt: fmtNum },
                       { label: "Visitas", sv: sellerMetrics.visitas, mv: bench.visitas, fmt: fmtNum },
-                      { label: "ROAS", sv: sellerMetrics.roas, mv: bench.roas, fmt: (v: number) => `${v.toFixed(1)}x` },
-                      { label: "Taxa de conversão", sv: sellerMetrics.conv, mv: bench.conv, fmt: (v: number) => `${v.toFixed(1)}%`, tooltip: CONVERSION_MARKET_BAND },
-                      { label: "Share Full", sv: sellerMetrics.shareFull, mv: bench.shareFull, fmt: (v: number) => `${v.toFixed(1)}%` },
-                      { label: "Share CDP", sv: sellerMetrics.shareCdp, mv: bench.shareCdp, fmt: (v: number) => `${v.toFixed(1)}%` },
+                      { label: "ROAS", sv: sellerMetrics.roas, mv: bench.roas, fmt: (v: number) => `${v.toFixed(1).replace(".", ",")}x` },
+                      { label: "Taxa de conversão", sv: sellerMetrics.conv, mv: bench.conv, fmt: (v: number) => `${v.toFixed(1).replace(".", ",")}%`, tooltip: CONVERSION_MARKET_BAND },
+                      { label: "Share Full", sv: sellerMetrics.shareFull, mv: bench.shareFull, fmt: (v: number) => `${v.toFixed(1).replace(".", ",")}%` },
+                      { label: "Share CDP", sv: sellerMetrics.shareCdp, mv: bench.shareCdp, fmt: (v: number) => `${v.toFixed(1).replace(".", ",")}%` },
                     ].map((row: any) => (
                       <TableRow key={row.label}>
                         <TableCell className="text-xs font-medium">
@@ -693,7 +693,7 @@ function CdpOpportunityBlock({ custId, subCategory, rawRows, startStr, endStr }:
               <span className="font-semibold text-foreground">{fmtNum(subBench.itens)} itens s/ optin</span>{" "}
               com <span className="font-semibold text-foreground">{subBench.sellers} sellers</span>{" "}
               e desconto sugerido médio de{" "}
-              <span className="font-semibold text-foreground">{subBench.descMedio.toFixed(1)}%</span>
+              <span className="font-semibold text-foreground">{subBench.descMedio.toFixed(1).replace(".", ",")}%</span>
             </p>
           </div>
         )}

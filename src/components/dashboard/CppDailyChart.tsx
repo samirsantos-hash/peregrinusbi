@@ -32,7 +32,7 @@ function fmtDateLabel(dateStr: string): string {
 const METRIC_CONFIG: Record<Metric, { label: string; color: string; mm7Key: string; fmt: (v: number) => string; unit?: string }> = {
   gmv: { label: "GMV", color: "hsl(var(--primary))", mm7Key: "gmvMM7", fmt: fmtCompact },
   tsi: { label: "Unidades", color: "hsl(var(--chart-3))", mm7Key: "", fmt: fmtNum },
-  roas: { label: "ROAS", color: "hsl(var(--chart-5, 30 80% 55%))", mm7Key: "roasMM7", fmt: (v) => `${v.toFixed(1)}x`, unit: "x" },
+  roas: { label: "ROAS", color: "hsl(var(--chart-5, 30 80% 55%))", mm7Key: "roasMM7", fmt: (v) => `${v.toFixed(1).replace(".", ",")}x`, unit: "x" },
 };
 
 function CustomTooltip({ active, payload, label }: any) {
@@ -48,11 +48,11 @@ function CustomTooltip({ active, payload, label }: any) {
       <p className="text-foreground">Unidades: {fmtNum(d.tsi)}</p>
       <p className="text-foreground">Visitas: {fmtNum(d.visitas)}</p>
       <p className="text-foreground">Ads: {fmtCompact(d.invPads)}</p>
-      <p className="text-foreground">ROAS: {d.roas !== null ? `${d.roas.toFixed(1)}x` : "—"}</p>
+      <p className="text-foreground">ROAS: {d.roas !== null ? `${d.roas.toFixed(1).replace(".", ",")}x` : "—"}</p>
       {d.gmvMM7 !== null && (
         <div className="border-t border-border pt-1 mt-1 text-muted-foreground">
           <p>MM7 GMV: {fmtCompact(d.gmvMM7)}</p>
-          {d.roasMM7 !== null && <p>MM7 ROAS: {d.roasMM7.toFixed(1)}x</p>}
+          {d.roasMM7 !== null && <p>MM7 ROAS: {d.roasMM7.toFixed(1).replace(".", ",")}x</p>}
         </div>
       )}
     </div>
@@ -102,7 +102,7 @@ export default function CppDailyChart({ data, title = "Evolução Diária" }: Pr
               />
               <YAxis
                 tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
-                tickFormatter={(v) => metric === "gmv" ? fmtCompact(v) : metric === "roas" ? `${v.toFixed(0)}x` : fmtNum(v)}
+                tickFormatter={(v) => metric === "gmv" ? fmtCompact(v) : metric === "roas" ? `${v.toFixed(0).replace(".", ",")}x` : fmtNum(v)}
                 width={60}
               />
               <Tooltip content={<CustomTooltip />} />

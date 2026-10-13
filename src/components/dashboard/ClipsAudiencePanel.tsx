@@ -38,9 +38,9 @@ const pct = (a: number, b: number) => (b > 0 ? (a / b) * 100 : 0);
 const fmtDiscount = (v: number): string => {
   if (v <= 0) return "—";
   // Values stored as percentage * 10 in DB (e.g. 350 = 35%, 85 = 8.5%)
-  if (v > 1) return `${(v / 10).toFixed(1)}%`;
+  if (v > 1) return `${(v / 10).toFixed(1).replace(".", ",")}%`;
   // Decimal form (e.g. 0.35 = 35%)
-  return `${(v * 100).toFixed(1)}%`;
+  return `${(v * 100).toFixed(1).replace(".", ",")}%`;
 };
 
 /**
@@ -624,7 +624,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                     ))}
                   </Pie>
                   <text x="50%" y="46%" textAnchor="middle" dominantBaseline="central" className="fill-foreground font-bold text-xl">
-                    {`${effectiveCoverage.pct.toFixed(0)}%`}
+                    {`${effectiveCoverage.pct.toFixed(0).replace(".", ",")}%`}
                   </text>
                   <text x="50%" y="58%" textAnchor="middle" dominantBaseline="central" className="fill-muted-foreground text-[10px]">
                     {effectiveCoverage.label}
@@ -689,14 +689,14 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={Eye}
           label="Audiência Total"
           value={fmt(totals.visits)}
-          sub={`Participação Vídeo: ${videoPctSafe.toFixed(1)}%`}
+          sub={`Participação Vídeo: ${videoPctSafe.toFixed(1).replace(".", ",")}%`}
           alert={lowExposure ? "⚠️ Baixa exposição de Clips: Oportunidade de aumentar alcance visual" : null}
           tooltip="Soma de visitas totais do seller no período selecionado."
         />
         <MetricCard
           icon={Activity}
           label="Conversão Geral"
-          value={`${conversionGeneral.toFixed(2)}%`}
+          value={`${conversionGeneral.toFixed(2).replace(".", ",")}%`}
           sub={`${fmt(totals.tsi)} pedidos / ${fmt(totals.visits)} visitas`}
           tooltip="Taxa de conversão geral da loja: (TSI / Visitas) × 100. É o benchmark interno que a conversão via Clips precisa superar."
           accentClass="text-foreground"
@@ -707,8 +707,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           value={fmt(totals.visitasClips)}
           sub={
             hasClipsPubli
-              ? `${fmt(totals.clipsPubli)} clips publicados · ${videoPctSafe.toFixed(1)}% da audiência`
-              : `Clips publicados: n/d · ${videoPctSafe.toFixed(1)}% da audiência`
+              ? `${fmt(totals.clipsPubli)} clips publicados · ${videoPctSafe.toFixed(1).replace(".", ",")}% da audiência`
+              : `Clips publicados: n/d · ${videoPctSafe.toFixed(1).replace(".", ",")}% da audiência`
           }
           tooltip="Total de visitas geradas por vídeos curtos (Clips) do seller. A contagem de clips publicados só aparece quando a base traz a coluna preenchida — quando exibe 'n/d', o dado não foi informado na carga e não deve ser lido como zero."
           accentClass="text-emerald"
@@ -724,10 +724,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         <MetricCard
           icon={ShoppingCart}
           label="Conversão Clips"
-          value={`${conversionRate.toFixed(2)}%`}
+          value={`${conversionRate.toFixed(2).replace(".", ",")}%`}
           sub={
             totals.visitasClips > 0 && totals.visits > 0
-              ? `${fmt(totals.ordersClips)} pedidos · ${clipsBeatsGeral ? "+" : ""}${clipsVsGeralDelta.toFixed(2)}pp vs Geral`
+              ? `${fmt(totals.ordersClips)} pedidos · ${clipsBeatsGeral ? "+" : ""}${clipsVsGeralDelta.toFixed(2).replace(".", ",")}pp vs Geral`
               : `${fmt(totals.ordersClips)} pedidos via clips`
           }
           tooltip="Taxa de conversão: (Pedidos via Clips / Visitas via Clips) × 100. Comparada ao benchmark interno (Conversão Geral) — quando acima, o vídeo está pré-qualificando o comprador."
@@ -756,8 +756,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           <div className="text-xs space-y-1">
             <p className="font-semibold text-foreground">
               {clipsBeatsGeral
-                ? `Clips convertem ACIMA da média da loja (${conversionRate.toFixed(2)}% vs ${conversionGeneral.toFixed(2)}% geral, +${Math.abs(clipsVsGeralDelta).toFixed(2)}pp)`
-                : `Clips convertem ABAIXO da média da loja (${conversionRate.toFixed(2)}% vs ${conversionGeneral.toFixed(2)}% geral, -${Math.abs(clipsVsGeralDelta).toFixed(2)}pp)`}
+                ? `Clips convertem ACIMA da média da loja (${conversionRate.toFixed(2).replace(".", ",")}% vs ${conversionGeneral.toFixed(2).replace(".", ",")}% geral, +${Math.abs(clipsVsGeralDelta).toFixed(2).replace(".", ",")}pp)`
+                : `Clips convertem ABAIXO da média da loja (${conversionRate.toFixed(2).replace(".", ",")}% vs ${conversionGeneral.toFixed(2).replace(".", ",")}% geral, -${Math.abs(clipsVsGeralDelta).toFixed(2).replace(".", ",")}pp)`}
             </p>
             <p className="text-muted-foreground">
               {clipsBeatsGeral
@@ -810,12 +810,12 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               <YAxis
                 tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
                 axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-                tickFormatter={(v) => `${Number(v).toFixed(1)}%`}
+                tickFormatter={(v) => `${Number(v).toFixed(1).replace(".", ",")}%`}
                 domain={["auto", "auto"]}
               />
               <Tooltip
                 contentStyle={{ background: "hsl(var(--card) / 0.95)", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
-                formatter={(v: any) => `${Number(v).toFixed(2)}%`}
+                formatter={(v: any) => `${Number(v).toFixed(2).replace(".", ",")}%`}
               />
               <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
               <Line type="monotone" dataKey="convGeral" name="Conversão Geral" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />

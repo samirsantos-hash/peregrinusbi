@@ -115,7 +115,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
     if (weekendVisits > weekdayVisits * 0.6) {
       insightList.push({
         type: "positive",
-        text: `O tráfego de fim de semana representa ${((weekendVisits / (weekendVisits + weekdayVisits)) * 100).toFixed(0)}% do total. Mantenha campanhas ativas no sábado e domingo.`,
+        text: `O tráfego de fim de semana representa ${((weekendVisits / (weekendVisits + weekdayVisits)) * 100).toFixed(0).replace(".", ",")}% do total. Mantenha campanhas ativas no sábado e domingo.`,
       });
     }
 
@@ -127,7 +127,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
     if (totalVisits > 0 && nightVisits / totalVisits > 0.25) {
       insightList.push({
         type: "critical",
-        text: `${((nightVisits / totalVisits) * 100).toFixed(0)}% das visitas ocorrem após as 20h. Garanta que o estoque e o atendimento estejam preparados para o horário noturno.`,
+        text: `${((nightVisits / totalVisits) * 100).toFixed(0).replace(".", ",")}% das visitas ocorrem após as 20h. Garanta que o estoque e o atendimento estejam preparados para o horário noturno.`,
       });
     }
 

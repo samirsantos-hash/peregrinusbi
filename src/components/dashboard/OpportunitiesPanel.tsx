@@ -253,7 +253,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
               <p className="text-sm font-medium text-foreground truncate">{profileCards.bestProduct.itemName || profileCards.bestProduct.itemId}</p>
               <div className="flex gap-3 mt-1 text-[10px] text-muted-foreground">
                 <span>{profileCards.bestProduct.pedidos7d} pedidos</span>
-                <span>Gap: {profileCards.bestProduct.gapDesconto > 0 ? `+${profileCards.bestProduct.gapDesconto.toFixed(1)}%` : "—"}</span>
+                <span>Gap: {profileCards.bestProduct.gapDesconto > 0 ? `+${profileCards.bestProduct.gapDesconto.toFixed(1).replace(".", ",")}%` : "—"}</span>
                 <span>Score: {profileCards.bestProduct.score.toFixed(0)}</span>
               </div>
             </motion.div>
@@ -405,18 +405,18 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
                       {fmtCampaignType(item.campaignType)}
                     </td>
                     <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
-                      {item.discountSellerPct > 0 ? `${(item.discountSellerPct / 10).toFixed(1)}%` : "—"}
+                      {item.discountSellerPct > 0 ? `${(item.discountSellerPct / 10).toFixed(1).replace(".", ",")}%` : "—"}
                     </td>
                     <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
-                      {item.discountTotal > 0 ? `${(item.discountTotal / 10).toFixed(1)}%` : "—"}
+                      {item.discountTotal > 0 ? `${(item.discountTotal / 10).toFixed(1).replace(".", ",")}%` : "—"}
                     </td>
                     <td className="text-right py-1.5 px-1.5 font-mono text-[11px]">
                       {item.gapDesconto > 0 ? (
-                        <span className="text-emerald-400">+{(item.gapDesconto / 10).toFixed(1)}%</span>
+                        <span className="text-emerald-400">+{(item.gapDesconto / 10).toFixed(1).replace(".", ",")}%</span>
                       ) : item.gapDesconto === 0 ? (
                         <span className="text-muted-foreground">—</span>
                       ) : (
-                        <span className="text-destructive">{(item.gapDesconto / 10).toFixed(1)}%</span>
+                        <span className="text-destructive">{(item.gapDesconto / 10).toFixed(1).replace(".", ",")}%</span>
                       )}
                     </td>
                     <td className="text-right py-1.5 px-1.5 font-mono text-[11px] font-medium">

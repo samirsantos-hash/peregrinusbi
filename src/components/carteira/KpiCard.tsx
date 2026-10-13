@@ -59,7 +59,7 @@ const KpiCard = ({ id, titulo, valor, delta, sparkline, severidade = "neutro", n
           "bg-muted text-muted-foreground"
         }`}>
           {delta.direcao === "up" ? <TrendingUp className="w-3 h-3" /> : delta.direcao === "down" ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
-          {delta.pct >= 0 ? "+" : ""}{delta.pct.toFixed(1)}%
+          {delta.pct >= 0 ? "+" : ""}{delta.pct.toFixed(1).replace(".", ",")}%
         </div>
       )}
     </motion.button>

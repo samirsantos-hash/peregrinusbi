@@ -109,7 +109,7 @@ export default function ProjecaoPanel({ custIds, portfolioName }: Props) {
                 <p className="text-lg font-bold tabular-nums">{ultimo ? fmtBRL(ultimo.receita) : "—"}</p>
                 {mom != null && (
                   <p className={`text-xs ${mom >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-                    {mom >= 0 ? "+" : ""}{mom.toFixed(1)}% MoM
+                    {mom >= 0 ? "+" : ""}{mom.toFixed(1).replace(".", ",")}% MoM
                   </p>
                 )}
               </div>

@@ -42,8 +42,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             ? p.dataKey?.includes("Inv") || p.dataKey?.includes("GMV") || p.dataKey?.includes("Faturamento")
               ? fmtBRLCompact(p.value)
               : p.dataKey?.includes("ROAS") || p.dataKey?.includes("roas")
-                ? `${p.value.toFixed(2)}x`
-                : `${p.value.toFixed(2)}%`
+                ? `${p.value.toFixed(2).replace(".", ",")}x`
+                : `${p.value.toFixed(2).replace(".", ",")}%`
             : p.value}
         </p>
       ))}
@@ -181,7 +181,7 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
     const isInverse = format === "%" ;
     const positive = isInverse ? delta <= 0 : delta >= 0;
     return {
-      text: `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}%`,
+      text: `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1).replace(".", ",")}%`,
       positive,
     };
   };
@@ -211,8 +211,8 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {[
               { label: "GMV", pct: cb.cluster.percentileGmv, seller: fmtBRLCompact(cb.cluster.sellerGmv), median: fmtBRLCompact(cb.cluster.medianGmv) },
-              { label: "ROAS", pct: cb.cluster.percentileRoas, seller: `${cb.cluster.sellerRoas.toFixed(1)}x`, median: `${cb.cluster.medianRoas.toFixed(1)}x` },
-              { label: "Conversão", pct: cb.cluster.percentileConv, seller: `${cb.cluster.sellerConv.toFixed(1)}%`, median: `${cb.cluster.medianConv.toFixed(1)}%`, tooltip: CONVERSION_MARKET_BAND },
+              { label: "ROAS", pct: cb.cluster.percentileRoas, seller: `${cb.cluster.sellerRoas.toFixed(1).replace(".", ",")}x`, median: `${cb.cluster.medianRoas.toFixed(1).replace(".", ",")}x` },
+              { label: "Conversão", pct: cb.cluster.percentileConv, seller: `${cb.cluster.sellerConv.toFixed(1).replace(".", ",")}%`, median: `${cb.cluster.medianConv.toFixed(1).replace(".", ",")}%`, tooltip: CONVERSION_MARKET_BAND },
             ].map((m) => {
               const badge = getPercentileBadge(m.pct);
               return (

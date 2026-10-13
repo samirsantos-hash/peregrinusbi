@@ -65,7 +65,7 @@ const SeletorPrograma = ({ participacoes, programasPorId, selecionado, onSelecio
               <SemaforoStatus status={c.status} compacto />
             </div>
             <div className="mt-1 flex items-center gap-3 text-[11px] text-muted-foreground font-mono tabular-nums">
-              <span>{c.pct === null ? "—" : `${c.pct.toFixed(0)}% da meta`}</span>
+              <span>{c.pct === null ? "—" : `${c.pct.toFixed(0).replace(".", ",")}% da meta`}</span>
               <span>{c.gap === null ? "gap —" : `gap ${fmtBRL0(c.gap)}`}</span>
             </div>
           </button>

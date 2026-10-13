@@ -241,7 +241,7 @@ const TickerLojas = ({ base, prev, dias, periodoAtual, periodoAnterior, onSeleci
     const cor = l.basePequena || l.delta == null || estavel
       ? "text-muted-foreground"
       : l.delta > 0 ? "text-emerald" : "text-destructive";
-    const textoDelta = l.delta == null ? "—" : `${l.delta > 0 ? "+" : ""}${(l.delta * 100).toFixed(1)}%`;
+    const textoDelta = l.delta == null ? "—" : `${l.delta > 0 ? "+" : ""}${(l.delta * 100).toFixed(1).replace(".", ",")}%`;
     const aria = `${l.loja}, ${METRICAS.find((m) => m.id === metrica)!.label} ${rotuloValorAria(metrica, l.valor)}, ${
       l.delta == null ? "sem base de comparação" : estavel ? "estável" : l.delta > 0 ? `alta de ${(l.delta * 100).toFixed(1)} por cento` : `queda de ${(Math.abs(l.delta) * 100).toFixed(1)} por cento`
     }${l.basePequena ? ", base pequena" : ""}`;
@@ -296,7 +296,7 @@ const TickerLojas = ({ base, prev, dias, periodoAtual, periodoAnterior, onSeleci
             ) : (
               <span className={indice.dGrupo >= 0 ? "text-emerald" : "text-destructive"}>
                 <span aria-hidden>{indice.dGrupo >= 0 ? "▲" : "▼"} </span>
-                {indice.dGrupo >= 0 ? "+" : ""}{(indice.dGrupo * 100).toFixed(1)}% vs. período anterior
+                {indice.dGrupo >= 0 ? "+" : ""}{(indice.dGrupo * 100).toFixed(1).replace(".", ",")}% vs. período anterior
               </span>
             )}
           </span>

@@ -22,11 +22,11 @@ function fmtCompact(v: number | null): string {
 }
 function fmtPct(v: number | null): string {
   if (v === null || v === undefined) return "—";
-  return `${v.toFixed(1)}%`;
+  return `${v.toFixed(1).replace(".", ",")}%`;
 }
 function fmtRoas(v: number | null): string {
   if (v === null || v === undefined) return "—";
-  return `${v.toFixed(1)}x`;
+  return `${v.toFixed(1).replace(".", ",")}x`;
 }
 function fmtNum(v: number): string {
   return Math.round(v).toLocaleString("pt-BR");

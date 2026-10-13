@@ -10,7 +10,7 @@ function fmtNum(n: number) {
 function fmtPct(n: number | null) {
   if (n === null || !Number.isFinite(n)) return "—";
   const sign = n > 0 ? "+" : "";
-  return `${sign}${n.toFixed(1)}%`;
+  return `${sign}${n.toFixed(1).replace(".", ",")}%`;
 }
 
 export function RiskSellerTable({ rows }: { rows: RiskSellerResult[] }) {

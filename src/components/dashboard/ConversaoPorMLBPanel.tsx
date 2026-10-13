@@ -256,7 +256,7 @@ function ItemRow({ item }: { item: MLBPerformance }) {
         </td>
         <td className="py-2 px-2 text-right text-xs font-mono tabular-nums">{item.estoqueMedio.toFixed(0)}</td>
         <td className={`py-2 px-2 text-right text-xs font-mono tabular-nums ${item.shareEstoqueFull >= 50 ? "text-emerald font-semibold" : "text-muted-foreground"}`}>
-          {item.shareEstoqueFull.toFixed(0)}%
+          {item.shareEstoqueFull.toFixed(0).replace(".", ",")}%
         </td>
         <td className="py-2 px-2 text-right">
           {item.qualityScore !== null ? (
@@ -291,12 +291,12 @@ function ItemRow({ item }: { item: MLBPerformance }) {
                 <p className="text-[11px] text-emerald">✅ Sem gaps identificados.</p>
               )}
               <p className="text-[10px] text-muted-foreground pt-1">
-                Estoque Full: <span className="font-mono tabular-nums">{item.estoqueFull.toFixed(0)} un</span> ({item.shareEstoqueFull.toFixed(0)}%)
+                Estoque Full: <span className="font-mono tabular-nums">{item.estoqueFull.toFixed(0)} un</span> ({item.shareEstoqueFull.toFixed(0).replace(".", ",")}%)
                 {item.diasEstoque !== null && item.diasEstoque < 999 && (
                   <> · Cobertura: <span className="font-mono tabular-nums">{item.diasEstoque} dias</span></>
                 )}
                 {" · "}
-                Desconto seller: <span className="font-mono tabular-nums">{item.descontoSellerPct.toFixed(0)}%</span>
+                Desconto seller: <span className="font-mono tabular-nums">{item.descontoSellerPct.toFixed(0).replace(".", ",")}%</span>
                 {item.qualityScore !== null && (
                   <>
                     {" · "}Fotos <span className="font-mono">{(item.scoreFotos ?? 0).toFixed(0)}</span>

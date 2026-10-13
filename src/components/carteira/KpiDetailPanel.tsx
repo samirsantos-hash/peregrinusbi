@@ -23,7 +23,7 @@ const fmtBRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
 const fmtCompact = (v: number) =>
   new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(v);
-const fmtPct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
+const fmtPct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1).replace(".", ",")}%`;
 const mesLabel = (m: number) => `${String(m).slice(4)}/${String(m).slice(0, 4)}`;
 
 const TT_STYLE = { background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 11 };
@@ -297,7 +297,7 @@ function TgmvTable({ sellers }: { sellers: EnrichedSeller[] }) {
         <div key={s.cust_id} className="flex items-center gap-2 text-[11px] py-1 border-b border-border/30">
           <span className="w-5 text-muted-foreground">{i + 1}.</span>
           <span className="flex-1 truncate font-medium">{s.cus_nickname}</span>
-          <span className="tabular-nums text-muted-foreground">{s.pctTotal.toFixed(1)}%</span>
+          <span className="tabular-nums text-muted-foreground">{s.pctTotal.toFixed(1).replace(".", ",")}%</span>
           <span className="tabular-nums">{fmtCompact(s.tgmv_lc)}</span>
           <button onClick={() => abrirSellerNoMeli(s.cust_id, s.cus_nickname)} className="text-primary hover:text-blue-400">
             <ExternalLink className="w-3 h-3" />
@@ -425,7 +425,7 @@ function TicketMedioChart({ sellers }: { sellers: EnrichedSeller[] }) {
           <Row label="P25" value={fmtCompact(stats.p25)} />
           <Row label="P75" value={fmtCompact(stats.p75)} />
           <Row label="P90" value={fmtCompact(stats.p90)} />
-          <Row label="Gini" value={`${(stats.gini * 100).toFixed(0)}%`} />
+          <Row label="Gini" value={`${(stats.gini * 100).toFixed(0).replace(".", ",")}%`} />
           <Row label="n" value={String(values.length)} />
         </div>
         <p className="text-[10px] leading-tight text-muted-foreground pt-1">
@@ -552,7 +552,7 @@ function CrescimentoChart({ sellers, onClickSeller }: { sellers: any[]; onClickS
           <XAxis dataKey="name" tick={{ fontSize: 9 }} angle={-30} textAnchor="end" height={60} />
           <YAxis yAxisId="left" tickFormatter={fmtCompact} />
           <YAxis yAxisId="right" orientation="right" unit="%" />
-          <Tooltip contentStyle={TT_STYLE} formatter={(v: number, name: string) => [name === "delta_pct" ? `${v.toFixed(1)}%` : fmtBRL(v), name === "delta_pct" ? "Δ %" : "Δ R$"]} />
+          <Tooltip contentStyle={TT_STYLE} formatter={(v: number, name: string) => [name === "delta_pct" ? `${v.toFixed(1).replace(".", ",")}%` : fmtBRL(v), name === "delta_pct" ? "Δ %" : "Δ R$"]} />
           <Bar yAxisId="left" dataKey="delta_rs" radius={[4, 4, 0, 0]} name="Δ R$" cursor="pointer" onClick={(d: any) => d?.seller && onClickSeller(d.seller)}>
             {data.map((d, i) => <Cell key={i} fill={d.fill} />)}
           </Bar>
@@ -574,7 +574,7 @@ function CrescimentoTable({ sellers }: { sellers: any[] }) {
           <div key={s.cust_id} className="flex items-center gap-1 text-[11px] py-0.5">
             <span className="w-4 text-muted-foreground">{i + 1}.</span>
             <span className="flex-1 truncate">{s.cus_nickname}</span>
-            <Badge className="text-[9px] bg-yellow-600/20 text-yellow-400 border-0">+{pct.toFixed(0)}%</Badge>
+            <Badge className="text-[9px] bg-yellow-600/20 text-yellow-400 border-0">+{pct.toFixed(0).replace(".", ",")}%</Badge>
             <button onClick={() => abrirSellerNoMeli(s.cust_id, s.cus_nickname)} className="text-primary"><ExternalLink className="w-3 h-3" /></button>
           </div>
         );

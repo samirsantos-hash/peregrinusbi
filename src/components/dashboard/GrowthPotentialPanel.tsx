@@ -305,8 +305,8 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
 
   const formatValor = (v: number, u: Dimensao["unidade"]) => {
     if (u === "R$") return fmtBRLCompact(v);
-    if (u === "%") return `${v.toFixed(1)}%`;
-    if (u === "x") return `${v.toFixed(2)}x`;
+    if (u === "%") return `${v.toFixed(1).replace(".", ",")}%`;
+    if (u === "x") return `${v.toFixed(2).replace(".", ",")}x`;
     return `${v.toFixed(1)} pts`;
   };
 
@@ -427,7 +427,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                         className="font-mono font-bold tabular-nums"
                         style={{ color: cor }}
                       >
-                        {delta >= 0 ? "+" : ""}{delta.toFixed(0)}%
+                        {delta >= 0 ? "+" : ""}{delta.toFixed(0).replace(".", ",")}%
                       </span>
                       <span className="text-[10px]" style={{ color: cor }}>
                         {lbl}
@@ -472,7 +472,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                 ⚠️ Dimensão mais fraca: {dimensaoMaisFraca.label}
               </span>{" "}
               <span className="font-mono">
-                ({indiceParaDelta(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido).toFixed(0)}% vs mediana)
+                ({indiceParaDelta(dimensaoMaisFraca.indice, dimensaoMaisFraca.sentido).toFixed(0).replace(".", ",")}% vs mediana)
               </span>.{" "}
               <span className="text-muted-foreground">
                 {dimensaoMaisFraca.id === "full_pct" && "Sellers da categoria operam com mais Full em média — desvantagem logística direta no algoritmo."}
@@ -553,7 +553,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                 benchmarkTotal > 0
                   ? `${fmtBRLCompact(Math.abs(benchmarkTotal - sellerTotal))} (${(
                       ((sellerTotal - benchmarkTotal) / benchmarkTotal) * 100
-                    ).toFixed(1)}%)`
+                    ).toFixed(1).replace(".", ",")}%)`
                   : "—",
               cor: sellerTotal >= benchmarkTotal ? "text-emerald-400" : "text-destructive",
             },
@@ -662,7 +662,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
                   <span className="text-xs text-foreground truncate">{c.categoria}</span>
                   <span className="text-[11px] font-mono tabular-nums text-muted-foreground shrink-0">
                     {c.itens.toLocaleString("pt-BR")} itens ·{" "}
-                    <span className="font-bold text-foreground">{c.pct.toFixed(1)}%</span>
+                    <span className="font-bold text-foreground">{c.pct.toFixed(1).replace(".", ",")}%</span>
                   </span>
                 </div>
                 <div className="relative w-full h-2 bg-muted/40 rounded-full overflow-hidden">

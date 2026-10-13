@@ -82,7 +82,7 @@ function ScoreBar({
         </div>
         <div className="text-[11px] font-mono tabular-nums whitespace-nowrap shrink-0">
           <span className="text-muted-foreground">?</span>
-          <span className="text-cyan-400"> → +{p.toFixed(0)}pp</span>
+          <span className="text-cyan-400"> → +{p.toFixed(0).replace(".", ",")}pp</span>
         </div>
       </div>
     );
@@ -113,9 +113,9 @@ function ScoreBar({
         )}
       </div>
       <div className="text-[11px] font-mono tabular-nums whitespace-nowrap shrink-0">
-        <span className={corTxt}>{a.toFixed(0)}%</span>
+        <span className={corTxt}>{a.toFixed(0).replace(".", ",")}%</span>
         {ganho > 0 && (
-          <span className="text-cyan-400"> → {p.toFixed(0)}%</span>
+          <span className="text-cyan-400"> → {p.toFixed(0).replace(".", ",")}%</span>
         )}
       </div>
     </div>
@@ -188,7 +188,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
         <td className="py-2 px-3 text-center text-xs font-mono tabular-nums">
           {anuncio.flag_optin_cdp ? (
             <span className="text-emerald">
-              🎯 {(anuncio.desconto_atual / 100).toFixed(1)}%
+              🎯 {(anuncio.desconto_atual / 100).toFixed(1).replace(".", ",")}%
             </span>
           ) : (
             <span className="text-muted-foreground">—</span>
@@ -237,8 +237,8 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
                     anuncio.score_atual !== null &&
                     anuncio.score_potencial > anuncio.score_atual && (
                     <span className="text-[11px] text-cyan-400 font-mono">
-                      Score potencial: {anuncio.score_potencial.toFixed(0)}% (+
-                      {(anuncio.score_potencial - anuncio.score_atual).toFixed(0)}pp)
+                      Score potencial: {anuncio.score_potencial.toFixed(0).replace(".", ",")}% (+
+                      {(anuncio.score_potencial - anuncio.score_atual).toFixed(0).replace(".", ",")}pp)
                     </span>
                   )}
                 </div>
@@ -467,7 +467,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
               vendidas por MLB não existem na fonte: são estimadas por visitas × taxa de
               conversão do seller
               {taxaConversao !== null
-                ? ` (${(taxaConversao * 100).toFixed(2)}% na base diária)`
+                ? ` (${(taxaConversao * 100).toFixed(2).replace(".", ",")}% na base diária)`
                 : " (não medida — coluna em branco)"}
               . "Sem dados" = seller_listings_quality não carregado.
             </span>

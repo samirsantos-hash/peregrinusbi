@@ -83,7 +83,7 @@ function PilarCard({
       >
         <div className="flex flex-col items-start gap-0.5 min-w-0">
           <span className="text-sm font-semibold truncate">{pilar.label}</span>
-          <span className="text-[10px] text-muted-foreground">peso {(pilar.peso * 100).toFixed(0)}%</span>
+          <span className="text-[10px] text-muted-foreground">peso {(pilar.peso * 100).toFixed(0).replace(".", ",")}%</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className="flex items-baseline gap-1">
@@ -164,7 +164,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
                   key={p.id}
                   className={tp.bar}
                   style={{ width: `${p.peso * 100}%` }}
-                  title={`${p.label}: ${p.score}/100 (peso ${(p.peso * 100).toFixed(0)}%)`}
+                  title={`${p.label}: ${p.score}/100 (peso ${(p.peso * 100).toFixed(0).replace(".", ",")}%)`}
                 />
               );
             })}
@@ -265,7 +265,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
                       {p.scoreNota}
                     </span>
                   </td>
-                  <td className="py-2 text-right font-mono tabular-nums">{(p.peso * 100).toFixed(0)}%</td>
+                  <td className="py-2 text-right font-mono tabular-nums">{(p.peso * 100).toFixed(0).replace(".", ",")}%</td>
                   <td className="py-2 text-right font-mono tabular-nums">{(p.score * p.peso).toFixed(1)} pts</td>
                 </tr>
               );

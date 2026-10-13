@@ -443,7 +443,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                           if (!sh) {
                             return (
                               <span className="inline-flex items-center gap-1">
-                                {s.roas.toFixed(1)}x
+                                {s.roas.toFixed(1).replace(".", ",")}x
                                 <span className="text-[10px] text-muted-foreground">n={s.mesesObservados}</span>
                               </span>
                             );
@@ -452,15 +452,15 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <span className="inline-flex items-center gap-1 cursor-help">
-                                  {sh.valorAjustado.toFixed(1)}x
+                                  {sh.valorAjustado.toFixed(1).replace(".", ",")}x
                                   <span className="text-[10px] text-muted-foreground">n={sh.n}</span>
                                   <span className="text-[9px] uppercase tracking-wide text-muted-foreground/80">aj.</span>
                                 </span>
                               </TooltipTrigger>
                               <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
                                 Estimador: ROAS ajustado (encolhimento empírico de Bayes).<br />
-                                Bruto {sh.valorBruto.toFixed(1)}x · {sh.n} {sh.n === 1 ? "mês" : "meses"} · peso do prior {(sh.B * 100).toFixed(0)}%<br />
-                                Prior {sh.prior.toFixed(1)}x ({sh.priorEscopo === "vertical" ? `vertical ${sh.priorRotulo}` : "carteira — vertical pequena demais"})
+                                Bruto {sh.valorBruto.toFixed(1).replace(".", ",")}x · {sh.n} {sh.n === 1 ? "mês" : "meses"} · peso do prior {(sh.B * 100).toFixed(0).replace(".", ",")}%<br />
+                                Prior {sh.prior.toFixed(1).replace(".", ",")}x ({sh.priorEscopo === "vertical" ? `vertical ${sh.priorRotulo}` : "carteira — vertical pequena demais"})
                               </TooltipContent>
                             </Tooltip>
                           );
@@ -468,7 +468,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                       </TableCell>
                       <TableCell>
                         <span className={`font-mono text-sm font-semibold ${potenciaColor}`}>
-                          {s.potenciaFull.toFixed(1)}%
+                          {s.potenciaFull.toFixed(1).replace(".", ",")}%
                         </span>
                       </TableCell>
                       <TableCell>
@@ -478,7 +478,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                       </TableCell>
                       <TableCell className="font-mono text-sm">
                         <span className="inline-flex items-center gap-1.5">
-                          {s.pctAds.toFixed(2)}%
+                          {s.pctAds.toFixed(2).replace(".", ",")}%
                           <TrendArrow value={trend?.adsTrend} />
                         </span>
                       </TableCell>
@@ -507,8 +507,8 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                               </TooltipTrigger>
                               <TooltipContent className="max-w-[220px] text-xs">
                                 <p className="font-semibold">{campaign.verticalPrincipal || "N/A"}</p>
-                                <p>Efetividade: {campaign.efectRtaVertical.toFixed(0)}%</p>
-                                <p>Conv. Vertical: {campaign.taxaConversaoVertical.toFixed(2)}%</p>
+                                <p>Efetividade: {campaign.efectRtaVertical.toFixed(0).replace(".", ",")}%</p>
+                                <p>Conv. Vertical: {campaign.taxaConversaoVertical.toFixed(2).replace(".", ",")}%</p>
                               </TooltipContent>
                             </Tooltip>
                           );

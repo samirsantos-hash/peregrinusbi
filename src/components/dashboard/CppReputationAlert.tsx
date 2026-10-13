@@ -142,7 +142,7 @@ export default function CppReputationAlert({ data, selectedSeller }: Props) {
                   <span className="text-lg font-bold font-mono" style={{ color: g.color }}>
                     {g.count}
                   </span>
-                  <p className="text-[10px] text-muted-foreground">{g.label} ({pct.toFixed(0)}%)</p>
+                  <p className="text-[10px] text-muted-foreground">{g.label} ({pct.toFixed(0).replace(".", ",")}%)</p>
                 </div>
               );
             })}

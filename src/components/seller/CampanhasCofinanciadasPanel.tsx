@@ -165,17 +165,17 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                   <div className="text-[11px] font-mono tabular-nums whitespace-nowrap">
                     {cofi ? (
                       <>
-                        <span className="text-red-400">Seller {stats.seller_medio.toFixed(1)}%</span>
+                        <span className="text-red-400">Seller {stats.seller_medio.toFixed(1).replace(".", ",")}%</span>
                         <span className="text-muted-foreground"> + </span>
-                        <span className="text-cyan-300">ML {stats.ml_medio.toFixed(1)}%</span>
+                        <span className="text-cyan-300">ML {stats.ml_medio.toFixed(1).replace(".", ",")}%</span>
                         <span className="text-muted-foreground"> = </span>
                         <span className="text-foreground font-semibold">
-                          {(stats.seller_medio + stats.ml_medio).toFixed(1)}%
+                          {(stats.seller_medio + stats.ml_medio).toFixed(1).replace(".", ",")}%
                         </span>
                       </>
                     ) : (
                       <span className="text-muted-foreground">
-                        Seller {stats.seller_medio.toFixed(1)}% (sem cofinanciamento)
+                        Seller {stats.seller_medio.toFixed(1).replace(".", ",")}% (sem cofinanciamento)
                       </span>
                     )}
                   </div>
@@ -294,22 +294,22 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                     ))}
                   </div>
                   <div className="text-right font-mono tabular-nums text-red-400">
-                    {item.discount_seller.toFixed(1)}%
+                    {item.discount_seller.toFixed(1).replace(".", ",")}%
                   </div>
                   <div className="text-right font-mono tabular-nums">
                     {item.discount_ml > 0 ? (
-                      <span className="text-cyan-300">+{item.discount_ml.toFixed(1)}%</span>
+                      <span className="text-cyan-300">+{item.discount_ml.toFixed(1).replace(".", ",")}%</span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
                   </div>
                   <div className="text-right">
                     <div className="font-mono tabular-nums text-foreground font-semibold">
-                      {item.discount_total.toFixed(1)}%
+                      {item.discount_total.toFixed(1).replace(".", ",")}%
                     </div>
                     {item.discount_ml > 0 && (
                       <div className="text-[9px] text-cyan-400">
-                        ML banca {item.pct_ml.toFixed(0)}%
+                        ML banca {item.pct_ml.toFixed(0).replace(".", ",")}%
                       </div>
                     )}
                   </div>
@@ -343,7 +343,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                             }%`,
                             background: "hsl(var(--crit))",
                           }}
-                          title={`Seller: ${item.discount_seller.toFixed(1)}%`}
+                          title={`Seller: ${item.discount_seller.toFixed(1).replace(".", ",")}%`}
                         />
                         {item.discount_ml > 0 && (
                           <div
@@ -351,21 +351,21 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                               width: `${(item.discount_ml / item.discount_total) * 100}%`,
                               background: "hsl(var(--series-3))",
                             }}
-                            title={`ML: ${item.discount_ml.toFixed(1)}%`}
+                            title={`ML: ${item.discount_ml.toFixed(1).replace(".", ",")}%`}
                           />
                         )}
                       </div>
                       <div className="flex gap-3 mt-1.5 text-[10px] font-mono tabular-nums">
                         <span className="text-red-400">
-                          Seller: {item.discount_seller.toFixed(1)}%
+                          Seller: {item.discount_seller.toFixed(1).replace(".", ",")}%
                         </span>
                         {item.discount_ml > 0 && (
                           <span className="text-cyan-300">
-                            ML: {item.discount_ml.toFixed(1)}%
+                            ML: {item.discount_ml.toFixed(1).replace(".", ",")}%
                           </span>
                         )}
                         <span className="text-foreground ml-auto">
-                          Total comprador: {item.discount_total.toFixed(1)}%
+                          Total comprador: {item.discount_total.toFixed(1).replace(".", ",")}%
                         </span>
                       </div>
                     </div>
@@ -402,8 +402,8 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                           <span>
                             Existe campanha melhor disponível —{" "}
                             <span className="font-mono">{item.best_campaign_id}</span> com desconto
-                            de <strong>{item.discount_best.toFixed(1)}%</strong> vs{" "}
-                            <strong>{item.discount_total.toFixed(1)}%</strong> atual.
+                            de <strong>{item.discount_best.toFixed(1).replace(".", ",")}%</strong> vs{" "}
+                            <strong>{item.discount_total.toFixed(1).replace(".", ",")}%</strong> atual.
                           </span>
                         </p>
                       </div>
@@ -416,7 +416,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                           <span>
                             Este anúncio está elegível a uma campanha cofinanciada mas{" "}
                             <strong>sem opt-in</strong>. O ML está pronto para bancar{" "}
-                            <strong>{item.discount_ml.toFixed(1)}%</strong> do desconto — ative o
+                            <strong>{item.discount_ml.toFixed(1).replace(".", ",")}%</strong> do desconto — ative o
                             opt-in para receber o benefício algorítmico.
                           </span>
                         </p>

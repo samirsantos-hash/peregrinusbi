@@ -92,7 +92,7 @@ interface EnrichedSeller extends SellerData {
 // ── Formatters ──
 const fmtBRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
-const fmtPct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1)}%`;
+const fmtPct = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(1).replace(".", ",")}%`;
 const fmtCompact = (v: number) =>
   new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(v);
 
@@ -1025,7 +1025,7 @@ export default function GestaoCarteira() {
               </div>
               {funnel.length > 1 && funnel[0].valor > 0 && (
                 <p className="text-[11px] text-muted-foreground mt-1">
-                  Conversão total: {((funnel[funnel.length - 1].valor / funnel[0].valor) * 100).toFixed(1)}% dos itens elegíveis geraram pedidos.
+                  Conversão total: {((funnel[funnel.length - 1].valor / funnel[0].valor) * 100).toFixed(1).replace(".", ",")}% dos itens elegíveis geraram pedidos.
                 </p>
               )}
             </CardContent>

@@ -285,11 +285,11 @@ export default function GmCadastroPanel({ custIds, sellers = [] }: Props) {
                   </TableCell>
                   <TableCell className="text-xs text-right tabular-nums">{fmtBRL(r.gmv)}</TableCell>
                   <TableCell className="text-xs text-right tabular-nums">
-                    {r.roas === null ? "—" : `${r.roas.toFixed(1)}x`}
+                    {r.roas === null ? "—" : `${r.roas.toFixed(1).replace(".", ",")}x`}
                   </TableCell>
                   <TableCell className="text-xs text-right tabular-nums">{r.score.toFixed(0)}</TableCell>
                   <TableCell className="text-xs text-right tabular-nums text-muted-foreground">
-                    {totalGmvDivisao > 0 ? `${((r.gmv / totalGmvDivisao) * 100).toFixed(1)}%` : "—"}
+                    {totalGmvDivisao > 0 ? `${((r.gmv / totalGmvDivisao) * 100).toFixed(1).replace(".", ",")}%` : "—"}
                   </TableCell>
                 </TableRow>
               ))}

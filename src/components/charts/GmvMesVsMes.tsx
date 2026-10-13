@@ -36,10 +36,10 @@ const fBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
 const fDelta = (v: number) =>
-  Number.isFinite(v) ? `${v >= 0 ? "+" : ""}${(v * 100).toFixed(1)}%` : "—";
+  Number.isFinite(v) ? `${v >= 0 ? "+" : ""}${(v * 100).toFixed(1).replace(".", ",")}%` : "—";
 
 const fPct = (v: number) =>
-  Number.isFinite(v) ? `${v >= 0 ? "+" : ""}${v.toFixed(1)}%` : "—";
+  Number.isFinite(v) ? `${v >= 0 ? "+" : ""}${v.toFixed(1).replace(".", ",")}%` : "—";
 
 /** Compara o GMV de dois meses dia a dia (barras = mês base, linha = mês de comparação). */
 export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", className = "" }: Props) {

@@ -57,9 +57,9 @@ function computeQualityIndex(
   return {
     score: total,
     pillars: [
-      { name: "Logística", score: logScore, max: 25, details: `Potência Full: ${potenciaFull.toFixed(1)}%` },
+      { name: "Logística", score: logScore, max: 25, details: `Potência Full: ${potenciaFull.toFixed(1).replace(".", ",")}%` },
       { name: "SEO & Catálogo", score: seoScore, max: 25, details: seoIssues.length ? `Pendências: ${seoIssues.join(", ")}` : "Todos os critérios OK" },
-      { name: "Conversão", score: convScore, max: 25, details: `Seller: ${sellerConv.toFixed(2)}% ${verticalConv > 0 ? `vs Vertical: ${verticalConv.toFixed(2)}%` : ""}` },
+      { name: "Conversão", score: convScore, max: 25, details: `Seller: ${sellerConv.toFixed(2).replace(".", ",")}% ${verticalConv > 0 ? `vs Vertical: ${verticalConv.toFixed(2).replace(".", ",")}%` : ""}` },
       { name: "Promoções", score: promoScore, max: 25, details: hasPromo ? "Campanhas ativas" : "Baixa adesão a campanhas" },
     ],
   };
@@ -194,7 +194,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
                 <Badge variant="outline" className={`text-xs border ${getEffectivenessBadge(campaign.efectRtaVertical).className}`}>
                   {getEffectivenessBadge(campaign.efectRtaVertical).label}
                 </Badge>
-                <span className="text-xs font-mono">{campaign.efectRtaVertical.toFixed(0)}%</span>
+                <span className="text-xs font-mono">{campaign.efectRtaVertical.toFixed(0).replace(".", ",")}%</span>
                 {subAprov && (
                   <Badge className="text-[10px] bg-amber-500/20 text-amber-300 border-amber-500/30 border">
                     ⚡ Subaproveitamento
@@ -212,14 +212,14 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <span>Sua Conversão</span>
-                <span className="font-mono font-bold">{sellerConv.toFixed(2)}%</span>
+                <span className="font-mono font-bold">{sellerConv.toFixed(2).replace(".", ",")}%</span>
               </div>
               <Progress value={Math.min(sellerConv * 20, 100)} className="h-2" />
               {campaign && campaign.taxaConversaoVertical > 0 && (
                 <>
                   <div className="flex items-center justify-between text-xs">
                     <span>Média Vertical ({campaign.verticalPrincipal || "N/A"})</span>
-                    <span className="font-mono font-bold">{campaign.taxaConversaoVertical.toFixed(2)}%</span>
+                    <span className="font-mono font-bold">{campaign.taxaConversaoVertical.toFixed(2).replace(".", ",")}%</span>
                   </div>
                   <Progress value={Math.min(campaign.taxaConversaoVertical * 20, 100)} className="h-2" />
                   {sellerConv < campaign.taxaConversaoVertical && (
@@ -245,7 +245,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
                   transition={{ duration: 0.8 }}
                 />
               </div>
-              <span className="text-xs font-mono font-bold">{latest.pctFull.toFixed(1)}%</span>
+              <span className="text-xs font-mono font-bold">{latest.pctFull.toFixed(1).replace(".", ",")}%</span>
             </div>
             <p className="text-[10px] text-muted-foreground">
               Full R$ {latest.tgmvFull.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} · Flex R$ {latest.tgmvFlex.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}

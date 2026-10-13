@@ -187,9 +187,9 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
                 <BarChart3 className="w-4 h-4" />
                 <span className="text-xs font-semibold uppercase tracking-wider">Resumo</span>
               </div>
-              <p className="text-xl font-bold">ROAS {summary.roas.toFixed(1)}x</p>
+              <p className="text-xl font-bold">ROAS {summary.roas.toFixed(1).replace(".", ",")}x</p>
               <p className="text-xs text-muted-foreground">
-                Ratio Ads: {summary.adsRatio.toFixed(2)}% · Invest: {fmtBRL(summary.totalInvPads)}
+                Ratio Ads: {summary.adsRatio.toFixed(2).replace(".", ",")}% · Invest: {fmtBRL(summary.totalInvPads)}
               </p>
             </CardContent>
           </Card>
@@ -211,10 +211,10 @@ export default function PortfolioDetail({ portfolio, onBack }: Props) {
                 <Truck className="w-4 h-4" />
                 <span className="text-xs font-semibold uppercase tracking-wider">Potencial de Vendas no Full</span>
               </div>
-              <p className="text-xl font-bold">{summary.pctFull.toFixed(1)}%</p>
+              <p className="text-xl font-bold">{summary.pctFull.toFixed(1).replace(".", ",")}%</p>
               <p className="text-xs text-muted-foreground">
                 Share do Full no total de vendas (TSI_FULL / TSI). Indica potencial de crescimento via logística Full.
-                Flex: {summary.pctFlex.toFixed(1)}%
+                Flex: {summary.pctFlex.toFixed(1).replace(".", ",")}%
               </p>
             </CardContent>
           </Card>

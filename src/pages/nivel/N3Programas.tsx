@@ -27,7 +27,7 @@ export default function N3Programas() {
         { rotulo: "Categorias", valor: String(data?.totalFilhos ?? "—") },
         {
           rotulo: "Atingimento",
-          valor: data?.gmv && data?.meta ? `${((data.gmv / data.meta) * 100).toFixed(0)}%` : "—",
+          valor: data?.gmv && data?.meta ? `${((data.gmv / data.meta) * 100).toFixed(0).replace(".", ",")}%` : "—",
         },
       ]}
       corpo={

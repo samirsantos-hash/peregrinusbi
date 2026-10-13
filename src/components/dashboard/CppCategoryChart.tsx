@@ -44,7 +44,7 @@ function fmtPctDelta(seller: number, bench: number): { text: string; positive: b
   if (bench === 0) return { text: "—", positive: true };
   const delta = ((seller - bench) / bench) * 100;
   return {
-    text: `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1)}%`,
+    text: `${delta >= 0 ? "▲" : "▼"} ${Math.abs(delta).toFixed(1).replace(".", ",")}%`,
     positive: delta >= 0,
   };
 }
@@ -333,14 +333,14 @@ export default function CppCategoryChart({ seller, rawRows, startDate, endDate }
                 },
                 {
                   label: "ROAS",
-                  seller: `${m.sellerRoas.toFixed(1)}x`,
-                  bench: `${m.medianRoas.toFixed(1)}x`,
+                  seller: `${m.sellerRoas.toFixed(1).replace(".", ",")}x`,
+                  bench: `${m.medianRoas.toFixed(1).replace(".", ",")}x`,
                   delta: roasDelta,
                 },
                 {
                   label: "Conversão",
-                  seller: `${m.sellerConv.toFixed(1)}%`,
-                  bench: `${m.medianConv.toFixed(1)}%`,
+                  seller: `${m.sellerConv.toFixed(1).replace(".", ",")}%`,
+                  bench: `${m.medianConv.toFixed(1).replace(".", ",")}%`,
                   delta: convDelta,
                 },
                 {

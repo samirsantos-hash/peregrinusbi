@@ -51,7 +51,7 @@ function fmtNum(v: number): string {
 }
 function fmtPct1(v: number | null): string {
   if (v === null) return "—";
-  return `${v.toFixed(1)}%`;
+  return `${v.toFixed(1).replace(".", ",")}%`;
 }
 function fmtCompact(v: number | null): string {
   return brlCurto(v);
@@ -64,7 +64,7 @@ function DeltaBadge({ value }: { value: number | null }) {
     <span className={cn("inline-flex items-center gap-0.5 text-[10px] font-semibold",
       isPos ? "text-emerald-400" : "text-destructive")}>
       {isPos ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-      {isPos ? "+" : ""}{value.toFixed(1)}%
+      {isPos ? "+" : ""}{value.toFixed(1).replace(".", ",")}%
     </span>
   );
 }
@@ -104,10 +104,10 @@ function CustomDowTooltip({ active, payload, label }: any) {
       <p className="font-semibold text-foreground">{label}</p>
       <p className="text-foreground">Unidades: {fmtNum(entry.tsi)}</p>
       <p className="text-foreground">GMV: {fmtCompact(entry.tgmv)}</p>
-      <p className="text-foreground">ROAS: {entry.roas !== null ? `${entry.roas.toFixed(1)}x` : "—"}</p>
+      <p className="text-foreground">ROAS: {entry.roas !== null ? `${entry.roas.toFixed(1).replace(".", ",")}x` : "—"}</p>
       {bench && (
         <div className="border-t border-border pt-1 mt-1 text-muted-foreground">
-          <p>Bench ROAS: {bench.roas.toFixed(1)}x</p>
+          <p>Bench ROAS: {bench.roas.toFixed(1).replace(".", ",")}x</p>
           <p>Bench GMV médio/dia: {fmtCompact(bench.gmvMedio)}</p>
         </div>
       )}
@@ -167,7 +167,7 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
     { label: "Visitas", value: fmtNum(c.visitas), delta: deltas.visitas, icon: Eye, color: "text-chart-4" },
     { label: "Preço médio/unidade", value: c.precoMedio !== null ? `R$ ${c.precoMedio.toFixed(2).replace(".", ",")}` : "—", delta: deltas.precoMedio, icon: DollarSign, color: "text-secondary" },
     { label: "Conversão", value: fmtPct1(c.txConversao), delta: deltas.txConversao, icon: TrendingUp, color: "text-emerald-400" },
-    { label: "ROAS", value: c.roas !== null ? `${c.roas.toFixed(1)}x` : "—", delta: deltas.roas, icon: ArrowUpDown, color: "text-amber-400" },
+    { label: "ROAS", value: c.roas !== null ? `${c.roas.toFixed(1).replace(".", ",")}x` : "—", delta: deltas.roas, icon: ArrowUpDown, color: "text-amber-400" },
   ];
 
   const maxTsi = Math.max(...dowData.map(d => d.tsi), 1);
@@ -240,9 +240,9 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
           <div className="flex gap-3 mt-2 text-[10px] text-muted-foreground justify-center flex-wrap">
             {dowData.filter(d => d.tsi > 0).map(d => (
               <span key={d.dow}>
-                {d.label}: {fmtNum(d.tsi)} un · ROAS {d.roas !== null ? `${d.roas.toFixed(1)}x` : "—"}
+                {d.label}: {fmtNum(d.tsi)} un · ROAS {d.roas !== null ? `${d.roas.toFixed(1).replace(".", ",")}x` : "—"}
                 {DOW_BENCHMARKS[d.dow] && (
-                  <span className="opacity-60"> (bench {DOW_BENCHMARKS[d.dow].roas.toFixed(0)}x)</span>
+                  <span className="opacity-60"> (bench {DOW_BENCHMARKS[d.dow].roas.toFixed(0).replace(".", ",")}x)</span>
                 )}
               </span>
             ))}
@@ -275,7 +275,7 @@ export default function CppSellerDetail({ seller, rawRows, dateRange, startDate,
                   <TableRow key={l.categoria}>
                     <TableCell className="text-xs">{l.categoria}</TableCell>
                     <TableCell className="text-right font-mono text-xs">{fmtNum(l.itens)}</TableCell>
-                    <TableCell className="text-right font-mono text-xs">{l.pct.toFixed(1)}%</TableCell>
+                    <TableCell className="text-right font-mono text-xs">{l.pct.toFixed(1).replace(".", ",")}%</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

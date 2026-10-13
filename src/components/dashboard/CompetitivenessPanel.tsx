@@ -92,7 +92,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
     <div className="glass-card p-3 !bg-card/95 text-xs space-y-1 max-w-[240px]">
       <p className="font-semibold text-foreground truncate">Período: {d.name}</p>
       <p className="text-muted-foreground">
-        % Preço Alto: <span className={d.gapPct > 30 ? "text-destructive" : "text-emerald"}>{d.gapPct.toFixed(1)}%</span>
+        % Preço Alto: <span className={d.gapPct > 30 ? "text-destructive" : "text-emerald"}>{d.gapPct.toFixed(1).replace(".", ",")}%</span>
       </p>
       <p className="text-muted-foreground">Força Competitiva: <span className="text-foreground font-mono">{d.forcaCompetitiva.toFixed(1)}</span></p>
       <p className="text-muted-foreground">Atratividade: <span className="text-foreground font-mono">{d.atratividade.toFixed(1)}</span></p>

@@ -391,7 +391,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 <Badge
                   variant="outline"
                   className="text-[9px] px-1.5 py-0 font-normal border-warning/40 text-warning ml-auto"
-                  title={`Pro-rata do último mês: ${proRata.diasComDados}d de ${proRata.diasNoMes}d (fator ${proRata.factor.toFixed(2)}x)`}
+                  title={`Pro-rata do último mês: ${proRata.diasComDados}d de ${proRata.diasNoMes}d (fator ${proRata.factor.toFixed(2).replace(".", ",")}x)`}
                 >
                   Último mês projetado
                 </Badge>
@@ -437,8 +437,8 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                   "bg-destructive/10 critical-text"}`
                   }>
                       {insights.totalAds <= insights.totalGmv * 0.03 ?
-                    `${(insights.totalAds / (insights.totalGmv * 0.03) * 100).toFixed(0)}% utilizado` :
-                    `${((insights.totalAds - insights.totalGmv * 0.03) / (insights.totalGmv * 0.03) * 100).toFixed(0)}% acima`
+                    `${(insights.totalAds / (insights.totalGmv * 0.03) * 100).toFixed(0).replace(".", ",")}% utilizado` :
+                    `${((insights.totalAds - insights.totalGmv * 0.03) / (insights.totalGmv * 0.03) * 100).toFixed(0).replace(".", ",")}% acima`
                     }
                     </span>
                   }
@@ -474,7 +474,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                   Para cada <span className="font-mono font-semibold neon-text">R$ 1,00</span> investido a mais em Ads, o Faturamento Bruto
                   {insights.efficiency >= 0 ? " cresceu " : " caiu "}
                   <span className={`font-mono font-bold ${insights.efficiency >= 1 ? "emerald-text" : "critical-text"}`}>
-                    {Math.abs(insights.efficiency).toFixed(1)}x
+                    {Math.abs(insights.efficiency).toFixed(1).replace(".", ",")}x
                   </span>
                 </p>
                 <div className="flex items-center gap-1.5">

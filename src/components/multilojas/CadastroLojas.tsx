@@ -149,7 +149,7 @@ const CadastroLojas = () => {
                   <button className="text-[11px] text-primary hover:underline flex items-center gap-1"
                     onClick={() => salvar(l, { conta_id: sug.conta.cust_id, vinculo_score: sug.s }, "automatico")}>
                     <Link2 className="w-3 h-3" />
-                    vincular automaticamente a {sug.conta.nickname || sug.conta.cust_id} (confiança {(sug.s * 100).toFixed(0)}%)
+                    vincular automaticamente a {sug.conta.nickname || sug.conta.cust_id} (confiança {(sug.s * 100).toFixed(0).replace(".", ",")}%)
                   </button>
                 )}
                 {!l.conta_id && !sug && (

@@ -98,7 +98,7 @@ Janelas de 15 e 30 dias foram removidas: eram reconstruídas por proporção a p
           conversão do seller{" "}
           {portfolio.taxaConversao === null
             ? "não medida"
-            : `${(portfolio.taxaConversao * 100).toFixed(2)}%`}{" "}
+            : `${(portfolio.taxaConversao * 100).toFixed(2).replace(".", ",")}%`}{" "}
           · ticket médio{" "}
           {portfolio.ticketMedio === null ? "não medido" : fmtBRL(portfolio.ticketMedio)}{" "}
           (base diária, 30 dias).
