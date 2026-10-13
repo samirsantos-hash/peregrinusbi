@@ -353,7 +353,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
       <div className="glass-card p-6 text-center text-sm text-muted-foreground space-y-2">
         <p>Nenhum dado encontrado para este seller.</p>
         <p className="text-xs">
-          Verifique se os arquivos de <span className="font-mono">seller_listings_quality</span>{" "}
+          Verifique se os arquivos de qualidade por anúncio{" "}
           e <span className="font-mono">seller_eligibility</span> foram carregados.
         </p>
       </div>
@@ -395,7 +395,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
       {semQualidade && !semElegibilidade && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 text-warning px-3 py-2 text-[11px]">
           ⚠️ <strong>Dados parciais:</strong> a tabela{" "}
-          <span className="font-mono">seller_listings_quality</span> está vazia para este
+          qualidade por anúncio está vazia para este
           seller. Exibindo apenas dados de venda e CDP (elegibilidade). Scores de IPI,
           fotos, título e ficha técnica não estão disponíveis — carregue o arquivo de
           qualidade por anúncio para habilitar o diagnóstico completo.
@@ -469,7 +469,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
               {taxaConversao !== null
                 ? ` (${(taxaConversao * 100).toFixed(2).replace(".", ",")}% na base diária)`
                 : " (não medida — coluna em branco)"}
-              . "Sem dados" = seller_listings_quality não carregado.
+              . "Sem dados" = base de qualidade por anúncio não carregada.
             </span>
           </div>
         </div>

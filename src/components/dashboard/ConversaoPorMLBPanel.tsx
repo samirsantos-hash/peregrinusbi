@@ -384,7 +384,7 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
             <TooltipInfo text="Diagnóstico por MLB usando dias de estoque (estoque ÷ média diária de vendas) cruzado com qualidade do anúncio." />
           </div>
           <p className="text-[11px] text-muted-foreground mt-1">
-            Baseado em giro (dias de estoque) e qualidade — fonte: <code className="px-1 rounded bg-muted">seller_eligibility</code> + <code className="px-1 rounded bg-muted">seller_listings_quality</code>
+            Baseado em giro (dias de estoque) e qualidade — fonte: elegibilidade de promoções + qualidade por anúncio
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -414,7 +414,7 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
         <p className="text-muted-foreground">
           <span className="font-semibold text-foreground">Como funciona:</span> visitas por anúncio não estão no CSV diarizado.
           O painel usa <span className="font-semibold">dias de estoque</span> (estoque ÷ média diária de vendas) como sinal de giro — mais acionável que taxa de conversão para decisões de reposição e promoção.
-          Quando há linha em <code className="px-1 rounded bg-muted">seller_listings_quality</code>, o score (fotos+título+ficha) refina o diagnóstico.
+          Quando há dado de qualidade do anúncio, o score (fotos+título+ficha) refina o diagnóstico.
         </p>
       </div>
 

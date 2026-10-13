@@ -132,7 +132,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
   if (!qi) {
     return (
       <div className="glass-card p-6 text-center text-sm text-muted-foreground">
-        Sem dados mensais (cpp_mensal) para este seller.
+        Nenhum resumo mensal desta loja no período — atualize a base mensal para liberar o Quality Index.
       </div>
     );
   }
