@@ -64,7 +64,7 @@ interface LogisticsPanelProps {
   eligibilityItems?: EligibilityItem[];
 }
 
-const COLORS = ["hsl(199, 100%, 50%)", "hsl(160, 84%, 39%)", "hsl(280, 80%, 60%)", "hsl(45, 80%, 55%)"];
+const COLORS = ["hsl(var(--ec-verde))", "hsl(var(--ok))", "hsl(var(--series-3))", "hsl(var(--ec-ambar))"];
 
 const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = [] }: LogisticsPanelProps) => {
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
@@ -487,7 +487,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             </Pie>
             <Tooltip content={<CustomTooltip />} />
             <Legend
-              formatter={(value) => <span style={{ color: "hsl(215, 20%, 70%)", fontSize: 12 }}>{value}</span>}
+              formatter={(value) => <span style={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }}>{value}</span>}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -506,22 +506,22 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             <AreaChart data={evolutionData}>
               <defs>
                 <linearGradient id="gradFullLog" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gradFlexLog" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--ok))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--ok))" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gradAgLog" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="hsl(280, 80%, 60%)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="hsl(280, 80%, 60%)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="hsl(var(--series-3))" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="hsl(var(--series-3))" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 interval="preserveStartEnd"
                 angle={evolutionData.length > 8 ? -45 : 0}
@@ -529,16 +529,16 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                 height={evolutionData.length > 8 ? 50 : 30}
               />
               <YAxis
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 tickFormatter={(v) => `${v}%`}
                 domain={[0, 100]}
               />
               <Tooltip content={<EvolutionTooltip />} />
-              <Area type="monotone" dataKey="% Full" stroke="hsl(199, 100%, 50%)" fill="url(#gradFullLog)" strokeWidth={2} />
-              <Area type="monotone" dataKey="% Flex" stroke="hsl(160, 84%, 39%)" fill="url(#gradFlexLog)" strokeWidth={2} />
-              <Area type="monotone" dataKey="% Agência" stroke="hsl(280, 80%, 60%)" fill="url(#gradAgLog)" strokeWidth={2} />
-              <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+              <Area type="monotone" dataKey="% Full" stroke="hsl(var(--ec-verde))" fill="url(#gradFullLog)" strokeWidth={2} />
+              <Area type="monotone" dataKey="% Flex" stroke="hsl(var(--ok))" fill="url(#gradFlexLog)" strokeWidth={2} />
+              <Area type="monotone" dataKey="% Agência" stroke="hsl(var(--series-3))" fill="url(#gradAgLog)" strokeWidth={2} />
+              <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

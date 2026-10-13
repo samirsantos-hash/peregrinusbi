@@ -27,9 +27,9 @@ function pearson(xs: number[], ys: number[]): number {
 /* ── Color scale for correlation value ── */
 function corrColor(r: number): string {
   const abs = Math.abs(r);
-  if (abs > 0.7) return r > 0 ? "hsl(199, 100%, 50%)" : "hsl(0, 84%, 60%)";
-  if (abs > 0.4) return r > 0 ? "hsl(199, 70%, 65%)" : "hsl(0, 60%, 70%)";
-  return "hsl(215, 20%, 55%)";
+  if (abs > 0.7) return r > 0 ? "hsl(var(--ec-verde))" : "hsl(var(--ec-vermelho))";
+  if (abs > 0.4) return r > 0 ? "hsl(var(--ec-verde))" : "hsl(var(--ec-vermelho))";
+  return "hsl(var(--ec-text-sec))";
 }
 
 function corrBg(r: number): string {
@@ -238,15 +238,15 @@ const SynergyAnalysisPanel = ({ kpis }: SynergyAnalysisPanelProps) => {
           {/* Legend */}
           <div className="flex flex-wrap gap-3 mt-3 justify-center text-[10px] text-muted-foreground">
             <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-sm" style={{ background: "hsl(199, 100%, 50%)", opacity: 0.7 }} />
+              <span className="w-3 h-3 rounded-sm" style={{ background: "hsl(var(--ec-verde))", opacity: 0.7 }} />
               Positiva forte
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-sm" style={{ background: "hsl(215, 20%, 55%)", opacity: 0.5 }} />
+              <span className="w-3 h-3 rounded-sm" style={{ background: "hsl(var(--ec-text-sec))", opacity: 0.5 }} />
               Neutra
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-3 h-3 rounded-sm" style={{ background: "hsl(0, 84%, 60%)", opacity: 0.7 }} />
+              <span className="w-3 h-3 rounded-sm" style={{ background: "hsl(var(--ec-vermelho))", opacity: 0.7 }} />
               Negativa forte
             </span>
           </div>

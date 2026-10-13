@@ -361,8 +361,8 @@ export default function GraficoReputacao() {
                 <defs>
                   {/* Red zone above claims target */}
                   <linearGradient id="repZoneClaims" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0.08} />
-                    <stop offset="100%" stopColor="hsl(0, 84%, 60%)" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--ec-vermelho))" stopOpacity={0.08} />
+                    <stop offset="100%" stopColor="hsl(var(--ec-vermelho))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
@@ -407,10 +407,10 @@ export default function GraficoReputacao() {
                   type="linear"
                   dataKey="claims"
                   name="🟡 Reclamações"
-                  stroke="hsl(40, 95%, 55%)"
+                  stroke="hsl(var(--ec-ambar))"
                   strokeWidth={2}
                   connectNulls={false}
-                  dot={{ r: 4, fill: "hsl(40, 95%, 55%)", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: "hsl(var(--ec-ambar))", strokeWidth: 0 }}
                   activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
                 />
                 {/* Delays line */}
@@ -418,10 +418,10 @@ export default function GraficoReputacao() {
                   type="linear"
                   dataKey="atrasos"
                   name="🔴 Atrasos HT"
-                  stroke="hsl(0, 84%, 60%)"
+                  stroke="hsl(var(--ec-vermelho))"
                   strokeWidth={2}
                   connectNulls={false}
-                  dot={{ r: 4, fill: "hsl(0, 84%, 60%)", strokeWidth: 0 }}
+                  dot={{ r: 4, fill: "hsl(var(--ec-vermelho))", strokeWidth: 0 }}
                   activeDot={{ r: 6, strokeWidth: 2, stroke: "hsl(var(--background))" }}
                 />
               </LineChart>

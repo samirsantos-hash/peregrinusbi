@@ -70,9 +70,9 @@ function histogram(values: number[], bins = 12) {
 /* ── Color helpers ── */
 function corrColor(r: number): string {
   const abs = Math.abs(r);
-  if (abs > 0.7) return r > 0 ? "hsl(199, 100%, 50%)" : "hsl(0, 84%, 60%)";
-  if (abs > 0.4) return r > 0 ? "hsl(199, 70%, 65%)" : "hsl(0, 60%, 70%)";
-  return "hsl(215, 20%, 55%)";
+  if (abs > 0.7) return r > 0 ? "hsl(var(--ec-verde))" : "hsl(var(--ec-vermelho))";
+  if (abs > 0.4) return r > 0 ? "hsl(var(--ec-verde))" : "hsl(var(--ec-vermelho))";
+  return "hsl(var(--ec-text-sec))";
 }
 
 function corrBg(r: number): string {
@@ -97,11 +97,11 @@ const CellTooltip = ({ active, payload }: any) => {
 
 const CELL_SIZE = 130;
 const CHART_COLORS = {
-  dot: "hsl(199, 100%, 50%)",
-  regression: "hsl(0, 84%, 60%)",
-  histogram: "hsl(199, 80%, 55%)",
-  grid: "hsl(215, 25%, 14%)",
-  axis: "hsl(215, 20%, 55%)",
+  dot: "hsl(var(--ec-verde))",
+  regression: "hsl(var(--ec-vermelho))",
+  histogram: "hsl(var(--ec-verde))",
+  grid: "hsl(var(--ec-text-sec))",
+  axis: "hsl(var(--ec-text-sec))",
 };
 
 const PairplotMatrix = ({ data, variables, resultVar }: PairplotMatrixProps) => {

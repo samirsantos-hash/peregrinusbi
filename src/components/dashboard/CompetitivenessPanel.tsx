@@ -80,10 +80,10 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   if (!d) return null;
 
   const getQuadrant = (x: number, y: number, mx: number, my: number) => {
-    if (x >= mx && y >= my) return { label: "🚀 Investir Agressivamente", color: "hsl(160, 84%, 39%)" };
-    if (x < mx && y >= my) return { label: "🔄 Otimizar Conversão", color: "hsl(199, 100%, 50%)" };
-    if (x >= mx && y < my) return { label: "⚙ Manter Eficiência", color: "hsl(40, 95%, 55%)" };
-    return { label: "⚠ Descontinuar / Liquidar", color: "hsl(0, 84%, 60%)" };
+    if (x >= mx && y >= my) return { label: "🚀 Investir Agressivamente", color: "hsl(var(--ok))" };
+    if (x < mx && y >= my) return { label: "🔄 Otimizar Conversão", color: "hsl(var(--ec-verde))" };
+    if (x >= mx && y < my) return { label: "⚙ Manter Eficiência", color: "hsl(var(--ec-ambar))" };
+    return { label: "⚠ Descontinuar / Liquidar", color: "hsl(var(--ec-vermelho))" };
   };
 
   const q = getQuadrant(d.forcaCompetitiva, d.atratividade, d.medianX, d.medianY);
@@ -354,19 +354,19 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
   }, [kpis, scatterPeriod]);
 
   const getBubbleColor = (x: number, y: number) => {
-    if (x >= medianX && y >= medianY) return "hsl(160, 84%, 39%)";
-    if (x < medianX && y >= medianY) return "hsl(199, 100%, 50%)";
-    if (x >= medianX && y < medianY) return "hsl(40, 95%, 55%)";
-    return "hsl(0, 84%, 60%)";
+    if (x >= medianX && y >= medianY) return "hsl(var(--ok))";
+    if (x < medianX && y >= medianY) return "hsl(var(--ec-verde))";
+    if (x >= medianX && y < medianY) return "hsl(var(--ec-ambar))";
+    return "hsl(var(--ec-vermelho))";
   };
 
   // Cor dinâmica para % Mais Caro: <20 verde, 20-30 âmbar, >=30 vermelho
   const pctExpColor =
     monthlyTotals.pctExpensive >= 30
-      ? "hsl(0, 84%, 60%)"
+      ? "hsl(var(--ec-vermelho))"
       : monthlyTotals.pctExpensive >= 20
-      ? "hsl(40, 95%, 55%)"
-      : "hsl(160, 84%, 39%)";
+      ? "hsl(var(--ec-ambar))"
+      : "hsl(var(--ok))";
   const pctExpAlert =
     monthlyTotals.pctExpensive >= 30
       ? "⚠️ Acima de 30% — o ML começa a rebaixar o anúncio"
@@ -447,7 +447,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             {(m as any).alert && (
               <p
                 className="text-[10px] mt-1.5 leading-tight font-medium"
-                style={{ color: (m as any).inlineStyle?.color ?? "hsl(40, 95%, 55%)" }}
+                style={{ color: (m as any).inlineStyle?.color ?? "hsl(var(--ec-ambar))" }}
               >
                 {(m as any).alert}
               </p>
@@ -490,7 +490,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <p className="text-xs uppercase tracking-wide text-muted-foreground">
                 Índice de Competitividade de Preço
               </p>
-              <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? 'hsl(var(--emerald))' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text))' : 'hsl(var(--crit))' }}>
+              <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? 'hsl(var(--emerald))' : bpcData.median >= 0.7 ? 'hsl(var(--ok))' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text))' : 'hsl(var(--crit))' }}>
                 {bpcData.median.toFixed(3)}
               </p>
               <p className="text-[11px] text-muted-foreground text-center leading-snug">
@@ -500,7 +500,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               </p>
               <span className="status-badge text-[11px]" style={{
                 backgroundColor: bpcData.median >= 0.9 ? 'hsl(var(--emerald) / 0.1)' : bpcData.median >= 0.7 ? 'hsl(var(--emerald) / 0.08)' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text) / 0.1)' : 'hsl(var(--crit) / 0.1)',
-                color: bpcData.median >= 0.9 ? 'hsl(var(--emerald))' : bpcData.median >= 0.7 ? 'hsl(175, 60%, 45%)' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text))' : 'hsl(var(--crit))',
+                color: bpcData.median >= 0.9 ? 'hsl(var(--emerald))' : bpcData.median >= 0.7 ? 'hsl(var(--ok))' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text))' : 'hsl(var(--crit))',
                 borderColor: bpcData.median >= 0.9 ? 'hsl(var(--emerald) / 0.3)' : bpcData.median >= 0.7 ? 'hsl(var(--emerald) / 0.2)' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text) / 0.3)' : 'hsl(var(--crit) / 0.3)',
               }}>
                 {bpcData.median >= 0.9 ? 'Altamente competitivo' : bpcData.median >= 0.7 ? 'Competitivo' : bpcData.median >= 0.6 ? 'Moderado' : 'Pouco competitivo'}

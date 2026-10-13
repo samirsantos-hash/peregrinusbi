@@ -247,7 +247,7 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
               style={{
                 color:
                   a.pctVsMediaPedidos === null
-                    ? "hsl(215, 20%, 65%)"
+                    ? "hsl(var(--ec-text-sec))"
                     : a.pctVsMediaPedidos >= 0
                     ? "hsl(var(--ok))"
                     : a.pctVsMediaPedidos > -50

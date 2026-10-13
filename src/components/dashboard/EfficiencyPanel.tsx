@@ -461,12 +461,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkInvestmentData} barCategoryGap="30%">
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="name" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
+                <XAxis dataKey="name" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
+                <YAxis tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} tickFormatter={(v) => fmtBRLCompact(v)} />
                 <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
                   {benchmarkInvestmentData.map((_, i) => (
-                    <Cell key={i} fill={i === 0 ? "hsl(199, 100%, 50%)" : "hsl(174, 60%, 50%)"} />
+                    <Cell key={i} fill={i === 0 ? "hsl(var(--ec-verde))" : "hsl(var(--ok))"} />
                   ))}
                 </Bar>
               </BarChart>
@@ -484,12 +484,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={benchmarkRatioData} barGap={4} barCategoryGap="25%">
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="metric" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+                <XAxis dataKey="metric" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
+                <YAxis tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
                 <Tooltip content={<BenchmarkBarTooltip />} />
-                <Bar dataKey="Seu Desempenho" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                <Bar dataKey="Mediana da Vertical" fill="hsl(174, 60%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={50} />
-                <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+                <Bar dataKey="Seu Desempenho" fill="hsl(var(--ec-verde))" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Bar dataKey="Mediana da Vertical" fill="hsl(var(--ok))" radius={[4, 4, 0, 0]} maxBarSize={50} />
+                <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -510,18 +510,18 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
           <AreaChart data={adsData}>
             <defs>
               <linearGradient id="gradBlueEff" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(199, 100%, 50%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradEmeraldEff" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--ok))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--ok))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
               angle={allDates.length > 6 ? -45 : 0}
@@ -530,21 +530,21 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             />
             <YAxis
               yAxisId="gmv"
-              tick={{ fill: "hsl(199, 100%, 60%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-verde))", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) => numCurto(v)}
             />
             <YAxis
               yAxisId="ads"
               orientation="right"
-              tick={{ fill: "hsl(160, 70%, 50%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ok))", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) => numCurto(v)}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(199, 100%, 50%)" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Area yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(160, 84%, 39%)" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(var(--ec-verde))" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(var(--ok))" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
         <p className="mt-2 text-[11px] text-muted-foreground">
@@ -567,19 +567,19 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
               angle={allDates.length > 6 ? -45 : 0}
               textAnchor={allDates.length > 6 ? "end" : "middle"}
               height={allDates.length > 6 ? 50 : 30}
             />
-            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+            <YAxis tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
             <Tooltip content={<RatioTooltip />} />
-            <Line type="monotone" dataKey="ROAS" stroke="hsl(199, 100%, 50%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
-            <Line type="monotone" dataKey="ACOS" stroke="hsl(280, 80%, 60%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
-            <Line type="monotone" dataKey="TACOS" stroke="hsl(40, 95%, 55%)" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
-            <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            <Line type="monotone" dataKey="ROAS" stroke="hsl(var(--ec-verde))" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
+            <Line type="monotone" dataKey="ACOS" stroke="hsl(var(--series-3))" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
+            <Line type="monotone" dataKey="TACOS" stroke="hsl(var(--ec-ambar))" strokeWidth={2} dot={false} activeDot={{ r: 4 }} animationDuration={800} animationEasing="ease-in-out" />
+            <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

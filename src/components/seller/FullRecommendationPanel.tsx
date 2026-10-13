@@ -10,12 +10,12 @@ import {
 import TooltipInfo from "@/components/dashboard/TooltipInfo";
 
 const COR_PRIORIDADE: Record<Prioridade, string> = {
-  alta: "hsl(160, 84%, 39%)",
-  media: "hsl(45, 80%, 55%)",
-  baixa: "hsl(215, 20%, 45%)",
-  repor_estoque: "hsl(25, 85%, 50%)",
-  sem_movimento: "hsl(0, 60%, 45%)",
-  sem_dado: "hsl(215, 15%, 35%)",
+  alta: "hsl(var(--ok))",
+  media: "hsl(var(--ec-ambar))",
+  baixa: "hsl(var(--ec-text-sec))",
+  repor_estoque: "hsl(var(--ec-laranja))",
+  sem_movimento: "hsl(var(--ec-vermelho))",
+  sem_dado: "hsl(var(--ec-text-sec))",
 };
 
 const BADGE_PRIORIDADE: Record<Prioridade, string> = {

@@ -65,7 +65,7 @@ const SalesHeatmap = ({ kpis }: Props) => {
 
   // Interpolate from blue (cold) to red (hot)
   const getHeatColor = (val: number): string => {
-    if (maxVal === 0) return "hsl(210, 80%, 50%)";
+    if (maxVal === 0) return "hsl(var(--ec-verde))";
     const ratio = Math.max(0, Math.min(1, val / maxVal));
     // Blue (210°) → Red (0°) via hue interpolation
     const hue = 210 - ratio * 210;
@@ -89,7 +89,7 @@ const SalesHeatmap = ({ kpis }: Props) => {
           <TooltipInfo text="Distribuição estimada do faturamento por dia da semana e horário, baseada nos dados históricos. Identifica o 'Prime Time' para otimização de campanhas de Ads." />
         </div>
         <div className="text-xs text-muted-foreground">
-          Prime Time: <span className="font-semibold" style={{ color: "hsl(0, 90%, 50%)" }}>{primeTime.day} {primeTime.hour}</span>
+          Prime Time: <span className="font-semibold" style={{ color: "hsl(var(--ec-vermelho))" }}>{primeTime.day} {primeTime.hour}</span>
         </div>
       </div>
 

@@ -167,22 +167,22 @@ const FacetChart = ({
           <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
           <XAxis
             type="number" dataKey="x" name={xVar.label}
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-            axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-            label={{ value: xVar.label, position: "bottom", offset: 10, fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+            tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
+            axisLine={{ stroke: "hsl(var(--ec-text-sec))" }}
+            label={{ value: xVar.label, position: "bottom", offset: 10, fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
             domain={["auto", "auto"]}
           />
           <YAxis
             type="number" dataKey="y" name={yVar.label}
-            tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-            axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+            tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
+            axisLine={{ stroke: "hsl(var(--ec-text-sec))" }}
             tickFormatter={(v) => numCurto(v)}
-            label={{ value: yVar.label, angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+            label={{ value: yVar.label, angle: -90, position: "insideLeft", fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
           />
           <ZAxis type="number" dataKey="z" range={[50, 400]} name={sizeVar.label} />
           <Tooltip
             content={<BubbleTooltip xLabel={xVar.label} yLabel={yVar.label} colorLabel={colorVar.label} sizeLabel={sizeVar.label} sellerCustIdMap={sellerCustIdMap} />}
-            cursor={{ strokeDasharray: "3 3", stroke: "hsl(215, 20%, 35%)" }}
+            cursor={{ strokeDasharray: "3 3", stroke: "hsl(var(--ec-text-sec))" }}
           />
           <Scatter name="Sellers" data={points} animationDuration={600}>
             {points.map((entry, i) => (
@@ -190,7 +190,7 @@ const FacetChart = ({
             ))}
           </Scatter>
           {trend.length === 2 && (
-            <Scatter name="Tendência" data={trend} fill="none" line={{ stroke: "hsl(0, 84%, 60%)", strokeWidth: 2, strokeDasharray: "6 3" }} legendType="none" r={0} />
+            <Scatter name="Tendência" data={trend} fill="none" line={{ stroke: "hsl(var(--ec-vermelho))", strokeWidth: 2, strokeDasharray: "6 3" }} legendType="none" r={0} />
           )}
         </ScatterChart>
       </ResponsiveContainer>
@@ -296,7 +296,7 @@ const MultidimensionalBubbleChart = ({
         </div>
         <span className="mx-2 text-border">|</span>
         <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-          <span className="w-3 h-0.5" style={{ background: "hsl(0, 84%, 60%)", display: "inline-block" }} /> Tendência
+          <span className="w-3 h-0.5" style={{ background: "hsl(var(--ec-vermelho))", display: "inline-block" }} /> Tendência
         </span>
         <span className="mx-2 text-border">|</span>
         <span className="text-[10px] text-muted-foreground">Tamanho = {sizeVar.label}</span>

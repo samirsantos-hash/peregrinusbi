@@ -40,10 +40,10 @@ interface ElasticityPoint {
 }
 
 const QUADRANTS = {
-  star: { label: "⭐ Escalar (Estrelas)", color: "hsl(160, 84%, 39%)", desc: "Alta elasticidade + alto volume. Priorizar orçamento." },
-  cow: { label: "🐄 Saturados (Vacas Leiteiras)", color: "hsl(199, 100%, 50%)", desc: "Baixa elasticidade + alto volume. Manter investimento." },
-  opportunity: { label: "🔬 Testar (Oportunidades)", color: "hsl(40, 95%, 55%)", desc: "Alta elasticidade + baixo volume. Aumentar investimento." },
-  dog: { label: "🐕 Descartar (Cães)", color: "hsl(0, 84%, 60%)", desc: "Baixa elasticidade + baixo volume. Reduzir ou cortar." },
+  star: { label: "⭐ Escalar (Estrelas)", color: "hsl(var(--ok))", desc: "Alta elasticidade + alto volume. Priorizar orçamento." },
+  cow: { label: "🐄 Saturados (Vacas Leiteiras)", color: "hsl(var(--ec-verde))", desc: "Baixa elasticidade + alto volume. Manter investimento." },
+  opportunity: { label: "🔬 Testar (Oportunidades)", color: "hsl(var(--ec-ambar))", desc: "Alta elasticidade + baixo volume. Aumentar investimento." },
+  dog: { label: "🐕 Descartar (Cães)", color: "hsl(var(--ec-vermelho))", desc: "Baixa elasticidade + baixo volume. Reduzir ou cortar." },
 };
 
 const getQuadrant = (elasticity: number, volume: number, mx: number, my: number) => {
@@ -53,7 +53,7 @@ const getQuadrant = (elasticity: number, volume: number, mx: number, my: number)
   return "dog";
 };
 
-const getColor = (q: string) => QUADRANTS[q as keyof typeof QUADRANTS]?.color ?? "hsl(215, 20%, 55%)";
+const getColor = (q: string) => QUADRANTS[q as keyof typeof QUADRANTS]?.color ?? "hsl(var(--ec-text-sec))";
 
 const ScatterTooltipContent = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;
@@ -205,34 +205,34 @@ const ElasticityAdsChart = ({ kpis }: Props) => {
               type="number"
               dataKey="elasticity"
               name="Elasticidade"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-              axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
-              label={{ value: "Elasticidade (Sensibilidade Ads) →", position: "bottom", offset: 15, fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
+              axisLine={{ stroke: "hsl(var(--ec-text-sec))" }}
+              label={{ value: "Elasticidade (Sensibilidade Ads) →", position: "bottom", offset: 15, fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               domain={["auto", "auto"]}
             />
             <YAxis
               type="number"
               dataKey="salesVolume"
               name="Volume de Vendas"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-              axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
+              axisLine={{ stroke: "hsl(var(--ec-text-sec))" }}
               tickFormatter={(v) => numCurto(v)}
-              label={{ value: "Volume de Vendas (GMV) ↑", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              label={{ value: "Volume de Vendas (GMV) ↑", angle: -90, position: "insideLeft", fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
             />
             <ZAxis type="number" dataKey="salesVolume" range={[100, 600]} />
             <ReferenceLine
               x={medianX}
-              stroke="hsl(215, 20%, 35%)"
+              stroke="hsl(var(--ec-text-sec))"
               strokeDasharray="6 3"
               strokeOpacity={0.6}
             />
             <ReferenceLine
               y={medianY}
-              stroke="hsl(215, 20%, 35%)"
+              stroke="hsl(var(--ec-text-sec))"
               strokeDasharray="6 3"
               strokeOpacity={0.6}
             />
-            <Tooltip content={<ScatterTooltipContent />} cursor={{ strokeDasharray: "3 3", stroke: "hsl(215, 20%, 35%)" }} />
+            <Tooltip content={<ScatterTooltipContent />} cursor={{ strokeDasharray: "3 3", stroke: "hsl(var(--ec-text-sec))" }} />
             <Scatter name="Sellers" data={points} animationDuration={800} animationEasing="ease-in-out">
               {points.map((entry, index) => (
                 <Cell

@@ -191,7 +191,7 @@ export default function CppCdpSellerBreakdown({ custId, rawRows, startDate, endD
                     wrapperStyle={{ fontSize: "10px" }}
                   />
                   <Bar dataKey="cdpGmv" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} />
-                  <Bar dataKey="rebate" fill="hsl(45, 80%, 55%)" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="rebate" fill="hsl(var(--ec-ambar))" radius={[3, 3, 0, 0]} />
                   <Bar dataKey="semRebate" fill="hsl(var(--muted-foreground))" radius={[3, 3, 0, 0]} opacity={0.6} />
                 </BarChart>
               </ResponsiveContainer>

@@ -143,7 +143,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
 
   // Gray/blue → Orange/fire color scale
   const getHeatColor = (val: number): string => {
-    if (maxVal === 0) return "hsl(215, 15%, 20%)";
+    if (maxVal === 0) return "hsl(var(--ec-text-sec))";
     const ratio = Math.max(0, Math.min(1, val / maxVal));
     if (ratio < 0.3) {
       // Dark gray-blue

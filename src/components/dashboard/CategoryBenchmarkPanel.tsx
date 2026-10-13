@@ -334,16 +334,16 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
             </div>
             <ResponsiveContainer width="100%" height={280}>
               <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="70%">
-                <PolarGrid stroke="hsl(215, 25%, 20%)" />
+                <PolarGrid stroke="hsl(var(--ec-text-sec))" />
                 <PolarAngleAxis
                   dataKey="metric"
-                  tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+                  tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 />
                 <PolarRadiusAxis tick={false} axisLine={false} domain={[0, 100]} />
-                <Radar name="Seller" dataKey="Seller" stroke="hsl(199, 100%, 50%)" fill="hsl(199, 100%, 50%)" fillOpacity={0.25} strokeWidth={2} />
-                <Radar name={verticalKey} dataKey={verticalKey} stroke="hsl(160, 84%, 39%)" fill="hsl(160, 84%, 39%)" fillOpacity={0.15} strokeWidth={2} />
-                <Radar name="Carteira" dataKey="Carteira" stroke="hsl(40, 95%, 55%)" fill="hsl(40, 95%, 55%)" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 4" />
-                <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11 }} />
+                <Radar name="Seller" dataKey="Seller" stroke="hsl(var(--ec-verde))" fill="hsl(var(--ec-verde))" fillOpacity={0.25} strokeWidth={2} />
+                <Radar name={verticalKey} dataKey={verticalKey} stroke="hsl(var(--ok))" fill="hsl(var(--ok))" fillOpacity={0.15} strokeWidth={2} />
+                <Radar name="Carteira" dataKey="Carteira" stroke="hsl(var(--ec-ambar))" fill="hsl(var(--ec-ambar))" fillOpacity={0.1} strokeWidth={1.5} strokeDasharray="4 4" />
+                <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 11 }} />
               </RadarChart>
             </ResponsiveContainer>
           </div>
@@ -368,13 +368,13 @@ const CategoryBenchmarkPanel = ({ portfolioBenchmark, loading, campaign, sellerB
                 barCategoryGap="25%"
               >
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="kpi" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
-                <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={false} />
+                <XAxis dataKey="kpi" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
+                <YAxis tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 11 }} />
-                <Bar dataKey="Seller" fill="hsl(199, 100%, 50%)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                <Bar dataKey={verticalKey} fill="hsl(160, 84%, 39%)" radius={[4, 4, 0, 0]} maxBarSize={40} />
-                <Bar dataKey="Carteira" fill="hsl(40, 95%, 55%)" radius={[4, 4, 0, 0]} maxBarSize={40} fillOpacity={0.6} />
+                <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 11 }} />
+                <Bar dataKey="Seller" fill="hsl(var(--ec-verde))" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey={verticalKey} fill="hsl(var(--ok))" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="Carteira" fill="hsl(var(--ec-ambar))" radius={[4, 4, 0, 0]} maxBarSize={40} fillOpacity={0.6} />
               </BarChart>
             </ResponsiveContainer>
           </div>

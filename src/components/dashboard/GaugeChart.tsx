@@ -13,14 +13,14 @@ const GaugeChart = ({ value, label, color, max = 100 }: GaugeChartProps) => {
   const strokeDashoffset = circumference - (percentage / 100) * circumference * 0.75;
   const rotation = -225;
 
-  const colorClass = color === "blue" ? "hsl(199, 100%, 50%)" : "hsl(160, 84%, 39%)";
-  const glowColor = color === "blue" ? "hsl(199, 100%, 50%)" : "hsl(160, 84%, 39%)";
+  const colorClass = color === "blue" ? "hsl(var(--ec-verde))" : "hsl(var(--ok))";
+  const glowColor = color === "blue" ? "hsl(var(--ec-verde))" : "hsl(var(--ok))";
 
   const getStatus = (val: number) => {
-    if (val >= 80) return { text: "Excelente", color: "hsl(160, 84%, 39%)" };
-    if (val >= 70) return { text: "Bom", color: "hsl(199, 100%, 50%)" };
-    if (val >= 50) return { text: "Regular", color: "hsl(40, 95%, 55%)" };
-    return { text: "Crítico", color: "hsl(0, 84%, 60%)" };
+    if (val >= 80) return { text: "Excelente", color: "hsl(var(--ok))" };
+    if (val >= 70) return { text: "Bom", color: "hsl(var(--ec-verde))" };
+    if (val >= 50) return { text: "Regular", color: "hsl(var(--ec-ambar))" };
+    return { text: "Crítico", color: "hsl(var(--ec-vermelho))" };
   };
 
   const status = getStatus(value);
@@ -35,7 +35,7 @@ const GaugeChart = ({ value, label, color, max = 100 }: GaugeChartProps) => {
             cy="80"
             r="60"
             fill="none"
-            stroke="hsl(215, 25%, 14%)"
+            stroke="hsl(var(--ec-text-sec))"
             strokeWidth="12"
             strokeDasharray={`${circumference * 0.75} ${circumference * 0.25}`}
             strokeLinecap="round"

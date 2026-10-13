@@ -584,18 +584,18 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="gradSellerGrowth" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"} stopOpacity={0} />
+                <stop offset="5%" stopColor={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"} stopOpacity={0.3} />
+                <stop offset="95%" stopColor={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"} stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradBenchmark" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="hsl(40, 95%, 55%)" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--ec-ambar))" stopOpacity={0.15} />
+                <stop offset="95%" stopColor="hsl(var(--ec-ambar))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
             <XAxis
               dataKey="date"
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
               angle={chartData.length > 8 ? -45 : 0}
@@ -603,7 +603,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               height={chartData.length > 8 ? 50 : 30}
             />
             <YAxis
-              tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) =>
                 modoCurva === "indexado"
@@ -616,7 +616,7 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
               <Area
                 type="monotone"
                 dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
-                stroke="hsl(40, 95%, 55%)"
+                stroke="hsl(var(--ec-ambar))"
                 fill="url(#gradBenchmark)"
                 strokeWidth={2}
                 strokeDasharray="6 3"
@@ -628,14 +628,14 @@ const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, bench
             <Area
               type="monotone"
               dataKey={modoCurva === "indexado" ? "Seller (Índice)" : "Seller (Acumulado)"}
-              stroke={deltaGeral >= 10 ? "hsl(160, 84%, 39%)" : "hsl(199, 100%, 50%)"}
+              stroke={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"}
               fill="url(#gradSellerGrowth)"
               strokeWidth={2.5}
               connectNulls={false}
               animationDuration={800}
               animationEasing="ease-in-out"
             />
-            <Legend wrapperStyle={{ color: "hsl(215, 20%, 55%)", fontSize: 12 }} />
+            <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
         )}

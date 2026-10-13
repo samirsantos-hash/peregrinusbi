@@ -781,11 +781,11 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           <ResponsiveContainer width="100%" height={320}>
             <ComposedChart data={chartData} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
-              <YAxis yAxisId="left" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Visitas Clips", angle: -90, position: "insideLeft", fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
-              <YAxis yAxisId="right" orientation="right" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} tickFormatter={(v) => fmt(v)} label={{ value: "Faturamento (R$)", angle: 90, position: "insideRight", fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
+              <XAxis dataKey="date" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--ec-text-sec))" }} />
+              <YAxis yAxisId="left" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--ec-text-sec))" }} tickFormatter={(v) => fmt(v)} label={{ value: "Visitas Clips", angle: -90, position: "insideLeft", fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} />
+              <YAxis yAxisId="right" orientation="right" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--ec-text-sec))" }} tickFormatter={(v) => fmt(v)} label={{ value: "Faturamento (R$)", angle: 90, position: "insideRight", fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} />
               <Tooltip content={<ComboTooltipContent />} />
-              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(var(--ec-text-sec))" }} />
               <Bar yAxisId="left" dataKey="visitasClips" name="Visitas Clips" fill="hsl(var(--neon-blue))" fillOpacity={0.7} radius={[4, 4, 0, 0]} barSize={32} />
               <Line yAxisId="right" type="monotone" dataKey="tgmvClips" name="Faturamento Clips" stroke="hsl(var(--warning))" strokeWidth={2.5} dot={{ fill: "hsl(var(--warning))", r: 4 }} activeDot={{ r: 6 }} />
             </ComposedChart>
@@ -806,10 +806,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={conversionSeries} margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis dataKey="date" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} axisLine={{ stroke: "hsl(215, 20%, 25%)" }} />
+              <XAxis dataKey="date" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={{ stroke: "hsl(var(--ec-text-sec))" }} />
               <YAxis
-                tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }}
-                axisLine={{ stroke: "hsl(215, 20%, 25%)" }}
+                tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
+                axisLine={{ stroke: "hsl(var(--ec-text-sec))" }}
                 tickFormatter={(v) => `${Number(v).toFixed(1).replace(".", ",")}%`}
                 domain={["auto", "auto"]}
               />
@@ -817,7 +817,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                 contentStyle={{ background: "hsl(var(--card) / 0.95)", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 11 }}
                 formatter={(v: any) => `${Number(v).toFixed(2).replace(".", ",")}%`}
               />
-              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(215, 20%, 55%)" }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: "hsl(var(--ec-text-sec))" }} />
               <Line type="monotone" dataKey="convGeral" name="Conversão Geral" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
               <Line type="monotone" dataKey="convClips" name="Conversão Clips" stroke="hsl(var(--emerald))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
             </LineChart>

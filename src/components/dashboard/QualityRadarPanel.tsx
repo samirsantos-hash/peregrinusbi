@@ -272,19 +272,19 @@ const QualityRadarPanel = ({ kpis }: QualityRadarPanelProps) => {
               <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="72%">
                 <defs>
                   <linearGradient id="gradTecnico" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(199,100%,50%)" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="hsl(199,100%,50%)" stopOpacity={0.05} />
+                    <stop offset="0%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.05} />
                   </linearGradient>
                   <linearGradient id="gradComercial" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(160,84%,39%)" stopOpacity={0.5} />
-                    <stop offset="100%" stopColor="hsl(160,84%,39%)" stopOpacity={0.05} />
+                    <stop offset="0%" stopColor="hsl(var(--ok))" stopOpacity={0.5} />
+                    <stop offset="100%" stopColor="hsl(var(--ok))" stopOpacity={0.05} />
                   </linearGradient>
                   <linearGradient id="gradEngajamento" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={engajamentoColor} stopOpacity={0.55} />
                     <stop offset="100%" stopColor={engajamentoColor} stopOpacity={0.08} />
                   </linearGradient>
                 </defs>
-                <PolarGrid stroke="hsl(215,25%,16%)" strokeOpacity={0.6} />
+                <PolarGrid stroke="hsl(var(--ec-text-sec))" strokeOpacity={0.6} />
                 <PolarAngleAxis
                   dataKey="dimension"
                   tick={{ fill: "hsl(var(--axis))", fontSize: 11 }} />
