@@ -433,7 +433,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
                 <TooltipInfo text={m.tooltip} />
               )}
             </div>
-            <p className={`metric-value mt-1 ${m.color}`}>{m.value}</p>
+            <p className={`metric-value mt-1 ${m.color}`}><NumeroAnimado valor={String(m.value)} /></p>
             {m.benchmarkText && (
               <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{m.benchmarkText}</p>
             )}
@@ -442,9 +442,9 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       </div>
 
       {/* Sales Record + Best Investment Period */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
         <SalesRecordCard kpis={kpis} />
-        <BestInvestmentPeriod kpis={kpis} />
+        <div className="md:col-span-2"><BestInvestmentPeriod kpis={kpis} /></div>
       </div>
 
       {/* Benchmark: Investimento (escala monetária) + Ratios (escala %) */}

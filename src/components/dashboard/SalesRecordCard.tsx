@@ -38,19 +38,17 @@ const SalesRecordCard = ({ kpis }: Props) => {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="glass-card p-5 flex items-center gap-4"
+      className="glass-card p-5 h-full flex flex-col justify-center gap-3"
     >
-      <div className="w-12 h-12 rounded-xl bg-ec-ambar/10 border border-ec-ambar/20 flex items-center justify-center shrink-0">
-        <Trophy className="w-6 h-6 text-ec-ambar" />
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-ec-ambar/10 border border-ec-ambar/20 flex items-center justify-center shrink-0">
+          <Trophy className="w-5 h-5 text-ec-ambar" />
+        </div>
+        <p className="metric-label">Recorde de Vendas</p>
       </div>
       <div>
-        <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-          Recorde de Vendas
-        </p>
-        <p className="text-lg font-bold text-foreground mt-0.5">
-          {fmtBRLCompact(record.value)}{" "}
-          <span className="text-sm font-normal text-ec-ambar">em {record.date}</span>
-        </p>
+        <p className="metric-value text-foreground"><NumeroAnimado valor={fmtBRLCompact(record.value)} /></p>
+        <p className="text-sm text-ec-ambar mt-1">em {record.date}</p>
       </div>
     </motion.div>
   );
