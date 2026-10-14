@@ -73,12 +73,14 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
               const top = larg(i);
               const bot = i < etapas.length - 1 ? larg(i + 1) : top * 0.85;
               const y = i * 70;
-              const pts = `${(W - top) / 2},${y} ${(W + top) / 2},${y} ${(W + bot) / 2},${y + 62} ${(W - bot) / 2},${y + 62}`;
+              const xl = (W - top) / 2, xr = (W + top) / 2, bl = (W - bot) / 2, br = (W + bot) / 2, yb = y + 62, r = 14, my = y + 31;
+              // Laterais em curva (bezier) e cantos arredondados — formato fluido, sem quinas
+              const pts = `M ${xl + r} ${y} L ${xr - r} ${y} Q ${xr} ${y} ${xr - 2} ${y + r * 0.6} C ${xr - (top - bot) / 4} ${my} ${br + 6} ${yb - r} ${br} ${yb - 4} Q ${br - 2} ${yb} ${br - r} ${yb} L ${bl + r} ${yb} Q ${bl + 2} ${yb} ${bl} ${yb - 4} C ${bl - 6} ${yb - r} ${xl + (top - bot) / 4} ${my} ${xl + 2} ${y + r * 0.6} Q ${xl} ${y} ${xl + r} ${y} Z`;
               const daAnterior = i > 0 ? e.valor / etapas[i - 1].valor : 1;
               return (
-                <motion.g key={e.nome} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.12 }} className="cursor-default [&:hover>polygon]:[filter:url(#funilBrilho)_brightness(1.4)]">
+                <motion.g key={e.nome} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.12 }} className="cursor-default [&:hover>path]:[filter:url(#funilBrilho)_brightness(1.4)]">
                   <title>{`${e.nome}: ${e.fmt} · ${pct(e.valor / d.visitas * 100, 2)} das visitas`}</title>
-                  <polygon points={pts} fill="url(#funilVidro)" fillOpacity={1 - i * 0.18} stroke="rgb(34 211 238 / 0.7)" strokeWidth={1} strokeLinejoin="round" filter="url(#funilBrilho)" className="transition-all duration-200" />
+                  <path d={pts} fill="url(#funilVidro)" fillOpacity={1 - i * 0.18} stroke="rgb(34 211 238 / 0.7)" strokeWidth={1} strokeLinejoin="round" filter="url(#funilBrilho)" className="transition-all duration-200" />
                   <text x={W / 2} y={y + 27} textAnchor="middle" fontSize={11} fontWeight={500} letterSpacing="0.1em" fill="rgb(255 255 255 / 0.7)">{e.nome.toUpperCase()}</text>
                   <text x={W / 2} y={y + 46} textAnchor="middle" fontSize={15} fontWeight={500} fill="rgb(255 255 255)" style={{ fontVariantNumeric: "tabular-nums" }}>
                     {e.fmt}{i > 0 ? ` · ${pct(daAnterior * 100, 2)} da etapa anterior` : ""}
