@@ -5,6 +5,8 @@ import {
 } from "recharts";
 import { Table as TableIcon, ExternalLink } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
+import TendenciaChip from "@/components/charts/TendenciaChip";
+import { calcularTendencia } from "@/lib/tendencia";
 import { fmtBRL, formatChartDate } from "@/utils/formatters";
 
 /* Escala DIVERGENTE: quente = caro (ruim) · neutro = equivalente · frio = barato (bom).
@@ -146,6 +148,16 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
     };
   }, [kpis, granularity]);
 
+  const [janela, setJanela] = useState<"3" | "6" | "12" | "all">("12");
+  const visiveis = useMemo(() => {
+    if (janela === "all" || granularity === "daily") return pontos;
+    return pontos.slice(-Number(janela));
+  }, [pontos, janela, granularity]);
+  const tendCaro = useMemo(
+    () => calcularTendencia(visiveis.filter((p) => p.expensive != null && !p.parcial).map((p) => p.expensive as number)),
+    [visiveis],
+  );
+
   const ultimo = [...pontos].reverse().find((p) => p.bpc > 0) || null;
 
   /* Validação automática das invariantes visuais/numéricas do gráfico. */
@@ -221,9 +233,8 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
   /* Rótulo direto no valor final de cada faixa. */
   const rotuloFinal = (cor: string) => (props: any) => {
     const { x, y, index, value } = props;
-    if (index !== pontos.length - 1 || value == null) return null;
-    /* Último período parcial: rótulo suprimido (invadiria a faixa hachurada). */
-    if (pontos[pontos.length - 1]?.parcial) return null;
+    if (index !== visiveis.length - 1 || value == null) return null;
+    if (visiveis[visiveis.length - 1]?.parcial) return null;
     const px = Number(x);
     const py = Number(y);
     if (!Number.isFinite(px) || !Number.isFinite(py)) return null;
@@ -289,43 +300,65 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
         </p>
       </div>
 
-      {/* Área empilhada 100% — sem suavização */}
+      {/* Período do gráfico */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex rounded-md border border-border overflow-hidden">
+          {(["3", "6", "12", "all"] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setJanela(p)}
+              className={`px-2.5 py-1 text-[11px] font-medium transition-colors ${
+                janela === p ? "bg-primary/20 text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {p === "all" ? "Tudo" : `${p}M`}
+            </button>
+          ))}
+        </div>
+        <TendenciaChip t={tendCaro} />
+        <span className="text-[10px] text-muted-foreground">tendência do % preço alto</span>
+      </div>
+
+      {/* Linhas suaves: cada faixa com sua cor, área leve sob a linha */}
       <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart data={pontos} margin={margem} stackOffset="none">
+        <ComposedChart key={janela} data={visiveis} margin={margem}>
           <defs>
             <pattern id="hachuraMes" width={6} height={6} patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
               <rect width="6" height="6" fill="transparent" />
-              <line x1="0" y1="0" x2="0" y2="6" stroke={AXIS} strokeWidth={2} strokeOpacity={0.55} />
+              <line x1="0" y1="0" x2="0" y2="6" stroke={AXIS} strokeWidth={2} strokeOpacity={0.35} />
             </pattern>
+            {[["gCool", COOL], ["gNeutral", NEUTRAL], ["gHot", HOT]].map(([id, cor]) => (
+              <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={cor} stopOpacity={0.28} />
+                <stop offset="100%" stopColor={cor} stopOpacity={0} />
+              </linearGradient>
+            ))}
           </defs>
           <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-          <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 11 }} tickLine={false} stroke={GRID} />
+          <XAxis dataKey="label" tick={{ fill: AXIS, fontSize: 11 }} tickLine={false} axisLine={false} interval="preserveStartEnd" />
           <YAxis
             domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fill: AXIS, fontSize: 11 }}
-            tickLine={false} stroke={GRID} tickFormatter={(v) => `${v}%`}
+            tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`}
           />
-          <Tooltip content={<CustomTooltip />} cursor={{ stroke: GRID }} />
+          <Tooltip content={<CustomTooltip />} cursor={{ stroke: AXIS, strokeDasharray: "3 3" }} />
           <Legend wrapperStyle={{ color: AXIS, fontSize: 12 }} />
-          <Area
-            type="linear" dataKey="cheaper" name="% Mais Barato" stackId="p" connectNulls={false}
-            stroke={SURFACE} strokeWidth={2} fill={COOL} fillOpacity={0.85} isAnimationActive={false}
-            label={rotuloFinal(COOL)}
-          />
-          <Area
-            type="linear" dataKey="match" name="% Equivalente" stackId="p" connectNulls={false}
-            stroke={SURFACE} strokeWidth={2} fill={NEUTRAL} fillOpacity={0.85} isAnimationActive={false}
-            label={rotuloFinal(NEUTRAL)}
-          />
-          <Area
-            type="linear" dataKey="expensive" name="% Preço Alto" stackId="p" connectNulls={false}
-            stroke={SURFACE} strokeWidth={2} fill={HOT} fillOpacity={0.85} isAnimationActive={false}
-            label={rotuloFinal(HOT)}
-          />
-          {/* Meses hachurados: amostra pequena ou mês em curso */}
-          <Bar dataKey="hachura" name="Amostra pequena / mês parcial" fill="url(#hachuraMes)" isAnimationActive={false} barSize={28} />
+          <Bar dataKey="hachura" name="Amostra pequena / mês parcial" fill="url(#hachuraMes)" isAnimationActive={false} barSize={22} legendType="none" />
+          {([
+            ["cheaper", "% Mais Barato", COOL, "gCool"],
+            ["match", "% Equivalente", NEUTRAL, "gNeutral"],
+            ["expensive", "% Preço Alto", HOT, "gHot"],
+          ] as const).map(([k, nome, cor, g]) => (
+            <Area
+              key={k} type="monotone" dataKey={k} name={nome} connectNulls={false}
+              stroke={cor} strokeWidth={2.5} fill={`url(#${g})`}
+              dot={false} activeDot={{ r: 5, stroke: SURFACE, strokeWidth: 2, fill: cor }}
+              animationDuration={900} animationEasing="ease-out"
+              label={rotuloFinal(cor)} className="chart-line"
+            />
+          ))}
           <ReferenceLine
-            y={LIMITE_CARO} stroke={HOT} strokeDasharray="5 4" strokeWidth={1.5} ifOverflow="extendDomain"
-          
+            y={LIMITE_CARO} stroke={HOT} strokeDasharray="5 4" strokeWidth={1.2} strokeOpacity={0.7} ifOverflow="extendDomain"
+            label={{ value: "limite 30%", position: "insideTopLeft", fill: HOT, fontSize: 10 }}
           />
         </ComposedChart>
       </ResponsiveContainer>
@@ -334,12 +367,12 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
       <div>
         <p className="text-[11px] text-muted-foreground mb-1">Volume BPC por período (escala azul — mais escuro = maior volume)</p>
         <ResponsiveContainer width="100%" height={34}>
-          <BarChart data={pontos} margin={{ ...margem, top: 0 }}>
+          <BarChart data={visiveis} margin={{ ...margem, top: 0 }}>
             <XAxis dataKey="label" hide />
             <YAxis domain={[0, 1]} hide />
             <Tooltip content={<VolumeTooltip />} cursor={false} />
             <Bar dataKey={() => 1} barSize={16} isAnimationActive={false}>
-              {pontos.map((p) => (
+              {visiveis.map((p) => (
                 <Cell
                   key={p.key}
                   fill={p.amostraPequena ? "url(#hachuraVolume)" : COOL}
