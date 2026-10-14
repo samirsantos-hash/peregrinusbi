@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Shield, Barcode, Sparkles, Package } from "lucide-react";
-import GaugeChart from "./GaugeChart";
 import { cn } from "@/lib/utils";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import type { TOOLTIPS } from "@/lib/algoTooltips";
@@ -217,8 +216,8 @@ const QualityKpiCards = ({
         })}
       </div>
 
-      {/* Main gauge cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Main cards — mesma proporção dos cards de serviço */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {mainCards.map((card, i) => {
           const sem = card.isGauge ? getSemaphore(card.value) : null;
           return (
@@ -226,45 +225,36 @@ const QualityKpiCards = ({
               key={card.label}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08 }}
-              className="glass-card p-5 flex flex-col items-center text-center space-y-3"
+              transition={{ delay: i * 0.06 }}
+              className="glass-card p-4 flex flex-col gap-2 h-full"
             >
               <div className="flex items-center gap-2">
-                <card.icon className="w-4 h-4 text-neon-blue" />
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
-                  {card.label}
-                </h4>
+                <card.icon className="w-3.5 h-3.5 text-neon-blue" />
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground truncate">{card.label}</span>
                 {card.algoKey && <AlgoTooltip tooltipKey={card.algoKey} />}
               </div>
               <p className="text-[10px] text-muted-foreground -mt-1">{card.sublabel}</p>
-
-              {card.isGauge ? (
-                <>
-                  <GaugeChart value={card.value} label="" color={card.color} />
-                  {sem && (
-                    <div className="flex flex-col items-center gap-1">
-                      <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", sem.textClass,
-                        sem.label === "Crítico" ? "bg-destructive/10" :
-                        sem.label === "Em desenvolvimento" ? "bg-warning/10" : "bg-emerald/10"
-                      )}>
-                        {sem.label}
-                      </span>
-                      {(card as any).zeroWarning && (
-                        <span className="text-[10px] text-muted-foreground italic">
-                          Dado indisponível neste período
-                        </span>
-                      )}
+              <div className="mt-auto space-y-2">
+                {card.isGauge && sem ? (
+                  <>
+                    <div className="flex items-baseline gap-1">
+                      <span className={cn("text-2xl font-bold tabular-nums", sem.textClass)}>{card.value}</span>
+                      <span className="text-xs text-muted-foreground">pts</span>
                     </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex flex-col items-center py-2">
-                  <span className="text-4xl font-bold font-mono text-foreground">
-                    {totalLiveListings.toLocaleString("pt-BR")}
-                  </span>
-                  <span className="text-xs text-muted-foreground mt-1">anúncios</span>
-                </div>
-              )}
+                    <SemaphoreBar score={card.value} />
+                    {(card as any).zeroWarning && (
+                      <span className="text-[10px] text-muted-foreground italic">Dado indisponível neste período</span>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold tabular-nums text-foreground">
+                      {totalLiveListings.toLocaleString("pt-BR")}
+                    </span>
+                    <span className="text-xs text-muted-foreground">anúncios</span>
+                  </div>
+                )}
+              </div>
             </motion.div>
           );
         })}

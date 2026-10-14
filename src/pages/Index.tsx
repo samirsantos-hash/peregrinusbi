@@ -581,46 +581,34 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
-                    <QualityIndexPanelV2
-                      custId={sellerCustIdMap[selectedSeller]}
-                      sellerUuid={selectedSeller}
-                    />
-                    <PlanoAcaoAnuncioPanel sellerId={selectedSeller} />
-                    <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
-                    <QualityKpiCards
-                      scoreCaracteristica={(() => {
-                        const latest = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
-                        return latest ? (latest as any).scoreCaracteristica || 0 : 0;
-                      })()}
-                      pontuacaoLlGtin={(() => {
-                        const latest = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
-                        return latest ? (latest as any).pontuacaoLlGtin || 0 : 0;
-                      })()}
-                      scoreOfertaFinal={(() => {
-                        const latest = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
-                        return latest ? (latest as any).scoreOferta || 0 : 0;
-                      })()}
-                      scoreFull={(() => {
-                        const latest = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
-                        return latest ? (latest as any).scoreFull || 0 : 0;
-                      })()}
-                      scorePads={(() => {
-                        const latest = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
-                        return latest ? (latest as any).scorePads || 0 : 0;
-                      })()}
-                      scoreCdp={(() => {
-                        const latest = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
-                        return latest ? (latest as any).cdpTgmv > 0 ? 36 : 0 : 0;
-                      })()}
-                      pontuacaoIpi={(() => {
-                        const latest = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0];
-                        return latest ? (latest as any).pontuacaoIpi || 0 : 0;
-                      })()}
-                      totalLiveListings={liveListingsCount || 0}
-                    />
-                    <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
-                    <ConversaoPorMLBPanel sellerId={selectedSeller} />
-                    <CriticalListingsTable listings={listingsQuality || []} />
+                    {(() => {
+                      const latest: any = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0] || {};
+                      return (
+                        <>
+                          {/* 1. Índice e indicadores */}
+                          <QualityIndexPanelV2 custId={sellerCustIdMap[selectedSeller]} sellerUuid={selectedSeller} />
+                          <QualityKpiCards
+                            scoreCaracteristica={latest.scoreCaracteristica || 0}
+                            pontuacaoLlGtin={latest.pontuacaoLlGtin || 0}
+                            scoreOfertaFinal={latest.scoreOferta || 0}
+                            scoreFull={latest.scoreFull || 0}
+                            scorePads={latest.scorePads || 0}
+                            scoreCdp={latest.cdpTgmv > 0 ? 36 : 0}
+                            pontuacaoIpi={latest.pontuacaoIpi || 0}
+                            totalLiveListings={liveListingsCount || 0}
+                          />
+                          {/* 2. Evolução e diagnóstico */}
+                          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch">
+                            <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
+                            <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
+                          </div>
+                          {/* 3. Ação por anúncio */}
+                          <PlanoAcaoAnuncioPanel sellerId={selectedSeller} />
+                          <ConversaoPorMLBPanel sellerId={selectedSeller} />
+                          <CriticalListingsTable listings={listingsQuality || []} />
+                        </>
+                      );
+                    })()}
                   </TabsContent>
                   <TabsContent value="clips" className="mt-0">
                     {isConsolidado && <CarteiraNaSecao secao="clips" />}
