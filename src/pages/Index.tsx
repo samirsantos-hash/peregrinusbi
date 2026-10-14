@@ -105,7 +105,6 @@ const Index = () => {
   const temRedePiloto = allowedSellers.some((s) => /megaju/i.test(s.nickname));
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { theme, toggle: toggleTheme } = useTheme();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
