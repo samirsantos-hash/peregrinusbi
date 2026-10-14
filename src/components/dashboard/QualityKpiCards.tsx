@@ -197,7 +197,7 @@ const QualityKpiCards = ({
   return (
     <div className="space-y-4">
       {/* Score cards with semaphore bars and correction badges */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className={cn("grid grid-cols-1 sm:grid-cols-2 gap-3", scoreCards.length === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
         {scoreCards.map((card, i) => {
           const sem = getSemaphore(card.value);
           return (
