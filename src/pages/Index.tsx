@@ -1,4 +1,4 @@
-import AguiaLogo, { SombraAguia } from "@/components/aura/AguiaLogo";
+import AguiaLogo from "@/components/aura/AguiaLogo";
 import CarteiraNaSecao from "@/components/carteira/deepdive/CarteiraNaSecao";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -366,7 +366,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <SombraAguia />
       <div className="fixed inset-0 opacity-[0.015] pointer-events-none" style={{
         backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--neon-blue)) 1px, transparent 0)`,
         backgroundSize: '40px 40px'
