@@ -1,3 +1,4 @@
+import NumeroAnimado from "@/components/ds/NumeroAnimado";
 import { useMemo, useState } from "react";
 import {
   format, parseISO, subDays, addDays, startOfDay, differenceInCalendarDays,
@@ -125,7 +126,7 @@ function MiniSerie({ valores, formato }: { valores: (number | null)[]; formato: 
       </svg>
       {ultimoValor !== undefined && (
         <span className="text-[10px] tnum lnum text-muted-foreground whitespace-nowrap">
-          {fmtKpi(ultimoValor, formato, true)}
+          <NumeroAnimado valor={String(fmtKpi(ultimoValor, formato, true))} />
         </span>
       )}
     </div>
@@ -374,7 +375,7 @@ export function Daily7DPanel({ dailyKpis, sellerNickname }: Daily7DPanelProps) {
                   {!c.aditivo && key !== "roas" && <span className="normal-case tracking-normal text-[9px]">· média</span>}
                 </div>
                 <div className="text-base font-semibold tnum lnum mt-1 text-foreground">
-                  {fmtKpi(total, c.format, true)}
+                  <NumeroAnimado valor={String(fmtKpi(total, c.format, true))} />
                 </div>
                 <MiniSerie valores={valores} formato={c.format} />
               </button>
