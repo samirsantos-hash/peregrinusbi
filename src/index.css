@@ -394,13 +394,13 @@
   .aguia-asa-e { transform-origin: 100% 60%; }
   .aguia-asa-d { transform-origin: 0% 60%; }
   @keyframes aguia-bate {
-    0%, 100% { transform: rotateX(0deg) scaleY(1) skewY(0deg); }
-    50% { transform: rotateX(55deg) scaleY(0.45) skewY(-6deg); }
+    0%, 100% { transform: rotate(16deg) rotateX(0deg); }
+    50% { transform: rotate(-20deg) rotateX(38deg); }
   }
   .aguia-asa-d { animation-name: aguia-bate-d; }
   @keyframes aguia-bate-d {
-    0%, 100% { transform: rotateX(0deg) scaleY(1) skewY(0deg); }
-    50% { transform: rotateX(55deg) scaleY(0.45) skewY(6deg); }
+    0%, 100% { transform: rotate(-16deg) rotateX(0deg); }
+    50% { transform: rotate(20deg) rotateX(38deg); }
   }
   .aguia-voo-trilha { position: absolute; left: 0; top: 0; animation: aguia-voa 38s linear infinite; }
   .aguia-voo-trilha .aguia-asa { animation-duration: 1.6s; }
