@@ -141,37 +141,12 @@ const TrafficHeatmap = ({ kpis }: Props) => {
 
   if (!kpis.length) return null;
 
-  // Gray/blue → Orange/fire color scale
+  // Escala única da identidade: ciano da marca, do vidro escuro ao ciano intenso
   const getHeatColor = (val: number): string => {
-    if (maxVal === 0) return "hsl(var(--ec-text-sec))";
-    const ratio = Math.max(0, Math.min(1, val / maxVal));
-    if (ratio < 0.3) {
-      // Dark gray-blue
-      const hue = 215;
-      const sat = 15 + ratio * 40;
-      const light = 18 + ratio * 20;
-      return `hsl(${hue}, ${Math.round(sat)}%, ${Math.round(light)}%)`;
-    }
-    if (ratio < 0.7) {
-      // Transition to warm orange
-      const t = (ratio - 0.3) / 0.4;
-      const hue = 215 - t * 185; // 215 → 30
-      const sat = 30 + t * 50;
-      const light = 25 + t * 20;
-      return `hsl(${Math.round(hue)}, ${Math.round(sat)}%, ${Math.round(light)}%)`;
-    }
-    // Hot fire
-    const t = (ratio - 0.7) / 0.3;
-    const hue = 30 - t * 20; // 30 → 10
-    const sat = 80 + t * 15;
-    const light = 45 + t * 10;
-    return `hsl(${Math.round(hue)}, ${Math.round(sat)}%, ${Math.round(light)}%)`;
+    const ratio = maxVal === 0 ? 0 : Math.max(0, Math.min(1, val / maxVal));
+    return `rgb(34 211 238 / ${(0.04 + ratio * 0.86).toFixed(2)})`;
   };
-
-  const getOpacity = (val: number) => {
-    if (maxVal === 0) return 0.2;
-    return Math.max(0.2, 0.2 + (val / maxVal) * 0.8);
-  };
+  const getOpacity = (_val: number) => 1;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
@@ -203,11 +178,11 @@ const TrafficHeatmap = ({ kpis }: Props) => {
 
             {/* Grid rows */}
             {DAYS.map((day, dayIdx) => (
-              <div key={day} className="flex items-center gap-1 mb-[2px]">
+              <div key={day} className="flex items-center gap-1 mb-[3px]">
                 <span className="w-10 text-[11px] text-muted-foreground font-medium text-right shrink-0">
                   {day}
                 </span>
-                <div className="flex flex-1 gap-[1px]">
+                <div className="flex flex-1 gap-[3px]">
                   {HOURS.map((hour) => {
                     const cell = grid[dayIdx][hour];
                     const isTop3 = top3.has(`${dayIdx}-${hour}`);
@@ -217,8 +192,8 @@ const TrafficHeatmap = ({ kpis }: Props) => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: (dayIdx * 24 + hour) * 0.001 }}
-                        className={`flex-1 h-7 rounded-[2px] relative group cursor-default flex items-center justify-center ${
-                          isTop3 ? "ring-1 ring-ec-ambar/80" : ""
+                        className={`flex-1 h-7 rounded-md border border-white/5 relative group cursor-default flex items-center justify-center transition-transform duration-150 hover:scale-110 hover:z-10 hover:border-white/40 ${
+                          isTop3 ? "ring-1 ring-white/70 shadow-[0_0_12px_rgb(34_211_238/0.6)]" : ""
                         }`}
                         style={{
                           backgroundColor: getHeatColor(cell.visits),
@@ -226,7 +201,7 @@ const TrafficHeatmap = ({ kpis }: Props) => {
                         }}
                       >
                         {isTop3 && (
-                          <Star className="w-3 h-3 text-ec-ambar fill-ec-ambar drop-shadow-sm" />
+                          <Star className="w-3 h-3 text-white fill-white drop-shadow-sm" />
                         )}
                         {/* Tooltip on hover */}
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-20 glass-card !bg-card/95 px-3 py-2 text-[10px] whitespace-nowrap rounded space-y-0.5">
@@ -249,14 +224,14 @@ const TrafficHeatmap = ({ kpis }: Props) => {
                 {[0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1].map((ratio, i) => (
                   <div
                     key={i}
-                    className="w-5 h-3 rounded-[1px]"
+                    className="w-5 h-3 rounded-sm border border-white/5"
                     style={{ backgroundColor: getHeatColor(ratio * (maxVal || 1)) }}
                   />
                 ))}
               </div>
               <span className="text-[10px] text-muted-foreground">Alto</span>
               <span className="text-[10px] text-muted-foreground ml-2 flex items-center gap-1">
-                <Star className="w-3 h-3 text-ec-ambar fill-ec-ambar" /> Horário Nobre
+                <Star className="w-3 h-3 text-neon-blue fill-neon-blue" /> Horário Nobre
               </span>
             </div>
           </div>
