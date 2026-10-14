@@ -11,31 +11,14 @@ interface Props {
   mecanismos: PockMecanismo[];
   /** F_TGMV_LC do período — base do percentual */
   base: number;
+  /** Mês de referência (AAAA-MM-01) da janela de 30 dias */
+  mesReferencia?: string | null;
 }
 
 const fmtBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
-function Sparkline({ pontos }: { pontos: { mes: string; valor: number }[] }) {
-  if (pontos.length < 2) return <div className="w-[72px] h-[18px]" aria-hidden />;
-  const max = Math.max(...pontos.map((p) => p.valor), 0);
-  const w = 72;
-  const h = 18;
-  const d = pontos
-    .map((p, i) => {
-      const x = (i / (pontos.length - 1)) * w;
-      const y = max > 0 ? h - (p.valor / max) * (h - 2) - 1 : h - 1;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-  return (
-    <svg width={w} height={h} className="shrink-0" role="img" aria-label="tendência de 12 meses">
-      <path d={d} fill="none" stroke="hsl(var(--brand-blue))" strokeWidth={1.4} strokeOpacity={0.85} />
-    </svg>
-  );
-}
-
-export default function PockMecanismosDesconto({ mecanismos, base }: Props) {
+export default function PockMecanismosDesconto({ mecanismos, base, mesReferencia }: Props) {
   const ordenados = useMemo(() => {
     const comValor = mecanismos.filter((m) => m.valor > 0).sort((a, b) => b.valor - a.valor);
     const zerados = mecanismos.filter((m) => !(m.valor > 0));
@@ -61,7 +44,7 @@ export default function PockMecanismosDesconto({ mecanismos, base }: Props) {
                 </button>
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-[320px] leading-relaxed space-y-1.5">
-                <p><span className="font-semibold">O que mostra: </span>quanto do faturamento passou por cada tipo de desconto no período.</p>
+                <p><span className="font-semibold">O que mostra: </span>quanto do faturamento passou por cada tipo de desconto nos últimos 30 dias (janela travada: é o prazo limite de uma promoção).</p>
                 <p><span className="font-semibold">Unidade: </span>R$ e % do faturamento do período.</p>
                 <p><span className="font-semibold">Como ler: </span>cada barra é independente. O mesmo pedido pode ter mais de um mecanismo, então a soma das barras pode ultrapassar o faturamento total — não é uma divisão de um bolo.</p>
                 <p><span className="font-semibold">Base insuficiente: </span>meses sem informação não entram na conta; mecanismos sem uso aparecem com R$ 0 em vez de sumir da lista.</p>
@@ -74,11 +57,13 @@ export default function PockMecanismosDesconto({ mecanismos, base }: Props) {
         </div>
         <div className="text-right text-[10px] text-muted-foreground tnum">
           <div>
-            Faturamento do período:{" "}
+            Faturamento em 30 dias:{" "}
             <span className="text-foreground font-semibold">{base > 0 ? fmtBRL(base) : "—"}</span>
           </div>
           <div>
-            {semMeses ? "Nenhum mês com informação" : `${meses} ${meses === 1 ? "mês" : "meses"} com informação`}
+            {semMeses
+              ? "Sem informação nos últimos 30 dias"
+              : `Últimos 30 dias${mesReferencia ? ` · ref. ${new Date(mesReferencia + "T12:00:00").toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}` : ""}`}
             {" · "}
             {usados} de {ordenados.length} mecanismos em uso
           </div>
@@ -87,7 +72,7 @@ export default function PockMecanismosDesconto({ mecanismos, base }: Props) {
 
       {semMeses && (
         <p className="text-[11px] text-muted-foreground rounded-md border border-border/60 px-2.5 py-1.5">
-          Base insuficiente: ainda não há meses com informação de descontos para esta loja. Os
+          Base insuficiente: não há informação de descontos desta loja nos últimos 30 dias. Os
           mecanismos aparecem com R$ 0 até a carga chegar.
         </p>
       )}
@@ -120,16 +105,13 @@ export default function PockMecanismosDesconto({ mecanismos, base }: Props) {
                   {pct === null ? "—" : `${pct.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`}
                 </span>
               </span>
-              <span className="hidden sm:block">
-                <Sparkline pontos={m.historico} />
-              </span>
-            </li>
+                          </li>
           );
         })}
       </ul>
 
       <p className="text-[10px] text-muted-foreground">
-        Percentual sobre o faturamento do período. Faturamento tocado somado (com sobreposição):{" "}
+        Janela travada em 30 dias. Percentual sobre o faturamento desses 30 dias. Faturamento tocado somado (com sobreposição):{" "}
         <span className="tnum">{totalTocado > 0 ? fmtBRL(totalTocado) : "R$ 0"}</span>.
       </p>
     </div>
