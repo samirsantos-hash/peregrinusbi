@@ -1,3 +1,4 @@
+import AguiaLogo from "@/components/aura/AguiaLogo";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
@@ -247,9 +248,7 @@ const DashboardHeader = ({
         {/* Left - Store selector + Date */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="h-12 w-12 rounded-lg bg-background/80 border border-border/50 p-1.5 flex items-center justify-center">
-              <img alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2f12a5a6-9e0e-4367-a737-5d6a8137e4bd.png" />
-            </div>
+            <AguiaLogo className="h-10 w-10 sm:h-12 sm:w-12 shrink-0" />
             <Store className="w-4 h-4 text-neon-blue" />
 
             <Popover open={storeOpen} onOpenChange={setStoreOpen}>

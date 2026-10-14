@@ -386,3 +386,43 @@
     stroke-opacity: 0.9;
   }
 }
+
+/* ─── Águia animada ─────────────────────────────────────────── */
+@layer components {
+  .aguia { perspective: 400px; transform-style: preserve-3d; }
+  .aguia-asa { transform-box: fill-box; animation: aguia-bate 0.9s ease-in-out infinite; }
+  .aguia-asa-e { transform-origin: 100% 60%; }
+  .aguia-asa-d { transform-origin: 0% 60%; }
+  @keyframes aguia-bate {
+    0%, 100% { transform: rotate(16deg) rotateX(0deg); }
+    50% { transform: rotate(-20deg) rotateX(38deg); }
+  }
+  .aguia-asa-d { animation-name: aguia-bate-d; }
+  @keyframes aguia-bate-d {
+    0%, 100% { transform: rotate(-16deg) rotateX(0deg); }
+    50% { transform: rotate(20deg) rotateX(38deg); }
+  }
+  .aguia-voo-trilha { position: absolute; left: 0; top: 0; animation: aguia-voa 38s linear infinite; }
+  .aguia-voo-trilha .aguia-asa { animation-duration: 1.6s; }
+  @keyframes aguia-voa {
+    0%   { transform: translate(-80vw, 70vh) rotate(-12deg) scale(0.8); }
+    25%  { transform: translate(20vw, 35vh) rotate(-6deg) scale(1); }
+    50%  { transform: translate(60vw, 10vh) rotate(4deg) scale(1.15); }
+    75%  { transform: translate(110vw, 40vh) rotate(10deg) scale(1); }
+    100% { transform: translate(140vw, 60vh) rotate(10deg) scale(0.8); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .aguia-asa, .aguia-voo-trilha { animation: none; }
+    .aguia-voo { display: none; }
+  }
+
+  /* ─── Gráficos: brilho, textura e resposta ao mouse ───────── */
+  .recharts-line-curve, .recharts-area-curve { filter: drop-shadow(0 0 4px currentColor); transition: stroke-width .2s; }
+  .recharts-wrapper:hover .recharts-line-curve, .recharts-wrapper:hover .recharts-area-curve { stroke-width: 3px; }
+  .recharts-area-area { mask-image: repeating-linear-gradient(135deg, #000 0 6px, rgba(0,0,0,.65) 6px 8px); }
+  .recharts-active-dot circle { filter: drop-shadow(0 0 6px hsl(var(--primary))); animation: ponto-pulsa 1.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  @keyframes ponto-pulsa { 50% { transform: scale(1.35); } }
+  .recharts-tooltip-cursor { stroke: hsl(var(--primary) / 0.5); stroke-dasharray: 3 3; }
+  .recharts-bar-rectangle path { transition: filter .2s, opacity .2s; }
+  .recharts-bar-rectangle:hover path { filter: brightness(1.25) drop-shadow(0 0 6px hsl(var(--primary) / .6)); }
+}
