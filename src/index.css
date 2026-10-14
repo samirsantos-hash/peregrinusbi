@@ -411,8 +411,15 @@
     75%  { transform: translate(110vw, 40vh) rotate(10deg) scale(1); }
     100% { transform: translate(140vw, 60vh) rotate(10deg) scale(0.8); }
   }
+  .aguia-flutua { animation: aguia-plana 6s ease-in-out infinite; transform-origin: 50% 60%; }
+  @keyframes aguia-plana {
+    0%, 100% { transform: translate(0, 0) rotate(-2deg); }
+    25%      { transform: translate(1.5%, -4%) rotate(0deg); }
+    50%      { transform: translate(0, -6%) rotate(2deg); }
+    75%      { transform: translate(-1.5%, -3%) rotate(0deg); }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .aguia-asa, .aguia-voo-trilha { animation: none; }
+    .aguia-asa, .aguia-voo-trilha, .aguia-flutua { animation: none; }
     .aguia-voo { display: none; }
   }
 
