@@ -17,6 +17,7 @@ interface QualityKpiCardsProps {
   pontuacaoIpi?: number;
   diasRecentes?: any[];
   pctFullPeriodo?: number;
+  semDado?: { atributos?: boolean; gtin?: boolean; oferta?: boolean };
 }
 
 /* ── Benchmarks da carteira (mediana Mar/2026) ── */
@@ -99,6 +100,7 @@ const QualityKpiCards = ({
   pontuacaoIpi = 0,
   diasRecentes = [],
   pctFullPeriodo = 0,
+  semDado = {},
 }: QualityKpiCardsProps) => {
   const normalizedCaracteristica = normalizeScore(scoreCaracteristica);
   const normalizedGtin = normalizeScore(pontuacaoLlGtin);
@@ -158,6 +160,7 @@ const QualityKpiCards = ({
       icon: Shield,
       color: "blue" as const,
       isGauge: true,
+      semDado: semDado.atributos,
       algoKey: "pontuacaoAtributos" as keyof typeof TOOLTIPS | undefined,
     },
     {
@@ -167,7 +170,7 @@ const QualityKpiCards = ({
       icon: Barcode,
       color: "emerald" as const,
       isGauge: true,
-      zeroWarning: normalizedGtin === 0,
+      semDado: semDado.gtin,
       algoKey: "saudeCodigoBarras" as keyof typeof TOOLTIPS | undefined,
     },
     {
@@ -177,6 +180,7 @@ const QualityKpiCards = ({
       icon: Sparkles,
       color: "blue" as const,
       isGauge: true,
+      semDado: semDado.oferta,
       algoKey: "atratividadeOferta" as keyof typeof TOOLTIPS | undefined,
     },
     {
@@ -248,16 +252,18 @@ const QualityKpiCards = ({
               </div>
               <p className="text-[10px] text-muted-foreground -mt-1">{card.sublabel}</p>
               <div className="mt-auto space-y-2">
-                {card.isGauge && sem ? (
+                {card.isGauge && (card as any).semDado ? (
+                  <div className="space-y-1">
+                    <span className="text-2xl font-bold text-muted-foreground">—</span>
+                    <p className="text-[10px] text-muted-foreground italic">Sem dado enviado para esta loja</p>
+                  </div>
+                ) : card.isGauge && sem ? (
                   <>
                     <div className="flex items-baseline gap-1">
                       <span className={cn("text-2xl font-bold tabular-nums", sem.textClass)}>{card.value}</span>
                       <span className="text-xs text-muted-foreground">pts</span>
                     </div>
                     <SemaphoreBar score={card.value} />
-                    {(card as any).zeroWarning && (
-                      <span className="text-[10px] text-muted-foreground italic">Dado indisponível neste período</span>
-                    )}
                   </>
                 ) : (
                   <div className="flex items-baseline gap-1">
