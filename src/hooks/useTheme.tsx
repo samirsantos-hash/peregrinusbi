@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 type Theme = "dark" | "light";
-const KEY = "peregrinus_theme_v2"; // v2: Sistema de Design abre no claro
+const KEY = "peregrinus_theme_v3"; // v3: Aura abre no modo noite; modo dia opcional
 
 const ThemeCtx = createContext<{ theme: Theme; toggle: () => void }>({
   theme: "light",
@@ -10,8 +10,8 @@ const ThemeCtx = createContext<{ theme: Theme; toggle: () => void }>({
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === "undefined") return "light";
-    return (localStorage.getItem(KEY) as Theme) || "light";
+    if (typeof window === "undefined") return "dark";
+    return (localStorage.getItem(KEY) as Theme) || "dark";
   });
 
   useEffect(() => {

@@ -399,11 +399,11 @@ const Index = () => {
               size="sm"
               onClick={toggleTheme}
               className="gap-2 px-2 sm:px-3"
-              title={theme === "dark" ? "Alternar para Modo Claro" : "Alternar para Modo Noire"}
+              title={theme === "dark" ? "Alternar para Modo Dia" : "Alternar para Modo Noite"}
               aria-label="Alternar tema"
             >
               {theme === "dark" ? <Sun className="w-4 h-4 text-neon-blue" /> : <Moon className="w-4 h-4 text-neon-blue" />}
-              <span className="hidden sm:inline">{theme === "dark" ? "Modo Claro" : "Modo Noire"}</span>
+              <span className="hidden sm:inline">{theme === "dark" ? "Modo Dia" : "Modo Noite"}</span>
             </Button>
             {(isAdmin || isGerente || isGestorLoja || temRedePiloto) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
