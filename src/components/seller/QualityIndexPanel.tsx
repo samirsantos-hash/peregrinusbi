@@ -2,7 +2,9 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ChevronDown, ChevronUp, AlertTriangle, Lightbulb } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, ReferenceLine } from "recharts";
+
+const CORES_PILAR = ["hsl(var(--neon-blue))", "hsl(var(--media))", "hsl(var(--emerald))", "hsl(25 90% 60%)"];
 import { supabase } from "@/integrations/supabase/client";
 import {
   getQualityIndex,
@@ -137,72 +139,85 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
     );
   }
 
-  const tendenciaData = qi.tendencia.map((v, i) => ({ i, v }));
+  const nT = qi.tendencia.length;
+  const tendenciaData = qi.tendencia.map((v, i) => ({ i: i === nT - 1 ? "Atual" : `-${nT - 1 - i}m`, v }));
+  const mesBR = (() => { const m = String(qi.mes).match(/^(\d{4})-(\d{2})/); return m ? `${m[2]}/${m[1]}` : qi.mes; })();
   const tGeral = statusTone(qi.scoreGeral >= 70 ? "ok" : qi.scoreGeral >= 45 ? "atencao" : "critico");
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-      {/* Header: score geral + composição + sparkline */}
-      <div className="glass-card p-6 flex flex-col lg:flex-row gap-6 items-center">
-        <ScoreBig score={qi.scoreGeral} nota={qi.notaGeral} />
-        <div className="flex-1 w-full space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-semibold">Quality Index</h3>
-              <p className="text-xs text-muted-foreground">
-                Mês de referência: <span className="font-mono">{qi.mes}</span> · 4 pilares do algoritmo ML
-              </p>
-            </div>
+      {/* Header: score geral + pilares + tendência */}
+      <div className="glass-card p-5 sm:p-6 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-6">
+        <div className="space-y-4 min-w-0">
+          <div>
+            <h3 className="text-base font-semibold">Quality Index</h3>
+            <p className="text-xs text-muted-foreground">Mês de referência: <span className="tabular-nums">{mesBR}</span> · 4 pilares</p>
           </div>
-
-          {/* Barra de composição */}
-          <div className="flex w-full h-3 rounded-full overflow-hidden border border-border">
-            {qi.pilares.map((p) => {
-              const tp = statusTone(p.status);
-              return (
-                <div
-                  key={p.id}
-                  className={tp.bar}
-                  style={{ width: `${p.peso * 100}%` }}
-                  title={`${p.label}: ${p.score}/100 (peso ${(p.peso * 100).toFixed(0).replace(".", ",")}%)`}
-                />
-              );
-            })}
+          <div className="flex items-baseline gap-2">
+            <span className={`text-5xl font-bold tabular-nums ${tGeral.text}`}>{qi.scoreGeral}</span>
+            <span className="text-sm text-muted-foreground">/100</span>
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px]">
-            {qi.pilares.map((p) => (
-              <span key={p.id} className="flex items-center gap-1">
-                {statusEmoji(p.status)} {p.label.replace(/^\S+\s/, "")}:{" "}
-                <span className="font-mono font-bold tabular-nums">{p.score}</span>
-              </span>
+          <div className="space-y-2.5">
+            {qi.pilares.map((p, i) => (
+              <div key={p.id} className="space-y-1">
+                <div className="flex items-center justify-between gap-2 text-[11px]">
+                  <span className="flex items-center gap-1.5 min-w-0">
+                    <span className="w-2 h-2 rounded-full shrink-0" style={{ background: CORES_PILAR[i % CORES_PILAR.length] }} />
+                    <span className="truncate">{p.label.replace(/^\S+\s/, "")}</span>
+                    <span className="text-muted-foreground shrink-0">· peso {(p.peso * 100).toFixed(0)}%</span>
+                  </span>
+                  <span className="font-semibold tabular-nums shrink-0">{p.score}</span>
+                </div>
+                <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ background: CORES_PILAR[i % CORES_PILAR.length], boxShadow: `0 0 10px ${CORES_PILAR[i % CORES_PILAR.length]}` }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${p.score}%` }}
+                    transition={{ duration: 0.9, delay: i * 0.08 }}
+                  />
+                </div>
+              </div>
             ))}
           </div>
+        </div>
 
-          {qi.tendencia.length > 1 && (
-            <div className="pt-2">
-              <p className="text-[10px] text-muted-foreground mb-1">
-                Tendência ({qi.tendencia.length} meses)
-              </p>
-              <div className="h-12">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={tendenciaData}>
-                    <XAxis dataKey="i" hide />
-                    <Tooltip
-                      contentStyle={{ fontSize: 11 }}
-                      formatter={(v: number) => [`${v}/100`, "Quality Index"]}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="v"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      dot={{ r: 2 }}
-                      className={tGeral.text}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+        <div className="min-w-0 flex flex-col">
+          <p className="text-[11px] text-muted-foreground mb-2">Evolução do índice ({qi.tendencia.length} meses)</p>
+          {qi.tendencia.length > 1 ? (
+            <div className="flex-1 min-h-[180px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={tendenciaData} margin={{ top: 10, right: 12, left: -18, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="qiArea" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--neon-blue))" stopOpacity={0.45} />
+                      <stop offset="100%" stopColor="hsl(var(--neon-blue))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} stroke="hsl(var(--border))" strokeOpacity={0.4} />
+                  <XAxis dataKey="i" tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <YAxis domain={[0, 100]} tickLine={false} axisLine={false} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} />
+                  <ReferenceLine y={70} stroke="hsl(var(--emerald))" strokeDasharray="4 4" label={{ value: "meta 70", fontSize: 10, fill: "hsl(var(--emerald))", position: "insideTopRight" }} />
+                  <Tooltip
+                    cursor={{ stroke: "hsl(var(--neon-blue))", strokeOpacity: 0.4 }}
+                    contentStyle={{ fontSize: 11, background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }}
+                    formatter={(v: number) => [`${v}/100`, "Quality Index"]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="v"
+                    stroke="hsl(var(--neon-blue))"
+                    strokeWidth={2.5}
+                    fill="url(#qiArea)"
+                    dot={{ r: 3, fill: "hsl(var(--neon-blue))", strokeWidth: 0 }}
+                    activeDot={{ r: 6, stroke: "hsl(var(--background))", strokeWidth: 2 }}
+                    animationDuration={900}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">Histórico insuficiente para a evolução.</p>
           )}
         </div>
       </div>
