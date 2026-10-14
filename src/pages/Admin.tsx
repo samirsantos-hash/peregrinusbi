@@ -254,7 +254,7 @@ const Admin = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-neon-blue" />
       </div>
     );
@@ -263,7 +263,7 @@ const Admin = () => {
   // uploadSources removed — now handled by BatchUploadPanel
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 space-y-6">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center justify-between">
           <div className="flex items-center gap-3">

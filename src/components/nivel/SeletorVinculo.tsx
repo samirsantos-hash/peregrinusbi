@@ -78,7 +78,7 @@ export default function SeletorVinculo({ perfil, nivel }: { perfil: Perfil; nive
   }, [data, busca]);
 
   return (
-    <div className="min-h-screen bg-background flex items-start justify-center p-6">
+    <div className="min-h-screen flex items-start justify-center p-6">
       <div className="w-full max-w-3xl space-y-3 pt-16">
         <h1 className="text-lg font-semibold">Escolha por onde começar</h1>
         <p className="text-sm text-muted-foreground">

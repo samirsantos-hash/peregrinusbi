@@ -83,7 +83,7 @@ const ChangePassword = () => {
 
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="glass-card p-8 w-full max-w-sm space-y-6 animate-fade-in">
         <div className="text-center space-y-2">
           <KeyRound className="w-8 h-8 text-neon-blue mx-auto" />

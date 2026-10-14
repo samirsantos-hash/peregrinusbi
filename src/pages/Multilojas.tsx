@@ -237,7 +237,7 @@ const Multilojas = () => {
 
   if (perfilML.loading || (carregando && !modoLocal)) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Topo titulo="Multilojas · gestão consolidada de rede" />
         <div className="py-24 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
           <Loader2 className="w-6 h-6 animate-spin text-primary" /> Carregando as cargas publicadas…
@@ -248,7 +248,7 @@ const Multilojas = () => {
 
   if (!temAcesso) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Topo titulo="Multilojas" />
         <div className="py-24 text-center text-xs text-muted-foreground">
           Esta aba é restrita a Administrador, Consultor e Gestor de Loja Oficial.
@@ -268,7 +268,7 @@ const Multilojas = () => {
 
   if (!dados) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Topo titulo="Multilojas · gestão consolidada de rede" sub={erroBase || "Nenhuma carga publicada"} />
         <nav className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-border/40">
           {TABS.filter((t) => t === "Central de dados" || t === "Cadastro de lojas").map((t) => (
@@ -320,7 +320,7 @@ const Multilojas = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <header className="sticky top-0 z-30 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-5 py-3 flex items-center gap-3 flex-wrap">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2"><ArrowLeft className="w-4 h-4" />Voltar</Button>

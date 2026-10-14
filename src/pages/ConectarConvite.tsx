@@ -41,7 +41,7 @@ const ConectarConvite = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md rounded-2xl border border-border/50 bg-card/60 p-8 space-y-6 text-center">
         <img src={logo} alt="Ecom Peregrinus" className="mx-auto h-16 w-16 rounded-xl object-cover" />
         <div className="space-y-1">

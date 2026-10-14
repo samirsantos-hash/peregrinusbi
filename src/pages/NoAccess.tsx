@@ -7,7 +7,7 @@ const NoAccess = () => {
   const { signOut } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 w-full max-w-md text-center space-y-4">
         <ShieldAlert className="w-12 h-12 text-warning mx-auto" />
         <h1 className="text-xl font-bold">Painel em Processamento</h1>
