@@ -105,7 +105,6 @@ const Index = () => {
   const temRedePiloto = allowedSellers.some((s) => /megaju/i.test(s.nickname));
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { theme, toggle: toggleTheme } = useTheme();
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -393,18 +392,6 @@ const Index = () => {
             </div>
           </div>
           <div className="flex flex-1 items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
-            {/* 1 — Tema: Modo Claro / Modo Noire */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggleTheme}
-              className="gap-2 px-2 sm:px-3"
-              title={theme === "dark" ? "Alternar para Modo Dia" : "Alternar para Modo Noite"}
-              aria-label="Alternar tema"
-            >
-              {theme === "dark" ? <Sun className="w-4 h-4 text-neon-blue" /> : <Moon className="w-4 h-4 text-neon-blue" />}
-              <span className="hidden sm:inline">{theme === "dark" ? "Modo Dia" : "Modo Noite"}</span>
-            </Button>
             {(isAdmin || isGerente || isGestorLoja || temRedePiloto) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
                 <Store className="w-4 h-4" />
