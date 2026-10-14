@@ -260,7 +260,7 @@ export function usePockData(sellerId: string | undefined) {
           visitas: num(ultima.visits),
           vendas: num(ultima.tsi),
           competitividade_preco_pct: bpc === null ? null : Math.round(bpc * 1000) / 10,
-          reputacao: ultima.rep_current_level ?? null,
+          reputacao: ({ green_platinum: "MercadoLíder Platinum", green_gold: "MercadoLíder Gold", green_silver: "MercadoLíder", green: "Verde", light_green: "Verde claro", yellow: "Amarela", orange: "Laranja", red: "Vermelha", newbie: "Novo vendedor" } as Record<string, string>)[ultima.rep_current_level] ?? ultima.rep_current_level ?? null,
           reclamacoes_pct: num(ultima.rep_claims_rate),
           atrasos_pct: num(ultima.rep_delayed_ht_rate),
           cancelamentos_pct: num(ultima.rep_cancellations_rate),

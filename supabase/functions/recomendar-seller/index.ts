@@ -46,7 +46,7 @@ Leia as métricas abaixo e escreva recomendações práticas para o vendedor mel
 Use só os números informados; campo null = sem dado (não conclua nada sobre ele).
 Metas da consultoria: competitividade de preço ≥ 70%; Ads ≥ 5% do faturamento; Full ≥ 40% do faturamento;
 faturamento com promoção ≥ 20%; queda de faturamento > 20% contra o mês anterior é alerta;
-reputação: green_platinum/green_gold são ótimas, yellow/orange/red exigem ação; reclamações, atrasos e cancelamentos baixos.
+reputação: Platinum/Gold são ótimas; Amarela, Laranja e Vermelha exigem ação; reclamações, atrasos e cancelamentos baixos.
 Favorabilidade é a nota (0–100%) de cumprimento dessas metas. Crescimento compara o último mês fechado com o anterior e com a mediana do mercado.
 Responda em português do Brasil, frases curtas, cite o número que motivou cada sugestão e o próximo passo.
 Entre 3 e 6 recomendações, ordenadas pela prioridade. "resumo": 2 frases com a leitura geral do vendedor.
