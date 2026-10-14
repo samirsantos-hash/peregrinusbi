@@ -76,51 +76,33 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
       </div>
 
       {/* Cards de resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <div className="glass-card p-4 border-l-4 border-l-emerald-500">
-          <div className="flex items-center gap-2 mb-1">
-            <CheckCircle2 className="w-4 h-4 text-ok" />
-            <p className="text-[10px] font-semibold text-ok uppercase tracking-wider">
-              Cofinanciadas com opt-in
-            </p>
-          </div>
-          <p className="text-2xl font-bold font-mono tabular-nums text-foreground">
-            {portfolio.cofinanciadas_com_optin}
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            itens ativos com ML bancando parte do desconto
-          </p>
-        </div>
-
-        <div className="glass-card p-4 border-l-4 border-l-amber-500">
-          <div className="flex items-center gap-2 mb-1">
-            <AlertTriangle className="w-4 h-4 text-ec-ambar" />
-            <p className="text-[10px] font-semibold text-ec-ambar uppercase tracking-wider">
-              Cofinanciadas SEM opt-in
-            </p>
-          </div>
-          <p className="text-2xl font-bold font-mono tabular-nums text-foreground">
-            {portfolio.cofinanciadas_sem_optin}
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            oportunidade imediata — ML pronto para cofinanciar
-          </p>
-        </div>
-
-        <div className="glass-card p-4 border-l-4 border-l-sky-500">
-          <div className="flex items-center gap-2 mb-1">
-            <RefreshCw className="w-4 h-4 text-ec-verde-txt" />
-            <p className="text-[10px] font-semibold text-ec-verde-txt uppercase tracking-wider">
-              Pode trocar por campanha melhor
-            </p>
-          </div>
-          <p className="text-2xl font-bold font-mono tabular-nums text-foreground">
-            {portfolio.pode_melhorar}
-          </p>
-          <p className="text-[10px] text-muted-foreground mt-1">
-            existe opção com desconto maior disponível
-          </p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
+        {[
+          { titulo: "Cofinanciadas com opt-in", valor: portfolio.cofinanciadas_com_optin, texto: "itens ativos com o ML bancando parte do desconto", Icone: CheckCircle2, cor: "hsl(var(--emerald))" },
+          { titulo: "Cofinanciadas sem opt-in", valor: portfolio.cofinanciadas_sem_optin, texto: "oportunidade imediata: o ML já cofinancia, falta aderir", Icone: AlertTriangle, cor: "hsl(var(--warning))" },
+          { titulo: "Pode trocar de campanha", valor: portfolio.pode_melhorar, texto: "existe opção com desconto maior disponível", Icone: RefreshCw, cor: "hsl(var(--neon-blue))" },
+        ].map(({ titulo, valor, texto, Icone, cor }) => {
+          const total = portfolio.itens.length;
+          const pct = total > 0 ? (valor / total) * 100 : 0;
+          return (
+            <div key={titulo} className="glass-card p-4 flex flex-col gap-3 border-l-4" style={{ borderLeftColor: cor }}>
+              <div className="flex items-center gap-2 min-h-[20px]">
+                <Icone className="w-4 h-4 shrink-0" style={{ color: cor }} />
+                <p className="text-[11px] font-semibold uppercase tracking-wider truncate" style={{ color: cor }}>{titulo}</p>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold tabular-nums text-foreground leading-none">{valor.toLocaleString("pt-BR")}</span>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  de {total.toLocaleString("pt-BR")} itens · {pct.toFixed(1).replace(".", ",")}%
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                <div className="h-full rounded-full" style={{ width: `${pct}%`, background: cor }} />
+              </div>
+              <p className="text-xs text-muted-foreground leading-snug mt-auto">{texto}</p>
+            </div>
+          );
+        })}
       </div>
 
       {/* Resumo por tipo */}
