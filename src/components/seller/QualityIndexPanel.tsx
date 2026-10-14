@@ -23,6 +23,8 @@ function statusEmoji(s: StatusLevel) {
   return s === "ok" ? "🟢" : s === "atencao" ? "🟡" : "🔴";
 }
 
+function limpar(t: string) { return t.replace(/^[^\p{L}\d]+/u, "").replace(/^\d+º\s*/, ""); }
+
 function ScoreBig({ score, nota }: { score: number; nota: string }) {
   const t = statusTone(score >= 70 ? "ok" : score >= 45 ? "atencao" : "critico");
   return (
@@ -39,7 +41,7 @@ function TopicoRow({ topico }: { topico: Topico }) {
     <div className={`rounded-lg border ${t.border} ${t.bg} p-3 space-y-2`}>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <span>{statusEmoji(topico.status)}</span>
+          <span className={`w-2 h-2 rounded-full shrink-0 ${t.bar}`} />
           <span className="text-xs font-semibold truncate">{topico.label}</span>
           <span className="text-[10px] text-muted-foreground font-mono truncate hidden md:inline">
             ({topico.fonte})
@@ -84,7 +86,7 @@ function PilarCard({
         className={`w-full flex items-center justify-between gap-3 p-3 ${t.bg} hover:opacity-80 transition`}
       >
         <div className="flex flex-col items-start gap-0.5 min-w-0">
-          <span className="text-sm font-semibold truncate">{pilar.label}</span>
+          <span className="text-sm font-semibold truncate">{limpar(pilar.label)}</span>
           <span className="text-[10px] text-muted-foreground">peso {(pilar.peso * 100).toFixed(0).replace(".", ",")}%</span>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -92,9 +94,6 @@ function PilarCard({
             <span className={`text-2xl font-bold tabular-nums ${t.text}`}>{pilar.score}</span>
             <span className="text-xs text-muted-foreground">/100</span>
           </div>
-          <span className={`px-2 py-0.5 rounded text-xs font-bold ${t.bg} ${t.text} border ${t.border}`}>
-            {pilar.scoreNota}
-          </span>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </div>
       </button>
@@ -163,7 +162,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
                 <div className="flex items-center justify-between gap-2 text-[11px]">
                   <span className="flex items-center gap-1.5 min-w-0">
                     <span className="w-2 h-2 rounded-full shrink-0" style={{ background: CORES_PILAR[i % CORES_PILAR.length] }} />
-                    <span className="truncate">{p.label.replace(/^\S+\s/, "")}</span>
+                    <span className="truncate">{limpar(p.label)}</span>
                     <span className="text-muted-foreground shrink-0">· peso {(p.peso * 100).toFixed(0)}%</span>
                   </span>
                   <span className="font-semibold tabular-nums shrink-0">{p.score}</span>
@@ -239,7 +238,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
       {/* Pilar mais fraco */}
       {pilarMaisFraco && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs">
-          💡 <span className="font-semibold">Pilar mais fraco:</span> {pilarMaisFraco.label} ({pilarMaisFraco.score}/100).
+          <span className="font-semibold">Pilar mais fraco:</span> {limpar(pilarMaisFraco.label)} ({pilarMaisFraco.score}/100).
           Melhorar este pilar tem o maior impacto relativo no score geral.
         </div>
       )}
