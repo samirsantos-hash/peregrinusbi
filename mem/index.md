@@ -1,0 +1,2 @@
+- [Chart Line Colors](mem://ui/chart-line-colors) — Linhas de um mesmo gráfico nunca repetem cor
+- [Seller Category](mem://features/seller-category) — Categoria pelos produtos vendidos/base de clientes; campanhas só último recurso

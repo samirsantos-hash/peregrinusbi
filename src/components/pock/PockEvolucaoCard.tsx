@@ -243,7 +243,7 @@ export default function PockEvolucaoCard({
               {temAnoAnterior && (
                 <Line yAxisId="p" type="linear" dataKey="yoy" name="Var. YOY" stroke="hsl(var(--brand-navy))" strokeWidth={2} strokeDasharray="5 3" dot={false} connectNulls={false} />
               )}
-              <Line yAxisId="p" type="linear" dataKey="mom" name="Var. MOM" stroke="hsl(var(--brand-navy))" strokeOpacity={0.5} strokeWidth={1.6} dot={false} connectNulls={false} />
+              <Line yAxisId="p" type="linear" dataKey="mom" name="Var. MOM" stroke="hsl(var(--ec-laranja))" strokeWidth={1.6} dot={false} connectNulls={false} />
             </ComposedChart>
           </ResponsiveContainer>
         )}
