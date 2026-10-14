@@ -78,6 +78,27 @@ const SEVERITY_CONFIG: Record<Severity, { emoji: string; bg: string; border: str
   },
 };
 
+const ROTULO_SEV: Record<Severity, string> = { green: "Saudável", yellow: "Atenção", red: "Crítico" };
+const COR_SEV: Record<Severity, string> = { green: "hsl(var(--emerald))", yellow: "hsl(var(--warning))", red: "hsl(var(--destructive))" };
+
+function StatusPill({ sev }: { sev: Severity }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+      style={{ color: COR_SEV[sev], borderColor: COR_SEV[sev].replace(")", " / 0.4)"), background: COR_SEV[sev].replace(")", " / 0.1)") }}>
+      <span className="w-2 h-2 rounded-full" style={{ background: COR_SEV[sev], boxShadow: `0 0 8px ${COR_SEV[sev]}` }} />
+      {ROTULO_SEV[sev]}
+    </span>
+  );
+}
+
+function nivelLegivel(n?: string) {
+  if (!n) return "Sem dado";
+  const cor: Record<string, string> = { green: "Verde", light_green: "Verde-claro", yellow: "Amarelo", orange: "Laranja", red: "Vermelho" };
+  const m = n.toLowerCase().match(/^(.*?)(?:_(platinum|gold|silver|leader))?$/);
+  const base = m?.[1] ?? n; const medalha = m?.[2];
+  return [cor[base] ?? base, medalha ? `MercadoLíder ${medalha[0].toUpperCase()}${medalha.slice(1)}` : ""].filter(Boolean).join(" · ");
+}
+
 const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelProps) => {
   const { lights, latest, trendData, overallSeverity, slopes } = useMemo(() => {
     if (kpis.length === 0) {
@@ -109,7 +130,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
         formatted: `${(lat.repClaimsRate * 100).toFixed(2).replace(".", ",")}%`,
         severity: claimsSev,
         description: "Percentual de vendas com reclamações abertas",
-        thresholds: "🟢 ≤2% · 🟡 ≤5% · 🔴 >5%",
+        thresholds: "≤2%|≤5%|>5%",
         serie: claimsSerie,
         metrica: "reclamacoes",
         tooltipKey: "taxaReclamacoes",
@@ -120,7 +141,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
         formatted: `${(lat.repDelayedRate * 100).toFixed(2).replace(".", ",")}%`,
         severity: delaySev,
         description: "Percentual de envios atrasados (handling time)",
-        thresholds: "🟢 ≤5% · 🟡 ≤10% · 🔴 >10%",
+        thresholds: "≤5%|≤10%|>10%",
         serie: delaysSerie,
         metrica: "atrasos",
         tooltipKey: "taxaAtrasos",
@@ -128,10 +149,10 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
       {
         label: "Taxa de Cancelamento",
         value: cancRate,
-        formatted: `${cancRate.toFixed(1).replace(".", ",")}%`,
+        formatted: `${cancRate.toFixed(2).replace(".", ",")}%`,
         severity: cancSev,
         description: "Percentual de vendas canceladas",
-        thresholds: "🟢 ≤2% · 🟡 ≤5% · 🔴 >5%",
+        thresholds: "≤2%|≤5%|>5%",
         serie: cancelsSerie,
         metrica: "cancelamentos",
         tooltipKey: "taxaCancelamentos",
@@ -215,11 +236,11 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                 <AlgoTooltip tooltipKey="nivelReputacao" />
               </h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Nível atual: <span className="font-bold text-foreground">{latest.repLevel || "N/A"}</span>
+                Nível atual: <span className="font-semibold text-foreground">{nivelLegivel(latest.repLevel)}</span>
               </p>
             </div>
           </div>
-          <span className="text-3xl">{overallCfg.emoji}</span>
+          <StatusPill sev={overallSeverity} />
         </div>
       </div>
 
@@ -240,25 +261,32 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className={`glass-card p-5 border ${cfg.border} ${cfg.glow}`}
+              className={`glass-card p-5 border ${cfg.border} flex flex-col gap-3 h-full`}
             >
-              <div className="flex items-start justify-between mb-3">
-                <span className="text-2xl">{cfg.emoji}</span>
-                <span className={`text-2xl font-bold font-mono ${cfg.text}`}>
-                  {light.formatted}
-                </span>
+              <div className="flex items-center justify-between gap-2">
+                <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5 min-w-0">
+                  <span className="truncate">{light.label}</span>
+                  <AlgoTooltip tooltipKey={light.tooltipKey} />
+                </h4>
+                <StatusPill sev={light.severity} />
               </div>
-              <h4 className="text-sm font-semibold text-foreground mb-1 flex items-center gap-1.5">
-                {light.label}
-                <AlgoTooltip tooltipKey={light.tooltipKey} />
-              </h4>
-              <p className="text-xs text-muted-foreground mb-2">{light.description}</p>
-              <p className="text-[10px] text-muted-foreground/70 font-mono mb-2">{light.thresholds}</p>
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className={`text-3xl font-bold tabular-nums leading-none ${cfg.text}`}>{light.formatted}</span>
                 <TrendBadge serie={light.serie} sentido="menor_melhor" formato="pp" casas={2} />
               </div>
+              <p className="text-xs text-muted-foreground leading-snug min-h-[2.5rem]">{light.description}</p>
+              <div className="flex items-center gap-3 text-[11px] text-muted-foreground tabular-nums">
+                {light.thresholds.split("|").map((t, i) => {
+                  const c = [COR_SEV.green, COR_SEV.yellow, COR_SEV.red][i];
+                  return (
+                    <span key={t} className="inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: c }} />{t}
+                    </span>
+                  );
+                })}
+              </div>
               <p
-                className="text-[10px] mt-2 px-2 py-1 rounded font-medium"
+                className="text-[11px] mt-auto px-2.5 py-1.5 rounded-md font-medium"
                 style={{ color: st.cor, background: st.bg }}
               >
                 {st.texto}
