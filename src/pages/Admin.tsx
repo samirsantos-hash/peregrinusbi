@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store, Folder, KeyRound } from "lucide-react";
+import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store, Folder, KeyRound, PauseCircle, PlayCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/fetchAllRows";
@@ -178,6 +178,40 @@ const Admin = () => {
       toast({ title: "Erro", description: err.message, variant: "destructive" });
     }
     setCreating(false);
+  };
+
+  const [pausedIds, setPausedIds] = useState<Set<string>>(new Set());
+  const [pausing, setPausing] = useState<string | null>(null);
+
+  const loadPaused = async () => {
+    const { data } = await supabase.functions.invoke("admin-users", { body: { action: "list_paused" } });
+    if (data?.ids) setPausedIds(new Set(data.ids));
+  };
+
+  useEffect(() => {
+    if (isAdmin) void loadPaused();
+  }, [isAdmin]);
+
+  const handleTogglePause = async (userId: string, email: string, paused: boolean) => {
+    if (!confirm(paused ? `Pausar o acesso de ${email}? A pessoa não conseguirá entrar até ser reativada.` : `Reativar o acesso de ${email}?`)) return;
+    setPausing(userId);
+    try {
+      const { data, error } = await supabase.functions.invoke("admin-users", {
+        body: { action: "set_paused", targetUserId: userId, paused },
+      });
+      if (error) throw new Error(await getEdgeFunctionErrorMessage(error, "Falha ao alterar acesso"));
+      if (data?.error) throw new Error(data.error);
+      toast({ title: paused ? "Acesso pausado" : "Acesso reativado" });
+      setPausedIds((prev) => {
+        const next = new Set(prev);
+        if (paused) next.add(userId); else next.delete(userId);
+        return next;
+      });
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setPausing(null);
+    }
   };
 
   const handleDeleteUser = async (userId: string, email: string) => {
@@ -449,6 +483,11 @@ const Admin = () => {
                         <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{u.email}</p>
+                            {pausedIds.has(u.userId) && (
+                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider bg-warning/15 text-warning border border-warning/30">
+                                Pausado
+                              </span>
+                            )}
                             <span className={cn(
                               "text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider",
                               u.role === "admin"
@@ -485,6 +524,17 @@ const Admin = () => {
                           </Button>
                           <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => handleResetPassword(u.userId, u.email)}>
                             <RotateCcw className="w-4 h-4 text-neon-blue" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={pausedIds.has(u.userId) ? "Reativar acesso" : "Pausar acesso"}
+                            disabled={pausing === u.userId || u.userId === user?.id}
+                            onClick={() => handleTogglePause(u.userId, u.email, !pausedIds.has(u.userId))}
+                          >
+                            {pausedIds.has(u.userId)
+                              ? <PlayCircle className="w-4 h-4 text-emerald" />
+                              : <PauseCircle className="w-4 h-4 text-warning" />}
                           </Button>
                           <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.userId, u.email)}>
                             <Trash2 className="w-4 h-4 text-destructive" />

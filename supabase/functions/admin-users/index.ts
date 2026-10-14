@@ -404,6 +404,47 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "set_paused") {
+      const { targetUserId, paused } = body;
+      if (!targetUserId || targetUserId === callerId) {
+        return new Response(JSON.stringify({ error: "Não é possível pausar o próprio acesso" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { error: banErr } = await adminClient.auth.admin.updateUserById(targetUserId, {
+        ban_duration: paused ? "876000h" : "none",
+      } as any);
+      if (banErr) {
+        return new Response(JSON.stringify({ error: banErr.message }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (paused) {
+        const agora = new Date().toISOString();
+        await adminClient.from("user_sessions").update({ logout_at: agora, last_seen_at: agora })
+          .eq("user_id", targetUserId).is("logout_at", null);
+      }
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "list_paused") {
+      const ids: string[] = [];
+      const agora = Date.now();
+      for (let page = 1; page < 50; page++) {
+        const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage: 1000 });
+        if (error) break;
+        for (const u of data.users as any[]) {
+          if (u.banned_until && new Date(u.banned_until).getTime() > agora) ids.push(u.id);
+        }
+        if (data.users.length < 1000) break;
+      }
+      return new Response(JSON.stringify({ success: true, ids }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
 
       status: 400,
