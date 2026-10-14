@@ -351,7 +351,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
   ];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
       {/* Campaign Intelligence Alerts */}
       {campaignAlerts.length > 0 && (
         <div className="space-y-2">
@@ -450,7 +450,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
 
       {/* Benchmark: Investimento (escala monetária) + Ratios (escala %) */}
       {benchmark && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* Investment comparison */}
           <div className="glass-card p-5">
             <div className="flex items-center gap-2 mb-4">
