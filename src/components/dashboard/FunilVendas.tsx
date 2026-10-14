@@ -89,8 +89,8 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
           <dl className="grid grid-cols-2 gap-2 text-xs">
             {[
               ["Faturamento", brl(d.fat)],
-              ["Ticket por unidade", brl(ticket)],
-              ["Receita por visita", brl(receitaVisita)],
+              ["Ticket por unidade", brl(ticket, true)],
+              ["Receita por visita", brl(receitaVisita, true)],
               ["Visitas sem compra", num(Math.max(0, d.visitas - d.unidades))],
             ].map(([k, v]) => (
               <div key={k} className="rounded-lg border border-white/10 bg-white/5 p-2.5 transition-colors hover:border-primary/40">

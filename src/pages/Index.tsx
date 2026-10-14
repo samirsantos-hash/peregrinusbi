@@ -52,6 +52,7 @@ import { useEligibility } from "@/hooks/useEligibility";
 import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
+import FunilVendas from "@/components/dashboard/FunilVendas";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
@@ -495,6 +496,9 @@ const Index = () => {
                       sellerCustIdMap={sellerCustIdMap}
                       seller={sellers.find((s) => s.id === selectedSeller) || null}
                     />
+                  )}
+                  {activeTab === "executive" && (
+                    <div className="my-4"><FunilVendas kpis={displayKpis as any} /></div>
                   )}
                   <div className="lg:hidden mb-3">
                     <Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}>
