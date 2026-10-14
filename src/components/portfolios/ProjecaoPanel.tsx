@@ -138,8 +138,8 @@ export default function ProjecaoPanel({ custIds, portfolioName }: Props) {
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Area type="monotone" dataKey="band" stroke="none" fill="hsl(var(--primary))" fillOpacity={0.12} name="IC95" />
                   <Line type="monotone" dataKey="real" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="Receita real" />
-                  <Line type="monotone" dataKey="ma3real" stroke="hsl(var(--primary))" strokeWidth={1.5} strokeDasharray="4 2" strokeOpacity={0.6} dot={false} connectNulls name="MM3 real" />
-                  <Line type="monotone" dataKey="proj" stroke="hsl(var(--primary))" strokeWidth={2} strokeDasharray="5 4" dot={false} name="Projeção" />
+                  <Line type="monotone" dataKey="ma3real" stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="4 2" strokeOpacity={0.6} dot={false} connectNulls name="MM3 real" />
+                  <Line type="monotone" dataKey="proj" stroke="hsl(var(--ec-ambar))" strokeWidth={2} strokeDasharray="5 4" dot={false} name="Projeção" />
                 </ComposedChart>
               </ResponsiveContainer>
             </div>

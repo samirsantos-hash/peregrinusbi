@@ -303,7 +303,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             type="monotone"
             dataKey="ma7tsi"
             name="MM7 Unidades"
-            stroke="hsl(var(--ok))"
+            stroke="hsl(var(--ec-laranja))"
             strokeWidth={1.5}
             strokeDasharray="4 2"
             dot={false}
