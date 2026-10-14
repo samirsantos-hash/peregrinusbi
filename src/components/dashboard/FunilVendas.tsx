@@ -12,7 +12,6 @@ interface KpiFunil {
   tgmv?: number;
 }
 
-const CORES = ["34 211 238", "56 189 248", "45 212 191", "16 185 129"];
 
 /** Funil de vendas do período: visitas → visitas com preço competitivo → unidades vendidas. */
 export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
@@ -59,7 +58,17 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" role="img" aria-label="Funil de vendas">
+          <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto overflow-visible" role="img" aria-label="Funil de vendas">
+            <defs>
+              <linearGradient id="funilVidro" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stopColor="rgb(34 211 238)" stopOpacity={0.45} />
+                <stop offset="1" stopColor="rgb(34 211 238)" stopOpacity={0.08} />
+              </linearGradient>
+              <filter id="funilBrilho" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="6" result="b" />
+                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
             {etapas.map((e, i) => {
               const top = larg(i);
               const bot = i < etapas.length - 1 ? larg(i + 1) : top * 0.85;
@@ -67,11 +76,11 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
               const pts = `${(W - top) / 2},${y} ${(W + top) / 2},${y} ${(W + bot) / 2},${y + 62} ${(W - bot) / 2},${y + 62}`;
               const daAnterior = i > 0 ? e.valor / etapas[i - 1].valor : 1;
               return (
-                <motion.g key={e.nome} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.12 }} className="cursor-default [&:hover>polygon]:brightness-125">
+                <motion.g key={e.nome} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.12 }} className="cursor-default [&:hover>polygon]:[filter:url(#funilBrilho)_brightness(1.4)]">
                   <title>{`${e.nome}: ${e.fmt} · ${pct(e.valor / d.visitas * 100, 2)} das visitas`}</title>
-                  <polygon points={pts} fill={`rgb(${CORES[i % CORES.length]} / 0.85)`} stroke="rgb(255 255 255 / 0.25)" strokeWidth={1} />
-                  <text x={W / 2} y={y + 27} textAnchor="middle" fontSize={13} fontWeight={600} fill="hsl(var(--background))">{e.nome}</text>
-                  <text x={W / 2} y={y + 46} textAnchor="middle" fontSize={14} fontWeight={700} fill="hsl(var(--background))" style={{ fontVariantNumeric: "tabular-nums" }}>
+                  <polygon points={pts} fill="url(#funilVidro)" fillOpacity={1 - i * 0.18} stroke="rgb(34 211 238 / 0.7)" strokeWidth={1} strokeLinejoin="round" filter="url(#funilBrilho)" className="transition-all duration-200" />
+                  <text x={W / 2} y={y + 27} textAnchor="middle" fontSize={11} fontWeight={500} letterSpacing="0.1em" fill="rgb(255 255 255 / 0.7)">{e.nome.toUpperCase()}</text>
+                  <text x={W / 2} y={y + 46} textAnchor="middle" fontSize={15} fontWeight={500} fill="rgb(255 255 255)" style={{ fontVariantNumeric: "tabular-nums" }}>
                     {e.fmt}{i > 0 ? ` · ${pct(daAnterior * 100, 2)} da etapa anterior` : ""}
                   </text>
                 </motion.g>
@@ -81,9 +90,9 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
         </div>
 
         <div className="space-y-3">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-4">
+          <div className="rounded-xl border border-cyan-400/20 bg-black/40 p-4 backdrop-blur">
             <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Conversão (unidades ÷ visitas)</p>
-            <p className="text-3xl font-medium tabular-nums text-foreground">{pct(conversao * 100, 2)}</p>
+            <p className="text-3xl font-medium tabular-nums tracking-tight text-neon-blue drop-shadow-[0_0_10px_rgb(34_211_238/0.5)]">{pct(conversao * 100, 2)}</p>
             <p className="text-[11px] text-muted-foreground">a cada 100 visitas, {num(conversao * 100, 1)} unidades vendidas</p>
           </div>
           <dl className="grid grid-cols-2 gap-2 text-xs">
@@ -93,7 +102,7 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
               ["Receita por visita", brl(receitaVisita, true)],
               ["Visitas sem compra", num(Math.max(0, d.visitas - d.unidades))],
             ].map(([k, v]) => (
-              <div key={k} className="rounded-lg border border-white/10 bg-white/5 p-2.5 transition-colors hover:border-primary/40">
+              <div key={k} className="rounded-lg border border-white/10 bg-white/5 p-2.5 transition-colors hover:border-cyan-400/40">
                 <dt className="text-[11px] text-muted-foreground">{k}</dt>
                 <dd className="font-medium tabular-nums text-foreground">{v}</dd>
               </div>
