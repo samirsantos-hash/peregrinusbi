@@ -1,3 +1,4 @@
+import { ROTULO_VERTICAL } from "@/lib/verticalCarteiras";
 import { numCurto } from "@/lib/format";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
@@ -75,12 +76,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 
-const ROTULO_VERTICAL: Record<string, string> = {
-  BEAUTY: "Beleza", "CONSTRUCTION & INDUSTRY": "Construção e Indústria", CPG: "Mercado e Consumo",
-  ENTERTAINMENT: "Entretenimento", FASHION: "Moda", "FURNISHING & HOUSEWARE": "Casa e Decoração",
-  HEALTH: "Saúde", "HOME ELECTRONICS": "Eletrodomésticos", OTHERS: "Outros", SPORTS: "Esportes",
-  "T & B": "Brinquedos e Bebês", TECHNOLOGY: "Tecnologia", "VEHICLE PARTS & ACCESSORIES": "Autopeças", VIS: "Veículos",
-};
 
 const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPotentialPanelProps) => {
   const { data: mix } = useCategoryMix(sellerId);

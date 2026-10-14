@@ -41,3 +41,10 @@ export function compararLojas(lojas: LojaMes[]): { lojas: LojaComparada[]; verti
   verticais.sort((a, b) => b.lojas - a.lojas);
   return { lojas: out, verticais };
 }
+
+export const ROTULO_VERTICAL: Record<string, string> = {
+  BEAUTY: "Beleza", "CONSTRUCTION & INDUSTRY": "Construção e Indústria", CPG: "Mercado e Consumo",
+  ENTERTAINMENT: "Entretenimento", FASHION: "Moda", "FURNISHING & HOUSEWARE": "Casa e Decoração",
+  HEALTH: "Saúde", "HOME ELECTRONICS": "Eletrodomésticos", OTHERS: "Outros", SPORTS: "Esportes",
+  "T & B": "Brinquedos e Bebês", TECHNOLOGY: "Tecnologia", "VEHICLE PARTS & ACCESSORIES": "Autopeças", VIS: "Veículos",
+};
