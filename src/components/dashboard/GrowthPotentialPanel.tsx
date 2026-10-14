@@ -2,7 +2,7 @@ import { numCurto } from "@/lib/format";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid,
+  ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { AlertTriangle } from "lucide-react";
@@ -266,7 +266,7 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
     for (const d of dims) {
       const peso = PESOS[d.id] ?? 0;
       if (peso === 0) continue;
-      const delta = indiceParaDelta(d.indice, d.sentido);
+      const delta = Math.max(-50, Math.min(50, indiceParaDelta(d.indice, d.sentido)));
       somaPond += delta * peso;
       somaPeso += peso;
     }
@@ -488,7 +488,7 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
             "Como ler este gráfico:\n\n" +
             "MODO ACUMULADO (R$): soma o faturamento ponto a ponto — a curva nunca desce, por construção. Serve para dimensionar o gap em reais, NÃO para comparar trajetórias de crescimento.\n\n" +
             "MODO INDEXADO (base 100): cada ponto é o valor do período dividido pela média dos 3 primeiros pontos da janela. Pode subir e descer, e é a leitura correta de crescimento. A base é uma média (não um mês único) justamente para não inflar a curva com um mês atípico.\n\n" +
-            "Curva tracejada (amarela) = referência da vertical, derivada da fonte declarada abaixo do título. Ela NÃO é hoje uma coorte fixa de sellers da vertical — é reconstruída a partir do índice da categoria aplicado ao próprio seller.\n\n" +
+            "Curva tracejada (amarela) = mediana dos sellers da carteira na mesma vertical (sem este seller); no modo indexado a faixa sombreada vai do P25 ao P75.\n\n" +
             "Como interpretar o gap:\n" +
             "• Seller ACIMA da referência ⇒ ganho de share dentro da categoria.\n" +
             "• Seller ABAIXO ⇒ receita não capturada; no modo acumulado a distância vertical em R$ é o tamanho aproximado da oportunidade.\n" +
@@ -511,41 +511,38 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
         </div>
 
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <Badge variant="outline" className="text-[10px] font-normal">
-            Referência: {rotuloFonte}
-          </Badge>
-          {!verticalRotulo && (
-            <Badge variant="outline" className="text-[10px] font-normal border-ec-ambar/40 text-ec-ambar">
-              Vertical não identificada para este seller
-            </Badge>
-          )}
-          {fonteBenchmark === "estimativa" && (
-            <Badge variant="outline" className="text-[10px] font-normal border-ec-ambar/40 text-ec-ambar">
-              Curva da vertical é estimativa, não dado de mercado
-            </Badge>
-          )}
-          {modoCurva === "indexado" && baseInfo?.valida && (
+          {referenciaValida && (
             <Badge variant="outline" className="text-[10px] font-normal">
-              Base: {fmtBRLCompact(baseInfo.seller)} (média de {baseInfo.pontos} pontos)
+              Mediana de {refData!.nPares} sellers da carteira · {verticalRotulo}
             </Badge>
           )}
+          {modoCurva === "indexado" && baseInfo.valida && (
+            <Badge variant="outline" className="text-[10px] font-normal">
+              Base: {fmtBRLCompact(baseInfo.seller)} (média de {baseInfo.pontos} meses)
+            </Badge>
+          )}
+          <Badge variant="outline" className="text-[10px] font-normal">Mês corrente fora (incompleto)</Badge>
         </div>
 
-        {/* Resumo do gap no período */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+        {!referenciaValida && motivoSemRef && (
+          <div className="mb-4 rounded-md border border-ec-ambar/30 bg-ec-ambar/5 px-3 py-2 text-[11px] text-ec-ambar">
+            {motivoSemRef} Suba o relatório de campanhas com a Vertical Principal deste seller.
+          </div>
+        )}
+
+        <div className={`grid gap-3 mb-4 ${referenciaValida ? "grid-cols-2 md:grid-cols-3" : "grid-cols-1"}`}>
           {[
             { label: "Seller no período", valor: fmtBRLCompact(sellerTotal), cor: "text-foreground" },
-            { label: "Referência da vertical", valor: fmtBRLCompact(benchmarkTotal), cor: "text-ec-ambar" },
-            {
-              label: "Gap (oportunidade)",
-              valor:
-                benchmarkTotal > 0
-                  ? `${fmtBRLCompact(Math.abs(benchmarkTotal - sellerTotal))} (${(
-                      ((sellerTotal - benchmarkTotal) / benchmarkTotal) * 100
-                    ).toFixed(1).replace(".", ",")}%)`
-                  : "—",
-              cor: sellerTotal >= benchmarkTotal ? "text-ok" : "text-destructive",
-            },
+            ...(referenciaValida && benchmarkTotal > 0
+              ? [
+                  { label: "Referência da vertical", valor: fmtBRLCompact(benchmarkTotal), cor: "text-ec-ambar" },
+                  {
+                    label: sellerTotal < benchmarkTotal ? "Gap (oportunidade)" : "Acima da referência",
+                    valor: `${fmtBRLCompact(Math.abs(benchmarkTotal - sellerTotal))} (${(((sellerTotal - benchmarkTotal) / benchmarkTotal) * 100).toFixed(1).replace(".", ",")}%)`,
+                    cor: sellerTotal >= benchmarkTotal ? "text-ok" : "text-destructive",
+                  },
+                ]
+              : []),
           ].map((c) => (
             <div key={c.label} className="rounded-lg border border-border/50 bg-muted/20 p-3">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{c.label}</p>
@@ -554,78 +551,35 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
           ))}
         </div>
 
-        {modoCurva === "indexado" && curvaProporcional && (
-          <div className="mb-3 rounded-md border border-ec-ambar/30 bg-ec-ambar/5 px-3 py-2 text-[11px] text-ec-ambar">
-            A referência da vertical é obtida aplicando um índice fixo ao próprio faturamento do seller.
-            No modo indexado as duas curvas são matematicamente idênticas, então mostramos apenas a do
-            seller — o gap só faz sentido no modo Acumulado (R$).
-          </div>
-        )}
-
-        {modoCurva === "indexado" && !baseInfo?.valida ? (
+        {modoCurva === "indexado" && !baseInfo.valida ? (
           <div className="flex h-[320px] items-center justify-center rounded-md border border-ec-ambar/30 bg-ec-ambar/5 px-6 text-center text-xs text-ec-ambar">
-            Base de cálculo igual a zero nos primeiros pontos da janela — o índice não pode ser calculado
-            (divisão por zero). Use o modo Acumulado (R$) ou amplie o período.
+            Faturamento zero nos primeiros meses da janela — o índice não pode ser calculado. Use o modo Acumulado (R$) ou amplie o período.
           </div>
         ) : (
-
         <ResponsiveContainer width="100%" height={320}>
-          <AreaChart data={chartData}>
+          <ComposedChart data={chartData}>
             <defs>
               <linearGradient id="gradSellerGrowth" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"} stopOpacity={0.3} />
-                <stop offset="95%" stopColor={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"} stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="gradBenchmark" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--ec-ambar))" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="hsl(var(--ec-ambar))" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-            <XAxis
-              dataKey="date"
-              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
-              axisLine={false}
-              interval="preserveStartEnd"
-              angle={chartData.length > 8 ? -45 : 0}
-              textAnchor={chartData.length > 8 ? "end" : "middle"}
-              height={chartData.length > 8 ? 50 : 30}
-            />
-            <YAxis
-              tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
-              axisLine={false}
-              tickFormatter={(v) =>
-                modoCurva === "indexado"
-                  ? String(v)
-                  : numCurto(v)
-              }
-            />
+            <XAxis dataKey="date" tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false} interval="preserveStartEnd" />
+            <YAxis tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }} axisLine={false}
+              tickFormatter={(v) => (modoCurva === "indexado" ? String(v) : numCurto(v))} />
             <Tooltip content={<CustomTooltip />} />
-            {!(modoCurva === "indexado" && curvaProporcional) && (
-              <Area
-                type="monotone"
-                dataKey={modoCurva === "indexado" ? "Vertical (Índice)" : "Benchmark Vertical"}
-                stroke="hsl(var(--ec-ambar))"
-                fill="url(#gradBenchmark)"
-                strokeWidth={2}
-                strokeDasharray="6 3"
-                connectNulls={false}
-                animationDuration={800}
-                animationEasing="ease-in-out"
-              />
+            {referenciaValida && modoCurva === "indexado" && (
+              <Area type="monotone" dataKey="Faixa P25–P75" stroke="none" fill="hsl(var(--ec-ambar))" fillOpacity={0.15} connectNulls={false} />
             )}
-            <Area
-              type="monotone"
-              dataKey={modoCurva === "indexado" ? "Seller (Índice)" : "Seller (Acumulado)"}
-              stroke={deltaGeral >= 10 ? "hsl(var(--ok))" : "hsl(var(--ec-verde))"}
-              fill="url(#gradSellerGrowth)"
-              strokeWidth={2.5}
-              connectNulls={false}
-              animationDuration={800}
-              animationEasing="ease-in-out"
-            />
+            {referenciaValida && (
+              <Line type="monotone" dataKey={modoCurva === "indexado" ? "Mediana da vertical (Índice)" : "Referência da vertical"}
+                stroke="hsl(var(--ec-ambar))" strokeWidth={2} strokeDasharray="6 3" dot={false} connectNulls={false} />
+            )}
+            <Area type="monotone" dataKey={modoCurva === "indexado" ? "Seller (Índice)" : "Seller (Acumulado)"}
+              stroke="hsl(var(--ec-verde))" fill="url(#gradSellerGrowth)" strokeWidth={2.5} connectNulls={false} />
             <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
-          </AreaChart>
+          </ComposedChart>
         </ResponsiveContainer>
         )}
       </div>
