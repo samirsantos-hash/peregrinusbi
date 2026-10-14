@@ -254,13 +254,6 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
         </div>
       )}
 
-      {/* Banner quando não há histórico mensal */}
-      {m.historico.length === 0 && !semDados && (
-        <div className="rounded-lg border border-border/40 bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
-          ℹ️ Sem histórico mensal disponível (tabela <code>cpp_mensal</code> vazia para este seller).
-          Os KPIs do período acima foram calculados a partir dos dados diários.
-        </div>
-      )}
 
       {/* ── Granularidade de investimento em Ads ─────────────────────── */}
       <AdsGranularidadePanel sellerUuid={sellerUuid} fromDate={fromDate} toDate={toDate} />
