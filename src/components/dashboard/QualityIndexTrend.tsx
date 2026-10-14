@@ -86,6 +86,11 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
               strokeWidth={1}
               label={{ value: `meta ${meta}`, position: "right", fontSize: 9, fill: "hsl(var(--axis))" }}
             />
+            {dados.length >= 2 && (() => {
+              const m = dados.reduce((a: number, d: any) => a + (Number(d.valor) || 0), 0) / dados.length;
+              return <ReferenceLine y={m} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
+                label={{ value: `média ${fmt1(m)}`, position: "insideTopLeft", fontSize: 9, fill: "hsl(var(--media))" }} />;
+            })()}
             <Tooltip
               contentStyle={{
                 background: "hsl(var(--popover))",

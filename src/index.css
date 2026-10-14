@@ -106,6 +106,7 @@
     --series-4: var(--aura-white);
     --series-5: var(--aura-orange-400);
     --grid: var(--aura-line);
+    --media: 280 85% 72%;
     --axis: var(--aura-gray-500);
 
     --sidebar-background: var(--aura-black);
@@ -433,3 +434,16 @@
   .recharts-bar-rectangle path { transition: filter .2s, opacity .2s; }
   .recharts-bar-rectangle:hover path { filter: brightness(1.25) drop-shadow(0 0 6px hsl(var(--primary) / .6)); }
 }
+
+/* Cartões reagem ao mouse: leve elevação, borda e brilho ciano */
+.glass-card {
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+.glass-card:hover {
+  transform: translateY(-2px);
+  border-color: rgb(34 211 238 / 0.35);
+  box-shadow: 0 10px 30px -12px rgb(34 211 238 / 0.35);
+}
+.recharts-wrapper .recharts-line-curve, .recharts-wrapper .recharts-area-curve { transition: stroke-width .2s ease; }
+.recharts-wrapper:hover .recharts-line-curve, .recharts-wrapper:hover .recharts-area-curve { stroke-width: 2.6px; }
+@media (prefers-reduced-motion: reduce) { .glass-card:hover { transform: none; } }

@@ -314,8 +314,8 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
           />
 
           {tend && !hidden.has("tgmv") && (
-            <ReferenceLine yAxisId="left" y={tend.media} stroke="hsl(var(--muted-foreground))" strokeDasharray="6 4"
-              label={{ value: `Média ${fmtNumCompact(tend.media)}`, position: "insideTopLeft", fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+            <ReferenceLine yAxisId="left" y={tend.media} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
+              label={{ value: `Média ${fmtNumCompact(tend.media)}`, position: "insideTopLeft", fill: "hsl(var(--media))", fontSize: 10 }} />
           )}
           <Line
             yAxisId="left"
