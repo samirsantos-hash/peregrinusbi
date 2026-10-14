@@ -1,7 +1,7 @@
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid } from "recharts";
+import { Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
 import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2, Boxes, Download, Info } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
@@ -465,31 +465,35 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
           <span className="font-medium text-foreground">Flex</span> = <code className="text-[10px]">TGMV_LC_FLEX</code> ·{" "}
           <span className="font-medium text-foreground">Outros modais</span> = restante (inclui Agência, Correios e Places, entre outros — não separáveis no CSV diário).
         </p>
+        <div className="flex flex-wrap justify-center gap-4 mb-2 text-xs">
+          {donutData.map((d, i) => (
+            <span key={d.name} className="flex items-center gap-1.5 tabular-nums">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: COLORS[i] }} />
+              <span className="text-muted-foreground">{d.name}</span>
+              <span className="font-semibold text-foreground">{d.value.toLocaleString("pt-BR")}%</span>
+            </span>
+          ))}
+        </div>
         <ResponsiveContainer width="100%" height={320}>
-          <PieChart>
-            <Pie
-              data={donutData}
-              cx="50%"
-              cy="50%"
-              innerRadius={80}
-              outerRadius={120}
-              paddingAngle={4}
-              dataKey="value"
-              stroke="none"
-            >
-              {donutData.map((_, index) => (
-                <Cell
-                  key={index}
-                  fill={COLORS[index]}
-                  style={{ filter: `drop-shadow(0 0 8px ${COLORS[index]})` }}
-                />
-              ))}
-            </Pie>
+          <LineChart data={evolutionData.length > 1 ? evolutionData : [{ date: "Atual", "% Full": donutData[0].value, "% Flex": donutData[1].value, "% Agência": donutData[2].value }]} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend
-              formatter={(value) => <span style={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }}>{value}</span>}
-            />
-          </PieChart>
+            {(["% Full", "% Flex", "% Agência"] as const).map((k, i) => (
+              <Line
+                key={k}
+                type="monotone"
+                dataKey={k}
+                name={donutData[i].name}
+                stroke={COLORS[i]}
+                strokeWidth={2.5}
+                dot={{ r: 3, fill: COLORS[i] }}
+                activeDot={{ r: 6 }}
+                style={{ filter: `drop-shadow(0 0 6px ${COLORS[i]})` }}
+              />
+            ))}
+          </LineChart>
         </ResponsiveContainer>
       </div>
 
