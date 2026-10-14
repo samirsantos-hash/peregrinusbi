@@ -30,7 +30,9 @@ const SalesRecordCard = ({ kpis }: Props) => {
 
     const [y, m, d] = maxDate.split("-");
     const formatted = `${d}/${m}/${y}`;
-    return { date: formatted, value: maxVal };
+    const vals = Object.values(byDate);
+    const media = vals.reduce((a, b) => a + b, 0) / vals.length;
+    return { date: formatted, value: maxVal, media };
   }, [kpis]);
 
   if (!record) return null;
@@ -50,6 +52,18 @@ const SalesRecordCard = ({ kpis }: Props) => {
       <div>
         <p className="metric-value text-foreground"><NumeroAnimado valor={fmtBRLCompact(record.value)} /></p>
         <p className="text-sm text-ec-ambar mt-1">em {record.date}</p>
+      </div>
+      <div className="pt-3 border-t border-border/40 space-y-2">
+        <div className="flex justify-between text-xs">
+          <span className="text-muted-foreground">Média por dia</span>
+          <span className="font-medium tabular-nums">{fmtBRLCompact(record.media)}</span>
+        </div>
+        <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+          <div className="h-full bg-ec-ambar/70" style={{ width: `${Math.min(100, (record.media / record.value) * 100)}%` }} />
+        </div>
+        <p className="text-[11px] text-muted-foreground">
+          Recorde {record.media > 0 ? (record.value / record.media).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : "—"}x acima da média diária
+        </p>
       </div>
     </motion.div>
   );

@@ -11,6 +11,8 @@ import SalesRecordCard from "./SalesRecordCard";
 import TrafficHeatmap from "./TrafficHeatmap";
 import BestInvestmentPeriod from "./BestInvestmentPeriod";
 import NumeroAnimado from "@/components/ds/NumeroAnimado";
+import { DollarSign, TrendingUp, Percent, PieChart, Target, Sparkles, MousePointerClick, Megaphone } from "lucide-react";
+const ICONES_KPI = [DollarSign, TrendingUp, Percent, PieChart, Target, Sparkles, MousePointerClick, Megaphone];
 import { fmtBRLCompact, fmtBRL, fmtNum, formatChartDate } from "@/utils/formatters";
 import { type SellerCampaign, getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
@@ -424,8 +426,9 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.06 }}
-            className="glass-card p-4"
+            className="glass-card p-4 flex items-center gap-3"
           >
+            <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1">
               <p className="metric-label">{m.label}</p>
               {m.algoKey ? (
@@ -438,6 +441,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             {m.benchmarkText && (
               <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{m.benchmarkText}</p>
             )}
+            </div>
+            {(() => { const Ic = ICONES_KPI[i % ICONES_KPI.length]; return (
+              <div className="hidden sm:flex w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 items-center justify-center shrink-0">
+                <Ic className={`w-5 h-5 ${m.color}`} />
+              </div>
+            ); })()}
           </motion.div>
         ))}
       </div>
