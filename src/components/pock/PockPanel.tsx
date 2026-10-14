@@ -341,11 +341,15 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
 
       {/* FAIXA 4 — Alavancas */}
       <section className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
-        <h3 className="text-sm font-semibold">Alavancas</h3>
+        <div className="flex items-baseline justify-between gap-2 flex-wrap">
+          <h3 className="text-sm font-semibold">Alavancas</h3>
+          <span className="text-[10px] text-muted-foreground">Janela fixa de 30 dias — prazo limite de uma promoção</span>
+        </div>
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-3">
           <PockMecanismosDesconto
             mecanismos={data?.mecanismos ?? []}
             base={data?.mecanismosBase ?? 0}
+            mesReferencia={data?.mecanismosMes ?? null}
           />
           <PockAdesaoFull dados={data?.full ?? []} coberturaFbm={data?.coberturaFbm} />
         </div>
