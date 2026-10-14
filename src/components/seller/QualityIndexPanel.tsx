@@ -139,7 +139,8 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
     );
   }
 
-  const tendenciaData = qi.tendencia.map((v, i) => ({ i: `M${i + 1 - qi.tendencia.length || ""}`.replace("M", i === qi.tendencia.length - 1 ? "Atual" : "M"), v }));
+  const nT = qi.tendencia.length;
+  const tendenciaData = qi.tendencia.map((v, i) => ({ i: i === nT - 1 ? "Atual" : `-${nT - 1 - i}m`, v }));
   const mesBR = (() => { const m = String(qi.mes).match(/^(\d{4})-(\d{2})/); return m ? `${m[2]}/${m[1]}` : qi.mes; })();
   const tGeral = statusTone(qi.scoreGeral >= 70 ? "ok" : qi.scoreGeral >= 45 ? "atencao" : "critico");
 
