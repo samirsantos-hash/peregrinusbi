@@ -1,3 +1,4 @@
+import NumeroAnimado from "@/components/ds/NumeroAnimado";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Lightbulb, AlertTriangle, Star } from "lucide-react";
@@ -27,7 +28,7 @@ interface CellData {
 }
 
 const TrafficHeatmap = ({ kpis }: Props) => {
-  const { grid, maxVal, top3, insights } = useMemo(() => {
+  const { grid, maxVal, top3, insights, resumo } = useMemo(() => {
     // Hour distribution weights (traffic patterns)
     const hourWeights = HOURS.map((h) => {
       if (h < 6) return 0.01;
@@ -136,6 +137,12 @@ const TrafficHeatmap = ({ kpis }: Props) => {
       maxVal: max,
       top3: new Set(topCells.map((c) => `${c.day}-${c.hour}`)),
       insights: insightList.slice(0, 3),
+      resumo: (() => {
+        const v = allCells.reduce((a, c) => a + c.visits, 0);
+        const o = g.flat().reduce((a, c) => a + c.orders, 0);
+        const pico = topCells[0];
+        return { visitas: v, pedidos: o, conv: v > 0 ? (o / v) * 100 : 0, pico: pico ? pico.visits : 0 };
+      })(),
     };
   }, [kpis]);
 
@@ -159,6 +166,20 @@ const TrafficHeatmap = ({ kpis }: Props) => {
             </h3>
             <TooltipInfo text="Distribuição estimada das visitas por dia da semana e horário. As ⭐ indicam os 3 horários nobres (maior tráfego). Passe o mouse para ver conversão e GMV." />
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          {[
+            ["Visitas", fmtNumCompact(resumo.visitas)],
+            ["Vendas", fmtNumCompact(resumo.pedidos)],
+            ["Conversão média", `${fmtNum(resumo.conv, 1)}%`],
+            ["Visitas no pico", fmtNumCompact(resumo.pico)],
+          ].map(([k, v]) => (
+            <div key={k} className="rounded-lg border border-border/40 bg-muted/20 p-2.5">
+              <p className="text-[11px] text-muted-foreground">{k}</p>
+              <p className="text-base font-medium text-foreground"><NumeroAnimado valor={v} /></p>
+            </div>
+          ))}
         </div>
 
         <div className="overflow-x-auto">

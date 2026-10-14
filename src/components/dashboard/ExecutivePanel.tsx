@@ -1,3 +1,4 @@
+import NumeroAnimado from "@/components/ds/NumeroAnimado";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Activity, Clock, Crown, Target, BarChart3 } from "lucide-react";
@@ -131,7 +132,7 @@ const ExecutivePanel = ({ kpis, allKpis, dataGranularity = "consolidated" }: Exe
               <p className="metric-label">{m.label}</p>
               <TooltipInfo text={m.tooltip} />
             </div>
-            <p className={`metric-value mt-1 ${m.color}`}>{m.value}</p>
+            <p className={`metric-value mt-1 ${m.color}`}><NumeroAnimado valor={String(m.value)} /></p>
           </motion.div>
         ))}
       </div>

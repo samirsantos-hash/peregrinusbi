@@ -1,3 +1,4 @@
+import NumeroAnimado from "@/components/ds/NumeroAnimado";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { brl, num, pct } from "@/lib/format";
@@ -83,7 +84,7 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
                   <path d={pts} fill="url(#funilVidro)" fillOpacity={1 - i * 0.18} stroke="rgb(34 211 238 / 0.7)" strokeWidth={1} strokeLinejoin="round" filter="url(#funilBrilho)" className="transition-all duration-200" />
                   <text x={W / 2} y={y + 27} textAnchor="middle" fontSize={11} fontWeight={500} letterSpacing="0.1em" fill="rgb(255 255 255 / 0.7)">{e.nome.toUpperCase()}</text>
                   <text x={W / 2} y={y + 46} textAnchor="middle" fontSize={15} fontWeight={500} fill="rgb(255 255 255)" style={{ fontVariantNumeric: "tabular-nums" }}>
-                    {e.fmt}{i > 0 ? ` · ${pct(daAnterior * 100, 2)} da etapa anterior` : ""}
+                    <NumeroAnimado valor={String(e.fmt)} />{i > 0 ? ` · ${pct(daAnterior * 100, 2)} da etapa anterior` : ""}
                   </text>
                 </motion.g>
               );
@@ -94,7 +95,7 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
         <div className="space-y-3">
           <div className="rounded-xl border border-cyan-400/20 bg-black/40 p-4 backdrop-blur">
             <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Conversão (unidades ÷ visitas)</p>
-            <p className="text-3xl font-medium tabular-nums tracking-tight text-neon-blue drop-shadow-[0_0_10px_rgb(34_211_238/0.5)]">{pct(conversao * 100, 2)}</p>
+            <p className="text-3xl font-medium tabular-nums tracking-tight text-neon-blue drop-shadow-[0_0_10px_rgb(34_211_238/0.5)]"><NumeroAnimado valor={pct(conversao * 100, 2)} /></p>
             <p className="text-[11px] text-muted-foreground">a cada 100 visitas, {num(conversao * 100, 1)} unidades vendidas</p>
           </div>
           <dl className="grid grid-cols-2 gap-2 text-xs">
@@ -106,7 +107,7 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
             ].map(([k, v]) => (
               <div key={k} className="rounded-lg border border-white/10 bg-white/5 p-2.5 transition-colors hover:border-cyan-400/40">
                 <dt className="text-[11px] text-muted-foreground">{k}</dt>
-                <dd className="font-medium tabular-nums text-foreground">{v}</dd>
+                <dd className="font-medium tabular-nums text-foreground"><NumeroAnimado valor={String(v)} /></dd>
               </div>
             ))}
           </dl>
