@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Trophy } from "lucide-react";
 import { fmtBRLCompact } from "@/utils/formatters";
+import NumeroAnimado from "@/components/ds/NumeroAnimado";
 
 interface Props {
   kpis: { date: string; revenue: number }[];

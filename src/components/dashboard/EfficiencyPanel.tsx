@@ -10,6 +10,7 @@ import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import SalesRecordCard from "./SalesRecordCard";
 import TrafficHeatmap from "./TrafficHeatmap";
 import BestInvestmentPeriod from "./BestInvestmentPeriod";
+import NumeroAnimado from "@/components/ds/NumeroAnimado";
 import { fmtBRLCompact, fmtBRL, fmtNum, formatChartDate } from "@/utils/formatters";
 import { type SellerCampaign, getEffectivenessBadge } from "@/hooks/useMeliCampaigns";
 import { type VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
