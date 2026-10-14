@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { Shield, Barcode, Sparkles, Package } from "lucide-react";
-import GaugeChart from "./GaugeChart";
 import { cn } from "@/lib/utils";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import type { TOOLTIPS } from "@/lib/algoTooltips";
