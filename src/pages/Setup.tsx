@@ -61,7 +61,7 @@ const Setup = () => {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
@@ -69,7 +69,7 @@ const Setup = () => {
 
   if (adminExists) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 w-full max-w-sm text-center space-y-4">
           <ShieldCheck className="w-10 h-10 text-emerald mx-auto" />
           <h1 className="text-xl font-bold">Admin já configurado</h1>
@@ -80,7 +80,7 @@ const Setup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-8 w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
           <ShieldCheck className="w-8 h-8 text-neon-blue mx-auto" />

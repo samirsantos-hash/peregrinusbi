@@ -35,6 +35,7 @@ import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 import RodapeInstitucional from "./components/RodapeInstitucional";
 import AlertaInatividade from "./components/AlertaInatividade";
+import { AuraBackground, AuraReveal } from "@/components/aura/AuraBackground";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,7 +53,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
@@ -75,14 +76,18 @@ const AppRoutes = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <Routes>
+    <>
+      <AuraBackground />
+      <AuraReveal />
+      <div className="relative z-10">
+      <Routes>
       <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
@@ -106,6 +111,8 @@ const AppRoutes = () => {
       <Route path="/no-access" element={user ? <NoAccess /> : <Navigate to="/auth" replace />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
+      </div>
+    </>
   );
 };
 

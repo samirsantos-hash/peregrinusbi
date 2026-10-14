@@ -14,9 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "Arial", "sans-serif"],
-        display: ["DM Sans", "Arial", "sans-serif"],
-        mono: ["DM Sans", "Arial", "sans-serif"], // números em DM Sans com tabular-nums
+        sans: ["ui-sans-serif", "system-ui", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"],
+        display: ["ui-sans-serif", "system-ui", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"],
+        mono: ["ui-sans-serif", "system-ui", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"], // números em DM Sans com tabular-nums
       },
       colors: {
         border: "hsl(var(--border))",

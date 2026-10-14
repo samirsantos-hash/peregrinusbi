@@ -27,7 +27,7 @@ export class AppErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.failed) {
       return (
-        <main className="min-h-screen bg-background text-foreground flex items-center justify-center p-6">
+        <main className="min-h-screen text-foreground flex items-center justify-center p-6">
           <section className="w-full max-w-md border border-border bg-card p-6 text-center shadow-lg">
             <h1 className="text-lg font-semibold">Não foi possível abrir o painel</h1>
             <p className="mt-2 text-sm text-muted-foreground">

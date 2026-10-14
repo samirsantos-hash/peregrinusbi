@@ -48,7 +48,7 @@ const ProgramasLoja = () => {
   return (
     <TooltipProvider delayDuration={150}>
       <DadoRealProvider>
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen">
           <div className="mx-auto max-w-[1500px] px-4 py-6">
             <header className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>

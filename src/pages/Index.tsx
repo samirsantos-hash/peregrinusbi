@@ -363,7 +363,7 @@ const Index = () => {
   }, [dateRange]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <div className="fixed inset-0 opacity-[0.015] pointer-events-none" style={{
         backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--neon-blue)) 1px, transparent 0)`,
         backgroundSize: '40px 40px'

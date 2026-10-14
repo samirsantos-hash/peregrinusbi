@@ -134,7 +134,7 @@ export default function NivelLayout({
   acoesTopo,
 }: Props) {
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col">
       {/* Zona 1 — breadcrumb + seletor (sticky) */}
       <div className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
         <div className="flex items-center justify-between gap-3 px-4 md:px-6 py-2.5">
