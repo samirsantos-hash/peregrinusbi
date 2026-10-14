@@ -71,11 +71,8 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
     },
   ];
 
-  const W = 600, H = 70 * etapas.length;
-  const larg = (i: number) => {
-    const r = etapas[i].valor / d.visitas;
-    return Math.max(0.18, Math.sqrt(Math.min(1, r))) * W;
-  };
+  // Largura em % (escala de raiz, mínimo 46% para os números caberem dentro do desenho)
+  const larg = (i: number) => Math.max(46, Math.sqrt(Math.min(1, etapas[i].valor / d.visitas)) * 100);
 
   return (
     <div className="glass-card p-5">
@@ -85,38 +82,40 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto overflow-visible" role="img" aria-label="Funil de vendas">
-            <defs>
-              <linearGradient id="funilVidro" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stopColor="rgb(34 211 238)" stopOpacity={0.45} />
-                <stop offset="1" stopColor="rgb(34 211 238)" stopOpacity={0.08} />
-              </linearGradient>
-              <filter id="funilBrilho" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="6" result="b" />
-                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-            </defs>
-            {etapas.map((e, i) => {
-              const top = larg(i);
-              const bot = i < etapas.length - 1 ? larg(i + 1) : top * 0.85;
-              const y = i * 70;
-              const xl = (W - top) / 2, xr = (W + top) / 2, bl = (W - bot) / 2, br = (W + bot) / 2, yb = y + 62, r = 14, my = y + 31;
-              // Laterais em curva (bezier) e cantos arredondados — formato fluido, sem quinas
-              const pts = `M ${xl + r} ${y} L ${xr - r} ${y} Q ${xr} ${y} ${xr - 2} ${y + r * 0.6} C ${xr - (top - bot) / 4} ${my} ${br + 6} ${yb - r} ${br} ${yb - 4} Q ${br - 2} ${yb} ${br - r} ${yb} L ${bl + r} ${yb} Q ${bl + 2} ${yb} ${bl} ${yb - 4} C ${bl - 6} ${yb - r} ${xl + (top - bot) / 4} ${my} ${xl + 2} ${y + r * 0.6} Q ${xl} ${y} ${xl + r} ${y} Z`;
-              const daAnterior = i > 0 ? e.valor / etapas[i - 1].valor : 1;
-              return (
-                <motion.g key={e.nome} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.12 }} className="cursor-default [&:hover>path]:[filter:url(#funilBrilho)_brightness(1.4)]">
-                  <title>{`${e.nome}: ${e.fmt} · ${pct(e.valor / d.visitas * 100, 2)} das visitas`}</title>
-                  <path d={pts} fill="url(#funilVidro)" fillOpacity={1 - i * 0.18} stroke="rgb(34 211 238 / 0.7)" strokeWidth={1} strokeLinejoin="round" filter="url(#funilBrilho)" className="transition-all duration-200" />
-                  <text x={W / 2} y={y + 27} textAnchor="middle" fontSize={11} fontWeight={500} letterSpacing="0.1em" fill="rgb(255 255 255 / 0.7)">{e.nome.toUpperCase()}</text>
-                  <text x={W / 2} y={y + 46} textAnchor="middle" fontSize={15} fontWeight={500} fill="rgb(255 255 255)" style={{ fontVariantNumeric: "tabular-nums" }}>
-                    <NumeroAnimado valor={String(e.fmt)} />{i > 0 ? ` · ${pct(daAnterior * 100, 2)} da etapa anterior` : ""}
-                  </text>
-                </motion.g>
-              );
-            })}
-          </svg>
+        <div className="lg:col-span-2 flex flex-col items-center gap-1.5" role="img" aria-label="Funil de vendas">
+          {etapas.map((e, i) => {
+            const w = larg(i);
+            const prox = i < etapas.length - 1 ? larg(i + 1) : w * 0.88;
+            const recuo = ((w - prox) / 2 / w) * 100; // afunilamento lateral em % da própria largura
+            const daAnterior = i > 0 ? e.valor / etapas[i - 1].valor : 1;
+            return (
+              <motion.div
+                key={e.nome}
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.12 }}
+                title={`${e.nome}: ${e.fmt} · ${pct((e.valor / d.visitas) * 100, 2)} das visitas`}
+                className="group relative flex min-h-[74px] flex-col items-center justify-center px-6 py-3 text-center transition-[filter] duration-200 hover:brightness-125"
+                style={{ width: `${w}%` }}
+              >
+                <div
+                  className="absolute inset-0 border border-cyan-400/60 bg-gradient-to-b from-cyan-400/40 to-cyan-400/10 shadow-[0_0_18px_rgb(34_211_238/0.25)]"
+                  style={{
+                    opacity: 1 - i * 0.15,
+                    clipPath: `polygon(0 0, 100% 0, ${100 - recuo}% 100%, ${recuo}% 100%)`,
+                    borderRadius: "18px 18px 28px 28px",
+                  }}
+                />
+                <p className="relative text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/75">{e.nome}</p>
+                <p className="relative text-xl font-semibold tabular-nums leading-tight text-foreground">
+                  <NumeroAnimado valor={String(e.fmt)} />
+                </p>
+                {i > 0 && (
+                  <p className="relative text-[10px] tabular-nums text-neon-blue">{pct(daAnterior * 100, 2)} da etapa anterior</p>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
 
         <div className="space-y-3">
