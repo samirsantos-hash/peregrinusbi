@@ -43,11 +43,14 @@ export default function PockMecanismosDesconto({ mecanismos, base }: Props) {
   }, [mecanismos]);
 
   const maiorValor = Math.max(...ordenados.map((m) => m.valor), 0);
-  const semBase = base <= 0 && maiorValor <= 0;
+  const meses = Math.max(0, ...ordenados.map((m) => m.historico.length));
+  const semMeses = meses === 0;
+  const totalTocado = ordenados.reduce((s, m) => s + m.valor, 0);
+  const usados = ordenados.filter((m) => m.valor > 0).length;
 
   return (
     <div className="rounded-lg border border-border p-3 space-y-3 bg-card/40">
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start justify-between gap-2 flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <h4 className="text-[13px] font-semibold">Faturamento tocado por mecanismo de desconto</h4>
@@ -66,51 +69,68 @@ export default function PockMecanismosDesconto({ mecanismos, base }: Props) {
             </UiTooltip>
           </div>
           <p className="text-[10px] text-muted-foreground mt-0.5">
-            Um pedido pode ter mais de um mecanismo — a soma pode passar de 100%
+            Cada barra é independente — a soma pode passar de 100% do faturamento
           </p>
+        </div>
+        <div className="text-right text-[10px] text-muted-foreground tnum">
+          <div>
+            Faturamento do período:{" "}
+            <span className="text-foreground font-semibold">{base > 0 ? fmtBRL(base) : "—"}</span>
+          </div>
+          <div>
+            {semMeses ? "Nenhum mês com informação" : `${meses} ${meses === 1 ? "mês" : "meses"} com informação`}
+            {" · "}
+            {usados} de {ordenados.length} mecanismos em uso
+          </div>
         </div>
       </div>
 
-      {semBase ? (
-        <div className="py-8 text-center space-y-1">
-          <p className="text-xs font-medium">Sem dados de mecanismos de desconto para esta loja</p>
-          <p className="text-[10px] text-muted-foreground max-w-[320px] mx-auto">
-            A base mensal de descontos ainda não tem meses carregados para este vendedor. Assim que
-            a carga for feita, os dez mecanismos aparecem aqui automaticamente.
-          </p>
-        </div>
-      ) : (
-        <ul className="space-y-1.5">
-          {ordenados.map((m) => {
-            const pct = base > 0 ? (m.valor / base) * 100 : null;
-            const largura = maiorValor > 0 ? (m.valor / maiorValor) * 100 : 0;
-            return (
-              <li key={m.chave} className="flex items-center gap-2">
-                <span className="w-[150px] shrink-0 text-[11px] text-muted-foreground truncate" title={m.rotulo}>
-                  {m.rotulo}
-                </span>
-                <div className="flex-1 h-[14px] rounded-sm bg-muted/30 overflow-hidden">
-                  <div
-                    className="h-full rounded-sm"
-                    style={{ width: `${largura}%`, background: "hsl(var(--brand-blue))" }}
-                  />
-                </div>
-                <span className="w-[150px] shrink-0 text-right text-[11px] tnum">
-                  {m.valor > 0 ? fmtBRL(m.valor) : "R$ 0"}
-                  <span className="text-muted-foreground">
-                    {" · "}
-                    {pct === null ? "—" : `${pct.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`}
-                  </span>
-                </span>
-                <Sparkline pontos={m.historico} />
-              </li>
-            );
-          })}
-        </ul>
+      {semMeses && (
+        <p className="text-[11px] text-muted-foreground rounded-md border border-border/60 px-2.5 py-1.5">
+          Base insuficiente: ainda não há meses com informação de descontos para esta loja. Os
+          mecanismos aparecem com R$ 0 até a carga chegar.
+        </p>
       )}
 
+      <ul className="space-y-1.5">
+        {ordenados.map((m) => {
+          const pct = base > 0 ? (m.valor / base) * 100 : null;
+          const largura = maiorValor > 0 ? (m.valor / maiorValor) * 100 : 0;
+          const zerado = !(m.valor > 0);
+          return (
+            <li key={m.chave} className="flex items-center gap-2">
+              <span
+                className={`w-[110px] sm:w-[150px] shrink-0 text-[11px] truncate ${zerado ? "text-muted-foreground/70" : "text-foreground"}`}
+                title={m.rotulo}
+              >
+                {m.rotulo}
+              </span>
+              <div className="flex-1 h-[14px] rounded-sm bg-muted/30 overflow-hidden">
+                <div
+                  className="h-full rounded-sm transition-[width] duration-700"
+                  style={{ width: `${largura}%`, background: "hsl(var(--brand-blue))" }}
+                />
+              </div>
+              <span className="w-[120px] sm:w-[150px] shrink-0 text-right text-[11px] tnum">
+                <span className={zerado ? "text-muted-foreground" : "font-semibold"}>
+                  {zerado ? "R$ 0" : fmtBRL(m.valor)}
+                </span>
+                <span className="text-muted-foreground">
+                  {" · "}
+                  {pct === null ? "—" : `${pct.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`}
+                </span>
+              </span>
+              <span className="hidden sm:block">
+                <Sparkline pontos={m.historico} />
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
       <p className="text-[10px] text-muted-foreground">
-        Percentual calculado sobre o faturamento do período. Barras independentes, sem empilhamento.
+        Percentual sobre o faturamento do período. Faturamento tocado somado (com sobreposição):{" "}
+        <span className="tnum">{totalTocado > 0 ? fmtBRL(totalTocado) : "R$ 0"}</span>.
       </p>
     </div>
   );

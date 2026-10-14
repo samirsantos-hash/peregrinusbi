@@ -158,7 +158,12 @@ export function usePockData(sellerId: string | undefined) {
       const ultima: any = (kpiRes.data ?? [])[(kpiRes.data ?? []).length - 1] ?? {};
 
       // ── Mecanismos de desconto (não exclusivos: a soma pode passar de 100%) ──
-      const cdpRows: any[] = (cdpRes?.data as any[]) ?? [];
+      // Meses sem nenhuma informação (base e mecanismos vazios) não entram na conta.
+      const cdpRows: any[] = ((cdpRes?.data as any[]) ?? []).filter((r) =>
+        [r.f_tgmv_lc, ...MECANISMOS_DESCONTO.map((m) => r[m.coluna])].some(
+          (v) => v !== null && v !== undefined && v !== "",
+        ),
+      );
       const ultimos12 = cdpRows.slice(-12);
       const mecanismosBase = ultimos12.reduce((s, r) => s + (Number(r.f_tgmv_lc) || 0), 0);
       const mesDe = (id: any) => {
