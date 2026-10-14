@@ -268,160 +268,107 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
         })}
       </div>
 
-      {/* Cores semânticas: verde = dentro da meta, amarelo = atenção, vermelho = crítico */}
-      {trendData.length >= 1 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {mini.map((m) => {
-            // Cor da linha baseada no valor ATUAL (positivo = verde, negativo = vermelho)
-            const corAtual =
-              m.valor >= m.critico ? "hsl(var(--crit))" : m.valor >= m.atencao ? "hsl(var(--attention-text))" : "hsl(var(--ok))";
-            // Cor da tendência (seta): subindo é ruim (vermelho), descendo é bom (verde)
-            const corTendencia =
-              m.slope > 0.05 ? "hsl(var(--crit))" : m.slope < -0.05 ? "hsl(var(--ok))" : "hsl(var(--muted-foreground))";
-            const tendenciaLabel =
-              m.slope > 0.05 ? "↑ Piorando" : m.slope < -0.05 ? "↓ Melhorando" : "→ Estável";
-            // Cor por ponto, segundo o valor de cada dia
-            const dotColor = (v: number) =>
-              v >= m.critico ? "hsl(var(--crit))" : v >= m.atencao ? "hsl(var(--attention-text))" : "hsl(var(--ok))";
-            return (
-              <div key={m.key} className="glass-card p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 text-neon-blue" />
-                    {m.label}
-                  </h4>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="text-[10px] font-semibold px-1.5 py-0.5 rounded"
-                      style={{ color: corTendencia, background: `color-mix(in srgb, ${corTendencia} 12%, transparent)` }}
-                    >
-                      {tendenciaLabel}
-                    </span>
-                    <span className="text-[10px] font-mono text-muted-foreground">
-                      meta &lt; {m.atencao}%
-                    </span>
+      {/* Evolução única: uma linha suave por indicador, cada uma com cor própria */}
+      {trendData.length >= 1 && (() => {
+        const CORES: Record<string, string> = {
+          claims: "hsl(var(--brand-blue))",
+          delays: "hsl(var(--ec-laranja, 25 75% 44%))",
+          cancels: "hsl(var(--media))",
+        };
+        const statusCor = (v: number, a: number, c: number) =>
+          v >= c ? "hsl(var(--crit))" : v >= a ? "hsl(var(--attention-text))" : "hsl(var(--ok))";
+        return (
+          <div className="glass-card p-5 space-y-4">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground flex items-center gap-1.5">
+                <Activity className="w-3.5 h-3.5 text-neon-blue" />
+                Evolução da reputação (%)
+              </h4>
+              <span className="text-[10px] text-muted-foreground">Menor é melhor · passe o mouse nas linhas</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {mini.map((m) => {
+                const tend = m.slope > 0.05 ? "↑ Piorando" : m.slope < -0.05 ? "↓ Melhorando" : "→ Estável";
+                const corTend = m.slope > 0.05 ? "hsl(var(--crit))" : m.slope < -0.05 ? "hsl(var(--ok))" : "hsl(var(--muted-foreground))";
+                return (
+                  <div key={m.key} className="rounded-lg border border-border/60 bg-muted/10 px-3 py-2">
+                    <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ background: CORES[m.key] }} />
+                      {m.label}
+                    </div>
+                    <div className="flex items-baseline justify-between mt-1">
+                      <span className="text-xl font-bold tabular-nums" style={{ color: statusCor(m.valor, m.atencao, m.critico) }}>
+                        {m.valor.toFixed(2).replace(".", ",")}%
+                      </span>
+                      <span className="text-[10px] font-semibold" style={{ color: corTend }}>{tend}</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      meta &lt; {m.atencao}% · crítico ≥ {m.critico}%
+                    </p>
                   </div>
-                </div>
-                <div className="h-[180px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={trendData} margin={{ top: 8, right: 12, left: 0, bottom: 4 }}>
-                      <defs>
-                        <linearGradient id={`grad-${m.key}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="hsl(var(--crit))" stopOpacity={0.9} />
-                          <stop offset={`${Math.min(100, (m.critico / Math.max(m.critico * 1.5, m.valor + 1)) * 100)}%`} stopColor="hsl(var(--attention-text))" stopOpacity={0.9} />
-                          <stop offset="100%" stopColor="hsl(var(--ok))" stopOpacity={0.9} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                      <XAxis
-                        dataKey="date"
-                        tick={{ fill: "hsl(var(--axis))", fontSize: 9 }}
-                        tickFormatter={(v) => formatChartDate(v, dataGranularity)}
-                      />
-                      <YAxis
-                        tick={{ fill: "hsl(var(--axis))", fontSize: 9 }}
-                        domain={[
-                          (dataMin: number) => Math.max(0, dataMin - 0.5),
-                          (dataMax: number) => Math.max(dataMax + 0.5, m.atencao + 1),
-                        ]}
-                        tickFormatter={(v) => `${Number(v).toFixed(1).replace(".", ",")}%`}
-                        width={48}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "8px",
-                          fontSize: "11px",
-                        }}
-                        formatter={(value: number) => [`${value.toFixed(2).replace(".", ",")}%`, m.label]}
-                      />
-                      {/* Zonas de risco */}
-                      <ReferenceArea
-                        y1={0}
-                        y2={m.atencao}
-                        fill="hsl(var(--ok))"
-                        fillOpacity={0.08}
-                        ifOverflow="extendDomain"
-                      />
-                      <ReferenceArea
-                        y1={m.atencao}
-                        y2={m.critico}
-                        fill="hsl(var(--attention-text))"
-                        fillOpacity={0.12}
-                        ifOverflow="extendDomain"
-                      />
-                      <ReferenceArea
-                        y1={m.critico}
-                        y2={1e6}
-                        fill="hsl(var(--crit))"
-                        fillOpacity={0.15}
-                        ifOverflow="extendDomain"
-                      />
-                      <ReferenceLine
-                        y={m.atencao}
-                        stroke="hsl(var(--attention-text))"
-                        strokeDasharray="4 3"
-                        label={{ value: `${m.atencao}%`, position: "right", fill: "hsl(var(--attention-text))", fontSize: 9 }}
-                      />
-                      <ReferenceLine
-                        y={m.critico}
-                        stroke="hsl(var(--crit))"
-                        strokeDasharray="4 3"
-                        label={{ value: `${m.critico}%`, position: "right", fill: "hsl(var(--crit))", fontSize: 9 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey={m.key}
-                        stroke={corAtual}
-                        strokeWidth={2.5}
-                        dot={(props: any) => {
-                          const { cx, cy, payload, index } = props;
-                          if (cx == null || cy == null) return <g key={`d-${index}`} />;
-                          const v = Number(payload?.[m.key]) || 0;
-                          return (
-                            <circle
-                              key={`d-${index}`}
-                              cx={cx}
-                              cy={cy}
-                              r={3}
-                              fill={dotColor(v)}
-                              stroke="hsl(var(--card))"
-                              strokeWidth={1}
-                            />
-                          );
-                        }}
-                        activeDot={{ r: 5, stroke: corAtual, strokeWidth: 2 }}
-                        isAnimationActive={false}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-                {/* Legenda compacta */}
-                <div className="flex items-center justify-between mt-2 text-[10px] text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--ok))" }} />
-                      OK
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--attention-text))" }} />
-                      Atenção
-                    </span>
-                    <span className="inline-flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full" style={{ background: "hsl(var(--crit))" }} />
-                      Crítico
-                    </span>
-                  </div>
-                  <span className="font-mono" style={{ color: corAtual }}>
-                    Atual: {m.valor.toFixed(2).replace(".", ",")}%
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+                );
+              })}
+            </div>
+
+            <div className="h-[220px] sm:h-[260px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData} margin={{ top: 8, right: 16, left: 0, bottom: 4 }}>
+                  <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: "hsl(var(--axis))", fontSize: 10 }}
+                    tickLine={false}
+                    axisLine={false}
+                    minTickGap={16}
+                    tickFormatter={(v) => formatChartDate(v, dataGranularity)}
+                  />
+                  <YAxis
+                    tick={{ fill: "hsl(var(--axis))", fontSize: 10 }}
+                    tickLine={false}
+                    axisLine={false}
+                    domain={[0, (dataMax: number) => Math.max(dataMax + 0.5, 3)]}
+                    tickFormatter={(v) => `${Number(v).toFixed(1).replace(".", ",")}%`}
+                    width={48}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--popover))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "11px",
+                    }}
+                    labelFormatter={(l) => formatChartDate(String(l), dataGranularity)}
+                    formatter={(value: number, name: string) => [
+                      `${Number(value).toFixed(2).replace(".", ",")}%`,
+                      mini.find((m) => m.key === name)?.label ?? name,
+                    ]}
+                  />
+                  <ReferenceLine
+                    y={2}
+                    stroke="hsl(var(--attention-text))"
+                    strokeDasharray="4 3"
+                    label={{ value: "meta 2%", position: "right", fill: "hsl(var(--attention-text))", fontSize: 9 }}
+                  />
+                  {mini.map((m) => (
+                    <Line
+                      key={m.key}
+                      type="monotone"
+                      dataKey={m.key}
+                      stroke={CORES[m.key]}
+                      strokeWidth={2.5}
+                      dot={false}
+                      activeDot={{ r: 5, stroke: "hsl(var(--card))", strokeWidth: 2 }}
+                      isAnimationActive={false}
+                      connectNulls={false}
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        );
+      })()}
     </motion.div>
   );
 };
