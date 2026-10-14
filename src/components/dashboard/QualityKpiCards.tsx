@@ -3,6 +3,8 @@ import { Shield, Barcode, Sparkles, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import type { TOOLTIPS } from "@/lib/algoTooltips";
+import { scoresServicos30d } from "@/lib/scoresServicos30d";
+import { LIMIARES } from "@/config/limiaresCarteira";
 
 interface QualityKpiCardsProps {
   scoreCaracteristica: number;
@@ -13,6 +15,8 @@ interface QualityKpiCardsProps {
   scorePads?: number;
   scoreCdp?: number;
   pontuacaoIpi?: number;
+  diasRecentes?: any[];
+  pctFullPeriodo?: number;
 }
 
 /* ── Benchmarks da carteira (mediana Mar/2026) ── */
@@ -93,19 +97,28 @@ const QualityKpiCards = ({
   scorePads = 0,
   scoreCdp = 0,
   pontuacaoIpi = 0,
+  diasRecentes = [],
+  pctFullPeriodo = 0,
 }: QualityKpiCardsProps) => {
   const normalizedCaracteristica = normalizeScore(scoreCaracteristica);
   const normalizedGtin = normalizeScore(pontuacaoLlGtin);
   const normalizedOferta = normalizeScore(scoreOfertaFinal);
 
-  // ERRO 3: If scoreFull = 0, seller has no fulfillment — show message instead of bar
-  const hasFullActive = scoreFull > 0;
-  const normalizedFull = normalizeScore(scoreFull);
+  // Últimos 30 dias: investimento em publicidade vs meta de 3% e vendas pelo Full
+  const s30 = scoresServicos30d(diasRecentes);
+  const padsFinal = s30 ? s30.scorePads : normalizeScore(scorePads);
+  // Vendas pelo Full (30d; senão, % do período). Score = participação vs meta.
+  const pctFull = s30 && s30.pctFull > 0 ? s30.pctFull * 100 : pctFullPeriodo;
+  const scoreFullDerivado = pctFull > 0
+    ? Math.round(Math.min(100, (pctFull / (LIMIARES.full.min * 100)) * 100))
+    : 0;
+  const hasFullActive = scoreFull > 0 || pctFull > 0;
+  const normalizedFull = scoreFull > 0 ? normalizeScore(scoreFull) : scoreFullDerivado;
 
   const scoreCards = [
     {
       label: "Score PADS",
-      value: normalizeScore(scorePads),
+      value: padsFinal,
       refKey: "SCORE_FINAL_PADS",
       icon: Shield,
       noFullMessage: null as string | null,
@@ -116,7 +129,7 @@ const QualityKpiCards = ({
       value: hasFullActive ? normalizedFull : 0,
       refKey: "SCORE_FINAL_FULL",
       icon: Package,
-      noFullMessage: !hasFullActive ? "Seller sem itens no fulfillment ativo" : null,
+      noFullMessage: !hasFullActive ? "Seller sem vendas pelo Full" : null,
       algoKey: "shareFullPct" as keyof typeof TOOLTIPS,
     },
     {

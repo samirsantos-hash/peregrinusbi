@@ -599,6 +599,8 @@ const Index = () => {
                             scoreCdp={latest.cdpTgmv > 0 ? 36 : 0}
                             pontuacaoIpi={latest.pontuacaoIpi || 0}
                             totalLiveListings={liveListingsCount || 0}
+                            diasRecentes={allKpisDaily as any[]}
+                            pctFullPeriodo={Number(latest.pctFull) || 0}
                           />
                           {/* 2. Evolução e diagnóstico */}
                           <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch">
