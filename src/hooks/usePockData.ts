@@ -49,6 +49,8 @@ export interface PockData {
   mecanismos: PockMecanismo[];
   /** Base do período para % dos mecanismos (F_TGMV_LC somado) */
   mecanismosBase: number;
+  /** Mês de referência da janela de 30 dias dos mecanismos */
+  mecanismosMes: string | null;
   /** Adesão ao FULL por mês */
   full: PockFullMes[];
   /** cobertura % dos meses com TGMV_LC_FBM */
@@ -164,7 +166,8 @@ export function usePockData(sellerId: string | undefined) {
           (v) => v !== null && v !== undefined && v !== "",
         ),
       );
-      const ultimos12 = cdpRows.slice(-12);
+      // Travado em 30 dias (prazo limite de promoção): usa só o mês mais recente com informação.
+      const ultimos12 = cdpRows.slice(-1);
       const mecanismosBase = ultimos12.reduce((s, r) => s + (Number(r.f_tgmv_lc) || 0), 0);
       const mesDe = (id: any) => {
         const t = String(id ?? "");
@@ -286,6 +289,7 @@ export function usePockData(sellerId: string | undefined) {
         snapshot,
         mecanismos,
         mecanismosBase,
+        mecanismosMes: ultimos12[0] ? mesDe(ultimos12[0].tim_month_id) : null,
         full,
         coberturaFbm: cobertura(series, "tgmvFbm"),
         cobertura: {
