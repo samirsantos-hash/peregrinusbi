@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/fetchAllRows";
@@ -86,8 +86,8 @@ export default function VerticalCarteirasTabela({ sellerId }: { sellerId?: strin
           </thead>
           <tbody>
             {linhas.map(({ v, ls, acimaCart, medVsCart }) => (
-              <>
-                <tr key={v.vertical} onClick={() => setAberta(aberta === v.vertical ? null : v.vertical)} className="cursor-pointer border-b border-border/50 hover:bg-white/5">
+              <Fragment key={v.vertical}>
+                <tr onClick={() => setAberta(aberta === v.vertical ? null : v.vertical)} className="cursor-pointer border-b border-border/50 hover:bg-white/5">
                   <td className="py-2 pr-3 font-medium text-foreground">{aberta === v.vertical ? "▾" : "▸"} {ROTULO_VERTICAL[v.vertical] ?? v.vertical}</td>
                   <td className="py-2 pr-3 text-right">{num(ls.length)}{carteira !== "todas" && <span className="text-muted-foreground"> de {num(v.lojas)}</span>}</td>
                   <td className="py-2 pr-3 text-right">{brl(v.medianaFat)}</td>
@@ -104,7 +104,7 @@ export default function VerticalCarteirasTabela({ sellerId }: { sellerId?: strin
                     <td className={`py-1.5 text-right ${l.vsMediana === null ? "" : l.vsMediana >= 0 ? "text-ok" : "text-crit"}`}>{pp(l.vsMediana)}</td>
                   </tr>
                 ))}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>
