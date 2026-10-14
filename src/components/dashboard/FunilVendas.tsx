@@ -99,8 +99,8 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.12 }}
                 title={`${e.nome}: ${e.fmt} · ${pct((e.valor / d.visitas) * 100, 2)} das visitas`}
-                className="group relative flex min-h-[74px] flex-col items-center justify-center px-6 py-3 text-center transition-[filter] duration-200 hover:brightness-125"
-                style={{ width: `${w}%` }}
+                className="group relative flex min-h-[84px] flex-col items-center justify-center gap-0.5 py-3 text-center transition-[filter] duration-200 hover:brightness-125"
+                style={{ width: `${w}%`, paddingInline: `calc(${recuo}% + 12px)` }}
               >
                 <div
                   className="absolute inset-0 border border-cyan-400/60 bg-gradient-to-b from-cyan-400/40 to-cyan-400/10 shadow-[0_0_18px_rgb(34_211_238/0.25)]"
@@ -110,12 +110,12 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
                     borderRadius: "18px 18px 28px 28px",
                   }}
                 />
-                <p className="relative text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/75">{e.nome}</p>
-                <p className="relative text-xl font-semibold tabular-nums leading-tight text-foreground">
+                <p className="relative max-w-full truncate text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/75">{e.nome}</p>
+                <p className="relative max-w-full truncate text-xl font-semibold tabular-nums leading-tight text-foreground">
                   <NumeroAnimado valor={String(e.fmt)} />
                 </p>
                 {i > 0 && (
-                  <p className="relative text-[10px] tabular-nums text-neon-blue">{pct(daAnterior * 100, 2)} da etapa anterior</p>
+                  <p className="relative max-w-full truncate text-[10px] leading-tight tabular-nums text-neon-blue">{pct(daAnterior * 100, 2)} da etapa anterior</p>
                 )}
               </motion.div>
             );
