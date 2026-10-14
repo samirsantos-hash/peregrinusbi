@@ -71,97 +71,82 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 
-const GrowthPotentialPanel = ({ kpis, dataGranularity = "daily", campaign, benchmark, sellerId }: GrowthPotentialPanelProps) => {
+const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPotentialPanelProps) => {
   const { data: mix } = useCategoryMix(sellerId);
-  // Primary source: Efect Rta Vertical from meli_campaigns
-  const hasCampaignData = !!campaign && campaign.efectRtaVertical > 0;
   const [modoCurva, setModoCurva] = useState<"acumulado" | "indexado">("acumulado");
-
-  // Procedência declarada do benchmark (elo 1 da auditoria)
   const verticalRotulo = campaign?.verticalPrincipal?.trim() || null;
-  const fonteBenchmark: "efect_rta" | "cdp" | "estimativa" = hasCampaignData
-    ? "efect_rta"
-    : kpis.some((k) => (k.cdpTgmv || 0) > 0)
-    ? "cdp"
-    : "estimativa";
-  const rotuloFonte =
-    fonteBenchmark === "efect_rta"
-      ? `Índice Efect Rta da vertical${verticalRotulo ? ` (${verticalRotulo})` : ""}`
-      : fonteBenchmark === "cdp"
-      ? "Faturamento CDP do próprio seller (proxy)"
-      : "Estimativa derivada do uplift (dado frágil)";
-  // Quando a referência vem de um índice fixo aplicado ao próprio seller,
-  // as curvas são proporcionais (idênticas no modo indexado).
-  const curvaProporcional = fonteBenchmark === "efect_rta";
 
-  const {
-    chartData,
-    sellerTotal,
-    benchmarkTotal,
-    baseInfo,
-  } = useMemo(() => {
-    if (kpis.length === 0) {
-      return { chartData: [], sellerTotal: 0, benchmarkTotal: 0, baseInfo: null as null | { seller: number; bench: number; pontos: number; valida: boolean } };
-    }
-
-    // If we have campaign data, use efectRtaVertical as the potentialPct directly
-    const efectPct = hasCampaignData ? campaign!.efectRtaVertical : 0;
-
-    const byDate: Record<string, { sellerGmv: number; benchmarkGmv: number }> = {};
-
+  // Série mensal do seller, sem o mês corrente (incompleto).
+  const sellerMensal = useMemo(() => {
+    const atual = new Date().toISOString().slice(0, 7);
+    const m = new Map<string, number>();
     for (const k of kpis) {
-      if (!byDate[k.date]) byDate[k.date] = { sellerGmv: 0, benchmarkGmv: 0 };
-      byDate[k.date].sellerGmv += k.revenue;
-
-      if (hasCampaignData) {
-        // Benchmark = seller revenue / (efectRtaVertical / 100) — reverse-engineer category potential
-        const benchmarkRevenue = efectPct > 0 ? k.revenue / (efectPct / 100) : k.revenue;
-        byDate[k.date].benchmarkGmv += benchmarkRevenue;
-      } else {
-        const cdp = k.cdpTgmv || 0;
-        if (cdp > 0) {
-          byDate[k.date].benchmarkGmv += cdp;
-        } else {
-          const uplift = k.upliftGmvM1 || 0;
-          const estimated = k.revenue * (1 + Math.abs(uplift) * 0.5 + 0.15);
-          byDate[k.date].benchmarkGmv += estimated;
-        }
-      }
+      const mes = String(k.date).slice(0, 7);
+      if (mes >= atual) continue;
+      m.set(mes, (m.get(mes) ?? 0) + (k.revenue || 0));
     }
+    return [...m.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [kpis]);
+  const meses = sellerMensal.map(([m]) => m);
 
-    const sortedDates = Object.keys(byDate).sort();
+  const { data: refData, isLoading: refLoading } = useQuery({
+    queryKey: ["ref-vertical", sellerId, verticalRotulo, meses[0], meses[meses.length - 1]],
+    enabled: !!sellerId && !!verticalRotulo && meses.length > 0,
+    queryFn: async () => {
+      const { data: camp } = await fetchAllRows<{ seller_id: string }>((f, t) =>
+        supabase.from("meli_campaigns" as any).select("seller_id")
+          .eq("vertical_principal", verticalRotulo!).order("seller_id").range(f, t) as any,
+      );
+      const ids = [...new Set(camp.map((r) => r.seller_id))].filter((id) => id && id !== sellerId);
+      const linhas: LinhaPar[] = [];
+      for (let i = 0; i < ids.length; i += 200) {
+        const lote = ids.slice(i, i + 200);
+        const { data } = await fetchAllRows<any>((f, t) =>
+          supabase.from("sellers_kpi").select("seller_id, data, tgmv_lc")
+            .in("seller_id", lote)
+            .gte("data", `${meses[0]}-01`).lte("data", `${meses[meses.length - 1]}-31`)
+            .order("seller_id").order("data").range(f, t) as any,
+        );
+        for (const r of data) linhas.push({ seller_id: r.seller_id, mes: String(r.data).slice(0, 7), tgmv: Number(r.tgmv_lc) || 0 });
+      }
+      return calcularReferenciaVertical(sellerId!, meses, linhas);
+    },
+  });
 
-    // Base do índice = média dos 3 primeiros pontos (nunca um mês único).
-    const nBase = Math.min(3, sortedDates.length);
-    const baseSeller =
-      sortedDates.slice(0, nBase).reduce((s, d) => s + byDate[d].sellerGmv, 0) / nBase;
-    const baseBench =
-      sortedDates.slice(0, nBase).reduce((s, d) => s + byDate[d].benchmarkGmv, 0) / nBase;
-    const baseValida = baseSeller > 0 && baseBench > 0 && Number.isFinite(baseSeller) && Number.isFinite(baseBench);
+  const referenciaValida = !!verticalRotulo && !!refData && refData.nPares >= MIN_PARES;
+  const motivoSemRef = !verticalRotulo
+    ? "Este seller não tem Vertical Principal cadastrada, então não há pares para comparar."
+    : refLoading
+    ? null
+    : `Menos de ${MIN_PARES} sellers da carteira com dados válidos na vertical ${verticalRotulo}.`;
 
-    let cumSeller = 0;
-    let cumBenchmark = 0;
-    const data = sortedDates.map((date) => {
-      cumSeller += byDate[date].sellerGmv;
-      cumBenchmark += byDate[date].benchmarkGmv;
-      const label = formatChartDate(date, dataGranularity);
+  const { chartData, sellerTotal, benchmarkTotal, baseInfo } = useMemo(() => {
+    const nBase = Math.min(3, sellerMensal.length);
+    const baseSeller = nBase ? sellerMensal.slice(0, nBase).reduce((s, [, v]) => s + v, 0) / nBase : 0;
+    const baseValida = baseSeller > 0 && Number.isFinite(baseSeller);
+    let cumS = 0;
+    let cumR = 0;
+    const data = sellerMensal.map(([mes, v], i) => {
+      const p = referenciaValida ? refData!.pontos[i] : null;
+      cumS += v;
+      const refMes = p?.mediana != null ? (baseSeller * p.mediana) / 100 : null;
+      if (refMes != null) cumR += refMes;
       return {
-        date: label,
-        "Seller (Acumulado)": Math.round(cumSeller),
-        "Benchmark Vertical": Math.round(cumBenchmark),
-        // Índice base 100 — só calculado quando a base é válida (base 0 nunca vira Infinity)
-        "Seller (Índice)": baseValida ? Math.round((byDate[date].sellerGmv / baseSeller) * 100) : null,
-        "Vertical (Índice)": baseValida ? Math.round((byDate[date].benchmarkGmv / baseBench) * 100) : null,
+        date: formatChartDate(`${mes}-01`, "consolidated"),
+        "Seller (Acumulado)": Math.round(cumS),
+        "Referência da vertical": referenciaValida && refMes != null ? Math.round(cumR) : null,
+        "Seller (Índice)": baseValida ? Math.round((v / baseSeller) * 100) : null,
+        "Mediana da vertical (Índice)": p?.mediana != null ? Math.round(p.mediana) : null,
+        "Faixa P25–P75": p?.p25 != null && p?.p75 != null ? [Math.round(p.p25), Math.round(p.p75)] : null,
       };
     });
-
     return {
       chartData: data,
-      sellerTotal: cumSeller,
-      benchmarkTotal: cumBenchmark,
-      baseInfo: { seller: baseSeller, bench: baseBench, pontos: nBase, valida: baseValida },
+      sellerTotal: cumS,
+      benchmarkTotal: cumR,
+      baseInfo: { seller: baseSeller, pontos: nBase, valida: baseValida },
     };
-  }, [kpis, hasCampaignData, campaign, dataGranularity]);
+  }, [sellerMensal, refData, referenciaValida]);
 
 
   // ---------------------------------------------------------------
