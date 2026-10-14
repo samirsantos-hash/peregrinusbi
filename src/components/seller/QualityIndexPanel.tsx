@@ -262,7 +262,6 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
             <tr className="text-muted-foreground border-b border-border">
               <th className="text-left py-2 font-semibold">Pilar</th>
               <th className="text-right py-2 font-semibold">Score</th>
-              <th className="text-right py-2 font-semibold">Nota</th>
               <th className="text-right py-2 font-semibold">Peso</th>
               <th className="text-right py-2 font-semibold">Contribuição</th>
             </tr>
@@ -272,20 +271,15 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
               const t = statusTone(p.status);
               return (
                 <tr key={p.id} className="border-b border-border/50">
-                  <td className="py-2">{p.label}</td>
+                  <td className="py-2">{limpar(p.label)}</td>
                   <td className={`py-2 text-right font-mono font-bold tabular-nums ${t.text}`}>{p.score}</td>
-                  <td className="py-2 text-right">
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${t.bg} ${t.text} border ${t.border}`}>
-                      {p.scoreNota}
-                    </span>
-                  </td>
                   <td className="py-2 text-right font-mono tabular-nums">{(p.peso * 100).toFixed(0).replace(".", ",")}%</td>
-                  <td className="py-2 text-right font-mono tabular-nums">{(p.score * p.peso).toFixed(1)} pts</td>
+                  <td className="py-2 text-right font-mono tabular-nums">{(p.score * p.peso).toFixed(1).replace(".", ",")} pts</td>
                 </tr>
               );
             })}
             <tr className="bg-muted/30 font-bold">
-              <td className="py-2" colSpan={4}>Quality Index Total</td>
+              <td className="py-2" colSpan={3}>Quality Index Total</td>
               <td className={`py-2 text-right font-mono text-base tabular-nums ${tGeral.text}`}>{qi.scoreGeral}</td>
             </tr>
           </tbody>
