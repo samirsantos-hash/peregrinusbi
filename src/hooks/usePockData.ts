@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { calcularFavorabilidade, calcularTaxaVenda, crescimento } from "@/lib/pockIndicadores";
 
 /**
  * POCK lê da camada agregada (sellers_kpi + live_listings), nunca de raw_*.
@@ -33,6 +34,11 @@ export interface PockSnapshot {
   scorePads: number | null;
   scoreIntegradores: number | null;
   usoCentralPromocoes: number | null;
+  /** Taxa de Venda em p.p. contra a mediana do mercado */
+  taxaVenda: { valor: number | null; seller: number | null; mercado: number | null; mesRef: string | null; pares: number };
+  favorabilidade: ReturnType<typeof calcularFavorabilidade>;
+  /** métricas do último mês para leitura da IA */
+  metricas: Record<string, number | string | null>;
 }
 
 export interface PockData {
@@ -98,7 +104,7 @@ export function usePockData(sellerId: string | undefined) {
         supabase
           .from("sellers_kpi")
           .select(
-            "data, tgmv_lc, visits, tsi, tgmv_lc_flex, tgmv_lc_full, inv_pads, tgmv_lc_pads, cdp_tgmv_lc, tgmv_lc_clips, visitas_clips, orders_clips, rep_current_level, rep_claims_rate, rep_delayed_ht_rate, rep_cancellations_rate, score_final_full, score_final_pads, score_qualidade_final",
+            "data, tgmv_lc, bpc, score_qualidade_final, visits, tsi, tgmv_lc_flex, tgmv_lc_full, inv_pads, tgmv_lc_pads, cdp_tgmv_lc, tgmv_lc_clips, visitas_clips, orders_clips, rep_current_level, rep_claims_rate, rep_delayed_ht_rate, rep_cancellations_rate, score_final_full, score_final_pads, score_qualidade_final",
           )
           .eq("seller_id", sellerId)
           .order("data", { ascending: true }),
@@ -192,6 +198,47 @@ export function usePockData(sellerId: string | undefined) {
         return null;
       };
 
+      // ── Indicadores derivados ───────────────────────────────────────
+      const tg = Number(ultima.tgmv_lc) || 0;
+      const share = (v: any) => (tg > 0 && v !== null && v !== undefined ? Number(v) / tg : null);
+      const bpc = num(ultima.bpc);
+      const ads = share(ultima.inv_pads);
+      const fullShare = share(ultima.tgmv_lc_full);
+      const promo = share(ultima.cdp_tgmv_lc);
+      const favorabilidade = calcularFavorabilidade({
+        bpc, repLevel: ultima.rep_current_level || null, ads, full: fullShare, promo,
+      });
+
+      // Último mês fechado (o mês corrente é parcial) contra o anterior, vs mercado.
+      const rows: any[] = (kpiRes.data ?? []) as any[];
+      const hoje = new Date().toISOString().slice(0, 7);
+      const fechados = rows.filter((r) => String(r.data).slice(0, 7) < hoje);
+      const a = fechados[fechados.length - 1];
+      const b = fechados[fechados.length - 2];
+      let taxaVenda = { valor: null as number | null, seller: null as number | null, mercado: null as number | null, mesRef: null as string | null, pares: 0 };
+      if (a && b) {
+        const { data: sel } = await supabase.from("sellers").select("sub_cluster_seller").eq("id", sellerId).maybeSingle();
+        let q = supabase.from("sellers_kpi").select("seller_id, data, tgmv_lc").in("data", [a.data, b.data]);
+        if (sel?.sub_cluster_seller) {
+          const { data: ids } = await supabase.from("sellers").select("id").eq("sub_cluster_seller", sel.sub_cluster_seller).range(0, 4999);
+          const lista = (ids ?? []).map((x: any) => x.id);
+          if (lista.length >= 5) q = q.in("seller_id", lista.slice(0, 900));
+        }
+        const { data: pares } = await q.range(0, 9999);
+        const por = new Map<string, { a?: number; b?: number }>();
+        for (const r of (pares ?? []) as any[]) {
+          const e = por.get(r.seller_id) ?? {};
+          if (r.data === a.data) e.a = Number(r.tgmv_lc) || 0; else e.b = Number(r.tgmv_lc) || 0;
+          por.set(r.seller_id, e);
+        }
+        const cres = [...por.entries()]
+          .filter(([id]) => id !== sellerId)
+          .map(([, e]) => crescimento(e.a ?? null, e.b ?? null))
+          .filter((v): v is number => v !== null && Number.isFinite(v) && Math.abs(v) < 500);
+        const t = calcularTaxaVenda(crescimento(num(a.tgmv_lc), num(b.tgmv_lc)), cres);
+        taxaVenda = { ...t, mesRef: String(a.data).slice(0, 7), pares: cres.length };
+      }
+
       const snapshot: PockSnapshot = {
         repLevel: ultima.rep_current_level || null,
         repClaimsRate: num(ultima.rep_claims_rate),
@@ -200,11 +247,33 @@ export function usePockData(sellerId: string | undefined) {
         // REP_DISPUTES_RATE não existe na camada agregada hoje
         repDisputesRate: null,
         // SCORE_FINAL_BBF não existe na camada agregada hoje
-        scoreBbf: null,
+        scoreBbf: num(ultimoCom("score_qualidade_final")),
         scoreFull: num(ultimoCom("score_final_full")),
         scorePads: num(ultimoCom("score_final_pads")),
         scoreIntegradores: null,
-        usoCentralPromocoes: null,
+        usoCentralPromocoes: promo === null ? null : Math.min(100, promo * 100),
+        taxaVenda,
+        favorabilidade,
+        metricas: {
+          mes: ultima.data ?? null,
+          faturamento: num(ultima.tgmv_lc),
+          visitas: num(ultima.visits),
+          vendas: num(ultima.tsi),
+          competitividade_preco_pct: bpc === null ? null : Math.round(bpc * 1000) / 10,
+          reputacao: ({ green_platinum: "MercadoLíder Platinum", green_gold: "MercadoLíder Gold", green_silver: "MercadoLíder", green: "Verde", light_green: "Verde claro", yellow: "Amarela", orange: "Laranja", red: "Vermelha", newbie: "Novo vendedor" } as Record<string, string>)[ultima.rep_current_level] ?? ultima.rep_current_level ?? null,
+          reclamacoes_pct: num(ultima.rep_claims_rate),
+          atrasos_pct: num(ultima.rep_delayed_ht_rate),
+          cancelamentos_pct: num(ultima.rep_cancellations_rate),
+          ads_sobre_faturamento_pct: ads === null ? null : Math.round(ads * 1000) / 10,
+          roas: ultima.inv_pads > 0 ? Math.round((Number(ultima.tgmv_lc_pads) / Number(ultima.inv_pads)) * 10) / 10 : null,
+          full_pct: fullShare === null ? null : Math.round(fullShare * 1000) / 10,
+          flex_pct: tg > 0 ? Math.round((Number(ultima.tgmv_lc_flex) / tg) * 1000) / 10 : null,
+          promocao_pct: promo === null ? null : Math.round(promo * 1000) / 10,
+          clips_faturamento: num(ultima.tgmv_lc_clips),
+          crescimento_mes_pct: taxaVenda.seller === null ? null : Math.round(taxaVenda.seller * 10) / 10,
+          crescimento_mercado_pct: taxaVenda.mercado === null ? null : Math.round(taxaVenda.mercado * 10) / 10,
+          favorabilidade_pct: favorabilidade.valor,
+        },
       };
 
       return {

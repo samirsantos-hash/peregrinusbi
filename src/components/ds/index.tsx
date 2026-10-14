@@ -104,7 +104,7 @@ export interface BandBarProps {
 
 export function BandBar({ valor, max = 100, limiares = [25, 50, 75], maiorMelhor = true, rotulo, className }: BandBarProps) {
   if (valor === null || !Number.isFinite(valor)) {
-    return <p className={cn("ds-nota", className)}>{rotulo ? `${rotulo}: ` : ""}sem dado no período</p>;
+    return <p className={cn("text-[12px] text-foreground/65", className)}>{rotulo ? `${rotulo}: ` : ""}sem dado no período</p>;
   }
   const f = faixaDe(valor, limiares, maiorMelhor);
   const w = Math.max(0, Math.min(100, (valor / max) * 100));
