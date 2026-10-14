@@ -49,7 +49,7 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
   if (!best) return null;
 
   return (
-    <div className="glass-card p-5 h-full">
+    <div className="glass-card p-5 h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
           Melhor Período de Investimento
@@ -57,7 +57,8 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
         <TooltipInfo text="Mês com o menor CPA (custo por aquisição) em relação ao faturamento obtido. Indica o período mais eficiente para investir em Ads." />
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex-1 flex flex-col lg:flex-row lg:items-center gap-4">
+<div className="flex items-center gap-4 lg:w-[40%] shrink-0">
         <div className="w-12 h-12 rounded-xl bg-ec-verde/10 border border-ec-verde/20 flex items-center justify-center shrink-0">
           <TrendingDown className="w-6 h-6 text-ok text-destructive-foreground" />
         </div>
@@ -71,7 +72,7 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mt-4">
+      <div className="grid grid-cols-3 gap-3 flex-1">
         <motion.div
           initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
@@ -99,6 +100,7 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Retorno / R$ Investido</p>
           <p className="text-sm font-bold font-mono text-foreground mt-1">{best.efficiency.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}x</p>
         </motion.div>
+      </div>
       </div>
     </div>);
 
