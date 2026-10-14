@@ -42,7 +42,7 @@ export default function AguiaLogo({ className }: { className?: string }) {
       aria-label="Ecom Peregrinus"
       role="img"
     >
-      <img src={aguiaImg} alt="" className="aguia-flutua h-full w-full object-cover" draggable={false} />
+      <span className="aguia-flutua block h-full w-full"><img src={aguiaImg} alt="" className="h-full w-full scale-[1.15] object-cover" draggable={false} /></span>
     </div>
   );
 }
