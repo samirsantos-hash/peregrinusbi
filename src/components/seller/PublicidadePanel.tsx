@@ -1,3 +1,5 @@
+import { calcularTendencia } from "@/lib/tendencia";
+import TendenciaChip from "@/components/charts/TendenciaChip";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -180,6 +182,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Evolução histórica ({m.historico.length} {m.historico.length === 1 ? "mês" : "meses"})
+              <TendenciaChip t={calcularTendencia(m.historico.map((d) => Number(d.gmv_ads) || 0))} className="ml-2 normal-case tracking-normal" />
             </div>
             <div className="flex gap-2">
               {([
@@ -218,6 +221,11 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   ]}
                 />
                 <Legend formatter={(n) => (n === "inv" ? "Investimento" : "GMV via Ads")} />
+                {m.historico.length >= 2 && (() => {
+                  const med = m.historico.reduce((a, d) => a + (Number(d.gmv_ads) || 0), 0) / m.historico.length;
+                  return <ReferenceLine y={med} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
+                    label={{ value: `Média GMV Ads ${fmtBRLCompact(med)}`, position: "insideTopLeft", fill: "hsl(var(--media))", fontSize: 10 }} />;
+                })()}
                 <Bar dataKey="inv" fill="hsl(var(--series-2))">
                   {m.historico.map((d, i) => (
                     <Cell key={`inv-${i}`} fill={corRoas(d.roas)} fillOpacity={0.55} />
