@@ -75,6 +75,13 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 
+const ROTULO_VERTICAL: Record<string, string> = {
+  BEAUTY: "Beleza", "CONSTRUCTION & INDUSTRY": "Construção e Indústria", CPG: "Mercado e Consumo",
+  ENTERTAINMENT: "Entretenimento", FASHION: "Moda", "FURNISHING & HOUSEWARE": "Casa e Decoração",
+  HEALTH: "Saúde", "HOME ELECTRONICS": "Eletrodomésticos", OTHERS: "Outros", SPORTS: "Esportes",
+  "T & B": "Brinquedos e Bebês", TECHNOLOGY: "Tecnologia", "VEHICLE PARTS & ACCESSORIES": "Autopeças", VIS: "Veículos",
+};
+
 const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPotentialPanelProps) => {
   const { data: mix } = useCategoryMix(sellerId);
   const [modoCurva, setModoCurva] = useState<"acumulado" | "indexado">("acumulado");
@@ -133,7 +140,7 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
 
   const referenciaValida = !!verticalRotulo && !!refData && refData.nPares >= MIN_PARES;
   const motivoSemRef = !verticalRotulo
-    ? "Este seller não tem Vertical Principal cadastrada, então não há pares para comparar."
+    ? "Não foi possível identificar a categoria deste seller pelos produtos que vende nem pela base de clientes."
     : refLoading
     ? null
     : `Menos de ${MIN_PARES} sellers da carteira com dados válidos na vertical ${verticalRotulo}.`;
@@ -527,7 +534,7 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
         <div className="flex flex-wrap items-center gap-2 mb-3">
           {referenciaValida && (
             <Badge variant="outline" className="text-[10px] font-normal">
-              Mediana de {refData!.nPares} sellers da carteira · {verticalRotulo}
+              Mediana de {refData!.nPares} sellers da carteira · {verticalRotulo}{fonteVertical === "produtos" ? " (pelos produtos vendidos)" : " (pelas campanhas)"}
             </Badge>
           )}
           {modoCurva === "indexado" && baseInfo.valida && (
@@ -540,7 +547,7 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
 
         {!referenciaValida && motivoSemRef && (
           <div className="mb-4 rounded-md border border-ec-ambar/30 bg-ec-ambar/5 px-3 py-2 text-[11px] text-ec-ambar">
-            {motivoSemRef} Suba o relatório de campanhas com a Vertical Principal deste seller.
+            {motivoSemRef} Suba a planilha de anúncios ativos ou o relatório de campanhas com a Vertical Principal deste seller.
           </div>
         )}
 
