@@ -78,7 +78,18 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPotentialPanelProps) => {
   const { data: mix } = useCategoryMix(sellerId);
   const [modoCurva, setModoCurva] = useState<"acumulado" | "indexado">("acumulado");
-  const verticalRotulo = campaign?.verticalPrincipal?.trim() || null;
+  // Categoria do seller: produtos que vende / base de clientes; campanhas só como último recurso.
+  const { data: verticalProdutos } = useQuery({
+    queryKey: ["vertical-seller", sellerId],
+    enabled: !!sellerId,
+    queryFn: async () => {
+      const { data } = await supabase.from("sellers").select("vertical_dominant").eq("id", sellerId!).maybeSingle();
+      return (data?.vertical_dominant as string | null)?.trim() || null;
+    },
+  });
+  const fonteVertical: "produtos" | "campanha" | null = verticalProdutos ? "produtos" : campaign?.verticalPrincipal?.trim() ? "campanha" : null;
+  const verticalChave = verticalProdutos || campaign?.verticalPrincipal?.trim() || null;
+  const verticalRotulo = verticalChave ? (ROTULO_VERTICAL[verticalChave] ?? verticalChave) : null;
 
   // Série mensal do seller, sem o mês corrente (incompleto).
   const sellerMensal = useMemo(() => {
@@ -94,13 +105,16 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
   const meses = sellerMensal.map(([m]) => m);
 
   const { data: refData, isLoading: refLoading } = useQuery({
-    queryKey: ["ref-vertical", sellerId, verticalRotulo, meses[0], meses[meses.length - 1]],
-    enabled: !!sellerId && !!verticalRotulo && meses.length > 0,
+    queryKey: ["ref-vertical", sellerId, fonteVertical, verticalChave, meses[0], meses[meses.length - 1]],
+    enabled: !!sellerId && !!verticalChave && meses.length > 0,
     queryFn: async () => {
-      const { data: camp } = await fetchAllRows<{ seller_id: string }>((f, t) =>
-        supabase.from("meli_campaigns" as any).select("seller_id")
-          .eq("vertical_principal", verticalRotulo!).order("seller_id").range(f, t) as any,
-      );
+      const { data: camp } = fonteVertical === "produtos"
+        ? await fetchAllRows<{ seller_id: string }>((f, t) =>
+            supabase.from("sellers").select("seller_id:id")
+              .eq("vertical_dominant", verticalChave!).order("id").range(f, t) as any)
+        : await fetchAllRows<{ seller_id: string }>((f, t) =>
+            supabase.from("meli_campaigns" as any).select("seller_id")
+              .eq("vertical_principal", verticalChave!).order("seller_id").range(f, t) as any);
       const ids = [...new Set(camp.map((r) => r.seller_id))].filter((id) => id && id !== sellerId);
       const linhas: LinhaPar[] = [];
       for (let i = 0; i < ids.length; i += 200) {
