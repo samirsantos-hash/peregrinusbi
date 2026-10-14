@@ -1,3 +1,5 @@
+import { calcularTendencia } from "@/lib/tendencia";
+import TendenciaChip from "@/components/charts/TendenciaChip";
 import { brlCurto } from "@/lib/format";
 import { useMemo, useState, useEffect } from "react";
 import {
@@ -68,6 +70,17 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
     [porMes, mesA, mesB, modo],
   );
 
+  const tendGmv = useMemo(() => {
+    const a = porMes.get(mesA);
+    if (!a) return null;
+    return calcularTendencia([...a.entries()].sort((x, y) => x[0] - y[0]).map(([, v]) => v));
+  }, [porMes, mesA]);
+  const mediaBase = useMemo(() => {
+    if (modo !== "diario" && modo !== "variacao") return null;
+    const v = dados.filter((d) => d.ocorrido !== false).map((d) => d.base).filter((x): x is number => Number.isFinite(x as number));
+    return v.length >= 2 ? v.reduce((a, b) => a + b, 0) / v.length : null;
+  }, [dados, modo]);
+
   const resumo = useMemo(() => resumirComparacao(porMes, mesA, mesB), [porMes, mesA, mesB]);
   const { totalA, totalB, totalBJanela, ultimoDiaA, parcial, variacao } = resumo;
 
@@ -104,6 +117,7 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
           {titulo}
           <TooltipInfo text="Barras = mês base, linha = mês de comparação, alinhados pelo dia do mês. No modo Variação %, cada barra mostra quanto o acumulado do mês base está acima (+) ou abaixo (−) do mesmo dia do mês comparado; a linha tracejada no zero é a referência, não uma série. A faixa hachurada marca dias que ainda não ocorreram." />
           <NovidadeTip id="gmv-mes-vs-mes" className="ml-1" />
+          <TendenciaChip t={tendGmv} className="ml-2" />
         </h3>
         <div className="flex flex-wrap items-center gap-2">
           <Select value={mesA} onValueChange={setMesA}>
@@ -227,6 +241,10 @@ export default function GmvMesVsMes({ pontos, titulo = "GMV mês vs mês", class
                 fontSize={11}
               />
             </ReferenceLine>
+          )}
+          {mediaBase != null && (
+            <ReferenceLine y={mediaBase} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
+              label={{ value: `Média ${modo === "variacao" ? fPct(mediaBase) : fShort(mediaBase)}`, position: "insideTopLeft", fill: "hsl(var(--media))", fontSize: 10 }} />
           )}
           <Bar
             dataKey="base"

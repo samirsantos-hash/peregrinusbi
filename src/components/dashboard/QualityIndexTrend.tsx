@@ -1,3 +1,5 @@
+import { calcularTendencia } from "@/lib/tendencia";
+import TendenciaChip from "@/components/charts/TendenciaChip";
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { PontoBbf } from "@/lib/qualityIndex";
 
@@ -48,6 +50,7 @@ const QualityIndexTrend = ({ serie, meta = 80 }: Props) => {
       <div className="flex items-baseline justify-between gap-2">
         <p className="text-[11px] uppercase tracking-wide text-muted-alt">
           Evolução do índice no período selecionado
+          <TendenciaChip t={calcularTendencia(valores)} className="ml-2 normal-case tracking-normal" />
         </p>
         <span
           className={
