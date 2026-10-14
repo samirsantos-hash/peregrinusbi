@@ -1,4 +1,3 @@
-import AguiaLogo from "@/components/aura/AguiaLogo";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
@@ -248,7 +247,6 @@ const DashboardHeader = ({
         {/* Left - Store selector + Date */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <AguiaLogo className="h-10 w-10 sm:h-12 sm:w-12 shrink-0" />
             <Store className="w-4 h-4 text-neon-blue" />
 
             <Popover open={storeOpen} onOpenChange={setStoreOpen}>
