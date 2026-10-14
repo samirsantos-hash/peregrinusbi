@@ -23,6 +23,13 @@ describe("calcularReferenciaVertical", () => {
     expect(r.nPares).toBe(3);
   });
 
+  it("descarta exagero (ex.: par que cresce 50x)", () => {
+    const mais = [...pares, ...par("d", [100, 100, 100, 110]), ...par("x", [100, 100, 100, 5000])];
+    const r = calcularReferenciaVertical("eu", meses, mais);
+    expect(r.pontos[3].exageros).toBe(1);
+    expect(r.pontos[3].p75).toBeLessThan(200);
+  });
+
   it("faixa P25–P75 dos índices", () => {
     const r = calcularReferenciaVertical("eu", meses, pares);
     expect(r.pontos[3].p25).toBe(110);

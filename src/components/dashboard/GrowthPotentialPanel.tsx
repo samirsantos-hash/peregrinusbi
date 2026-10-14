@@ -129,7 +129,7 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
         const { data } = await fetchAllRows<any>((f, t) =>
           supabase.from("sellers_kpi").select("seller_id, data, tgmv_lc")
             .in("seller_id", lote)
-            .gte("data", `${meses[0]}-01`).lte("data", `${meses[meses.length - 1]}-31`)
+            .gte("data", `${meses[0]}-01`).lte("data", `${meses[meses.length - 1]}-28`)
             .order("seller_id").order("data").range(f, t) as any,
         );
         for (const r of data) linhas.push({ seller_id: r.seller_id, mes: String(r.data).slice(0, 7), tgmv: Number(r.tgmv_lc) || 0 });
@@ -535,6 +535,11 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
           {referenciaValida && (
             <Badge variant="outline" className="text-[10px] font-normal">
               Mediana de {refData!.nPares} sellers da carteira · {verticalRotulo}{fonteVertical === "produtos" ? " (pelos produtos vendidos)" : " (pelas campanhas)"}
+            </Badge>
+          )}
+          {referenciaValida && refData!.pontos.some((p) => p.exageros > 0) && (
+            <Badge variant="outline" className="text-[10px] font-normal" title="Lojas com crescimento muito fora do padrão do mês (desvio robusto acima de 3,5) saem da mediana e da faixa, para um caso extremo não distorcer a referência.">
+              {Math.max(...refData!.pontos.map((p) => p.exageros))} loja(s) com crescimento exagerado fora da conta
             </Badge>
           )}
           {modoCurva === "indexado" && baseInfo.valida && (

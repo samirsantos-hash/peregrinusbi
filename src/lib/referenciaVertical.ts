@@ -16,6 +16,21 @@ export interface PontoReferencia {
   p25: number | null;
   p75: number | null;
   n: number;
+  /** pares descartados no mês por exagero (MAD robusto > 3,5) */
+  exageros: number;
+}
+
+/** Limite de exagero: |x − mediana| / (1,4826 × MAD) acima disso sai da conta. */
+export const LIMITE_EXAGERO = 3.5;
+
+export function semExageros(v: number[]): { dentro: number[]; fora: number } {
+  if (v.length < 4) return { dentro: v, fora: 0 };
+  const s = [...v].sort((a, b) => a - b);
+  const med = percentil(s, 0.5) as number;
+  const mad = percentil([...s.map((x) => Math.abs(x - med))].sort((a, b) => a - b), 0.5) as number;
+  if (!(mad > 0)) return { dentro: s, fora: 0 };
+  const dentro = s.filter((x) => Math.abs(x - med) / (1.4826 * mad) <= LIMITE_EXAGERO);
+  return { dentro, fora: s.length - dentro.length };
 }
 
 export const MIN_PARES = 5;
@@ -57,7 +72,8 @@ export function calcularReferenciaVertical(
       .map((m) => m.get(mes))
       .filter((x): x is number => x !== undefined && Number.isFinite(x))
       .sort((a, b) => a - b);
-    return { mes, mediana: percentil(v, 0.5), p25: percentil(v, 0.25), p75: percentil(v, 0.75), n: v.length };
+    const { dentro, fora } = semExageros(v);
+    return { mes, mediana: percentil(dentro, 0.5), p25: percentil(dentro, 0.25), p75: percentil(dentro, 0.75), n: dentro.length, exageros: fora };
   });
   return { pontos, nPares: indices.size };
 }
