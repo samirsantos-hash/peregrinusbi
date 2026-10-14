@@ -49,7 +49,7 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
   if (!best) return null;
 
   return (
-    <div className="glass-card p-5">
+    <div className="glass-card p-5 h-full">
       <div className="flex items-center gap-2 mb-4">
         <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
           Melhor Período de Investimento
