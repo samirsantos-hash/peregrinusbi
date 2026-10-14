@@ -154,7 +154,7 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
     return pontos.slice(-Number(janela));
   }, [pontos, janela, granularity]);
   const tendCaro = useMemo(
-    () => calcularTendencia(visiveis.filter((p) => p.expensive != null && !p.parcial).map((p) => p.expensive as number)),
+    () => calcularTendencia(visiveis.filter((p) => p.cheaper != null && !p.parcial).map((p) => p.cheaper as number)),
     [visiveis],
   );
 
@@ -316,7 +316,7 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
           ))}
         </div>
         <TendenciaChip t={tendCaro} />
-        <span className="text-[10px] text-muted-foreground">tendência do % preço alto</span>
+        <span className="text-[10px] text-muted-foreground">tendência do % mais barato no período</span>
       </div>
 
       {/* Linhas suaves: cada faixa com sua cor, área leve sob a linha */}
