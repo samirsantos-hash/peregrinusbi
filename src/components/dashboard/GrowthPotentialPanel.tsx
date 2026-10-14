@@ -24,10 +24,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { calcularReferenciaVertical, MIN_PARES, type LinhaPar } from "@/lib/referenciaVertical";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { fetchAllRows } from "@/lib/fetchAllRows";
-import { calcularReferenciaVertical, MIN_PARES, type LinhaPar } from "@/lib/referenciaVertical";
 
 interface KpiLike {
   date: string;
