@@ -16,6 +16,7 @@ export function useContagemNumeros(chave: string, raiz: () => HTMLElement | null
   useEffect(() => {
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
+    let pendentes: { n: Text; original: string; ultimo: string }[] = [];
     const t = window.setTimeout(() => {
       const el = raiz();
       if (!el) return;
@@ -34,6 +35,7 @@ export function useContagemNumeros(chave: string, raiz: () => HTMLElement | null
         });
         if (partes.length) nos.push({ n, original: txt, ultimo: txt, partes });
       }
+      pendentes = nos;
       const inicio = performance.now();
       const passo = (agora: number) => {
         const pr = Math.min(1, (agora - inicio) / duracao);
@@ -50,7 +52,10 @@ export function useContagemNumeros(chave: string, raiz: () => HTMLElement | null
       };
       raf = requestAnimationFrame(passo);
     }, 350);
-    return () => { clearTimeout(t); cancelAnimationFrame(raf); };
+    return () => {
+      clearTimeout(t); cancelAnimationFrame(raf);
+      for (const x of pendentes) if (x.n.nodeValue === x.ultimo) x.n.nodeValue = x.original;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chave]);
 }

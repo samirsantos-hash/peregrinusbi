@@ -42,7 +42,7 @@ export function NumeroAnimado({ valor, duracao = 1200 }: { valor: string; duraca
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [valor, duracao]);
 
-  return <span className="tabular-nums">{texto}</span>;
+  return <span className="tabular-nums" data-contando>{texto}</span>;
 }
 
 export default NumeroAnimado;
