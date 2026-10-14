@@ -574,18 +574,6 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      {/* ── Aviso: dados de clips apenas no nível seller ── */}
-      {hasSellerLevelClipsOnly && (
-        <div className="glass-card p-3 border border-warning/30 bg-warning/5 flex items-start gap-2 text-xs text-foreground">
-          <AlertTriangle className="w-4 h-4 text-warning shrink-0 mt-0.5" />
-          <span>
-            Este seller possui atividade de Clips agregada (visitas/pedidos/faturamento), mas não há
-            métricas por MLB na base de qualidade de anúncios. O painel exibe totais e tendências do
-            seller — a cobertura por anúncio só ficará disponível quando a base de listings_quality for
-            atualizada com as colunas <code>visitas_clips / orders_clips / si_clips</code>.
-          </span>
-        </div>
-      )}
 
       {/* ── Sem dados de clips ── */}
       {!sellerHasAnyClipActivity && clipCoverage.total === 0 && (
