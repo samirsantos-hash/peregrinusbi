@@ -132,13 +132,6 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
         </div>
       </div>
 
-      {/* ── Nota CPC/CTR ─────────────────────────────────────────────── */}
-      <div className="rounded-lg border border-border/40 bg-muted/20 px-4 py-3 text-xs text-muted-foreground">
-        ℹ️ <strong className="text-foreground">CPC e CTR não disponíveis:</strong>{" "}
-        o arquivo SFTP do Mercado Livre não exporta dados de cliques e impressões por campanha.
-        CPC (custo por clique) e CTR (taxa de clique) exigem acesso à API do Mercado Ads ou
-        relatório interno da plataforma — não estão no feed utilizado por este dashboard.
-      </div>
 
       {/* ── Scores ML ────────────────────────────────────────────────── */}
       {algumScore && (
