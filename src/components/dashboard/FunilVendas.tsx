@@ -44,6 +44,33 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
   const ticket = d.unidades > 0 ? d.fat / d.unidades : 0;
   const receitaVisita = d.fat / d.visitas;
 
+  const taxaPreco = d.competitivas > 0 && d.competitivas <= d.visitas ? d.competitivas / d.visitas : null;
+  const convComp = taxaPreco !== null && d.competitivas > 0 ? d.unidades / d.competitivas : conversao;
+  // Perda relativa de cada etapa (quanto não passa para a seguinte)
+  const perdas = [
+    { k: "atrair", v: 0 },
+    { k: "preco", v: taxaPreco === null ? -1 : 1 - taxaPreco },
+    { k: "fechar", v: 1 - Math.min(1, convComp) },
+  ];
+  const foco = perdas.reduce((m, p) => (p.v > m.v ? p : m)).k;
+  const alavancas = [
+    {
+      k: "atrair", etapa: "1. Atrair visitas", foco: false,
+      indicador: `${num(d.visitas)} visitas · ${brl(receitaVisita, true)} por visita`,
+      acoes: ["Título com termos de busca e foto principal limpa", "Publicidade nos anúncios com melhor conversão", "Selo de vendidos e reputação visíveis no resultado"],
+    },
+    {
+      k: "preco", etapa: "2. Preço que convence", foco: foco === "preco",
+      indicador: taxaPreco === null ? "Sem dado de competitividade" : `${pct(taxaPreco * 100, 1)} das visitas viram preço competitivo`,
+      acoes: ["Preço de/por com desconto real (âncora riscada)", "Parcelamento sem juros em destaque", "Entrar em campanha com prazo de até 30 dias"],
+    },
+    {
+      k: "fechar", etapa: "3. Fechar a compra", foco: foco === "fechar",
+      indicador: `${pct(convComp * 100, 2)} ${taxaPreco === null ? "das visitas" : "das visitas competitivas"} compram`,
+      acoes: ["Frete grátis e entrega rápida (Full)", "Opiniões de compradores e respostas a perguntas", "Estoque e urgência reais: oferta com prazo"],
+    },
+  ];
+
   const W = 600, H = 70 * etapas.length;
   const larg = (i: number) => {
     const r = etapas[i].valor / d.visitas;
@@ -111,6 +138,28 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
               </div>
             ))}
           </dl>
+        </div>
+      </div>
+
+      {/* Alavancas da página do anúncio — cada etapa do funil tem elementos da página que a movem */}
+      <div className="mt-5">
+        <div className="mb-2 flex items-center gap-2">
+          <h4 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">Onde a venda se perde e o que mexer no anúncio</h4>
+          <TooltipInfo text="Cada etapa do funil depende de elementos da página do anúncio. A etapa com maior perda aparece destacada: comece por ela." />
+        </div>
+        <div className="grid gap-2 md:grid-cols-3">
+          {alavancas.map((a) => (
+            <div key={a.etapa} className={`rounded-lg border p-3 text-xs transition-colors ${a.foco ? "border-cyan-400/60 bg-cyan-400/10" : "border-white/10 bg-white/5"}`}>
+              <div className="flex items-center justify-between gap-2">
+                <p className="font-medium text-foreground">{a.etapa}</p>
+                {a.foco && <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-[10px] font-medium text-neon-blue">Maior perda</span>}
+              </div>
+              <p className="mt-0.5 tabular-nums text-muted-foreground">{a.indicador}</p>
+              <ul className="mt-2 space-y-1 text-muted-foreground">
+                {a.acoes.map((t) => <li key={t}>• {t}</li>)}
+              </ul>
+            </div>
+          ))}
         </div>
       </div>
     </div>

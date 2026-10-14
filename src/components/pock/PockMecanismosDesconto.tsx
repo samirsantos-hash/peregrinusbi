@@ -18,25 +18,6 @@ interface Props {
 const fmtBRL = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
-function Sparkline({ pontos }: { pontos: { mes: string; valor: number }[] }) {
-  if (pontos.length < 2) return <div className="w-[72px] h-[18px]" aria-hidden />;
-  const max = Math.max(...pontos.map((p) => p.valor), 0);
-  const w = 72;
-  const h = 18;
-  const d = pontos
-    .map((p, i) => {
-      const x = (i / (pontos.length - 1)) * w;
-      const y = max > 0 ? h - (p.valor / max) * (h - 2) - 1 : h - 1;
-      return `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(" ");
-  return (
-    <svg width={w} height={h} className="shrink-0" role="img" aria-label="tendência de 12 meses">
-      <path d={d} fill="none" stroke="hsl(var(--brand-blue))" strokeWidth={1.4} strokeOpacity={0.85} />
-    </svg>
-  );
-}
-
 export default function PockMecanismosDesconto({ mecanismos, base, mesReferencia }: Props) {
   const ordenados = useMemo(() => {
     const comValor = mecanismos.filter((m) => m.valor > 0).sort((a, b) => b.valor - a.valor);
