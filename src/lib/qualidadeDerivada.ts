@@ -34,7 +34,7 @@ export function atratividadeDerivada(m: Mes): number | null {
     partes.push([Math.min(1, comp / LIMIARES.competitividade.min), 0.5]);
   }
   if (gmv > 0) {
-    partes.push([Math.min(1, (Number(m.cdpTgmv) || 0) / gmv / LIMIARES.promo.min), 0.25]);
+    partes.push([Math.min(1, (Number(m.cdpTgmv) || 0) / gmv / LIMIARES.promocao.min), 0.25]);
     partes.push([Math.min(1, (Number(m.tgmvFull) || 0) / gmv / LIMIARES.full.min), 0.25]);
   }
   if (!partes.length) return null;

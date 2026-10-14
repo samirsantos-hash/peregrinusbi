@@ -15,15 +15,14 @@ export function useLiveListingsCount(sellerId: string | undefined) {
       if (error) throw error;
       if (!data || data.length === 0) return 0;
 
-      // Snapshot mais recente do seller
-      const maxData = data.reduce(
-        (mx, r) => (r.data && r.data > mx ? r.data : mx),
-        ""
-      );
-
-      return data
-        .filter((r) => r.data === maxData)
-        .reduce((sum, r) => sum + (r.itens ?? 0), 0);
+      // Snapshots parciais (ex.: 1 item) acontecem; usa o maior total entre os últimos 45 dias.
+      const totais = new Map<string, number>();
+      for (const r of data) if (r.data) totais.set(r.data, (totais.get(r.data) ?? 0) + (r.itens ?? 0));
+      const datas = [...totais.keys()].sort();
+      const ult = new Date(datas[datas.length - 1] + "T00:00:00");
+      ult.setDate(ult.getDate() - 45);
+      const corte = ult.toISOString().slice(0, 10);
+      return Math.max(0, ...datas.filter((d) => d >= corte).map((d) => totais.get(d) ?? 0));
     },
     enabled: !!sellerId,
   });

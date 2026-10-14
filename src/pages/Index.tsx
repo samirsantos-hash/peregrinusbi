@@ -54,6 +54,7 @@ import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import FunilVendas from "@/components/dashboard/FunilVendas";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
+import { qualidadeDerivada } from "@/lib/qualidadeDerivada";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
 import { useAuth } from "@/hooks/useAuth";
@@ -586,14 +587,16 @@ const Index = () => {
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
                     {(() => {
                       const latest: any = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0] || {};
+                      const qd = qualidadeDerivada(allKpis as any[]);
                       return (
                         <>
                           {/* 1. Índice e indicadores */}
                           <QualityIndexPanelV2 custId={sellerCustIdMap[selectedSeller]} sellerUuid={selectedSeller} />
                           <QualityKpiCards
-                            scoreCaracteristica={latest.scoreCaracteristica || 0}
-                            pontuacaoLlGtin={latest.pontuacaoLlGtin || 0}
-                            scoreOfertaFinal={latest.scoreOferta || 0}
+                            scoreCaracteristica={qd.atributos?.valor ?? 0}
+                            pontuacaoLlGtin={qd.gtin?.valor ?? 0}
+                            scoreOfertaFinal={qd.oferta ?? 0}
+                            semDado={{ atributos: !qd.atributos, gtin: !qd.gtin, oferta: qd.oferta == null }}
                             scoreFull={latest.scoreFull || 0}
                             scorePads={latest.scorePads || 0}
                             scoreCdp={latest.cdpTgmv > 0 ? 36 : 0}
