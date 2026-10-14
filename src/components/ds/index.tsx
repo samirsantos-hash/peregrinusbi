@@ -112,9 +112,10 @@ export function BandBar({ valor, max = 100, limiares = [25, 50, 75], maiorMelhor
   return (
     <div className={cn("space-y-1", className)}>
       <div className="flex items-baseline justify-between gap-2">
-        {rotulo && <span className="ds-corpo text-foreground">{rotulo}</span>}
-        <span className="text-[11px] font-medium tabular-nums uppercase tracking-[0.06em]" style={{ color: FAIXA_TXT[f] }}>
-          {Math.round(valor).toLocaleString("pt-BR")} {FAIXA_ROTULO[f]}
+        {rotulo && <span className="text-[13px] font-medium text-foreground leading-tight min-w-0">{rotulo}</span>}
+        <span className="shrink-0 inline-flex items-baseline gap-1.5 whitespace-nowrap" style={{ color: FAIXA_TXT[f] }}>
+          <span className="text-base font-semibold tabular-nums">{Math.round(valor).toLocaleString("pt-BR")}</span>
+          <span className="text-[10px] font-medium uppercase tracking-[0.08em]">{FAIXA_ROTULO[f]}</span>
         </span>
       </div>
       <div className="relative h-2 rounded-sm bg-ec-surface-2 overflow-hidden">
