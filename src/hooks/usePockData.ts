@@ -167,12 +167,35 @@ export function usePockData(sellerId: string | undefined) {
         ),
       );
       // Travado em 30 dias (prazo limite de promoção): usa só o mês mais recente com informação.
-      const ultimos12 = cdpRows.slice(-1);
-      const mecanismosBase = ultimos12.reduce((s, r) => s + (Number(r.f_tgmv_lc) || 0), 0);
+      let ultimos12 = cdpRows.slice(-1);
       const mesDe = (id: any) => {
         const t = String(id ?? "");
         return t.length === 6 ? `${t.slice(0, 4)}-${t.slice(4, 6)}-01` : t;
       };
+      // Sem base de descontos: usa os últimos 30 dias do diário (CDP e faturamento sem CDP).
+      if (!ultimos12.length) {
+        const { data: ult } = await supabase
+          .from("sellers_kpi_daily").select("data").eq("seller_id", sellerId)
+          .order("data", { ascending: false }).limit(1);
+        const fim = ult?.[0]?.data as string | undefined;
+        if (fim) {
+          const ini = new Date(new Date(fim + "T12:00:00").getTime() - 29 * 864e5).toISOString().slice(0, 10);
+          const { data: dias } = await supabase
+            .from("sellers_kpi_daily").select("tgmv_lc, cdp_tgmv_lc")
+            .eq("seller_id", sellerId).gte("data", ini).lte("data", fim);
+          const tg = (dias ?? []).reduce((s, r: any) => s + (Number(r.tgmv_lc) || 0), 0);
+          const cdp = (dias ?? []).reduce((s, r: any) => s + (Number(r.cdp_tgmv_lc) || 0), 0);
+          if (tg > 0 || cdp > 0) {
+            ultimos12 = [{
+              tim_month_id: `${fim.slice(0, 7)}-01`,
+              f_tgmv_lc: tg,
+              f_tgmv_lc_cdp: cdp,
+              f_tgmv_lc_regular: Math.max(0, tg - cdp),
+            }];
+          }
+        }
+      }
+      const mecanismosBase = ultimos12.reduce((s, r) => s + (Number(r.f_tgmv_lc) || 0), 0);
       const mecanismos: PockMecanismo[] = MECANISMOS_DESCONTO.map((m) => ({
         chave: m.chave,
         rotulo: m.rotulo,
