@@ -75,6 +75,7 @@ import PublicidadePanel from "@/components/seller/PublicidadePanel";
 import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
+import { useContagemNumeros } from "@/hooks/useContagemNumeros";
 import PockPanel from "@/components/pock/PockPanel";
 import VerticalCarteirasTabela from "@/components/pock/VerticalCarteirasTabela";
 import { NovidadesPrompt } from "@/components/novidades/novidades";
@@ -109,6 +110,7 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get("aba") || "executive";
   const [menuAberto, setMenuAberto] = useState(false);
+  useContagemNumeros(`${activeTab}|${selectedSeller}`, () => document.querySelector('[role="tabpanel"][data-state="active"]') as HTMLElement | null);
   const setActiveTab = useCallback(
     (tab: string) => {
       const next = new URLSearchParams(searchParams);
