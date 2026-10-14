@@ -69,10 +69,10 @@ export function TrendBadge({
   let valorDelta: string;
   if (formato === "abs") {
     const diff = ultimo - penultimo;
-    valorDelta = `${diff > 0 ? "+" : ""}${diff.toFixed(casas)}`;
+    valorDelta = `${diff > 0 ? "+" : ""}${diff.toFixed(casas).replace(".", ",")}`;
   } else if (formato === "pp") {
     const diff = ultimo - penultimo;
-    valorDelta = `${diff > 0 ? "+" : ""}${diff.toFixed(casas)}pp`;
+    valorDelta = `${diff > 0 ? "+" : ""}${diff.toFixed(casas).replace(".", ",")} p.p.`;
   } else {
     valorDelta = `${delta > 0 ? "+" : ""}${delta.toFixed(casas)}%`;
   }
