@@ -1,8 +1,10 @@
 import { useMemo, useState, useCallback } from "react";
 import {
   ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Legend, Brush
+  ResponsiveContainer, Legend, Brush, ReferenceLine
 } from "recharts";
+import { calcularTendencia } from "@/lib/tendencia";
+import TendenciaChip from "@/components/charts/TendenciaChip";
 import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
 import TooltipInfo from "./TooltipInfo";
 
@@ -124,7 +126,12 @@ function ChartTooltipContent({ active, payload }: any) {
 }
 
 const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformanceChartProps) => {
-  const chartData = useMemo(() => fillGaps(kpis), [kpis]);
+  const baseData = useMemo(() => fillGaps(kpis), [kpis]);
+  const tend = useMemo(() => calcularTendencia(baseData.map((d) => d.tgmv)), [baseData]);
+  const chartData = useMemo(
+    () => baseData.map((d, i) => ({ ...d, tendTgmv: tend ? Math.round(tend.reta(i)) : undefined })),
+    [baseData, tend],
+  );
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const isSinglePoint = chartData.length === 1;
 
@@ -167,19 +174,22 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
 
   return (
     <div className="glass-card p-5">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start sm:items-center justify-between gap-2 flex-wrap mb-4">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Desempenho Diário (Ciclo 24h)
           </h3>
           <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar séries." />
         </div>
-        <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
-          {chartData.length} dias
-        </span>
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          <TendenciaChip t={tend} />
+          <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
+            {chartData.length} dias
+          </span>
+        </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={340}>
+      <ResponsiveContainer width="100%" height={typeof window !== "undefined" && window.innerWidth < 640 ? 260 : 340}>
         <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="gradTgmv" x1="0" y1="0" x2="0" y2="1">
@@ -301,6 +311,23 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             animationDuration={800}
             hide={hidden.has("ma7tsi")}
             connectNulls
+          />
+
+          {tend && !hidden.has("tgmv") && (
+            <ReferenceLine yAxisId="left" y={tend.media} stroke="hsl(var(--muted-foreground))" strokeDasharray="6 4"
+              label={{ value: `Média ${fmtNumCompact(tend.media)}`, position: "insideTopLeft", fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+          )}
+          <Line
+            yAxisId="left"
+            type="linear"
+            dataKey="tendTgmv"
+            name="Tendência do faturamento"
+            stroke={tend?.sentido === "caindo" ? "hsl(var(--destructive))" : tend?.sentido === "estavel" ? "hsl(var(--warning))" : "hsl(var(--ok))"}
+            strokeWidth={2}
+            strokeDasharray="10 5"
+            dot={false}
+            activeDot={false}
+            hide={hidden.has("tendTgmv")}
           />
 
           {/* TSI line */}

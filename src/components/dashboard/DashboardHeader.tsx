@@ -1,4 +1,4 @@
-import AguiaLogo, { SombraAguia } from "@/components/aura/AguiaLogo";
+import AguiaLogo from "@/components/aura/AguiaLogo";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSoundFeedback } from "@/hooks/useSoundFeedback";
