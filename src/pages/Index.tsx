@@ -382,13 +382,9 @@ const Index = () => {
                 <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
                 <span className="sm:hidden">Peregrinus BI</span>
               </p>
-              {sellersFetched && (hasRealData || isAdmin) && (
+              {sellersFetched && !hasRealData && isAdmin && (
                 <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
-                  {hasRealData ? (
-                    <span className="text-emerald">● Dados reais</span>
-                  ) : (
-                    <span className="text-warning">● Dados de demonstração</span>
-                  )}
+                  <span className="text-warning">● Dados de demonstração</span>
                 </p>
               )}
             </div>
