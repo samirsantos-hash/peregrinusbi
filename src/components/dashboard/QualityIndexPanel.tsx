@@ -188,7 +188,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
 
           {/* Effectiveness badge */}
           <div className="space-y-1">
-            <span className="text-[11px] text-muted-foreground">Efetividade da Vertical</span>
+            <span className="text-[11px] text-muted-foreground block">Efetividade da Vertical</span>
             {campaign ? (
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className={`text-xs border ${getEffectivenessBadge(campaign.efectRtaVertical).className}`}>
@@ -202,7 +202,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
                 )}
               </div>
             ) : (
-              <span className="text-xs text-muted-foreground">Dados de campanha não disponíveis</span>
+              <span className="text-xs text-muted-foreground block">Dados de campanha não disponíveis</span>
             )}
           </div>
 

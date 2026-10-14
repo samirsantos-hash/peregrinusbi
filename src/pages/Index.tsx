@@ -593,7 +593,7 @@ const Index = () => {
                             pctFullPeriodo={Number(latest.pctFull) || 0}
                           />
                           {/* 2. Evolução e diagnóstico */}
-                          <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch">
+                          <div className="grid grid-cols-1 gap-5 items-stretch">
                             <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
                             <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
                           </div>
