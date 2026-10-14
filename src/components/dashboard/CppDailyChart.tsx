@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   AreaChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Brush,
+  ResponsiveContainer, Brush, ReferenceLine,
 } from "recharts";
 import type { DailySeriesPoint } from "@/utils/cppAggregation";
 
@@ -105,7 +105,16 @@ export default function CppDailyChart({ data, title = "Evolução Diária" }: Pr
                 tickFormatter={(v) => metric === "gmv" ? fmtCompact(v) : metric === "roas" ? `${v.toFixed(0).replace(".", ",")}x` : fmtNum(v)}
                 width={60}
               />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={{ stroke: "hsl(var(--primary))", strokeDasharray: "3 3" }} />
+              {(() => {
+                const vals = data.map((d: any) => Number(d[metric])).filter((v) => Number.isFinite(v));
+                if (vals.length < 2) return null;
+                const m = vals.reduce((a, b) => a + b, 0) / vals.length;
+                return (
+                  <ReferenceLine y={m} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
+                    label={{ value: `Média ${metric === "gmv" ? brlCurto(m) : metric === "roas" ? `${m.toFixed(1).replace(".", ",")}x` : numCurto(m)}`, position: "insideTopLeft", fill: "hsl(var(--media))", fontSize: 10 }} />
+                );
+              })()}
               {metric !== "roas" && (
                 <Area
                   type="monotone"
