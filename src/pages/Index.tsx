@@ -76,6 +76,7 @@ import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
 import PockPanel from "@/components/pock/PockPanel";
+import VerticalCarteirasTabela from "@/components/pock/VerticalCarteirasTabela";
 import { NovidadesPrompt } from "@/components/novidades/novidades";
 import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
@@ -550,6 +551,7 @@ const Index = () => {
                       segmento={(sellers.find((s) => s.id === selectedSeller) as any)?.subCluster}
                       programas={(sellers.find((s) => s.id === selectedSeller) as any)?.clusterSeller}
                     />
+                    <VerticalCarteirasTabela sellerId={selectedSeller || undefined} />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="competitiveness" />}
