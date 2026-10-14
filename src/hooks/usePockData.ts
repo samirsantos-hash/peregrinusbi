@@ -182,6 +182,16 @@ export function usePockData(sellerId: string | undefined) {
             : null,
       }));
 
+      // Último mês em que a planilha trouxe a nota (meses sem a coluna ficam vazios).
+      const ultimoCom = (col: string) => {
+        const rows: any[] = (kpiRes.data ?? []) as any[];
+        for (let i = rows.length - 1; i >= 0; i--) {
+          const v = rows[i]?.[col];
+          if (v !== null && v !== undefined && v !== "") return v;
+        }
+        return null;
+      };
+
       const snapshot: PockSnapshot = {
         repLevel: ultima.rep_current_level || null,
         repClaimsRate: num(ultima.rep_claims_rate),
@@ -191,8 +201,8 @@ export function usePockData(sellerId: string | undefined) {
         repDisputesRate: null,
         // SCORE_FINAL_BBF não existe na camada agregada hoje
         scoreBbf: null,
-        scoreFull: num(ultima.score_final_full),
-        scorePads: num(ultima.score_final_pads),
+        scoreFull: num(ultimoCom("score_final_full")),
+        scorePads: num(ultimoCom("score_final_pads")),
         scoreIntegradores: null,
         usoCentralPromocoes: null,
       };
