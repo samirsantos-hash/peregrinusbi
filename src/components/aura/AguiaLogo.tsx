@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import aguiaImg from "@/assets/aguia-peregrinus.png";
 
 /** Silhueta da águia com asas batendo em 3D (CSS perspective). */
 export function AguiaSvg({ className, sombra }: { className?: string; sombra?: boolean }) {
@@ -35,13 +36,13 @@ export default function AguiaLogo({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "relative flex items-center justify-center rounded-xl border border-primary/30 bg-background/70 shadow-[0_0_18px_hsl(var(--primary)/0.35),inset_0_1px_0_hsl(0_0%_100%/0.08)] backdrop-blur",
+        "relative flex items-center justify-center overflow-hidden rounded-[22%] bg-card shadow-[0_4px_14px_hsl(var(--foreground)/0.18)]",
         className,
       )}
       aria-label="Ecom Peregrinus"
       role="img"
     >
-      <AguiaSvg className="w-[82%] drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]" />
+      <img src={aguiaImg} alt="" className="aguia-flutua h-full w-full object-cover" draggable={false} />
     </div>
   );
 }
