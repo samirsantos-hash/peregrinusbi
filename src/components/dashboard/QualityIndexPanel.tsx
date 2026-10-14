@@ -202,7 +202,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
                 )}
               </div>
             ) : (
-              <span className="text-xs text-muted-foreground">Dados de campanha não disponíveis</span>
+              <span className="text-xs text-muted-foreground block">Dados de campanha não disponíveis</span>
             )}
           </div>
 
