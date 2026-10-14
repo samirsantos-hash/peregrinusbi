@@ -1,3 +1,4 @@
+import AguiaLogo, { SombraAguia } from "@/components/aura/AguiaLogo";
 import CarteiraNaSecao from "@/components/carteira/deepdive/CarteiraNaSecao";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -364,6 +365,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
+      <SombraAguia />
       <div className="fixed inset-0 opacity-[0.015] pointer-events-none" style={{
         backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--neon-blue)) 1px, transparent 0)`,
         backgroundSize: '40px 40px'
@@ -372,9 +374,7 @@ const Index = () => {
       <div className="relative z-10 max-w-[1760px] mx-auto px-3 sm:px-5 xl:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg border border-border/50 p-1 flex items-center justify-center bg-primary-foreground shrink-0">
-              <img alt="Ecom Peregrinus" className="w-full h-full object-contain drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]" src="/lovable-uploads/2f12a5a6-9e0e-4367-a737-5d6a8137e4bd.png" />
-            </div>
+            <AguiaLogo className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
             <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-neon-blue shrink-0" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
             <div className="min-w-0">
               <p className="text-sm sm:text-xl font-bold tracking-tight truncate">
