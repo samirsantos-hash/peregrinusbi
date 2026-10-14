@@ -253,7 +253,7 @@ export function AuraBackground() {
         ref={canvasRef}
         id="bg-canvas"
         aria-hidden
-        className="fixed inset-0 w-full h-full scale-110 pointer-events-none z-0"
+        className="aura-canvas fixed inset-0 w-full h-full scale-110 pointer-events-none z-0"
       />
       <div
         ref={blobsRef}

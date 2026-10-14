@@ -119,8 +119,69 @@
     --sidebar-ring: var(--aura-cyan-400);
   }
 
-  /* O Aura é só escuro: o modo escuro usa exatamente os mesmos tokens */
+  /* Modo noite = tokens do :root (Aura escuro) */
   .dark {
+  }
+
+  /* Modo dia: mesma identidade (ciano/teal, vidro, DM Sans) sobre fundo claro */
+  .light {
+    --aura-line: 200 18% 86%;
+    --aura-glass: 0 0% 100%;
+    --aura-fill: 200 25% 96%;
+    --aura-raise: 200 25% 93%;
+    --aura-gray-400: 215 14% 38%;
+    --aura-gray-500: 215 12% 46%;
+    --aura-gray-300: 215 15% 70%;
+
+    --ec-ink: 222 47% 11%;
+    --ec-verde-txt: 160 84% 28%;
+    --ec-vermelho: 0 72% 46%;
+    --ec-ambar: 32 95% 36%;
+    --ec-laranja: 24 90% 45%;
+
+    --background: 200 30% 97%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 190 90% 34%;
+    --primary-foreground: 0 0% 100%;
+    --secondary-foreground: 222 47% 11%;
+    --muted-foreground: 215 14% 38%;
+    --accent-foreground: 222 47% 11%;
+    --ring: 190 90% 34%;
+
+    --brand-navy: 222 47% 11%;
+    --brand-blue: 192 85% 36%;
+    --brand-accent: 174 72% 32%;
+    --brand-purple: 190 80% 40%;
+    --neon-blue: 190 90% 36%;
+    --neon-blue-glow: 188 86% 45%;
+    --emerald: 160 84% 30%;
+    --emerald-glow: 158 64% 40%;
+    --warning: 32 95% 40%;
+
+    --crit: 0 72% 48%;
+    --warn: 24 90% 45%;
+    --warn-soft: 32 95% 40%;
+    --ok: 160 84% 30%;
+    --attention: 45 93% 42%;
+    --attention-text: 32 95% 36%;
+    --price-hot: 24 90% 45%;
+    --price-cool: 192 85% 36%;
+
+    --chart-1: 190 90% 36%;
+    --chart-4: 222 47% 11%;
+    --series-1: 190 90% 36%;
+    --series-4: 222 47% 11%;
+    --media: 270 60% 50%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 190 90% 34%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent-foreground: 222 47% 11%;
   }
 }
 
@@ -130,6 +191,8 @@
     scrollbar-width: thin;
     scrollbar-color: rgb(255 255 255 / 0.12) transparent;
   }
+  html.light { background-color: hsl(200 30% 97%); }
+  html.light ::selection { color: hsl(222 47% 11%); }
   html {
     background-color: #000;
     scroll-behavior: smooth;
@@ -454,3 +517,17 @@
 .recharts-wrapper .recharts-line-curve, .recharts-wrapper .recharts-area-curve { transition: stroke-width .2s ease; }
 .recharts-wrapper:hover .recharts-line-curve, .recharts-wrapper:hover .recharts-area-curve { stroke-width: 2.6px; }
 @media (prefers-reduced-motion: reduce) { .glass-card:hover { transform: none; } }
+
+/* ── Modo dia: ajusta o vidro e as classes escuras fixas do Aura ── */
+.light .glass-card {
+  background-color: rgb(255 255 255 / 0.78);
+  border-color: hsl(200 18% 84%);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px -12px rgb(14 116 144 / 0.18);
+}
+.light .glass-card-highlight { border-color: rgb(8 145 178 / 0.35); }
+.light .aura-canvas { opacity: 0.12; filter: invert(1) hue-rotate(180deg); }
+.light .bg-black\/40, .light .bg-black\/60, .light .bg-black\/70, .light .bg-black\/80 { background-color: rgb(255 255 255 / 0.85); }
+.light .bg-white\/5, .light .bg-white\/\[0\.03\], .light .bg-white\/\[0\.06\], .light .bg-white\/10 { background-color: rgb(15 23 42 / 0.04); }
+.light .border-white\/5, .light .border-white\/10, .light .border-white\/40 { border-color: hsl(200 18% 86%); }
+.light .text-white { color: hsl(222 47% 11%); }
+.light .ds-hachura { background-image: repeating-linear-gradient(135deg, rgb(15 23 42 / 0.06) 0 4px, transparent 4px 8px); }
