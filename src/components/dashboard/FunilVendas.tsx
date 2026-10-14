@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { brl, num, pct } from "@/lib/format";
 import TooltipInfo from "./TooltipInfo";
+import { planoFunil } from "@/lib/planoFunil";
 
 interface KpiFunil {
   visits: number;
@@ -70,6 +71,9 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
       acoes: ["Frete grátis e entrega rápida (Full)", "Opiniões de compradores e respostas a perguntas", "Estoque e urgência reais: oferta com prazo"],
     },
   ];
+
+  const plano = planoFunil(d);
+  const passos = plano.map((p) => ({ ...p, a: alavancas.find((x) => x.k === p.etapa)! }));
 
   // Largura em % (escala de raiz, mínimo 46% para os números caberem dentro do desenho)
   const larg = (i: number) => Math.max(46, Math.sqrt(Math.min(1, etapas[i].valor / d.visitas)) * 100);
@@ -140,26 +144,28 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
         </div>
       </div>
 
-      {/* Alavancas da página do anúncio — cada etapa do funil tem elementos da página que a movem */}
+      {/* Plano de ação automático: etapas ordenadas pela perda de clientes */}
       <div className="mt-5">
         <div className="mb-2 flex items-center gap-2">
-          <h4 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">Onde a venda se perde e o que mexer no anúncio</h4>
-          <TooltipInfo text="Cada etapa do funil depende de elementos da página do anúncio. A etapa com maior perda aparece destacada: comece por ela." />
+          <h4 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">Plano de ação da loja — por ordem de prioridade</h4>
+          <TooltipInfo text="Gerado automaticamente: a etapa onde a loja perde mais clientes vem primeiro. Atrair mais visitas fica por último, depois de estancar as perdas." />
         </div>
-        <div className="grid gap-2 md:grid-cols-3">
-          {alavancas.map((a) => (
-            <div key={a.etapa} className={`rounded-lg border p-3 text-xs transition-colors ${a.foco ? "border-cyan-400/60 bg-cyan-400/10" : "border-white/10 bg-white/5"}`}>
+        <ol className="grid gap-2 md:grid-cols-3">
+          {passos.map((p, i) => (
+            <li key={p.etapa} className={`rounded-lg border p-3 text-xs ${p.prioridade === "Alta" ? "border-cyan-400/60 bg-cyan-400/10" : "border-white/10 bg-white/5"}`}>
               <div className="flex items-center justify-between gap-2">
-                <p className="font-medium text-foreground">{a.etapa}</p>
-                {a.foco && <span className="rounded-full bg-cyan-400/20 px-2 py-0.5 text-[10px] font-medium text-neon-blue">Maior perda</span>}
+                <p className="font-medium text-foreground">Passo {i + 1} · {p.a.etapa.replace(/^\d\.\s*/, "")}</p>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${p.prioridade === "Alta" ? "bg-cyan-400/20 text-neon-blue" : "bg-white/10 text-muted-foreground"}`}>Prioridade {p.prioridade.toLowerCase()}</span>
               </div>
-              <p className="mt-0.5 tabular-nums text-muted-foreground">{a.indicador}</p>
+              <p className="mt-0.5 tabular-nums text-muted-foreground">{p.a.indicador}</p>
+              {p.perdidos > 0 && <p className="mt-1 tabular-nums text-foreground">{num(p.perdidos)} clientes perdidos aqui ({pct(p.perda * 100, 1)})</p>}
+              {p.unidadesPotenciais >= 1 && <p className="tabular-nums text-neon-blue">+{num(p.unidadesPotenciais)} unidades se chegar à meta de 70% de preço competitivo</p>}
               <ul className="mt-2 space-y-1 text-muted-foreground">
-                {a.acoes.map((t) => <li key={t}>• {t}</li>)}
+                {p.a.acoes.map((t) => <li key={t}>• {t}</li>)}
               </ul>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
       </div>
     </div>
   );
