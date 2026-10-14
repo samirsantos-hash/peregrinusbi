@@ -520,12 +520,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
           <AreaChart data={adsData}>
             <defs>
               <linearGradient id="gradBlueEff" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--neon-blue))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--neon-blue))" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradEmeraldEff" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="hsl(var(--ok))" stopOpacity={0.3} />
-                <stop offset="95%" stopColor="hsl(var(--ok))" stopOpacity={0} />
+                <stop offset="5%" stopColor="hsl(var(--ec-laranja))" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="hsl(var(--ec-laranja))" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
@@ -540,25 +540,25 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             />
             <YAxis
               yAxisId="gmv"
-              tick={{ fill: "hsl(var(--ec-verde))", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--neon-blue))", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) => numCurto(v)}
             />
             <YAxis
               yAxisId="ads"
               orientation="right"
-              tick={{ fill: "hsl(var(--ok))", fontSize: 11 }}
+              tick={{ fill: "hsl(var(--ec-laranja))", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) => numCurto(v)}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(var(--ec-verde))" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Area yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(var(--ok))" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(var(--neon-blue))" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(var(--ec-laranja))" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
             <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
           </AreaChart>
         </ResponsiveContainer>
         <p className="mt-2 text-[11px] text-muted-foreground">
-          Escalas independentes: faturamento no eixo esquerdo (azul), investimento em Ads no eixo direito (verde).
+          Escalas independentes: faturamento no eixo esquerdo (azul), investimento em Ads no eixo direito (laranja).
         </p>
       </div>
 
