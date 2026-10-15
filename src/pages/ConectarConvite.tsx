@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { CheckCircle2, Loader2, ShieldCheck, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.jpeg";
+import logo from "@/assets/logo-peregrinus.webp";
 
 type Estado = "carregando" | "pronto" | "ok" | "erro" | "invalido";
 
