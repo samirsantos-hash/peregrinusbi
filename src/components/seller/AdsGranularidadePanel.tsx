@@ -193,12 +193,8 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                   n === "inv" ? "Investimento" : n === "gmv_ads" ? "GMV via Ads" : n === "roas" ? "ROAS" : n === "acos" ? "ACOS %" : "TACOS %"
                 }
               />
-              <Bar yAxisId="brl" dataKey="inv" name="inv">
-                {serie.map((b, i) => (
-                  <Cell key={i} fill={corRoas(b.roas)} fillOpacity={0.6} />
-                ))}
-              </Bar>
-              <Bar yAxisId="brl" dataKey="gmv_ads" name="gmv_ads" fill="hsl(var(--series-2))" fillOpacity={0.35} />
+              <Bar yAxisId="brl" dataKey="gmv_ads" name="gmv_ads" fill="hsl(var(--primary))" fillOpacity={0.9} radius={[2, 2, 0, 0]} />
+              <Bar yAxisId="brl" dataKey="inv" name="inv" fill="hsl(var(--ec-laranja))" fillOpacity={1} radius={[2, 2, 0, 0]} />
               {metrica !== "inv" && (
                 <Line
                   yAxisId="sec"
