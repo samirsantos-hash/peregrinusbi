@@ -1,9 +1,9 @@
 # Roadmap
 
 ## CDP e Multilojas (16/10)
-- [ ] Calcular e apresentar evolução de participação e pontuação CDP com dados reais e testes.
-- [ ] Organizar as seções Multilojas com a identidade visual do painel, sem alterar regras de acesso ou dados.
-- [ ] Verificar os cálculos e as telas na pré-visualização.
+- [x] Calcular e apresentar evolução de participação e pontuação CDP com dados reais e testes.
+- [x] Organizar as seções Multilojas com a identidade visual do painel, sem alterar regras de acesso ou dados.
+- [x] Verificar cálculos (16 testes), gráfico CDP da SINOSCAR FARRAPOS e Diretoria Multilojas com base publicada na pré-visualização; navegação completa não verificada.
 
 ## Correções estatísticas (ordens de serviço, set/2026)
 - [x] OS-1 — Alerta de churn por z-score modificado (MAD), flag `ALERTS_USE_ROBUST_Z`
