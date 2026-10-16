@@ -232,7 +232,7 @@ const Multilojas = () => {
 
   if (perfilML.loading || (carregando && !modoLocal)) {
     return (
-      <div className="min-h-screen">
+      <div className="multilojas-page min-h-screen bg-background text-foreground">
         <Topo titulo="Multilojas · gestão consolidada de rede" />
         <div className="py-24 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
           <Loader2 className="w-6 h-6 animate-spin text-primary" /> Carregando as cargas publicadas…
@@ -243,7 +243,7 @@ const Multilojas = () => {
 
   if (!temAcesso) {
     return (
-      <div className="min-h-screen">
+      <div className="multilojas-page min-h-screen bg-background text-foreground">
         <Topo titulo="Multilojas" />
         <div className="py-24 text-center text-xs text-muted-foreground">
           Esta aba é restrita a Administrador, Consultor e Gestor de Loja Oficial.
@@ -319,7 +319,7 @@ const Multilojas = () => {
       <header className="sticky top-0 z-30 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-5 py-3 flex items-center gap-3 flex-wrap">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2"><ArrowLeft className="w-4 h-4" />Voltar</Button>
-        <Store className="w-5 h-5 shrink-0" style={{ color: "hsl(var(--brand-blue))" }} />
+        <Store className="w-5 h-5 shrink-0 text-primary" />
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-semibold break-words leading-tight">
             Multilojas · {escopoRede ? `${dados.diag.lojas.length} lojas` : lojaAtual?.nome_publico || "minha loja"}
