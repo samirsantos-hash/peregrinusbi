@@ -321,15 +321,19 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       {
         rotulo: "Investimento em Ads",
         valor: shareAds != null ? fmtPct(shareAds) : "—",
-        meta: `meta mínima Tier 1: ≥ ${META_ADS}%`,
+        meta: `meta: ≥ ${META_ADS}%`,
         estado:
-          shareAds == null ? "sem_dado" : shareAds >= META_ADS ? "ok" : shareAds >= META_ADS / 2 ? "atencao" : "critico",
-        derivado: "Investimento em anúncios ÷ faturamento bruto dos últimos 30 dias.",
+          shareAds == null ? "sem_dado" : shareAds >= META_ADS ? "ok" : shareAds >= 1.25 ? "atencao" : "critico",
+        derivado: "Investimento em anúncios ÷ faturamento bruto dos últimos 30 dias. Critério do Marketplace (% SoW Pads): Tier 1 ≥ 2,5% · Tier 2 ≥ 1,25% · Tier 3 ≥ 0,5%. Meta da consultoria: 3%.",
         temDado: shareAds != null,
         foraDaMeta: shareAds != null && shareAds < META_ADS,
-        contexto: shareAds != null && shareAds < META_ADS && tgmvTotal > 0
-          ? `faltam R$ ${Math.round((META_ADS / 100) * tgmvTotal - adsTotal).toLocaleString("pt-BR")} em 30 dias para Tier 1`
-          : undefined,
+        contexto: shareAds == null ? undefined : [
+          `nível pelo investimento: ${shareAds >= 2.5 ? "Tier 1" : shareAds >= 1.25 ? "Tier 2" : shareAds >= 0.5 ? "Tier 3" : "abaixo do Tier 3"}`,
+          "Tier 1 ≥ 2,5% · Tier 2 ≥ 1,25% · Tier 3 ≥ 0,5%",
+          shareAds < META_ADS && tgmvTotal > 0
+            ? `faltam R$ ${Math.round((META_ADS / 100) * tgmvTotal - adsTotal).toLocaleString("pt-BR")} em 30 dias para 3%`
+            : null,
+        ].filter(Boolean).join("  ·  "),
       },
     ];
     const iRep = 0, iPrazo = 1, iQual = 3, iAds = 4;
