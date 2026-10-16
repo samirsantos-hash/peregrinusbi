@@ -68,7 +68,10 @@ const NIVEIS_OK = ["green", "light_green", "green_gold", "green_platinum", "gree
 function semaforoReputacao(nivel: string): { estado: Semaforo; rotulo: string } {
   const n = (nivel || "").trim().toLowerCase();
   if (!n) return { estado: "sem_dado", rotulo: "sem dado" };
-  if (NIVEIS_OK.includes(n)) return { estado: "ok", rotulo: n.replace(/_/g, " ") };
+  if (NIVEIS_OK.includes(n)) {
+    const sufixo = n.includes("platinum") ? " Platinum" : n.includes("gold") ? " Gold" : n.includes("silver") ? " Silver" : "";
+    return { estado: "ok", rotulo: (n === "light_green" ? "verde claro" : "verde") + sufixo };
+  }
   if (n === "yellow") return { estado: "atencao", rotulo: "amarelo" };
   if (n === "orange" || n === "red") return { estado: "critico", rotulo: n === "red" ? "vermelho" : "laranja" };
   if (n === "newbie") return { estado: "neutro", rotulo: "newbie" };
@@ -159,11 +162,21 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     if (seller?.state) chipsId.push({ rotulo: "UF", valor: seller.state });
 
     // Linha 2 — indicadores
-    const nivelRep = linhas.find((k) => (k.repLevel || "").trim())?.repLevel || "";
+    // A linha do último dia costuma vir sem reputação: busca o registro mais recente com dado
+    // no período e, se não houver, na série mensal.
+    const todas = [...ordenados, ...[...fallbackKpis].sort((a, b) => String(b.date).localeCompare(String(a.date)))];
+    const nivelRep = todas.find((k) => (k.repLevel || "").trim())?.repLevel || "";
     const rep = semaforoReputacao(nivelRep);
 
-    const atraso = mediaPonderada((k) => k.repDelayedRate); // escala 0–1
+    const ultimoValor = (fn: (k: KpiLike) => number | undefined) => {
+      const r = todas.find((k) => Number(fn(k)) > 0 || (fn(k) === 0 && (k.repLevel || "").trim()));
+      return r ? Number(fn(r)) || 0 : null;
+    };
+    const atrasoRaw = mediaPonderada((k) => k.repDelayedRate) ?? ultimoValor((k) => k.repDelayedRate);
+    const atraso = atrasoRaw != null ? (atrasoRaw > 1 ? atrasoRaw / 100 : atrasoRaw) : null;
     const noPrazo = atraso != null ? (1 - atraso) * 100 : null;
+    const reclRaw = mediaPonderada((k) => k.repClaimsRate) ?? ultimoValor((k) => k.repClaimsRate);
+    const reclamacoes = reclRaw != null ? (reclRaw > 1 ? reclRaw : reclRaw * 100) : null;
 
     // Quality Index (SCORE_FINAL_BBF): média dos três blocos. A base diária vem zerada
     // nesses scores, então caímos no último período mensal com dado.
@@ -229,19 +242,39 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       .filter(Boolean)
       .join("  ·  ");
 
-    const tgmvTotal = soma((k) => Number(k.tgmv) || Number(k.revenue) || 0);
-    const adsTotal = soma((k) => Number(k.adsInvestment) || 0);
-    const shareAds = tgmvTotal > 0 && adsTotal > 0 ? (adsTotal / tgmvTotal) * 100 : null;
+    // Investimento: últimos 30 dias da base (diária + mensal como apoio)
+    const baseAds = (() => {
+      const comData = todas.filter((k) => k.date);
+      if (!comData.length) return [] as KpiLike[];
+      const fim = new Date(String(comData[0].date).slice(0, 10) + "T00:00:00");
+      const ini = new Date(fim); ini.setDate(ini.getDate() - 29);
+      const iniStr = ini.toISOString().slice(0, 10);
+      const janela = ordenados.filter((k) => String(k.date).slice(0, 10) >= iniStr);
+      if (janela.some((k) => Number(k.adsInvestment) > 0)) return janela;
+      const mensal = [...fallbackKpis].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      const d = mensal.find((k) => Number(k.adsInvestment) > 0)?.date;
+      return d ? mensal.filter((k) => k.date === d) : janela;
+    })();
+    const tgmvTotal = baseAds.reduce((s, k) => s + (Number(k.tgmv) || Number(k.revenue) || 0), 0);
+    const adsTotal = baseAds.reduce((s, k) => s + (Number(k.adsInvestment) || 0), 0);
+    const shareAds = tgmvTotal > 0 ? (adsTotal / tgmvTotal) * 100 : null;
+
+    const motivosQualidade = [...itensQualidade]
+      .filter((it) => it.valor != null && (it.ganho ?? 0) > 0)
+      .sort((a, b) => (b.ganho ?? 0) - (a.ganho ?? 0))
+      .slice(0, 3)
+      .map((it) => `${it.nome} ${Math.round(Number(it.valor))}`);
 
     const inds: Indicador[] = [
       {
         rotulo: "Reputação",
         valor: rep.estado === "sem_dado" ? "—" : rep.rotulo,
-        meta: "meta: verde",
+        meta: "meta: verde (Platinum)",
         estado: rep.estado,
         chip: rep.estado === "sem_dado" ? undefined : rep.rotulo,
         temDado: rep.estado !== "sem_dado",
         foraDaMeta: rep.estado === "atencao" || rep.estado === "critico",
+        contexto: "Verde = saudável · Amarelo = risco · Laranja/Vermelho = crítico",
       },
       {
         rotulo: "Envios no prazo",
@@ -249,9 +282,20 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         meta: `meta: ≥ ${META_PRAZO}%`,
         estado:
           noPrazo == null ? "sem_dado" : noPrazo >= META_PRAZO ? "ok" : noPrazo >= META_PRAZO - 3 ? "atencao" : "critico",
-        derivado: "1 − REP_DELAYED_HT_RATE. O campo vem na escala 0–1: 0,0285 equivale a 97,2% no prazo.",
+        derivado: "100% menos a taxa de envios com atraso, último dado disponível.",
         temDado: noPrazo != null,
         foraDaMeta: noPrazo != null && noPrazo < META_PRAZO,
+        contexto: atraso != null ? `atrasos: ${fmtPct(atraso * 100, 2)} · limite 5%` : undefined,
+      },
+      {
+        rotulo: "Reclamações",
+        valor: reclamacoes != null ? fmtPct(reclamacoes, 2) : "—",
+        meta: "meta: < 2%",
+        estado: reclamacoes == null ? "sem_dado" : reclamacoes < 2 ? "ok" : reclamacoes < 5 ? "atencao" : "critico",
+        derivado: "Taxa de reclamações sobre vendas, último dado disponível.",
+        temDado: reclamacoes != null,
+        foraDaMeta: reclamacoes != null && reclamacoes >= 2,
+        contexto: "Acima de 5% = risco de rebaixamento",
       },
       {
         rotulo: "Qualidade do anúncio",
@@ -261,7 +305,10 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         derivado: qualidadeFallback
           ? "Valor do último mês fechado — a base diária não traz esses scores."
           : "Valor do período exibido.",
-        contexto: contextoQualidade,
+        contexto: [
+          motivosQualidade.length ? `puxam para baixo: ${motivosQualidade.join(" · ")}` : null,
+          contextoQualidade || null,
+        ].filter(Boolean).join("  ·  "),
         onAbrir: qualidade != null ? () => setQualidadeDrawer(true) : undefined,
         ajuda: `${TEXTO_AJUDA_QUALITY} Referência: mediana da carteira ${
           medianaCarteira != null ? medianaCarteira.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) : "33"
@@ -274,47 +321,51 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       {
         rotulo: "Investimento em Ads",
         valor: shareAds != null ? fmtPct(shareAds) : "—",
-        meta: `meta: ${META_ADS}%`,
+        meta: `meta mínima Tier 1: ≥ ${META_ADS}%`,
         estado:
-          shareAds == null ? "sem_dado" : shareAds <= META_ADS ? "ok" : shareAds <= META_ADS * 2 ? "atencao" : "critico",
-        derivado: "INV_PADS ÷ TGMV_LC no período exibido.",
+          shareAds == null ? "sem_dado" : shareAds >= META_ADS ? "ok" : shareAds >= META_ADS / 2 ? "atencao" : "critico",
+        derivado: "Investimento em anúncios ÷ faturamento bruto dos últimos 30 dias.",
         temDado: shareAds != null,
-        foraDaMeta: shareAds != null && shareAds > META_ADS,
+        foraDaMeta: shareAds != null && shareAds < META_ADS,
+        contexto: shareAds != null && shareAds < META_ADS && tgmvTotal > 0
+          ? `faltam R$ ${Math.round((META_ADS / 100) * tgmvTotal - adsTotal).toLocaleString("pt-BR")} em 30 dias para Tier 1`
+          : undefined,
       },
     ];
+    const iRep = 0, iPrazo = 1, iQual = 3, iAds = 4;
 
     // Linha 3 — alertas determinísticos
     const lista: Alerta[] = [];
-    if (inds[0].estado === "critico")
+    if (inds[iRep].estado === "critico")
       lista.push({
         id: "rep", severidade: "critico", descricao: "Reputação fora da faixa verde.", acao: "Ver detalhe",
         titulo: "Reputação fora da faixa verde",
-        contexto: `Nível atual: ${inds[0].valor}. Meta: verde. Fonte: REP_LEVEL do último período com dado.`,
+        contexto: `Nível atual: ${inds[iRep].valor}. Meta: verde. Último período com dado.`,
         passos: [
           "Reduzir atrasos de envio e cancelamentos por falta de estoque.",
           "Responder e resolver reclamações abertas dentro do prazo.",
           "Revisar anúncios com maior volume de mediações.",
         ],
       });
-    else if (inds[0].estado === "atencao")
+    else if (inds[iRep].estado === "atencao")
       lista.push({
         id: "rep", severidade: "atencao", descricao: "Reputação em amarelo — risco de rebaixamento.", acao: "Ver detalhe",
         titulo: "Reputação em amarelo",
-        contexto: `Nível atual: ${inds[0].valor}. Meta: verde. Amarelo indica risco de rebaixamento no próximo ciclo.`,
+        contexto: `Nível atual: ${inds[iRep].valor}. Meta: verde. Amarelo indica risco de rebaixamento no próximo ciclo.`,
         passos: [
           "Monitorar diariamente reclamações e atrasos.",
           "Priorizar SKUs com maior giro para evitar rupturas.",
         ],
       });
 
-    if (inds[1].foraDaMeta)
+    if (inds[iPrazo].foraDaMeta)
       lista.push({
         id: "prazo",
-        severidade: inds[1].estado === "critico" ? "critico" : "atencao",
-        descricao: `Envios no prazo em ${inds[1].valor}, abaixo da meta de ${META_PRAZO}%.`,
+        severidade: inds[iPrazo].estado === "critico" ? "critico" : "atencao",
+        descricao: `Envios no prazo em ${inds[iPrazo].valor}, abaixo da meta de ${META_PRAZO}%.`,
         acao: "Ver detalhe",
         titulo: "Envios no prazo abaixo da meta",
-        contexto: `Atual: ${inds[1].valor} · Meta: ≥ ${META_PRAZO}%. Cálculo: 1 − REP_DELAYED_HT_RATE (campo na escala 0–1).`,
+        contexto: `Atual: ${inds[iPrazo].valor} · Meta: ≥ ${META_PRAZO}%. Cálculo: 100% menos a taxa de atrasos.`,
         passos: [
           "Verificar handling time cadastrado versus o real.",
           "Avaliar migração dos SKUs de maior giro para Full.",
@@ -348,18 +399,33 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         ],
       });
 
-    if (inds[3].foraDaMeta)
+    if (inds[2].foraDaMeta)
+      lista.push({
+        id: "recl",
+        severidade: inds[2].estado === "critico" ? "critico" : "atencao",
+        descricao: `Reclamações em ${inds[2].valor}, acima do limite de 2%.`,
+        acao: "Ver detalhe",
+        titulo: "Reclamações acima do limite",
+        contexto: `Atual: ${inds[2].valor} · Meta: abaixo de 2% · Acima de 5% há risco de rebaixamento da reputação.`,
+        passos: [
+          "Responder reclamações abertas em até 24h.",
+          "Revisar anúncios com mais devoluções (descrição, medidas, compatibilidade).",
+          "Conferir embalagem e conferência do pedido antes do envio.",
+        ],
+      });
+
+    if (inds[iAds].foraDaMeta)
       lista.push({
         id: "ads",
-        severidade: inds[3].estado === "critico" ? "critico" : "atencao",
-        descricao: `Investimento em Ads em ${inds[3].valor} do faturamento (meta ${META_ADS}%).`,
+        severidade: inds[iAds].estado === "critico" ? "critico" : "atencao",
+        descricao: `Investimento em Ads em ${inds[iAds].valor} do faturamento, abaixo do mínimo de ${META_ADS}% para Tier 1.`,
         acao: "Ver detalhe",
-        titulo: "Investimento em Ads acima da meta",
-        contexto: `Atual: ${inds[3].valor} do faturamento · Meta: ${META_ADS}%. Cálculo: INV_PADS ÷ TGMV_LC no período exibido.`,
+        titulo: "Investimento em Ads abaixo do mínimo Tier 1",
+        contexto: `Atual: ${inds[iAds].valor} do faturamento bruto dos últimos 30 dias · Mínimo Tier 1: ${META_ADS}%.`,
         passos: [
-          "Revisar campanhas com ROAS abaixo de 2,0x.",
+          "Elevar o orçamento até 3% do faturamento, começando pelos anúncios com melhor conversão.",
           "Concentrar orçamento nos SKUs com maior conversão orgânica.",
-          "Checar se a alta de TACOS não vem de queda de faturamento.",
+          "Acompanhar ROAS semanalmente para manter a escala rentável.",
         ],
       });
 
@@ -378,11 +444,11 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         ],
       });
 
-    if (inds[2].foraDaMeta)
+    if (inds[iQual].foraDaMeta)
       lista.push({
         id: "qualidade", severidade: "info", descricao: "Qualidade do anúncio abaixo da faixa 80–100.", acao: "Ver detalhe",
         titulo: "Qualidade do anúncio abaixo da faixa ideal",
-        contexto: `Atual: ${inds[2].valor} · Faixa ideal: 80–100. Combina ficha técnica, fotos, título e conversão.`,
+        contexto: `Atual: ${inds[iQual].valor} · Faixa ideal: 80–100. Combina ficha técnica, fotos, título e conversão.`,
         passos: [
           "Completar atributos obrigatórios e EAN.",
           "Revisar descrição e ficha técnica dos anúncios de maior visita.",
@@ -397,7 +463,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     const cobertura = Math.round((comDado / inds.length) * 100);
     const fora = inds.filter((i) => i.foraDaMeta).length;
     const pior = lista[0];
-    const nivelTexto = inds[0].temDado ? inds[0].valor : "sem dado";
+    const nivelTexto = inds[iRep].temDado ? inds[iRep].valor : "sem dado";
     let frase = `${nomeLoja} está em reputação ${nivelTexto}, com ${fora} de ${inds.length} indicadores fora da meta.`;
     if (pior) frase += ` ${pior.severidade === "critico" ? "Crítico" : "Atenção"}: ${pior.descricao}`;
     if (cobertura < 70) frase = `Leitura parcial (${cobertura}% de cobertura) — ${frase}`;
@@ -456,19 +522,23 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
           ) : (
             <span className="text-base font-bold">{nome}</span>
           )}
-          {chips.map((c) => (
+          {chips.map((c) => {
+            const destaque = c.rotulo === "Perfil" || c.rotulo === "Classificação";
+            const mature = /mature/i.test(c.valor);
+            return (
             <span
               key={c.rotulo}
-              className="inline-flex items-center gap-1 rounded-full bg-muted/10 border border-border px-2 py-0.5 text-[11px] text-muted-alt"
+              className={cn(destaque && "!text-[13px] !px-3 !py-1 font-semibold", mature && "!border-ok/50 !bg-ok/15 shadow-[0_0_12px_hsl(var(--ok)/0.35)]", "inline-flex items-center gap-1 rounded-full bg-muted/10 border border-border px-2 py-0.5 text-[11px] text-muted-alt")}
             >
               <span className="opacity-70">{c.rotulo}</span>
-              <span className="font-medium text-foreground/90">{c.valor}</span>
+              <span className={cn("font-medium text-foreground/90", mature && "!text-ok font-bold")}>{c.valor}</span>
             </span>
-          ))}
+            );
+          })}
         </div>
 
         {/* LINHA 2 — indicadores */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
           {indicadores.map((i) => (
             <div
               key={i.rotulo}
@@ -524,6 +594,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
                   className={cn(
                     "text-[22px] font-bold font-mono tabular-nums leading-none capitalize",
                     !i.temDado && "text-muted-foreground",
+                    i.rotulo === "Reputação" && i.temDado && CORES[i.estado],
                   )}
                 >
                   {i.valor}
