@@ -333,36 +333,36 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
 
     // Linha 3 — alertas determinísticos
     const lista: Alerta[] = [];
-    if (inds[0].estado === "critico")
+    if (inds[iRep].estado === "critico")
       lista.push({
         id: "rep", severidade: "critico", descricao: "Reputação fora da faixa verde.", acao: "Ver detalhe",
         titulo: "Reputação fora da faixa verde",
-        contexto: `Nível atual: ${inds[0].valor}. Meta: verde. Fonte: REP_LEVEL do último período com dado.`,
+        contexto: `Nível atual: ${inds[iRep].valor}. Meta: verde. Último período com dado.`,
         passos: [
           "Reduzir atrasos de envio e cancelamentos por falta de estoque.",
           "Responder e resolver reclamações abertas dentro do prazo.",
           "Revisar anúncios com maior volume de mediações.",
         ],
       });
-    else if (inds[0].estado === "atencao")
+    else if (inds[iRep].estado === "atencao")
       lista.push({
         id: "rep", severidade: "atencao", descricao: "Reputação em amarelo — risco de rebaixamento.", acao: "Ver detalhe",
         titulo: "Reputação em amarelo",
-        contexto: `Nível atual: ${inds[0].valor}. Meta: verde. Amarelo indica risco de rebaixamento no próximo ciclo.`,
+        contexto: `Nível atual: ${inds[iRep].valor}. Meta: verde. Amarelo indica risco de rebaixamento no próximo ciclo.`,
         passos: [
           "Monitorar diariamente reclamações e atrasos.",
           "Priorizar SKUs com maior giro para evitar rupturas.",
         ],
       });
 
-    if (inds[1].foraDaMeta)
+    if (inds[iPrazo].foraDaMeta)
       lista.push({
         id: "prazo",
-        severidade: inds[1].estado === "critico" ? "critico" : "atencao",
-        descricao: `Envios no prazo em ${inds[1].valor}, abaixo da meta de ${META_PRAZO}%.`,
+        severidade: inds[iPrazo].estado === "critico" ? "critico" : "atencao",
+        descricao: `Envios no prazo em ${inds[iPrazo].valor}, abaixo da meta de ${META_PRAZO}%.`,
         acao: "Ver detalhe",
         titulo: "Envios no prazo abaixo da meta",
-        contexto: `Atual: ${inds[1].valor} · Meta: ≥ ${META_PRAZO}%. Cálculo: 1 − REP_DELAYED_HT_RATE (campo na escala 0–1).`,
+        contexto: `Atual: ${inds[iPrazo].valor} · Meta: ≥ ${META_PRAZO}%. Cálculo: 100% menos a taxa de atrasos.`,
         passos: [
           "Verificar handling time cadastrado versus o real.",
           "Avaliar migração dos SKUs de maior giro para Full.",
@@ -445,7 +445,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     const cobertura = Math.round((comDado / inds.length) * 100);
     const fora = inds.filter((i) => i.foraDaMeta).length;
     const pior = lista[0];
-    const nivelTexto = inds[0].temDado ? inds[0].valor : "sem dado";
+    const nivelTexto = inds[iRep].temDado ? inds[iRep].valor : "sem dado";
     let frase = `${nomeLoja} está em reputação ${nivelTexto}, com ${fora} de ${inds.length} indicadores fora da meta.`;
     if (pior) frase += ` ${pior.severidade === "critico" ? "Crítico" : "Atenção"}: ${pior.descricao}`;
     if (cobertura < 70) frase = `Leitura parcial (${cobertura}% de cobertura) — ${frase}`;
@@ -516,7 +516,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         </div>
 
         {/* LINHA 2 — indicadores */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
           {indicadores.map((i) => (
             <div
               key={i.rotulo}
