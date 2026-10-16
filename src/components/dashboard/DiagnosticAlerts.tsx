@@ -159,11 +159,21 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
     if (seller?.state) chipsId.push({ rotulo: "UF", valor: seller.state });
 
     // Linha 2 — indicadores
-    const nivelRep = linhas.find((k) => (k.repLevel || "").trim())?.repLevel || "";
+    // A linha do último dia costuma vir sem reputação: busca o registro mais recente com dado
+    // no período e, se não houver, na série mensal.
+    const todas = [...ordenados, ...[...fallbackKpis].sort((a, b) => String(b.date).localeCompare(String(a.date)))];
+    const nivelRep = todas.find((k) => (k.repLevel || "").trim())?.repLevel || "";
     const rep = semaforoReputacao(nivelRep);
 
-    const atraso = mediaPonderada((k) => k.repDelayedRate); // escala 0–1
+    const ultimoValor = (fn: (k: KpiLike) => number | undefined) => {
+      const r = todas.find((k) => Number(fn(k)) > 0 || (fn(k) === 0 && (k.repLevel || "").trim()));
+      return r ? Number(fn(r)) || 0 : null;
+    };
+    const atrasoRaw = mediaPonderada((k) => k.repDelayedRate) ?? ultimoValor((k) => k.repDelayedRate);
+    const atraso = atrasoRaw != null ? (atrasoRaw > 1 ? atrasoRaw / 100 : atrasoRaw) : null;
     const noPrazo = atraso != null ? (1 - atraso) * 100 : null;
+    const reclRaw = mediaPonderada((k) => k.repClaimsRate) ?? ultimoValor((k) => k.repClaimsRate);
+    const reclamacoes = reclRaw != null ? (reclRaw > 1 ? reclRaw : reclRaw * 100) : null;
 
     // Quality Index (SCORE_FINAL_BBF): média dos três blocos. A base diária vem zerada
     // nesses scores, então caímos no último período mensal com dado.
@@ -229,19 +239,39 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       .filter(Boolean)
       .join("  ·  ");
 
-    const tgmvTotal = soma((k) => Number(k.tgmv) || Number(k.revenue) || 0);
-    const adsTotal = soma((k) => Number(k.adsInvestment) || 0);
-    const shareAds = tgmvTotal > 0 && adsTotal > 0 ? (adsTotal / tgmvTotal) * 100 : null;
+    // Investimento: últimos 30 dias da base (diária + mensal como apoio)
+    const baseAds = (() => {
+      const comData = todas.filter((k) => k.date);
+      if (!comData.length) return [] as KpiLike[];
+      const fim = new Date(String(comData[0].date).slice(0, 10) + "T00:00:00");
+      const ini = new Date(fim); ini.setDate(ini.getDate() - 29);
+      const iniStr = ini.toISOString().slice(0, 10);
+      const janela = ordenados.filter((k) => String(k.date).slice(0, 10) >= iniStr);
+      if (janela.some((k) => Number(k.adsInvestment) > 0)) return janela;
+      const mensal = [...fallbackKpis].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      const d = mensal.find((k) => Number(k.adsInvestment) > 0)?.date;
+      return d ? mensal.filter((k) => k.date === d) : janela;
+    })();
+    const tgmvTotal = baseAds.reduce((s, k) => s + (Number(k.tgmv) || Number(k.revenue) || 0), 0);
+    const adsTotal = baseAds.reduce((s, k) => s + (Number(k.adsInvestment) || 0), 0);
+    const shareAds = tgmvTotal > 0 ? (adsTotal / tgmvTotal) * 100 : null;
+
+    const motivosQualidade = [...itensQualidade]
+      .filter((it) => it.valor != null && (it.ganho ?? 0) > 0)
+      .sort((a, b) => (b.ganho ?? 0) - (a.ganho ?? 0))
+      .slice(0, 3)
+      .map((it) => `${it.nome} ${Math.round(Number(it.valor))}`);
 
     const inds: Indicador[] = [
       {
         rotulo: "Reputação",
         valor: rep.estado === "sem_dado" ? "—" : rep.rotulo,
-        meta: "meta: verde",
+        meta: "meta: verde (Platinum)",
         estado: rep.estado,
         chip: rep.estado === "sem_dado" ? undefined : rep.rotulo,
         temDado: rep.estado !== "sem_dado",
         foraDaMeta: rep.estado === "atencao" || rep.estado === "critico",
+        contexto: "Verde = saudável · Amarelo = risco · Laranja/Vermelho = crítico",
       },
       {
         rotulo: "Envios no prazo",
@@ -249,9 +279,20 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         meta: `meta: ≥ ${META_PRAZO}%`,
         estado:
           noPrazo == null ? "sem_dado" : noPrazo >= META_PRAZO ? "ok" : noPrazo >= META_PRAZO - 3 ? "atencao" : "critico",
-        derivado: "1 − REP_DELAYED_HT_RATE. O campo vem na escala 0–1: 0,0285 equivale a 97,2% no prazo.",
+        derivado: "100% menos a taxa de envios com atraso, último dado disponível.",
         temDado: noPrazo != null,
         foraDaMeta: noPrazo != null && noPrazo < META_PRAZO,
+        contexto: atraso != null ? `atrasos: ${fmtPct(atraso * 100, 2)} · limite 5%` : undefined,
+      },
+      {
+        rotulo: "Reclamações",
+        valor: reclamacoes != null ? fmtPct(reclamacoes, 2) : "—",
+        meta: "meta: < 2%",
+        estado: reclamacoes == null ? "sem_dado" : reclamacoes < 2 ? "ok" : reclamacoes < 5 ? "atencao" : "critico",
+        derivado: "Taxa de reclamações sobre vendas, último dado disponível.",
+        temDado: reclamacoes != null,
+        foraDaMeta: reclamacoes != null && reclamacoes >= 2,
+        contexto: "Acima de 5% = risco de rebaixamento",
       },
       {
         rotulo: "Qualidade do anúncio",
@@ -261,7 +302,10 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         derivado: qualidadeFallback
           ? "Valor do último mês fechado — a base diária não traz esses scores."
           : "Valor do período exibido.",
-        contexto: contextoQualidade,
+        contexto: [
+          motivosQualidade.length ? `puxam para baixo: ${motivosQualidade.join(" · ")}` : null,
+          contextoQualidade || null,
+        ].filter(Boolean).join("  ·  "),
         onAbrir: qualidade != null ? () => setQualidadeDrawer(true) : undefined,
         ajuda: `${TEXTO_AJUDA_QUALITY} Referência: mediana da carteira ${
           medianaCarteira != null ? medianaCarteira.toLocaleString("pt-BR", { maximumFractionDigits: 0 }) : "33"
@@ -274,14 +318,18 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       {
         rotulo: "Investimento em Ads",
         valor: shareAds != null ? fmtPct(shareAds) : "—",
-        meta: `meta: ${META_ADS}%`,
+        meta: `meta mínima Tier 1: ≥ ${META_ADS}%`,
         estado:
-          shareAds == null ? "sem_dado" : shareAds <= META_ADS ? "ok" : shareAds <= META_ADS * 2 ? "atencao" : "critico",
-        derivado: "INV_PADS ÷ TGMV_LC no período exibido.",
+          shareAds == null ? "sem_dado" : shareAds >= META_ADS ? "ok" : shareAds >= META_ADS / 2 ? "atencao" : "critico",
+        derivado: "Investimento em anúncios ÷ faturamento bruto dos últimos 30 dias.",
         temDado: shareAds != null,
-        foraDaMeta: shareAds != null && shareAds > META_ADS,
+        foraDaMeta: shareAds != null && shareAds < META_ADS,
+        contexto: shareAds != null && shareAds < META_ADS && tgmvTotal > 0
+          ? `faltam R$ ${Math.round((META_ADS / 100) * tgmvTotal - adsTotal).toLocaleString("pt-BR")} em 30 dias para Tier 1`
+          : undefined,
       },
     ];
+    const iRep = 0, iPrazo = 1, iQual = 3, iAds = 4;
 
     // Linha 3 — alertas determinísticos
     const lista: Alerta[] = [];
