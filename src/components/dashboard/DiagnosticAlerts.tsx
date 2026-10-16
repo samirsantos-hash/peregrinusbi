@@ -68,7 +68,10 @@ const NIVEIS_OK = ["green", "light_green", "green_gold", "green_platinum", "gree
 function semaforoReputacao(nivel: string): { estado: Semaforo; rotulo: string } {
   const n = (nivel || "").trim().toLowerCase();
   if (!n) return { estado: "sem_dado", rotulo: "sem dado" };
-  if (NIVEIS_OK.includes(n)) return { estado: "ok", rotulo: n.replace(/_/g, " ") };
+  if (NIVEIS_OK.includes(n)) {
+    const sufixo = n.includes("platinum") ? " Platinum" : n.includes("gold") ? " Gold" : n.includes("silver") ? " Silver" : "";
+    return { estado: "ok", rotulo: (n === "light_green" ? "verde claro" : "verde") + sufixo };
+  }
   if (n === "yellow") return { estado: "atencao", rotulo: "amarelo" };
   if (n === "orange" || n === "red") return { estado: "critico", rotulo: n === "red" ? "vermelho" : "laranja" };
   if (n === "newbie") return { estado: "neutro", rotulo: "newbie" };
@@ -396,6 +399,21 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         ],
       });
 
+    if (inds[2].foraDaMeta)
+      lista.push({
+        id: "recl",
+        severidade: inds[2].estado === "critico" ? "critico" : "atencao",
+        descricao: `Reclamações em ${inds[2].valor}, acima do limite de 2%.`,
+        acao: "Ver detalhe",
+        titulo: "Reclamações acima do limite",
+        contexto: `Atual: ${inds[2].valor} · Meta: abaixo de 2% · Acima de 5% há risco de rebaixamento da reputação.`,
+        passos: [
+          "Responder reclamações abertas em até 24h.",
+          "Revisar anúncios com mais devoluções (descrição, medidas, compatibilidade).",
+          "Conferir embalagem e conferência do pedido antes do envio.",
+        ],
+      });
+
     if (inds[iAds].foraDaMeta)
       lista.push({
         id: "ads",
@@ -504,15 +522,19 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
           ) : (
             <span className="text-base font-bold">{nome}</span>
           )}
-          {chips.map((c) => (
+          {chips.map((c) => {
+            const destaque = c.rotulo === "Perfil" || c.rotulo === "Classificação";
+            const mature = /mature/i.test(c.valor);
+            return (
             <span
               key={c.rotulo}
-              className="inline-flex items-center gap-1 rounded-full bg-muted/10 border border-border px-2 py-0.5 text-[11px] text-muted-alt"
+              className={cn(destaque && "!text-[13px] !px-3 !py-1 font-semibold", mature && "!border-ok/50 !bg-ok/15 shadow-[0_0_12px_hsl(var(--ok)/0.35)]", "inline-flex items-center gap-1 rounded-full bg-muted/10 border border-border px-2 py-0.5 text-[11px] text-muted-alt")}
             >
               <span className="opacity-70">{c.rotulo}</span>
-              <span className="font-medium text-foreground/90">{c.valor}</span>
+              <span className={cn("font-medium text-foreground/90", mature && "!text-ok font-bold")}>{c.valor}</span>
             </span>
-          ))}
+            );
+          })}
         </div>
 
         {/* LINHA 2 — indicadores */}
@@ -572,6 +594,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
                   className={cn(
                     "text-[22px] font-bold font-mono tabular-nums leading-none capitalize",
                     !i.temDado && "text-muted-foreground",
+                    i.rotulo === "Reputação" && i.temDado && CORES[i.estado],
                   )}
                 >
                   {i.valor}
