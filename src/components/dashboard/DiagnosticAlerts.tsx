@@ -396,18 +396,18 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         ],
       });
 
-    if (inds[3].foraDaMeta)
+    if (inds[iAds].foraDaMeta)
       lista.push({
         id: "ads",
-        severidade: inds[3].estado === "critico" ? "critico" : "atencao",
-        descricao: `Investimento em Ads em ${inds[3].valor} do faturamento (meta ${META_ADS}%).`,
+        severidade: inds[iAds].estado === "critico" ? "critico" : "atencao",
+        descricao: `Investimento em Ads em ${inds[iAds].valor} do faturamento, abaixo do mínimo de ${META_ADS}% para Tier 1.`,
         acao: "Ver detalhe",
-        titulo: "Investimento em Ads acima da meta",
-        contexto: `Atual: ${inds[3].valor} do faturamento · Meta: ${META_ADS}%. Cálculo: INV_PADS ÷ TGMV_LC no período exibido.`,
+        titulo: "Investimento em Ads abaixo do mínimo Tier 1",
+        contexto: `Atual: ${inds[iAds].valor} do faturamento bruto dos últimos 30 dias · Mínimo Tier 1: ${META_ADS}%.`,
         passos: [
-          "Revisar campanhas com ROAS abaixo de 2,0x.",
+          "Elevar o orçamento até 3% do faturamento, começando pelos anúncios com melhor conversão.",
           "Concentrar orçamento nos SKUs com maior conversão orgânica.",
-          "Checar se a alta de TACOS não vem de queda de faturamento.",
+          "Acompanhar ROAS semanalmente para manter a escala rentável.",
         ],
       });
 
@@ -426,11 +426,11 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         ],
       });
 
-    if (inds[2].foraDaMeta)
+    if (inds[iQual].foraDaMeta)
       lista.push({
         id: "qualidade", severidade: "info", descricao: "Qualidade do anúncio abaixo da faixa 80–100.", acao: "Ver detalhe",
         titulo: "Qualidade do anúncio abaixo da faixa ideal",
-        contexto: `Atual: ${inds[2].valor} · Faixa ideal: 80–100. Combina ficha técnica, fotos, título e conversão.`,
+        contexto: `Atual: ${inds[iQual].valor} · Faixa ideal: 80–100. Combina ficha técnica, fotos, título e conversão.`,
         passos: [
           "Completar atributos obrigatórios e EAN.",
           "Revisar descrição e ficha técnica dos anúncios de maior visita.",
