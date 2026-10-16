@@ -16,7 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Upload, Download, Search, ArrowUpDown, ArrowUp, ArrowDown, DollarSign, TrendingUp, Users, BarChart3, ArrowLeft, CalendarIcon, ShoppingCart, Eye, Percent } from "lucide-react";
-import { aggregateSellers, computePeriodComparison, getDailySeries, type ConsolidatedSeller, type CppRow, type DailyRoasPoint } from "@/utils/cppAggregation";
+import { aggregateSellers, computePeriodComparison, getDailySeries, parseBrNumber, cleanCustId, type ConsolidatedSeller, type CppRow, type DailyRoasPoint } from "@/utils/cppAggregation";
 import { useNavigate } from "react-router-dom";
 import CppActionCards from "@/components/dashboard/CppActionCards";
 import CppReputationAlert from "@/components/dashboard/CppReputationAlert";
@@ -553,7 +553,7 @@ export default function CppDashboard() {
             </TabsContent>
 
             <TabsContent value="cdp">
-              <CppCdpPanel data={filtered} onSelectSeller={setSelectedSeller} />
+              <CppCdpPanel data={filtered} onSelectSeller={setSelectedSeller} dailyRows={rawRows.filter((r) => filtered.some((s) => s.CUS_CUST_ID_SEL === cleanCustId(r.CUS_CUST_ID_SEL))).map((r) => ({ date: String(r.TIM_DAY || r.DATA || "").slice(0, 10), tgmv: parseBrNumber(r.TGMV_LC), cdpTgmv: parseBrNumber(r.CDP_TGMV_LC) }))} />
             </TabsContent>
           </Tabs>
         </>

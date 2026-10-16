@@ -531,3 +531,26 @@
 .light .border-white\/5, .light .border-white\/10, .light .border-white\/40 { border-color: hsl(200 18% 86%); }
 .light .text-white { color: hsl(222 47% 11%); }
 .light .ds-hachura { background-image: repeating-linear-gradient(135deg, rgb(15 23 42 / 0.06) 0 4px, transparent 4px 8px); }
+
+/* Identidade Multilojas: escopo visual compartilhado entre todas as seções. */
+.multilojas-page { font-variant-numeric: tabular-nums; }
+.multilojas-page h1, .multilojas-page h2, .multilojas-page h3 { letter-spacing: 0; }
+.multilojas-page .multilojas-chart {
+  background: hsl(var(--card));
+  border-color: hsl(var(--border));
+  transition: border-color .2s ease;
+}
+.multilojas-page .multilojas-chart:hover { border-color: hsl(var(--primary) / .4); }
+.multilojas-page .multilojas-kpi .ds-numero-sec {
+  font-size: 22px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.multilojas-page .glass-card { border-radius: 8px; }
+.multilojas-page .recharts-cartesian-axis-tick-value { fill: hsl(var(--muted-foreground)); }
+.multilojas-page .recharts-default-tooltip { border-radius: 8px !important; }
+.multilojas-page main > .space-y-4 { row-gap: 20px; }
+.multilojas-page table th, .multilojas-page table td { padding: 10px 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .multilojas-page .multilojas-chart { transition: none; }
+}

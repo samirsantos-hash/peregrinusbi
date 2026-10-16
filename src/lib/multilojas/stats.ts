@@ -1,4 +1,4 @@
-import { brlCurto } from "@/lib/format";
+import { brl, brlCurto, num, pctFracao, delta } from "@/lib/format";
 /* Estatística própria do módulo Multilojas — sem dependência nova. */
 
 export const sum = (a: number[]) => a.reduce((s, v) => s + v, 0);
@@ -191,14 +191,12 @@ export function backtest(y: number[], cortes = [30, 45, 60], p = FC_PARAMS): Bac
 }
 
 /* ---------------- formatação ---------------- */
-export const fBRL = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
-export const fBRL2 = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export const fBRL = (v: number) => brl(v);
+export const fBRL2 = (v: number) => brl(v, true);
 export const fShort = (v: number) => brlCurto(v);
-export const fInt = (v: number) => Math.round(v).toLocaleString("pt-BR");
-export const fPct = (v: number, d = 1) => `${(v * 100).toFixed(d)}%`;
-export const fDelta = (v: number, d = 1) => `${v >= 0 ? "+" : ""}${(v * 100).toFixed(d)}%`;
+export const fInt = (v: number) => num(v);
+export const fPct = (v: number, d = 1) => pctFracao(v, d);
+export const fDelta = (v: number, d = 1) => delta(v * 100, d);
 
 export const faixaHHI = (h: number) =>
   h > 2500 ? { label: "crítico", tone: "red" } :

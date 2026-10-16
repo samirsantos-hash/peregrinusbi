@@ -42,6 +42,7 @@ import StockoutRiskPanel from "@/components/dashboard/StockoutRiskPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
 import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
+import CdpEvolucao from "@/components/dashboard/CdpEvolucao";
 import { CampanhasCofinanciadasPanel } from "@/components/seller/CampanhasCofinanciadasPanel";
 import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
@@ -609,6 +610,7 @@ const Index = () => {
                   <TabsContent value="opportunities" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="opportunities" />}
                     <JuniorActionBanner abaId="opportunities" dados={dadosJunior} />
+                    <CdpEvolucao rows={allKpisDaily.map((r) => ({ date: r.date, tgmv: r.tgmv, cdpTgmv: r.cdpTgmv }))} />
                     <CampanhasCofinanciadasPanel items={eligibilityItems || []} />
                     <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
