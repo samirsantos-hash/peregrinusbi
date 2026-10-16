@@ -1,3 +1,4 @@
+import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ExternalLink, Copy, Check, Video, Filter, AlertTriangle, Search } from "lucide-react";
@@ -152,6 +153,7 @@ const CriticalListingsTable = ({ listings }: CriticalListingsTableProps) => {
                       MLB{listing.itemId.replace(/\D/g, "")}
                       <ExternalLink className="w-3 h-3 opacity-60" />
                     </a>
+                    <CopiarAnuncio itemId={listing.itemId} titulo={(listing as any).title ?? (listing as any).itemName} />
                   </td>
 
                   {/* Severity badge */}

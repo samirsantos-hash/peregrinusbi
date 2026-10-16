@@ -1,3 +1,4 @@
+import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
@@ -393,6 +394,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
                         ) : (
                           <span className="truncate text-[11px]">{(item.itemName || item.itemId).slice(0, 40)}</span>
                         )}
+                        <CopiarAnuncio itemId={item.itemId} titulo={item.itemName} />
                       </div>
                     </td>
                     <td className="py-1.5 px-1.5 text-[10px] text-muted-foreground">{item.domDomainAgg1 || "—"}</td>
