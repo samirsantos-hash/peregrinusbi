@@ -475,7 +475,7 @@ const Index = () => {
                   />
 
                   {/* Diagnóstico só no Resumo — não se repete em todas as abas */}
-                  {activeTab === "executive" && (
+                  {activeTab === "efficiency" && (
                     <DiagnosticAlerts
                       kpis={displayKpis}
                       fallbackKpis={allKpisMonthly}
