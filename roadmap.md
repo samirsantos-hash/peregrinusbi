@@ -1,5 +1,10 @@
 # Roadmap
 
+## CDP e Multilojas (16/10)
+- [ ] Calcular e apresentar evolução de participação e pontuação CDP com dados reais e testes.
+- [ ] Organizar as seções Multilojas com a identidade visual do painel, sem alterar regras de acesso ou dados.
+- [ ] Verificar os cálculos e as telas na pré-visualização.
+
 ## Correções estatísticas (ordens de serviço, set/2026)
 - [x] OS-1 — Alerta de churn por z-score modificado (MAD), flag `ALERTS_USE_ROBUST_Z`
 - [x] OS-4 — Encolhimento empírico de Bayes nos rankings, flag `RANKINGS_USE_SHRINKAGE`

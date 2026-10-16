@@ -24,42 +24,37 @@ import {
   forecast, backtest, faixaHHI, fBRL, fShort, fInt, fPct, fDelta,
 } from "@/lib/multilojas/stats";
 import { UF_INFO, POP_TOTAL } from "@/lib/geoBrasil";
+import { KpiCard } from "@/components/ds";
 
-/* Paleta 60/30/10 — Navy domina, Blue apoia, Green é acento.
- * Vermelho fica reservado a valores negativos/alertas. */
+/* Séries distintas da identidade Aura; vermelho reservado a alertas. */
 const COLORS = [
-  "hsl(var(--brand-navy))",
-  "hsl(var(--brand-blue))",
-  "hsl(var(--brand-accent))",
-  "hsl(var(--muted-foreground))",
+  "hsl(var(--primary))",
+  "hsl(var(--ec-laranja))",
+  "hsl(var(--emerald))",
+  "hsl(var(--media))",
   "hsl(var(--destructive))",
-  "hsl(var(--brand-blue) / 0.6)",
+  "hsl(var(--chart-3))",
 ];
 
 /* ───────── primitives ───────── */
 const Card = ({ title, hint, children, className = "" }: { title?: string; hint?: string; children: React.ReactNode; className?: string }) => (
-  <div className={`rounded-xl border border-border/50 bg-card/60 p-4 lg:p-5 min-w-0 ${className}`}>
+  <section className={`multilojas-chart rounded-lg border border-border bg-card p-4 lg:p-5 min-w-0 ${className}`}>
     {title && (
-      <h3 className="text-xs lg:text-[13px] font-semibold text-foreground mb-3 flex items-center gap-1">
+      <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2 leading-snug flex-wrap">
         {title}{hint && <TooltipInfo text={hint} />}
       </h3>
     )}
     {children}
-  </div>
+  </section>
 );
 
 const Kpi = ({ label, value, delta, hint }: { label: string; value: string; delta?: number; hint?: string }) => (
-  <div className="rounded-lg border border-border/40 bg-card/50 p-3 min-w-0">
-    <div className="text-[10px] uppercase tracking-wide text-muted-foreground flex items-center gap-1 leading-tight">
-      {label}{hint && <TooltipInfo text={hint} />}
-    </div>
-    <div className="text-lg lg:text-xl font-semibold tabular-nums mt-1 truncate">{value}</div>
-    {delta !== undefined && Number.isFinite(delta) && (
-      <div className={`text-[11px] tabular-nums ${delta >= 0 ? "text-emerald" : "text-destructive"}`}>
-        {fDelta(delta)} vs período anterior
-      </div>
-    )}
-  </div>
+  <KpiCard rotulo={label} valor={value} className="min-w-0 h-full multilojas-kpi" referencia={
+    <span className="inline-flex items-start gap-1.5">
+      {delta !== undefined && Number.isFinite(delta) ? <span className={delta >= 0 ? "text-emerald" : "text-destructive"}>{fDelta(delta)} vs período anterior</span> : "Período selecionado"}
+      {hint && <TooltipInfo text={hint} />}
+    </span>
+  } />
 );
 
 const Empty = ({ msg = "Sem dados para o filtro selecionado." }) => (
@@ -270,12 +265,12 @@ const Multilojas = () => {
     return (
       <div className="min-h-screen">
         <Topo titulo="Multilojas · gestão consolidada de rede" sub={erroBase || "Nenhuma carga publicada"} />
-        <nav className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-border/40">
+        <nav className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-border/40" aria-label="Seções administrativas Multilojas">
           {TABS.filter((t) => t === "Central de dados" || t === "Cadastro de lojas").map((t) => (
-            <button key={t} onClick={() => setTab(t)}
+            <Button variant="ghost" size="sm" key={t} onClick={() => setTab(t)}
               className={`px-3 py-1 rounded-md text-[11px] whitespace-nowrap transition-colors ${
                 tab === t ? "bg-primary/15 text-primary font-semibold" : "text-muted-foreground hover:text-foreground"
-              }`}>{t}</button>
+              }`}>{t}</Button>
           ))}
         </nav>
         <main className="max-w-5xl mx-auto p-6 space-y-4">
@@ -320,17 +315,17 @@ const Multilojas = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="multilojas-page min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-30 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-5 py-3 flex items-center gap-3 flex-wrap">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2"><ArrowLeft className="w-4 h-4" />Voltar</Button>
         <Store className="w-5 h-5 shrink-0" style={{ color: "hsl(var(--brand-blue))" }} />
         <div className="min-w-0 flex-1">
-          <h1 className="text-sm font-semibold truncate leading-tight">
+          <h1 className="text-xl font-semibold break-words leading-tight">
             Multilojas · {escopoRede ? `${dados.diag.lojas.length} lojas` : lojaAtual?.nome_publico || "minha loja"}
           </h1>
-          <p className="text-[11px] text-muted-foreground truncate mt-0.5 tabular-nums">
-            {fInt(dados.diag.validas)} pedidos · {dados.diag.ini} → {dados.diag.fim} · {modoLocal ? "análise local, não publicada" : dados.diag.arquivo}
+          <p className="text-xs text-muted-foreground mt-1 tabular-nums">
+            {fInt(dados.diag.validas)} pedidos · {dados.diag.ini.split("-").reverse().join("/")} → {dados.diag.fim.split("-").reverse().join("/")} · {modoLocal ? "análise local, não publicada" : "base publicada"}
           </p>
         </div>
         <div className="ml-auto flex items-center gap-2 flex-wrap">
@@ -350,19 +345,23 @@ const Multilojas = () => {
       <nav className="border-b border-border/40">
         <div className="mx-auto w-full max-w-[1600px] flex gap-1 overflow-x-auto px-3 sm:px-5 py-2">
           {TABS.map((t) => (
-            <button key={t} onClick={() => setTab(t)} aria-current={tab === t ? "page" : undefined}
+            <Button variant="ghost" size="sm" key={t} onClick={() => setTab(t)} aria-current={tab === t ? "page" : undefined}
               className={`px-3 py-1.5 rounded-md text-[11px] whitespace-nowrap transition-colors border ${
                 tab === t
-                  ? "border-transparent font-semibold text-[hsl(var(--brand-blue))] bg-[hsl(var(--brand-blue)/0.14)]"
+                  ? "border-primary/40 font-semibold text-primary bg-primary/10"
                   : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/40"
               }`}>
               {t}
-            </button>
+            </Button>
           ))}
         </div>
       </nav>
 
-      <main className="mx-auto w-full max-w-[1600px] px-3 sm:px-5 py-4 space-y-4">
+      <main className="mx-auto w-full max-w-[1600px] px-3 sm:px-5 py-6 space-y-5">
+        <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border pb-3">
+          <h2 className="text-lg font-semibold">{tab}</h2>
+          <span className="text-xs text-muted-foreground tabular-nums">{d.ini.split("-").reverse().join("/")} — {d.fim.split("-").reverse().join("/")}</span>
+        </div>
         {painelAdmin}
         {tab === "Minha loja" && (
           <MinhaLoja

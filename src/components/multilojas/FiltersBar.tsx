@@ -36,7 +36,7 @@ const FiltersBar = ({ filtros, set, opcoes }: Props) => {
     set({ lojas: filtros.lojas.includes(l) ? filtros.lojas.filter((x) => x !== l) : [...filtros.lojas, l] });
 
   return (
-    <div className="sticky top-0 z-20 border-b border-border/40 bg-background/95 backdrop-blur px-3 py-2 space-y-2">
+    <div className="border-b border-border bg-background py-4 space-y-3">
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="text-[11px] text-muted-foreground mr-1">
           Lojas{" "}
@@ -44,7 +44,7 @@ const FiltersBar = ({ filtros, set, opcoes }: Props) => {
             ({filtros.lojas.length || opcoes.lojas.length}/{opcoes.lojas.length})
           </span>
         </span>
-        <button
+        <Button variant="ghost" size="sm"
           onClick={() => set({ lojas: [] })}
           className={`px-2 py-0.5 rounded-full text-[11px] border transition-colors ${
             filtros.lojas.length === 0
@@ -53,11 +53,11 @@ const FiltersBar = ({ filtros, set, opcoes }: Props) => {
           }`}
         >
           rede inteira
-        </button>
+        </Button>
         {opcoes.lojas.map((l) => {
           const on = filtros.lojas.includes(l);
           return (
-            <button
+            <Button variant="ghost" size="sm"
               key={l}
               onClick={() => toggleLoja(l)}
               className={`px-2 py-0.5 rounded-full text-[11px] border transition-colors ${
@@ -65,7 +65,7 @@ const FiltersBar = ({ filtros, set, opcoes }: Props) => {
               }`}
             >
               {l}
-            </button>
+            </Button>
           );
         })}
         {filtros.lojas.length > 0 && filtros.lojas.length < opcoes.lojas.length && (
@@ -75,8 +75,8 @@ const FiltersBar = ({ filtros, set, opcoes }: Props) => {
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Input type="date" value={filtros.ini} onChange={(e) => set({ ini: e.target.value })} className="h-8 w-[140px] text-xs" />
-        <Input type="date" value={filtros.fim} onChange={(e) => set({ fim: e.target.value })} className="h-8 w-[140px] text-xs" />
+        <Input aria-label="Data inicial" type="date" value={filtros.ini} onChange={(e) => set({ ini: e.target.value })} className="h-9 w-[140px] text-xs" />
+        <Input aria-label="Data final" type="date" value={filtros.fim} onChange={(e) => set({ fim: e.target.value })} className="h-9 w-[140px] text-xs" />
         {[7, 15, 30, 60, 90].map((d) => (
           <Button key={d} variant="outline" size="sm" className="h-8 px-2 text-[11px]"
             onClick={() => set({ ini: shift(opcoes.fim, d), fim: opcoes.fim })}>

@@ -7,9 +7,12 @@ import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { ArrowUpDown, ArrowUp, ArrowDown, Zap, TrendingUp, DollarSign, Target } from "lucide-react";
 import { type ConsolidatedSeller } from "@/utils/cppAggregation";
+import CdpEvolucao from "./CdpEvolucao";
+import type { DiaCdp } from "@/lib/cdpEvolucao";
 
 interface Props {
   data: ConsolidatedSeller[];
+  dailyRows?: DiaCdp[];
   onSelectSeller: (seller: ConsolidatedSeller) => void;
 }
 
@@ -80,7 +83,7 @@ function computeOpportunity(data: ConsolidatedSeller[]): CdpSellerRow[] {
 
 type SortCol = "opportunityScore" | "cdpTgmv" | "shareCdp" | "cdpRoas" | "gap" | "itemsOptin" | "scoreCdp";
 
-export default function CppCdpPanel({ data, onSelectSeller }: Props) {
+export default function CppCdpPanel({ data, onSelectSeller, dailyRows = [] }: Props) {
   const [sortCol, setSortCol] = useState<SortCol>("opportunityScore");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
@@ -132,6 +135,7 @@ export default function CppCdpPanel({ data, onSelectSeller }: Props) {
 
   return (
     <div className="space-y-4">
+      <CdpEvolucao rows={dailyRows} />
       {/* CDP Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className="bg-card border-border">
