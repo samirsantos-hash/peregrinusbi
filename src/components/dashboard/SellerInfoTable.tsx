@@ -134,7 +134,7 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
   };
   const tierValue = loja ? tierLabels[loja.tier] : "—";
   const tierTooltip = loja
-    ? `Classificação Mercado Livre baseada em ${fonteLabel[loja.tierFonte]}. Critérios oficiais: T1 SoW Pads ≥2.5%, OOS ≤15%, BS ≤35%; T2 ≥1.25% / ≤25% / ≤45%; T3 ≥0.5% / ≤35% / ≤55%.`
+    ? `Classificação Mercado Livre baseada em ${fonteLabel[loja.tierFonte]}. Critérios oficiais: Tier 1: %3PGM ≥60%, SoW Pads ≥2,5%, OOS ≤15%, BS ≤35%; Tier 2: ≥45% / ≥1,25% / ≤25% / ≤45%; Tier 3: ≥20% / ≥0,5% / ≤35% / ≤55%. Meta mínima de investimento em Ads para Tier 1: 3% do faturamento bruto dos últimos 30 dias.`
     : "Tier oficial Mercado Livre (Platinum/Gold/Silver) — combina reputação e métricas SoW Pads, OOS e Bad Seller do último mês.";
 
   const rows = [
@@ -209,9 +209,17 @@ const SellerInfoTable = ({ seller, allKpis }: Props) => {
               <span>{r.label}</span>
               <TooltipInfo text={r.tooltip} />
             </div>
-            <span className="text-[11px] font-medium text-foreground truncate max-w-[60%] text-right">
-              {r.value}
-            </span>
+            {(() => {
+              const v = String(r.value);
+              const vazio = v === SEM_CADASTRO || v === "—";
+              const mature = /mature/i.test(v);
+              const tier = r.label === "Tier ML" && !vazio ? v.match(/Tier (\d)/)?.[1] : undefined;
+              const corTier = tier === "1" ? "border-ok/50 bg-ok/15 text-ok" : tier === "2" ? "border-warning/50 bg-warning/15 text-warning" : "border-destructive/50 bg-destructive/15 text-destructive";
+              if (vazio) return <span className="text-[11px] italic text-muted-foreground/70 text-right">Sem dado</span>;
+              if (mature) return <span className="inline-flex items-center rounded-full border border-ok/50 bg-ok/15 px-3 py-0.5 text-[12px] font-bold text-ok shadow-[0_0_12px_hsl(var(--ok)/0.35)] truncate max-w-[60%]">{v}</span>;
+              if (tier) return <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${corTier}`}>{v}</span>;
+              return <span className="text-[11px] font-medium text-foreground truncate max-w-[60%] text-right">{v}</span>;
+            })()}
           </div>
         ))}
       </div>
