@@ -41,10 +41,20 @@ const MEDALHAS: Record<string, { rotulo: string; cor: string }> = {
 };
 
 function Linha({ rotulo, valor }: { rotulo: string; valor?: string | null }) {
+  const mature = !!valor && /mature/i.test(valor);
+  const ativa = valor === "Ativa";
   return (
-    <div className="flex items-baseline justify-between gap-3 py-1 border-b border-border/40 last:border-0">
+    <div className="flex items-center justify-between gap-3 py-1 border-b border-border/40 last:border-0">
       <span className="text-[10px] uppercase tracking-wide text-foreground/70">{rotulo}</span>
-      <span className="text-xs font-medium tnum text-right truncate text-foreground">{valor || "—"}</span>
+      {!valor ? (
+        <span className="text-[11px] italic text-muted-foreground/70">Sem dado</span>
+      ) : mature ? (
+        <span className="inline-flex items-center rounded-full border border-ok/50 bg-ok/15 px-3 py-0.5 text-[12px] font-bold text-ok shadow-[0_0_12px_hsl(var(--ok)/0.35)]">{valor}</span>
+      ) : ativa ? (
+        <span className="inline-flex items-center rounded-full border border-ok/40 bg-ok/10 px-2.5 py-0.5 text-[11px] font-semibold text-ok">{valor}</span>
+      ) : (
+        <span className="text-xs font-medium tnum text-right truncate text-foreground">{valor}</span>
+      )}
     </div>
   );
 }
