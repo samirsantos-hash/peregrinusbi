@@ -1,3 +1,4 @@
+import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -284,6 +285,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                   >
                     {p.item_name}
                   </a>
+                  <CopiarAnuncio itemId={p.item_id} titulo={p.item_name} />
                   <span className="font-mono text-xs font-semibold tabular-nums text-foreground">
                     {p.pedidos_7d.toLocaleString("pt-BR")} visitas/7d
                   </span>

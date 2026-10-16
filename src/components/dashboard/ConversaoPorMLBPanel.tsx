@@ -1,3 +1,4 @@
+import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
@@ -230,6 +231,7 @@ function ItemRow({ item }: { item: MLBPerformance }) {
                 MLB{item.itemId}
                 <ExternalLink className="w-2.5 h-2.5" />
               </a>
+              <CopiarAnuncio itemId={item.itemId} titulo={item.itemName} />
               <p className="text-[11px] text-muted-foreground truncate max-w-[260px]">
                 {item.itemName}
               </p>
