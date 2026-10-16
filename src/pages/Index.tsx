@@ -52,6 +52,7 @@ import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import FunilVendas from "@/components/dashboard/FunilVendas";
+import ConversaoCarteiraSegmento from "@/components/dashboard/ConversaoCarteiraSegmento";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { qualidadeDerivada } from "@/lib/qualidadeDerivada";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
@@ -483,7 +484,10 @@ const Index = () => {
                     />
                   )}
                   {activeTab === "executive" && (
-                    <div className="my-4"><FunilVendas kpis={displayKpis as any} /></div>
+                    <>
+                      <div className="my-4"><FunilVendas kpis={displayKpis as any} /></div>
+                      <ConversaoCarteiraSegmento />
+                    </>
                   )}
                   <div className="lg:hidden mb-3">
                     <Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}>
