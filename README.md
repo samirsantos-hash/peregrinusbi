@@ -60,6 +60,12 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## How can I connect Mercado Livre?
+
+The OAuth flow is already in this repo (Edge Functions + `/integracoes`). Follow the Portuguese step-by-step:
+
+**[docs/conectar-mercado-livre-lovable.md](docs/conectar-mercado-livre-lovable.md)**
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
