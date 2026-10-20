@@ -1,3 +1,5 @@
+import { faixaInvestimento, investimento30d } from "@/lib/analiseDiaria";
+import { META_INVEST_ADS } from "@/lib/scoresServicos30d";
 import { useMemo, useState } from "react";
 import { AlertTriangle, CheckCircle2, ChevronRight, ExternalLink, HelpCircle, Info, MinusCircle, OctagonAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -52,6 +54,7 @@ interface KpiLike {
 
 interface DiagnosticAlertsProps {
   kpis: KpiLike[];
+  dailyKpis?: KpiLike[];
   /** Série mensal usada como fallback quando a série diária não traz o indicador (ex.: score de qualidade só existe no mensal). */
   fallbackKpis?: KpiLike[];
   sellerCustIdMap?: Record<string, string>;
@@ -61,7 +64,7 @@ interface DiagnosticAlertsProps {
 /* ---------------- helpers determinísticos ---------------- */
 
 const META_PRAZO = 95; // % de envios no prazo exigido pelo programa
-const META_ADS = 3; // % de investimento sobre o TGMV
+const META_ADS = META_INVEST_ADS * 100; // % de investimento sobre o TGMV
 
 const NIVEIS_OK = ["green", "light_green", "green_gold", "green_platinum", "green_silver"];
 
@@ -133,7 +136,7 @@ const PESO: Record<Severidade, number> = { critico: 0, atencao: 1, info: 2 };
 
 /* ---------------- componente ---------------- */
 
-const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, seller = null }: DiagnosticAlertsProps) => {
+const DiagnosticAlerts = ({ kpis, dailyKpis = [], fallbackKpis = [], sellerCustIdMap = {}, seller = null }: DiagnosticAlertsProps) => {
   const [drawer, setDrawer] = useState(false);
   const [detalhe, setDetalhe] = useState<Alerta | null>(null);
   const [qualidadeDrawer, setQualidadeDrawer] = useState(false);
@@ -242,22 +245,13 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       .filter(Boolean)
       .join("  ·  ");
 
-    // Investimento: últimos 30 dias da base (diária + mensal como apoio)
-    const baseAds = (() => {
-      const comData = todas.filter((k) => k.date);
-      if (!comData.length) return [] as KpiLike[];
-      const fim = new Date(String(comData[0].date).slice(0, 10) + "T00:00:00");
-      const ini = new Date(fim); ini.setDate(ini.getDate() - 29);
-      const iniStr = ini.toISOString().slice(0, 10);
-      const janela = ordenados.filter((k) => String(k.date).slice(0, 10) >= iniStr);
-      if (janela.some((k) => Number(k.adsInvestment) > 0)) return janela;
-      const mensal = [...fallbackKpis].sort((a, b) => String(b.date).localeCompare(String(a.date)));
-      const d = mensal.find((k) => Number(k.adsInvestment) > 0)?.date;
-      return d ? mensal.filter((k) => k.date === d) : janela;
-    })();
-    const tgmvTotal = baseAds.reduce((s, k) => s + (Number(k.tgmv) || Number(k.revenue) || 0), 0);
-    const adsTotal = baseAds.reduce((s, k) => s + (Number(k.adsInvestment) || 0), 0);
-    const shareAds = tgmvTotal > 0 ? (adsTotal / tgmvTotal) * 100 : null;
+    // Janela diária exclusiva, ancorada no último registro, sem fallback mensal.
+    const ads30 = investimento30d(dailyKpis.map((k) => ({
+      date: k.date ?? "", revenue: Number(k.tgmv ?? k.revenue ?? 0),
+      adsInvestment: k.adsInvestment,
+    })));
+    const shareAds = ads30?.share ?? null;
+    const faixaAds = faixaInvestimento(shareAds);
 
     const motivosQualidade = [...itensQualidade]
       .filter((it) => it.valor != null && (it.ganho ?? 0) > 0)
@@ -320,20 +314,17 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       },
       {
         rotulo: "Investimento em Ads",
-        valor: shareAds != null ? fmtPct(shareAds) : "—",
-        meta: `meta: ≥ ${META_ADS}%`,
-        estado:
-          shareAds == null ? "sem_dado" : shareAds >= META_ADS ? "ok" : shareAds >= 1.25 ? "atencao" : "critico",
-        derivado: "Investimento em anúncios ÷ faturamento bruto dos últimos 30 dias. Critério do Marketplace (% SoW Pads): Tier 1 ≥ 2,5% · Tier 2 ≥ 1,25% · Tier 3 ≥ 0,5%. Meta da consultoria: 3%.",
+        valor: shareAds != null ? fmtPct(shareAds, 2) : "—",
+        meta: `Meta Peregrinus: ${META_ADS}%`,
+        estado: !faixaAds ? "sem_dado" : faixaAds.alerta ? "critico" : faixaAds.tier === 1 ? "ok" : "atencao",
+        chip: !faixaAds ? undefined : faixaAds.alerta ? "Abaixo do Tier 3" : `Atende investimento do Tier ${faixaAds.tier}${faixaAds.metaPeregrinus ? " e a Meta Peregrinus" : ""}`,
+        derivado: "Investimento em anúncios ÷ faturamento bruto dos últimos 30 dias. Requisito financeiro: Tier 1 ≥ 2,5% · Tier 2 ≥ 1,25% · Tier 3 ≥ 0,5%. Meta Peregrinus interna: 3%. Não define sozinho o tier da loja.",
         temDado: shareAds != null,
-        foraDaMeta: shareAds != null && shareAds < META_ADS,
-        contexto: shareAds == null ? undefined : [
-          `nível pelo investimento: ${shareAds >= 2.5 ? "Tier 1" : shareAds >= 1.25 ? "Tier 2" : shareAds >= 0.5 ? "Tier 3" : "abaixo do Tier 3"}`,
-          "Tier 1 ≥ 2,5% · Tier 2 ≥ 1,25% · Tier 3 ≥ 0,5%",
-          shareAds < META_ADS && tgmvTotal > 0
-            ? `faltam R$ ${Math.round((META_ADS / 100) * tgmvTotal - adsTotal).toLocaleString("pt-BR")} em 30 dias para 3%`
-            : null,
-        ].filter(Boolean).join("  ·  "),
+        foraDaMeta: faixaAds?.alerta ?? false,
+        contexto: !faixaAds ? "Sem série diária com faturamento para calcular os últimos 30 dias." : [
+          faixaAds.proximo != null ? `faltam ${faixaAds.distancia.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} p.p. para ${faixaAds.proximo === 3 ? "a Meta Peregrinus" : `o investimento do Tier ${faixaAds.proximo === 0.5 ? 3 : faixaAds.proximo === 1.25 ? 2 : 1}`}` : null,
+          ads30 ? `${ads30.from.split("-").reverse().join("/")}–${ads30.to.split("-").reverse().join("/")} · ${ads30.diasComDado}/30 dias com registro` : null,
+        ].filter(Boolean).join(" · "),
       },
     ];
     const iRep = 0, iPrazo = 1, iQual = 3, iAds = 4;
@@ -422,10 +413,10 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
       lista.push({
         id: "ads",
         severidade: inds[iAds].estado === "critico" ? "critico" : "atencao",
-        descricao: `Investimento em Ads em ${inds[iAds].valor} do faturamento, abaixo do mínimo de ${META_ADS}% para Tier 1.`,
+        descricao: `Investimento em Ads em ${inds[iAds].valor} do faturamento, abaixo de 0,5% (requisito do Tier 3).`,
         acao: "Ver detalhe",
-        titulo: "Investimento em Ads abaixo do mínimo Tier 1",
-        contexto: `Atual: ${inds[iAds].valor} do faturamento bruto dos últimos 30 dias · Mínimo Tier 1: ${META_ADS}%.`,
+        titulo: "Investimento em Ads abaixo do requisito do Tier 3",
+        contexto: `Atual: ${inds[iAds].valor} do faturamento bruto dos últimos 30 dias · Requisito financeiro Tier 3: 0,5%. Meta Peregrinus: ${META_ADS}%.`,
         passos: [
           "Elevar o orçamento até 3% do faturamento, começando pelos anúncios com melhor conversão.",
           "Concentrar orçamento nos SKUs com maior conversão orgânica.",
@@ -487,7 +478,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
         serie: serieQualidade,
       },
     };
-  }, [kpis, fallbackKpis, sellerCustIdMap, seller, carteira]);
+  }, [kpis, dailyKpis, fallbackKpis, sellerCustIdMap, seller, carteira]);
 
   const criticos = alertas.filter((a) => a.severidade === "critico").length;
   const visiveis = alertas.slice(0, 5);
@@ -593,12 +584,13 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
                   </Tooltip>
                 )}
               </div>
-              <div className="flex items-baseline gap-2 mt-1">
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 mt-1">
                 <span
                   className={cn(
-                    "text-[22px] font-bold font-mono tabular-nums leading-none capitalize",
+                    "text-[22px] font-bold tabular-nums leading-tight break-words capitalize",
                     !i.temDado && "text-muted-foreground",
                     i.rotulo === "Reputação" && i.temDado && CORES[i.estado],
+                    i.rotulo === "Investimento em Ads" && faixaInvestimento(Number(i.valor.replace("%", "").replace(",", ".")))?.tier === 3 && "text-ec-laranja",
                   )}
                 >
                   {i.valor}
@@ -607,7 +599,7 @@ const DiagnosticAlerts = ({ kpis, fallbackKpis = [], sellerCustIdMap = {}, selle
               </div>
               <div className={cn("flex items-center gap-1 text-[11px] mt-1.5", CORES[i.estado])}>
                 <IconeSemaforo estado={i.estado} />
-                <span>{ROTULO_SEMAFORO[i.estado]}</span>
+                <span>{i.chip && i.rotulo === "Investimento em Ads" ? i.chip : ROTULO_SEMAFORO[i.estado]}</span>
                 {i.onAbrir && <ChevronRight className="w-3 h-3 ml-auto text-muted-foreground" />}
               </div>
               {i.contexto && (

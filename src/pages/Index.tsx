@@ -306,6 +306,14 @@ const Index = () => {
     return filteredKpis;
   }, [filteredKpis, isDailyPeriod]);
 
+  // Dados diários ficam independentes da escolha de visão mensal/trimestral.
+  const filteredDailyKpis = useMemo(() => {
+    if (!dateRange?.from) return allKpisDaily;
+    const from = formatDateString(dateRange.from);
+    const to = formatDateString(dateRange.to ?? dateRange.from);
+    return allKpisDaily.filter((k) => k.date >= from && k.date <= to);
+  }, [allKpisDaily, dateRange]);
+
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["sellers"] });
@@ -479,6 +487,7 @@ const Index = () => {
                     <DiagnosticAlerts
                       kpis={displayKpis}
                       fallbackKpis={allKpisMonthly}
+                      dailyKpis={allKpisDaily}
                       sellerCustIdMap={sellerCustIdMap}
                       seller={sellers.find((s) => s.id === selectedSeller) || null}
                     />
@@ -530,7 +539,7 @@ const Index = () => {
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
-                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
+                    <EfficiencyPanel kpis={displayKpis} dailyKpis={filteredDailyKpis} from={dateRange?.from ? formatDateString(dateRange.from) : undefined} to={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
                   </TabsContent>
                   <TabsContent value="pock" className="mt-0 space-y-5">
                     <PockPanel
