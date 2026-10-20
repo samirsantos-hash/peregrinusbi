@@ -1,5 +1,12 @@
 # Roadmap
 
+## Melhorias aprovadas CND27 (20/10)
+- [ ] Usar série diária em média, mediana, recorde, evolução e distribuição semanal normalizada.
+- [ ] Retirar ROI sem custos e CPC proxy; apresentar TACOS e separar tiers da Meta Peregrinus.
+- [ ] Testar cálculos e conferir o fluxo com uma loja real na pré-visualização.
+- [ ] Reimportar Product Ads e validar painel × conta no mesmo período — aguarda relatórios completos e definição do recorte.
+- [ ] Liberar ROI/ACOS de equilíbrio e visão horária — aguarda custos e exportação horária reais.
+
 ## CDP e Multilojas (16/10)
 - [x] Calcular e apresentar evolução de participação e pontuação CDP com dados reais e testes.
 - [x] Organizar as seções Multilojas com a identidade visual do painel, sem alterar regras de acesso ou dados.

@@ -1,9 +1,10 @@
+import { analiseDiaria, type DiaAnalise } from "@/lib/analiseDiaria";
 import { numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   AreaChart, Area, LineChart, Line, BarChart, Bar, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceArea,
 } from "recharts";
 import TooltipInfo from "./TooltipInfo";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
@@ -50,6 +51,9 @@ interface KpiLike {
 
 interface EfficiencyPanelProps {
   kpis: KpiLike[];
+  dailyKpis?: DiaAnalise[];
+  from?: string;
+  to?: string;
   sellerCustIdMap?: Record<string, string>;
   dataGranularity?: "consolidated" | "daily";
   campaign?: SellerCampaign | null;
@@ -112,7 +116,7 @@ const BenchmarkBarTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark, sellerId, sellerCluster }: EfficiencyPanelProps) => {
+const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark, sellerId, sellerCluster }: EfficiencyPanelProps) => {
 
   const { data: portfolioBenchmark, loading: portfolioLoading } = usePortfolioBenchmark();
   const { data: clusterBenchmarkData } = useClusterBenchmark(sellerId, sellerCluster);
@@ -154,13 +158,24 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
 
   const allDates = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
 
-  const adsData = useMemo(() => {
-    return allDates.map((d) => ({
-      date: formatChartDate(d.date, dataGranularity),
-      "Faturamento Bruto": Math.round(d.gmv),
-      "Investimento em Marketing": Math.round(d.adsInvestment),
-    }));
-  }, [allDates, dataGranularity]);
+  const diario = useMemo(() => analiseDiaria(dailyKpis, from, to), [dailyKpis, from, to]);
+  const adsData = diario?.serie.map((d) => ({
+    date: formatChartDate(d.date, "daily"),
+    "Faturamento Bruto": d.revenue,
+    "Investimento em Marketing": d.adsInvestment,
+  })) ?? [];
+  const periodosParciais = useMemo(() => {
+    const meses = new Map<string, string[]>();
+    for (const d of diario?.serie ?? []) {
+      const mes = d.date.slice(0, 7);
+      meses.set(mes, [...(meses.get(mes) ?? []), d.date]);
+    }
+    return [...meses].filter(([mes, datas]) => {
+      const [y, m] = mes.split("-").map(Number);
+      const diasMes = new Date(Date.UTC(y, m, 0)).getUTCDate();
+      return datas.length < diasMes || (diario?.serie.filter((d) => d.date.startsWith(mes) && d.revenue !== null).length ?? 0) < diasMes;
+    }).map(([, datas]) => ({ inicio: formatChartDate(datas[0], "daily"), fim: formatChartDate(datas[datas.length - 1], "daily") }));
+  }, [diario]);
 
   // Weighted ROAS/ACOS/TACOS per date (not simple average); TACOS usa TGMV_LC
   // Sem investimento → null (gap no gráfico), nunca 0 fingindo desempenho péssimo
@@ -190,12 +205,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
   const acosClass = classifyVsThreshold(avgAcos, acosStat, -1);
   const tacosClass = classifyVsThreshold(avgTacos, tacosStat, -1);
 
-  // ROI weighted: (Sum_TGMV_LC_PADS - Sum_INV_PADS) / Sum_INV_PADS * 100
-  const totalTgmvPads = kpis.reduce((s, k) => s + (k.tgmvPads || 0), 0);
-  const roi = totalAds > 0 ? ((totalTgmvPads - totalAds) / totalAds) * 100 : 0;
-  if (roi > 1000) console.warn(`[EfficiencyPanel] ROI=${roi.toFixed(1).replace(".", ",")}% — verificar integridade de INV_PADS e TGMV_LC_PADS`);
   const totalVisits = kpis.reduce((s, k) => s + (k.visits || 0), 0);
-  const cpcProxy = totalVisits > 0 ? totalAds / totalVisits : 0;
 
   // Campaign benchmarking alerts
   const campaignAlerts = useMemo(() => {
@@ -272,7 +282,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
   }, [benchmark, avgRoas, avgAcos, avgTacos]);
 
   const adsEstado = classificarInvestimento(totalAds);
-  const roasDisplay = formatarComEstado(adsEstado, fmtNum(avgRoas, 2));
+  const roasDisplay = formatarComEstado(adsEstado, `${fmtNum(avgRoas, 2)}x`);
   const acosDisplay = formatarComEstado(
     adsEstado,
     `${avgAcos.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%`,
@@ -325,22 +335,6 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       tooltip: "Custo por aquisição. INV_PADS / TSI_PADS.",
       benchmarkText: null,
       algoKey: "cpa" as const,
-    },
-    {
-      label: "ROI",
-      value: adsEstado === "valor" ? `${roi.toFixed(1).replace(".", ",")}%` : formatarComEstado(adsEstado, ""),
-      color: adsEstado !== "valor" ? classNameEstado(adsEstado) : roi > 0 ? "emerald-text" : "critical-text",
-      tooltip: "(TGMV_LC_PADS − INV_PADS) / INV_PADS × 100.",
-      benchmarkText: null,
-      algoKey: undefined,
-    },
-    {
-      label: "CPC Proxy",
-      value: fmtBRL(cpcProxy),
-      color: "text-muted-foreground",
-      tooltip: "INV_PADS / VISITAS. Proxy do custo por clique.",
-      benchmarkText: null,
-      algoKey: undefined,
     },
     {
       label: "Investimento em Marketing",
@@ -453,7 +447,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
 
       {/* Sales Record + Best Investment Period */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
-        <SalesRecordCard kpis={kpis} />
+        <SalesRecordCard kpis={dailyKpis} from={from} to={to} />
         <div className="md:col-span-2"><BestInvestmentPeriod kpis={kpis} /></div>
       </div>
 
@@ -506,6 +500,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
         </div>
       )}
 
+      <p className="text-xs text-muted-foreground">ROAS usa vendas atribuídas a Ads. ROI não é exibido sem custos da mercadoria, tarifas, frete e impostos; CPC não é exibido sem cliques pagos reais.</p>
       {/* Area Chart — Faturamento vs Ads */}
       <div className="glass-card p-5">
         <div className="flex items-center justify-between mb-4">
@@ -516,9 +511,11 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
             <TooltipInfo text="Comparativo entre o GMV gerado (eixo esquerdo) e o valor investido em Ads (eixo direito). As escalas são independentes porque o investimento é de ordem de grandeza muito menor que o faturamento — compare o formato das curvas, não a altura." />
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={280}>
+        <p className="text-xs text-muted-foreground mb-3">Série diária: {diario?.diasComDado ?? 0} de {diario?.dias ?? 0} dias com registro. Lacunas permanecem sem ligação; faixas hachuradas indicam meses incompletos.</p>
+        {!diario?.diasComDado ? <p className="text-sm text-muted-foreground">Sem dados diários no período selecionado.</p> : <ResponsiveContainer width="100%" height={280}>
           <AreaChart data={adsData}>
             <defs>
+              <pattern id="parcialEff" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M-1,1 l2,-2 M0,6 l6,-6 M5,7 l2,-2" stroke="hsl(var(--ec-ambar))" strokeOpacity={0.3} /></pattern>
               <linearGradient id="gradBlueEff" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="hsl(var(--neon-blue))" stopOpacity={0.3} />
                 <stop offset="95%" stopColor="hsl(var(--neon-blue))" stopOpacity={0} />
@@ -552,11 +549,12 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
               tickFormatter={(v) => numCurto(v)}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Area yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(var(--neon-blue))" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
-            <Area yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(var(--ec-laranja))" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            {periodosParciais.map((p) => <ReferenceArea key={p.inicio} yAxisId="gmv" x1={p.inicio} x2={p.fim} fill="url(#parcialEff)" />)}
+            <Area connectNulls={false} dot={adsData.length === 1} activeDot={{ r: 4 }} yAxisId="gmv" type="monotone" dataKey="Faturamento Bruto" stroke="hsl(var(--neon-blue))" fill="url(#gradBlueEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
+            <Area connectNulls={false} dot={adsData.length === 1} activeDot={{ r: 4 }} yAxisId="ads" type="monotone" dataKey="Investimento em Marketing" stroke="hsl(var(--ec-laranja))" fill="url(#gradEmeraldEff)" strokeWidth={2} animationDuration={800} animationEasing="ease-in-out" />
             <Legend wrapperStyle={{ color: "hsl(var(--ec-text-sec))", fontSize: 12 }} />
           </AreaChart>
-        </ResponsiveContainer>
+        </ResponsiveContainer>}
         <p className="mt-2 text-[11px] text-muted-foreground">
           Escalas independentes: faturamento no eixo esquerdo (azul), investimento em Ads no eixo direito (laranja).
         </p>
@@ -605,7 +603,7 @@ const EfficiencyPanel = ({ kpis, sellerCustIdMap, dataGranularity = "daily", cam
       />
 
       {/* Heatmap */}
-      <TrafficHeatmap kpis={kpis} />
+      <TrafficHeatmap kpis={dailyKpis} from={from} to={to} />
     </motion.div>
   );
 };

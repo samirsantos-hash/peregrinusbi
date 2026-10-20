@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { TrendingDown } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
+import { pct } from "@/lib/format";
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 
 interface Props {
@@ -32,7 +33,7 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
       avgCpa: v.cpa / v.count,
       revenue: v.revenue,
       ads: v.ads,
-      efficiency: v.revenue / v.ads // revenue per R$ invested
+      tacos: v.ads / v.revenue * 100
     })).
     sort((a, b) => a.avgCpa - b.avgCpa);
 
@@ -97,8 +98,8 @@ const BestInvestmentPeriod = ({ kpis }: Props) => {
           transition={{ delay: 0.2 }}
           className="bg-muted/30 rounded-lg p-3">
           
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Retorno / R$ Investido</p>
-          <p className="text-sm font-bold font-mono text-foreground mt-1">{best.efficiency.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}x</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">TACOS</p>
+          <p className="text-sm font-bold font-mono text-foreground mt-1">{pct(best.tacos, 2)}</p>
         </motion.div>
       </div>
       </div>
