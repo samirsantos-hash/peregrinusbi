@@ -1,3 +1,4 @@
 - [Chart Line Colors](mem://ui/chart-line-colors) — Linhas de um mesmo gráfico nunca repetem cor
 - [Seller Category](mem://features/seller-category) — Categoria pelos produtos vendidos/base de clientes; campanhas só último recurso
 - [Tier Criteria](mem://logic/tier-criteria) — Tier 1/2/3: rep, 3PGM 60/45/20, SoW Pads 2,5/1,25/0,5, OOS 15/25/35, BS 35/45/55; meta Ads 3%
+- [Meta Ads 3%](mem://logic/meta-invest-ads) — 3% faturamento 30d é métrica interna Peregrinus documentada; rotular "Meta Peregrinus"
