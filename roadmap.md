@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Melhorias aprovadas CND27 (20/10)
-- [ ] Usar série diária em média, mediana, recorde, evolução e distribuição semanal normalizada.
-- [ ] Retirar ROI sem custos e CPC proxy; apresentar TACOS e separar tiers da Meta Peregrinus.
-- [ ] Testar cálculos e conferir o fluxo com uma loja real na pré-visualização.
+- [x] Usar série diária em média, mediana, recorde, evolução e distribuição semanal normalizada.
+- [x] Retirar ROI sem custos e CPC proxy; apresentar TACOS e separar tiers da Meta Peregrinus.
+- [x] Testar cálculos e conferir o fluxo com uma loja real: CND27 20/09–19/10, média R$ 2.538,44 e recorde 07/10 R$ 5.904,72; 167 testes, sem exceções.
+- [x] Registrar matriz de origem e validação em docs/validacao-cnd27.md.
 - [ ] Reimportar Product Ads e validar painel × conta no mesmo período — aguarda relatórios completos e definição do recorte.
 - [ ] Liberar ROI/ACOS de equilíbrio e visão horária — aguarda custos e exportação horária reais.
 
