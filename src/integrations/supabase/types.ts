@@ -1650,6 +1650,45 @@ export type Database = {
           },
         ]
       }
+      ml_notificacoes: {
+        Row: {
+          application_id: number | null
+          attempts: number | null
+          enviado_em: string | null
+          id: string
+          ml_user_id: number | null
+          payload: Json | null
+          processado: boolean
+          recebido_em: string
+          resource: string
+          topic: string
+        }
+        Insert: {
+          application_id?: number | null
+          attempts?: number | null
+          enviado_em?: string | null
+          id?: string
+          ml_user_id?: number | null
+          payload?: Json | null
+          processado?: boolean
+          recebido_em?: string
+          resource: string
+          topic: string
+        }
+        Update: {
+          application_id?: number | null
+          attempts?: number | null
+          enviado_em?: string | null
+          id?: string
+          ml_user_id?: number | null
+          payload?: Json | null
+          processado?: boolean
+          recebido_em?: string
+          resource?: string
+          topic?: string
+        }
+        Relationships: []
+      }
       ml_oauth_states: {
         Row: {
           consumed_at: string | null

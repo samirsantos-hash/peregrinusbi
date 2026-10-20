@@ -20,3 +20,5 @@ verify_jwt = false
 
 [functions.drive-sync]
 verify_jwt = false
+[functions.ml-notificacoes]
+verify_jwt = false
