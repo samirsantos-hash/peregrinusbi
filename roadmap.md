@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Retorno Mercado Livre (21/10)
+- [ ] Conferir validade e uso do convite enviado; concluir correção de APP_URL pelo formulário seguro.
 - [x] Corrigir destino do callback, impedir loop e testar o retorno publicado: quatro testes; acesso direto 200, erros 302 para ecomperegrinus.com.br, sem troca de tokens.
 - [ ] Validar autorização completa — depende de o lojista autorizar no Mercado Livre.
 
