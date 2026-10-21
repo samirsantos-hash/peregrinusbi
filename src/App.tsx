@@ -12,6 +12,8 @@ import { Loader2 } from "lucide-react";
 import { useSessionTracker } from "@/hooks/useSessionTracker";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import OAuthConsent from "./pages/OAuthConsent";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 import Admin from "./pages/Admin";
 import ChangePassword from "./pages/ChangePassword";
 import NoAccess from "./pages/NoAccess";
@@ -88,7 +90,8 @@ const AppRoutes = () => {
       <AuraReveal />
       <div className="relative z-10">
       <Routes>
-      <Route path="/auth" element={user ? <Navigate to="/" replace /> : <Auth />} />
+      <Route path="/auth" element={user ? <Navigate to={oauthReturnPath(new URLSearchParams(window.location.search).get("next"))} replace /> : <Auth />} />
+      <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/setup" element={<Setup />} />
