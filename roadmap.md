@@ -1,7 +1,8 @@
 # Roadmap
 
 ## Retorno Mercado Livre (21/10)
-- [ ] Corrigir destino do callback, impedir loop e testar o retorno publicado.
+- [x] Corrigir destino do callback, impedir loop e testar o retorno publicado: quatro testes; acesso direto 200, erros 302 para ecomperegrinus.com.br, sem troca de tokens.
+- [ ] Validar autorização completa — depende de o lojista autorizar no Mercado Livre.
 
 ## Melhorias aprovadas CND27 (20/10)
 - [x] Usar série diária em média, mediana, recorde, evolução e distribuição semanal normalizada.
