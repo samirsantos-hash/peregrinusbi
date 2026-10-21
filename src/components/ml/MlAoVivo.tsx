@@ -333,7 +333,7 @@ function Perguntas({ p }: { p: any }) {
             {lista.map((q) => (
               <li key={q.id ?? q.data} className="p-3 space-y-1 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-2">{dataBr(q.data)} · <CopiarAnuncio mlb={q.item} /></span>
+                  <span className="flex items-center gap-2">{dataBr(q.data)} · <CopiarAnuncio itemId={q.item} /></span>
                   <span className={q.status === "UNANSWERED" ? "font-medium text-destructive" : ""}>{STATUS_P[q.status] ?? q.status}{q.horas != null ? ` · respondida em ${horasTxt(q.horas)}` : ""}</span>
                 </div>
                 <p>{q.texto}</p>
