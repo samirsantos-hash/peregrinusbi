@@ -22,3 +22,6 @@ verify_jwt = false
 verify_jwt = false
 [functions.ml-notificacoes]
 verify_jwt = false
+
+[functions.ml-sync-loja]
+verify_jwt = false
