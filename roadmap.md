@@ -1,5 +1,8 @@
 # Roadmap
 
+## Retorno Mercado Livre (21/10)
+- [ ] Corrigir destino do callback, impedir loop e testar o retorno publicado.
+
 ## Melhorias aprovadas CND27 (20/10)
 - [x] Usar série diária em média, mediana, recorde, evolução e distribuição semanal normalizada.
 - [x] Retirar ROI sem custos e CPC proxy; apresentar TACOS e separar tiers da Meta Peregrinus.

@@ -7,6 +7,7 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "../_shared/env.ts";
+import { resolveMlAppUrl } from "../_shared/mlAppUrl.ts";
 
 // ATENÇÃO: autorização é "mercadolivre.com.br"; token é "mercadolibre.com".
 const ML_TOKEN_URL = "https://api.mercadolibre.com/oauth/token";
@@ -27,13 +28,13 @@ Deno.serve(async (req) => {
   const CLIENT_SECRET = requireEnv("ML_CLIENT_SECRET");
   const REDIRECT_URI =
     Deno.env.get("ML_REDIRECT_URI") ?? `${SUPABASE_URL}/functions/v1/ml-oauth-callback`;
-  const APP_URL = (requireEnv("APP_URL")).replace(/\/+$/, "");
+  const APP_URL = resolveMlAppUrl(Deno.env.get("APP_URL"));
 
   let conviteToken: string | null = null;
   const volta = (status: "ok" | "erro", msg?: string) => {
     // Lojista convidado não tem login: volta para a página pública da marca.
     const caminho = conviteToken ? `/conectar/${conviteToken}` : "/integracoes";
-    const destino = new URL(`${APP_URL || SUPABASE_URL}${caminho}`);
+    const destino = new URL(`${APP_URL}${caminho}`);
     destino.searchParams.set("status", status);
     if (msg) destino.searchParams.set("msg", msg);
     return new Response(null, { status: 302, headers: { Location: destino.toString() } });
@@ -46,6 +47,19 @@ Deno.serve(async (req) => {
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
+
+  // Opening the endpoint directly is a status check, not an OAuth attempt.
+  if (!code && !state && !url.searchParams.has("error")) {
+    return new Response(
+      `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Conexão Mercado Livre — Peregrinus</title></head><body><main><h1>Retorno da conexão Mercado Livre ativo</h1><p>Para conectar uma loja, abra o convite e autorize o acesso no Mercado Livre.</p><a href="${APP_URL}/integracoes">Voltar ao Painel Peregrinus</a></main></body></html>`,
+      { status: 200, headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        "Content-Security-Policy": "default-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+        "X-Content-Type-Options": "nosniff",
+      } },
+    );
+  }
 
   // Valida primeiro, mas só consome depois que o Mercado Livre troca o code.
   // Assim, uma indisponibilidade externa não inutiliza o state antes da hora.

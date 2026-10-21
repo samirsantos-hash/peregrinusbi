@@ -1,5 +1,7 @@
 # Architecture Rules
 
+- Mercado Livre callback destinations use the shared validated panel-origin resolver and direct visits return status without redirects; never fall back to a function URL, to prevent redirect loops and untrusted destinations.
+
 - Daily summary, calendar-gap charts, occurrence-normalized weekdays and 30-day investment diagnostics share the pure `src/lib/analiseDiaria.ts` calculator; pass daily data explicitly and never use monthly fallback for daily claims to avoid fabricated dates and hourly estimates.
 
 - CDP participation history and goal-attainment scores use the pure `src/lib/cdpEvolucao.ts` calculator over trailing calendar-day windows; reuse the existing promotion threshold and label attainment separately from imported official scores to prevent invented ML ratings.
