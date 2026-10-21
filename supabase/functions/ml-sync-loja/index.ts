@@ -206,12 +206,15 @@ Deno.serve(async (req) => {
     // Histórico: até 1.000 perguntas mais recentes (páginas de 50).
     const hist: any[] = [];
     let total: number | null = null;
+    const vistos = new Set<unknown>();
     for (let off = 0; off < 1000; off += 50) {
       const s = await get(`/questions/search?seller_id=${uid}&api_version=4&limit=50&offset=${off}&sort_fields=date_created&sort_types=DESC`);
       total = s.total ?? total;
-      hist.push(...(s.questions ?? []));
-      if ((s.questions ?? []).length < 50) break;
+      const antes = vistos.size;
+      for (const q of s.questions ?? []) if (!vistos.has(q.id)) { vistos.add(q.id); hist.push(q); }
+      if ((s.questions ?? []).length < 50 || vistos.size === antes) break;
     }
+    total = Math.max(total ?? 0, hist.length);
     const horasDe = (q: any) => q.answer?.date_created ? (Date.parse(q.answer.date_created) - Date.parse(q.date_created)) / 36e5 : null;
     const resp = hist.map(horasDe).filter((h): h is number => h != null && h >= 0).sort((a, b) => a - b);
     const desde90 = new Date(hoje.getTime() - 90 * 864e5);
