@@ -1,12 +1,12 @@
 # Roadmap
 
 ## Gestão no Mercado Livre (só servidor, uma etapa por vez)
-- [ ] Pré-requisito: APP_URL correto — aguarda aprovação do usuário.
+- [x] Pré-requisito: APP_URL correto (retorno 302 para ecomperegrinus.com.br confirmado).
 - [ ] Etapa 1 — base comum (auditoria, pedidos de ação, ajustes por conta, webhook, notificações) — aguarda respostas às dúvidas.
 - [ ] Etapas 2–6 — Ads leitura, Ads gestão, promoções, perguntas, testes/contratos.
 
 ## Retorno Mercado Livre (21/10)
-- [ ] Conferir validade e uso do convite enviado; concluir correção de APP_URL pelo formulário seguro.
+- [x] Convite conferido (válido até 27/10) e APP_URL corrigido.
 - [x] Corrigir destino do callback, impedir loop e testar o retorno publicado: quatro testes; acesso direto 200, erros 302 para ecomperegrinus.com.br, sem troca de tokens.
 - [ ] Validar autorização completa — depende de o lojista autorizar no Mercado Livre.
 
