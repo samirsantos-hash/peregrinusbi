@@ -1760,6 +1760,33 @@ export type Database = {
           },
         ]
       }
+      ml_sync_tema: {
+        Row: {
+          account_id: string
+          atualizado_em: string
+          cust_id: string
+          dados: Json | null
+          erro: string | null
+          tema: string
+        }
+        Insert: {
+          account_id: string
+          atualizado_em?: string
+          cust_id: string
+          dados?: Json | null
+          erro?: string | null
+          tema: string
+        }
+        Update: {
+          account_id?: string
+          atualizado_em?: string
+          cust_id?: string
+          dados?: Json | null
+          erro?: string | null
+          tema?: string
+        }
+        Relationships: []
+      }
       ml_tokens: {
         Row: {
           access_token: string

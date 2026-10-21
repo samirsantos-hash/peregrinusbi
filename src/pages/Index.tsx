@@ -1,5 +1,6 @@
 import AguiaLogo from "@/components/aura/AguiaLogo";
 import CarteiraNaSecao from "@/components/carteira/deepdive/CarteiraNaSecao";
+import MlAoVivo from "@/components/ml/MlAoVivo";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -515,6 +516,7 @@ const Index = () => {
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     {isConsolidado && <CarteiraNaSecao secao="executive" />}
                     <NovidadesPrompt />
+                    <MlAoVivo secao="resumo" custId={sellerCustIdMap[selectedSeller]} />
                     <JuniorActionBanner abaId="executive" dados={dadosJunior} />
                     <Daily7DPanel
                       dailyKpis={allKpisDaily}
@@ -558,6 +560,7 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="publicidade" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="publicidade" />}
+                    <MlAoVivo secao="publicidade" custId={sellerCustIdMap[selectedSeller]} />
                     <PublicidadePanel
                       sellerUuid={selectedSeller}
                       custId={sellerCustIdMap[selectedSeller]}
@@ -569,6 +572,7 @@ const Index = () => {
                   <TabsContent value="logistics" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="logistics" />}
                     <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
+                    <MlAoVivo secao="logistica" custId={sellerCustIdMap[selectedSeller]} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} eligibilityItems={eligibilityItems || []} />
                     <FullRecommendationPanel
                       sellerId={selectedSeller}
@@ -579,6 +583,7 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
+                    <MlAoVivo secao="qualidade" custId={sellerCustIdMap[selectedSeller]} />
                     {(() => {
                       const latest: any = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0] || {};
                       const qd = qualidadeDerivada(allKpis as any[]);
@@ -619,12 +624,14 @@ const Index = () => {
                   <TabsContent value="opportunities" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="opportunities" />}
                     <JuniorActionBanner abaId="opportunities" dados={dadosJunior} />
+                    <MlAoVivo secao="oportunidades" custId={sellerCustIdMap[selectedSeller]} />
                     <CdpEvolucao rows={allKpisDaily.map((r) => ({ date: r.date, tgmv: r.tgmv, cdpTgmv: r.cdpTgmv }))} />
                     <CampanhasCofinanciadasPanel items={eligibilityItems || []} />
                     <OpportunitiesPanel items={eligibilityItems || []} />
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="reputation" dados={dadosJunior} />
+                    <MlAoVivo secao="reputacao" custId={sellerCustIdMap[selectedSeller]} />
                     <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
                   <TabsContent value="metas" className="mt-0">

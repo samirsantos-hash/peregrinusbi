@@ -20,3 +20,4 @@
 - A "Referência da vertical" do GrowthPotentialPanel é a mediana (faixa P25–P75) dos índices mensais dos pares da mesma vertical, sem o próprio seller, calculada em src/lib/referenciaVertical.ts; com menos de 5 pares não há curva, para evitar comparação circular.
 - Notificações do Mercado Livre chegam em `ml-notificacoes` (sem login, valida application_id), que só grava em `ml_notificacoes` e responde 200 na hora; o processamento é separado porque o ML exige resposta rápida.
 - Integrações de agentes (MCP) ficam em src/lib/mcp (uma ferramenta por arquivo, só leitura, cliente com o token OAuth do usuário para respeitar as permissões); a função mcp é gerada pelo plugin e só vai ao ar ao publicar.
+- `ml-sync-loja` (admin ou x-refresh-secret) lê o ML com o token da própria loja e grava um resumo por tema em `ml_sync_tema`; o painel mostra cada tema na aba correspondente via `src/components/ml/MlAoVivo.tsx`, sem misturar com as fontes de planilha.
