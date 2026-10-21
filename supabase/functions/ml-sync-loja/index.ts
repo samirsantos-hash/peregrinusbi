@@ -41,6 +41,12 @@ Deno.serve(async (req) => {
   }
 
   const body = await req.json().catch(() => ({}));
+  // Admin: copia a senha das rotinas do ambiente para o cofre do banco,
+  // que é de onde a atualização programada a lê. O valor nunca sai do servidor.
+  if (body.sincronizar_segredo) {
+    const { error } = await db.rpc("ml_set_trigger_secret", { p_value: requireEnv("REFRESH_TRIGGER_SECRET") });
+    return json({ ok: !error, erro: error?.message ?? null }, error ? 500 : 200);
+  }
   const rotina = segredoOk(segredo, Deno.env.get("REFRESH_TRIGGER_SECRET") ?? "");
 
   // Rotina programada sem loja: atualiza cada loja conectada, uma por vez
