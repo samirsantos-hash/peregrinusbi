@@ -41,6 +41,26 @@ Deno.serve(async (req) => {
   }
 
   const body = await req.json().catch(() => ({}));
+  const rotina = segredoOk(segredo, Deno.env.get("REFRESH_TRIGGER_SECRET") ?? "");
+
+  // Rotina programada sem loja: atualiza cada loja conectada, uma por vez
+  // (chamadas paralelas ao ML dão 429). Limitado às lojas ativas.
+  if (rotina && !body.account_id && !body.cust_id) {
+    const { data: contas } = await db.from("ml_accounts").select("id, nickname").eq("status", "active").limit(200);
+    const resumo: { loja: string; status: number }[] = [];
+    for (const c of contas ?? []) {
+      const r = await fetch(`${URL_}/functions/v1/ml-sync-loja`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-refresh-secret": segredo },
+        body: JSON.stringify({ account_id: c.id }),
+      }).catch(() => null);
+      await r?.text();
+      resumo.push({ loja: c.nickname, status: r?.status ?? 0 });
+      await espera(2000);
+    }
+    return json({ rotina: true, lojas: resumo });
+  }
+
   let q = db.from("ml_accounts").select("id, ml_user_id, nickname, status").eq("status", "active");
   if (body.account_id) q = q.eq("id", String(body.account_id));
   else if (body.cust_id) q = q.eq("ml_user_id", Number(String(body.cust_id).replace(/\D/g, "")));
