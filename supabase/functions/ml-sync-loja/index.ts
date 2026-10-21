@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
   }
   async function salvar(tema: string, fn: () => Promise<unknown>) {
     let dados: unknown = null, erro: string | null = null;
-    try { dados = await fn(); } catch (e) { erro = String((e as Error).message ?? e).slice(0, 300); }
+    try { dados = await fn(); } catch (e) { erro = String((e as Error).message ?? e).replace(/https?:\/\/\S+/g, "").replace(/APP_USR-\S+/g, "").slice(0, 200); }
     await db.from("ml_sync_tema").upsert({ account_id: conta!.id, cust_id: cust, tema, dados, erro, atualizado_em: new Date().toISOString() });
     return { tema, ok: !erro, erro };
   }
@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
     const a = (adv.advertisers ?? []).find((x: any) => x.site_id === "MLB") ?? adv.advertisers?.[0];
     if (!a) return { usa_ads: false };
     const de = dia(desde.toISOString()), ate = dia(hoje.toISOString());
-    const c = await get(`/advertising/advertisers/${a.advertiser_id}/product_ads/campaigns?limit=50&date_from=${de}&date_to=${ate}&metrics=clicks,prints,cost,acos,direct_amount,indirect_amount,total_amount,units_quantity&metrics_summary=true`, { "Api-Version": "2" });
+    const c = await get(`/advertising/MLB/advertisers/${a.advertiser_id}/product_ads/campaigns/search?limit=50&date_from=${de}&date_to=${ate}&metrics=clicks,prints,cost,acos,direct_amount,indirect_amount,total_amount,units_quantity&metrics_summary=true`, { "Api-Version": "2" });
     const s = c.metrics_summary ?? {};
     return {
       usa_ads: true,
