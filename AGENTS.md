@@ -1,6 +1,6 @@
 # Architecture Rules
 
-- Mercado Livre callback destinations use the shared validated panel-origin resolver and direct visits return status without redirects; never fall back to a function URL, to prevent redirect loops and untrusted destinations.
+- Mercado Livre callback destinations require a valid APP_URL checked by the shared panel-origin resolver; when it is missing or untrusted the callback shows an error page instead of redirecting, to prevent redirect loops and untrusted destinations.
 
 - Daily summary, calendar-gap charts, occurrence-normalized weekdays and 30-day investment diagnostics share the pure `src/lib/analiseDiaria.ts` calculator; pass daily data explicitly and never use monthly fallback for daily claims to avoid fabricated dates and hourly estimates.
 
