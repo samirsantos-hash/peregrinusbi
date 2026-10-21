@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "sdk_version": "3.1.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://uepfrcrlxaasvijxyqrg.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "peregrinus-business-intelligence",
+      "version": "0.1.0",
+      "title": "Peregrinus Business Intelligence"
+    },
+    "tools": [
+      {
+        "name": "listar_lojas",
+        "title": "Listar lojas",
+        "description": "Lista as lojas que o usuário conectado pode ver na carteira, com busca opcional por apelido ou Cust ID.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "busca": {
+              "type": "string",
+              "maxLength": 100,
+              "description": "Trecho do apelido ou do Cust ID."
+            },
+            "limite": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "description": "Máximo de lojas (padrão 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "indicadores_mensais_loja",
+        "title": "Indicadores mensais da loja",
+        "description": "Retorna faturamento, pedidos, visitas, investimento em Ads e notas de qualidade por mês de uma loja da carteira do usuário.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "loja_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "ID da loja, obtido em listar_lojas."
+            },
+            "meses": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 24,
+              "description": "Quantidade de meses mais recentes (padrão 6)."
+            }
+          },
+          "required": [
+            "loja_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
