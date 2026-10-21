@@ -202,15 +202,43 @@ Deno.serve(async (req) => {
 
   // 6. Perguntas
   res.push(await salvar("perguntas", async () => {
-    const pend = await get(`/questions/search?seller_id=${uid}&status=UNANSWERED&api_version=4&limit=20`);
-    const todas = await get(`/questions/search?seller_id=${uid}&api_version=4&limit=50&sort_fields=date_created&sort_types=DESC`);
-    const resp = (todas.questions ?? []).filter((q: any) => q.answer?.date_created);
-    const horas = resp.map((q: any) => (Date.parse(q.answer.date_created) - Date.parse(q.date_created)) / 36e5).filter((h: number) => h >= 0).sort((a: number, b: number) => a - b);
+    const pend = await get(`/questions/search?seller_id=${uid}&status=UNANSWERED&api_version=4&limit=50`);
+    // Histórico: até 1.000 perguntas mais recentes (páginas de 50).
+    const hist: any[] = [];
+    let total: number | null = null;
+    for (let off = 0; off < 1000; off += 50) {
+      const s = await get(`/questions/search?seller_id=${uid}&api_version=4&limit=50&offset=${off}&sort_fields=date_created&sort_types=DESC`);
+      total = s.total ?? total;
+      hist.push(...(s.questions ?? []));
+      if ((s.questions ?? []).length < 50) break;
+    }
+    const horasDe = (q: any) => q.answer?.date_created ? (Date.parse(q.answer.date_created) - Date.parse(q.date_created)) / 36e5 : null;
+    const resp = hist.map(horasDe).filter((h): h is number => h != null && h >= 0).sort((a, b) => a - b);
+    const desde90 = new Date(hoje.getTime() - 90 * 864e5);
+    const porDia: Record<string, { recebidas: number; respondidas: number; sem_resposta: number }> = {};
+    for (let d = new Date(desde90); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { recebidas: 0, respondidas: 0, sem_resposta: 0 };
+    for (const q of hist) {
+      const k = dia(q.date_created ?? "");
+      if (!porDia[k]) continue;
+      porDia[k].recebidas++;
+      if (q.status === "ANSWERED") porDia[k].respondidas++; else if (q.status === "UNANSWERED") porDia[k].sem_resposta++;
+    }
     return {
       sem_resposta: pend.total ?? (pend.questions ?? []).length,
-      total: todas.total ?? null,
-      mediana_horas_resposta: horas.length ? horas[Math.floor(horas.length / 2)] : null,
-      pendentes: (pend.questions ?? []).slice(0, 10).map((q: any) => ({ item: q.item_id, texto: q.text, data: q.date_created })),
+      total,
+      importadas: hist.length,
+      respondidas: resp.length,
+      mediana_horas_resposta: resp.length ? resp[Math.floor(resp.length / 2)] : null,
+      ate_1h: resp.length ? resp.filter((h) => h <= 1).length / resp.length : null,
+      serie: Object.entries(porDia).map(([data, v]) => ({ data, ...v })),
+      pendentes: (pend.questions ?? []).slice(0, 50).map((q: any) => ({ item: q.item_id, texto: String(q.text ?? "").slice(0, 500), data: q.date_created })),
+      historico: hist.slice(0, 500).map((q: any) => ({
+        id: q.id, item: q.item_id, status: q.status, data: q.date_created,
+        texto: String(q.text ?? "").slice(0, 500),
+        resposta: q.answer?.text ? String(q.answer.text).slice(0, 500) : null,
+        respondida_em: q.answer?.date_created ?? null,
+        horas: horasDe(q),
+      })),
     };
   }));
 

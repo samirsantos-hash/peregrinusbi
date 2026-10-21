@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Gauge,
   Target,
+  MessageCircleQuestion,
   type LucideIcon,
 } from "lucide-react";
 
@@ -60,6 +61,9 @@ export const SELLER_TABS: SellerTab[] = [
   { id: "reputation", label: "Reputação", icon: HeartPulse, order: 9,
     descricao: "Reclamações, atrasos, cancelamentos e disputas",
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
+  { id: "perguntas", label: "Perguntas", icon: MessageCircleQuestion, order: 9.5,
+    descricao: "Perguntas dos compradores, respostas e tempo de resposta",
+    juniorTip: "Pergunta sem resposta é venda perdida. Responder em até 1 hora melhora a conversão." },
   { id: "metas", label: "Metas", icon: Target, order: 10,
     descricao: "Metas definidas por loja e o realizado",
     juniorTip: "Defina metas de faturamento, clips e reposição por loja e compare com o realizado." },

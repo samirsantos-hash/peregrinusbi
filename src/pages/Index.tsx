@@ -634,6 +634,12 @@ const Index = () => {
                     <MlAoVivo secao="reputacao" custId={sellerCustIdMap[selectedSeller]} />
                     <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
                   </TabsContent>
+                  <TabsContent value="perguntas" className="mt-0 space-y-5">
+                    <MlAoVivo secao="perguntas" custId={sellerCustIdMap[selectedSeller]} />
+                    {!sellerCustIdMap[selectedSeller] && (
+                      <p className="text-sm text-muted-foreground">Selecione uma loja conectada ao Mercado Livre para ver as perguntas.</p>
+                    )}
+                  </TabsContent>
                   <TabsContent value="metas" className="mt-0">
                     <MetasPanel sellerId={selectedSeller} kpis={allKpisMonthly} />
                   </TabsContent>
