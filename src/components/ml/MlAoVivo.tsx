@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ComposedChart, Bar, Legend } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -98,15 +98,23 @@ const Grade = ({ children }: { children: React.ReactNode }) => (
 function Resumo({ vendas, visitas }: { vendas: any; visitas: any }) {
   if (!vendas && !visitas) return null;
   const vis = new Map<string, number>((visitas?.serie ?? []).map((x: any) => [x.data, x.visitas]));
-  const serie = (vendas?.serie ?? []).map((x: any) => ({ ...x, visitas: vis.get(x.data) ?? null, label: x.data.slice(8, 10) + "/" + x.data.slice(5, 7) }));
+  const serie = (vendas?.serie ?? []).map((x: any) => {
+    const tot = (x.pedidos ?? 0) + (x.cancelados ?? 0);
+    return { ...x, visitas: vis.get(x.data) ?? null, taxa: tot ? ((x.cancelados ?? 0) / tot) * 100 : null, label: x.data.slice(8, 10) + "/" + x.data.slice(5, 7) };
+  });
   const conv = vendas?.pedidos_30d && visitas?.total_30d ? vendas.pedidos_30d / visitas.total_30d : null;
+  const totPed = (vendas?.pedidos_30d ?? 0) + (vendas?.cancelados_30d ?? 0);
+  const taxaCanc = vendas?.taxa_cancelamento_30d ?? (totPed ? (vendas?.cancelados_30d ?? 0) / totPed : null);
+  const valorCanc = vendas?.valor_cancelado_30d ?? null;
   return (
     <>
       <Grade>
         <KpiCard focal rotulo="Faturamento 30 dias" valor={brl(vendas?.faturamento_30d)} referencia={`${num(vendas?.pedidos_30d)} pedidos`} />
         <KpiCard rotulo="Ticket médio" valor={brl(vendas?.ticket_medio, true)} referencia="faturamento ÷ pedidos" />
         <KpiCard rotulo="Visitas 30 dias" valor={num(visitas?.total_30d)} referencia="todos os anúncios" />
-        <KpiCard rotulo="Conversão" valor={pctFracao(conv, 2)} referencia={`${num(vendas?.cancelados_30d)} cancelados no período`} />
+        <KpiCard rotulo="Conversão" valor={pctFracao(conv, 2)} referencia="pedidos ÷ visitas" />
+        <KpiCard rotulo="Taxa de cancelamento" valor={pctFracao(taxaCanc, 2)} referencia={`${num(vendas?.cancelados_30d)} de ${num(totPed)} pedidos`} />
+        <KpiCard rotulo="Valor cancelado" valor={valorCanc == null ? "Sem dado" : brl(valorCanc)} referencia="pedidos cancelados em 30 dias" />
       </Grade>
       {serie.length > 0 && (
         <div className="h-56">
@@ -120,6 +128,24 @@ function Resumo({ vendas, visitas }: { vendas: any; visitas: any }) {
               <Line yAxisId="f" type="monotone" dataKey="faturamento" name="Faturamento" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
               <Line yAxisId="v" type="monotone" dataKey="visitas" name="Visitas" stroke="hsl(var(--chart-2, 200 80% 50%))" strokeWidth={1.5} dot={false} connectNulls={false} />
             </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {serie.length > 0 && (
+        <div className="h-56">
+          <p className="mb-1 text-xs text-muted-foreground">Pedidos, cancelamentos e taxa de cancelamento por dia</p>
+          <ResponsiveContainer>
+            <ComposedChart data={serie} margin={{ left: 0, right: 8, top: 8 }}>
+              <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+              <YAxis yAxisId="q" tick={{ fontSize: 11 }} width={40} allowDecimals={false} />
+              <YAxis yAxisId="t" orientation="right" tick={{ fontSize: 11 }} width={44} tickFormatter={(v) => `${num(v)}%`} />
+              <Tooltip formatter={(v: number, n: string) => (n === "Taxa de cancelamento" ? `${(v ?? 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` : num(v))} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar yAxisId="q" dataKey="pedidos" name="Pedidos" stackId="p" fill="hsl(var(--primary))" />
+              <Bar yAxisId="q" dataKey="cancelados" name="Cancelados" stackId="p" fill="hsl(var(--destructive))" />
+              <Line yAxisId="t" type="monotone" dataKey="taxa" name="Taxa de cancelamento" stroke="hsl(var(--foreground))" strokeWidth={1.5} dot={false} connectNulls />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       )}

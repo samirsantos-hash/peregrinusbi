@@ -160,18 +160,25 @@ Deno.serve(async (req) => {
       pedidos.push(...(s.results ?? []));
       if ((s.results ?? []).length < 50) break;
     }
-    const porDia: Record<string, { faturamento: number; pedidos: number; cancelados: number }> = {};
-    for (let d = new Date(desde); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { faturamento: 0, pedidos: 0, cancelados: 0 };
+    const porDia: Record<string, { faturamento: number; pedidos: number; cancelados: number; valor_cancelado: number }> = {};
+    for (let d = new Date(desde); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { faturamento: 0, pedidos: 0, cancelados: 0, valor_cancelado: 0 };
     for (const p of pedidos) {
       const k = dia(p.date_created ?? "");
       if (!porDia[k]) continue;
-      if (p.status === "cancelled") porDia[k].cancelados++;
+      if (p.status === "cancelled") { porDia[k].cancelados++; porDia[k].valor_cancelado += Number(p.total_amount) || 0; }
       else { porDia[k].pedidos++; porDia[k].faturamento += Number(p.total_amount) || 0; }
     }
     const serie = Object.entries(porDia).map(([data, v]) => ({ data, ...v }));
     const fat = serie.reduce((s, x) => s + x.faturamento, 0);
     const ped = serie.reduce((s, x) => s + x.pedidos, 0);
-    return { faturamento_30d: fat, pedidos_30d: ped, ticket_medio: ped ? fat / ped : null, cancelados_30d: serie.reduce((s, x) => s + x.cancelados, 0), serie };
+    const canc = serie.reduce((s, x) => s + x.cancelados, 0);
+    const valorCanc = serie.reduce((s, x) => s + x.valor_cancelado, 0);
+    return {
+      faturamento_30d: fat, pedidos_30d: ped, ticket_medio: ped ? fat / ped : null,
+      cancelados_30d: canc, valor_cancelado_30d: valorCanc,
+      taxa_cancelamento_30d: ped + canc ? canc / (ped + canc) : null,
+      serie,
+    };
   }));
 
   res.push(await salvar("envios", async () => {
