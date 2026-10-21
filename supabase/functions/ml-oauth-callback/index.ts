@@ -29,6 +29,18 @@ Deno.serve(async (req) => {
   const REDIRECT_URI =
     Deno.env.get("ML_REDIRECT_URI") ?? `${SUPABASE_URL}/functions/v1/ml-oauth-callback`;
   const APP_URL = resolveMlAppUrl(Deno.env.get("APP_URL"));
+  if (!APP_URL) {
+    console.log("APP_URL ausente ou inválido; callback não redireciona");
+    return new Response(
+      `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Conexão Mercado Livre — configuração incompleta</title></head><body><main><h1>Não foi possível concluir a conexão</h1><p>O endereço do Painel Peregrinus não está configurado corretamente. Avise o administrador do painel. Nenhum dado foi alterado.</p></main></body></html>`,
+      { status: 500, headers: {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        "Content-Security-Policy": "default-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+        "X-Content-Type-Options": "nosniff",
+      } },
+    );
+  }
 
   let conviteToken: string | null = null;
   const volta = (status: "ok" | "erro", msg?: string) => {
