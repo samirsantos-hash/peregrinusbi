@@ -305,8 +305,8 @@ export function validarIa(json: unknown, maxTitulo: number | null, maxDescricao:
   const recs = (Array.isArray(r.recomendacoes) ? r.recomendacoes : []).flatMap((x) => {
     const o = x as Record<string, unknown>;
     const titulo = txt(o.titulo), texto = txt(o.texto);
-    const prioridade = o.prioridade === "alta" || o.prioridade === "media" || o.prioridade === "baixa" ? o.prioridade : null;
-    const origem = o.origem === "regra" || o.origem === "ia" ? o.origem : null;
+    const prioridade = o.prioridade === "alta" || o.prioridade === "media" || o.prioridade === "baixa" ? (o.prioridade as Gravidade) : null;
+    const origem = o.origem === "regra" || o.origem === "ia" ? (o.origem as "regra" | "ia") : null;
     if (!titulo || !texto || !prioridade || !origem) return [];
     return [{ frente: txt(o.frente) ?? "geral", prioridade, origem, titulo, texto }];
   });

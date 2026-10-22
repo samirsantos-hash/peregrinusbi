@@ -60,6 +60,8 @@ interface EfficiencyPanelProps {
   benchmark?: VerticalBenchmark | null;
   sellerId?: string;
   sellerCluster?: string;
+  /** Carteira consolidada não tem série diária: oculta quadros diários. */
+  semDiario?: boolean;
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -116,7 +118,7 @@ const BenchmarkBarTooltip = ({ active, payload, label }: any) => {
   );
 };
 
-const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark, sellerId, sellerCluster }: EfficiencyPanelProps) => {
+const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark, sellerId, sellerCluster, semDiario = false }: EfficiencyPanelProps) => {
 
   const { data: portfolioBenchmark, loading: portfolioLoading } = usePortfolioBenchmark();
   const { data: clusterBenchmarkData } = useClusterBenchmark(sellerId, sellerCluster);
@@ -447,7 +449,7 @@ const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, data
 
       {/* Sales Record + Best Investment Period */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-stretch">
-        <SalesRecordCard kpis={dailyKpis} from={from} to={to} />
+        {!semDiario && <SalesRecordCard kpis={dailyKpis} from={from} to={to} />}
         <div className="md:col-span-2"><BestInvestmentPeriod kpis={kpis} /></div>
       </div>
 
@@ -502,7 +504,7 @@ const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, data
 
       <p className="text-xs text-muted-foreground">ROAS usa vendas atribuídas a Ads. ROI não é exibido sem custos da mercadoria, tarifas, frete e impostos; CPC não é exibido sem cliques pagos reais.</p>
       {/* Area Chart — Faturamento vs Ads */}
-      <div className="glass-card p-5">
+      {!semDiario && <div className="glass-card p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
@@ -558,7 +560,7 @@ const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, data
         <p className="mt-2 text-[11px] text-muted-foreground">
           Escalas independentes: faturamento no eixo esquerdo (azul), investimento em Ads no eixo direito (laranja).
         </p>
-      </div>
+      </div>}
 
       {/* Line Chart — ROAS / ACOS / TACOS */}
       <div className="glass-card p-5">
@@ -603,7 +605,7 @@ const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, data
       />
 
       {/* Heatmap */}
-      <TrafficHeatmap kpis={dailyKpis} from={from} to={to} />
+      {!semDiario && <TrafficHeatmap kpis={dailyKpis} from={from} to={to} />}
     </motion.div>
   );
 };
