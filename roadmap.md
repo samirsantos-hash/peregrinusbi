@@ -1,5 +1,10 @@
 # Roadmap
 
+## Gestão de Product Ads (22/10)
+- [ ] Criar painel na seção Publicidade com campanhas reais, indicadores e filtros de período.
+- [ ] Editar orçamento/meta e pausar/ativar campanhas com confirmação; escrita só super_admin/consultor da carteira.
+- [ ] Validar consultas reais, cálculos e confirmação no painel sem alterar campanhas reais nos testes.
+
 ## Qualidade — estatísticas por anúncio (22/10)
 - [x] Mostrar tipo Clássico/Premium, visitas, vendas e conversão no mesmo período; promoção atual consultada por anúncio.
 - [x] Comparar até 4 anúncios da própria loja e indicar destaques observados, sem inventar volume de buscas.
