@@ -1561,6 +1561,353 @@ export type Database = {
           },
         ]
       }
+      ml_action_requests: {
+        Row: {
+          acao: string
+          account_id: string
+          antes: Json | null
+          atualizado_em: string
+          codigo_ml: string | null
+          criado_em: string
+          depois: Json | null
+          erro: string | null
+          estado_ml_hash: string | null
+          id: string
+          idempotency_key: string
+          payload: Json | null
+          resposta_ml: Json | null
+          status: string
+          usuario_id: string
+        }
+        Insert: {
+          acao: string
+          account_id: string
+          antes?: Json | null
+          atualizado_em?: string
+          codigo_ml?: string | null
+          criado_em?: string
+          depois?: Json | null
+          erro?: string | null
+          estado_ml_hash?: string | null
+          id?: string
+          idempotency_key: string
+          payload?: Json | null
+          resposta_ml?: Json | null
+          status: string
+          usuario_id: string
+        }
+        Update: {
+          acao?: string
+          account_id?: string
+          antes?: Json | null
+          atualizado_em?: string
+          codigo_ml?: string | null
+          criado_em?: string
+          depois?: Json | null
+          erro?: string | null
+          estado_ml_hash?: string | null
+          id?: string
+          idempotency_key?: string
+          payload?: Json | null
+          resposta_ml?: Json | null
+          status?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_action_requests_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_ads: {
+        Row: {
+          account_id: string
+          ad_group_id: number
+          ad_group_type: string | null
+          advertiser_id: number
+          campaign_id: number | null
+          catalog_listing: boolean | null
+          channel: string | null
+          external_id: string | null
+          site_id: string
+          status: string | null
+          synced_at: string
+          title: string | null
+        }
+        Insert: {
+          account_id: string
+          ad_group_id: number
+          ad_group_type?: string | null
+          advertiser_id: number
+          campaign_id?: number | null
+          catalog_listing?: boolean | null
+          channel?: string | null
+          external_id?: string | null
+          site_id: string
+          status?: string | null
+          synced_at?: string
+          title?: string | null
+        }
+        Update: {
+          account_id?: string
+          ad_group_id?: number
+          ad_group_type?: string | null
+          advertiser_id?: number
+          campaign_id?: number | null
+          catalog_listing?: boolean | null
+          channel?: string | null
+          external_id?: string | null
+          site_id?: string
+          status?: string | null
+          synced_at?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_ads_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_advertisers: {
+        Row: {
+          account_id: string
+          account_name: string | null
+          advertiser_id: number
+          advertiser_name: string | null
+          site_id: string
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          account_name?: string | null
+          advertiser_id: number
+          advertiser_name?: string | null
+          site_id: string
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          account_name?: string | null
+          advertiser_id?: number
+          advertiser_name?: string | null
+          site_id?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_advertisers_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_campaigns: {
+        Row: {
+          account_id: string
+          acos_target: number | null
+          advertiser_id: number
+          automatic_budget: boolean | null
+          budget: number | null
+          campaign_id: number
+          channel: string | null
+          currency_id: string | null
+          daily_budget: number | null
+          date_created: string | null
+          last_updated: string | null
+          name: string | null
+          roas_target: number | null
+          site_id: string
+          status: string | null
+          strategy: string | null
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          acos_target?: number | null
+          advertiser_id: number
+          automatic_budget?: boolean | null
+          budget?: number | null
+          campaign_id: number
+          channel?: string | null
+          currency_id?: string | null
+          daily_budget?: number | null
+          date_created?: string | null
+          last_updated?: string | null
+          name?: string | null
+          roas_target?: number | null
+          site_id: string
+          status?: string | null
+          strategy?: string | null
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          acos_target?: number | null
+          advertiser_id?: number
+          automatic_budget?: boolean | null
+          budget?: number | null
+          campaign_id?: number
+          channel?: string | null
+          currency_id?: string | null
+          daily_budget?: number | null
+          date_created?: string | null
+          last_updated?: string | null
+          name?: string | null
+          roas_target?: number | null
+          site_id?: string
+          status?: string | null
+          strategy?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_campaigns_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_dias_sync: {
+        Row: {
+          account_id: string
+          campaign_id: number
+          dia: string
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          campaign_id: number
+          dia: string
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          campaign_id?: number
+          dia?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_dias_sync_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_estado: {
+        Row: {
+          account_id: string
+          metricas_campanha_em: string | null
+          status: string
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          metricas_campanha_em?: string | null
+          status: string
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          metricas_campanha_em?: string | null
+          status?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_estado_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_metrics_daily: {
+        Row: {
+          account_id: string
+          acos: number | null
+          ad_group_id: number
+          campaign_id: number
+          clicks: number | null
+          cost: number | null
+          cpc: number | null
+          ctr: number | null
+          cvr: number | null
+          dia: string
+          direct_amount: number | null
+          indirect_amount: number | null
+          nivel: string
+          prints: number | null
+          roas: number | null
+          synced_at: string
+          total_amount: number | null
+          units_quantity: number | null
+        }
+        Insert: {
+          account_id: string
+          acos?: number | null
+          ad_group_id?: number
+          campaign_id: number
+          clicks?: number | null
+          cost?: number | null
+          cpc?: number | null
+          ctr?: number | null
+          cvr?: number | null
+          dia: string
+          direct_amount?: number | null
+          indirect_amount?: number | null
+          nivel: string
+          prints?: number | null
+          roas?: number | null
+          synced_at?: string
+          total_amount?: number | null
+          units_quantity?: number | null
+        }
+        Update: {
+          account_id?: string
+          acos?: number | null
+          ad_group_id?: number
+          campaign_id?: number
+          clicks?: number | null
+          cost?: number | null
+          cpc?: number | null
+          ctr?: number | null
+          cvr?: number | null
+          dia?: string
+          direct_amount?: number | null
+          indirect_amount?: number | null
+          nivel?: string
+          prints?: number | null
+          roas?: number | null
+          synced_at?: string
+          total_amount?: number | null
+          units_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_metrics_daily_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_anuncios: {
         Row: {
           atualizado_em: string
@@ -1609,6 +1956,47 @@ export type Database = {
         }
         Relationships: []
       }
+      ml_audit_log: {
+        Row: {
+          acao: string
+          account_id: string | null
+          codigo_ml: string | null
+          criado_em: string
+          id: string
+          payload: Json | null
+          resposta_ml: Json | null
+          usuario_id: string | null
+        }
+        Insert: {
+          acao: string
+          account_id?: string | null
+          codigo_ml?: string | null
+          criado_em?: string
+          id?: string
+          payload?: Json | null
+          resposta_ml?: Json | null
+          usuario_id?: string | null
+        }
+        Update: {
+          acao?: string
+          account_id?: string | null
+          codigo_ml?: string | null
+          criado_em?: string
+          id?: string
+          payload?: Json | null
+          resposta_ml?: Json | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_audit_log_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_convites: {
         Row: {
           created_at: string
@@ -1646,6 +2034,260 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_listing_improvements: {
+        Row: {
+          account_id: string
+          achados_altos: number
+          achados_total: number
+          diagnostico: Json
+          entrada_hash: string
+          erro_ia: string | null
+          gerado_em: string
+          gerado_por: string | null
+          ia: Json | null
+          item_id: string
+          modelo: string | null
+          origem: string
+          qualidade_score: number | null
+          titulo: string | null
+          verificado_em: string
+        }
+        Insert: {
+          account_id: string
+          achados_altos?: number
+          achados_total?: number
+          diagnostico: Json
+          entrada_hash: string
+          erro_ia?: string | null
+          gerado_em?: string
+          gerado_por?: string | null
+          ia?: Json | null
+          item_id: string
+          modelo?: string | null
+          origem: string
+          qualidade_score?: number | null
+          titulo?: string | null
+          verificado_em?: string
+        }
+        Update: {
+          account_id?: string
+          achados_altos?: number
+          achados_total?: number
+          diagnostico?: Json
+          entrada_hash?: string
+          erro_ia?: string | null
+          gerado_em?: string
+          gerado_por?: string | null
+          ia?: Json | null
+          item_id?: string
+          modelo?: string | null
+          origem?: string
+          qualidade_score?: number | null
+          titulo?: string | null
+          verificado_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_listing_improvements_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_listings: {
+        Row: {
+          account_id: string
+          catalog_product_id: string | null
+          catalogo: boolean | null
+          categoria_id: string | null
+          estoque: number | null
+          family_id: string | null
+          frete_gratis: boolean | null
+          item_id: string
+          link: string | null
+          logistica: string | null
+          moeda: string | null
+          preco: number | null
+          preco_original: number | null
+          saude: number | null
+          sku: string | null
+          skus: string[]
+          status: string | null
+          sub_status: string[]
+          synced_at: string
+          thumbnail: string | null
+          tipo_anuncio: string | null
+          titulo: string | null
+          variacoes: Json
+          vendidos: number | null
+        }
+        Insert: {
+          account_id: string
+          catalog_product_id?: string | null
+          catalogo?: boolean | null
+          categoria_id?: string | null
+          estoque?: number | null
+          family_id?: string | null
+          frete_gratis?: boolean | null
+          item_id: string
+          link?: string | null
+          logistica?: string | null
+          moeda?: string | null
+          preco?: number | null
+          preco_original?: number | null
+          saude?: number | null
+          sku?: string | null
+          skus?: string[]
+          status?: string | null
+          sub_status?: string[]
+          synced_at?: string
+          thumbnail?: string | null
+          tipo_anuncio?: string | null
+          titulo?: string | null
+          variacoes?: Json
+          vendidos?: number | null
+        }
+        Update: {
+          account_id?: string
+          catalog_product_id?: string | null
+          catalogo?: boolean | null
+          categoria_id?: string | null
+          estoque?: number | null
+          family_id?: string | null
+          frete_gratis?: boolean | null
+          item_id?: string
+          link?: string | null
+          logistica?: string | null
+          moeda?: string | null
+          preco?: number | null
+          preco_original?: number | null
+          saude?: number | null
+          sku?: string | null
+          skus?: string[]
+          status?: string | null
+          sub_status?: string[]
+          synced_at?: string
+          thumbnail?: string | null
+          tipo_anuncio?: string | null
+          titulo?: string | null
+          variacoes?: Json
+          vendidos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_listings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_listings_estado: {
+        Row: {
+          account_id: string
+          completo_em: string | null
+          lidos: number | null
+          pendentes: number | null
+          synced_at: string
+          total_ml: number | null
+        }
+        Insert: {
+          account_id: string
+          completo_em?: string | null
+          lidos?: number | null
+          pendentes?: number | null
+          synced_at?: string
+          total_ml?: number | null
+        }
+        Update: {
+          account_id?: string
+          completo_em?: string | null
+          lidos?: number | null
+          pendentes?: number | null
+          synced_at?: string
+          total_ml?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_listings_estado_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_market_studies: {
+        Row: {
+          account_id: string
+          categoria_id: string | null
+          categoria_nome: string | null
+          criado_em: string
+          criado_por: string | null
+          custo: number | null
+          erro_ia: string | null
+          frete: number | null
+          ia: Json | null
+          id: string
+          item_id: string
+          modelo: string | null
+          resultado: Json
+          sinais_amarelos: number
+          sinais_verdes: number
+          sinais_vermelhos: number
+          titulo: string | null
+        }
+        Insert: {
+          account_id: string
+          categoria_id?: string | null
+          categoria_nome?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          custo?: number | null
+          erro_ia?: string | null
+          frete?: number | null
+          ia?: Json | null
+          id?: string
+          item_id: string
+          modelo?: string | null
+          resultado: Json
+          sinais_amarelos?: number
+          sinais_verdes?: number
+          sinais_vermelhos?: number
+          titulo?: string | null
+        }
+        Update: {
+          account_id?: string
+          categoria_id?: string | null
+          categoria_nome?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          custo?: number | null
+          erro_ia?: string | null
+          frete?: number | null
+          ia?: Json | null
+          id?: string
+          item_id?: string
+          modelo?: string | null
+          resultado?: Json
+          sinais_amarelos?: number
+          sinais_verdes?: number
+          sinais_vermelhos?: number
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_market_studies_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -1737,6 +2379,207 @@ export type Database = {
           },
         ]
       }
+      ml_promotion_items: {
+        Row: {
+          account_id: string
+          estoque_max: number | null
+          estoque_min: number | null
+          fim: string | null
+          inicio: string | null
+          item_id: string
+          meli_pct: number | null
+          offer_id: string | null
+          preco: number | null
+          preco_max: number | null
+          preco_min: number | null
+          preco_original: number | null
+          preco_sugerido: number | null
+          promotion_id: string
+          status: string
+          status_item: string | null
+          synced_at: string
+          tipo: string
+          vendedor_pct: number | null
+        }
+        Insert: {
+          account_id: string
+          estoque_max?: number | null
+          estoque_min?: number | null
+          fim?: string | null
+          inicio?: string | null
+          item_id: string
+          meli_pct?: number | null
+          offer_id?: string | null
+          preco?: number | null
+          preco_max?: number | null
+          preco_min?: number | null
+          preco_original?: number | null
+          preco_sugerido?: number | null
+          promotion_id: string
+          status: string
+          status_item?: string | null
+          synced_at?: string
+          tipo: string
+          vendedor_pct?: number | null
+        }
+        Update: {
+          account_id?: string
+          estoque_max?: number | null
+          estoque_min?: number | null
+          fim?: string | null
+          inicio?: string | null
+          item_id?: string
+          meli_pct?: number | null
+          offer_id?: string | null
+          preco?: number | null
+          preco_max?: number | null
+          preco_min?: number | null
+          preco_original?: number | null
+          preco_sugerido?: number | null
+          promotion_id?: string
+          status?: string
+          status_item?: string | null
+          synced_at?: string
+          tipo?: string
+          vendedor_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_promotion_items_account_id_promotion_id_fkey"
+            columns: ["account_id", "promotion_id"]
+            isOneToOne: false
+            referencedRelation: "ml_promotions"
+            referencedColumns: ["account_id", "promotion_id"]
+          },
+        ]
+      }
+      ml_promotions: {
+        Row: {
+          account_id: string
+          beneficios: Json | null
+          candidatos: number | null
+          extras: Json
+          fim: string | null
+          inicio: string | null
+          itens_completo: boolean
+          itens_sync_em: string | null
+          nome: string | null
+          participando: number | null
+          prazo: string | null
+          promotion_id: string
+          status: string | null
+          sub_tipo: string | null
+          synced_at: string
+          tipo: string
+        }
+        Insert: {
+          account_id: string
+          beneficios?: Json | null
+          candidatos?: number | null
+          extras?: Json
+          fim?: string | null
+          inicio?: string | null
+          itens_completo?: boolean
+          itens_sync_em?: string | null
+          nome?: string | null
+          participando?: number | null
+          prazo?: string | null
+          promotion_id: string
+          status?: string | null
+          sub_tipo?: string | null
+          synced_at?: string
+          tipo: string
+        }
+        Update: {
+          account_id?: string
+          beneficios?: Json | null
+          candidatos?: number | null
+          extras?: Json
+          fim?: string | null
+          inicio?: string | null
+          itens_completo?: boolean
+          itens_sync_em?: string | null
+          nome?: string | null
+          participando?: number | null
+          prazo?: string | null
+          promotion_id?: string
+          status?: string | null
+          sub_tipo?: string | null
+          synced_at?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_promotions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_questions: {
+        Row: {
+          account_id: string
+          data_criacao: string | null
+          from_id: number | null
+          item_id: string | null
+          item_link: string | null
+          item_thumbnail: string | null
+          item_titulo: string | null
+          question_id: number
+          respondida_por: string | null
+          resposta_data: string | null
+          resposta_status: string | null
+          resposta_texto: string | null
+          status: string
+          synced_at: string
+          texto: string | null
+        }
+        Insert: {
+          account_id: string
+          data_criacao?: string | null
+          from_id?: number | null
+          item_id?: string | null
+          item_link?: string | null
+          item_thumbnail?: string | null
+          item_titulo?: string | null
+          question_id: number
+          respondida_por?: string | null
+          resposta_data?: string | null
+          resposta_status?: string | null
+          resposta_texto?: string | null
+          status: string
+          synced_at?: string
+          texto?: string | null
+        }
+        Update: {
+          account_id?: string
+          data_criacao?: string | null
+          from_id?: number | null
+          item_id?: string | null
+          item_link?: string | null
+          item_thumbnail?: string | null
+          item_titulo?: string | null
+          question_id?: number
+          respondida_por?: string | null
+          resposta_data?: string | null
+          resposta_status?: string | null
+          resposta_texto?: string | null
+          status?: string
+          synced_at?: string
+          texto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_questions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_refresh_locks: {
         Row: {
           account_id: string
@@ -1753,6 +2596,56 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ml_refresh_locks_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_settings: {
+        Row: {
+          account_id: string
+          acos_alvo: number | null
+          alerta_acos: number
+          alerta_cpc: number
+          alerta_ctr: number
+          alerta_roas: number
+          alerta_tacos: number
+          atualizado_em: string
+          atualizado_por: string | null
+          margem_minima: number | null
+          meta_investimento_ads: number
+        }
+        Insert: {
+          account_id: string
+          acos_alvo?: number | null
+          alerta_acos?: number
+          alerta_cpc?: number
+          alerta_ctr?: number
+          alerta_roas?: number
+          alerta_tacos?: number
+          atualizado_em?: string
+          atualizado_por?: string | null
+          margem_minima?: number | null
+          meta_investimento_ads?: number
+        }
+        Update: {
+          account_id?: string
+          acos_alvo?: number | null
+          alerta_acos?: number
+          alerta_cpc?: number
+          alerta_ctr?: number
+          alerta_roas?: number
+          alerta_tacos?: number
+          atualizado_em?: string
+          atualizado_por?: string | null
+          margem_minima?: number | null
+          meta_investimento_ads?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_settings_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: true
             referencedRelation: "ml_accounts"
@@ -1821,6 +2714,143 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ml_tokens_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_trend_categorias: {
+        Row: {
+          category_id: string
+          escopo_id: string | null
+          escopo_nome: string | null
+          nome: string | null
+          verificado_em: string
+        }
+        Insert: {
+          category_id: string
+          escopo_id?: string | null
+          escopo_nome?: string | null
+          nome?: string | null
+          verificado_em?: string
+        }
+        Update: {
+          category_id?: string
+          escopo_id?: string | null
+          escopo_nome?: string | null
+          nome?: string | null
+          verificado_em?: string
+        }
+        Relationships: []
+      }
+      ml_trends_coletas: {
+        Row: {
+          coletado_em: string
+          escopo: string
+          nome: string | null
+          semana: string
+          termos: number
+        }
+        Insert: {
+          coletado_em?: string
+          escopo: string
+          nome?: string | null
+          semana: string
+          termos?: number
+        }
+        Update: {
+          coletado_em?: string
+          escopo?: string
+          nome?: string | null
+          semana?: string
+          termos?: number
+        }
+        Relationships: []
+      }
+      ml_trends_weekly: {
+        Row: {
+          coletado_em: string
+          escopo: string
+          grupo: string
+          palavra: string
+          posicao: number
+          semana: string
+          url: string | null
+        }
+        Insert: {
+          coletado_em?: string
+          escopo: string
+          grupo: string
+          palavra: string
+          posicao: number
+          semana: string
+          url?: string | null
+        }
+        Update: {
+          coletado_em?: string
+          escopo?: string
+          grupo?: string
+          palavra?: string
+          posicao?: number
+          semana?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      ml_webhook_events: {
+        Row: {
+          account_id: string | null
+          application_id: string | null
+          codigo_ml: string | null
+          dedupe_key: string
+          erro: string | null
+          id: string
+          ml_user_id: number | null
+          payload: Json
+          processado_em: string | null
+          recebido_em: string
+          recurso: Json | null
+          resource: string
+          status: string
+          topic: string
+        }
+        Insert: {
+          account_id?: string | null
+          application_id?: string | null
+          codigo_ml?: string | null
+          dedupe_key: string
+          erro?: string | null
+          id?: string
+          ml_user_id?: number | null
+          payload: Json
+          processado_em?: string | null
+          recebido_em?: string
+          recurso?: Json | null
+          resource: string
+          status?: string
+          topic: string
+        }
+        Update: {
+          account_id?: string | null
+          application_id?: string | null
+          codigo_ml?: string | null
+          dedupe_key?: string
+          erro?: string | null
+          id?: string
+          ml_user_id?: number | null
+          payload?: Json
+          processado_em?: string | null
+          recebido_em?: string
+          recurso?: Json | null
+          resource?: string
+          status?: string
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_webhook_events_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "ml_accounts"
@@ -2141,6 +3171,50 @@ export type Database = {
             columns: ["loja_id"]
             isOneToOne: false
             referencedRelation: "multilojas_loja"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          account_id: string | null
+          corpo: string
+          criado_em: string
+          id: string
+          lida_em: string | null
+          payload: Json | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          corpo: string
+          criado_em?: string
+          id?: string
+          lida_em?: string | null
+          payload?: Json | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          corpo?: string
+          criado_em?: string
+          id?: string
+          lida_em?: string | null
+          payload?: Json | null
+          tipo?: string
+          titulo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -3353,11 +4427,95 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      ml_ads_painel_grupos: {
+        Args: { p_account_id: string; p_dias?: number }
+        Returns: {
+          achados_altos: number
+          ad_group_id: number
+          analisado_em: string
+          anuncios: number
+          anuncios_ativos: number
+          campaign_id: number
+          cliques: number
+          cliques_ant: number
+          custo: number
+          custo_ant: number
+          dias: number
+          dias_ant: number
+          estoque: number
+          external_id: string
+          ficha_obrigatorios: number
+          fotos: number
+          fotos_abaixo_minimo: number
+          fotos_abaixo_recomendado: number
+          frete_gratis: boolean
+          impressoes: number
+          impressoes_ant: number
+          item_id: string
+          link: string
+          logistica: string
+          preco: number
+          qualidade_nivel: string
+          qualidade_score: number
+          receita: number
+          receita_ant: number
+          status: string
+          thumbnail: string
+          tipo: string
+          titulo: string
+          unidades: number
+          unidades_ant: number
+        }[]
+      }
       ml_agendar_backfill: {
         Args: { p_account_id: string; p_meses?: number }
         Returns: number
       }
+      ml_buscar_anuncios: {
+        Args: { p_account_id: string; p_limite?: number; p_termo: string }
+        Returns: {
+          account_id: string
+          catalog_product_id: string | null
+          catalogo: boolean | null
+          categoria_id: string | null
+          estoque: number | null
+          family_id: string | null
+          frete_gratis: boolean | null
+          item_id: string
+          link: string | null
+          logistica: string | null
+          moeda: string | null
+          preco: number | null
+          preco_original: number | null
+          saude: number | null
+          sku: string | null
+          skus: string[]
+          status: string | null
+          sub_status: string[]
+          synced_at: string
+          thumbnail: string | null
+          tipo_anuncio: string | null
+          titulo: string | null
+          variacoes: Json
+          vendidos: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ml_listings"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       ml_claim_refresh: { Args: { p_account_id: string }; Returns: boolean }
+      ml_contas_gerenciaveis: {
+        Args: never
+        Returns: {
+          id: string
+          ml_user_id: number
+          nickname: string
+          site_id: string
+        }[]
+      }
       ml_contas_status: {
         Args: never
         Returns: {
@@ -3373,11 +4531,21 @@ export type Database = {
         }[]
       }
       ml_cron_refresh_tokens: { Args: { p_url: string }; Returns: number }
+      ml_destinatarios_conta: {
+        Args: { p_account_id: string }
+        Returns: {
+          user_id: string
+        }[]
+      }
+      ml_e_consultor: { Args: { p_user_id: string }; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
+      ml_notificacao_lida: { Args: { p_id: string }; Returns: undefined }
       ml_pode_carregar: { Args: never; Returns: boolean }
+      ml_pode_gerir_conta: { Args: { p_account_id: string }; Returns: boolean }
       ml_pode_ver_rede: { Args: never; Returns: boolean }
       ml_release_refresh: { Args: { p_account_id: string }; Returns: undefined }
       ml_set_trigger_secret: { Args: { p_value: string }; Returns: undefined }
+      ml_sou_consultor: { Args: never; Returns: boolean }
       ml_store_token: {
         Args: {
           p_access: string
@@ -3387,6 +4555,22 @@ export type Database = {
           p_scope: string
         }
         Returns: undefined
+      }
+      ml_tendencias_cobertura: {
+        Args: { p_account_id: string; p_termos: string[] }
+        Returns: {
+          anuncios: number
+          termo: string
+        }[]
+      }
+      ml_tendencias_escopos: {
+        Args: { p_account_id: string }
+        Returns: {
+          anuncios: number
+          escopo: string
+          nome: string
+          vendidos: number
+        }[]
       }
       ml_token_rotacionar: {
         Args: {

@@ -76,8 +76,10 @@ async function itensDaPromocao(
         fim: x!.fim,
         synced_at: new Date().toISOString(),
       }));
-      if (linhas.length) {
-        const { error } = await admin.from("ml_promotion_items").upsert(linhas);
+      // O ML pode repetir o mesmo anúncio na página (uma linha por oferta); fica a última.
+      const unicas = [...new Map(linhas.map((l) => [l.item_id, l])).values()];
+      if (unicas.length) {
+        const { error } = await admin.from("ml_promotion_items").upsert(unicas);
         if (error) {
           console.error("ml-promotions-sync", error.message);
           return { ok: false, erro: "Falha ao gravar anúncios da promoção." };
