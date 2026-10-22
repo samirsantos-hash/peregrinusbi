@@ -50,9 +50,9 @@ Deno.serve(async (req) => {
   const lista = [...ids].slice(0, 20);
   if (!lista.length) return json({ itens: [] });
 
-  const det = await get(`/items?ids=${lista.join(",")}&attributes=id,title,price,original_price,available_quantity,sold_quantity,status,permalink,seller_custom_field,attributes,shipping,health,thumbnail`);
+  const det = await get(`/items?ids=${lista.join(",")}&attributes=id,seller_id,title,price,original_price,available_quantity,sold_quantity,status,permalink,seller_custom_field,attributes,shipping,health,thumbnail`);
   const itens = (det ?? [])
-    .filter((x: any) => x.code === 200 && String(x.body?.id))
+    .filter((x: any) => x.code === 200 && String(x.body?.seller_id) === cust)
     .map(({ body: b }: any) => ({
       id: b.id, titulo: b.title, preco: b.price, preco_original: b.original_price ?? null,
       estoque: b.available_quantity, vendidos: b.sold_quantity, status: b.status, link: b.permalink,
