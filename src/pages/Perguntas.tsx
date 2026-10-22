@@ -38,6 +38,18 @@ type Pergunta = {
 
 type Filtro = "sem_resposta" | "respondidas" | "todas";
 
+type Anuncio = {
+  item_id: string;
+  titulo: string | null;
+  thumbnail: string | null;
+  link: string | null;
+  preco: number | null;
+  estoque: number | null;
+  frete_gratis: boolean | null;
+  skus: string[] | null;
+  catalog_product_id: string | null;
+};
+
 type Previa = {
   pergunta: Pergunta;
   texto: string;
@@ -102,6 +114,38 @@ export default function Perguntas() {
     if (filtro === "respondidas") return todas.filter((p) => p.status === "ANSWERED");
     return todas;
   }, [perguntas.data, filtro]);
+
+  const itemIds = useMemo(
+    () => [...new Set((perguntas.data ?? []).map((p) => p.item_id).filter(Boolean) as string[])],
+    [perguntas.data],
+  );
+  const anuncios = useQuery({
+    queryKey: ["ml-questions-anuncios", contaId, itemIds.join(",")],
+    enabled: !!contaId && itemIds.length > 0,
+    queryFn: async () => {
+      const mapa: Record<string, Anuncio> = {};
+      for (let i = 0; i < itemIds.length; i += 200) {
+        const { data, error } = await (supabase as any)
+          .from("ml_listings")
+          .select("item_id, titulo, thumbnail, link, preco, estoque, frete_gratis, skus, catalog_product_id")
+          .eq("account_id", contaId)
+          .in("item_id", itemIds.slice(i, i + 200));
+        if (error) throw error;
+        for (const a of data ?? []) mapa[a.item_id] = a as Anuncio;
+      }
+      return mapa;
+    },
+  });
+
+  const grupos = useMemo(() => {
+    const m = new Map<string, Pergunta[]>();
+    for (const p of lista) {
+      const k = p.item_id ?? "sem_item";
+      if (!m.has(k)) m.set(k, []);
+      m.get(k)!.push(p);
+    }
+    return [...m.entries()];
+  }, [lista]);
 
   const semResposta = (perguntas.data ?? []).filter((p) => p.status === "UNANSWERED").length;
   const ultimaLeitura = (perguntas.data ?? []).map((p) => p.synced_at).sort().pop();
@@ -215,52 +259,76 @@ export default function Perguntas() {
               <EmptyState falta={filtro === "sem_resposta" ? "Nenhuma pergunta esperando resposta." : "Nenhuma pergunta neste filtro."} />
             )}
 
-            <ul className="space-y-3">
-              {lista.map((p) => {
-                const rascunho = rascunhos[p.question_id] ?? "";
+            <ul className="space-y-4">
+              {grupos.map(([itemId, qs]) => {
+                const p0 = qs[0];
+                const a = anuncios.data?.[itemId];
+                const titulo = a?.titulo ?? p0.item_titulo ?? p0.item_id ?? "Anúncio";
+                const thumb = a?.thumbnail ?? p0.item_thumbnail;
+                const link = a?.link ?? p0.item_link;
+                const sku = a?.skus?.find(Boolean);
                 return (
-                  <li key={p.question_id} className="border border-border bg-card p-4 space-y-3 [border-width:0.5px]">
-                    <div className="flex items-start gap-3">
-                      {p.item_thumbnail && <img src={p.item_thumbnail} alt="" className="h-12 w-12 object-contain border border-border" />}
-                      <div className="min-w-0 flex-1">
-                        {p.item_link ? (
-                          <a href={p.item_link} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline line-clamp-1">
-                            {p.item_titulo ?? p.item_id}
-                          </a>
-                        ) : (
-                          <p className="text-sm font-medium line-clamp-1">{p.item_titulo ?? p.item_id ?? "Anúncio"}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground">
-                          {p.item_id} · {dataHoraBr(p.data_criacao)} · {STATUS[p.status] ?? p.status}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="text-sm">{p.texto || "Texto indisponível."}</p>
-
-                    {p.resposta_texto && (
-                      <div className="border-l-2 border-primary pl-3">
-                        <p className="text-xs text-muted-foreground">Resposta · {dataHoraBr(p.resposta_data)}</p>
-                        <p className="text-sm">{p.resposta_texto}</p>
-                      </div>
-                    )}
-
-                    {p.status === "UNANSWERED" && (
-                      <div className="space-y-2">
-                        <Textarea
-                          value={rascunho}
-                          maxLength={LIMITE}
-                          rows={3}
-                          placeholder="Escreva a resposta ao comprador"
-                          onChange={(e) => setRascunhos((r) => ({ ...r, [p.question_id]: e.target.value }))}
-                        />
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground tabular-nums">{rascunho.length}/{LIMITE}</span>
-                          <Button size="sm" onClick={() => revisar(p)} disabled={!rascunho.trim() || revisando === p.question_id}>
-                            {revisando === p.question_id ? "Conferindo…" : "Revisar resposta"}
-                          </Button>
+                  <li key={itemId} className="border border-border bg-card [border-width:0.5px]">
+                    <div className="relative flex flex-wrap items-center gap-x-6 gap-y-2 p-4 border-b border-border [border-bottom-width:0.5px]">
+                      {a?.catalog_product_id && (
+                        <span className="absolute left-0 top-0 bg-primary px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary-foreground">Catálogo</span>
+                      )}
+                      <div className="flex min-w-0 flex-1 items-center gap-3">
+                        {thumb && <img src={thumb} alt="" className="h-12 w-12 shrink-0 object-contain border border-border" />}
+                        <div className="min-w-0">
+                          <p className="text-[11px] text-muted-foreground">
+                            {sku ? `SKU ${sku} · ` : ""}{itemId !== "sem_item" ? itemId : ""}
+                          </p>
+                          {link ? (
+                            <a href={link} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline line-clamp-1">{titulo}</a>
+                          ) : (
+                            <p className="text-sm font-medium line-clamp-1">{titulo}</p>
+                          )}
                         </div>
                       </div>
-                    )}
+                      <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm tabular-nums">
+                        <span className="font-medium">{a?.estoque != null ? `${Number(a.estoque).toLocaleString("pt-BR")} unidades` : "Estoque sem dado"}</span>
+                        <span className="font-medium">{a?.preco != null ? Number(a.preco).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "Preço sem dado"}</span>
+                        {a?.frete_gratis && <span className="text-xs text-muted-foreground">Frete grátis</span>}
+                        <span className="text-xs text-muted-foreground">{qs.length} {qs.length === 1 ? "pergunta" : "perguntas"}</span>
+                      </div>
+                    </div>
+                    <ul className="divide-y divide-border">
+                      {qs.map((p) => {
+                        const rascunho = rascunhos[p.question_id] ?? "";
+                        return (
+                          <li key={p.question_id} className="p-4 space-y-2">
+                            <p className="text-sm">
+                              {p.texto || "Texto indisponível."}
+                              <span className="ml-2 text-xs text-muted-foreground">{dataHoraBr(p.data_criacao)} · {STATUS[p.status] ?? p.status}</span>
+                            </p>
+                            {p.resposta_texto && (
+                              <div className="border-l-2 border-primary pl-3">
+                                <p className="text-xs text-muted-foreground">Resposta · {dataHoraBr(p.resposta_data)}</p>
+                                <p className="text-sm">{p.resposta_texto}</p>
+                              </div>
+                            )}
+                            {p.status === "UNANSWERED" && (
+                              <div className="space-y-2">
+                                <Textarea
+                                  value={rascunho}
+                                  maxLength={LIMITE}
+                                  rows={3}
+                                  placeholder="Escreva a resposta ao comprador"
+                                  onChange={(e) => setRascunhos((r) => ({ ...r, [p.question_id]: e.target.value }))}
+                                />
+                                <div className="flex items-center justify-between">
+                                  <span className="text-xs text-muted-foreground tabular-nums">{rascunho.length}/{LIMITE}</span>
+                                  <Button size="sm" onClick={() => revisar(p)} disabled={!rascunho.trim() || revisando === p.question_id}>
+                                    {revisando === p.question_id ? "Conferindo…" : "Revisar resposta"}
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </li>
                 );
               })}
