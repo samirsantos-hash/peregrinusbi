@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { KpiCard, RotuloSecao } from "@/components/ds";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { brl, num, pctFracao } from "@/lib/format";
+import { LOGISTICA } from "@/lib/mlRotulos";
 import { toast } from "sonner";
 
 export type SecaoMl = "resumo" | "reputacao" | "qualidade" | "logistica" | "oportunidades" | "publicidade";
@@ -23,10 +24,7 @@ const TEMAS: Record<SecaoMl, string[]> = {
   publicidade: ["ads"],
 };
 
-const MODAL: Record<string, string> = {
-  fulfillment: "Full", self_service: "Flex", xd_drop_off: "Agência", cross_docking: "Coleta",
-  drop_off: "Correios", sem_info: "Sem informação",
-};
+const MODAL = LOGISTICA;
 const NIVEL: Record<string, string> = {
   "5_green": "Verde", "4_light_green": "Verde-claro", "3_yellow": "Amarela", "2_orange": "Laranja", "1_red": "Vermelha",
 };

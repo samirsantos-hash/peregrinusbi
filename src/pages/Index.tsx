@@ -5,7 +5,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu } from "lucide-react";
+import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu, MessageCircleQuestion, Search, Megaphone } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import NewBadge from "@/components/ui/NewBadge";
 import {
@@ -59,6 +59,7 @@ import { qualidadeDerivada } from "@/lib/qualidadeDerivada";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
 import { useAuth } from "@/hooks/useAuth";
+import { useSouConsultor } from "@/lib/mlFuncoes";
 import { useMyAccess } from "@/hooks/useMyAccess";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -101,6 +102,7 @@ function formatDateString(date: Date): string {
 
 const Index = () => {
   const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
+  const souConsultor = useSouConsultor(user?.id);
   const { allowedSellers } = useMyAccess();
   // Piloto: consultores com acesso ao cliente MEGAJU também enxergam a rede consolidada.
   const temRedePiloto = allowedSellers.some((s) => /megaju/i.test(s.nickname));
@@ -406,6 +408,30 @@ const Index = () => {
                 <Store className="w-4 h-4" />
                 <span className="hidden sm:inline">Multilojas</span>
                 <NewBadge featureKey="multilojas_v1" tooltip="Novo: consolidação de rede a partir do relatório de Vendas do Mercado Livre" />
+              </Button>
+            }
+            {souConsultor &&
+              <Button variant="outline" size="sm" onClick={() => navigate("/anuncios")} className="gap-2 px-2 sm:px-3">
+                <Search className="w-4 h-4" />
+                <span className="hidden sm:inline">Anúncios</span>
+              </Button>
+            }
+            {souConsultor &&
+              <Button variant="outline" size="sm" onClick={() => navigate("/perguntas")} className="gap-2 px-2 sm:px-3">
+                <MessageCircleQuestion className="w-4 h-4" />
+                <span className="hidden sm:inline">Perguntas</span>
+              </Button>
+            }
+            {souConsultor &&
+              <Button variant="outline" size="sm" onClick={() => navigate("/mercado")} className="gap-2 px-2 sm:px-3">
+                <TrendingUp className="w-4 h-4" />
+                <span className="hidden sm:inline">Mercado</span>
+              </Button>
+            }
+            {souConsultor &&
+              <Button variant="outline" size="sm" onClick={() => navigate("/publicidade")} className="gap-2 px-2 sm:px-3">
+                <Megaphone className="w-4 h-4" />
+                <span className="hidden sm:inline">Publicidade</span>
               </Button>
             }
             {(isAdmin || isGerente) &&

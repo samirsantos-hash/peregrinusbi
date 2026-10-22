@@ -25,3 +25,27 @@ verify_jwt = false
 
 [functions.ml-sync-loja]
 verify_jwt = false
+
+[functions.ml-webhook]
+verify_jwt = false
+
+[functions.ml-webhook-reconcile]
+verify_jwt = false
+
+[functions.ml-ads-sync]
+verify_jwt = false
+
+[functions.ml-questions-sync]
+verify_jwt = false
+
+[functions.ml-listings-sync]
+verify_jwt = false
+
+[functions.ml-promotions-sync]
+verify_jwt = false
+
+[functions.ml-listing-improve]
+verify_jwt = false
+
+[functions.ml-trends-sync]
+verify_jwt = false

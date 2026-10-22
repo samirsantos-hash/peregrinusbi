@@ -26,6 +26,10 @@ import GestaoCarteira from "./pages/GestaoCarteira";
 import Carteira from "./pages/Carteira";
 import Multilojas from "./pages/Multilojas";
 import Integracoes from "./pages/Integracoes";
+import Perguntas from "./pages/Perguntas";
+import Anuncios from "./pages/Anuncios";
+import Mercado from "./pages/Mercado";
+import Publicidade from "./pages/Publicidade";
 import N0Carteira from "./pages/nivel/N0Carteira";
 import N1Grupo from "./pages/nivel/N1Grupo";
 import N2Loja from "./pages/nivel/N2Loja";
@@ -110,6 +114,10 @@ const AppRoutes = () => {
       <Route path="/lojas/:lojaId/anuncios/:mlb" element={<ProtectedRoute><GuardaNivel nivel={5}><N5Anuncio /></GuardaNivel></ProtectedRoute>} />
       <Route path="/multilojas" element={<ProtectedRoute><Multilojas /></ProtectedRoute>} />
       <Route path="/integracoes" element={<ProtectedRoute><Integracoes /></ProtectedRoute>} />
+      <Route path="/perguntas" element={<ProtectedRoute><Perguntas /></ProtectedRoute>} />
+      <Route path="/anuncios" element={<ProtectedRoute><Anuncios /></ProtectedRoute>} />
+      <Route path="/mercado" element={<ProtectedRoute><Mercado /></ProtectedRoute>} />
+      <Route path="/publicidade" element={<ProtectedRoute><Publicidade /></ProtectedRoute>} />
       <Route path="/lojas/:lojaId/programas" element={<ProtectedRoute><GuardaNivel nivel={3}><N3Programas /></GuardaNivel></ProtectedRoute>} />
       <Route path="/no-access" element={user ? <NoAccess /> : <Navigate to="/auth" replace />} />
       <Route path="*" element={<NotFound />} />
