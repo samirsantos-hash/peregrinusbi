@@ -1,10 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Megaphone, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { KpiCard, RotuloSecao } from "@/components/ds";
+import { useAuth } from "@/hooks/useAuth";
 import { brl, num, pctFracao } from "@/lib/format";
+import { useSouConsultor } from "@/lib/mlFuncoes";
 
 type Campanha = { id: string; nome: string; status: string | null; orcamento_diario: number | null; meta_acos: number | null; meta_roas: number | null; investimento: number | null; vendas: number | null; cliques: number | null; impressoes: number | null; roas: number | null; acos: number | null; cpc: number | null; ctr: number | null };
 const DIAS = [7, 14, 30, 60, 90] as const;
@@ -12,6 +15,9 @@ const DIAS = [7, 14, 30, 60, 90] as const;
 export default function GestaoAds({ custId }: { custId: string }) {
   const [dias, setDias] = useState<(typeof DIAS)[number]>(30);
   const [status, setStatus] = useState<"todas" | "active" | "paused">("todas");
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const souConsultor = useSouConsultor(user?.id);
   const { data, error, isFetching, refetch } = useQuery({
     queryKey: ["ml-gestao-ads", custId, dias], staleTime: 5 * 60_000, retry: false,
     queryFn: async () => {
@@ -32,6 +38,7 @@ export default function GestaoAds({ custId }: { custId: string }) {
         <div className="flex flex-wrap gap-1.5">
           {DIAS.map((d) => <Button key={d} size="sm" variant={dias === d ? "default" : "outline"} onClick={() => setDias(d)}>{d} dias</Button>)}
           <Button size="sm" variant="outline" onClick={() => refetch()} disabled={isFetching}><RefreshCw className={`mr-1.5 h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />Consultar</Button>
+          {souConsultor && <Button size="sm" onClick={() => navigate("/publicidade")}><Megaphone className="mr-1.5 h-3.5 w-3.5" />Gerenciar campanhas</Button>}
         </div>
       </div>
       {error ? <p className="text-sm text-destructive">{(error as Error).message}</p> : !data ? <p className="text-sm text-muted-foreground">Consultando campanhas…</p> : !data.usa_ads ? <p className="text-sm text-muted-foreground">Esta loja não tem Product Ads ativo no Mercado Livre.</p> : <>
