@@ -1561,6 +1561,68 @@ export type Database = {
           },
         ]
       }
+      ml_action_requests: {
+        Row: {
+          acao: string
+          account_id: string
+          antes: Json | null
+          atualizado_em: string
+          codigo_ml: string | null
+          criado_em: string
+          depois: Json | null
+          erro: string | null
+          estado_ml_hash: string | null
+          id: string
+          idempotency_key: string
+          payload: Json | null
+          resposta_ml: Json | null
+          status: string
+          usuario_id: string
+        }
+        Insert: {
+          acao: string
+          account_id: string
+          antes?: Json | null
+          atualizado_em?: string
+          codigo_ml?: string | null
+          criado_em?: string
+          depois?: Json | null
+          erro?: string | null
+          estado_ml_hash?: string | null
+          id?: string
+          idempotency_key: string
+          payload?: Json | null
+          resposta_ml?: Json | null
+          status: string
+          usuario_id: string
+        }
+        Update: {
+          acao?: string
+          account_id?: string
+          antes?: Json | null
+          atualizado_em?: string
+          codigo_ml?: string | null
+          criado_em?: string
+          depois?: Json | null
+          erro?: string | null
+          estado_ml_hash?: string | null
+          id?: string
+          idempotency_key?: string
+          payload?: Json | null
+          resposta_ml?: Json | null
+          status?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_action_requests_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_anuncios: {
         Row: {
           atualizado_em: string
@@ -1608,6 +1670,47 @@ export type Database = {
           vendidos?: number | null
         }
         Relationships: []
+      }
+      ml_audit_log: {
+        Row: {
+          acao: string
+          account_id: string | null
+          codigo_ml: string | null
+          criado_em: string
+          id: string
+          payload: Json | null
+          resposta_ml: Json | null
+          usuario_id: string | null
+        }
+        Insert: {
+          acao: string
+          account_id?: string | null
+          codigo_ml?: string | null
+          criado_em?: string
+          id?: string
+          payload?: Json | null
+          resposta_ml?: Json | null
+          usuario_id?: string | null
+        }
+        Update: {
+          acao?: string
+          account_id?: string | null
+          codigo_ml?: string | null
+          criado_em?: string
+          id?: string
+          payload?: Json | null
+          resposta_ml?: Json | null
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_audit_log_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ml_convites: {
         Row: {
@@ -1760,6 +1863,56 @@ export type Database = {
           },
         ]
       }
+      ml_settings: {
+        Row: {
+          account_id: string
+          acos_alvo: number | null
+          alerta_acos: number
+          alerta_cpc: number
+          alerta_ctr: number
+          alerta_roas: number
+          alerta_tacos: number
+          atualizado_em: string
+          atualizado_por: string | null
+          margem_minima: number | null
+          meta_investimento_ads: number
+        }
+        Insert: {
+          account_id: string
+          acos_alvo?: number | null
+          alerta_acos?: number
+          alerta_cpc?: number
+          alerta_ctr?: number
+          alerta_roas?: number
+          alerta_tacos?: number
+          atualizado_em?: string
+          atualizado_por?: string | null
+          margem_minima?: number | null
+          meta_investimento_ads?: number
+        }
+        Update: {
+          account_id?: string
+          acos_alvo?: number | null
+          alerta_acos?: number
+          alerta_cpc?: number
+          alerta_ctr?: number
+          alerta_roas?: number
+          alerta_tacos?: number
+          atualizado_em?: string
+          atualizado_por?: string | null
+          margem_minima?: number | null
+          meta_investimento_ads?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_settings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_sync_tema: {
         Row: {
           account_id: string
@@ -1821,6 +1974,65 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "ml_tokens_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_webhook_events: {
+        Row: {
+          account_id: string | null
+          application_id: string | null
+          codigo_ml: string | null
+          dedupe_key: string
+          erro: string | null
+          id: string
+          ml_user_id: number | null
+          payload: Json
+          processado_em: string | null
+          recebido_em: string
+          recurso: Json | null
+          resource: string
+          status: string
+          topic: string
+        }
+        Insert: {
+          account_id?: string | null
+          application_id?: string | null
+          codigo_ml?: string | null
+          dedupe_key: string
+          erro?: string | null
+          id?: string
+          ml_user_id?: number | null
+          payload: Json
+          processado_em?: string | null
+          recebido_em?: string
+          recurso?: Json | null
+          resource: string
+          status?: string
+          topic: string
+        }
+        Update: {
+          account_id?: string | null
+          application_id?: string | null
+          codigo_ml?: string | null
+          dedupe_key?: string
+          erro?: string | null
+          id?: string
+          ml_user_id?: number | null
+          payload?: Json
+          processado_em?: string | null
+          recebido_em?: string
+          recurso?: Json | null
+          resource?: string
+          status?: string
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_webhook_events_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "ml_accounts"
@@ -2141,6 +2353,50 @@ export type Database = {
             columns: ["loja_id"]
             isOneToOne: false
             referencedRelation: "multilojas_loja"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          account_id: string | null
+          corpo: string
+          criado_em: string
+          id: string
+          lida_em: string | null
+          payload: Json | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Insert: {
+          account_id?: string | null
+          corpo: string
+          criado_em?: string
+          id?: string
+          lida_em?: string | null
+          payload?: Json | null
+          tipo: string
+          titulo: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string | null
+          corpo?: string
+          criado_em?: string
+          id?: string
+          lida_em?: string | null
+          payload?: Json | null
+          tipo?: string
+          titulo?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -3373,11 +3629,21 @@ export type Database = {
         }[]
       }
       ml_cron_refresh_tokens: { Args: { p_url: string }; Returns: number }
+      ml_destinatarios_conta: {
+        Args: { p_account_id: string }
+        Returns: {
+          user_id: string
+        }[]
+      }
+      ml_e_consultor: { Args: { p_user_id: string }; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
+      ml_notificacao_lida: { Args: { p_id: string }; Returns: undefined }
       ml_pode_carregar: { Args: never; Returns: boolean }
+      ml_pode_gerir_conta: { Args: { p_account_id: string }; Returns: boolean }
       ml_pode_ver_rede: { Args: never; Returns: boolean }
       ml_release_refresh: { Args: { p_account_id: string }; Returns: undefined }
       ml_set_trigger_secret: { Args: { p_value: string }; Returns: undefined }
+      ml_sou_consultor: { Args: never; Returns: boolean }
       ml_store_token: {
         Args: {
           p_access: string
