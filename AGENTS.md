@@ -1,5 +1,9 @@
 # Architecture Rules
 
+- Product Ads campaigns are queried on demand via `ml-gestao-ads` with the store's own token and complete UTC days; it never writes. Campaign and ad writes go only through `ml-ads-action` (preview and confirmation, see the Publicidade rule) to avoid unintended spend changes.
+
+- Per-listing comparisons query the own-store token on demand via `ml-buscar-produtos`; use the same 30 complete UTC days, paid orders per item (units separate), unknown metrics as null, and current item promotions separately from period performance to avoid fabricated conversion and attribution.
+
 - Mercado Livre callback destinations require a valid APP_URL checked by the shared panel-origin resolver; when it is missing or untrusted the callback shows an error page instead of redirecting, to prevent redirect loops and untrusted destinations.
 
 - Daily summary, calendar-gap charts, occurrence-normalized weekdays and 30-day investment diagnostics share the pure `src/lib/analiseDiaria.ts` calculator; pass daily data explicitly and never use monthly fallback for daily claims to avoid fabricated dates and hourly estimates.
@@ -30,4 +34,4 @@
 - Contratos das funções de gestão do ML e das tabelas e RPCs que as telas leem ficam em `docs/ml-gestao.md`; mudou entrada, saída, erro ou tabela, atualize lá. O teste de ponta a ponta contra o projeto publicado é `scripts/ml-e2e.sh` (confirma cada escrita, campanha de teste sempre pausada).
 - Notificações do Mercado Livre entram em `ml-webhook` (pública, só POST, 200 imediato, evento em `ml_webhook_events`); `ml-notificacoes` fica só como histórico. O processamento e o `missed_feeds` rodam depois, e o aviso interno vai para `notifications` só de quem tem a conta em `allowed_cust_ids`.
 - Integrações de agentes (MCP) ficam em src/lib/mcp (uma ferramenta por arquivo, só leitura, cliente com o token OAuth do usuário para respeitar as permissões); a função mcp é gerada pelo plugin e só vai ao ar ao publicar.
-- `ml-sync-loja` (admin ou x-refresh-secret) lê o ML com o token da própria loja e grava um resumo por tema em `ml_sync_tema`; o painel mostra cada tema na aba correspondente via `src/components/ml/MlAoVivo.tsx`, sem misturar com as fontes de planilha.
+- `ml-sync-loja` (admin ou x-refresh-secret; sem loja no corpo e com segredo, atualiza todas as lojas ativas em sequência — rotina diária às 09h UTC; o segredo do cofre é copiado do ambiente pela ação admin `sincronizar_segredo`) lê o ML com o token da própria loja e grava um resumo por tema em `ml_sync_tema`; o painel mostra cada tema na aba correspondente via `src/components/ml/MlAoVivo.tsx`, sem misturar com as fontes de planilha.

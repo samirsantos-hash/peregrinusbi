@@ -3,17 +3,19 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ComposedChart, Bar, Legend } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { KpiCard, RotuloSecao } from "@/components/ds";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
+import CompararAnuncios from "./CompararAnuncios";
+import GestaoAds from "./GestaoAds";
 import { brl, num, pctFracao } from "@/lib/format";
 import { LOGISTICA } from "@/lib/mlRotulos";
 import { toast } from "sonner";
 
-export type SecaoMl = "resumo" | "reputacao" | "qualidade" | "logistica" | "oportunidades" | "publicidade";
+export type SecaoMl = "resumo" | "reputacao" | "qualidade" | "logistica" | "oportunidades" | "publicidade" | "perguntas";
 
 const TEMAS: Record<SecaoMl, string[]> = {
   resumo: ["vendas", "visitas"],
@@ -22,6 +24,7 @@ const TEMAS: Record<SecaoMl, string[]> = {
   logistica: ["envios"],
   oportunidades: ["promocoes"],
   publicidade: ["ads"],
+  perguntas: ["perguntas"],
 };
 
 const MODAL = LOGISTICA;
@@ -33,7 +36,7 @@ const MEDALHA: Record<string, string> = { platinum: "Platinum", gold: "Gold", si
 const dataBr = (iso?: string | null) => (iso ? new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "");
 
 export default function MlAoVivo({ custId, secao }: { custId?: string; secao: SecaoMl }) {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isGerente } = useAuth();
   const qc = useQueryClient();
   const [atualizando, setAtualizando] = useState(false);
   const temas = TEMAS[secao];
@@ -43,7 +46,8 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
     enabled: !!custId,
     staleTime: 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("ml_sync_tema").select("tema, dados, erro, atualizado_em").eq("cust_id", custId!);
+      if (!custId) return {};
+      const { data, error } = await supabase.from("ml_sync_tema").select("tema, dados, erro, atualizado_em").eq("cust_id", custId);
       if (error) throw error;
       return Object.fromEntries((data ?? []).map((r) => [r.tema, r])) as Record<string, { dados: any; erro: string | null; atualizado_em: string }>;
     },
@@ -81,10 +85,11 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       ) : null)}
       {secao === "resumo" && <Resumo vendas={d("vendas")} visitas={d("visitas")} />}
       {secao === "reputacao" && <Reputacao r={d("reputacao")} p={d("perguntas")} />}
-      {secao === "qualidade" && <Qualidade a={d("anuncios")} />}
+      {secao === "qualidade" && <><Qualidade a={d("anuncios")} /><CompararAnuncios key={custId} custId={custId} itens={d("anuncios")?.itens ?? []} /></>}
       {secao === "logistica" && <Logistica e={d("envios")} />}
       {secao === "oportunidades" && <Promocoes p={d("promocoes")} />}
-      {secao === "publicidade" && <Ads a={d("ads")} fat={d("vendas")?.faturamento_30d} />}
+      {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
+      {secao === "publicidade" && <><Ads a={d("ads")} fat={d("vendas")?.faturamento_30d} /><GestaoAds key={custId} custId={custId} /></>}
     </section>
   );
 }
@@ -96,15 +101,23 @@ const Grade = ({ children }: { children: React.ReactNode }) => (
 function Resumo({ vendas, visitas }: { vendas: any; visitas: any }) {
   if (!vendas && !visitas) return null;
   const vis = new Map<string, number>((visitas?.serie ?? []).map((x: any) => [x.data, x.visitas]));
-  const serie = (vendas?.serie ?? []).map((x: any) => ({ ...x, visitas: vis.get(x.data) ?? null, label: x.data.slice(8, 10) + "/" + x.data.slice(5, 7) }));
+  const serie = (vendas?.serie ?? []).map((x: any) => {
+    const tot = (x.pedidos ?? 0) + (x.cancelados ?? 0);
+    return { ...x, visitas: vis.get(x.data) ?? null, taxa: tot ? ((x.cancelados ?? 0) / tot) * 100 : null, label: x.data.slice(8, 10) + "/" + x.data.slice(5, 7) };
+  });
   const conv = vendas?.pedidos_30d && visitas?.total_30d ? vendas.pedidos_30d / visitas.total_30d : null;
+  const totPed = (vendas?.pedidos_30d ?? 0) + (vendas?.cancelados_30d ?? 0);
+  const taxaCanc = vendas?.taxa_cancelamento_30d ?? (totPed ? (vendas?.cancelados_30d ?? 0) / totPed : null);
+  const valorCanc = vendas?.valor_cancelado_30d ?? null;
   return (
     <>
       <Grade>
         <KpiCard focal rotulo="Faturamento 30 dias" valor={brl(vendas?.faturamento_30d)} referencia={`${num(vendas?.pedidos_30d)} pedidos`} />
         <KpiCard rotulo="Ticket médio" valor={brl(vendas?.ticket_medio, true)} referencia="faturamento ÷ pedidos" />
         <KpiCard rotulo="Visitas 30 dias" valor={num(visitas?.total_30d)} referencia="todos os anúncios" />
-        <KpiCard rotulo="Conversão" valor={pctFracao(conv, 2)} referencia={`${num(vendas?.cancelados_30d)} cancelados no período`} />
+        <KpiCard rotulo="Conversão" valor={pctFracao(conv, 2)} referencia="pedidos ÷ visitas" />
+        <KpiCard rotulo="Taxa de cancelamento" valor={pctFracao(taxaCanc, 2)} referencia={`${num(vendas?.cancelados_30d)} de ${num(totPed)} pedidos`} />
+        <KpiCard rotulo="Valor cancelado" valor={valorCanc == null ? "Sem dado" : brl(valorCanc)} referencia="pedidos cancelados em 30 dias" />
       </Grade>
       {serie.length > 0 && (
         <div className="h-56">
@@ -118,6 +131,24 @@ function Resumo({ vendas, visitas }: { vendas: any; visitas: any }) {
               <Line yAxisId="f" type="monotone" dataKey="faturamento" name="Faturamento" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
               <Line yAxisId="v" type="monotone" dataKey="visitas" name="Visitas" stroke="hsl(var(--chart-2, 200 80% 50%))" strokeWidth={1.5} dot={false} connectNulls={false} />
             </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      {serie.length > 0 && (
+        <div className="h-56">
+          <p className="mb-1 text-xs text-muted-foreground">Pedidos, cancelamentos e taxa de cancelamento por dia</p>
+          <ResponsiveContainer>
+            <ComposedChart data={serie} margin={{ left: 0, right: 8, top: 8 }}>
+              <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+              <YAxis yAxisId="q" tick={{ fontSize: 11 }} width={40} allowDecimals={false} />
+              <YAxis yAxisId="t" orientation="right" tick={{ fontSize: 11 }} width={44} tickFormatter={(v) => `${num(v)}%`} />
+              <Tooltip formatter={(v: number, n: string) => (n === "Taxa de cancelamento" ? `${(v ?? 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%` : num(v))} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar yAxisId="q" dataKey="pedidos" name="Pedidos" stackId="p" fill="hsl(var(--primary))" />
+              <Bar yAxisId="q" dataKey="cancelados" name="Cancelados" stackId="p" fill="hsl(var(--destructive))" />
+              <Line yAxisId="t" type="monotone" dataKey="taxa" name="Taxa de cancelamento" stroke="hsl(var(--foreground))" strokeWidth={1.5} dot={false} connectNulls />
+            </ComposedChart>
           </ResponsiveContainer>
         </div>
       )}
@@ -247,5 +278,158 @@ function Ads({ a, fat }: { a: any; fat?: number }) {
         </ul>
       )}
     </>
+  );
+}
+
+const STATUS_P: Record<string, string> = { ANSWERED: "Respondida", UNANSWERED: "Sem resposta", CLOSED_UNANSWERED: "Fechada sem resposta", UNDER_REVIEW: "Em revisão", BANNED: "Removida", DELETED: "Excluída", DISABLED: "Desativada" };
+const horasTxt = (h?: number | null) => h == null ? "Sem dado" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${h.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h` : `${Math.round(h / 24)} dias`;
+
+function Perguntas({ p, custId, podeResponder }: { p: any; custId: string; podeResponder: boolean }) {
+  const [filtro, setFiltro] = useState<"todas" | "pendentes" | "respondidas">("todas");
+  const [busca, setBusca] = useState("");
+  if (!p) return null;
+  const serie = (p.serie ?? []).map((x: any) => ({ ...x, label: x.data.slice(8, 10) + "/" + x.data.slice(5, 7) }));
+  const hist: any[] = p.historico ?? [];
+  const taxaResp = p.importadas ? p.respondidas / p.importadas : null;
+  const lista = hist
+    .filter((q) => filtro === "todas" || (filtro === "pendentes" ? q.status === "UNANSWERED" : q.status === "ANSWERED"))
+    .filter((q) => !busca || `${q.texto} ${q.resposta ?? ""} ${q.item}`.toLowerCase().includes(busca.toLowerCase()))
+    .slice(0, 100);
+  return (
+    <>
+      <Grade>
+        <KpiCard focal rotulo="Sem resposta agora" valor={num(p.sem_resposta)} referencia="meta: zero pendentes" faixa={p.sem_resposta > 0 ? "abaixo" : "bom"} />
+        <KpiCard rotulo="Perguntas no histórico" valor={num(p.total)} referencia={`${num(p.importadas)} importadas`} />
+        <KpiCard rotulo="Tempo de resposta (mediana)" valor={horasTxt(p.mediana_horas_resposta)} referencia="meta: até 1 h" faixa={p.mediana_horas_resposta == null ? undefined : p.mediana_horas_resposta <= 1 ? "bom" : "abaixo"} />
+        <KpiCard rotulo="Respondidas em até 1 h" valor={pctFracao(p.ate_1h, 1)} referencia={`${pctFracao(taxaResp, 1)} do histórico respondido`} />
+      </Grade>
+      {serie.length > 0 && (
+        <div className="h-56">
+          <p className="mb-1 text-xs text-muted-foreground">Perguntas recebidas por dia (90 dias)</p>
+          <ResponsiveContainer>
+            <ComposedChart data={serie} margin={{ left: 0, right: 8, top: 8 }}>
+              <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+              <YAxis tick={{ fontSize: 11 }} width={36} allowDecimals={false} />
+              <Tooltip formatter={(v: number) => num(v)} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar dataKey="respondidas" name="Respondidas" stackId="q" fill="hsl(var(--primary))" />
+              <Bar dataKey="sem_resposta" name="Sem resposta" stackId="q" fill="hsl(var(--destructive))" />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {(["todas", "pendentes", "respondidas"] as const).map((f) => (
+            <Button key={f} size="sm" variant={filtro === f ? "default" : "outline"} onClick={() => setFiltro(f)}>
+              {f === "todas" ? "Todas" : f === "pendentes" ? "Sem resposta" : "Respondidas"}
+            </Button>
+          ))}
+          <input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Buscar no texto ou anúncio"
+            className="h-8 flex-1 min-w-[180px] rounded-md border border-input bg-background px-2 text-sm" />
+        </div>
+        {lista.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma pergunta encontrada.</p> : (
+          <ul className="divide-y divide-border rounded-md border border-border [border-width:0.5px]">
+            {lista.map((q) => (
+              <li key={q.id ?? q.data} className="p-3 space-y-1 text-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-2">{dataBr(q.data)} · <CopiarAnuncio itemId={q.item} /></span>
+                  <span className={q.status === "UNANSWERED" ? "font-medium text-destructive" : ""}>{STATUS_P[q.status] ?? q.status}{q.horas != null ? ` · respondida em ${horasTxt(q.horas)}` : ""}</span>
+                </div>
+                <p>{q.texto}</p>
+                {q.resposta && <p className="border-l-2 border-border pl-2 text-muted-foreground">{q.resposta}</p>}
+                {podeResponder && q.status === "UNANSWERED" && q.id && <ResponderPergunta custId={custId} questionId={q.id} />}
+              </li>
+            ))}
+          </ul>
+        )}
+        {hist.length > 100 && <p className="text-xs text-muted-foreground">Mostrando até 100 de {num(hist.length)} perguntas; use a busca para filtrar.</p>}
+      </div>
+    </>
+  );
+}
+
+function ResponderPergunta({ custId, questionId }: { custId: string; questionId: number | string }) {
+  const qc = useQueryClient();
+  const [aberto, setAberto] = useState(false);
+  const [texto, setTexto] = useState("");
+  const [ocupado, setOcupado] = useState<"" | "sugerir" | "responder">("");
+  const chamar = async (acao: "sugerir" | "responder") => {
+    setOcupado(acao);
+    const { data, error } = await supabase.functions.invoke("ml-responder-pergunta", { body: { acao, cust_id: custId, question_id: questionId, texto } });
+    setOcupado("");
+    let msg = data?.error as string | undefined;
+    if (error && !msg) { try { msg = (await (error as any).context?.json())?.error; } catch { /* sem corpo */ } }
+    if (error || msg) return toast.error(msg ?? "Não foi possível concluir agora.");
+    if (acao === "sugerir") { setTexto(data.sugestao); toast.success("Rascunho da IA pronto. Revise antes de enviar."); return; }
+    toast.success("Resposta enviada ao Mercado Livre.");
+    setAberto(false); setTexto("");
+    qc.invalidateQueries({ queryKey: ["ml-sync-tema", custId] });
+  };
+  if (!aberto) return <Button size="sm" variant="outline" onClick={() => setAberto(true)}>Responder</Button>;
+  return (
+    <div className="space-y-2 pt-1">
+      <textarea value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={2000} rows={3} placeholder="Escreva a resposta ao comprador"
+        className="w-full rounded-md border border-input bg-background p-2 text-sm" />
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" variant="outline" disabled={!!ocupado} onClick={() => chamar("sugerir")}>{ocupado === "sugerir" ? "Gerando…" : "Sugerir com IA"}</Button>
+        <Button size="sm" disabled={!!ocupado || texto.trim().length < 2}
+          onClick={() => { if (window.confirm("Enviar esta resposta ao comprador no Mercado Livre? Não dá para desfazer.")) chamar("responder"); }}>
+          {ocupado === "responder" ? "Enviando…" : "Enviar resposta"}
+        </Button>
+        <Button size="sm" variant="ghost" disabled={!!ocupado} onClick={() => setAberto(false)}>Cancelar</Button>
+        <span className="text-xs text-muted-foreground tnum">{texto.length}/2000</span>
+      </div>
+    </div>
+  );
+}
+
+function BuscarProdutos({ custId }: { custId: string }) {
+  const [termo, setTermo] = useState("");
+  const [itens, setItens] = useState<any[] | null>(null);
+  const [buscando, setBuscando] = useState(false);
+  const buscar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (termo.trim().length < 2) return;
+    setBuscando(true);
+    const { data, error } = await supabase.functions.invoke("ml-buscar-produtos", { body: { cust_id: custId, termo } });
+    setBuscando(false);
+    let msg = data?.error as string | undefined;
+    if (error && !msg) { try { msg = (await (error as any).context?.json())?.error; } catch { /* sem corpo */ } }
+    if (error || msg) return toast.error(msg ?? "Não foi possível buscar agora.");
+    setItens(data.itens ?? []);
+  };
+  return (
+    <div className="space-y-2">
+      <form onSubmit={buscar} className="flex flex-wrap gap-2">
+        <input value={termo} onChange={(e) => setTermo(e.target.value)} placeholder="Buscar anúncio por título, SKU ou MLB"
+          className="h-8 flex-1 min-w-[220px] rounded-md border border-input bg-background px-2 text-sm" />
+        <Button size="sm" type="submit" disabled={buscando || termo.trim().length < 2}>{buscando ? "Buscando…" : "Buscar"}</Button>
+      </form>
+      {itens && (itens.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum anúncio encontrado nesta loja.</p> : (
+        <div className="overflow-x-auto rounded-md border border-border [border-width:0.5px]">
+          <table className="w-full text-sm tnum">
+            <thead className="text-xs text-muted-foreground"><tr className="text-left">
+              <th className="p-2">Anúncio</th><th className="p-2">SKU</th><th className="p-2 text-right">Preço</th>
+              <th className="p-2 text-right">Estoque</th><th className="p-2 text-right">Vendidos</th><th className="p-2">Situação</th>
+            </tr></thead>
+            <tbody className="divide-y divide-border">
+              {itens.map((i) => (
+                <tr key={i.id}>
+                  <td className="p-2"><a href={i.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">{i.titulo}</a>
+                    <div className="mt-0.5"><CopiarAnuncio itemId={i.id} titulo={i.titulo} /></div></td>
+                  <td className="p-2">{i.sku ?? "Sem dado"}</td>
+                  <td className="p-2 text-right">{brl(i.preco)}{i.preco_original ? <div className="text-xs text-muted-foreground line-through">{brl(i.preco_original)}</div> : null}</td>
+                  <td className="p-2 text-right">{num(i.estoque)}</td>
+                  <td className="p-2 text-right">{num(i.vendidos)}</td>
+                  <td className="p-2">{i.status === "active" ? "Ativo" : i.status === "paused" ? "Pausado" : i.status === "closed" ? "Finalizado" : i.status}{i.full ? " · Full" : ""}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
   );
 }

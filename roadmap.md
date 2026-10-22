@@ -1,6 +1,23 @@
 # Roadmap
 
+## Gestão de Product Ads (22/10)
+- [x] Criar painel na seção Publicidade com campanhas reais, indicadores, períodos e filtros.
+- [ ] Editar orçamento/meta e pausar/ativar campanhas — aguarda contrato oficial de escrita e "OK, próxima etapa".
+- [x] Validar consultas reais e cálculos: VALDEMIR 30 dias R$ 610,09 → R$ 3.782,12, ROAS 6,20x; 6 testes.
+
+## Qualidade — estatísticas por anúncio (22/10)
+- [x] Mostrar tipo Clássico/Premium, visitas, vendas e conversão no mesmo período; promoção atual consultada por anúncio.
+- [x] Comparar até 4 anúncios da própria loja e indicar destaques observados, sem inventar volume de buscas.
+- [x] Testar cálculos (4 testes) e comparar no painel dois anúncios da VALDEMIR: 862/165 visitas, 66/4 pedidos pagos, conversão 7,66%/2,42%, promoção ativa/não.
+- [ ] Cliques Ads por anúncio — indisponíveis na consulta atual; exibidos como Sem dado, sem repartir totais de campanha.
+
+## Gestão no Mercado Livre (só servidor, uma etapa por vez)
+- [x] Pré-requisito: APP_URL correto (retorno 302 para ecomperegrinus.com.br confirmado).
+- [ ] Etapa 1 — base comum (auditoria, pedidos de ação, ajustes por conta, webhook, notificações) — aguarda respostas às dúvidas.
+- [ ] Etapas 2–6 — Ads leitura, Ads gestão, promoções, perguntas, testes/contratos.
+
 ## Retorno Mercado Livre (21/10)
+- [x] Convite conferido (válido até 27/10) e APP_URL corrigido.
 - [x] Corrigir destino do callback, impedir loop e testar o retorno publicado: quatro testes; acesso direto 200, erros 302 para ecomperegrinus.com.br, sem troca de tokens.
 - [ ] Validar autorização completa — depende de o lojista autorizar no Mercado Livre.
 

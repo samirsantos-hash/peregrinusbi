@@ -41,6 +41,32 @@ Deno.serve(async (req) => {
   }
 
   const body = await req.json().catch(() => ({}));
+  // Admin: copia a senha das rotinas do ambiente para o cofre do banco,
+  // que é de onde a atualização programada a lê. O valor nunca sai do servidor.
+  if (body.sincronizar_segredo) {
+    const { error } = await db.rpc("ml_set_trigger_secret", { p_value: requireEnv("REFRESH_TRIGGER_SECRET") });
+    return json({ ok: !error, erro: error?.message ?? null }, error ? 500 : 200);
+  }
+  const rotina = segredoOk(segredo, Deno.env.get("REFRESH_TRIGGER_SECRET") ?? "");
+
+  // Rotina programada sem loja: atualiza cada loja conectada, uma por vez
+  // (chamadas paralelas ao ML dão 429). Limitado às lojas ativas.
+  if (rotina && !body.account_id && !body.cust_id) {
+    const { data: contas } = await db.from("ml_accounts").select("id, nickname").eq("status", "active").limit(200);
+    const resumo: { loja: string; status: number }[] = [];
+    for (const c of contas ?? []) {
+      const r = await fetch(`${URL_}/functions/v1/ml-sync-loja`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-refresh-secret": segredo },
+        body: JSON.stringify({ account_id: c.id }),
+      }).catch(() => null);
+      await r?.text();
+      resumo.push({ loja: c.nickname, status: r?.status ?? 0 });
+      await espera(2000);
+    }
+    return json({ rotina: true, lojas: resumo });
+  }
+
   let q = db.from("ml_accounts").select("id, ml_user_id, nickname, status").eq("status", "active");
   if (body.account_id) q = q.eq("id", String(body.account_id));
   else if (body.cust_id) q = q.eq("ml_user_id", Number(String(body.cust_id).replace(/\D/g, "")));
@@ -134,18 +160,25 @@ Deno.serve(async (req) => {
       pedidos.push(...(s.results ?? []));
       if ((s.results ?? []).length < 50) break;
     }
-    const porDia: Record<string, { faturamento: number; pedidos: number; cancelados: number }> = {};
-    for (let d = new Date(desde); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { faturamento: 0, pedidos: 0, cancelados: 0 };
+    const porDia: Record<string, { faturamento: number; pedidos: number; cancelados: number; valor_cancelado: number }> = {};
+    for (let d = new Date(desde); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { faturamento: 0, pedidos: 0, cancelados: 0, valor_cancelado: 0 };
     for (const p of pedidos) {
       const k = dia(p.date_created ?? "");
       if (!porDia[k]) continue;
-      if (p.status === "cancelled") porDia[k].cancelados++;
+      if (p.status === "cancelled") { porDia[k].cancelados++; porDia[k].valor_cancelado += Number(p.total_amount) || 0; }
       else { porDia[k].pedidos++; porDia[k].faturamento += Number(p.total_amount) || 0; }
     }
     const serie = Object.entries(porDia).map(([data, v]) => ({ data, ...v }));
     const fat = serie.reduce((s, x) => s + x.faturamento, 0);
     const ped = serie.reduce((s, x) => s + x.pedidos, 0);
-    return { faturamento_30d: fat, pedidos_30d: ped, ticket_medio: ped ? fat / ped : null, cancelados_30d: serie.reduce((s, x) => s + x.cancelados, 0), serie };
+    const canc = serie.reduce((s, x) => s + x.cancelados, 0);
+    const valorCanc = serie.reduce((s, x) => s + x.valor_cancelado, 0);
+    return {
+      faturamento_30d: fat, pedidos_30d: ped, ticket_medio: ped ? fat / ped : null,
+      cancelados_30d: canc, valor_cancelado_30d: valorCanc,
+      taxa_cancelamento_30d: ped + canc ? canc / (ped + canc) : null,
+      serie,
+    };
   }));
 
   res.push(await salvar("envios", async () => {
@@ -169,15 +202,46 @@ Deno.serve(async (req) => {
 
   // 6. Perguntas
   res.push(await salvar("perguntas", async () => {
-    const pend = await get(`/questions/search?seller_id=${uid}&status=UNANSWERED&api_version=4&limit=20`);
-    const todas = await get(`/questions/search?seller_id=${uid}&api_version=4&limit=50&sort_fields=date_created&sort_types=DESC`);
-    const resp = (todas.questions ?? []).filter((q: any) => q.answer?.date_created);
-    const horas = resp.map((q: any) => (Date.parse(q.answer.date_created) - Date.parse(q.date_created)) / 36e5).filter((h: number) => h >= 0).sort((a: number, b: number) => a - b);
+    const pend = await get(`/questions/search?seller_id=${uid}&status=UNANSWERED&api_version=4&limit=50`);
+    // Histórico: até 1.000 perguntas mais recentes (páginas de 50).
+    const hist: any[] = [];
+    let total: number | null = null;
+    const vistos = new Set<unknown>();
+    for (let off = 0; off < 1000; off += 50) {
+      const s = await get(`/questions/search?seller_id=${uid}&api_version=4&limit=50&offset=${off}&sort_fields=date_created&sort_types=DESC`);
+      total = s.total ?? total;
+      const antes = vistos.size;
+      for (const q of s.questions ?? []) if (!vistos.has(q.id)) { vistos.add(q.id); hist.push(q); }
+      if ((s.questions ?? []).length < 50 || vistos.size === antes) break;
+    }
+    total = Math.max(total ?? 0, hist.length);
+    const horasDe = (q: any) => q.answer?.date_created ? (Date.parse(q.answer.date_created) - Date.parse(q.date_created)) / 36e5 : null;
+    const resp = hist.map(horasDe).filter((h): h is number => h != null && h >= 0).sort((a, b) => a - b);
+    const desde90 = new Date(hoje.getTime() - 90 * 864e5);
+    const porDia: Record<string, { recebidas: number; respondidas: number; sem_resposta: number }> = {};
+    for (let d = new Date(desde90); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { recebidas: 0, respondidas: 0, sem_resposta: 0 };
+    for (const q of hist) {
+      const k = dia(q.date_created ?? "");
+      if (!porDia[k]) continue;
+      porDia[k].recebidas++;
+      if (q.status === "ANSWERED") porDia[k].respondidas++; else if (q.status === "UNANSWERED") porDia[k].sem_resposta++;
+    }
     return {
       sem_resposta: pend.total ?? (pend.questions ?? []).length,
-      total: todas.total ?? null,
-      mediana_horas_resposta: horas.length ? horas[Math.floor(horas.length / 2)] : null,
-      pendentes: (pend.questions ?? []).slice(0, 10).map((q: any) => ({ item: q.item_id, texto: q.text, data: q.date_created })),
+      total,
+      importadas: hist.length,
+      respondidas: resp.length,
+      mediana_horas_resposta: resp.length ? resp[Math.floor(resp.length / 2)] : null,
+      ate_1h: resp.length ? resp.filter((h) => h <= 1).length / resp.length : null,
+      serie: Object.entries(porDia).map(([data, v]) => ({ data, ...v })),
+      pendentes: (pend.questions ?? []).slice(0, 50).map((q: any) => ({ item: q.item_id, texto: String(q.text ?? "").slice(0, 500), data: q.date_created })),
+      historico: hist.slice(0, 500).map((q: any) => ({
+        id: q.id, item: q.item_id, status: q.status, data: q.date_created,
+        texto: String(q.text ?? "").slice(0, 500),
+        resposta: q.answer?.text ? String(q.answer.text).slice(0, 500) : null,
+        respondida_em: q.answer?.date_created ?? null,
+        horas: horasDe(q),
+      })),
     };
   }));
 
