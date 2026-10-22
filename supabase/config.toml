@@ -31,3 +31,6 @@ verify_jwt = false
 
 [functions.ml-buscar-produtos]
 verify_jwt = false
+
+[functions.ml-gestao-ads]
+verify_jwt = false

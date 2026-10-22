@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Gestão de Product Ads (22/10)
-- [ ] Criar painel na seção Publicidade com campanhas reais, indicadores e filtros de período.
-- [ ] Editar orçamento/meta e pausar/ativar campanhas com confirmação; escrita só super_admin/consultor da carteira.
-- [ ] Validar consultas reais, cálculos e confirmação no painel sem alterar campanhas reais nos testes.
+- [x] Criar painel na seção Publicidade com campanhas reais, indicadores, períodos e filtros.
+- [ ] Editar orçamento/meta e pausar/ativar campanhas — aguarda contrato oficial de escrita e "OK, próxima etapa".
+- [x] Validar consultas reais e cálculos: VALDEMIR 30 dias R$ 610,09 → R$ 3.782,12, ROAS 6,20x; 6 testes.
 
 ## Qualidade — estatísticas por anúncio (22/10)
 - [x] Mostrar tipo Clássico/Premium, visitas, vendas e conversão no mesmo período; promoção atual consultada por anúncio.

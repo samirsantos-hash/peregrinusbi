@@ -36,6 +36,7 @@ Deno.serve(async (req) => {
         headers: { Authorization: `Bearer ${token.access_token}`, "Api-Version": version }, signal: AbortSignal.timeout(20_000),
       });
       if (!response.ok) {
+        if (response.status === 404 && path.startsWith("/advertising/advertisers")) return { advertisers: [] };
         if (response.status === 429) throw new Error("Limite de consultas do Mercado Livre atingido. Tente novamente em alguns minutos.");
         if ([401, 403].includes(response.status)) throw new Error("O Mercado Livre não liberou a consulta de Product Ads para esta conta. Confira a conexão e as permissões de Publicidade.");
         throw new Error(`O Mercado Livre não retornou as campanhas (código ${response.status}).`);
