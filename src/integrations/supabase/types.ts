@@ -2038,12 +2038,76 @@ export type Database = {
           },
         ]
       }
+      ml_listing_improvements: {
+        Row: {
+          account_id: string
+          achados_altos: number
+          achados_total: number
+          diagnostico: Json
+          entrada_hash: string
+          erro_ia: string | null
+          gerado_em: string
+          gerado_por: string | null
+          ia: Json | null
+          item_id: string
+          modelo: string | null
+          origem: string
+          qualidade_score: number | null
+          titulo: string | null
+          verificado_em: string
+        }
+        Insert: {
+          account_id: string
+          achados_altos?: number
+          achados_total?: number
+          diagnostico: Json
+          entrada_hash: string
+          erro_ia?: string | null
+          gerado_em?: string
+          gerado_por?: string | null
+          ia?: Json | null
+          item_id: string
+          modelo?: string | null
+          origem: string
+          qualidade_score?: number | null
+          titulo?: string | null
+          verificado_em?: string
+        }
+        Update: {
+          account_id?: string
+          achados_altos?: number
+          achados_total?: number
+          diagnostico?: Json
+          entrada_hash?: string
+          erro_ia?: string | null
+          gerado_em?: string
+          gerado_por?: string | null
+          ia?: Json | null
+          item_id?: string
+          modelo?: string | null
+          origem?: string
+          qualidade_score?: number | null
+          titulo?: string | null
+          verificado_em?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_listing_improvements_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_listings: {
         Row: {
           account_id: string
+          catalog_product_id: string | null
           catalogo: boolean | null
           categoria_id: string | null
           estoque: number | null
+          family_id: string | null
           frete_gratis: boolean | null
           item_id: string
           link: string | null
@@ -2065,9 +2129,11 @@ export type Database = {
         }
         Insert: {
           account_id: string
+          catalog_product_id?: string | null
           catalogo?: boolean | null
           categoria_id?: string | null
           estoque?: number | null
+          family_id?: string | null
           frete_gratis?: boolean | null
           item_id: string
           link?: string | null
@@ -2089,9 +2155,11 @@ export type Database = {
         }
         Update: {
           account_id?: string
+          catalog_product_id?: string | null
           catalogo?: boolean | null
           categoria_id?: string | null
           estoque?: number | null
+          family_id?: string | null
           frete_gratis?: boolean | null
           item_id?: string
           link?: string | null
@@ -2151,6 +2219,74 @@ export type Database = {
             foreignKeyName: "ml_listings_estado_account_id_fkey"
             columns: ["account_id"]
             isOneToOne: true
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_market_studies: {
+        Row: {
+          account_id: string
+          categoria_id: string | null
+          categoria_nome: string | null
+          criado_em: string
+          criado_por: string | null
+          custo: number | null
+          erro_ia: string | null
+          frete: number | null
+          ia: Json | null
+          id: string
+          item_id: string
+          modelo: string | null
+          resultado: Json
+          sinais_amarelos: number
+          sinais_verdes: number
+          sinais_vermelhos: number
+          titulo: string | null
+        }
+        Insert: {
+          account_id: string
+          categoria_id?: string | null
+          categoria_nome?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          custo?: number | null
+          erro_ia?: string | null
+          frete?: number | null
+          ia?: Json | null
+          id?: string
+          item_id: string
+          modelo?: string | null
+          resultado: Json
+          sinais_amarelos?: number
+          sinais_verdes?: number
+          sinais_vermelhos?: number
+          titulo?: string | null
+        }
+        Update: {
+          account_id?: string
+          categoria_id?: string | null
+          categoria_nome?: string | null
+          criado_em?: string
+          criado_por?: string | null
+          custo?: number | null
+          erro_ia?: string | null
+          frete?: number | null
+          ia?: Json | null
+          id?: string
+          item_id?: string
+          modelo?: string | null
+          resultado?: Json
+          sinais_amarelos?: number
+          sinais_verdes?: number
+          sinais_vermelhos?: number
+          titulo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_market_studies_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
             referencedRelation: "ml_accounts"
             referencedColumns: ["id"]
           },
@@ -2584,6 +2720,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ml_trend_categorias: {
+        Row: {
+          category_id: string
+          escopo_id: string | null
+          escopo_nome: string | null
+          nome: string | null
+          verificado_em: string
+        }
+        Insert: {
+          category_id: string
+          escopo_id?: string | null
+          escopo_nome?: string | null
+          nome?: string | null
+          verificado_em?: string
+        }
+        Update: {
+          category_id?: string
+          escopo_id?: string | null
+          escopo_nome?: string | null
+          nome?: string | null
+          verificado_em?: string
+        }
+        Relationships: []
+      }
+      ml_trends_coletas: {
+        Row: {
+          coletado_em: string
+          escopo: string
+          nome: string | null
+          semana: string
+          termos: number
+        }
+        Insert: {
+          coletado_em?: string
+          escopo: string
+          nome?: string | null
+          semana: string
+          termos?: number
+        }
+        Update: {
+          coletado_em?: string
+          escopo?: string
+          nome?: string | null
+          semana?: string
+          termos?: number
+        }
+        Relationships: []
+      }
+      ml_trends_weekly: {
+        Row: {
+          coletado_em: string
+          escopo: string
+          grupo: string
+          palavra: string
+          posicao: number
+          semana: string
+          url: string | null
+        }
+        Insert: {
+          coletado_em?: string
+          escopo: string
+          grupo: string
+          palavra: string
+          posicao: number
+          semana: string
+          url?: string | null
+        }
+        Update: {
+          coletado_em?: string
+          escopo?: string
+          grupo?: string
+          palavra?: string
+          posicao?: number
+          semana?: string
+          url?: string | null
+        }
+        Relationships: []
       }
       ml_webhook_events: {
         Row: {
@@ -4213,6 +4427,46 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      ml_ads_painel_grupos: {
+        Args: { p_account_id: string; p_dias?: number }
+        Returns: {
+          achados_altos: number
+          ad_group_id: number
+          analisado_em: string
+          anuncios: number
+          anuncios_ativos: number
+          campaign_id: number
+          cliques: number
+          cliques_ant: number
+          custo: number
+          custo_ant: number
+          dias: number
+          dias_ant: number
+          estoque: number
+          external_id: string
+          ficha_obrigatorios: number
+          fotos: number
+          fotos_abaixo_minimo: number
+          fotos_abaixo_recomendado: number
+          frete_gratis: boolean
+          impressoes: number
+          impressoes_ant: number
+          item_id: string
+          link: string
+          logistica: string
+          preco: number
+          qualidade_nivel: string
+          qualidade_score: number
+          receita: number
+          receita_ant: number
+          status: string
+          thumbnail: string
+          tipo: string
+          titulo: string
+          unidades: number
+          unidades_ant: number
+        }[]
+      }
       ml_agendar_backfill: {
         Args: { p_account_id: string; p_meses?: number }
         Returns: number
@@ -4221,9 +4475,11 @@ export type Database = {
         Args: { p_account_id: string; p_limite?: number; p_termo: string }
         Returns: {
           account_id: string
+          catalog_product_id: string | null
           catalogo: boolean | null
           categoria_id: string | null
           estoque: number | null
+          family_id: string | null
           frete_gratis: boolean | null
           item_id: string
           link: string | null
@@ -4299,6 +4555,22 @@ export type Database = {
           p_scope: string
         }
         Returns: undefined
+      }
+      ml_tendencias_cobertura: {
+        Args: { p_account_id: string; p_termos: string[] }
+        Returns: {
+          anuncios: number
+          termo: string
+        }[]
+      }
+      ml_tendencias_escopos: {
+        Args: { p_account_id: string }
+        Returns: {
+          anuncios: number
+          escopo: string
+          nome: string
+          vendidos: number
+        }[]
       }
       ml_token_rotacionar: {
         Args: {

@@ -43,6 +43,13 @@
       "when": 1792687497508,
       "tag": "0005_ml_anuncios_promocoes",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792687548692,
+      "tag": "0006_ml_melhorias_mercado_tendencias_ads",
+      "breakpoints": true
     }
   ]
 }
