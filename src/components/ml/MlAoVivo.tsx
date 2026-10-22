@@ -84,7 +84,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       ) : null)}
       {secao === "resumo" && <Resumo vendas={d("vendas")} visitas={d("visitas")} />}
       {secao === "reputacao" && <Reputacao r={d("reputacao")} p={d("perguntas")} />}
-      {secao === "qualidade" && <Qualidade a={d("anuncios")} />}
+      {secao === "qualidade" && <><BuscarProdutos custId={custId} /><Qualidade a={d("anuncios")} /></>}
       {secao === "logistica" && <Logistica e={d("envios")} />}
       {secao === "oportunidades" && <Promocoes p={d("promocoes")} />}
       {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
@@ -380,6 +380,55 @@ function ResponderPergunta({ custId, questionId }: { custId: string; questionId:
         <Button size="sm" variant="ghost" disabled={!!ocupado} onClick={() => setAberto(false)}>Cancelar</Button>
         <span className="text-xs text-muted-foreground tnum">{texto.length}/2000</span>
       </div>
+    </div>
+  );
+}
+
+function BuscarProdutos({ custId }: { custId: string }) {
+  const [termo, setTermo] = useState("");
+  const [itens, setItens] = useState<any[] | null>(null);
+  const [buscando, setBuscando] = useState(false);
+  const buscar = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (termo.trim().length < 2) return;
+    setBuscando(true);
+    const { data, error } = await supabase.functions.invoke("ml-buscar-produtos", { body: { cust_id: custId, termo } });
+    setBuscando(false);
+    let msg = data?.error as string | undefined;
+    if (error && !msg) { try { msg = (await (error as any).context?.json())?.error; } catch { /* sem corpo */ } }
+    if (error || msg) return toast.error(msg ?? "Não foi possível buscar agora.");
+    setItens(data.itens ?? []);
+  };
+  return (
+    <div className="space-y-2">
+      <form onSubmit={buscar} className="flex flex-wrap gap-2">
+        <input value={termo} onChange={(e) => setTermo(e.target.value)} placeholder="Buscar anúncio por título, SKU ou MLB"
+          className="h-8 flex-1 min-w-[220px] rounded-md border border-input bg-background px-2 text-sm" />
+        <Button size="sm" type="submit" disabled={buscando || termo.trim().length < 2}>{buscando ? "Buscando…" : "Buscar"}</Button>
+      </form>
+      {itens && (itens.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum anúncio encontrado nesta loja.</p> : (
+        <div className="overflow-x-auto rounded-md border border-border [border-width:0.5px]">
+          <table className="w-full text-sm tnum">
+            <thead className="text-xs text-muted-foreground"><tr className="text-left">
+              <th className="p-2">Anúncio</th><th className="p-2">SKU</th><th className="p-2 text-right">Preço</th>
+              <th className="p-2 text-right">Estoque</th><th className="p-2 text-right">Vendidos</th><th className="p-2">Situação</th>
+            </tr></thead>
+            <tbody className="divide-y divide-border">
+              {itens.map((i) => (
+                <tr key={i.id}>
+                  <td className="p-2"><a href={i.link} target="_blank" rel="noreferrer" className="text-primary hover:underline">{i.titulo}</a>
+                    <div className="mt-0.5"><CopiarAnuncio itemId={i.id} titulo={i.titulo} /></div></td>
+                  <td className="p-2">{i.sku ?? "Sem dado"}</td>
+                  <td className="p-2 text-right">{brl(i.preco)}{i.preco_original ? <div className="text-xs text-muted-foreground line-through">{brl(i.preco_original)}</div> : null}</td>
+                  <td className="p-2 text-right">{num(i.estoque)}</td>
+                  <td className="p-2 text-right">{num(i.vendidos)}</td>
+                  <td className="p-2">{i.status === "active" ? "Ativo" : i.status === "paused" ? "Pausado" : i.status === "closed" ? "Finalizado" : i.status}{i.full ? " · Full" : ""}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
     </div>
   );
 }
