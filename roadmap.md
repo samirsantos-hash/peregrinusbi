@@ -1,5 +1,10 @@
 # Roadmap
 
+## Qualidade — estatísticas por anúncio (22/10)
+- [ ] Mostrar tipo Clássico/Premium, visitas, cliques Ads, vendas e conversão no mesmo período; promoção ativa sem inferir só pelo preço.
+- [ ] Comparar anúncios da própria loja e indicar destaques observados, sem inventar volume de buscas.
+- [ ] Testar cálculos, consultar uma loja real e verificar a comparação no painel.
+
 ## Gestão no Mercado Livre (só servidor, uma etapa por vez)
 - [x] Pré-requisito: APP_URL correto (retorno 302 para ecomperegrinus.com.br confirmado).
 - [ ] Etapa 1 — base comum (auditoria, pedidos de ação, ajustes por conta, webhook, notificações) — aguarda respostas às dúvidas.
