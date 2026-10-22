@@ -25,3 +25,6 @@ verify_jwt = false
 
 [functions.ml-sync-loja]
 verify_jwt = false
+
+[functions.ml-responder-pergunta]
+verify_jwt = false
