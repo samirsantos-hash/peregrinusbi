@@ -57,6 +57,13 @@
       "when": 1792687582859,
       "tag": "0007_acesso_gestao_super_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792695060020,
+      "tag": "0008_ml_ads_realtime_15min",
+      "breakpoints": true
     }
   ]
 }
