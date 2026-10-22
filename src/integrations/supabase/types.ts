@@ -2038,6 +2038,124 @@ export type Database = {
           },
         ]
       }
+      ml_listings: {
+        Row: {
+          account_id: string
+          catalogo: boolean | null
+          categoria_id: string | null
+          estoque: number | null
+          frete_gratis: boolean | null
+          item_id: string
+          link: string | null
+          logistica: string | null
+          moeda: string | null
+          preco: number | null
+          preco_original: number | null
+          saude: number | null
+          sku: string | null
+          skus: string[]
+          status: string | null
+          sub_status: string[]
+          synced_at: string
+          thumbnail: string | null
+          tipo_anuncio: string | null
+          titulo: string | null
+          variacoes: Json
+          vendidos: number | null
+        }
+        Insert: {
+          account_id: string
+          catalogo?: boolean | null
+          categoria_id?: string | null
+          estoque?: number | null
+          frete_gratis?: boolean | null
+          item_id: string
+          link?: string | null
+          logistica?: string | null
+          moeda?: string | null
+          preco?: number | null
+          preco_original?: number | null
+          saude?: number | null
+          sku?: string | null
+          skus?: string[]
+          status?: string | null
+          sub_status?: string[]
+          synced_at?: string
+          thumbnail?: string | null
+          tipo_anuncio?: string | null
+          titulo?: string | null
+          variacoes?: Json
+          vendidos?: number | null
+        }
+        Update: {
+          account_id?: string
+          catalogo?: boolean | null
+          categoria_id?: string | null
+          estoque?: number | null
+          frete_gratis?: boolean | null
+          item_id?: string
+          link?: string | null
+          logistica?: string | null
+          moeda?: string | null
+          preco?: number | null
+          preco_original?: number | null
+          saude?: number | null
+          sku?: string | null
+          skus?: string[]
+          status?: string | null
+          sub_status?: string[]
+          synced_at?: string
+          thumbnail?: string | null
+          tipo_anuncio?: string | null
+          titulo?: string | null
+          variacoes?: Json
+          vendidos?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_listings_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_listings_estado: {
+        Row: {
+          account_id: string
+          completo_em: string | null
+          lidos: number | null
+          pendentes: number | null
+          synced_at: string
+          total_ml: number | null
+        }
+        Insert: {
+          account_id: string
+          completo_em?: string | null
+          lidos?: number | null
+          pendentes?: number | null
+          synced_at?: string
+          total_ml?: number | null
+        }
+        Update: {
+          account_id?: string
+          completo_em?: string | null
+          lidos?: number | null
+          pendentes?: number | null
+          synced_at?: string
+          total_ml?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_listings_estado_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_notificacoes: {
         Row: {
           application_id: number | null
@@ -2121,6 +2239,145 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_promotion_items: {
+        Row: {
+          account_id: string
+          estoque_max: number | null
+          estoque_min: number | null
+          fim: string | null
+          inicio: string | null
+          item_id: string
+          meli_pct: number | null
+          offer_id: string | null
+          preco: number | null
+          preco_max: number | null
+          preco_min: number | null
+          preco_original: number | null
+          preco_sugerido: number | null
+          promotion_id: string
+          status: string
+          status_item: string | null
+          synced_at: string
+          tipo: string
+          vendedor_pct: number | null
+        }
+        Insert: {
+          account_id: string
+          estoque_max?: number | null
+          estoque_min?: number | null
+          fim?: string | null
+          inicio?: string | null
+          item_id: string
+          meli_pct?: number | null
+          offer_id?: string | null
+          preco?: number | null
+          preco_max?: number | null
+          preco_min?: number | null
+          preco_original?: number | null
+          preco_sugerido?: number | null
+          promotion_id: string
+          status: string
+          status_item?: string | null
+          synced_at?: string
+          tipo: string
+          vendedor_pct?: number | null
+        }
+        Update: {
+          account_id?: string
+          estoque_max?: number | null
+          estoque_min?: number | null
+          fim?: string | null
+          inicio?: string | null
+          item_id?: string
+          meli_pct?: number | null
+          offer_id?: string | null
+          preco?: number | null
+          preco_max?: number | null
+          preco_min?: number | null
+          preco_original?: number | null
+          preco_sugerido?: number | null
+          promotion_id?: string
+          status?: string
+          status_item?: string | null
+          synced_at?: string
+          tipo?: string
+          vendedor_pct?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_promotion_items_account_id_promotion_id_fkey"
+            columns: ["account_id", "promotion_id"]
+            isOneToOne: false
+            referencedRelation: "ml_promotions"
+            referencedColumns: ["account_id", "promotion_id"]
+          },
+        ]
+      }
+      ml_promotions: {
+        Row: {
+          account_id: string
+          beneficios: Json | null
+          candidatos: number | null
+          extras: Json
+          fim: string | null
+          inicio: string | null
+          itens_completo: boolean
+          itens_sync_em: string | null
+          nome: string | null
+          participando: number | null
+          prazo: string | null
+          promotion_id: string
+          status: string | null
+          sub_tipo: string | null
+          synced_at: string
+          tipo: string
+        }
+        Insert: {
+          account_id: string
+          beneficios?: Json | null
+          candidatos?: number | null
+          extras?: Json
+          fim?: string | null
+          inicio?: string | null
+          itens_completo?: boolean
+          itens_sync_em?: string | null
+          nome?: string | null
+          participando?: number | null
+          prazo?: string | null
+          promotion_id: string
+          status?: string | null
+          sub_tipo?: string | null
+          synced_at?: string
+          tipo: string
+        }
+        Update: {
+          account_id?: string
+          beneficios?: Json | null
+          candidatos?: number | null
+          extras?: Json
+          fim?: string | null
+          inicio?: string | null
+          itens_completo?: boolean
+          itens_sync_em?: string | null
+          nome?: string | null
+          participando?: number | null
+          prazo?: string | null
+          promotion_id?: string
+          status?: string | null
+          sub_tipo?: string | null
+          synced_at?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_promotions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -3959,6 +4216,39 @@ export type Database = {
       ml_agendar_backfill: {
         Args: { p_account_id: string; p_meses?: number }
         Returns: number
+      }
+      ml_buscar_anuncios: {
+        Args: { p_account_id: string; p_limite?: number; p_termo: string }
+        Returns: {
+          account_id: string
+          catalogo: boolean | null
+          categoria_id: string | null
+          estoque: number | null
+          frete_gratis: boolean | null
+          item_id: string
+          link: string | null
+          logistica: string | null
+          moeda: string | null
+          preco: number | null
+          preco_original: number | null
+          saude: number | null
+          sku: string | null
+          skus: string[]
+          status: string | null
+          sub_status: string[]
+          synced_at: string
+          thumbnail: string | null
+          tipo_anuncio: string | null
+          titulo: string | null
+          variacoes: Json
+          vendidos: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "ml_listings"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       ml_claim_refresh: { Args: { p_account_id: string }; Returns: boolean }
       ml_contas_gerenciaveis: {
