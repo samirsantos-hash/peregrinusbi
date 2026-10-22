@@ -567,7 +567,7 @@ const Index = () => {
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
-                    <EfficiencyPanel kpis={displayKpis} dailyKpis={filteredDailyKpis} from={dateRange?.from ? formatDateString(dateRange.from) : undefined} to={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
+                    <EfficiencyPanel semDiario={isConsolidado} kpis={displayKpis} dailyKpis={filteredDailyKpis} from={dateRange?.from ? formatDateString(dateRange.from) : undefined} to={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
                   </TabsContent>
                   <TabsContent value="pock" className="mt-0 space-y-5">
                     <PockPanel
