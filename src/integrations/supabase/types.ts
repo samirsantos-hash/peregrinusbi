@@ -1623,6 +1623,291 @@ export type Database = {
           },
         ]
       }
+      ml_ads_ads: {
+        Row: {
+          account_id: string
+          ad_group_id: number
+          ad_group_type: string | null
+          advertiser_id: number
+          campaign_id: number | null
+          catalog_listing: boolean | null
+          channel: string | null
+          external_id: string | null
+          site_id: string
+          status: string | null
+          synced_at: string
+          title: string | null
+        }
+        Insert: {
+          account_id: string
+          ad_group_id: number
+          ad_group_type?: string | null
+          advertiser_id: number
+          campaign_id?: number | null
+          catalog_listing?: boolean | null
+          channel?: string | null
+          external_id?: string | null
+          site_id: string
+          status?: string | null
+          synced_at?: string
+          title?: string | null
+        }
+        Update: {
+          account_id?: string
+          ad_group_id?: number
+          ad_group_type?: string | null
+          advertiser_id?: number
+          campaign_id?: number | null
+          catalog_listing?: boolean | null
+          channel?: string | null
+          external_id?: string | null
+          site_id?: string
+          status?: string | null
+          synced_at?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_ads_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_advertisers: {
+        Row: {
+          account_id: string
+          account_name: string | null
+          advertiser_id: number
+          advertiser_name: string | null
+          site_id: string
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          account_name?: string | null
+          advertiser_id: number
+          advertiser_name?: string | null
+          site_id: string
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          account_name?: string | null
+          advertiser_id?: number
+          advertiser_name?: string | null
+          site_id?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_advertisers_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_campaigns: {
+        Row: {
+          account_id: string
+          acos_target: number | null
+          advertiser_id: number
+          automatic_budget: boolean | null
+          budget: number | null
+          campaign_id: number
+          channel: string | null
+          currency_id: string | null
+          daily_budget: number | null
+          date_created: string | null
+          last_updated: string | null
+          name: string | null
+          roas_target: number | null
+          site_id: string
+          status: string | null
+          strategy: string | null
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          acos_target?: number | null
+          advertiser_id: number
+          automatic_budget?: boolean | null
+          budget?: number | null
+          campaign_id: number
+          channel?: string | null
+          currency_id?: string | null
+          daily_budget?: number | null
+          date_created?: string | null
+          last_updated?: string | null
+          name?: string | null
+          roas_target?: number | null
+          site_id: string
+          status?: string | null
+          strategy?: string | null
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          acos_target?: number | null
+          advertiser_id?: number
+          automatic_budget?: boolean | null
+          budget?: number | null
+          campaign_id?: number
+          channel?: string | null
+          currency_id?: string | null
+          daily_budget?: number | null
+          date_created?: string | null
+          last_updated?: string | null
+          name?: string | null
+          roas_target?: number | null
+          site_id?: string
+          status?: string | null
+          strategy?: string | null
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_campaigns_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_dias_sync: {
+        Row: {
+          account_id: string
+          campaign_id: number
+          dia: string
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          campaign_id: number
+          dia: string
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          campaign_id?: number
+          dia?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_dias_sync_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_estado: {
+        Row: {
+          account_id: string
+          metricas_campanha_em: string | null
+          status: string
+          synced_at: string
+        }
+        Insert: {
+          account_id: string
+          metricas_campanha_em?: string | null
+          status: string
+          synced_at?: string
+        }
+        Update: {
+          account_id?: string
+          metricas_campanha_em?: string | null
+          status?: string
+          synced_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_estado_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: true
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_ads_metrics_daily: {
+        Row: {
+          account_id: string
+          acos: number | null
+          ad_group_id: number
+          campaign_id: number
+          clicks: number | null
+          cost: number | null
+          cpc: number | null
+          ctr: number | null
+          cvr: number | null
+          dia: string
+          direct_amount: number | null
+          indirect_amount: number | null
+          nivel: string
+          prints: number | null
+          roas: number | null
+          synced_at: string
+          total_amount: number | null
+          units_quantity: number | null
+        }
+        Insert: {
+          account_id: string
+          acos?: number | null
+          ad_group_id?: number
+          campaign_id: number
+          clicks?: number | null
+          cost?: number | null
+          cpc?: number | null
+          ctr?: number | null
+          cvr?: number | null
+          dia: string
+          direct_amount?: number | null
+          indirect_amount?: number | null
+          nivel: string
+          prints?: number | null
+          roas?: number | null
+          synced_at?: string
+          total_amount?: number | null
+          units_quantity?: number | null
+        }
+        Update: {
+          account_id?: string
+          acos?: number | null
+          ad_group_id?: number
+          campaign_id?: number
+          clicks?: number | null
+          cost?: number | null
+          cpc?: number | null
+          ctr?: number | null
+          cvr?: number | null
+          dia?: string
+          direct_amount?: number | null
+          indirect_amount?: number | null
+          nivel?: string
+          prints?: number | null
+          roas?: number | null
+          synced_at?: string
+          total_amount?: number | null
+          units_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_ads_metrics_daily_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_anuncios: {
         Row: {
           atualizado_em: string
@@ -1836,6 +2121,68 @@ export type Database = {
             columns: ["tenant_id"]
             isOneToOne: false
             referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_questions: {
+        Row: {
+          account_id: string
+          data_criacao: string | null
+          from_id: number | null
+          item_id: string | null
+          item_link: string | null
+          item_thumbnail: string | null
+          item_titulo: string | null
+          question_id: number
+          respondida_por: string | null
+          resposta_data: string | null
+          resposta_status: string | null
+          resposta_texto: string | null
+          status: string
+          synced_at: string
+          texto: string | null
+        }
+        Insert: {
+          account_id: string
+          data_criacao?: string | null
+          from_id?: number | null
+          item_id?: string | null
+          item_link?: string | null
+          item_thumbnail?: string | null
+          item_titulo?: string | null
+          question_id: number
+          respondida_por?: string | null
+          resposta_data?: string | null
+          resposta_status?: string | null
+          resposta_texto?: string | null
+          status: string
+          synced_at?: string
+          texto?: string | null
+        }
+        Update: {
+          account_id?: string
+          data_criacao?: string | null
+          from_id?: number | null
+          item_id?: string | null
+          item_link?: string | null
+          item_thumbnail?: string | null
+          item_titulo?: string | null
+          question_id?: number
+          respondida_por?: string | null
+          resposta_data?: string | null
+          resposta_status?: string | null
+          resposta_texto?: string | null
+          status?: string
+          synced_at?: string
+          texto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ml_questions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ml_accounts"
             referencedColumns: ["id"]
           },
         ]
@@ -3614,6 +3961,15 @@ export type Database = {
         Returns: number
       }
       ml_claim_refresh: { Args: { p_account_id: string }; Returns: boolean }
+      ml_contas_gerenciaveis: {
+        Args: never
+        Returns: {
+          id: string
+          ml_user_id: number
+          nickname: string
+          site_id: string
+        }[]
+      }
       ml_contas_status: {
         Args: never
         Returns: {
