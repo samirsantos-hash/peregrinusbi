@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     const end = new Date(); end.setUTCHours(0, 0, 0, 0);
     const start = new Date(end.getTime() - 30 * 864e5);
     const from = start.toISOString(), to = new Date(end.getTime() - 1).toISOString();
-    const visits = await get(`/items/visits?ids=${itemId}&date_from=${encodeURIComponent(from)}&date_to=${encodeURIComponent(to)}`);
+    const visits = await get(`/items/${itemId}/visits?date_from=${from.slice(0, 10)}&date_to=${to.slice(0, 10)}`);
     const visitas = parseItemVisits(visits, itemId);
     const orders: any[] = [];
     let completo = true;
