@@ -36,7 +36,7 @@ const MEDALHA: Record<string, string> = { platinum: "Platinum", gold: "Gold", si
 const dataBr = (iso?: string | null) => (iso ? new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "");
 
 export default function MlAoVivo({ custId, secao }: { custId?: string; secao: SecaoMl }) {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isGerente } = useAuth();
   const qc = useQueryClient();
   const [atualizando, setAtualizando] = useState(false);
   const temas = TEMAS[secao];
@@ -87,7 +87,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       {secao === "qualidade" && <Qualidade a={d("anuncios")} />}
       {secao === "logistica" && <Logistica e={d("envios")} />}
       {secao === "oportunidades" && <Promocoes p={d("promocoes")} />}
-      {secao === "perguntas" && <Perguntas p={d("perguntas")} />}
+      {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
       {secao === "publicidade" && <Ads a={d("ads")} fat={d("vendas")?.faturamento_30d} />}
     </section>
   );
@@ -283,7 +283,7 @@ function Ads({ a, fat }: { a: any; fat?: number }) {
 const STATUS_P: Record<string, string> = { ANSWERED: "Respondida", UNANSWERED: "Sem resposta", CLOSED_UNANSWERED: "Fechada sem resposta", UNDER_REVIEW: "Em revisão", BANNED: "Removida", DELETED: "Excluída", DISABLED: "Desativada" };
 const horasTxt = (h?: number | null) => h == null ? "Sem dado" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${h.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h` : `${Math.round(h / 24)} dias`;
 
-function Perguntas({ p }: { p: any }) {
+function Perguntas({ p, custId, podeResponder }: { p: any; custId: string; podeResponder: boolean }) {
   const [filtro, setFiltro] = useState<"todas" | "pendentes" | "respondidas">("todas");
   const [busca, setBusca] = useState("");
   if (!p) return null;
@@ -338,6 +338,7 @@ function Perguntas({ p }: { p: any }) {
                 </div>
                 <p>{q.texto}</p>
                 {q.resposta && <p className="border-l-2 border-border pl-2 text-muted-foreground">{q.resposta}</p>}
+                {podeResponder && q.status === "UNANSWERED" && q.id && <ResponderPergunta custId={custId} questionId={q.id} />}
               </li>
             ))}
           </ul>
@@ -345,5 +346,40 @@ function Perguntas({ p }: { p: any }) {
         {hist.length > 100 && <p className="text-xs text-muted-foreground">Mostrando até 100 de {num(hist.length)} perguntas; use a busca para filtrar.</p>}
       </div>
     </>
+  );
+}
+
+function ResponderPergunta({ custId, questionId }: { custId: string; questionId: number | string }) {
+  const qc = useQueryClient();
+  const [aberto, setAberto] = useState(false);
+  const [texto, setTexto] = useState("");
+  const [ocupado, setOcupado] = useState<"" | "sugerir" | "responder">("");
+  const chamar = async (acao: "sugerir" | "responder") => {
+    setOcupado(acao);
+    const { data, error } = await supabase.functions.invoke("ml-responder-pergunta", { body: { acao, cust_id: custId, question_id: questionId, texto } });
+    setOcupado("");
+    let msg = data?.error as string | undefined;
+    if (error && !msg) { try { msg = (await (error as any).context?.json())?.error; } catch { /* sem corpo */ } }
+    if (error || msg) return toast.error(msg ?? "Não foi possível concluir agora.");
+    if (acao === "sugerir") { setTexto(data.sugestao); toast.success("Rascunho da IA pronto. Revise antes de enviar."); return; }
+    toast.success("Resposta enviada ao Mercado Livre.");
+    setAberto(false); setTexto("");
+    qc.invalidateQueries({ queryKey: ["ml-sync-tema", custId] });
+  };
+  if (!aberto) return <Button size="sm" variant="outline" onClick={() => setAberto(true)}>Responder</Button>;
+  return (
+    <div className="space-y-2 pt-1">
+      <textarea value={texto} onChange={(e) => setTexto(e.target.value)} maxLength={2000} rows={3} placeholder="Escreva a resposta ao comprador"
+        className="w-full rounded-md border border-input bg-background p-2 text-sm" />
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm" variant="outline" disabled={!!ocupado} onClick={() => chamar("sugerir")}>{ocupado === "sugerir" ? "Gerando…" : "Sugerir com IA"}</Button>
+        <Button size="sm" disabled={!!ocupado || texto.trim().length < 2}
+          onClick={() => { if (window.confirm("Enviar esta resposta ao comprador no Mercado Livre? Não dá para desfazer.")) chamar("responder"); }}>
+          {ocupado === "responder" ? "Enviando…" : "Enviar resposta"}
+        </Button>
+        <Button size="sm" variant="ghost" disabled={!!ocupado} onClick={() => setAberto(false)}>Cancelar</Button>
+        <span className="text-xs text-muted-foreground tnum">{texto.length}/2000</span>
+      </div>
+    </div>
   );
 }
