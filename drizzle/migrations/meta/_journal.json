@@ -64,6 +64,13 @@
       "when": 1792695060020,
       "tag": "0008_ml_ads_realtime_15min",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792698099393,
+      "tag": "0009_ml_promocoes_realtime",
+      "breakpoints": true
     }
   ]
 }

@@ -80,7 +80,10 @@ export async function processarEvento(admin: Admin, eventId: string) {
   }
 
   const sep = caminho.includes("?") ? "&" : "?";
-  const sufixo = ev.topic === "questions" ? `${sep}api_version=4` : ev.topic === "items" ? `${sep}include_attributes=all` : "";
+  const sufixo = ev.topic === "questions" ? `${sep}api_version=4`
+    : ev.topic === "items" ? `${sep}include_attributes=all`
+    : caminho.startsWith("/seller-promotions/") && !caminho.includes("app_version") ? `${sep}app_version=v2`
+    : "";
   const resposta = await buscarMl(`https://api.mercadolibre.com${caminho}${sufixo}`, tok.access_token);
   if (!resposta.ok) {
     await marcar(admin, ev.id, { status: "erro", account_id: conta.id, codigo_ml: resposta.codigo, erro: resposta.erro });

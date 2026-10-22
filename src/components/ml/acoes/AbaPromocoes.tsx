@@ -69,6 +69,18 @@ export function AbaPromocoes({ accountId }: { accountId: string }) {
   };
   const acao = useAcaoEmLote("ml-promotions-action", accountId, recarregar);
 
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const avisar = () => { clearTimeout(t); t = setTimeout(recarregar, 1500); };
+    const canal = supabase
+      .channel(`ml_promocoes_${accountId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ml_promotions", filter: `account_id=eq.${accountId}` }, avisar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ml_promotion_items", filter: `account_id=eq.${accountId}` }, avisar)
+      .subscribe();
+    return () => { clearTimeout(t); supabase.removeChannel(canal); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountId]);
+
   const promocoes = useQuery({
     queryKey: ["ml-promocoes", accountId],
     queryFn: async () => {
