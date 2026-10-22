@@ -91,6 +91,20 @@ export default function Publicidade() {
     qc.invalidateQueries({ queryKey: ["ads-estado", contaId] });
     qc.invalidateQueries({ queryKey: ["ads-painel", contaId] });
   };
+
+  // Atualiza a tela sozinha quando a rotina grava campanhas novas.
+  useEffect(() => {
+    if (!contaId) return;
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const avisar = () => { clearTimeout(t); t = setTimeout(recarregar, 1500); };
+    const canal = supabase
+      .channel(`ml_ads_${contaId}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ml_ads_campaigns", filter: `account_id=eq.${contaId}` }, avisar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "ml_ads_estado", filter: `account_id=eq.${contaId}` }, avisar)
+      .subscribe();
+    return () => { clearTimeout(t); supabase.removeChannel(canal); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contaId]);
   const acao = useAcaoEmLote("ml-ads-action", contaId, recarregar);
 
   const atualizar = async () => {
