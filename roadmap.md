@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Qualidade — estatísticas por anúncio (22/10)
-- [ ] Mostrar tipo Clássico/Premium, visitas, cliques Ads, vendas e conversão no mesmo período; promoção ativa sem inferir só pelo preço.
-- [ ] Comparar anúncios da própria loja e indicar destaques observados, sem inventar volume de buscas.
-- [ ] Testar cálculos, consultar uma loja real e verificar a comparação no painel.
+- [x] Mostrar tipo Clássico/Premium, visitas, vendas e conversão no mesmo período; promoção atual consultada por anúncio.
+- [x] Comparar até 4 anúncios da própria loja e indicar destaques observados, sem inventar volume de buscas.
+- [x] Testar cálculos (4 testes) e comparar no painel dois anúncios da VALDEMIR: 862/165 visitas, 66/4 pedidos pagos, conversão 7,66%/2,42%, promoção ativa/não.
+- [ ] Cliques Ads por anúncio — indisponíveis na consulta atual; exibidos como Sem dado, sem repartir totais de campanha.
 
 ## Gestão no Mercado Livre (só servidor, uma etapa por vez)
 - [x] Pré-requisito: APP_URL correto (retorno 302 para ecomperegrinus.com.br confirmado).
