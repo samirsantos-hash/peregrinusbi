@@ -1,5 +1,7 @@
 # Architecture Rules
 
+- Per-listing comparisons query the own-store token on demand via `ml-buscar-produtos`; use the same 30 complete UTC days, paid orders per item (units separate), unknown metrics as null, and current item promotions separately from period performance to avoid fabricated conversion and attribution.
+
 - Mercado Livre callback destinations require a valid APP_URL checked by the shared panel-origin resolver; when it is missing or untrusted the callback shows an error page instead of redirecting, to prevent redirect loops and untrusted destinations.
 
 - Daily summary, calendar-gap charts, occurrence-normalized weekdays and 30-day investment diagnostics share the pure `src/lib/analiseDiaria.ts` calculator; pass daily data explicitly and never use monthly fallback for daily claims to avoid fabricated dates and hourly estimates.
