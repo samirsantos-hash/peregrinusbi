@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { aggregateItemOrders, itemConversion } from "../../supabase/functions/_shared/mlItemStats";
+import { aggregateItemOrders, itemConversion, parseItemVisits } from "../../supabase/functions/_shared/mlItemStats";
 import { ordenarAnuncios, type AnuncioComparavel } from "../lib/mlComparacaoAnuncios";
 
 describe("estatísticas reais por anúncio", () => {
+  it("lê visitas do anúncio correto no relatório e preserva ausência", () => {
+    expect(parseItemVisits([{ item_id: "MLB1", total_visits: 100 }, { item_id: "MLB2", total_visits: 200 }], "MLB1")).toBe(100);
+    expect(parseItemVisits({ MLB1: 0 }, "MLB1")).toBe(0);
+    expect(parseItemVisits(null, "MLB1")).toBeNull();
+  });
   it("conta pedidos pagos uma vez, separa unidades e ignora outros anúncios", () => {
     const paid = { id: 1, status: "paid", order_items: [{ item: { id: "MLB1" }, quantity: 3, unit_price: 20 }, { item: { id: "MLB2" }, quantity: 2, unit_price: 99 }] };
     expect(aggregateItemOrders([paid, paid, { id: 2, status: "cancelled", order_items: paid.order_items }, { id: 3, status: "confirmed", order_items: paid.order_items }], "MLB1"))

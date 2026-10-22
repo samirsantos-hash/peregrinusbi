@@ -4,7 +4,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireEnv } from "../_shared/env.ts";
-import { aggregateItemOrders, itemConversion } from "../_shared/mlItemStats.ts";
+import { aggregateItemOrders, itemConversion, parseItemVisits } from "../_shared/mlItemStats.ts";
 import { z } from "npm:zod@3";
 
 const json = (b: unknown, status = 200) =>
@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
     const start = new Date(end.getTime() - 30 * 864e5);
     const from = start.toISOString(), to = new Date(end.getTime() - 1).toISOString();
     const visits = await get(`/items/visits?ids=${itemId}&date_from=${encodeURIComponent(from)}&date_to=${encodeURIComponent(to)}`);
-    const visitas = typeof visits?.[itemId] === "number" ? visits[itemId] : null;
+    const visitas = parseItemVisits(visits, itemId);
     const orders: any[] = [];
     let completo = true;
     for (let offset = 0; offset < 1000; offset += 50) {

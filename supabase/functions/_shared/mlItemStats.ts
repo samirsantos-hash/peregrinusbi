@@ -23,3 +23,9 @@ export function aggregateItemOrders(orders: any[], itemId: string) {
 export function itemConversion(pedidos: number | null, visitas: number | null) {
   return pedidos != null && visitas != null && visitas > 0 ? pedidos / visitas : null;
 }
+
+export function parseItemVisits(response: any, itemId: string): number | null {
+  const row = Array.isArray(response) ? response.find((r: any) => r.item_id === itemId || r.id === itemId) : response;
+  const value = row?.total_visits ?? row?.[itemId];
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+}
