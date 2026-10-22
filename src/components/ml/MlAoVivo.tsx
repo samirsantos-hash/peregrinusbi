@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { KpiCard, RotuloSecao } from "@/components/ds";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
+import CompararAnuncios from "./CompararAnuncios";
 import { brl, num, pctFracao } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -46,7 +47,8 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
     enabled: !!custId,
     staleTime: 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase.from("ml_sync_tema").select("tema, dados, erro, atualizado_em").eq("cust_id", custId!);
+      if (!custId) return {};
+      const { data, error } = await supabase.from("ml_sync_tema").select("tema, dados, erro, atualizado_em").eq("cust_id", custId);
       if (error) throw error;
       return Object.fromEntries((data ?? []).map((r) => [r.tema, r])) as Record<string, { dados: any; erro: string | null; atualizado_em: string }>;
     },
@@ -84,7 +86,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       ) : null)}
       {secao === "resumo" && <Resumo vendas={d("vendas")} visitas={d("visitas")} />}
       {secao === "reputacao" && <Reputacao r={d("reputacao")} p={d("perguntas")} />}
-      {secao === "qualidade" && <><BuscarProdutos custId={custId} /><Qualidade a={d("anuncios")} /></>}
+      {secao === "qualidade" && <><Qualidade a={d("anuncios")} /><CompararAnuncios key={custId} custId={custId} itens={d("anuncios")?.itens ?? []} /></>}
       {secao === "logistica" && <Logistica e={d("envios")} />}
       {secao === "oportunidades" && <Promocoes p={d("promocoes")} />}
       {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
