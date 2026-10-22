@@ -1,5 +1,7 @@
 # Architecture Rules
 
+- Product Ads campaigns are queried on demand via `ml-gestao-ads` with the store's own token and complete UTC days; writes stay disabled until the official update contract is verified to avoid unintended spend changes.
+
 - Per-listing comparisons query the own-store token on demand via `ml-buscar-produtos`; use the same 30 complete UTC days, paid orders per item (units separate), unknown metrics as null, and current item promotions separately from period performance to avoid fabricated conversion and attribution.
 
 - Mercado Livre callback destinations require a valid APP_URL checked by the shared panel-origin resolver; when it is missing or untrusted the callback shows an error page instead of redirecting, to prevent redirect loops and untrusted destinations.

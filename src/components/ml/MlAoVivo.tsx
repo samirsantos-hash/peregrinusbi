@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { KpiCard, RotuloSecao } from "@/components/ds";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import CompararAnuncios from "./CompararAnuncios";
+import GestaoAds from "./GestaoAds";
 import { brl, num, pctFracao } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -90,7 +91,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       {secao === "logistica" && <Logistica e={d("envios")} />}
       {secao === "oportunidades" && <Promocoes p={d("promocoes")} />}
       {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
-      {secao === "publicidade" && <Ads a={d("ads")} fat={d("vendas")?.faturamento_30d} />}
+      {secao === "publicidade" && <><Ads a={d("ads")} fat={d("vendas")?.faturamento_30d} /><GestaoAds key={custId} custId={custId} /></>}
     </section>
   );
 }
