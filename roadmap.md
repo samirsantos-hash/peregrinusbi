@@ -1,5 +1,10 @@
 # Roadmap
 
+## Avisos do desenvolvedor (23/10)
+- [ ] Atribuir perfil Desenvolvedor a Samir sem alterar acesso às lojas e proteger atribuição no servidor.
+- [ ] Criar painel privado com árvore de perfis, avisos de Ads, falhas de atualização/carregamento, lentidão e sinais de segurança registrados.
+- [ ] Testar isolamento de acesso e conferir painel com sessão real.
+
 ## Gestão de Product Ads (22/10)
 - [x] Criar painel na seção Publicidade com campanhas reais, indicadores, períodos e filtros.
 - [ ] Editar orçamento/meta e pausar/ativar campanhas — aguarda contrato oficial de escrita e "OK, próxima etapa".
