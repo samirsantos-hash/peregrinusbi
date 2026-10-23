@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Avisos do desenvolvedor (23/10)
-- [ ] Atribuir perfil Desenvolvedor a Samir sem alterar acesso às lojas e proteger atribuição no servidor.
-- [ ] Criar painel privado com árvore de perfis, avisos de Ads, falhas de atualização/carregamento, lentidão e sinais de segurança registrados.
-- [ ] Testar isolamento de acesso e conferir painel com sessão real.
+- [x] Atribuir perfil Desenvolvedor a Samir sem alterar acesso às lojas e proteger atribuição no servidor.
+- [x] Criar painel privado com árvore de perfis, avisos de Ads, falhas de atualização/carregamento, lentidão e sinais operacionais registrados.
+- [x] Conferir painel com sessão real, reconhecimento persistido, leitura anônima bloqueada e 84 testes; outro usuário autenticado não foi testado no navegador.
+- [ ] Detecção de ataques — depende de uma fonte de eventos de segurança externa ao painel; falhas operacionais não são classificadas como ataques.
 
 ## Gestão de Product Ads (22/10)
 - [x] Criar painel na seção Publicidade com campanhas reais, indicadores, períodos e filtros.
