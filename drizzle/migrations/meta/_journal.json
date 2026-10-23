@@ -71,6 +71,13 @@
       "when": 1792698099393,
       "tag": "0009_ml_promocoes_realtime",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792777654922,
+      "tag": "0010_developer_role",
+      "breakpoints": true
     }
   ]
 }
