@@ -69,12 +69,7 @@ export async function processarEvento(admin: Admin, eventId: string) {
     return;
   }
 
-  const { data: tok } = await admin
-    .from("ml_tokens")
-    .select("access_token, expires_at")
-    .eq("account_id", conta.id)
-    .eq("is_current", true)
-    .maybeSingle();
+  const tok = await tokenAtual(admin, conta.id);
   if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) {
     await marcar(admin, ev.id, { status: "erro", account_id: conta.id, codigo_ml: "invalid_token", erro: "A autorização da conta expirou. Conecte de novo." });
     return;

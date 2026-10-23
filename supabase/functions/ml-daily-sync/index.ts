@@ -228,12 +228,7 @@ Deno.serve(async (req) => {
     let gravados = 0;
 
     try {
-      const { data: tok } = await admin
-        .from("ml_tokens")
-        .select("access_token, expires_at")
-        .eq("account_id", conta.id)
-        .eq("is_current", true)
-        .maybeSingle();
+      const tok = await tokenAtual(admin, conta.id);
       if (!tok?.access_token) throw new Error("conta sem token corrente (reautorizar)");
       if (Date.parse(tok.expires_at) <= Date.now()) throw new Error("token expirado (aguardar refresh)");
 

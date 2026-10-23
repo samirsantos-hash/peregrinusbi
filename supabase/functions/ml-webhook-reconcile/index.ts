@@ -60,12 +60,7 @@ Deno.serve(async (req) => {
 
   const resumo: unknown[] = [];
   for (const conta of (contas ?? []) as Conta[]) {
-    const { data: tok } = await admin
-      .from("ml_tokens")
-      .select("access_token, expires_at")
-      .eq("account_id", conta.id)
-      .eq("is_current", true)
-      .maybeSingle();
+    const tok = await tokenAtual(admin, conta.id);
     if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) {
       resumo.push({ account_id: conta.id, ml_user_id: conta.ml_user_id, novas: 0, duplicadas: 0, erros: ["autorização vencida"] });
       continue;
