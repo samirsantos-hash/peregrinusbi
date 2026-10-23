@@ -48,6 +48,7 @@ interface ManagedUser {
   
   created_at: string;
   role: AppRole;
+  desenvolvedor: boolean;
 }
 
 interface UploadLog {
@@ -136,6 +137,7 @@ const Admin = () => {
           
           created_at: u.created_at,
           role: rolesMap[u.user_id] || "user",
+          desenvolvedor: rolesRes.data?.some(r => r.user_id === u.user_id && r.role === 'desenvolvedor') ?? false,
         }))
       );
     }
@@ -504,6 +506,7 @@ const Admin = () => {
                             )}>
                               {u.role === "admin" ? "Admin" : u.role === "gerente" ? "Gerente" : "Consultor"}
                             </span>
+                            {u.desenvolvedor && <span className="text-xs font-medium text-foreground">Desenvolvedor</span>}
                           </div>
                           <p className="text-xs text-muted-foreground">
                             CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
