@@ -1,3 +1,4 @@
+import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-webhook-reconcile
 // Recupera notificações que o Mercado Livre já desistiu de entregar.
 // Documentação: GET /missed_feeds?app_id={APP_ID}. O histórico dura 2 dias.
@@ -59,12 +60,7 @@ Deno.serve(async (req) => {
 
   const resumo: unknown[] = [];
   for (const conta of (contas ?? []) as Conta[]) {
-    const { data: tok } = await admin
-      .from("ml_tokens")
-      .select("access_token, expires_at")
-      .eq("account_id", conta.id)
-      .eq("is_current", true)
-      .maybeSingle();
+    const tok = await tokenAtual(admin, conta.id);
     if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) {
       resumo.push({ account_id: conta.id, ml_user_id: conta.ml_user_id, novas: 0, duplicadas: 0, erros: ["autorização vencida"] });
       continue;

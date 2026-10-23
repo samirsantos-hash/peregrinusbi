@@ -1,3 +1,4 @@
+import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-ads-sync
 // Lê Product Ads de cada conta conectada. Não escreve no Mercado Livre.
 //
@@ -118,8 +119,7 @@ Deno.serve(async (req) => {
       continue;
     }
     const erros: string[] = [];
-    const { data: tok } = await admin.from("ml_tokens").select("access_token, expires_at")
-      .eq("account_id", conta.id).eq("is_current", true).maybeSingle();
+    const tok = await tokenAtual(admin, conta.id);
     if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) {
       resumo.push({ ...base, status: "sem_token", erros: ["autorização vencida"] });
       continue;

@@ -1,3 +1,4 @@
+import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-buscar-produtos
 // Busca anúncios da própria loja conectada por título, SKU ou código MLB.
 // Só leitura no ML. Acesso: quem enxerga a loja na carteira (RLS de ml_sync_tema).
@@ -31,8 +32,7 @@ Deno.serve(async (req) => {
 
   const { data: conta } = await db.from("ml_accounts").select("id").eq("status", "active").eq("ml_user_id", Number(cust)).maybeSingle();
   if (!conta) return json({ error: "Loja não conectada ao Mercado Livre." }, 404);
-  const { data: tok } = await db.from("ml_tokens").select("access_token, expires_at")
-    .eq("account_id", conta.id).eq("is_current", true).maybeSingle();
+  const tok = await tokenAtual(db, conta.id);
   if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) return json({ error: "Acesso da loja vencido; aguarde a renovação automática." }, 409);
   const get = async (path: string) => {
     try {
