@@ -1,3 +1,4 @@
+import { tokenAtual } from "./mlTokenAtual.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { buscarMl } from "./mlHttp.ts";
 import { lerPergunta } from "./mlPerguntas.ts";

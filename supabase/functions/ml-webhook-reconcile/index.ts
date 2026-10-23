@@ -1,3 +1,4 @@
+import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-webhook-reconcile
 // Recupera notificações que o Mercado Livre já desistiu de entregar.
 // Documentação: GET /missed_feeds?app_id={APP_ID}. O histórico dura 2 dias.

@@ -1,3 +1,4 @@
+import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-daily-sync
 // Extração diária de operações financeiras do Mercado Livre.
 // Recebe { site_id, start_date, end_date, limit, offset } e pagina o endpoint

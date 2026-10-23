@@ -1,3 +1,4 @@
+import { tokenAtual } from "./mlTokenAtual.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "./env.ts";
 
@@ -37,8 +38,7 @@ export async function contaComToken(
   const { data: conta } = await admin.from("ml_accounts").select("id, ml_user_id, site_id, nickname, status")
     .eq("id", accountId).maybeSingle();
   if (!conta || conta.status !== "active") return { ok: false, erro: "Conta do Mercado Livre não conectada." };
-  const { data: tok } = await admin.from("ml_tokens").select("access_token, expires_at")
-    .eq("account_id", accountId).eq("is_current", true).maybeSingle();
+  const tok = await tokenAtual(admin, accountId);
   if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) {
     return { ok: false, erro: "A autorização da conta expirou. Conecte de novo." };
   }

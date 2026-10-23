@@ -1,3 +1,4 @@
+import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
   const db = createClient(url, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
   const { data: account } = await db.from("ml_accounts").select("id,nickname").eq("status", "active").eq("ml_user_id", Number(cust)).maybeSingle();
   if (!account) return json({ error: "Loja não conectada ao Mercado Livre." }, 404);
-  const { data: token } = await db.from("ml_tokens").select("access_token,expires_at").eq("account_id", account.id).eq("is_current", true).maybeSingle();
+  const token = await tokenAtual(db, account.id);
   if (!token?.access_token || Date.parse(token.expires_at) <= Date.now()) return json({ error: "Acesso da loja vencido; aguarde a renovação automática ou reconecte a loja em Integrações." }, 409);
   const [{ data: sa }, { data: perfil }] = await Promise.all([userClient.rpc("is_super_admin"), userClient.rpc("get_perfil")]);
   const periodo = adsPeriod(dias);
