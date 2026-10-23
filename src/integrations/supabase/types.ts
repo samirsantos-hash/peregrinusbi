@@ -788,6 +788,39 @@ export type Database = {
         }
         Relationships: []
       }
+      developer_alerts: {
+        Row: {
+          categoria: string
+          codigo: string
+          criado_em: string
+          duracao_ms: number | null
+          id: string
+          mensagem: string
+          origem: string
+          reconhecido_em: string | null
+        }
+        Insert: {
+          categoria: string
+          codigo: string
+          criado_em?: string
+          duracao_ms?: number | null
+          id?: string
+          mensagem: string
+          origem: string
+          reconhecido_em?: string | null
+        }
+        Update: {
+          categoria?: string
+          codigo?: string
+          criado_em?: string
+          duracao_ms?: number | null
+          id?: string
+          mensagem?: string
+          origem?: string
+          reconhecido_em?: string | null
+        }
+        Relationships: []
+      }
       drive_ingest_log: {
         Row: {
           chunks_processed: number | null
@@ -4407,6 +4440,16 @@ export type Database = {
           user_id: string
         }[]
       }
+      avisos_operacionais_existentes: {
+        Args: never
+        Returns: {
+          categoria: string
+          criado_em: string
+          id: string
+          mensagem: string
+          origem: string
+        }[]
+      }
       get_allowed_cust_ids: { Args: never; Returns: string[] }
       get_data_coverage: {
         Args: never
@@ -4623,6 +4666,15 @@ export type Database = {
           sellers: number
         }[]
       }
+      reconhecer_aviso_desenvolvedor: {
+        Args: { p_id: string }
+        Returns: undefined
+      }
+      registrar_aviso_painel: {
+        Args: { p_codigo: string; p_duracao_ms?: number; p_origem: string }
+        Returns: undefined
+      }
+      sou_desenvolvedor: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role:
