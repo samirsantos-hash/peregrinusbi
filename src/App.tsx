@@ -5,7 +5,7 @@ import { SoundProvider } from "@/hooks/useSoundFeedback";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { JuniorModeProvider } from "@/hooks/useJuniorMode";
 import { ThemeProvider } from "@/hooks/useTheme";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -42,8 +42,14 @@ import NotificationsBell from "./components/portfolios/NotificationsBell";
 import RodapeInstitucional from "./components/RodapeInstitucional";
 import AlertaInatividade from "./components/AlertaInatividade";
 import { AuraBackground, AuraReveal } from "@/components/aura/AuraBackground";
+import AvisosGlobais from '@/components/AvisosGlobais';
+import { registrarAviso } from '@/lib/avisosDesenvolvedor';
 
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({ onError: (_error, query) => {
+    if (!['developer-alerts', 'sou-desenvolvedor'].includes(String(query.queryKey[0]))) void registrarAviso('carregamento_falhou');
+  } }),
+  mutationCache: new MutationCache({ onError: () => { void registrarAviso('atualizacao_falhou'); } }),
   defaultOptions: {
     queries: {
       staleTime: 60_000,
@@ -140,6 +146,7 @@ const App = () => (
               <AppRoutes />
               <NotificationsBell />
               <AlertaInatividade />
+              <AvisosGlobais />
             </ContextoNavegacaoProvider>
           </BrowserRouter>
         </JuniorModeProvider>

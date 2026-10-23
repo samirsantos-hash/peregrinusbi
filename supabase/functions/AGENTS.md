@@ -1,5 +1,7 @@
 # Regras das funções do Mercado Livre
 
+- Ads synchronization reports controlled operational warnings to developer-only `developer_alerts`, including scheduled runs, without copying raw upstream payloads or tokens; monitoring never changes Mercado Livre state.
+
 - A busca de concorrentes (`ml-busca-concorrentes`, aba Preço) usa token de aplicativo do ML e o catálogo (`/products/search` + `/products/:id/items`), chamadas sequenciais: `/sites/MLB/search` responde 403 para aplicativos e chamadas paralelas dão 429.
 - `ml-importar-anuncios` (só admin) lê MLBs conhecidos por cust_id e consulta `/items` em lotes de 20, gravando em `ml_anuncios`; com token de aplicativo o ML responde 403 para anúncios de terceiros, então só funciona com token da própria loja conectada.
 - Product Ads lê o anunciante (`/advertising/advertisers?product_id=PADS`), campanhas e Ad Groups; a métrica diária usa no máximo 90 dias e grava o valor que a API mandou, com ausência em null. A série do Ad Group só sai dia a dia (`/campaigns/{id}/ad_groups/metrics`), então `ml-ads-sync` roda a cada 15 minutos (o ML não avisa mudanças de Ads) com limite de tempo e retoma pelos dias pendentes em `ml_ads_dias_sync`.

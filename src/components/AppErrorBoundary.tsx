@@ -1,4 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
+import { registrarAviso } from '@/lib/avisosDesenvolvedor';
+import { Button } from '@/components/ui/button';
 
 interface Props {
   children: ReactNode;
@@ -18,6 +20,7 @@ export class AppErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Falha ao renderizar o Peregrinus", error, info);
+    void registrarAviso('renderizacao_falhou');
   }
 
   handleRetry = () => {
@@ -33,19 +36,14 @@ export class AppErrorBoundary extends Component<Props, State> {
             <p className="mt-2 text-sm text-muted-foreground">
               Ocorreu um erro ao carregar esta tela. Você pode tentar reenviar a solicitação.
             </p>
-            {this.state.message ? (
-              <p className="mt-3 break-words rounded-md border border-border bg-muted/40 p-3 text-left text-xs font-mono text-muted-foreground">
-                {this.state.message}
-              </p>
-            ) : null}
             <div className="mt-5 flex items-center justify-center gap-3">
-              <button
+              <Button
                 type="button"
                 onClick={this.handleRetry}
                 className="inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground"
               >
                 Reenviar solicitação
-              </button>
+              </Button>
               <a
                 href={window.location.href}
                 className="inline-flex h-9 items-center justify-center rounded-md border border-border px-4 text-sm font-medium"

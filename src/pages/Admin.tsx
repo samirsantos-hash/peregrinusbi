@@ -22,6 +22,9 @@ import TokensDeAcessoTab from "@/components/admin/TokensDeAcessoTab";
 import MercadoLivrePanel from "@/components/multilojas/MercadoLivrePanel";
 import { Link2, Sparkles } from "lucide-react";
 import RevisaoPlanilhaIA from "@/components/admin/RevisaoPlanilhaIA";
+import PainelAvisos from '@/components/admin/PainelAvisos';
+import { useDesenvolvedor } from '@/hooks/useDesenvolvedor';
+import { Bell } from 'lucide-react';
 import { format } from "date-fns";
 import { cn, getEdgeFunctionErrorMessage } from "@/lib/utils";
 
@@ -45,6 +48,7 @@ interface ManagedUser {
   
   created_at: string;
   role: AppRole;
+  desenvolvedor: boolean;
 }
 
 interface UploadLog {
@@ -74,6 +78,7 @@ const STATUS_BADGE: Record<string, { label: string; color: string }> = {
 
 const Admin = () => {
   const { user, isAdmin, isGerente, signOut } = useAuth();
+  const { autorizado: isDesenvolvedor } = useDesenvolvedor();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -132,6 +137,7 @@ const Admin = () => {
           
           created_at: u.created_at,
           role: rolesMap[u.user_id] || "user",
+          desenvolvedor: rolesRes.data?.some(r => r.user_id === u.user_id && r.role === 'desenvolvedor') ?? false,
         }))
       );
     }
@@ -314,7 +320,8 @@ const Admin = () => {
         </motion.div>
 
         <Tabs defaultValue={isAdmin ? "users" : "portfolios"} className="w-full">
-          <TabsList className="glass-card w-full justify-start gap-1 p-1 bg-card/60 h-auto">
+          <TabsList className="glass-card w-full flex-wrap justify-start gap-1 p-1 bg-card/60 h-auto">
+            {isDesenvolvedor && <TabsTrigger value="avisos" className="flex items-center gap-2 px-4 py-2.5 text-sm"><Bell className="h-4 w-4" /> Avisos do desenvolvedor</TabsTrigger>}
             {isAdmin && (
               <TabsTrigger value="users" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Users className="w-4 h-4" />
@@ -351,6 +358,7 @@ const Admin = () => {
             )}
           </TabsList>
 
+          {isDesenvolvedor && <TabsContent value="avisos" className="mt-5"><PainelAvisos /></TabsContent>}
           <TabsContent value="users" className="mt-5 space-y-6">
             {/* Create User Form */}
             <Card className="glass-card border-glass-border">
@@ -498,6 +506,7 @@ const Admin = () => {
                             )}>
                               {u.role === "admin" ? "Admin" : u.role === "gerente" ? "Gerente" : "Consultor"}
                             </span>
+                            {u.desenvolvedor && <span className="text-xs font-medium text-foreground">Desenvolvedor</span>}
                           </div>
                           <p className="text-xs text-muted-foreground">
                             CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
