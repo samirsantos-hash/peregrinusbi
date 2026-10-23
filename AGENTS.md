@@ -1,5 +1,8 @@
 # Architecture Rules
 
+- Developer diagnostics use a separate additive `desenvolvedor` role in `user_roles`, protected from browser assignment; private `developer_alerts` and developer-only RPCs never imply store-management permissions, so monitoring cannot escalate business access.
+- Operational telemetry accepts only allowlisted codes and origins, with server deduplication and 30-day retention; never persist raw error bodies, credentials, buyer information or arbitrary URLs, to keep diagnostics private and bounded.
+
 - Product Ads campaigns are queried on demand via `ml-gestao-ads` with the store's own token and complete UTC days; it never writes. Campaign and ad writes go only through `ml-ads-action` (preview and confirmation, see the Publicidade rule) to avoid unintended spend changes.
 
 - Per-listing comparisons query the own-store token on demand via `ml-buscar-produtos`; use the same 30 complete UTC days, paid orders per item (units separate), unknown metrics as null, and current item promotions separately from period performance to avoid fabricated conversion and attribution.

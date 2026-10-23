@@ -1,13 +1,18 @@
 import { FunctionsHttpError } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { consultaLenta, registrarAviso } from '@/lib/avisosDesenvolvedor';
 
 export type ContaMl = { id: string; ml_user_id: number; nickname: string | null; site_id: string };
 
 /** Chama uma Edge Function e devolve a mensagem em português do servidor quando ela recusa. */
 export async function chamarFuncaoMl<T>(nome: string, body: Record<string, unknown>): Promise<T> {
+  const inicio = performance.now();
   const { data, error } = await supabase.functions.invoke(nome, { body });
+  const duracao = performance.now() - inicio;
+  if (consultaLenta(duracao)) void registrarAviso('resposta_lenta', undefined, duracao);
   if (error) {
+    void registrarAviso('atualizacao_falhou');
     let msg = "Não foi possível falar com o servidor agora.";
     if (error instanceof FunctionsHttpError) {
       try { msg = (await error.context.json())?.error ?? msg; } catch { /* sem corpo */ }

@@ -256,5 +256,16 @@ Deno.serve(async (req) => {
     resumo.push({ ...base, status: "ativo", anunciantes: anunciantes.length, campanhas, anuncios, dias_lidos: diasLidos, dias_pendentes: pendentes, erros: erros.slice(0, 20) });
   }
 
+  // Avisos operacionais da rotina também chegam ao painel privado, sem payloads ou tokens.
+  for (const c of resumo) {
+    if (!c.erros.length && c.dias_pendentes === 0) continue;
+    const codigo = c.status === 'sem_token' ? 'ads_autorizacao' : c.status === 'erro' ? 'ads_falhou' : c.erros.length ? 'ads_aviso' : 'ads_pendente';
+    const { data: recente } = await admin.from('developer_alerts').select('id').eq('origem', `Publicidade · ${c.ml_user_id}`).eq('codigo', codigo).gte('criado_em', new Date(Date.now() - 3600000).toISOString()).limit(1);
+    if (recente?.length) continue;
+    await admin.from('developer_alerts').insert({
+      categoria: 'atualizacao', origem: `Publicidade · ${c.ml_user_id}`, codigo,
+      mensagem: c.status === 'sem_token' ? 'Não foi possível obter autorização válida para atualizar a conta.' : c.status === 'erro' ? 'O Mercado Livre recusou a leitura de Publicidade.' : c.erros.some(e => e.includes('não encontrou este recurso')) ? 'Leitura concluída com avisos: o Mercado Livre não encontrou um recurso solicitado.' : c.erros.length ? 'Leitura concluída com avisos no Mercado Livre.' : 'Há dias de métricas pendentes; a próxima rotina continuará a leitura.',
+    });
+  }
   return resposta({ janela, contas: resumo });
 });

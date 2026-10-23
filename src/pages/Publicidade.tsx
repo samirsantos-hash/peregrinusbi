@@ -16,6 +16,8 @@ import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useAcaoEmLote } from "@/lib/mlAcoes";
 import { chamarFuncaoMl, dataHoraBr, useContasMl } from "@/lib/mlFuncoes";
 import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel } from "@/lib/adsAnalise";
+import { useDesenvolvedor } from '@/hooks/useDesenvolvedor';
+import { registrarAviso } from '@/lib/avisosDesenvolvedor';
 
 /** Janela de comparação: 30 dias contra os 30 anteriores (a API guarda 90). */
 const DIAS = 30;
@@ -28,6 +30,7 @@ export default function Publicidade() {
   const qc = useQueryClient();
   const [params, setParams] = useSearchParams();
   const contas = useContasMl();
+  const { autorizado: isDesenvolvedor } = useDesenvolvedor();
   const contaId = params.get("conta") ?? "";
   const [atualizando, setAtualizando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -117,8 +120,10 @@ export default function Publicidade() {
       else if (c?.status === "erro") setAviso(`O Mercado Livre recusou a leitura: ${c.erros[0] ?? "erro desconhecido"}.`);
       else if (c && c.dias_pendentes > 0) setAviso(`Faltam ${c.dias_pendentes} dia(s) de métricas por anúncio. O restante entra nas próximas leituras automáticas (de hora em hora).`);
       else if (c?.erros.length) setAviso(`Leitura concluída com avisos: ${c.erros[0]}.`);
+      if (c && (c.erros.length || c.status === 'sem_token' || c.dias_pendentes > 0)) void registrarAviso(c.status === 'erro' || c.status === 'sem_token' ? 'atualizacao_falhou' : 'leitura_parcial', 'publicidade');
       recarregar();
     } catch (e) {
+      void registrarAviso('atualizacao_falhou', 'publicidade');
       setAviso(e instanceof Error ? e.message : "Não foi possível atualizar agora.");
     } finally {
       setAtualizando(false);
@@ -160,7 +165,7 @@ export default function Publicidade() {
           }
         />
 
-        {aviso && <p className="text-sm text-ec-ambar">{aviso}</p>}
+        {aviso && <p className="text-sm text-ec-ambar">{isDesenvolvedor ? aviso : 'A atualização não foi concluída integralmente. Os dados disponíveis foram mantidos.'}</p>}
         {contas.isLoading && <Carregando />}
         {contas.isError && <EmptyState falta="Não foi possível carregar suas contas." acao="Recarregue a página." />}
         {contas.data && contas.data.length === 0 && (

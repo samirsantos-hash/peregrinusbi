@@ -172,6 +172,7 @@ Contrato próprio (uma pergunta por vez), com a mesma idempotência das ações 
 - Saída: `200 { janela, contas: [{ account_id, ml_user_id, status, anunciantes, campanhas, anuncios, dias_lidos, dias_pendentes, erros }] }`. `status`: `ativo`, `sem_product_ads`, `sem_token`, `erro`, `adiado`.
 - Erros: 400 sem `account_id` com JWT, 401, 403, 405.
 - Campanhas e anúncios a cada chamada; métrica diária por campanha 1 vez a cada 20 h; métrica por anúncio dia a dia, retomando por `ml_ads_dias_sync`. Janela de 90 dias. Cron de hora em hora.
+- Erros e leituras parciais também gravam avisos controlados em `developer_alerts`, sem corpos de resposta ou tokens. Só o perfil `desenvolvedor` lê os diagnósticos; demais usuários recebem apenas estado genérico de atualização incompleta.
 
 #### `ml-ads-action` (lote)
 
@@ -270,5 +271,13 @@ Todas com RLS ligada. Só as funções (service role) gravam; o usuário autenti
 `ml_e_consultor(uuid)` e `ml_destinatarios_conta(uuid)` são só do service role.
 
 ## Teste de ponta a ponta
+
+### Avisos operacionais privados
+
+- `sou_desenvolvedor()` valida `user_roles` no servidor; o papel é adicional, sem novas permissões comerciais. A atribuição via cliente é bloqueada.
+- `developer_alerts`: leitura só desenvolvedor; escrita direta só serviço. Retenção de 30 dias, consulta do painel até 200 registros, a cada 15 segundos.
+- `registrar_aviso_painel(p_codigo, p_origem, p_duracao_ms?)`: usuário autenticado pode registrar apenas códigos/origens permitidos, sem texto livre; deduplicação de um minuto. Lentidão de chamadas de gestão medida a partir de 8 s.
+- `reconhecer_aviso_desenvolvedor(p_id)`: só desenvolvedor marca ciente, sem alterar dados comerciais.
+- `avisos_operacionais_existentes()`: só desenvolvedor; até 100 falhas de sincronização, webhook e rotinas dos últimos 7 dias, sem payloads brutos. Não classifica falhas como ataques; detecção de ataques não está conectada.
 
 Roteiro e script: `scripts/ml-e2e.sh` (ver o cabeçalho do script). Cobre ler Ads, criar campanha pausada, editar, incluir, pausar e remover um anúncio, entrar e sair de uma promoção em um anúncio, receber uma pergunta pelo webhook e respondê-la.
