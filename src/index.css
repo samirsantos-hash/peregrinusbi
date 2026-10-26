@@ -66,8 +66,8 @@
     --input: var(--aura-line);
     --ring: var(--aura-cyan-400);
     --radius: 1rem;
-    --vidro-fundo: linear-gradient(180deg, rgba(76,73,68,.58), rgba(36,35,33,.68));
-    --vidro-sombra: inset 0 1px 0 rgba(255,255,255,.16), 0 30px 60px -24px rgba(0,0,0,.65);
+    --vidro-fundo: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.07));
+    --vidro-sombra: inset 0 1px 0 rgba(255,255,255,.16), 0 30px 60px -24px rgba(0,0,0,.45);
     --cartao-sombra: 0 10px 24px -14px rgba(0,0,0,.55);
     --curva: cubic-bezier(.23,1,.32,1);
 
@@ -198,13 +198,13 @@
   html.light { background-color: hsl(200 30% 97%); }
   html.light ::selection { color: hsl(222 47% 11%); }
   html {
-    background-color: #25231F;
+    background-color: #1E2122;
     background-image:
-      radial-gradient(70% 45% at 50% -5%, rgba(238,232,220,.35), transparent 62%),
-      radial-gradient(35% 60% at 4% 60%, rgba(214,206,192,.28), transparent 70%),
-      radial-gradient(30% 55% at 98% 40%, rgba(196,186,170,.24), transparent 70%),
+      radial-gradient(70% 45% at 50% -5%, rgba(255,255,255,.30), transparent 62%),
+      radial-gradient(35% 60% at 4% 60%, rgba(235,240,240,.22), transparent 70%),
+      radial-gradient(30% 55% at 98% 40%, rgba(225,232,232,.18), transparent 70%),
       radial-gradient(14% 26% at 6% 100%, rgba(20,168,108,.30), transparent 70%),
-      linear-gradient(180deg, #4A463F 0%, #34312C 40%, #26241F 72%, #1C1B18 100%);
+      linear-gradient(180deg, #4A5052 0%, #363B3D 40%, #272B2C 72%, #1C1F20 100%);
     background-attachment: fixed;
     scroll-behavior: smooth;
   }
@@ -237,7 +237,7 @@
   /* Cartão de vidro do Aura: bg-black/60 + backdrop-blur-xl + borda white/10 */
   .glass-card {
     border-radius: 20px;
-    border: 1px solid rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.22);
     background: var(--vidro-fundo);
     -webkit-backdrop-filter: blur(28px) saturate(140%);
     backdrop-filter: blur(28px) saturate(140%);
