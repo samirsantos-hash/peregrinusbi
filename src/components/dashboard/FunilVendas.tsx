@@ -13,8 +13,18 @@ interface KpiFunil {
   bpc?: number | null;
 }
 
-/** Seção 4 — funil de 5 etapas. ATC/Checkout são estimativas rotuladas. */
-export default function FunilVendas({ kpis, periodo }: { kpis: KpiFunil[]; periodo?: string }) {
+/** Funil de 5 etapas. ATC/Checkout são estimativas rotuladas. */
+export default function FunilVendas({
+  kpis,
+  periodo,
+  indice = 4,
+  ocultarTitulo = false,
+}: {
+  kpis: KpiFunil[];
+  periodo?: string;
+  indice?: number;
+  ocultarTitulo?: boolean;
+}) {
   const d = useMemo(() => {
     const s = (f: (k: KpiFunil) => number) => kpis.reduce((a, k) => a + (Number(f(k)) || 0), 0);
     const visitas = s((k) => k.visits);
@@ -25,12 +35,12 @@ export default function FunilVendas({ kpis, periodo }: { kpis: KpiFunil[]; perio
     return { visitas, unidades, fat, bpcMedio, funil: funilCincoEtapas(visitas, unidades) };
   }, [kpis]);
 
-  const titulo = `4 · Funil de conversão${periodo ? ` · ${periodo}` : ""}`;
+  const titulo = `${indice} · Funil de conversão${periodo ? ` · ${periodo}` : ""}`;
 
   if (d.visitas <= 0) {
     return (
       <section aria-label="Funil de conversão" className="space-y-3">
-        <h2 className="ds-rotulo">{titulo}</h2>
+        {!ocultarTitulo && <h2 className="ds-rotulo">{titulo}</h2>}
         <div className="ds-kpi rounded-xl p-5 text-sm text-slate-600">
           Sem visitas no período — carregue a base de visitas para ver a conversão.
         </div>
@@ -46,10 +56,17 @@ export default function FunilVendas({ kpis, periodo }: { kpis: KpiFunil[]; perio
 
   return (
     <section aria-label="Funil de conversão" className="ds-kpi rounded-2xl p-5">
-      <div className="mb-4 flex flex-wrap items-center gap-2">
-        <h2 className="ds-rotulo">{titulo}</h2>
-        <TooltipInfo text="Visitas e PDP são dados reais (no ML a visita é a abertura da PDP). Add to cart e checkout são estimativas geométricas entre PDP e pedidos — não vêm da base. Pedidos = unidades (TSI). O maior abandono entre etapas estimadas não substitui diagnóstico com dado real." />
-      </div>
+      {!ocultarTitulo && (
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <h2 className="ds-rotulo">{titulo}</h2>
+          <TooltipInfo text="Visitas e PDP são dados reais (no ML a visita é a abertura da PDP). Add to cart e checkout são estimativas geométricas entre PDP e pedidos — não vêm da base. Pedidos = unidades (TSI). O maior abandono entre etapas estimadas não substitui diagnóstico com dado real." />
+        </div>
+      )}
+      {ocultarTitulo && (
+        <div className="mb-3 flex justify-end">
+          <TooltipInfo text="Visitas e PDP são dados reais (no ML a visita é a abertura da PDP). Add to cart e checkout são estimativas geométricas entre PDP e pedidos — não vêm da base. Pedidos = unidades (TSI)." />
+        </div>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="lg:col-span-2 flex flex-col items-center gap-1.5" role="img" aria-label="Funil de cinco etapas">

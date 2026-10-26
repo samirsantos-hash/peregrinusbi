@@ -2,7 +2,6 @@
 
 import {
   DollarSign,
-  LayoutDashboard,
   Truck,
   Shield,
   Video,
@@ -28,15 +27,12 @@ export type SellerTab = {
 };
 
 export const SELLER_TABS: SellerTab[] = [
-  { id: "efficiency", label: "Resumo", icon: DollarSign, order: 1,
-    descricao: "Visão geral da saúde da loja no período",
-    juniorTip: "Comece aqui. Dá a fotografia completa em uma tela." },
+  { id: "efficiency", label: "Visão geral", icon: DollarSign, order: 1,
+    descricao: "Resultado, causas, ritmo e conversão — Resumo e Faturamento numa só leitura",
+    juniorTip: "Comece aqui. Cadeia científica: efeito → tráfego → tendência → funil." },
   { id: "pock", label: "Full", icon: Gauge, order: 1.5,
     descricao: "Potencial da loja e produtos para avaliar no Full",
     juniorTip: "Potencial da loja, evolução e balanceamento de produtos para Full." },
-  { id: "executive", label: "Faturamento", icon: LayoutDashboard, order: 2,
-    descricao: "GMV, itens vendidos e ticket médio",
-    juniorTip: "Analise tendências de GMV e eficiência dos Ads antes de qualquer reunião." },
   { id: "logistics", label: "Logística", icon: Truck, order: 3,
     descricao: "Envios, prazos e adesão ao FULL",
     juniorTip: "Full é o fator de maior peso no algoritmo. Sempre analise aqui depois do Resumo." },
@@ -81,8 +77,11 @@ export function getSecao(id: string) {
 }
 
 export const GRUPOS_SECOES = [
-  { titulo: "Visão geral", ids: ["efficiency", "executive"] },
+  { titulo: "Visão geral", ids: ["efficiency"] },
   { titulo: "Desempenho comercial", ids: ["competitiveness", "publicidade", "opportunities", "clips"] },
   { titulo: "Operação e anúncios", ids: ["logistics", "reputation", "quality", "perguntas"] },
   { titulo: "Planejamento", ids: ["pock", "metas", "correlacoes"] },
 ];
+
+/** Aba legada "Faturamento" redireciona para a Visão geral unificada. */
+export const ABA_ALIAS: Record<string, string> = { executive: "efficiency" };

@@ -631,30 +631,121 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 .ds-seta-ruim { background: rgb(214 36 16 / 0.10); color: #D62410; }
 @media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
 
-/* ── Resumo Growth: canvas gelo só na aba Resumo (não troca o tema global) ── */
-.resumo-growth {
-  --resumo-gelo: #f8fafc;
-  border-radius: 1rem;
-  padding: 1rem;
+/* ── Painel Apple (Visão geral): gelo + vidro fosco, sem trocar o tema global ── */
+.painel-apple {
+  --apple-canvas: #f5f5f7;
+  --apple-glass: rgb(255 255 255 / 0.72);
+  --apple-line: rgb(255 255 255 / 0.65);
+  --apple-ink: #1d1d1f;
+  --apple-sec: #6e6e73;
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.15rem 1.5rem;
   background:
-    radial-gradient(120% 80% at 0% 0%, rgb(255 255 255 / 0.9), transparent 55%),
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  border: 1px solid rgb(15 23 42 / 0.05);
+    radial-gradient(90% 60% at 10% 0%, rgb(255 255 255 / 0.95), transparent 50%),
+    radial-gradient(70% 50% at 100% 10%, rgb(255 255 255 / 0.55), transparent 45%),
+    linear-gradient(165deg, #fbfbfd 0%, var(--apple-canvas) 48%, #eef0f4 100%);
+  border: 1px solid rgb(15 23 42 / 0.06);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.8) inset,
+    0 12px 40px -20px rgb(15 23 42 / 0.18);
 }
-.resumo-growth .ds-kpi {
-  background: #fff;
-  border-color: rgb(226 232 240 / 0.9);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+.painel-apple-hero {
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 0.15rem 0.75rem;
+  border-bottom: 1px solid rgb(15 23 42 / 0.06);
 }
-.resumo-growth .ds-kpi:hover {
+.painel-apple-titulo {
+  margin-top: 0.2rem;
+  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--apple-ink);
+  line-height: 1.2;
+}
+.painel-apple-sub {
+  margin-top: 0.35rem;
+  max-width: 42rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--apple-sec);
+}
+.painel-vidro {
+  background: var(--apple-glass);
+  backdrop-filter: saturate(1.4) blur(18px);
+  -webkit-backdrop-filter: saturate(1.4) blur(18px);
+  border: 1px solid var(--apple-line);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.9) inset,
+    0 8px 28px -16px rgb(15 23 42 / 0.2);
+}
+.painel-apple .ds-kpi,
+.painel-apple .glass-card {
+  background: var(--apple-glass);
+  backdrop-filter: saturate(1.35) blur(14px);
+  -webkit-backdrop-filter: saturate(1.35) blur(14px);
+  border-color: rgb(226 232 240 / 0.85);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.85) inset,
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 10px 28px -18px rgb(15 23 42 / 0.16);
+}
+.painel-apple .ds-kpi:hover,
+.painel-apple .glass-card:hover {
   border-color: rgb(203 213 225);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 20px -12px rgba(15, 23, 42, 0.12);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.9) inset,
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 14px 32px -14px rgb(15 23 42 / 0.18);
 }
-.resumo-growth .ds-numero-focal,
-.resumo-growth .ds-numero-sec {
+.painel-apple .ds-numero-focal,
+.painel-apple .ds-numero-sec,
+.painel-apple .metric-value {
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: var(--apple-ink);
+}
+.painel-bloco-cabeca { margin-bottom: 0.65rem; }
+.painel-bloco-porque {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--apple-sec);
+}
+.painel-ponte {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.95rem;
+  border-radius: 0.85rem;
+  background: rgb(255 255 255 / 0.45);
+  border: 1px solid rgb(255 255 255 / 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.painel-ponte-fluxo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--apple-ink);
+}
+.painel-ponte-seta { color: var(--apple-sec); font-weight: 500; }
+.painel-ponte-porque {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--apple-sec);
+}
+/* Compat: alias antigo do Resumo Growth */
+.resumo-growth {
+  border-radius: 1.25rem;
+  padding: 1rem;
+  background: linear-gradient(165deg, #fbfbfd 0%, #f5f5f7 100%);
+  border: 1px solid rgb(15 23 42 / 0.05);
 }
 @media (prefers-reduced-motion: reduce) {
-  .resumo-growth .ds-kpi:hover { transform: none; }
+  .painel-apple .ds-kpi:hover,
+  .painel-apple .glass-card:hover { transform: none; }
 }

@@ -28,13 +28,7 @@ import SecaoHeader from "@/components/dashboard/SecaoHeader";
 import AvisoSemOperacao from "@/components/dashboard/AvisoSemOperacao";
 
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
-import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
-import { Daily7DPanel } from "@/components/dashboard/Daily7DPanel";
-import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
-import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
-import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
-import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import UpliftFullPanel from "@/components/seller/UpliftFullPanel";
 import StockoutRiskPanel from "@/components/dashboard/StockoutRiskPanel";
@@ -44,16 +38,14 @@ import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
 import CdpEvolucao from "@/components/dashboard/CdpEvolucao";
 import { CampanhasCofinanciadasPanel } from "@/components/seller/CampanhasCofinanciadasPanel";
 import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
-import ClipsResumo from "@/components/dashboard/ClipsResumo";
 import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
+import VisaoGeralSecao from "@/components/dashboard/VisaoGeralSecao";
 import { formatarPeriodoBr } from "@/lib/periodoResumo";
+import { ABA_ALIAS } from "@/config/sellerTabs";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
-import FunilVendas from "@/components/dashboard/FunilVendas";
-import ResumoExecutivo from "@/components/dashboard/ResumoExecutivo";
-import ConversaoCarteiraSegmento from "@/components/dashboard/ConversaoCarteiraSegmento";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { qualidadeDerivada } from "@/lib/qualidadeDerivada";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
@@ -113,17 +105,26 @@ const Index = () => {
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("aba") || "efficiency";
+  const abaRaw = searchParams.get("aba") || "efficiency";
+  const activeTab = ABA_ALIAS[abaRaw] ?? abaRaw;
   const [menuAberto, setMenuAberto] = useState(false);
   useContagemNumeros(`${activeTab}|${selectedSeller}`, () => document.querySelector('[role="tabpanel"][data-state="active"]') as HTMLElement | null);
   const setActiveTab = useCallback(
     (tab: string) => {
       const next = new URLSearchParams(searchParams);
-      next.set("aba", tab);
+      next.set("aba", ABA_ALIAS[tab] ?? tab);
       setSearchParams(next, { replace: true });
     },
     [searchParams, setSearchParams],
   );
+  // Links antigos ?aba=executive → Visão geral unificada
+  useEffect(() => {
+    if (abaRaw in ABA_ALIAS && ABA_ALIAS[abaRaw] !== abaRaw) {
+      const next = new URLSearchParams(searchParams);
+      next.set("aba", ABA_ALIAS[abaRaw]);
+      setSearchParams(next, { replace: true });
+    }
+  }, [abaRaw, searchParams, setSearchParams]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
   const [activePeriod, setActivePeriod] = useState<string>("q1");
@@ -518,53 +519,37 @@ const Index = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                   className="mt-0">
-                  <TabsContent value="executive" className="mt-0 space-y-6">
-                    {isConsolidado && <CarteiraNaSecao secao="executive" />}
+                  <TabsContent value="efficiency" className="mt-0 space-y-5">
                     <NovidadesPrompt />
-                    <JuniorActionBanner abaId="executive" dados={dadosJunior} />
-                    <Daily7DPanel
-                      dailyKpis={allKpisDaily}
-                      sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
-                    />
-                    <GmvMesVsMes
-                      pontos={(allKpisDaily.length ? allKpisDaily : allKpisMonthly).map((k: any) => ({
-                        date: String(k.date || "").slice(0, 10),
-                        gmv: Number(k.gmv ?? k.revenue ?? 0),
-                      }))}
-                      titulo="GMV mês vs mês (comparação anual)"
-                    />
-                    <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
-                    <ConversaoCarteiraSegmento />
-                    <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller || undefined} />
-                    <TrendAnalysisPanel
-                      kpis={displayKpis}
-                      dataGranularity={granularity}
-                      allKpisDaily={allKpisDaily}
-                    />
-                    <SynergyAnalysisPanel kpis={displayKpis} />
-                  </TabsContent>
-                  <TabsContent value="efficiency" className="mt-0">
+                    <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     <ResumoLojaApi custId={sellerCustIdMap[selectedSeller]} historico={
-                      <div className="resumo-growth space-y-5">
+                      <>
+                        {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
                         {!isConsolidado && (() => {
                           const de = dateRange?.from ? formatDateString(dateRange.from) : undefined;
                           const ate = dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined;
                           const periodo = de && ate ? formatarPeriodoBr(de, ate) : undefined;
+                          const serieGmv = (allKpisDaily.length ? allKpisDaily : allKpisMonthly).map((k: any) => ({
+                            date: String(k.date || "").slice(0, 10),
+                            gmv: Number(k.gmv ?? k.revenue ?? 0),
+                          }));
                           return (
-                            <>
-                              <ResumoExecutivo diario={resumoDiario as any} de={de} ate={ate} />
-                              <ClipsResumo
-                                kpis={resumoDiario as any}
-                                listingsQuality={listingsQuality || []}
-                                eligibilityItems={eligibilityItems || []}
-                                periodo={periodo}
-                              />
-                              <FunilVendas kpis={resumoDiario as any} periodo={periodo} />
-                            </>
+                            <VisaoGeralSecao
+                              diario={resumoDiario as any}
+                              de={de}
+                              ate={ate}
+                              periodo={periodo}
+                              listingsQuality={listingsQuality || []}
+                              eligibilityItems={eligibilityItems || []}
+                              serieGmv={serieGmv}
+                              campaign={currentCampaign}
+                              benchmark={verticalBenchmark}
+                              sellerId={selectedSeller || undefined}
+                              dataGranularity={granularity === "daily" ? "daily" : "consolidated"}
+                            />
                           );
                         })()}
-                        {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
-                      </div>
+                      </>
                     } />
                   </TabsContent>
                   <TabsContent value="pock" className="mt-0 space-y-5">

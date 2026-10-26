@@ -33,11 +33,16 @@ export default function ClipsResumo({
   listingsQuality,
   eligibilityItems,
   periodo,
+  indice = 3,
+  ocultarTitulo = false,
 }: {
   kpis: SellerKPI[];
   listingsQuality?: ListingQuality[];
   eligibilityItems?: EligibilityItem[];
   periodo?: string;
+  /** Número da seção na Visão geral (Macro→Micro). */
+  indice?: number;
+  ocultarTitulo?: boolean;
 }) {
   const totais = useMemo(() => {
     let visitas = 0;
@@ -107,9 +112,11 @@ export default function ClipsResumo({
 
   return (
     <section aria-label="Clips e vídeos" className="space-y-3">
-      <h2 className="ds-rotulo">
-        3 · Clips & vídeos{periodo ? ` · ${periodo}` : ""}
-      </h2>
+      {!ocultarTitulo && (
+        <h2 className="ds-rotulo">
+          {indice} · Clips & vídeos{periodo ? ` · ${periodo}` : ""}
+        </h2>
+      )}
 
       {!temPeriodo ? (
         <div className="ds-kpi rounded-xl p-5 text-sm text-slate-600">
