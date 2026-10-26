@@ -223,7 +223,7 @@ export default function CppReputationAlert({ data, selectedSeller }: Props) {
                       </div>
                       <div className="relative h-2.5 w-full rounded-full bg-secondary overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all ${styles.bg}`}
+                          className={`h-full rounded-full transition-[transform,opacity,background-color,border-color,color] ${styles.bg}`}
                           style={{ width: `${Math.min((displayPct / 20) * 100, 100)}%`, opacity: rawPct === 0 ? 0.2 : 1 }}
                         />
                       </div>

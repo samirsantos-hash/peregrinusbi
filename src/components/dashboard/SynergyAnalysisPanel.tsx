@@ -207,7 +207,7 @@ const SynergyAnalysisPanel = ({ kpis }: SynergyAnalysisPanelProps) => {
                       return (
                         <td key={ci} className="p-1">
                           <div
-                            className="rounded-md flex flex-col items-center justify-center transition-all hover:scale-105"
+                            className="rounded-md flex flex-col items-center justify-center transition-[transform,opacity,background-color,border-color,color] hover:scale-105"
                             style={{
                               background: isDiag ? "hsl(var(--muted) / 0.3)" : corrBg(val),
                               height: 56,
@@ -262,7 +262,7 @@ const SynergyAnalysisPanel = ({ kpis }: SynergyAnalysisPanelProps) => {
             {interpretacoes.map(({ correlacao, tone, icone, titulo, texto, acao }) => (
               <div
                 key={correlacao.id}
-                className={`rounded-lg border p-4 transition-all ${TONE_STYLES[tone]}`}
+                className={`rounded-lg border p-4 transition-[transform,opacity,background-color,border-color,color] ${TONE_STYLES[tone]}`}
               >
                 <div className="flex items-start gap-3">
                   <span className="text-lg leading-none mt-0.5">{icone}</span>

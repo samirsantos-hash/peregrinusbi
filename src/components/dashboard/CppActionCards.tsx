@@ -44,7 +44,7 @@ export default function CppActionCards({ data, activeGroup, onToggle }: Props) {
         <button
           key={c.key}
           onClick={() => onToggle(activeGroup === c.key ? null : c.key)}
-          className={`flex items-center gap-4 p-5 rounded-xl border transition-all cursor-pointer text-left ${c.bg} ${c.border} ${c.ring}`}
+          className={`flex items-center gap-4 p-5 rounded-xl border transition-[transform,opacity,background-color,border-color,color] cursor-pointer text-left ${c.bg} ${c.border} ${c.ring}`}
         >
           <div className={`p-3 rounded-lg bg-background/50 ${c.iconColor}`}>
             <c.icon className="w-6 h-6" />

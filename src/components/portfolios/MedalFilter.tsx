@@ -30,7 +30,7 @@ export default function MedalFilter({ selected, onChange }: Props) {
           <Badge
             key={m.key}
             variant="outline"
-            className={`cursor-pointer text-xs px-2.5 py-1 transition-all border ${
+            className={`cursor-pointer text-xs px-2.5 py-1 transition-[transform,opacity,background-color,border-color,color] border ${
               active
                 ? m.color + " ring-1 ring-primary/40"
                 : "bg-muted/20 text-muted-foreground border-border hover:bg-muted/40"

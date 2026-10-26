@@ -62,7 +62,7 @@ const UploadPlanilha = ({ onReady }: Props) => {
             <Loader2 className="w-8 h-8 mx-auto animate-spin text-primary" />
             <p className="text-sm text-muted-foreground">{label}</p>
             <div className="h-2 w-full max-w-md mx-auto rounded-full bg-muted overflow-hidden">
-              <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+              <div className="h-full bg-primary transition-[transform,opacity,background-color,border-color,color]" style={{ width: `${pct}%` }} />
             </div>
             <p className="text-xs text-muted-foreground tabular-nums">{pct}%</p>
           </div>

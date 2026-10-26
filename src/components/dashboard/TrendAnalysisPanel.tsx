@@ -262,7 +262,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
               <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-0.5">
                 <button
                   onClick={() => setGranularity("day")}
-                  className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
+                  className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-[transform,opacity,background-color,border-color,color] ${
                   granularity === "day" ?
                   "bg-primary/15 text-primary" :
                   "text-muted-foreground hover:text-foreground"}`
@@ -273,7 +273,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 </button>
                 <button
                   onClick={() => setGranularity("week")}
-                  className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
+                  className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-[transform,opacity,background-color,border-color,color] ${
                   granularity === "week" ?
                   "bg-primary/15 text-primary" :
                   "text-muted-foreground hover:text-foreground"}`
@@ -445,7 +445,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
                 </div>
                 <div className="w-full bg-muted/50 rounded-full h-1.5">
                   <div
-                    className={`h-1.5 rounded-full transition-all ${
+                    className={`h-1.5 rounded-full transition-[transform,opacity,background-color,border-color,color] ${
                     insights.totalAds <= insights.totalGmv * 0.03 ? "bg-emerald" : "bg-destructive"}`
                     }
                     style={{ width: `${Math.min(insights.totalGmv > 0 ? insights.totalAds / (insights.totalGmv * 0.03) * 100 : 0, 100)}%` }} />
