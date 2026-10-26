@@ -2,7 +2,8 @@
  * Sistema de Design Peregrinus — componentes base.
  * Verde é o único destaque; vermelho só para alerta real; amarelo só preenchimento.
  */
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /* ─── Faixas ──────────────────────────────────────────────────────────────── */
@@ -67,23 +68,66 @@ export interface KpiCardProps {
   naoConfirmado?: boolean;
   className?: string;
   onClick?: () => void;
+  /** Variação contra o período anterior (% ou p.p.); define a seta. */
+  variacao?: number | null;
+  /** Se subir é bom (faturamento) ou se cair é bom (TACOS, cancelamento). */
+  melhorQuando?: "subir" | "descer" | "neutro";
 }
 
-export function KpiCard({ rotulo, valor, referencia, focal, faixa, faixaTexto, naoConfirmado, className, onClick }: KpiCardProps) {
+/** Conta do zero até o número do texto (formato pt-BR), mantendo prefixo, sufixo e casas. */
+function useContagem(texto: string) {
+  const [saida, setSaida] = useState(texto);
+  const anterior = useRef(0);
+  useEffect(() => {
+    const m = texto.match(/-?\d{1,3}(?:\.\d{3})*(?:,\d+)?|-?\d+(?:,\d+)?/);
+    if (!m || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setSaida(texto); return; }
+    const casas = (m[0].split(",")[1] ?? "").length;
+    const alvo = Number(m[0].replace(/\./g, "").replace(",", "."));
+    const de = anterior.current; anterior.current = alvo;
+    const t0 = performance.now(); let id = 0;
+    const passo = (t: number) => {
+      const k = Math.min(1, (t - t0) / 700), e = 1 - Math.pow(1 - k, 4);
+      const v = (de + (alvo - de) * e).toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
+      setSaida(texto.replace(m[0], v));
+      if (k < 1) id = requestAnimationFrame(passo);
+    };
+    id = requestAnimationFrame(passo);
+    return () => cancelAnimationFrame(id);
+  }, [texto]);
+  return saida;
+}
+
+function SetaVariacao({ variacao, melhorQuando = "subir" }: { variacao: number; melhorQuando?: "subir" | "descer" | "neutro" }) {
+  const sobe = variacao > 0, estavel = Math.abs(variacao) < 0.05;
+  const bom = melhorQuando === "neutro" || estavel ? null : (sobe === (melhorQuando === "subir"));
+  const Icone = estavel ? Minus : sobe ? ArrowUp : ArrowDown;
+  return (
+    <span
+      className={cn("ds-seta", bom === true && "ds-seta-bom", bom === false && "ds-seta-ruim")}
+      aria-label={`${estavel ? "Estável" : sobe ? "Subiu" : "Caiu"}${bom === null ? "" : bom ? ", bom sinal" : ", ponto de atenção"}`}
+    >
+      <Icone className="h-3.5 w-3.5" strokeWidth={2.5} />
+    </span>
+  );
+}
+
+export function KpiCard({ rotulo, valor, referencia, focal, faixa, faixaTexto, naoConfirmado, className, onClick, variacao, melhorQuando }: KpiCardProps) {
   const Comp = onClick ? "button" : "div";
+  const valorAnimado = useContagem(valor);
   return (
     <Comp
       onClick={onClick}
-      className={cn("text-left rounded-lg border border-border bg-card p-4 [border-width:0.5px]", onClick && "hover:bg-muted/40", className)}
+      className={cn("ds-kpi text-left rounded-2xl p-5 min-w-0", onClick && "cursor-pointer active:scale-[0.98]", className)}
     >
-      <p className="ds-rotulo">
+      <p className="ds-rotulo truncate" title={rotulo}>
         {rotulo}
         {naoConfirmado && <span title="Regra de cálculo ainda não confirmada" className="ml-1 text-ec-laranja">*</span>}
       </p>
       <div className="mt-1.5 flex items-baseline gap-2 flex-wrap">
         <span className={focal ? "ds-numero-focal" : "ds-numero-sec"} style={faixa ? { color: FAIXA_TXT[faixa] } : undefined}>
-          {valor}
+          {valorAnimado}
         </span>
+        {variacao != null && Number.isFinite(variacao) && <SetaVariacao variacao={variacao} melhorQuando={melhorQuando} />}
         {faixa && <SeloFaixa faixa={faixa} />}
         {faixaTexto && <span className="ds-nota">{faixaTexto}</span>}
       </div>
