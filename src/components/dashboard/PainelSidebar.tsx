@@ -185,7 +185,7 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
       {/* Desktop / tablet */}
       <aside
         className={cn(
-          "hidden lg:block shrink-0 sticky self-start top-0 z-30 border-r border-muted/[0.15] bg-surface-alt rounded-none overflow-hidden",
+          "hidden lg:block shrink-0 sticky self-start top-0 z-30 glass-card !rounded-[32px] top-4 overflow-hidden",
           recolhida ? "w-[56px]" : "w-[224px]",
         )}
         style={{ height: "100vh" }}
