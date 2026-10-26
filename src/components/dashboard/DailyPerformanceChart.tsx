@@ -6,6 +6,7 @@ import {
 import { calcularTendencia } from "@/lib/tendencia";
 import TendenciaChip from "@/components/charts/TendenciaChip";
 import { fmtBRL, fmtNumCompact } from "@/utils/formatters";
+import { cn } from "@/lib/utils";
 import TooltipInfo from "./TooltipInfo";
 
 interface DailyKpi {
@@ -19,6 +20,24 @@ interface DailyPerformanceChartProps {
   kpis: DailyKpi[];
   granularity?: "consolidated" | "daily";
 }
+
+/** Vistas: no máximo 2–4 séries visíveis por padrão para evitar spaghetti. */
+type Vista = "essencial" | "suavizado" | "unidades" | "completo";
+
+const VISTAS: { id: Vista; rotulo: string; dica: string }[] = [
+  { id: "essencial", rotulo: "Essencial", dica: "Faturamento + Ads + média" },
+  { id: "suavizado", rotulo: "Suavizado", dica: "Essencial + médias móveis 7d" },
+  { id: "unidades", rotulo: "Unidades", dica: "Unidades na escala correta" },
+  { id: "completo", rotulo: "Completo", dica: "Todas as séries (análise avançada)" },
+];
+
+/** Séries ativas por vista. Unidades ficam fora do Completo misto — escala R$ esmagava TSI. */
+const SERIES_VISTA: Record<Vista, ReadonlySet<string>> = {
+  essencial: new Set(["tgmv", "ads"]),
+  suavizado: new Set(["tgmv", "ads", "ma7tgmv", "ma7ads"]),
+  unidades: new Set(["tsi", "ma7tsi"]),
+  completo: new Set(["tgmv", "ads", "ma7tgmv", "ma7ads", "tendTgmv"]),
+};
 
 function parseFlexDate(raw: string): string {
   if (!raw) return "";
@@ -81,7 +100,6 @@ function fillGaps(kpis: DailyKpi[]) {
     cursor.setDate(cursor.getDate() + 1);
   }
 
-  // Compute 7-day moving averages
   for (let i = 0; i < raw.length; i++) {
     if (i < 6) continue;
     let sumT = 0, sumA = 0, sumS = 0;
@@ -98,10 +116,11 @@ function fillGaps(kpis: DailyKpi[]) {
   return raw;
 }
 
-function ChartTooltipContent({ active, payload }: any) {
+function ChartTooltipContent({ active, payload, vista }: { active?: boolean; payload?: any[]; vista: Vista }) {
   if (!active || !payload?.length) return null;
   const row = payload[0]?.payload;
   if (!row) return null;
+  const show = SERIES_VISTA[vista];
 
   const fullDate = (() => {
     const [y, m, d] = (row.date || "").split("-");
@@ -109,50 +128,65 @@ function ChartTooltipContent({ active, payload }: any) {
   })();
 
   return (
-    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1.5 min-w-[220px]">
-      <p className="font-mono text-muted-foreground font-semibold">📅 {fullDate}</p>
-      <p className="text-neon-blue font-medium">💰 Faturamento: {fmtBRL(row.tgmv)}</p>
-      <p className="text-warning font-medium">📣 Ads: {fmtBRL(row.ads)}</p>
-      <p className="text-ok font-medium">📦 Unidades Vendidas: {row.tsi.toLocaleString("pt-BR")}</p>
-      {row.ma7tgmv != null && (
-        <div className="border-t border-border/30 pt-1.5 mt-1.5 space-y-1">
-          <p className="text-muted-foreground font-medium">📈 MM7 Faturamento: {fmtBRL(row.ma7tgmv)}</p>
-          <p className="text-muted-foreground font-medium">📈 MM7 Ads: {fmtBRL(row.ma7ads)}</p>
-          <p className="text-muted-foreground font-medium">📈 MM7 Unidades: {(row.ma7tsi ?? 0).toLocaleString("pt-BR")}</p>
+    <div className="glass-card p-3 !bg-card/95 text-xs space-y-1.5 min-w-[200px]">
+      <p className="font-mono text-muted-foreground font-semibold">{fullDate}</p>
+      {show.has("tgmv") && <p className="font-medium tabular-nums" style={{ color: "hsl(var(--series-1))" }}>Faturamento: {fmtBRL(row.tgmv)}</p>}
+      {show.has("ads") && <p className="font-medium tabular-nums text-warning">Ads: {fmtBRL(row.ads)}</p>}
+      {show.has("tsi") && <p className="font-medium tabular-nums" style={{ color: "hsl(var(--ok))" }}>Unidades: {row.tsi.toLocaleString("pt-BR")}</p>}
+      {(show.has("ma7tgmv") || show.has("ma7ads") || show.has("ma7tsi")) && row.ma7tgmv != null && (
+        <div className="border-t border-border/30 pt-1.5 mt-1.5 space-y-1 text-muted-foreground">
+          {show.has("ma7tgmv") && <p className="tabular-nums">MM7 Fat.: {fmtBRL(row.ma7tgmv)}</p>}
+          {show.has("ma7ads") && <p className="tabular-nums">MM7 Ads: {fmtBRL(row.ma7ads)}</p>}
+          {show.has("ma7tsi") && <p className="tabular-nums">MM7 Unid.: {(row.ma7tsi ?? 0).toLocaleString("pt-BR")}</p>}
         </div>
       )}
     </div>
   );
 }
 
-const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformanceChartProps) => {
+const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
   const baseData = useMemo(() => fillGaps(kpis), [kpis]);
   const tend = useMemo(() => calcularTendencia(baseData.map((d) => d.tgmv)), [baseData]);
   const chartData = useMemo(
     () => baseData.map((d, i) => ({ ...d, tendTgmv: tend ? Math.round(tend.reta(i)) : undefined })),
     [baseData, tend],
   );
-  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [vista, setVista] = useState<Vista>("essencial");
+  const [ocultas, setOcultas] = useState<Set<string>>(new Set());
   const isSinglePoint = chartData.length === 1;
+  const ativas = SERIES_VISTA[vista];
+  const modoUnidades = vista === "unidades";
 
-  const yDomain = useMemo(() => {
-    if (chartData.length === 0) return [0, 100];
+  const visivel = useCallback(
+    (key: string) => ativas.has(key) && !ocultas.has(key),
+    [ativas, ocultas],
+  );
+
+  const yDomainLeft = useMemo(() => {
+    if (chartData.length === 0) return [0, 100] as [number, number];
     let maxVal = 0;
     for (const d of chartData) {
-      if (!hidden.has("tgmv") && d.tgmv > maxVal) maxVal = d.tgmv;
-      if (!hidden.has("tsi") && d.tsi > maxVal) maxVal = d.tsi;
+      if (modoUnidades) {
+        if (visivel("tsi") && d.tsi > maxVal) maxVal = d.tsi;
+        if (visivel("ma7tsi") && (d.ma7tsi ?? 0) > maxVal) maxVal = d.ma7tsi ?? 0;
+      } else {
+        if (visivel("tgmv") && d.tgmv > maxVal) maxVal = d.tgmv;
+        if (visivel("ma7tgmv") && (d.ma7tgmv ?? 0) > maxVal) maxVal = d.ma7tgmv ?? 0;
+        if (visivel("tendTgmv") && (d.tendTgmv ?? 0) > maxVal) maxVal = d.tendTgmv ?? 0;
+      }
     }
-    return [0, Math.ceil(maxVal * 1.15) || 100];
-  }, [chartData, hidden]);
+    return [0, Math.ceil(maxVal * 1.12) || 100] as [number, number];
+  }, [chartData, modoUnidades, visivel]);
 
-  const yDomainAds = useMemo(() => {
-    if (chartData.length === 0) return [0, 100];
+  const yDomainRight = useMemo(() => {
+    if (chartData.length === 0 || modoUnidades) return [0, 100] as [number, number];
     let maxVal = 0;
     for (const d of chartData) {
-      if (!hidden.has("ads") && d.ads > maxVal) maxVal = d.ads;
+      if (visivel("ads") && d.ads > maxVal) maxVal = d.ads;
+      if (visivel("ma7ads") && (d.ma7ads ?? 0) > maxVal) maxVal = d.ma7ads ?? 0;
     }
-    return [0, Math.ceil(maxVal * 1.15) || 100];
-  }, [chartData, hidden]);
+    return [0, Math.ceil(maxVal * 1.12) || 100] as [number, number];
+  }, [chartData, modoUnidades, visivel]);
 
   const xInterval = useMemo(() => {
     if (isSinglePoint) return 0;
@@ -163,38 +197,78 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
 
   const handleLegendClick = useCallback((entry: any) => {
     const key = entry.dataKey as string;
-    setHidden((prev) => {
+    if (!SERIES_VISTA[vista].has(key)) return;
+    setOcultas((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
       return next;
     });
+  }, [vista]);
+
+  const trocarVista = useCallback((v: Vista) => {
+    setVista(v);
+    setOcultas(new Set());
   }, []);
 
   if (chartData.length === 0) return null;
 
+  const corFat = "hsl(var(--series-1))";
+  const corAds = "hsl(var(--warning))";
+  const corMmFat = "hsl(var(--series-2))";
+  const corMmAds = "hsl(var(--attention-text))";
+  const corUnid = "hsl(var(--ok))";
+  const corMmUnid = "hsl(var(--series-3))";
+  const corTend =
+    tend?.sentido === "caindo"
+      ? "hsl(var(--destructive))"
+      : tend?.sentido === "estavel"
+        ? "hsl(var(--warning))"
+        : "hsl(var(--ok))";
+
   return (
     <div className="glass-card p-5">
-      <div className="flex items-start sm:items-center justify-between gap-2 flex-wrap mb-4">
+      <div className="flex items-start sm:items-center justify-between gap-2 flex-wrap mb-3">
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
             Desempenho Diário (Ciclo 24h)
           </h3>
-          <TooltipInfo text="Cada ponto representa o fechamento de 1 dia. Dias sem vendas aparecem com valor zero. Clique na legenda para mostrar/ocultar séries." />
+          <TooltipInfo text="Essencial mostra só faturamento e ads. Suavizado acrescenta MM7. Unidades usa escala própria (antes ficavam achatadas na escala de R$). Completo inclui tendência. Clique na legenda para ocultar uma série." />
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
-          <TendenciaChip t={tend} />
-          <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded">
+          {!modoUnidades && <TendenciaChip t={tend} />}
+          <span className="text-[10px] text-muted-foreground bg-muted/20 border border-border/30 px-2 py-0.5 rounded tabular-nums">
             {chartData.length} dias
           </span>
         </div>
       </div>
 
+      <div className="mb-3 flex flex-wrap gap-1" role="tablist" aria-label="Vista do gráfico">
+        {VISTAS.map((v) => (
+          <button
+            key={v.id}
+            type="button"
+            role="tab"
+            aria-selected={vista === v.id}
+            title={v.dica}
+            onClick={() => trocarVista(v.id)}
+            className={cn(
+              "px-2.5 py-1 text-[11px] rounded-md border transition-[transform,background-color,color,border-color] duration-[120ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]",
+              vista === v.id
+                ? "border-primary/40 bg-primary/15 text-primary"
+                : "border-border/40 text-muted-foreground hover:text-foreground hover:bg-muted/40",
+            )}
+          >
+            {v.rotulo}
+          </button>
+        ))}
+      </div>
+
       <ResponsiveContainer width="100%" height={typeof window !== "undefined" && window.innerWidth < 640 ? 260 : 340}>
-        <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <ComposedChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="gradTgmv" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.15} />
-              <stop offset="100%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
+              <stop offset="0%" stopColor={corFat} stopOpacity={0.18} />
+              <stop offset="100%" stopColor={corFat} stopOpacity={0} />
             </linearGradient>
           </defs>
 
@@ -214,7 +288,7 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
 
           <YAxis
             yAxisId="left"
-            domain={yDomain}
+            domain={yDomainLeft}
             tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
@@ -222,127 +296,152 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
             width={55}
           />
 
-          <YAxis
-            yAxisId="right"
-            orientation="right"
-            domain={yDomainAds}
-            tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-            tickFormatter={(v) => fmtNumCompact(v)}
-            width={55}
-          />
-
-          <Tooltip content={<ChartTooltipContent />} />
-
-          {/* Faturamento — Area with gradient fill */}
-          <Area
-            yAxisId="left"
-            type="monotone"
-            dataKey="tgmv"
-            name="Faturamento (R$)"
-            stroke="hsl(var(--ec-verde))"
-            strokeWidth={2.5}
-            fill="url(#gradTgmv)"
-            dot={isSinglePoint ? { r: 6, fill: "hsl(var(--ec-verde))", strokeWidth: 2, stroke: "hsl(var(--ec-verde))" } : false}
-            activeDot={{ r: 5, strokeWidth: 2, fill: "hsl(var(--ec-verde))" }}
-            animationDuration={800}
-            hide={hidden.has("tgmv")}
-          />
-
-          {/* Ads line */}
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="ads"
-            name="Investimento Ads (R$)"
-            stroke="hsl(var(--warning))"
-            strokeWidth={2.5}
-            strokeDasharray="5 3"
-            dot={false}
-            activeDot={{ r: 5, strokeWidth: 2 }}
-            animationDuration={800}
-            hide={hidden.has("ads")}
-          />
-
-          {/* MM7 Faturamento */}
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="ma7tgmv"
-            name="MM7 Faturamento"
-            stroke="hsl(var(--ec-verde))"
-            strokeWidth={1.5}
-            strokeDasharray="4 2"
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 1 }}
-            animationDuration={800}
-            hide={hidden.has("ma7tgmv")}
-            connectNulls
-          />
-
-          {/* MM7 Ads */}
-          <Line
-            yAxisId="right"
-            type="monotone"
-            dataKey="ma7ads"
-            name="MM7 Ads"
-            stroke="hsl(var(--warning) / 0.6)"
-            strokeWidth={1.5}
-            strokeDasharray="4 2"
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 1 }}
-            animationDuration={800}
-            hide={hidden.has("ma7ads")}
-            connectNulls
-          />
-
-          {/* MM7 TSI */}
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="ma7tsi"
-            name="MM7 Unidades"
-            stroke="hsl(var(--ec-laranja))"
-            strokeWidth={1.5}
-            strokeDasharray="4 2"
-            dot={false}
-            activeDot={{ r: 4, strokeWidth: 1 }}
-            animationDuration={800}
-            hide={hidden.has("ma7tsi")}
-            connectNulls
-          />
-
-          {tend && !hidden.has("tgmv") && (
-            <ReferenceLine yAxisId="left" y={tend.media} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
-              label={{ value: `Média ${fmtNumCompact(tend.media)}`, position: "insideTopLeft", fill: "hsl(var(--media))", fontSize: 10 }} />
+          {!modoUnidades && (
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              domain={yDomainRight}
+              tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(v) => fmtNumCompact(v)}
+              width={55}
+            />
           )}
-          <Line
-            yAxisId="left"
-            type="linear"
-            dataKey="tendTgmv"
-            name="Tendência do faturamento"
-            stroke={tend?.sentido === "caindo" ? "hsl(var(--destructive))" : tend?.sentido === "estavel" ? "hsl(var(--warning))" : "hsl(var(--ok))"}
-            strokeWidth={2}
-            strokeDasharray="10 5"
-            dot={false}
-            activeDot={false}
-            hide={hidden.has("tendTgmv")}
-          />
 
-          {/* TSI line */}
-          <Line
-            yAxisId="left"
-            type="monotone"
-            dataKey="tsi"
-            name="Unidades Vendidas"
-            stroke="hsl(var(--ok))"
-            strokeWidth={2.5}
-            dot={false}
-            activeDot={{ r: 5, strokeWidth: 2 }}
-            animationDuration={800}
-            hide={hidden.has("tsi")}
-          />
+          <Tooltip content={<ChartTooltipContent vista={vista} />} />
+
+          {/* Séries da vista atual: `hide` mantém a legenda clicável para religar. */}
+          {ativas.has("tgmv") && (
+            <Area
+              yAxisId="left"
+              type="monotone"
+              dataKey="tgmv"
+              name="Faturamento (R$)"
+              stroke={corFat}
+              strokeWidth={2.5}
+              fill="url(#gradTgmv)"
+              dot={isSinglePoint ? { r: 6, fill: corFat, strokeWidth: 2, stroke: corFat } : false}
+              activeDot={{ r: 5, strokeWidth: 2, fill: corFat }}
+              animationDuration={600}
+              hide={!visivel("tgmv")}
+            />
+          )}
+
+          {ativas.has("ads") && (
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="ads"
+              name="Investimento Ads (R$)"
+              stroke={corAds}
+              strokeWidth={2}
+              strokeDasharray="5 3"
+              dot={false}
+              activeDot={{ r: 5, strokeWidth: 2 }}
+              animationDuration={600}
+              hide={!visivel("ads")}
+            />
+          )}
+
+          {ativas.has("ma7tgmv") && (
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="ma7tgmv"
+              name="MM7 Faturamento"
+              stroke={corMmFat}
+              strokeWidth={1.75}
+              strokeDasharray="4 3"
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 1 }}
+              animationDuration={600}
+              connectNulls
+              hide={!visivel("ma7tgmv")}
+            />
+          )}
+
+          {ativas.has("ma7ads") && (
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="ma7ads"
+              name="MM7 Ads"
+              stroke={corMmAds}
+              strokeWidth={1.75}
+              strokeDasharray="4 3"
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 1 }}
+              animationDuration={600}
+              connectNulls
+              hide={!visivel("ma7ads")}
+            />
+          )}
+
+          {ativas.has("tsi") && (
+            <Area
+              yAxisId="left"
+              type="monotone"
+              dataKey="tsi"
+              name="Unidades Vendidas"
+              stroke={corUnid}
+              strokeWidth={2.5}
+              fill={corUnid}
+              fillOpacity={0.08}
+              dot={false}
+              activeDot={{ r: 5, strokeWidth: 2 }}
+              animationDuration={600}
+              hide={!visivel("tsi")}
+            />
+          )}
+
+          {ativas.has("ma7tsi") && (
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="ma7tsi"
+              name="MM7 Unidades"
+              stroke={corMmUnid}
+              strokeWidth={1.75}
+              strokeDasharray="4 3"
+              dot={false}
+              activeDot={{ r: 4, strokeWidth: 1 }}
+              animationDuration={600}
+              connectNulls
+              hide={!visivel("ma7tsi")}
+            />
+          )}
+
+          {!modoUnidades && tend && visivel("tgmv") && (
+            <ReferenceLine
+              yAxisId="left"
+              y={tend.media}
+              stroke="hsl(var(--media))"
+              strokeWidth={1}
+              strokeDasharray="6 4"
+              label={{
+                value: `Média ${fmtNumCompact(tend.media)}`,
+                position: "insideTopRight",
+                fill: "hsl(var(--media))",
+                fontSize: 10,
+              }}
+            />
+          )}
+
+          {ativas.has("tendTgmv") && (
+            <Line
+              yAxisId="left"
+              type="linear"
+              dataKey="tendTgmv"
+              name="Tendência do faturamento"
+              stroke={corTend}
+              strokeWidth={2}
+              strokeDasharray="10 5"
+              dot={false}
+              activeDot={false}
+              hide={!visivel("tendTgmv")}
+            />
+          )}
 
           <Legend
             wrapperStyle={{ fontSize: 11, cursor: "pointer" }}
@@ -351,8 +450,8 @@ const DailyPerformanceChart = ({ kpis, granularity = "daily" }: DailyPerformance
               <span
                 className="text-xs"
                 style={{
-                  color: hidden.has(entry.dataKey) ? "hsl(var(--muted-foreground) / 0.4)" : "hsl(var(--muted-foreground))",
-                  textDecoration: hidden.has(entry.dataKey) ? "line-through" : "none",
+                  color: ocultas.has(entry.dataKey) ? "hsl(var(--muted-foreground) / 0.4)" : "hsl(var(--muted-foreground))",
+                  textDecoration: ocultas.has(entry.dataKey) ? "line-through" : "none",
                 }}
               >
                 {value}
