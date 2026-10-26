@@ -596,3 +596,19 @@
 @media (prefers-reduced-motion: reduce) {
   .multilojas-page .multilojas-chart { transition: none; }
 }
+
+/* ── Movimento tátil (padrão do painel) ──
+   Microinterações 100–200ms; entradas de janelas/menus 200–350ms; só transform e opacity. */
+:root { --curva-rapida: cubic-bezier(0.16, 1, 0.3, 1); }
+[data-state].animate-in, [data-state].animate-out { animation-duration: 220ms; animation-timing-function: var(--curva-rapida); }
+[role="dialog"][data-state].animate-in { animation-duration: 280ms; }
+.glass-card { transition: transform 200ms var(--curva-rapida), border-color 200ms ease, box-shadow 200ms var(--curva-rapida); }
+.glass-card:hover { transform: translateY(-2px); }
+button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-highlight-color: transparent; }
+[role="tab"]:active, [role="menuitem"]:active, [role="option"]:active { transform: scale(0.98); }
+[role="tab"], [role="menuitem"], [role="option"] { transition: transform 120ms var(--curva-rapida), background-color 150ms ease, color 150ms ease; }
+:focus-visible { outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+  .glass-card:hover, [role="tab"]:active { transform: none; }
+}
