@@ -13,8 +13,6 @@ import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 
-import { useJuniorMode } from "@/hooks/useJuniorMode";
-import { GraduationCap } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
@@ -94,7 +92,6 @@ const DashboardHeader = ({
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
 
   const { playClick } = useSoundFeedback();
-  const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
   const baseCal = calendarKpis && calendarKpis.length > 0 ? calendarKpis : allKpis;
@@ -366,7 +363,7 @@ const DashboardHeader = ({
                   title="Selecionar período no calendário"
                 >
                   <CalendarIcon className="h-4 w-4 text-neon-blue" />
-                  <span className="tnum">{rotuloIntervalo}</span>
+                  <span className="tnum text-xs tracking-normal leading-none">{rotuloIntervalo}</span>
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 bg-card border-glass-border" align="start">
@@ -446,20 +443,6 @@ const DashboardHeader = ({
               </Button>
             )}
 
-            {/* Junior Mode toggle */}
-            <button
-              onClick={toggleJunior}
-              title={juniorMode ? "Modo Didático ativo — clique para Modo Avançado" : "Modo Avançado — clique para ativar Modo Didático"}
-              className={cn(
-                "h-9 px-2.5 inline-flex items-center gap-1.5 rounded-md border text-[11px] font-medium transition-all",
-                juniorMode
-                  ? "bg-neon-blue/10 text-neon-blue border-neon-blue/30"
-                  : "bg-card/60 text-muted-foreground border-border hover:text-foreground",
-              )}
-            >
-              <GraduationCap className="w-3.5 h-3.5" />
-              {juniorMode ? "Modo Didático" : "Modo Avançado"}
-            </button>
           </div>
         </div>
 
