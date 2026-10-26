@@ -52,6 +52,7 @@ import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
 import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import FunilVendas from "@/components/dashboard/FunilVendas";
+import ResumoExecutivo from "@/components/dashboard/ResumoExecutivo";
 import ConversaoCarteiraSegmento from "@/components/dashboard/ConversaoCarteiraSegmento";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { qualidadeDerivada } from "@/lib/qualidadeDerivada";
@@ -534,7 +535,6 @@ const Index = () => {
                       titulo="GMV mês vs mês (comparação anual)"
                     />
                     <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
-                    <FunilVendas kpis={displayKpis as any} />
                     <ConversaoCarteiraSegmento />
                     <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller || undefined} />
                     <TrendAnalysisPanel
@@ -548,6 +548,8 @@ const Index = () => {
                     <ResumoLojaApi custId={sellerCustIdMap[selectedSeller]} historico={<>
                       <HomeResumo nome={(user?.user_metadata as any)?.full_name?.split(" ")[0] || user?.email?.split("@")[0]} loja={sellers.find(s => s.id === selectedSeller)?.nickname} todos={allKpis} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} />
                       <DiagnosticAlerts kpis={displayKpis} fallbackKpis={allKpisMonthly} dailyKpis={allKpisDaily} sellerCustIdMap={sellerCustIdMap} seller={sellers.find(s => s.id === selectedSeller) || null} />
+                    {!isConsolidado && <ResumoExecutivo diario={allKpisDaily as any} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} />}
+                    {!isConsolidado && <FunilVendas kpis={displayKpis as any} />}
                     {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     <EfficiencyPanel semDiario={isConsolidado} kpis={displayKpis} dailyKpis={filteredDailyKpis} from={dateRange?.from ? formatDateString(dateRange.from) : undefined} to={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
