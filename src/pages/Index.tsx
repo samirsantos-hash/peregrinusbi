@@ -37,7 +37,6 @@ import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
-import FullRecommendationPanel from "@/components/seller/FullRecommendationPanel";
 import UpliftFullPanel from "@/components/seller/UpliftFullPanel";
 import StockoutRiskPanel from "@/components/dashboard/StockoutRiskPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
@@ -84,6 +83,8 @@ import VerticalCarteirasTabela from "@/components/pock/VerticalCarteirasTabela";
 import { NovidadesPrompt } from "@/components/novidades/novidades";
 import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
+import ResumoLojaApi from "@/components/ml/ResumoLojaApi";
+import FullProdutosApi from "@/components/pock/FullProdutosApi";
 import HomeResumo from "@/components/dashboard/HomeResumo";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
@@ -112,7 +113,7 @@ const Index = () => {
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("aba") || "executive";
+  const activeTab = searchParams.get("aba") || "efficiency";
   const [menuAberto, setMenuAberto] = useState(false);
   useContagemNumeros(`${activeTab}|${selectedSeller}`, () => document.querySelector('[role="tabpanel"][data-state="active"]') as HTMLElement | null);
   const setActiveTab = useCallback(
@@ -482,14 +483,6 @@ const Index = () => {
               onPeriodChange={handlePeriodChange}
               dailyDisponivel={!isConsolidado && hasRealData && allKpisDaily.length > 0}
             />
-            <HomeResumo
-              nome={(user?.user_metadata as any)?.full_name?.split(" ")[0] || user?.email?.split("@")[0]}
-              loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
-              todos={allKpis}
-              de={dateRange?.from ? formatDateString(dateRange.from) : undefined}
-              ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined}
-            />
-
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-start gap-0 lg:gap-4 isolate">
                 <PainelSidebar
@@ -511,22 +504,6 @@ const Index = () => {
                     contexto={dateDebugLabel}
                   />
 
-                  {/* Diagnóstico só no Resumo — não se repete em todas as abas */}
-                  {activeTab === "efficiency" && (
-                    <DiagnosticAlerts
-                      kpis={displayKpis}
-                      fallbackKpis={allKpisMonthly}
-                      dailyKpis={allKpisDaily}
-                      sellerCustIdMap={sellerCustIdMap}
-                      seller={sellers.find((s) => s.id === selectedSeller) || null}
-                    />
-                  )}
-                  {activeTab === "executive" && (
-                    <>
-                      <div className="my-4"><FunilVendas kpis={displayKpis as any} /></div>
-                      <ConversaoCarteiraSegmento />
-                    </>
-                  )}
                   <div className="lg:hidden mb-3">
                     <Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}>
                       <Menu className="w-4 h-4" />
@@ -544,7 +521,6 @@ const Index = () => {
                   <TabsContent value="executive" className="mt-0 space-y-6">
                     {isConsolidado && <CarteiraNaSecao secao="executive" />}
                     <NovidadesPrompt />
-                    <MlAoVivo secao="resumo" custId={sellerCustIdMap[selectedSeller]} />
                     <JuniorActionBanner abaId="executive" dados={dadosJunior} />
                     <Daily7DPanel
                       dailyKpis={allKpisDaily}
@@ -558,6 +534,8 @@ const Index = () => {
                       titulo="GMV mês vs mês (comparação anual)"
                     />
                     <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
+                    <FunilVendas kpis={displayKpis as any} />
+                    <ConversaoCarteiraSegmento />
                     <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller || undefined} />
                     <TrendAnalysisPanel
                       kpis={displayKpis}
@@ -567,9 +545,13 @@ const Index = () => {
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
+                    <ResumoLojaApi custId={sellerCustIdMap[selectedSeller]} historico={<>
+                      <HomeResumo nome={(user?.user_metadata as any)?.full_name?.split(" ")[0] || user?.email?.split("@")[0]} loja={sellers.find(s => s.id === selectedSeller)?.nickname} todos={allKpis} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} />
+                      <DiagnosticAlerts kpis={displayKpis} fallbackKpis={allKpisMonthly} dailyKpis={allKpisDaily} sellerCustIdMap={sellerCustIdMap} seller={sellers.find(s => s.id === selectedSeller) || null} />
                     {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     <EfficiencyPanel semDiario={isConsolidado} kpis={displayKpis} dailyKpis={filteredDailyKpis} from={dateRange?.from ? formatDateString(dateRange.from) : undefined} to={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
+                    </>} />
                   </TabsContent>
                   <TabsContent value="pock" className="mt-0 space-y-5">
                     <PockPanel
@@ -580,6 +562,7 @@ const Index = () => {
                       programas={(sellers.find((s) => s.id === selectedSeller) as any)?.clusterSeller}
                     />
                     <VerticalCarteirasTabela sellerId={selectedSeller || undefined} />
+                    <FullProdutosApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="competitiveness" />}
@@ -602,16 +585,11 @@ const Index = () => {
                     <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
                     <MlAoVivo secao="logistica" custId={sellerCustIdMap[selectedSeller]} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} eligibilityItems={eligibilityItems || []} />
-                    <FullRecommendationPanel
-                      sellerId={selectedSeller}
-                      custId={sellerCustIdMap[selectedSeller]}
-                    />
                     <UpliftFullPanel custId={sellerCustIdMap[selectedSeller]} />
                     <StockoutRiskPanel sellerId={selectedSeller} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
-                    <MlAoVivo secao="qualidade" custId={sellerCustIdMap[selectedSeller]} />
                     {(() => {
                       const latest: any = [...(displayKpis.length ? displayKpis : allKpis)].sort((a: any, b: any) => b.date.localeCompare(a.date))[0] || {};
                       const qd = qualidadeDerivada(allKpis as any[]);
@@ -638,6 +616,7 @@ const Index = () => {
                             <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
                           </div>
                           {/* 3. Ação por anúncio */}
+                          <MlAoVivo secao="qualidade" custId={sellerCustIdMap[selectedSeller]} />
                           <PlanoAcaoAnuncioPanel sellerId={selectedSeller} />
                           <ConversaoPorMLBPanel sellerId={selectedSeller} />
                           <CriticalListingsTable listings={listingsQuality || []} />

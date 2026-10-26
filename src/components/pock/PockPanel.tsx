@@ -156,7 +156,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
     return (
       <div className="rounded-xl border border-dashed border-border p-10 text-center space-y-2">
         <Store className="w-7 h-7 mx-auto text-muted-foreground" />
-        <p className="text-sm font-semibold">Selecione uma loja para ver o diagnóstico Pock</p>
+        <p className="text-sm font-semibold">Selecione uma loja para ver o potencial e o Full</p>
         <p className="text-xs text-muted-foreground max-w-md mx-auto">
           Use o seletor de loja no cabeçalho. Os medidores e a medalha são por vendedor — a visão
           consolidada da carteira não é somável aqui.
@@ -181,7 +181,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
       {/* FAIXA 1 — Identidade e diagnóstico */}
-      <section className="rounded-xl border border-border bg-card/40 p-4 space-y-4">
+      <section className="py-4 space-y-4">
         <h3 className="text-sm font-semibold flex items-center gap-2">
           Identidade e diagnóstico
           <NovidadeTip id="pock" />
@@ -231,7 +231,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       </section>
 
       {/* FAIXA 2 — Qualidade de Atendimento */}
-      <section className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
+      <section className="border-t border-border py-4 space-y-3">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-sm font-semibold">Qualidade de Atendimento</h3>
           <span
@@ -261,11 +261,11 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       </section>
 
       {/* FAIXA 3 — Evolução ao longo do ano */}
-      <section className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
+      <section className="border-t border-border py-4 space-y-3">
         <h3 className="text-sm font-semibold">Evolução ao longo do ano</h3>
         <div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-3">
           <PockEvolucaoCard
-            titulo="Evolução TGMV"
+            titulo="Evolução do faturamento"
             pontos={pontos.tgmv}
             formato="moeda"
             cobertura={data?.cobertura.tgmv}
@@ -274,7 +274,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
             comoLer="Barra escura é o mês atual e a clara é o ano anterior; as linhas mostram a variação contra o ano anterior e contra o mês anterior. Serve para separar sazonalidade de crescimento real."
           />
           <PockEvolucaoCard
-            titulo="Evolução LL"
+            titulo="Evolução dos anúncios ativos"
             pontos={pontos.ll}
             cobertura={data?.cobertura.ll}
             unidade="quantidade de anúncios ativos"
@@ -350,7 +350,7 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
       </section>
 
       {/* FAIXA 4 — Alavancas */}
-      <section className="rounded-xl border border-border bg-card/40 p-4 space-y-3">
+      <section className="border-t border-border py-4 space-y-3">
         <div className="flex items-baseline justify-between gap-2 flex-wrap">
           <h3 className="text-sm font-semibold">Alavancas</h3>
           <span className="text-[10px] text-muted-foreground">Janela fixa de 30 dias — prazo limite de uma promoção</span>
