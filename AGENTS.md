@@ -32,3 +32,4 @@
 - Contratos das funções de gestão do ML e das tabelas e RPCs que as telas leem ficam em `docs/ml-gestao.md`; mudou entrada, saída, erro ou tabela, atualize lá. O teste de ponta a ponta contra o projeto publicado é `scripts/ml-e2e.sh` (confirma cada escrita, campanha de teste sempre pausada).
 - Integrações de agentes (MCP) ficam em src/lib/mcp (uma ferramenta por arquivo, só leitura, cliente com o token OAuth do usuário para respeitar as permissões); a função mcp é gerada pelo plugin e só vai ao ar ao publicar.
 - Subdiretórios têm o próprio AGENTS.md (ex.: supabase/functions/AGENTS.md com as regras das funções do ML); leia antes de alterar arquivos lá.
+- Operational summary surfaces and typography are scoped by `.operacao-resumo` using global CSS tokens and shared KpiCard, so presentation changes never alter reputation thresholds or logistics calculations.
