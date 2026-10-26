@@ -151,7 +151,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/40">
                     <div
-                      className="h-full rounded-full transition-all"
+                      className="h-full rounded-full transition-[transform,opacity,background-color,border-color,color]"
                       style={{
                         width: `${Math.min(100, Math.max(0, val))}%`,
                         background: corScoreCustom(val, ok, warn),

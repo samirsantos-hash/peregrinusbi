@@ -51,7 +51,7 @@ function TopicoRow({ topico }: { topico: Topico }) {
           <span className="text-xs font-mono font-bold tabular-nums">{topico.valor}</span>
           <div className="w-24 h-1.5 bg-muted/40 rounded-full overflow-hidden">
             <div
-              className={`h-full ${t.bar} rounded-full transition-all`}
+              className={`h-full ${t.bar} rounded-full transition-[transform,opacity,background-color,border-color,color]`}
               style={{ width: `${topico.score}%` }}
             />
           </div>

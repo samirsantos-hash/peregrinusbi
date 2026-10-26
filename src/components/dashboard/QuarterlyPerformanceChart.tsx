@@ -167,7 +167,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
               <button
                 key={opt.key}
                 onClick={() => setSelectedPeriod(opt.key)}
-                className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-all ${
+                className={`px-2.5 py-1 text-[11px] font-medium rounded-md transition-[transform,opacity,background-color,border-color,color] ${
                   selectedPeriod === opt.key
                     ? "bg-primary/15 text-primary shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -185,7 +185,7 @@ const QuarterlyPerformanceChart = ({ kpis }: QuarterlyPerformanceChartProps) => 
                   ? `Mostrar dados parciais (${partialRange?.first} – ${partialRange?.last})`
                   : `Ocultar dados parciais (${partialRange?.first} – ${partialRange?.last}) (<30% da mediana)`
               }
-              className={`px-2 py-0.5 text-[10px] font-medium rounded border transition-all ${
+              className={`px-2 py-0.5 text-[10px] font-medium rounded border transition-[transform,opacity,background-color,border-color,color] ${
                 hidePartial
                   ? "bg-warning/10 text-warning border-warning/30"
                   : "bg-muted/30 text-muted-foreground border-border/50 hover:text-foreground"
