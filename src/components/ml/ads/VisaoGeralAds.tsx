@@ -23,6 +23,7 @@ export function VisaoGeralAds({ painel, faturamentoEm, aoVerAnuncios }: {
   const ant = conta.anterior;
   const per = `${dataCurta(periodo.atual.de)} a ${dataCurta(periodo.atual.ate)}`;
   const semDados = conta.somas.dias === 0;
+  const dv = (x: number | null | undefined, y: number | null | undefined) => x == null || y == null || y === 0 ? null : (x / y - 1) * 100;
 
   const mensal = painel.orcamentoAtivo * DIAS_MES;
   const limiteMensal = painel.faturamento != null ? painel.faturamento * limites.meta_investimento_ads : null;
@@ -46,21 +47,21 @@ export function VisaoGeralAds({ painel, faturamentoEm, aoVerAnuncios }: {
       <section className="space-y-2">
         <RotuloSecao>Conta · {per} · comparado com os {painel.dias} dias anteriores</RotuloSecao>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <KpiCard focal rotulo="Investimento" valor={brl(a.investimento, true)} referencia={comparacao(a.investimento, ant.investimento, (v) => brl(v, true))} />
-          <KpiCard rotulo="Receita de Ads" valor={brl(a.receita, true)} referencia={comparacao(a.receita, ant.receita, (v) => brl(v, true))} />
+          <KpiCard focal rotulo="Investimento" valor={brl(a.investimento, true)} variacao={dv(a.investimento, ant.investimento)} melhorQuando="neutro" referencia={comparacao(a.investimento, ant.investimento, (v) => brl(v, true))} />
+          <KpiCard rotulo="Receita de Ads" valor={brl(a.receita, true)} variacao={dv(a.receita, ant.receita)} melhorQuando="subir" referencia={comparacao(a.receita, ant.receita, (v) => brl(v, true))} />
           <KpiCard
             rotulo="ROAS"
             valor={vezes(a.roas)}
             faixa={a.roas == null ? undefined : a.roas < limites.alerta_roas ? "critico" : "bom"}
             faixaTexto={`limite ${vezes(limites.alerta_roas)}`}
-            referencia={comparacao(a.roas, ant.roas, (v) => vezes(v))}
+            variacao={dv(a.roas, ant.roas)} melhorQuando="subir" referencia={comparacao(a.roas, ant.roas, (v) => vezes(v))}
           />
           <KpiCard
             rotulo="ACOS"
             valor={pctFracao(a.acos)}
             faixa={a.acos == null ? undefined : a.acos > limites.alerta_acos ? "critico" : "bom"}
             faixaTexto={`até ${pctFracao(limites.alerta_acos)}`}
-            referencia={comparacao(a.acos, ant.acos, (v) => pctFracao(v))}
+            variacao={dv(a.acos, ant.acos)} melhorQuando="descer" referencia={comparacao(a.acos, ant.acos, (v) => pctFracao(v))}
           />
           <KpiCard
             rotulo="TACOS"
@@ -76,14 +77,14 @@ export function VisaoGeralAds({ painel, faturamentoEm, aoVerAnuncios }: {
             valor={pctFracao(a.ctr, 2)}
             faixa={a.ctr == null ? undefined : a.ctr < limites.alerta_ctr ? "critico" : "bom"}
             faixaTexto={`mín. ${pctFracao(limites.alerta_ctr, 2)}`}
-            referencia={comparacao(a.ctr, ant.ctr, (v) => pctFracao(v, 2))}
+            variacao={dv(a.ctr, ant.ctr)} melhorQuando="subir" referencia={comparacao(a.ctr, ant.ctr, (v) => pctFracao(v, 2))}
           />
           <KpiCard
             rotulo="CPC"
             valor={brl(a.cpc, true)}
             faixa={a.cpc == null ? undefined : a.cpc > limites.alerta_cpc ? "critico" : "bom"}
             faixaTexto={`até ${brl(limites.alerta_cpc, true)}`}
-            referencia={comparacao(a.cpc, ant.cpc, (v) => brl(v, true))}
+            variacao={dv(a.cpc, ant.cpc)} melhorQuando="descer" referencia={comparacao(a.cpc, ant.cpc, (v) => brl(v, true))}
           />
           <KpiCard
             rotulo="Orçamento mensal projetado"
