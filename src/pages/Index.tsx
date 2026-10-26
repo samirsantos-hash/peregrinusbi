@@ -380,16 +380,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <div className="fixed inset-0 opacity-[0.015] pointer-events-none" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--neon-blue)) 1px, transparent 0)`,
-        backgroundSize: '40px 40px'
-      }} />
-
-      <div className="relative z-10 max-w-[1760px] mx-auto px-3 sm:px-5 xl:px-8 py-4 sm:py-6 space-y-4 sm:space-y-6">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-wrap items-center justify-between gap-3">
+      <div className="relative z-10 max-w-[1760px] mx-auto px-3 sm:px-5 xl:px-6 py-4 sm:py-6 space-y-4">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card !rounded-[32px] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <AguiaLogo className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
-            <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-neon-blue shrink-0" style={{ boxShadow: '0 0 12px hsl(199, 100%, 50%)' }} />
+            <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-primary shrink-0" />
             <div className="min-w-0">
               <p className="text-sm sm:text-xl font-bold tracking-tight truncate">
                 <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
@@ -486,7 +481,13 @@ const Index = () => {
               onPeriodChange={handlePeriodChange}
               dailyDisponivel={!isConsolidado && hasRealData && allKpisDaily.length > 0}
             />
-
+            <HomeResumo
+              nome={(user?.user_metadata as any)?.full_name?.split(" ")[0] || user?.email?.split("@")[0]}
+              loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
+              todos={allKpis}
+              de={dateRange?.from ? formatDateString(dateRange.from) : undefined}
+              ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined}
+            />
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-start gap-0 lg:gap-4 isolate">
