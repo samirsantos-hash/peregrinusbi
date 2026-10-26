@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { KpiCard, type Faixa } from "@/components/ds";
-import { pct, num } from "@/lib/format";
+import { pct } from "@/lib/format";
 import { statusReputacao, type StatusUrgencia } from "@/lib/reputationStatus";
 
 type K = {
@@ -115,7 +115,7 @@ export default function OperacaoResumo({ diario }: { diario: K[] }) {
 
   if (!d) {
     return (
-      <p className="text-sm" style={{ color: "var(--apple-sec, #6e6e73)" }}>
+      <p className="py-8 text-center text-sm text-muted-foreground" role="status">
         Sem dados de reputação ou logística no período.
       </p>
     );
@@ -124,13 +124,18 @@ export default function OperacaoResumo({ diario }: { diario: K[] }) {
   const dataBr = d.dataRef.slice(8, 10) + "/" + d.dataRef.slice(5, 7) + "/" + d.dataRef.slice(0, 4);
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="operacao-resumo space-y-6">
+      <section aria-labelledby="operacao-reputacao-titulo" className="space-y-3">
+        <header className="flex flex-wrap items-center justify-between gap-2">
+          <h3 id="operacao-reputacao-titulo" className="text-sm font-semibold text-foreground tracking-normal">Reputação e atendimento</h3>
+          <span className="text-xs text-muted-foreground tabular-nums">Último registro · {dataBr}</span>
+        </header>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
         <KpiCard
           focal
           rotulo="Termômetro"
           valor={d.nivel}
-          referencia={`Snapshot ${dataBr} · nível ML`}
+          referencia="Nível informado pelo Mercado Livre"
         />
         <KpiCard
           rotulo="Reclamações"
@@ -154,16 +159,19 @@ export default function OperacaoResumo({ diario }: { diario: K[] }) {
           referencia="Meta abaixo de 2%"
         />
       </div>
+      </section>
 
+      <section aria-labelledby="operacao-logistica-titulo" className="space-y-3">
+        <h3 id="operacao-logistica-titulo" className="text-sm font-semibold text-foreground tracking-normal">Participação logística</h3>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <KpiCard
-          rotulo="Full (part. GMV)"
+          rotulo="Full · participação no GMV"
           valor={pct(d.shareFull, 1)}
           faixa={faixaFull(d.shareFull)}
           referencia="Meta ≥ 60% do GMV · Full eleva conversão"
         />
         <KpiCard
-          rotulo="Flex (part. GMV)"
+          rotulo="Flex · participação no GMV"
           valor={pct(d.shareFlex, 1)}
           faixa={d.shareFlex >= 10 ? "bom" : d.shareFlex > 0 ? "intermediario" : "abaixo"}
           referencia="Canal complementar ao Full"
@@ -177,20 +185,28 @@ export default function OperacaoResumo({ diario }: { diario: K[] }) {
         />
       </div>
 
-      {/* Barra de mix — mesma família de tons do painel gelo */}
-      <div className="painel-mix-envio" aria-label="Mix logístico do período">
-        <div className="painel-mix-envio-cabeca">
-          <span>Mix de envio no período</span>
-          <span className="tabular-nums">
-            Full {num(d.shareFull, 1)}% · Flex {num(d.shareFlex, 1)}% · Outros {num(d.shareAgencia, 1)}%
-          </span>
-        </div>
-        <div className="painel-mix-envio-trilha" role="img" aria-hidden>
+      <div className="operacao-mix space-y-3 pt-1" aria-label="Mix logístico do período">
+        <p className="text-xs font-medium text-muted-foreground">Mix de envio no período</p>
+        <div className="painel-mix-envio-trilha" aria-hidden="true">
           <span className="painel-mix-envio-full" style={{ width: `${Math.max(0, Math.min(100, d.shareFull))}%` }} />
           <span className="painel-mix-envio-flex" style={{ width: `${Math.max(0, Math.min(100, d.shareFlex))}%` }} />
           <span className="painel-mix-envio-outros" style={{ width: `${Math.max(0, Math.min(100, d.shareAgencia))}%` }} />
         </div>
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3 text-xs text-muted-foreground">
+          {[
+            { nome: "Full", valor: d.shareFull, classe: "operacao-mix-full" },
+            { nome: "Flex", valor: d.shareFlex, classe: "operacao-mix-flex" },
+            { nome: "Agência / outros", valor: d.shareAgencia, classe: "operacao-mix-outros" },
+          ].map(({ nome, valor, classe }) => (
+            <li key={nome} className="flex min-w-0 items-center gap-2">
+              <span className={`h-2 w-2 shrink-0 rounded-full ${classe}`} aria-hidden="true" />
+              <span>{nome}</span>
+              <span className="ml-auto tabular-nums font-semibold text-foreground">{pct(valor, 1)}</span>
+            </li>
+          ))}
+        </ul>
       </div>
+      </section>
     </div>
   );
 }
