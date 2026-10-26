@@ -31,8 +31,8 @@ export type SellerTab = {
 
 export const SELLER_TABS: SellerTab[] = [
   { id: "efficiency", label: "Resumo", icon: DollarSign, order: 1,
-    descricao: "Visão geral da saúde da loja no período",
-    juniorTip: "Comece aqui. Dá a fotografia completa em uma tela." },
+    descricao: "Growth: North Star → tráfego → Clips → funil",
+    juniorTip: "Comece aqui. Quatro seções do macro ao micro, sem métricas duplicadas." },
   { id: "pock", label: "Pock", icon: Gauge, order: 1.5,
     descricao: "Full Potential — diagnóstico seller centric",
     juniorTip: "Diagnóstico Pock da loja: identidade, medidores de serviços, atendimento e evolução anual." },

@@ -31,8 +31,7 @@ import { Daily7DPanel } from "@/components/dashboard/Daily7DPanel";
 import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
-import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
-import SellerInfoTable from "@/components/dashboard/SellerInfoTable";
+import GrowthDashboard from "@/components/dashboard/growth/GrowthDashboard";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
@@ -103,7 +102,7 @@ const Index = () => {
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("aba") || "executive";
+  const activeTab = searchParams.get("aba") || "efficiency";
   const [menuAberto, setMenuAberto] = useState(false);
   const setActiveTab = useCallback(
     (tab: string) => {
@@ -360,9 +359,9 @@ const Index = () => {
   }, [dateRange]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="fixed inset-0 opacity-[0.015] pointer-events-none" style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--neon-blue)) 1px, transparent 0)`,
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-background dark:text-foreground">
+      <div className="fixed inset-0 opacity-[0.03] dark:opacity-[0.015] pointer-events-none" style={{
+        backgroundImage: `radial-gradient(circle at 1px 1px, rgb(148 163 184) 1px, transparent 0)`,
         backgroundSize: '40px 40px'
       }} />
 
@@ -529,11 +528,12 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
-                    <SellerInfoTable
-                      seller={sellers.find((s) => s.id === selectedSeller) as any}
-                      allKpis={allKpisMonthly as any}
+                    <GrowthDashboard
+                      kpis={displayKpis as any}
+                      dataGranularity={granularity}
+                      periodLabel={dateDebugLabel}
+                      sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
                     />
-                    <EfficiencyPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
                   </TabsContent>
                   <TabsContent value="pock" className="mt-0 space-y-5">
                     <PockPanel
