@@ -372,7 +372,7 @@ const DashboardHeader = ({
                     <button
                       key={p.label}
                       onClick={() => aplicarPreset(p)}
-                      className="px-2 py-1 text-[11px] rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      className="px-2 py-1 text-[11px] rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-transform duration-[120ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]"
                     >
                       {p.label}
                     </button>
@@ -386,7 +386,7 @@ const DashboardHeader = ({
                       setCalOpen(false);
                     }}
                     className={cn(
-                      "px-2 py-1 text-[11px] rounded-md",
+                      "px-2 py-1 text-[11px] rounded-md transition-transform duration-[120ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]",
                       activePeriod === "all"
                         ? "bg-primary/15 text-primary"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/50",

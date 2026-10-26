@@ -3,119 +3,102 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { brl, num, pct } from "@/lib/format";
 import TooltipInfo from "./TooltipInfo";
-import { planoFunil } from "@/lib/planoFunil";
+import { funilCincoEtapas } from "@/lib/funilCincoEtapas";
 
 interface KpiFunil {
   visits: number;
-  visitsMatch: number;
-  visitsCheaper: number;
   tsi: number;
   gmv: number;
   tgmv?: number;
+  bpc?: number | null;
 }
 
-
-/** Funil de vendas do período: visitas → visitas com preço competitivo → unidades vendidas. */
-export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
+/** Seção 4 — funil de 5 etapas. ATC/Checkout são estimativas rotuladas. */
+export default function FunilVendas({ kpis, periodo }: { kpis: KpiFunil[]; periodo?: string }) {
   const d = useMemo(() => {
     const s = (f: (k: KpiFunil) => number) => kpis.reduce((a, k) => a + (Number(f(k)) || 0), 0);
     const visitas = s((k) => k.visits);
-    const competitivas = s((k) => (k.visitsMatch || 0) + (k.visitsCheaper || 0));
     const unidades = s((k) => k.tsi);
     const fat = s((k) => k.tgmv || k.gmv);
-    return { visitas, competitivas, unidades, fat };
+    const bpcs = kpis.map((k) => k.bpc).filter((v): v is number => v != null && Number.isFinite(v));
+    const bpcMedio = bpcs.length ? bpcs.reduce((a, b) => a + b, 0) / bpcs.length : null;
+    return { visitas, unidades, fat, bpcMedio, funil: funilCincoEtapas(visitas, unidades) };
   }, [kpis]);
 
   if (d.visitas <= 0) {
     return (
-      <div className="glass-card p-5 text-xs text-muted-foreground">
-        Funil de vendas: sem visitas registradas no período — carregue a base de visitas para ver a conversão.
+      <div className="ds-kpi rounded-xl p-5 text-sm text-slate-600">
+        Funil de vendas: sem visitas no período — carregue a base de visitas para ver a conversão.
       </div>
     );
   }
 
-  const etapas = [
-    { nome: "Visitas", valor: d.visitas, fmt: num(d.visitas) },
-    ...(d.competitivas > 0 && d.competitivas <= d.visitas
-      ? [{ nome: "Visitas com preço competitivo", valor: d.competitivas, fmt: num(d.competitivas) }]
-      : []),
-    { nome: "Unidades vendidas", valor: d.unidades, fmt: num(d.unidades) },
-  ];
-  const conversao = d.unidades / d.visitas;
+  const { etapas, cvr, maiorAbandono } = d.funil;
   const ticket = d.unidades > 0 ? d.fat / d.unidades : 0;
   const receitaVisita = d.fat / d.visitas;
-
-  const taxaPreco = d.competitivas > 0 && d.competitivas <= d.visitas ? d.competitivas / d.visitas : null;
-  const convComp = taxaPreco !== null && d.competitivas > 0 ? d.unidades / d.competitivas : conversao;
-  // Perda relativa de cada etapa (quanto não passa para a seguinte)
-  const perdas = [
-    { k: "atrair", v: 0 },
-    { k: "preco", v: taxaPreco === null ? -1 : 1 - taxaPreco },
-    { k: "fechar", v: 1 - Math.min(1, convComp) },
-  ];
-  const foco = perdas.reduce((m, p) => (p.v > m.v ? p : m)).k;
-  const alavancas = [
-    {
-      k: "atrair", etapa: "1. Atrair visitas", foco: false,
-      indicador: `${num(d.visitas)} visitas · ${brl(receitaVisita, true)} por visita`,
-      acoes: ["Título com termos de busca e foto principal limpa", "Publicidade nos anúncios com melhor conversão", "Selo de vendidos e reputação visíveis no resultado"],
-    },
-    {
-      k: "preco", etapa: "2. Preço que convence", foco: foco === "preco",
-      indicador: taxaPreco === null ? "Sem dado de competitividade" : `${pct(taxaPreco * 100, 1)} das visitas viram preço competitivo`,
-      acoes: ["Preço de/por com desconto real (âncora riscada)", "Parcelamento sem juros em destaque", "Entrar em campanha com prazo de até 30 dias"],
-    },
-    {
-      k: "fechar", etapa: "3. Fechar a compra", foco: foco === "fechar",
-      indicador: `${pct(convComp * 100, 2)} ${taxaPreco === null ? "das visitas" : "das visitas competitivas"} compram`,
-      acoes: ["Frete grátis e entrega rápida (Full)", "Opiniões de compradores e respostas a perguntas", "Estoque e urgência reais: oferta com prazo"],
-    },
-  ];
-
-  const plano = planoFunil(d);
-  const passos = plano.map((p) => ({ ...p, a: alavancas.find((x) => x.k === p.etapa)! }));
-
-  // Largura em % (escala de raiz, mínimo 46% para os números caberem dentro do desenho)
-  const larg = (i: number) => Math.max(46, Math.sqrt(Math.min(1, etapas[i].valor / d.visitas)) * 100);
+  const topo = Math.max(1, etapas[0].valor);
+  const larg = (i: number) => Math.max(42, Math.sqrt(Math.min(1, etapas[i].valor / topo)) * 100);
 
   return (
-    <div className="glass-card p-5">
-      <div className="mb-4 flex items-center gap-2">
-        <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">Funil de vendas</h3>
-        <TooltipInfo text="Soma do período selecionado. Cada etapa mostra quantos seguiram da etapa anterior e do total de visitas. A largura usa escala de raiz para que as etapas pequenas continuem visíveis." />
+    <section aria-label="Funil de conversão" className="ds-kpi rounded-2xl p-5">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <h2 className="ds-rotulo !normal-case !tracking-[0.12em]">
+          4 · Funil de conversão{periodo ? ` · ${periodo}` : ""}
+        </h2>
+        <TooltipInfo text="Visitas e PDP são dados reais (no ML a visita é a abertura da PDP). Add to cart e checkout são estimativas geométricas entre PDP e pedidos — não vêm da base. Pedidos = unidades (TSI)." />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2 flex flex-col items-center gap-1.5" role="img" aria-label="Funil de vendas">
+        <div className="lg:col-span-2 flex flex-col items-center gap-1.5" role="img" aria-label="Funil de cinco etapas">
           {etapas.map((e, i) => {
             const w = larg(i);
-            const prox = i < etapas.length - 1 ? larg(i + 1) : w * 0.88;
-            const recuo = ((w - prox) / 2 / w) * 100; // afunilamento lateral em % da própria largura
-            const daAnterior = i > 0 ? e.valor / etapas[i - 1].valor : 1;
+            const prox = i < etapas.length - 1 ? larg(i + 1) : w * 0.9;
+            const recuo = ((w - prox) / 2 / w) * 100;
+            const daAnterior = i > 0 && etapas[i - 1].valor > 0 ? e.valor / etapas[i - 1].valor : 1;
+            const eMaiorDrop =
+              maiorAbandono != null &&
+              i > 0 &&
+              maiorAbandono.de === etapas[i - 1].nome &&
+              maiorAbandono.para === e.nome;
+
             return (
               <motion.div
-                key={e.nome}
-                initial={{ opacity: 0, y: -8 }}
+                key={e.id}
+                initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.12 }}
-                title={`${e.nome}: ${e.fmt} · ${pct((e.valor / d.visitas) * 100, 2)} das visitas`}
-                className="group relative flex min-h-[84px] flex-col items-center justify-center gap-0.5 py-3 text-center transition-[filter] duration-200 hover:brightness-125"
-                style={{ width: `${w}%`, paddingInline: `calc(${recuo}% + 12px)` }}
+                transition={{ delay: i * 0.08, duration: 0.28 }}
+                title={`${e.nome}: ${num(e.valor)}${e.fonte === "estimativa" ? " (estimativa)" : ""}`}
+                className="group relative flex min-h-[72px] flex-col items-center justify-center gap-0.5 py-2.5 text-center"
+                style={{ width: `${w}%`, paddingInline: `calc(${recuo}% + 10px)` }}
               >
                 <div
-                  className="absolute inset-0 border border-cyan-400/60 bg-gradient-to-b from-cyan-400/40 to-cyan-400/10 shadow-[0_0_18px_rgb(34_211_238/0.25)]"
+                  className={`absolute inset-0 border transition-colors duration-150 ${
+                    eMaiorDrop
+                      ? "border-amber-400/70 bg-gradient-to-b from-amber-100 to-amber-50/80"
+                      : "border-slate-200/90 bg-gradient-to-b from-white to-slate-50/90"
+                  }`}
                   style={{
-                    opacity: 1 - i * 0.15,
                     clipPath: `polygon(0 0, 100% 0, ${100 - recuo}% 100%, ${recuo}% 100%)`,
-                    borderRadius: "18px 18px 28px 28px",
+                    borderRadius: "14px 14px 22px 22px",
                   }}
                 />
-                <p className="relative max-w-full truncate text-[10px] font-medium uppercase tracking-[0.12em] text-foreground/75">{e.nome}</p>
-                <p className="relative max-w-full truncate text-xl font-semibold tabular-nums leading-tight text-foreground">
-                  <NumeroAnimado valor={String(e.fmt)} />
+                <div className="relative flex max-w-full items-center gap-1.5">
+                  <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">{e.nome}</p>
+                  {e.fonte === "estimativa" && (
+                    <span className="shrink-0 rounded bg-slate-200/80 px-1.5 py-px text-[9px] font-medium uppercase tracking-wide text-slate-600">
+                      estimativa
+                    </span>
+                  )}
+                </div>
+                <p className="relative max-w-full truncate text-xl font-semibold tabular-nums font-mono leading-tight text-slate-900">
+                  <NumeroAnimado valor={num(e.valor)} />
                 </p>
+                {e.nota && <p className="relative max-w-full truncate text-[10px] text-slate-400">{e.nota}</p>}
                 {i > 0 && (
-                  <p className="relative max-w-full truncate text-[10px] leading-tight tabular-nums text-neon-blue">{pct(daAnterior * 100, 2)} da etapa anterior</p>
+                  <p className={`relative max-w-full truncate text-[10px] leading-tight tabular-nums font-mono ${eMaiorDrop ? "text-amber-700 font-medium" : "text-slate-500"}`}>
+                    {pct(daAnterior * 100, 2)} da etapa anterior
+                    {eMaiorDrop ? " · maior abandono" : ""}
+                  </p>
                 )}
               </motion.div>
             );
@@ -123,50 +106,46 @@ export default function FunilVendas({ kpis }: { kpis: KpiFunil[] }) {
         </div>
 
         <div className="space-y-3">
-          <div className="rounded-xl border border-cyan-400/20 bg-black/40 p-4 backdrop-blur">
-            <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Conversão (unidades ÷ visitas)</p>
-            <p className="text-3xl font-medium tabular-nums tracking-tight text-neon-blue drop-shadow-[0_0_10px_rgb(34_211_238/0.5)]"><NumeroAnimado valor={pct(conversao * 100, 2)} /></p>
-            <p className="text-[11px] text-muted-foreground">a cada 100 visitas, {num(conversao * 100, 1)} unidades vendidas</p>
+          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+            <p className="text-[11px] uppercase tracking-[0.1em] text-slate-500">Conversão final</p>
+            <p className="text-3xl font-semibold tabular-nums font-mono tracking-tight text-slate-900">
+              <NumeroAnimado valor={cvr != null ? pct(cvr * 100, 2) : "—"} />
+            </p>
+            <p className="text-[11px] text-slate-500">
+              unidades ÷ visitas
+              {cvr != null ? ` · a cada 100 visitas, ${num(cvr * 100, 1)} unidades` : ""}
+            </p>
           </div>
+
+          {maiorAbandono && (
+            <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 p-3.5 text-xs">
+              <p className="font-medium text-amber-900">Maior abandono</p>
+              <p className="mt-0.5 text-amber-800/90">
+                {maiorAbandono.de} → {maiorAbandono.para}
+              </p>
+              <p className="mt-1 tabular-nums font-mono text-amber-900">
+                {pct(maiorAbandono.taxa * 100, 1)} de queda · {num(maiorAbandono.perdidos)} não avançaram
+              </p>
+            </div>
+          )}
+
           <dl className="grid grid-cols-2 gap-2 text-xs">
             {[
               ["Faturamento", brl(d.fat)],
-              ["Ticket por unidade", brl(ticket, true)],
-              ["Receita por visita", brl(receitaVisita, true)],
-              ["Visitas sem compra", num(Math.max(0, d.visitas - d.unidades))],
+              ["Ticket / unidade", brl(ticket, true)],
+              ["Receita / visita", brl(receitaVisita, true)],
+              ["BPC médio", d.bpcMedio != null ? num(d.bpcMedio, 2) : "Sem dado"],
             ].map(([k, v]) => (
-              <div key={k} className="rounded-lg border border-white/10 bg-white/5 p-2.5 transition-colors hover:border-cyan-400/40">
-                <dt className="text-[11px] text-muted-foreground">{k}</dt>
-                <dd className="font-medium tabular-nums text-foreground"><NumeroAnimado valor={String(v)} /></dd>
+              <div key={k} className="rounded-lg border border-slate-200/80 bg-white p-2.5 transition-colors duration-150 hover:border-slate-300">
+                <dt className="text-[11px] text-slate-500">{k}</dt>
+                <dd className="font-medium tabular-nums font-mono text-slate-800">
+                  <NumeroAnimado valor={String(v)} />
+                </dd>
               </div>
             ))}
           </dl>
         </div>
       </div>
-
-      {/* Plano de ação automático: etapas ordenadas pela perda de clientes */}
-      <div className="mt-5">
-        <div className="mb-2 flex items-center gap-2">
-          <h4 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-foreground">Plano de ação da loja — por ordem de prioridade</h4>
-          <TooltipInfo text="Gerado automaticamente: a etapa onde a loja perde mais clientes vem primeiro. Atrair mais visitas fica por último, depois de estancar as perdas." />
-        </div>
-        <ol className="grid gap-2 md:grid-cols-3">
-          {passos.map((p, i) => (
-            <li key={p.etapa} className={`rounded-lg border p-3 text-xs ${p.prioridade === "Alta" ? "border-cyan-400/60 bg-cyan-400/10" : "border-white/10 bg-white/5"}`}>
-              <div className="flex items-center justify-between gap-2">
-                <p className="font-medium text-foreground">Passo {i + 1} · {p.a.etapa.replace(/^\d\.\s*/, "")}</p>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${p.prioridade === "Alta" ? "bg-cyan-400/20 text-neon-blue" : "bg-white/10 text-muted-foreground"}`}>Prioridade {p.prioridade.toLowerCase()}</span>
-              </div>
-              <p className="mt-0.5 tabular-nums text-muted-foreground">{p.a.indicador}</p>
-              {p.perdidos > 0 && <p className="mt-1 tabular-nums text-foreground">{num(p.perdidos)} clientes perdidos aqui ({pct(p.perda * 100, 1)})</p>}
-              {p.unidadesPotenciais >= 1 && <p className="tabular-nums text-neon-blue">+{num(p.unidadesPotenciais)} unidades se chegar à meta de 70% de preço competitivo</p>}
-              <ul className="mt-2 space-y-1 text-muted-foreground">
-                {p.a.acoes.map((t) => <li key={t}>• {t}</li>)}
-              </ul>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </div>
+    </section>
   );
 }

@@ -630,3 +630,31 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 .ds-seta-bom { background: rgb(20 168 108 / 0.12); color: #0B7A4D; }
 .ds-seta-ruim { background: rgb(214 36 16 / 0.10); color: #D62410; }
 @media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
+
+/* ── Resumo Growth: canvas gelo só na aba Resumo (não troca o tema global) ── */
+.resumo-growth {
+  --resumo-gelo: #f8fafc;
+  border-radius: 1rem;
+  padding: 1rem;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgb(255 255 255 / 0.9), transparent 55%),
+    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid rgb(15 23 42 / 0.05);
+}
+.resumo-growth .ds-kpi {
+  background: #fff;
+  border-color: rgb(226 232 240 / 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+.resumo-growth .ds-kpi:hover {
+  border-color: rgb(203 213 225);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 20px -12px rgba(15, 23, 42, 0.12);
+}
+.resumo-growth .ds-numero-focal,
+.resumo-growth .ds-numero-sec {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+@media (prefers-reduced-motion: reduce) {
+  .resumo-growth .ds-kpi:hover { transform: none; }
+}

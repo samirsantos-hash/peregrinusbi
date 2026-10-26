@@ -33,7 +33,6 @@ import { Daily7DPanel } from "@/components/dashboard/Daily7DPanel";
 import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
-import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
@@ -45,12 +44,12 @@ import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
 import CdpEvolucao from "@/components/dashboard/CdpEvolucao";
 import { CampanhasCofinanciadasPanel } from "@/components/seller/CampanhasCofinanciadasPanel";
 import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
+import ClipsResumo from "@/components/dashboard/ClipsResumo";
 import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
 import ReputationPanel from "@/components/dashboard/ReputationPanel";
-import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
 import FunilVendas from "@/components/dashboard/FunilVendas";
 import ResumoExecutivo from "@/components/dashboard/ResumoExecutivo";
 import ConversaoCarteiraSegmento from "@/components/dashboard/ConversaoCarteiraSegmento";
@@ -86,7 +85,6 @@ import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
 import ResumoLojaApi from "@/components/ml/ResumoLojaApi";
 import FullProdutosApi from "@/components/pock/FullProdutosApi";
-import HomeResumo from "@/components/dashboard/HomeResumo";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
@@ -312,14 +310,6 @@ const Index = () => {
     return filteredKpis;
   }, [filteredKpis, isDailyPeriod]);
 
-  // Dados diários ficam independentes da escolha de visão mensal/trimestral.
-  const filteredDailyKpis = useMemo(() => {
-    if (!dateRange?.from) return allKpisDaily;
-    const from = formatDateString(dateRange.from);
-    const to = formatDateString(dateRange.to ?? dateRange.from);
-    return allKpisDaily.filter((k) => k.date >= from && k.date <= to);
-  }, [allKpisDaily, dateRange]);
-
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["sellers"] });
@@ -544,16 +534,31 @@ const Index = () => {
                     />
                     <SynergyAnalysisPanel kpis={displayKpis} />
                   </TabsContent>
-                  <TabsContent value="efficiency" className="mt-0 space-y-5">
-                    <ResumoLojaApi custId={sellerCustIdMap[selectedSeller]} historico={<>
-                      <HomeResumo nome={(user?.user_metadata as any)?.full_name?.split(" ")[0] || user?.email?.split("@")[0]} loja={sellers.find(s => s.id === selectedSeller)?.nickname} todos={allKpis} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} />
-                      <DiagnosticAlerts kpis={displayKpis} fallbackKpis={allKpisMonthly} dailyKpis={allKpisDaily} sellerCustIdMap={sellerCustIdMap} seller={sellers.find(s => s.id === selectedSeller) || null} />
-                    {!isConsolidado && <ResumoExecutivo diario={allKpisDaily as any} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} />}
-                    {!isConsolidado && <FunilVendas kpis={displayKpis as any} />}
-                    {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
-                    <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
-                    <EfficiencyPanel semDiario={isConsolidado} kpis={displayKpis} dailyKpis={filteredDailyKpis} from={dateRange?.from ? formatDateString(dateRange.from) : undefined} to={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
-                    </>} />
+                  <TabsContent value="efficiency" className="mt-0">
+                    <ResumoLojaApi custId={sellerCustIdMap[selectedSeller]} historico={
+                      <div className="resumo-growth space-y-5">
+                        {!isConsolidado && (() => {
+                          const de = dateRange?.from ? formatDateString(dateRange.from) : undefined;
+                          const ate = dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined;
+                          const periodo = de && ate
+                            ? `${de.split("-").reverse().join("/")} a ${ate.split("-").reverse().join("/")}`
+                            : undefined;
+                          return (
+                            <>
+                              <ResumoExecutivo diario={allKpisDaily as any} de={de} ate={ate} />
+                              <ClipsResumo
+                                kpis={displayKpis as any}
+                                listingsQuality={listingsQuality || []}
+                                eligibilityItems={eligibilityItems || []}
+                                periodo={periodo}
+                              />
+                              <FunilVendas kpis={displayKpis as any} periodo={periodo} />
+                            </>
+                          );
+                        })()}
+                        {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
+                      </div>
+                    } />
                   </TabsContent>
                   <TabsContent value="pock" className="mt-0 space-y-5">
                     <PockPanel
