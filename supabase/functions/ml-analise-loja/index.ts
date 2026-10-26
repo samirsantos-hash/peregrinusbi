@@ -33,14 +33,25 @@ Deno.serve(async req => {
   try {
     const periodo = janelaAnalise(), completo = janelaAnalise(new Date(), modo === 'resumo' ? 60 : 30);
     const orders: any[] = [];
-    let total = Infinity;
-    for (let off = 0; off < 1000; off += 50) {
-      const page = await get(`/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(completo.inicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(completo.fim + 'T23:59:59.999Z')}&limit=50&offset=${off}`);
-      if (!Array.isArray(page.results) || !Number.isFinite(page.paging?.total)) throw new Error('Cobertura de pedidos não confirmada.');
-      orders.push(...page.results); total = page.paging.total;
-      if (orders.length >= total) break;
+    const MAX = 10000;
+    const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(completo.inicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(completo.fim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
+    const first = await get(url(0));
+    if (!Array.isArray(first.results) || !Number.isFinite(first.paging?.total)) throw new Error('Cobertura de pedidos não confirmada.');
+    const total: number = first.paging.total;
+    if (total > MAX) return json({ error: 'Há mais de 10.000 pedidos no período; análise suspensa para não apresentar totais parciais.' }, 422);
+    orders.push(...first.results);
+    const offsets: number[] = [];
+    for (let off = 50; off < total; off += 50) offsets.push(off);
+    for (let i = 0; i < offsets.length; i += 10) {
+      const pages = await Promise.all(offsets.slice(i, i + 10).map(o => get(url(o))));
+      for (const p of pages) {
+        if (!Array.isArray(p.results)) throw new Error('Cobertura de pedidos não confirmada.');
+        orders.push(...p.results);
+      }
     }
-    if (orders.length < total) return json({ error: 'Há mais de 1.000 pedidos no período; análise suspensa para não apresentar totais parciais.' }, 422);
+    const unicos = new Map(orders.map(o => [o.id, o]));
+    orders.length = 0; orders.push(...unicos.values());
+    if (orders.length < total) return json({ error: 'Não foi possível ler todos os pedidos do período; análise suspensa para não apresentar totais parciais.' }, 422);
     const atual = projetarPedidos(orders, periodo.inicio, periodo.fim);
     if (modo === 'resumo') {
       const anteriorFim = new Date(Date.parse(periodo.inicio) - 864e5).toISOString().slice(0, 10);
