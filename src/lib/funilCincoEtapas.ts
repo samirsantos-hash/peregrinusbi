@@ -22,6 +22,8 @@ export interface AbandonoFunil {
   /** Fração que não avançou (0–1). */
   taxa: number;
   perdidos: number;
+  /** True se alguma ponta da transição é estimativa. */
+  estimado: boolean;
 }
 
 export interface FunilCincoEtapas {
@@ -38,9 +40,20 @@ function geom(visitas: number, pedidos: number, t: number): number {
   return visitas * Math.pow(ratio, t);
 }
 
+function escolherMaior(abandonos: AbandonoFunil[]): AbandonoFunil | null {
+  if (abandonos.length === 0) return null;
+  return abandonos.reduce((m, a) => {
+    if (a.taxa > m.taxa + 1e-9) return a;
+    if (Math.abs(a.taxa - m.taxa) <= 1e-9 && a.perdidos > m.perdidos) return a;
+    return m;
+  });
+}
+
 export function funilCincoEtapas(visitas: number, pedidos: number): FunilCincoEtapas {
   const V = Math.max(0, Number(visitas) || 0);
-  const P = Math.max(0, Math.min(Number(pedidos) || 0, V > 0 ? V : Number(pedidos) || 0));
+  const Pbruto = Math.max(0, Number(pedidos) || 0);
+  // Pedidos não podem superar visitas no desenho do funil (protege base inconsistente).
+  const P = V > 0 ? Math.min(Pbruto, V) : Pbruto;
 
   const atc = Math.round(geom(V, P, 1 / 3));
   const checkout = Math.round(geom(V, P, 2 / 3));
@@ -79,27 +92,23 @@ export function funilCincoEtapas(visitas: number, pedidos: number): FunilCincoEt
 
   const abandonos: AbandonoFunil[] = [];
   for (let i = 1; i < etapas.length; i++) {
-    const prev = etapas[i - 1].valor;
-    const cur = etapas[i].valor;
-    if (prev <= 0) continue;
-    const taxa = Math.max(0, 1 - cur / prev);
+    const prev = etapas[i - 1];
+    const cur = etapas[i];
+    if (prev.valor <= 0) continue;
+    const taxa = Math.max(0, 1 - cur.valor / prev.valor);
     if (taxa <= 0) continue;
     abandonos.push({
-      de: etapas[i - 1].nome,
-      para: etapas[i].nome,
+      de: prev.nome,
+      para: cur.nome,
       taxa,
-      perdidos: Math.max(0, prev - cur),
+      perdidos: Math.max(0, prev.valor - cur.valor),
+      estimado: prev.fonte === "estimativa" || cur.fonte === "estimativa",
     });
   }
-
-  const maiorAbandono =
-    abandonos.length === 0
-      ? null
-      : abandonos.reduce((m, a) => (a.taxa > m.taxa ? a : m));
 
   return {
     etapas,
     cvr: V > 0 ? P / V : null,
-    maiorAbandono,
+    maiorAbandono: escolherMaior(abandonos),
   };
 }

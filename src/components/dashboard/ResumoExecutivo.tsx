@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { KpiCard } from "@/components/ds";
 import { brl, num, pct } from "@/lib/format";
+import { adicionarDiasIso, diasInclusive, formatarPeriodoBr } from "@/lib/periodoResumo";
 
 type K = { date: string; gmv?: number; tgmv?: number; revenue?: number; adsInvestment?: number; tgmvPads?: number; visits?: number; tsi?: number };
 
@@ -25,10 +26,6 @@ function totais(ks: K[]) {
   };
 }
 
-function formatarPeriodo(ini: string, fim: string) {
-  return `${ini.split("-").reverse().join("/")} a ${fim.split("-").reverse().join("/")}`;
-}
-
 /** Seções 1 e 2 do Resumo: resultado (macro) e tráfego/aquisição (meso). CVR fica só no funil (S4). */
 export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?: string; ate?: string }) {
   const d = useMemo(() => {
@@ -36,9 +33,9 @@ export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?:
     if (!ord.length) return null;
     const fim = (ate ?? ord[ord.length - 1].date).slice(0, 10);
     const ini = (de ?? ord[Math.max(0, ord.length - 30)].date).slice(0, 10);
-    const dias = Math.round((Date.parse(fim) - Date.parse(ini)) / 864e5) + 1;
-    const antFim = new Date(Date.parse(ini) - 864e5).toISOString().slice(0, 10);
-    const antIni = new Date(Date.parse(ini) - dias * 864e5).toISOString().slice(0, 10);
+    const dias = diasInclusive(ini, fim);
+    const antFim = adicionarDiasIso(ini, -1);
+    const antIni = adicionarDiasIso(ini, -dias);
     const atual = ord.filter((k) => k.date.slice(0, 10) >= ini && k.date.slice(0, 10) <= fim);
     const ant = ord.filter((k) => k.date.slice(0, 10) >= antIni && k.date.slice(0, 10) <= antFim);
     return { atual: totais(atual), ant: ant.length ? totais(ant) : null, serie: atual, ini, fim };
@@ -47,7 +44,7 @@ export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?:
   if (!d || !d.serie.length) return null;
   const { atual: a, ant: p } = d;
   const v = (x: number | null, y: number | null | undefined) => (x != null && y != null ? variacao(x, y) : null);
-  const periodo = formatarPeriodo(d.ini, d.fim);
+  const periodo = formatarPeriodoBr(d.ini, d.fim);
 
   return (
     <div className="space-y-5">

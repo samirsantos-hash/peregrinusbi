@@ -25,7 +25,8 @@ function statusClip(visitas: number, orders: number, mediaOrders: number): { lab
 
 /**
  * Seção 3 do Resumo — Clips & Vídeos (compacto).
- * Deep-dive permanece na aba Clips (`ClipsAudiencePanel`).
+ * KPIs somam o período (mesmo grão diário das outras seções).
+ * A lista por MLB é snapshot da última base de qualidade — rotulada à parte.
  */
 export default function ClipsResumo({
   kpis,
@@ -55,8 +56,13 @@ export default function ClipsResumo({
   }, [kpis]);
 
   const participacao = totais.tgmv > 0 ? (totais.tgmvClips / totais.tgmv) * 100 : null;
+  const temPeriodo =
+    totais.visitasClips > 0 || totais.tgmvClips > 0 || totais.ordersClips > 0;
 
   const topClips = useMemo(() => {
+    // Ranking só faz sentido junto dos KPIs do período — evita lista “cheia” com cards em zero.
+    if (!temPeriodo) return [];
+
     const nomes = new Map<string, string>();
     for (const e of eligibilityItems || []) {
       if (e.itemId && e.itemName) nomes.set(String(e.itemId), e.itemName);
@@ -97,10 +103,7 @@ export default function ClipsResumo({
         link: lq.mlbLink,
         status: statusClip(lq.visitasClips || 0, lq.ordersClips || 0, mediaOrders),
       }));
-  }, [listingsQuality, eligibilityItems]);
-
-  const temDado =
-    totais.visitasClips > 0 || totais.tgmvClips > 0 || totais.ordersClips > 0 || topClips.length > 0;
+  }, [listingsQuality, eligibilityItems, temPeriodo]);
 
   return (
     <section aria-label="Clips e vídeos" className="space-y-3">
@@ -108,7 +111,7 @@ export default function ClipsResumo({
         3 · Clips & vídeos{periodo ? ` · ${periodo}` : ""}
       </h2>
 
-      {!temDado ? (
+      {!temPeriodo ? (
         <div className="ds-kpi rounded-xl p-5 text-sm text-slate-600">
           Sem atividade de clips no período. Quando houver visitas ou TGMV via vídeo, o resumo aparece aqui.
         </div>
@@ -139,9 +142,14 @@ export default function ClipsResumo({
 
           {topClips.length > 0 && (
             <div className="ds-kpi rounded-xl overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-slate-200/80">
-                <Video className="h-3.5 w-3.5 text-slate-500" />
-                <p className="text-xs font-medium text-slate-600">Vídeos com maior tração</p>
+              <div className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 border-b border-slate-200/80">
+                <div className="flex items-center gap-2">
+                  <Video className="h-3.5 w-3.5 text-slate-500" />
+                  <p className="text-xs font-medium text-slate-600">Vídeos com maior tração</p>
+                </div>
+                <p className="text-[10px] text-slate-400">
+                  Snapshot por MLB · base de qualidade (não é o somatório do período)
+                </p>
               </div>
               <ul className="divide-y divide-slate-100">
                 {topClips.map((c) => (

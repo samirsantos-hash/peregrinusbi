@@ -25,11 +25,16 @@ export default function FunilVendas({ kpis, periodo }: { kpis: KpiFunil[]; perio
     return { visitas, unidades, fat, bpcMedio, funil: funilCincoEtapas(visitas, unidades) };
   }, [kpis]);
 
+  const titulo = `4 · Funil de conversão${periodo ? ` · ${periodo}` : ""}`;
+
   if (d.visitas <= 0) {
     return (
-      <div className="ds-kpi rounded-xl p-5 text-sm text-slate-600">
-        Funil de vendas: sem visitas no período — carregue a base de visitas para ver a conversão.
-      </div>
+      <section aria-label="Funil de conversão" className="space-y-3">
+        <h2 className="ds-rotulo">{titulo}</h2>
+        <div className="ds-kpi rounded-xl p-5 text-sm text-slate-600">
+          Sem visitas no período — carregue a base de visitas para ver a conversão.
+        </div>
+      </section>
     );
   }
 
@@ -42,10 +47,8 @@ export default function FunilVendas({ kpis, periodo }: { kpis: KpiFunil[]; perio
   return (
     <section aria-label="Funil de conversão" className="ds-kpi rounded-2xl p-5">
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        <h2 className="ds-rotulo !normal-case !tracking-[0.12em]">
-          4 · Funil de conversão{periodo ? ` · ${periodo}` : ""}
-        </h2>
-        <TooltipInfo text="Visitas e PDP são dados reais (no ML a visita é a abertura da PDP). Add to cart e checkout são estimativas geométricas entre PDP e pedidos — não vêm da base. Pedidos = unidades (TSI)." />
+        <h2 className="ds-rotulo">{titulo}</h2>
+        <TooltipInfo text="Visitas e PDP são dados reais (no ML a visita é a abertura da PDP). Add to cart e checkout são estimativas geométricas entre PDP e pedidos — não vêm da base. Pedidos = unidades (TSI). O maior abandono entre etapas estimadas não substitui diagnóstico com dado real." />
       </div>
 
       <div className="grid gap-5 lg:grid-cols-3">
@@ -119,13 +122,20 @@ export default function FunilVendas({ kpis, periodo }: { kpis: KpiFunil[]; perio
 
           {maiorAbandono && (
             <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 p-3.5 text-xs">
-              <p className="font-medium text-amber-900">Maior abandono</p>
+              <p className="font-medium text-amber-900">
+                {maiorAbandono.estimado ? "Maior queda estimada" : "Maior abandono"}
+              </p>
               <p className="mt-0.5 text-amber-800/90">
                 {maiorAbandono.de} → {maiorAbandono.para}
               </p>
               <p className="mt-1 tabular-nums font-mono text-amber-900">
                 {pct(maiorAbandono.taxa * 100, 1)} de queda · {num(maiorAbandono.perdidos)} não avançaram
               </p>
+              {maiorAbandono.estimado && (
+                <p className="mt-1.5 text-[10px] leading-snug text-amber-800/80">
+                  Inclui etapa estimada — a conversão oficial é só visitas → pedidos.
+                </p>
+              )}
             </div>
           )}
 

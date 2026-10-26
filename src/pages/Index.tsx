@@ -46,6 +46,7 @@ import { CampanhasCofinanciadasPanel } from "@/components/seller/CampanhasCofina
 import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import ClipsResumo from "@/components/dashboard/ClipsResumo";
 import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
+import { formatarPeriodoBr } from "@/lib/periodoResumo";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
@@ -310,6 +311,14 @@ const Index = () => {
     return filteredKpis;
   }, [filteredKpis, isDailyPeriod]);
 
+  /** Resumo Growth: sempre grão diário no mesmo intervalo do calendário (evita S1 diário × S3/S4 mensal). */
+  const resumoDiario: any[] = useMemo(() => {
+    if (!dateRange?.from) return allKpisDaily;
+    const from = formatDateString(dateRange.from);
+    const to = formatDateString(dateRange.to ?? dateRange.from);
+    return allKpisDaily.filter((k) => String(k.date).slice(0, 10) >= from && String(k.date).slice(0, 10) <= to);
+  }, [allKpisDaily, dateRange]);
+
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
     await queryClient.invalidateQueries({ queryKey: ["sellers"] });
@@ -540,19 +549,17 @@ const Index = () => {
                         {!isConsolidado && (() => {
                           const de = dateRange?.from ? formatDateString(dateRange.from) : undefined;
                           const ate = dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined;
-                          const periodo = de && ate
-                            ? `${de.split("-").reverse().join("/")} a ${ate.split("-").reverse().join("/")}`
-                            : undefined;
+                          const periodo = de && ate ? formatarPeriodoBr(de, ate) : undefined;
                           return (
                             <>
-                              <ResumoExecutivo diario={allKpisDaily as any} de={de} ate={ate} />
+                              <ResumoExecutivo diario={resumoDiario as any} de={de} ate={ate} />
                               <ClipsResumo
-                                kpis={displayKpis as any}
+                                kpis={resumoDiario as any}
                                 listingsQuality={listingsQuality || []}
                                 eligibilityItems={eligibilityItems || []}
                                 periodo={periodo}
                               />
-                              <FunilVendas kpis={displayKpis as any} periodo={periodo} />
+                              <FunilVendas kpis={resumoDiario as any} periodo={periodo} />
                             </>
                           );
                         })()}
