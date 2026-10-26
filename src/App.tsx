@@ -5,6 +5,7 @@ import { SoundProvider } from "@/hooks/useSoundFeedback";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { JuniorModeProvider } from "@/hooks/useJuniorMode";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -147,6 +148,7 @@ const App = () => (
               <NotificationsBell />
               <AlertaInatividade />
               <AvisosGlobais />
+              <ThemeToggle />
             </ContextoNavegacaoProvider>
           </BrowserRouter>
         </JuniorModeProvider>
