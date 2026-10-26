@@ -1,10 +1,10 @@
 # Roadmap
 
 ## Organização macro → micro e Full (26/10)
-- [ ] Ordenar seções e conteúdo do panorama da loja até anúncio e ação.
-- [ ] Priorizar indicadores reais da API no Resumo, com origem e período explícitos, sem misturar séries.
-- [ ] Renomear Pock para Full e apresentar recomendação balanceada por produto, com risco/covariância quando disponíveis e alertas reais de qualidade/fotos.
-- [ ] Testar regras e verificar navegação com loja conectada.
+- [x] Ordenar navegação macro → micro; Resumo como abertura, detalhes por anúncio após indicadores de Qualidade, funil em Faturamento e produtos Full ao final.
+- [x] Priorizar indicadores reais da API no Resumo com 30 dias UTC completos, comparação anterior e histórico separado; leitura incompleta suspende totais.
+- [x] Renomear Pock para Full e recomendar até 20 produtos vendidos fora do Full com média/covariância da receita diária, alertas ML e dimensões originais das fotos; sem prometer elegibilidade/envio/lucro.
+- [x] Nove testes passaram e navegação autenticada conferida em VALDEMIR e GMABSOLUTA; GMABSOLUTA: 445 pedidos pagos, R$160.641, cancelamento 7,10%, 20 candidatos Full; busca por MLB e ajuste de proteção conferidos.
 
 ## Avisos do desenvolvedor (23/10)
 - [x] Atribuir perfil Desenvolvedor a Samir sem alterar acesso às lojas e proteger atribuição no servidor.
