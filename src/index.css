@@ -631,31 +631,80 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 .ds-seta-ruim { background: rgb(214 36 16 / 0.10); color: #D62410; }
 @media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
 
-/* ── Painel Apple (Visão geral): gelo + vidro fosco, sem trocar o tema global ── */
+/*
+ * Painel Apple (Visão geral) — uma escada de cinza neutro + vidro fosco.
+ *
+ * Distorção anterior: canvas azulado (#eef0f4) × branco 72% × vidro Aura escuro
+ * (bg-card / !bg-card/95 vazando) × saturate 1.7 × shimmer ::after = brancos
+ * “sujos” competindo com branco puro.
+ *
+ * Opções avaliadas:
+ *  A) Surfaces opacas só — harmônico, perde profundidade do glass
+ *  B) Vidro alto blur/baixa opacidade — belo, mas só funciona em fundo claro
+ *     e vaza o tema escuro do app se o canvas não isolar
+ *  C) Canvas opaco neutro + tokens remapeados + um só tom de vidro (escolhido)
+ *
+ * Escada (mesma família, zero matiz azul/verde):
+ *  #ffffff → #fbfbfd → #f5f5f7 → #ebebed
+ */
 .painel-apple {
+  /* Escada local (Apple system gray) */
+  --apple-white: #ffffff;
+  --apple-surface: #fbfbfd;
   --apple-canvas: #f5f5f7;
-  --apple-glass: rgb(255 255 255 / 0.72);
-  --apple-line: rgb(255 255 255 / 0.65);
+  --apple-wash: #ebebed;
+  --apple-glass: rgb(255 255 255 / 0.78);
+  --apple-glass-soft: rgb(255 255 255 / 0.52);
+  --apple-glass-edge: rgb(255 255 255 / 0.92);
+  --apple-stroke: rgb(0 0 0 / 0.06);
+  --apple-stroke-strong: rgb(0 0 0 / 0.1);
   --apple-ink: #1d1d1f;
   --apple-sec: #6e6e73;
+  --apple-blur: 14px;
+
+  /* Remapeia tokens do app: bg-card / text-muted / border deixam de ser Aura escuro */
+  --background: 240 5% 96%;
+  --foreground: 240 6% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 6% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 6% 10%;
+  --secondary: 240 5% 96%;
+  --secondary-foreground: 240 6% 10%;
+  --muted: 240 5% 94%;
+  --muted-foreground: 240 4% 46%;
+  --accent: 240 5% 94%;
+  --accent-foreground: 240 6% 10%;
+  --border: 240 6% 90%;
+  --input: 240 6% 90%;
+  --glass: 0 0% 100%;
+  --glass-border: 240 6% 90%;
+  --vidro-fundo: rgb(255 255 255 / 0.78);
+  --vidro-borda: rgb(0 0 0 / 0.06);
+  --vidro-sombra:
+    0 1px 0 rgb(255 255 255 / 0.92) inset,
+    0 1px 2px rgb(0 0 0 / 0.03),
+    0 8px 24px -14px rgb(0 0 0 / 0.12);
+
+  color: var(--apple-ink);
+  color-scheme: light;
+  isolation: isolate;
   border-radius: 1.25rem;
   padding: 1.25rem 1.15rem 1.5rem;
-  background:
-    radial-gradient(90% 60% at 10% 0%, rgb(255 255 255 / 0.95), transparent 50%),
-    radial-gradient(70% 50% at 100% 10%, rgb(255 255 255 / 0.55), transparent 45%),
-    linear-gradient(165deg, #fbfbfd 0%, var(--apple-canvas) 48%, #eef0f4 100%);
-  border: 1px solid rgb(15 23 42 / 0.06);
+  /* Opaco: isola o tema escuro — evita leite cinza no blur */
+  background: linear-gradient(180deg, var(--apple-surface) 0%, var(--apple-canvas) 100%);
+  border: 1px solid var(--apple-stroke);
   box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.8) inset,
-    0 12px 40px -20px rgb(15 23 42 / 0.18);
+    0 1px 0 rgb(255 255 255 / 0.9) inset,
+    0 10px 36px -18px rgb(0 0 0 / 0.12);
 }
 .painel-apple-hero {
-  margin-bottom: 0.25rem;
-  padding: 0.25rem 0.15rem 0.75rem;
-  border-bottom: 1px solid rgb(15 23 42 / 0.06);
+  margin-bottom: 0.35rem;
+  padding: 0.2rem 0.1rem 0.85rem;
+  border-bottom: 1px solid var(--apple-stroke);
 }
 .painel-apple-titulo {
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
   font-size: clamp(1.35rem, 2.2vw, 1.75rem);
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -669,33 +718,41 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   line-height: 1.45;
   color: var(--apple-sec);
 }
+/* Wrapper: sem segundo branco — o card interno carrega o vidro */
 .painel-vidro {
-  background: var(--apple-glass);
-  backdrop-filter: saturate(1.4) blur(18px);
-  -webkit-backdrop-filter: saturate(1.4) blur(18px);
-  border: 1px solid var(--apple-line);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.9) inset,
-    0 8px 28px -16px rgb(15 23 42 / 0.2);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 .painel-apple .ds-kpi,
-.painel-apple .glass-card {
-  background: var(--apple-glass);
-  backdrop-filter: saturate(1.35) blur(14px);
-  -webkit-backdrop-filter: saturate(1.35) blur(14px);
-  border-color: rgb(226 232 240 / 0.85);
-  box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.85) inset,
-    0 1px 3px rgba(0, 0, 0, 0.03),
-    0 10px 28px -18px rgb(15 23 42 / 0.16);
+.painel-apple .glass-card,
+.painel-apple .glass-card-highlight {
+  background: var(--apple-glass) !important;
+  backdrop-filter: blur(var(--apple-blur)) saturate(1.04);
+  -webkit-backdrop-filter: blur(var(--apple-blur)) saturate(1.04);
+  border: 1px solid var(--apple-stroke) !important;
+  border-radius: 1rem;
+  box-shadow: var(--vidro-sombra);
+  position: relative;
+  color: var(--apple-ink);
+}
+.painel-apple .glass-card::after,
+.painel-apple .glass-card-highlight::after {
+  display: none !important;
+  content: none !important;
 }
 .painel-apple .ds-kpi:hover,
-.painel-apple .glass-card:hover {
-  border-color: rgb(203 213 225);
+.painel-apple .glass-card:hover,
+.painel-apple .glass-card-highlight:hover {
+  border-color: var(--apple-stroke-strong) !important;
+  background: rgb(255 255 255 / 0.9) !important;
   box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.9) inset,
-    0 1px 3px rgba(0, 0, 0, 0.04),
-    0 14px 32px -14px rgb(15 23 42 / 0.18);
+    0 1px 0 var(--apple-white) inset,
+    0 1px 2px rgb(0 0 0 / 0.04),
+    0 12px 28px -12px rgb(0 0 0 / 0.13);
+  transform: translateY(-1px);
 }
 .painel-apple .ds-numero-focal,
 .painel-apple .ds-numero-sec,
@@ -704,6 +761,17 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color: var(--apple-ink);
 }
+.painel-apple .ds-rotulo,
+.painel-apple .ds-nota,
+.painel-apple .metric-label,
+.painel-apple .text-muted-foreground {
+  color: var(--apple-sec) !important;
+}
+/* Borders utilitárias: mesma família de stroke (sem verde/ciano Aura) */
+.painel-apple .border-border,
+.painel-apple .border-glass-border {
+  border-color: var(--apple-stroke) !important;
+}
 .painel-bloco-cabeca { margin-bottom: 0.65rem; }
 .painel-bloco-porque {
   margin-top: 0.25rem;
@@ -711,15 +779,17 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   line-height: 1.4;
   color: var(--apple-sec);
 }
+/* Ponte: mesmo branco da família, um degrau mais aberto */
 .painel-ponte {
   display: grid;
   gap: 0.2rem;
   padding: 0.7rem 0.95rem;
   border-radius: 0.85rem;
-  background: rgb(255 255 255 / 0.45);
-  border: 1px solid rgb(255 255 255 / 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--apple-glass-soft);
+  border: 1px solid var(--apple-stroke);
+  backdrop-filter: blur(10px) saturate(1.02);
+  -webkit-backdrop-filter: blur(10px) saturate(1.02);
+  box-shadow: 0 1px 0 var(--apple-glass-edge) inset;
 }
 .painel-ponte-fluxo {
   display: flex;
@@ -738,14 +808,15 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   line-height: 1.4;
   color: var(--apple-sec);
 }
-/* Compat: alias antigo do Resumo Growth */
+/* Compat: alias antigo */
 .resumo-growth {
   border-radius: 1.25rem;
   padding: 1rem;
-  background: linear-gradient(165deg, #fbfbfd 0%, #f5f5f7 100%);
-  border: 1px solid rgb(15 23 42 / 0.05);
+  background: linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 100%);
+  border: 1px solid rgb(0 0 0 / 0.06);
 }
 @media (prefers-reduced-motion: reduce) {
   .painel-apple .ds-kpi:hover,
-  .painel-apple .glass-card:hover { transform: none; }
+  .painel-apple .glass-card:hover,
+  .painel-apple .glass-card-highlight:hover { transform: none; }
 }
