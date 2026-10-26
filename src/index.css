@@ -808,6 +808,38 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   line-height: 1.4;
   color: var(--apple-sec);
 }
+/* Mix de envio — tons da escada gelo (sem ciano Aura) */
+.painel-mix-envio {
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.85rem;
+  background: var(--apple-glass-soft);
+  border: 1px solid var(--apple-stroke);
+  backdrop-filter: blur(10px) saturate(1.02);
+  -webkit-backdrop-filter: blur(10px) saturate(1.02);
+  box-shadow: 0 1px 0 var(--apple-glass-edge) inset;
+}
+.painel-mix-envio-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--apple-sec);
+}
+.painel-mix-envio-trilha {
+  display: flex;
+  height: 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--apple-wash);
+}
+.painel-mix-envio-full { background: #1d1d1f; min-width: 0; }
+.painel-mix-envio-flex { background: #6e6e73; min-width: 0; }
+.painel-mix-envio-outros { background: #c7c7cc; min-width: 0; }
 /* Compat: alias antigo */
 .resumo-growth {
   border-radius: 1.25rem;

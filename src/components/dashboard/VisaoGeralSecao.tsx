@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import ResumoExecutivo from "@/components/dashboard/ResumoExecutivo";
 import ClipsResumo from "@/components/dashboard/ClipsResumo";
 import FunilVendas from "@/components/dashboard/FunilVendas";
+import OperacaoResumo from "@/components/dashboard/OperacaoResumo";
 import DailyPerformanceChart from "@/components/dashboard/DailyPerformanceChart";
 import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
@@ -69,7 +70,7 @@ type Props = {
 
 /**
  * Visão geral unificada (Resumo + Faturamento).
- * Cadeia científica: efeito → causa (tráfego) → ritmo → canal → funil → sazonalidade → Ads×GMV → potencial.
+ * Cadeia: efeito → tráfego → ritmo → canal → funil → operação (reputação/envios) → sazonalidade → Ads×GMV → potencial.
  * Sem repetir big numbers de GMV/Ads/ROAS fora do bloco 1–2.
  */
 export default function VisaoGeralSecao({
@@ -91,7 +92,7 @@ export default function VisaoGeralSecao({
         <p className="ds-rotulo">Visão geral</p>
         <h1 className="painel-apple-titulo">Resultado, causas e tendências</h1>
         <p className="painel-apple-sub">
-          Metodologia em cadeia: o que vendeu → de onde veio o tráfego → se o ritmo sustenta → onde a conversão cai.
+          Metodologia em cadeia: o que vendeu → tráfego → ritmo → conversão → reputação e logística → sazonalidade.
           {periodo ? ` Período ${periodo}.` : ""}
         </p>
       </header>
@@ -144,12 +145,26 @@ export default function VisaoGeralSecao({
       </Bloco>
 
       <PonteDiagnostico
+        de="Conversão"
+        para="Reputação e envios"
+        porque="Atrasos, cancelamentos e mix Full/Flex explicam parte da conversão fraca e risco de rebaixamento — causa operacional."
+      />
+
+      <Bloco
+        n={6}
+        titulo="Reputação, envios e logística"
+        porque="Principais KPIs operacionais: termômetro, reclamações, atrasos, cancelamentos e participação Full/Flex/Agência."
+      >
+        <OperacaoResumo diario={diario as any} />
+      </Bloco>
+
+      <PonteDiagnostico
         de="Período atual"
         para="Sazonalidade"
         porque="Comparar com o mesmo mês em anos anteriores separa tendência estrutural de efeito de calendário."
       />
 
-      <Bloco n={6} titulo="GMV mês vs mês" porque="Comparação anual do faturamento — contexto de sazonalidade.">
+      <Bloco n={7} titulo="GMV mês vs mês" porque="Comparação anual do faturamento — contexto de sazonalidade.">
         <div className="painel-vidro rounded-2xl p-2">
           <GmvMesVsMes pontos={serieGmv} titulo="GMV mês vs mês (comparação anual)" />
         </div>
@@ -161,7 +176,7 @@ export default function VisaoGeralSecao({
         porque="Se o investimento sobe mais que o GMV, a causa é ineficiência de mídia — não falta de demanda."
       />
 
-      <Bloco n={7} titulo="Diagnóstico Ads × GMV" porque="Correlação e elasticidade entre investimento e faturamento.">
+      <Bloco n={8} titulo="Diagnóstico Ads × GMV" porque="Correlação e elasticidade entre investimento e faturamento.">
         <div className="painel-vidro overflow-hidden rounded-2xl">
           <TrendAnalysisPanel
             kpis={diario as any}
@@ -171,7 +186,7 @@ export default function VisaoGeralSecao({
         </div>
       </Bloco>
 
-      <Bloco n={8} titulo="Potencial de crescimento" porque="Referência da vertical — quanto a loja ainda pode crescer frente aos pares.">
+      <Bloco n={9} titulo="Potencial de crescimento" porque="Referência da vertical — quanto a loja ainda pode crescer frente aos pares.">
         <div className="painel-vidro overflow-hidden rounded-2xl">
           <GrowthPotentialPanel
             kpis={diario as any}
