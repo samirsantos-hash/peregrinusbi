@@ -585,14 +585,20 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="publicidade" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="publicidade" />}
-                    <MlAoVivo secao="publicidade" custId={sellerCustIdMap[selectedSeller]} />
-                    <PublicidadePanel
-                      sellerUuid={selectedSeller}
-                      custId={sellerCustIdMap[selectedSeller]}
-                      fromDate={dateRange?.from ? formatDateString(dateRange.from) : minStr}
-                      toDate={dateRange?.to ? formatDateString(dateRange.to) : anchorStr}
-                      sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
-                    />
+                    {/* Macro→Micro: 1 Product Ads (API) + campanhas → 3 evolução (plot) → scores/margem */}
+                    {!isConsolidado && (
+                      <>
+                        <MlAoVivo secao="publicidade" custId={sellerCustIdMap[selectedSeller]} />
+                        <PublicidadePanel
+                          variante="evolucao"
+                          sellerUuid={selectedSeller}
+                          custId={sellerCustIdMap[selectedSeller]}
+                          fromDate={dateRange?.from ? formatDateString(dateRange.from) : minStr}
+                          toDate={dateRange?.to ? formatDateString(dateRange.to) : anchorStr}
+                          sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
+                        />
+                      </>
+                    )}
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="logistics" />}

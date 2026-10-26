@@ -37,10 +37,16 @@ type Props = {
   fromDate: string; // YYYY-MM-DD
   toDate: string;   // YYYY-MM-DD
   sellerNickname?: string;
+  /**
+   * completo = KPIs + scores + gráfico + granular (legado).
+   * evolucao = só meso/micro histórico (gráfico + scores + margem), sem repetir big numbers do Product Ads ao vivo.
+   */
+  variante?: "completo" | "evolucao";
 };
 
-const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname }: Props) => {
+const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname, variante = "completo" }: Props) => {
   const [grafico, setGrafico] = useState<"roas_acos" | "investimento">("roas_acos");
+  const soEvolucao = variante === "evolucao";
 
   const { data: m, isLoading } = useQuery({
     queryKey: ["publicidade", sellerUuid, custId, fromDate, toDate],
@@ -74,14 +80,15 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
   return (
     <div className="space-y-5">
       {/* Banner sem dados */}
-      {semDados && (
+      {semDados && !soEvolucao && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
-          ⚠️ Nenhum investimento em Ads (PADS) detectado para {sellerNickname ?? "este seller"} no período.
+          Nenhum investimento em Ads (PADS) detectado para {sellerNickname ?? "este seller"} no período do calendário.
           Verifique se há campanhas ativas no Mercado Ads.
         </div>
       )}
 
-      {/* ── KPI Cards principais ─────────────────────────────────────── */}
+      {/* ── KPI Cards principais (só no modo completo — evita eco com Product Ads ao vivo) ── */}
+      {!soEvolucao && (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           titulo="ROAS"
@@ -131,50 +138,15 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           </div>
         </div>
       </div>
-
-
-      {/* ── Scores ML ────────────────────────────────────────────────── */}
-      {algumScore && (
-        <div className="rounded-xl border border-border/40 bg-card/60 p-5">
-          <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Scores ML — PADS (avaliação do algoritmo)
-          </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {scores.map(({ label, val, ok, warn }) =>
-              val === null || val === undefined ? null : (
-                <div key={label} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground">{label}</span>
-                    <span className="font-mono font-semibold tabular-nums" style={{ color: corScoreCustom(val, ok, warn) }}>
-                      {val.toFixed(1)}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/40">
-                    <div
-                      className="h-full rounded-full transition-[transform,opacity,background-color,border-color,color]"
-                      style={{
-                        width: `${Math.min(100, Math.max(0, val))}%`,
-                        background: corScoreCustom(val, ok, warn),
-                      }}
-                    />
-                  </div>
-                  <div className="flex justify-between text-[10px] text-muted-foreground">
-                    <span>0</span>
-                    <span>100</span>
-                  </div>
-                </div>
-              ),
-            )}
-          </div>
-        </div>
       )}
 
-      {/* ── Gráfico de evolução ──────────────────────────────────────── */}
+
+      {/* ── Gráfico de evolução (antes dos scores: Macro→Micro) ──────── */}
       {m.historico.length >= 1 && (
         <div className="rounded-xl border border-border/40 bg-card/60 p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Evolução histórica ({m.historico.length} {m.historico.length === 1 ? "mês" : "meses"})
+              {soEvolucao ? "3 · " : ""}Evolução histórica ({m.historico.length} {m.historico.length === 1 ? "mês" : "meses"})
               <TendenciaChip t={calcularTendencia(m.historico.map((d) => Number(d.gmv_ads) || 0))} className="ml-2 normal-case tracking-normal" />
             </div>
             <div className="flex gap-2">
@@ -254,14 +226,46 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
         </div>
       )}
 
-
-      {/* ── Granularidade de investimento em Ads ─────────────────────── */}
-      <AdsGranularidadePanel sellerUuid={sellerUuid} fromDate={fromDate} toDate={toDate} />
+      {/* ── Scores ML ────────────────────────────────────────────────── */}
+      {algumScore && (
+        <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+          <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {soEvolucao ? "4 · Scores ML (PADS)" : "Scores ML — PADS (avaliação do algoritmo)"}
+          </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {scores.map(({ label, val, ok, warn }) =>
+              val === null || val === undefined ? null : (
+                <div key={label} className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">{label}</span>
+                    <span className="font-mono font-semibold tabular-nums" style={{ color: corScoreCustom(val, ok, warn) }}>
+                      {val.toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-secondary/40">
+                    <div
+                      className="h-full rounded-full transition-[transform,opacity,background-color,border-color,color]"
+                      style={{
+                        width: `${Math.min(100, Math.max(0, val))}%`,
+                        background: corScoreCustom(val, ok, warn),
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>0</span>
+                    <span>100</span>
+                  </div>
+                </div>
+              ),
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Impacto do TACOS na margem ───────────────────────────────── */}
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">
         <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Impacto do TACOS na margem
+          {soEvolucao ? "5 · Impacto do TACOS na margem" : "Impacto do TACOS na margem"}
         </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {[
@@ -293,10 +297,13 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           })}
         </div>
         <div className="mt-3 text-xs text-muted-foreground">
-          TACOS atual: <span className="font-mono tabular-nums">{m.tacos.toFixed(1).replace(".", ",")}%</span> do GMV total consumido por Ads.
+          TACOS (base PADS do calendário): <span className="font-mono tabular-nums">{m.tacos.toFixed(1).replace(".", ",")}%</span> do GMV total consumido por Ads.
           Margem líquida = margem bruta estimada − TACOS.
         </div>
       </div>
+
+      {/* ── Granularidade (último nível) ─────────────────────────────── */}
+      <AdsGranularidadePanel sellerUuid={sellerUuid} fromDate={fromDate} toDate={toDate} />
     </div>
   );
 };

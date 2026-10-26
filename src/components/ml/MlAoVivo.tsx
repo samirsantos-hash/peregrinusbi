@@ -52,7 +52,9 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       return Object.fromEntries((data ?? []).map((r) => [r.tema, r])) as Record<string, { dados: any; erro: string | null; atualizado_em: string }>;
     },
   });
-  if (!custId || !data || !temas.some((t) => data[t])) return null;
+  // Publicidade consulta a API de Product Ads direto — não depende de ml_sync_tema.ads.
+  if (!custId) return null;
+  if (secao !== "publicidade" && (!data || !temas.some((t) => data[t]))) return null;
 
   const atualizar = async () => {
     setAtualizando(true);
@@ -63,8 +65,16 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
     qc.invalidateQueries({ queryKey: ["ml-sync-tema", custId] });
   };
 
-  const d = (t: string) => data[t]?.dados ?? null;
-  const ultima = temas.map((t) => data[t]?.atualizado_em).filter(Boolean).sort().pop();
+  const d = (t: string) => data?.[t]?.dados ?? null;
+  const ultima = temas.map((t) => data?.[t]?.atualizado_em).filter(Boolean).sort().pop();
+
+  if (secao === "publicidade") {
+    return (
+      <section className="rounded-lg border border-border bg-card p-4 space-y-4 [border-width:0.5px]">
+        <GestaoAds key={custId} custId={custId} />
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-lg border border-border bg-card p-4 space-y-4 [border-width:0.5px]">
@@ -80,7 +90,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
           </Button>
         )}
       </div>
-      {temas.map((t) => data[t]?.erro && !data[t]?.dados ? (
+      {temas.map((t) => data?.[t]?.erro && !data?.[t]?.dados ? (
         <p key={t} className="text-xs text-muted-foreground">Este dado não veio do Mercado Livre na última atualização.</p>
       ) : null)}
       {secao === "resumo" && <Resumo vendas={d("vendas")} visitas={d("visitas")} />}
@@ -89,7 +99,6 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       {secao === "logistica" && <Logistica e={d("envios")} />}
       {secao === "oportunidades" && <Promocoes p={d("promocoes")} />}
       {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
-      {secao === "publicidade" && <><Ads a={d("ads")} fat={d("vendas")?.faturamento_30d} /><GestaoAds key={custId} custId={custId} /></>}
     </section>
   );
 }
@@ -249,34 +258,6 @@ function Promocoes({ p }: { p: any }) {
           </li>
         ))}
       </ul>
-    </>
-  );
-}
-
-function Ads({ a, fat }: { a: any; fat?: number }) {
-  if (!a) return null;
-  if (!a.usa_ads) return <p className="text-sm text-muted-foreground">A loja não usa Product Ads.</p>;
-  const acos = a.vendas_ads ? a.investimento / a.vendas_ads : null;
-  const roas = a.investimento ? a.vendas_ads / a.investimento : null;
-  const share = fat ? a.investimento / fat : null;
-  return (
-    <>
-      <Grade>
-        <KpiCard focal rotulo="Investimento 30 dias" valor={brl(a.investimento, true)} referencia={`${pctFracao(share, 2)} do faturamento · Meta Peregrinus 3%`} />
-        <KpiCard rotulo="Vendas por Ads" valor={brl(a.vendas_ads)} referencia={`${num(a.unidades)} unidades`} />
-        <KpiCard rotulo="ROAS" valor={roas == null ? "Sem dado" : `${num(roas, 1)}x`} referencia={`ACOS ${pctFracao(acos)}`} />
-        <KpiCard rotulo="Cliques" valor={num(a.cliques)} referencia={`${num(a.impressoes)} impressões`} />
-      </Grade>
-      {(a.campanhas ?? []).length > 0 && (
-        <ul className="text-xs divide-y divide-border tabular-nums">
-          {a.campanhas.map((c: any, i: number) => (
-            <li key={i} className="py-1.5 flex justify-between gap-2">
-              <span>{c.nome} <span className="text-muted-foreground">({c.status === "active" ? "ativa" : "pausada"})</span></span>
-              <span>{brl(c.investimento, true)} → {brl(c.vendas)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
     </>
   );
 }
