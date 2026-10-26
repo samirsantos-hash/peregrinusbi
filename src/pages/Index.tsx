@@ -84,6 +84,7 @@ import VerticalCarteirasTabela from "@/components/pock/VerticalCarteirasTabela";
 import { NovidadesPrompt } from "@/components/novidades/novidades";
 import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
+import HomeResumo from "@/components/dashboard/HomeResumo";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
