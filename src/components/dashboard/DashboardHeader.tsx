@@ -14,7 +14,6 @@ import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 
 import { useJuniorMode } from "@/hooks/useJuniorMode";
-import { GraduationCap } from "lucide-react";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
@@ -94,7 +93,6 @@ const DashboardHeader = ({
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
 
   const { playClick } = useSoundFeedback();
-  const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
   const baseCal = calendarKpis && calendarKpis.length > 0 ? calendarKpis : allKpis;
