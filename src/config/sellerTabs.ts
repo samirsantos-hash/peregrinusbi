@@ -1,7 +1,4 @@
-// Ordem lógica de análise (NÃO ALTERAR sem revisão consultiva):
-// Abas 1–3 (Resumo, Faturamento, Logística): respondem "como está indo o negócio?"
-// Abas 4–6 (Qualidade, Clips, Preço): respondem "por que está indo assim?"
-// Abas 7–9 (Oportunidades, Reputação): respondem "o que fazer para melhorar?"
+// Navegação macro → micro: resultado, causas, produtos e planejamento.
 
 import {
   DollarSign,
@@ -34,9 +31,9 @@ export const SELLER_TABS: SellerTab[] = [
   { id: "efficiency", label: "Resumo", icon: DollarSign, order: 1,
     descricao: "Visão geral da saúde da loja no período",
     juniorTip: "Comece aqui. Dá a fotografia completa em uma tela." },
-  { id: "pock", label: "Pock", icon: Gauge, order: 1.5,
-    descricao: "Full Potential — diagnóstico seller centric",
-    juniorTip: "Diagnóstico Pock da loja: identidade, medidores de serviços, atendimento e evolução anual." },
+  { id: "pock", label: "Full", icon: Gauge, order: 1.5,
+    descricao: "Potencial da loja e produtos para avaliar no Full",
+    juniorTip: "Potencial da loja, evolução e balanceamento de produtos para Full." },
   { id: "executive", label: "Faturamento", icon: LayoutDashboard, order: 2,
     descricao: "GMV, itens vendidos e ticket médio",
     juniorTip: "Analise tendências de GMV e eficiência dos Ads antes de qualquer reunião." },
@@ -82,3 +79,10 @@ export const SECOES: Record<string, { label: string; descricao: string }> = Obje
 export function getSecao(id: string) {
   return SECOES[id] ?? { label: "Painel", descricao: "" };
 }
+
+export const GRUPOS_SECOES = [
+  { titulo: "Visão geral", ids: ["efficiency", "executive"] },
+  { titulo: "Desempenho comercial", ids: ["competitiveness", "publicidade", "opportunities", "clips"] },
+  { titulo: "Operação e anúncios", ids: ["logistics", "reputation", "quality", "perguntas"] },
+  { titulo: "Planejamento", ids: ["pock", "metas", "correlacoes"] },
+];

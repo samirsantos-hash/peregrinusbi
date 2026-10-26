@@ -66,6 +66,16 @@ Confirmação (só a chave; o servidor usa o que gravou na prévia):
 
 ## Funções
 
+### Resumo limpo e Full — `ml-analise-loja`
+
+- Entrada: POST autenticado `{ cust_id: "ID numérico", modo: "resumo" | "full" }`. Acesso pela visibilidade existente de `ml_sync_tema`, sem privilégio adicional do desenvolvedor.
+- Somente leitura do ML com token da própria conta e renovação compartilhada. Sem gravação de dados de negócio; retorna apenas agregados, nunca compradores ou pedidos brutos.
+- Período: 30 dias UTC completos. Resumo consulta também os 30 dias anteriores. Receita = soma de quantidade × preço em pedidos pagos, unidades separadas de pedidos; cancelamento = cancelados ÷ (pagos + cancelados). Outros status não entram.
+- Resumo: `{ periodo, anteriorPeriodo, atual, anterior, consultadoEm }`; totais incluem faturamento, pedidos, unidades, cancelados, ticket, visitas, conversao, taxaCancelamento e serie diária. Visitas/conversão ficam null se faltar qualquer dia da janela.
+- Full: `{ periodo, candidatos, universoVendido, limite: 20, consultadoEm, elegibilidadeFull: null }`. Até 20 anúncios vendidos fora de fulfillment, com MLB, título, SKU, estoque/status atuais, receita/unidades pagas, série diária completa, saúde, pendências ML e dimensões originais das fotos. Universo limitado explicitamente; pesos não são envio nem elegibilidade.
+- Frontend usa quadprog para minimizar risco de oscilação da receita diária combinado à média, com pesos long-only que somam 100% e limite de 40% por anúncio (50% com dois). Só calcula com ao menos dois anúncios ativos com estoque e 30 datas alinhadas; alertas não inventam resolução ou lucro.
+- Erros: 400 entrada inválida; 401 sem sessão; 403 sem loja visível; 404 desconectada; 409 autorização indisponível; 422 mais de 1.000 pedidos (suspende totais, não exibe parcial); 502 cobertura/API/tempo não confirmados.
+
 ### Notificações
 
 #### `ml-webhook`

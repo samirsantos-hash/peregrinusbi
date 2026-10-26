@@ -3,17 +3,13 @@ import { ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { SELLER_TABS, type SellerTab } from "@/config/sellerTabs";
+import { SELLER_TABS, GRUPOS_SECOES, type SellerTab } from "@/config/sellerTabs";
 import { NovidadeTip } from "@/components/novidades/novidades";
+import { Button } from "@/components/ui/button";
 
 const CHAVE = "peregrinus.sidebar.collapsed";
 
-const GRUPOS: { titulo: string; ids: string[] }[] = [
-  { titulo: "Visão", ids: ["efficiency", "pock"] },
-  { titulo: "Performance", ids: ["executive", "competitiveness", "publicidade"] },
-  { titulo: "Operação", ids: ["logistics", "quality", "clips"] },
-  { titulo: "Estratégia", ids: ["opportunities", "reputation", "perguntas", "metas", "correlacoes"] },
-];
+const GRUPOS = GRUPOS_SECOES;
 
 const ID_ALERTAS = "alertas-riscos";
 
@@ -32,7 +28,7 @@ interface ItemProps {
 function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
   const Icone = tab.icon;
   const botao = (
-    <button
+    <Button variant="ghost"
       type="button"
       onClick={() => onSelect(tab.id)}
       aria-current={ativo ? "page" : undefined}
@@ -60,7 +56,7 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
           {badge}
         </span>
       ) : null}
-    </button>
+    </Button>
   );
 
   if (!recolhida) return <li>{botao}</li>;
@@ -109,7 +105,7 @@ function Conteudo({
             {!recolhida && (
               <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.06em] text-muted-alt">
                 {g.titulo}
-                {g.titulo === "Visão" && <NovidadeTip id="sidebar" />}
+                {g.titulo === "Visão geral" && <NovidadeTip id="sidebar" />}
               </p>
             )}
             <ul className="space-y-0.5">
@@ -133,7 +129,7 @@ function Conteudo({
 
       <div className="border-t border-muted/[0.15] px-2 py-2 space-y-1">
         {mostrarToggle && (
-          <button
+          <Button variant="ghost"
             type="button"
             onClick={onToggle}
             aria-label={recolhida ? "Expandir navegação" : "Recolher navegação"}
@@ -145,7 +141,7 @@ function Conteudo({
           >
             {recolhida ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
             {!recolhida && <span>Recolher</span>}
-          </button>
+          </Button>
         )}
         {tabAlertas && (
           <ul>

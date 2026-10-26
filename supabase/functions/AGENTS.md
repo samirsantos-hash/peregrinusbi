@@ -1,5 +1,7 @@
 # Regras das funções do Mercado Livre
 
+- `ml-analise-loja` reads the own-store API on demand over complete UTC days, returning paid revenue/orders/units and cancellation rates separately; it rejects incomplete order coverage, returns no raw orders or buyer data, and never writes ML or business data. Full candidates use original photo dimensions and current ML performance; missing evidence remains null.
+
 - Ads synchronization reports controlled operational warnings to developer-only `developer_alerts`, including scheduled runs, without copying raw upstream payloads or tokens; monitoring never changes Mercado Livre state.
 
 - A busca de concorrentes (`ml-busca-concorrentes`, aba Preço) usa token de aplicativo do ML e o catálogo (`/products/search` + `/products/:id/items`), chamadas sequenciais: `/sites/MLB/search` responde 403 para aplicativos e chamadas paralelas dão 429.
