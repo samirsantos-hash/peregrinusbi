@@ -1,27 +1,12 @@
-import { linhaCsvSegura } from "@/lib/csvSafe";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
-import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2, Boxes, Download, Info } from "lucide-react";
+import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
 import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card";
 import type { EligibilityItem } from "@/hooks/useEligibility";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const CustomTooltip = ({ active, payload }: any) => {
   if (!active || !payload?.length) return null;

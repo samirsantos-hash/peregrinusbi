@@ -16,7 +16,8 @@ export default function FullProdutosApi({ custId }: { custId?: string }) {
   if (!custId) return null;
   if (q.verificandoConexao || q.isLoading) return <Skeleton className="h-64 w-full" />;
   if (!q.conectada && !q.erroConexao) return <p className="text-sm text-muted-foreground py-4">Recomendação por produto indisponível: loja sem conexão Mercado Livre.</p>;
-  const linhas = (carteira ?? q.data?.candidatos.map(p => ({ ...p, peso: null, cobertura: p.estoque != null && p.unidades > 0 ? p.estoque / (p.unidades / 30) : null, alertas: alertasFull(p) })) ?? []).filter(p => `${p.titulo} ${p.id} ${p.sku ?? ''}`.toLowerCase().includes(busca.toLowerCase()));
+  const semPeso = (q.data?.candidatos ?? []).filter(p => !carteira?.some(c => c.id === p.id)).map(p => ({ ...p, peso: null, cobertura: p.estoque != null && p.unidades > 0 ? p.estoque / (p.unidades / 30) : null, alertas: alertasFull(p) }));
+  const linhas = [...(carteira ?? []), ...semPeso].filter(p => `${p.titulo} ${p.id} ${p.sku ?? ''}`.toLowerCase().includes(busca.toLowerCase()));
   return <section className="space-y-4 border-t border-border pt-6">
     <div className="flex flex-wrap justify-between items-center gap-3"><h3 className="flex items-center gap-2 text-base font-semibold"><Package className="h-4 w-4 text-primary" /> Produtos para avaliar no Full</h3><Button variant="outline" size="icon" aria-label="Consultar produtos Full novamente" disabled={q.isFetching} onClick={() => q.refetch()}><RefreshCw className={`h-4 w-4 ${q.isFetching ? 'animate-spin' : ''}`} /></Button></div>
     {q.error || q.erroConexao ? <p className="text-sm text-muted-foreground">{q.error?.message ?? 'Não foi possível confirmar a conexão.'}</p> : q.data ? <>
