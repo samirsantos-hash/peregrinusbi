@@ -68,3 +68,4 @@
 - [ ] Reorganizar cada tela com um número focal (KpiCard ds)
 - [ ] Gráficos: período parcial hachurado, ordenação por valor, pizzas >4 fatias → tabela, connectNulls=false
 - [ ] Revisar ~440 toFixed restantes fora de "%"/"x" para format.ts
+- [ ] Levar cartões branco gelo + setas boas/ruins às demais seções (sem publicar)
