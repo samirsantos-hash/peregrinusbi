@@ -96,7 +96,7 @@ const AppRoutes = () => {
 
   return (
     <>
-      <AuraBackground />
+      {/* Fundo Glass Verde vem do CSS (ambiente fixo) */}
       <AuraReveal />
       <div className="relative z-10">
       <Routes>
