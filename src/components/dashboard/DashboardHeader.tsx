@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 
-import { useJuniorMode } from "@/hooks/useJuniorMode";
 
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
