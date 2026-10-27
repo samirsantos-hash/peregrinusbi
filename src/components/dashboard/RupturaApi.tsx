@@ -129,7 +129,7 @@ export default function RupturaApi({ accountId, planilha }: { accountId: string;
               <tr key={l.itemId} className="border-b border-border/20 hover:bg-muted/20 align-top">
                 <td className="py-2 px-2 max-w-[300px]">
                   <p className="truncate" title={l.titulo}>{l.titulo}</p>
-                  <div className="flex items-center gap-1 text-muted-foreground font-mono text-[10px]">{l.itemId}<CopiarAnuncio titulo={l.titulo} mlb={l.itemId} /></div>
+                  <div className="flex items-center gap-1 text-muted-foreground font-mono text-[10px]">{l.itemId}<CopiarAnuncio itemId={l.itemId} titulo={l.titulo} /></div>
                 </td>
                 <td className="text-right px-2 py-2">{l.vendas7d == null ? "Sem dado" : num(l.vendas7d)}</td>
                 <td className="text-right px-2 py-2">{l.estoque == null ? "Sem dado" : num(l.estoque)}</td>
