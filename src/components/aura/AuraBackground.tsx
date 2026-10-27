@@ -39,8 +39,8 @@ const FS = `
       vec2 mouse = u_mouse / u_resolution.xy;
       mouse.y = 1.0 - mouse.y;
 
-      // Mesmo fundo do painel escuro (#0B0F17).
-      vec3 color = vec3(0.043, 0.059, 0.090);
+      // Mesmo fundo do painel escuro (#0E131D, medido no print).
+      vec3 color = vec3(0.055, 0.075, 0.114);
 
       float bgGlow = max(0.0, 1.0 - distance(p, vec2(-0.1, 0.5)));
       color += vec3(0.02, 0.10, 0.06) * pow(bgGlow, 2.0) * 0.5 * u_intro;
@@ -123,7 +123,7 @@ const FS = `
       }
 
       if (u_light > 0.5) {
-          vec3 linhas = max(color - vec3(0.043, 0.059, 0.090), vec3(0.0));
+          vec3 linhas = max(color - vec3(0.055, 0.075, 0.114), vec3(0.0));
           float a = clamp(max(linhas.r, max(linhas.g, linhas.b)), 0.0, 1.0);
           vec3 bruto = linhas / max(a, 0.001);
           // Só verde da marca ou amarelo, sem misturar em verde-limão.
