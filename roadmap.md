@@ -1,5 +1,13 @@
 # Roadmap
 
+## Remover cordas do dashboard (27/10)
+- [x] Retirar o fundo de cordas das páginas do painel, mantendo o efeito no login e o acabamento dos quadros; conferido na GMABSOLUTA nos dois temas, sem erros.
+
+## Pressão do Lovable Cloud (27/10)
+- [x] Conferir recursos, consultas e custos; leituras amplas por data são o gargalo provável.
+- [ ] Otimizações das leituras — aguardam aprovação; nenhuma alteração aplicada.
+- [ ] Ampliação Tiny → Mini — aprovação interrompida, não executada.
+
 ## Identidade do login em todo o dashboard (27/10)
 - [x] Aplicar o fundo de cordas, vidro, tipografia e campos da tela de login às páginas protegidas, sem alterar dados ou navegação.
 - [x] Conferir login e Preço da GMABSOLUTA autenticada nos dois temas: um único fundo, reação ao mouse, sem transbordamento ou erros; regras de quadros aninhados preservadas.
