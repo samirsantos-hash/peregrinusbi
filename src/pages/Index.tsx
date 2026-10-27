@@ -577,6 +577,7 @@ const Index = () => {
                         <MlAoVivo secao="publicidade" custId={sellerCustIdMap[selectedSeller]} />
                         <PublicidadePanel
                           variante="evolucao"
+                          diario={resumoDiario}
                           sellerUuid={selectedSeller}
                           custId={sellerCustIdMap[selectedSeller]}
                           fromDate={dateRange?.from ? formatDateString(dateRange.from) : minStr}

@@ -30,6 +30,7 @@ import {
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 import AdsGranularidadePanel from "./AdsGranularidadePanel";
 import AcosTacosChart from "./AcosTacosChart";
+import { SinergiaIndicadores } from "@/components/ml/SinergiaPublicidade";
 
 type Props = {
   sellerUuid: string;
@@ -37,6 +38,7 @@ type Props = {
   fromDate: string; // YYYY-MM-DD
   toDate: string;   // YYYY-MM-DD
   sellerNickname?: string;
+  diario?: { date: string; adsInvestment?: number; tgmv?: number; tgmvPads?: number }[];
   /**
    * completo = KPIs + scores + gráfico + granular (legado).
    * evolucao = só meso/micro histórico (gráfico + scores + margem), sem repetir big numbers do Product Ads ao vivo.
@@ -44,7 +46,7 @@ type Props = {
   variante?: "completo" | "evolucao";
 };
 
-const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname, variante = "completo" }: Props) => {
+const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname, diario = [], variante = "completo" }: Props) => {
   const [grafico, setGrafico] = useState<"roas_acos" | "investimento">("roas_acos");
   const soEvolucao = variante === "evolucao";
 
@@ -79,6 +81,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
 
   return (
     <div className="space-y-5">
+      <SinergiaIndicadores fonte={`Histórico importado · ${fromDate} a ${toDate}`} pontos={diario.filter(d => d.date.slice(0, 10) >= fromDate && d.date.slice(0, 10) <= toDate).map(d => ({ data: d.date.slice(0, 10), investimento: d.adsInvestment ?? null, faturamento: d.tgmv ?? null, receitaAds: d.tgmvPads ?? null }))} />
       {/* Banner sem dados */}
       {semDados && !soEvolucao && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
