@@ -591,7 +591,7 @@ const Index = () => {
                     <MlAoVivo secao="logistica" custId={sellerCustIdMap[selectedSeller]} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} eligibilityItems={eligibilityItems || []} />
                     <UpliftFullPanel custId={sellerCustIdMap[selectedSeller]} />
-                    <StockoutRiskPanel sellerId={selectedSeller} />
+                    <StockoutRiskPanel sellerId={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
