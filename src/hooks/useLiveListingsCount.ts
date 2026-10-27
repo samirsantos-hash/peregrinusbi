@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 export function useLiveListingsCount(sellerId: string | undefined) {
   return useQuery({
@@ -7,10 +8,17 @@ export function useLiveListingsCount(sellerId: string | undefined) {
     queryFn: async (): Promise<number> => {
       if (!sellerId) return 0;
 
-      const { data, error } = await supabase
+      const latest = await supabase.from("live_listings").select("data").eq("seller_id", sellerId)
+        .not("data", "is", null).order("data", { ascending: false }).limit(1).maybeSingle();
+      if (latest.error) throw latest.error;
+      if (!latest.data?.data) return 0;
+      const fromDate = new Date(`${latest.data.data}T00:00:00Z`);
+      fromDate.setUTCDate(fromDate.getUTCDate() - 45);
+      const { data, error } = await fetchAllRows((from, to) => supabase
         .from("live_listings")
         .select("data, itens")
-        .eq("seller_id", sellerId);
+        .eq("seller_id", sellerId).gte("data", fromDate.toISOString().slice(0, 10))
+        .order("data").order("id").range(from, to));
 
       if (error) throw error;
       if (!data || data.length === 0) return 0;
