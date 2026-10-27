@@ -1698,7 +1698,7 @@ html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.
     box-shadow: var(--access-glass-hover-shadow) !important;
     transform: translateY(-2px) !important;
   }
-  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .noite-vidro:hover {
+  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref :is(.noite-vidro,div.noite-vidro[class*="rounded"][class*="bg-card"][class*="border"]):hover {
     border: 1px solid var(--access-glass-hover-edge) !important;
   }
 }
