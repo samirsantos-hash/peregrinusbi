@@ -1166,3 +1166,43 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
     background: hsl(var(--panel-glass-ice)) !important;
   }
 }
+
+/* Overview composition keeps the pre-kit layout and the Peregrinus palette. */
+.visao-geral-modulo {
+  --overview-glass-fill: linear-gradient(135deg, hsl(var(--panel-glass-white) / .8), hsl(var(--panel-glass-ice) / .68));
+  --overview-glass-edge: hsl(var(--panel-glass-white) / .6);
+  --overview-glass-shadow: inset 0 1px 1px hsl(var(--panel-glass-white) / .7),
+    0 1px 2px hsl(var(--panel-glass-shadow) / .02), 0 8px 24px hsl(var(--panel-glass-shadow) / .04);
+  --reputation-first: var(--panel-glass-negative);
+  --reputation-second: var(--panel-glass-negative);
+  --reputation-middle: var(--panel-glass-muted);
+  --reputation-fourth: var(--emerald-glow);
+  --reputation-last: var(--panel-glass-positive);
+}
+.peregrinus-panel .visao-geral-modulo :is(.ds-kpi, .ds-glass-surface, .glass-card) {
+  background: var(--overview-glass-fill) !important;
+  border: 1px solid var(--overview-glass-edge) !important;
+  box-shadow: var(--overview-glass-shadow);
+  border-radius: 16px;
+  backdrop-filter: blur(24px) saturate(105%);
+  -webkit-backdrop-filter: blur(24px) saturate(105%);
+}
+.visao-geral-modulo .painel-bloco { padding-block: 8px; }
+.visao-geral-modulo .painel-bloco-cabeca { margin-bottom: 16px; }
+.visao-geral-modulo .painel-bloco-cabeca h2 {
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: none;
+  color: hsl(var(--foreground));
+}
+.visao-geral-modulo :is(button, input, [role="combobox"]) { border-radius: 12px; }
+.visao-geral-modulo :is(.status-badge, .ds-seta) { border-radius: 9999px; }
+.visao-geral-modulo .ds-seta { border: 1px solid currentColor; }
+.visao-geral-modulo .reputacao-regua { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.reputacao-regua span { height: 8px; border-radius: 4px; opacity: .3; }
+.reputacao-regua [data-faixa="0"] { background: hsl(var(--reputation-first)); }
+.reputacao-regua [data-faixa="1"] { background: hsl(var(--reputation-second)); }
+.reputacao-regua [data-faixa="2"] { background: hsl(var(--reputation-middle)); }
+.reputacao-regua [data-faixa="3"] { background: hsl(var(--reputation-fourth)); }
+.reputacao-regua [data-faixa="4"] { background: hsl(var(--reputation-last)); }
+.reputacao-regua [data-atual="true"] { opacity: 1; outline: 2px solid hsl(var(--panel-glass-ink)); outline-offset: 3px; }
