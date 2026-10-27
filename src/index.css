@@ -1394,6 +1394,42 @@ body::after { content: none; }
 }
 .painel-navigation .panel-nav-item[aria-current="page"] > span[aria-hidden] { display: none; }
 .panel-content { padding: 4px 0 24px; }
+html body .peregrinus-panel .painel-noite {
+  --noite-canvas: hsl(var(--panel-canvas));
+  --noite-canvas-2: hsl(var(--panel-surface));
+  --noite-vidro: var(--panel-fill);
+  --noite-vidro-forte: var(--panel-fill);
+  --noite-borda: var(--panel-stroke);
+  --noite-borda-forte: hsl(var(--panel-brand) / .35);
+  --noite-tinta: hsl(var(--panel-text));
+  --noite-sec: hsl(var(--panel-text-secondary));
+  --noite-sec-2: hsl(var(--panel-text-secondary));
+  --foreground: var(--panel-text);
+  --card: var(--panel-surface);
+  --card-foreground: var(--panel-text);
+  --muted-foreground: var(--panel-text-secondary);
+  --ec-ink: var(--panel-text);
+  --ec-text-sec: var(--panel-text-secondary);
+  --ec-surface-2: var(--panel-raised);
+  --ec-verde-txt: var(--panel-positive);
+  --ec-vermelho: var(--panel-negative);
+  --ec-laranja: var(--panel-negative);
+  --border: var(--panel-line);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: hsl(var(--panel-text));
+  color-scheme: inherit;
+}
+html body .peregrinus-panel .painel-noite :is(.text-white,.text-slate-200,.text-slate-300) { color: hsl(var(--panel-text)); }
+html body .peregrinus-panel .painel-noite :is(.text-slate-400,.text-slate-500) { color: hsl(var(--panel-text-secondary)); }
+html body .peregrinus-panel .painel-noite :is(.text-emerald-400,.text-emerald-500) { color: hsl(var(--panel-positive)); }
+html body .peregrinus-panel .painel-noite :is(.text-rose-400,.text-rose-500) { color: hsl(var(--panel-negative)); }
+html body .peregrinus-panel .kpi-vidro { justify-content: flex-start; gap: 16px; }
+html body .peregrinus-panel .kpi-vidro-valor { font-size: 28px; font-weight: 500; line-height: 1.2; }
+@container (max-width: 160px) { html body .peregrinus-panel .kpi-vidro-valor { font-size: 20px !important; } }
 html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]) {
   --panel-glass-ink: var(--panel-text);
   --panel-glass-muted: var(--panel-text-secondary);
