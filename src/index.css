@@ -1007,6 +1007,11 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --ok: var(--panel-glass-positive);
   --emerald: var(--panel-glass-positive);
   --ec-verde-txt: var(--panel-glass-positive);
+  --crit: var(--panel-glass-negative);
+  --destructive: var(--panel-glass-negative);
+  --warn: var(--panel-glass-negative);
+  --warning: var(--panel-glass-negative);
+  --attention-text: var(--panel-glass-muted);
   --border: var(--panel-glass-edge);
   background: var(--panel-glass-fill) !important;
   border-color: hsl(var(--panel-glass-edge) / .5);
@@ -1034,6 +1039,13 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --emerald: var(--panel-glass-positive);
   --neon-blue: var(--panel-glass-positive);
   --ec-vermelho: var(--panel-glass-negative);
+  --ec-laranja: var(--panel-glass-negative);
+  --ec-ambar: var(--panel-glass-muted);
+  --crit: var(--panel-glass-negative);
+  --destructive: var(--panel-glass-negative);
+  --warn: var(--panel-glass-negative);
+  --warning: var(--panel-glass-negative);
+  --attention-text: var(--panel-glass-muted);
   --ec-surface-2: 210 12% 91%;
   --muted: 210 12% 91%;
   --border: var(--panel-glass-edge);
@@ -1089,6 +1101,52 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 .peregrinus-panel .ds-kpi :is(.ds-rotulo, .ds-nota) {
   color: hsl(var(--panel-glass-muted)) !important;
   letter-spacing: 0;
+}
+.peregrinus-panel {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  font-synthesis: none;
+  letter-spacing: 0;
+  --panel-kpi-label-size: 11px;
+  --panel-kpi-note-size: 12px;
+}
+.peregrinus-panel :is(h1, h2, h3, h4, h5, h6, .ds-titulo-pagina, .ds-numero-focal, .ds-numero-sec, .metric-value, .ds-rotulo, .metric-label) {
+  letter-spacing: 0;
+}
+.peregrinus-panel :is(.font-mono, .ds-numero-focal, .ds-numero-sec, .metric-value) {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+.peregrinus-panel .ds-kpi :is(.ds-numero-sec, .ds-numero-focal) {
+  font-weight: 500;
+  line-height: 1.2;
+}
+.peregrinus-panel .ds-kpi .ds-rotulo {
+  font-size: var(--panel-kpi-label-size);
+  font-weight: 500;
+  line-height: 1.5;
+}
+.peregrinus-panel .ds-kpi .ds-nota {
+  font-size: var(--panel-kpi-note-size);
+  font-weight: 400;
+  line-height: 1.5;
+}
+.peregrinus-panel .painel-secao-header .ds-titulo-pagina {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: hsl(var(--foreground));
+}
+.peregrinus-panel :is(.ds-titulo-bloco, .ds-corpo, .ds-nota) { letter-spacing: 0; }
+.peregrinus-panel .ds-seta-bom {
+  background: hsl(var(--panel-glass-positive) / .1);
+  color: hsl(var(--panel-glass-positive));
+}
+.peregrinus-panel .ds-seta-ruim {
+  background: hsl(var(--panel-glass-negative) / .1);
+  color: hsl(var(--panel-glass-negative));
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .peregrinus-panel .ds-kpi:hover { transform: translateY(-2px); }
