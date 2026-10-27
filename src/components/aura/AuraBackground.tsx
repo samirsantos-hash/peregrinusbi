@@ -123,8 +123,10 @@ const FS = `
 
       if (u_light > 0.5) {
           float a = clamp(max(color.r, max(color.g, color.b)), 0.0, 1.0);
-          vec3 tom = color / max(a, 0.001);
-          color = mix(vec3(0.965, 0.972, 0.968), tom, smoothstep(0.0, 0.9, a) * 0.9);
+          vec3 bruto = color / max(a, 0.001);
+          // Só verde da marca ou amarelo, sem misturar em verde-limão.
+          vec3 tom = mix(vec3(0.055, 0.50, 0.32), vec3(0.92, 0.76, 0.0), smoothstep(0.45, 0.85, bruto.r / max(bruto.g, 0.001)));
+          color = mix(vec3(0.965, 0.972, 0.968), tom, smoothstep(0.0, 0.8, a) * 0.85);
       }
       // Dither leve para evitar faixas no degradê escuro.
       color += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
