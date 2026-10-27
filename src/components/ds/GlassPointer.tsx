@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-const surfaces = ".ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco";
+const surfaces = '.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]';
 
 /** One delegated, frame-bounded reflection for all protected panel surfaces. */
 export function GlassPointer() {

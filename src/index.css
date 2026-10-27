@@ -980,7 +980,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
     hsl(var(--panel-glass-ice) / .68) 45%,
     hsl(var(--panel-glass-white) / .58));
 }
-.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) {
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
   --foreground: var(--panel-glass-ink);
   --card-foreground: var(--panel-glass-ink);
   --ec-ink: var(--panel-glass-ink);
@@ -1006,7 +1006,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   box-shadow: var(--panel-glass-elevation);
   transition: transform 180ms var(--curva-rapida);
 }
-.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco)::after {
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after {
   content: "" !important;
   display: block !important;
   position: absolute;
@@ -1016,7 +1016,6 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   background: var(--panel-glass-reflection);
   opacity: 0;
   transform: translateX(0);
-  clip-path: inset(0 round inherit);
   transition: opacity 180ms var(--curva-rapida);
 }
 .peregrinus-panel [data-glass-active]::after {
@@ -1050,11 +1049,11 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   .peregrinus-panel .glass-card:hover { transform: none; }
 }
 @media (hover: none), (prefers-reduced-motion: reduce) {
-  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco):hover { transform: none; }
-  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco)::after { display: none !important; }
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):hover { transform: none; }
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after { display: none !important; }
 }
 @supports not (backdrop-filter: blur(1px)) {
-  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) {
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
     background: hsl(var(--panel-glass-ice)) !important;
   }
 }
