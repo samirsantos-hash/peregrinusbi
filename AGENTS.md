@@ -35,3 +35,4 @@
 - Operational summary surfaces and typography are scoped by `.operacao-resumo` using global CSS tokens and shared KpiCard, so presentation changes never alter reputation thresholds or logistics calculations.
 - Protected pages share `.peregrinus-panel` glass tokens; `GlassPointer` delegates pointer reflections once per animation frame to shared surfaces, excluding login and preserving data, status colors and reduced-motion preferences.
 - Promotion rebate reading, expiry warnings and rebate-based recommendation live only in pure `src/lib/promocoesAnalise.ts`, so Oportunidades and future screens share one rule.
+- Overview composition reuses ResumoReputacao and FunilResumoReal for API and historical presentation; keep reputation snapshots separate from financial windows and never interpolate unavailable funnel stages.

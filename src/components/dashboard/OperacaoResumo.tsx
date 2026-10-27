@@ -71,7 +71,7 @@ function faixaAgencia(share: number): Faixa {
  * Resumo dos KPIs principais de reputação, atrasos de envio e mix logístico.
  * Snapshot do último dia com dado (reputação) + mix por GMV no período (logística).
  */
-export default function OperacaoResumo({ diario }: { diario: K[] }) {
+export default function OperacaoResumo({ diario, somenteLogistica = false }: { diario: K[]; somenteLogistica?: boolean }) {
   const d = useMemo(() => {
     const ord = [...diario].filter((k) => k.date).sort((a, b) => a.date.localeCompare(b.date));
     if (!ord.length) return null;
@@ -125,7 +125,7 @@ export default function OperacaoResumo({ diario }: { diario: K[] }) {
 
   return (
     <div className="operacao-resumo space-y-6">
-      <section aria-labelledby="operacao-reputacao-titulo" className="space-y-3">
+      {!somenteLogistica && <section aria-labelledby="operacao-reputacao-titulo" className="space-y-3">
         <header className="flex flex-wrap items-center justify-between gap-2">
           <h3 id="operacao-reputacao-titulo" className="text-sm font-semibold text-foreground tracking-normal">Reputação e atendimento</h3>
           <span className="text-xs text-muted-foreground tabular-nums">Último registro · {dataBr}</span>
@@ -159,7 +159,7 @@ export default function OperacaoResumo({ diario }: { diario: K[] }) {
           referencia="Meta abaixo de 2%"
         />
       </div>
-      </section>
+      </section>}
 
       <section aria-labelledby="operacao-logistica-titulo" className="space-y-3">
         <h3 id="operacao-logistica-titulo" className="text-sm font-semibold text-foreground tracking-normal">Participação logística</h3>

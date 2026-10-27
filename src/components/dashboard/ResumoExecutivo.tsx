@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import type { ReactNode } from "react";
 import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { KpiCard } from "@/components/ds";
 import { brl, num, pct } from "@/lib/format";
@@ -27,7 +28,7 @@ function totais(ks: K[]) {
 }
 
 /** Seções 1 e 2 do Resumo: resultado (macro) e tráfego/aquisição (meso). CVR fica só no funil (S4). */
-export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?: string; ate?: string }) {
+export default function ResumoExecutivo({ diario, de, ate, reputacao }: { diario: K[]; de?: string; ate?: string; reputacao?: ReactNode }) {
   const d = useMemo(() => {
     const ord = [...diario].filter((k) => k.date).sort((a, b) => a.date.localeCompare(b.date));
     if (!ord.length) return null;
@@ -47,19 +48,22 @@ export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?:
   const periodo = formatarPeriodoBr(d.ini, d.fim);
 
   return (
-    <div className="space-y-5">
-      <section aria-label="Resultado da loja">
-        <h2 className="ds-rotulo mb-2">1 · Resultado da loja · {periodo}</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+      <section aria-label="Resultado da loja" className={reputacao ? 'lg:col-span-8 space-y-3' : 'lg:col-span-12 space-y-3'}>
+        <h2 className="text-base font-semibold mb-2">Resumo executivo · {periodo}</h2>
+        <div className="grid grid-cols-2 2xl:grid-cols-4 gap-3">
           <KpiCard focal rotulo="TGMV" valor={brl(a.tgmv)} variacao={v(a.tgmv, p?.tgmv)} referencia={p ? `Anterior: ${brl(p.tgmv)}` : "Sem período anterior"} />
           <KpiCard rotulo="GMV faturado" valor={brl(a.gmv)} variacao={v(a.gmv, p?.gmv)} referencia={a.tgmv > 0 ? `${pct((a.gmv / a.tgmv) * 100, 1)} do TGMV` : "Sem dado"} />
           <KpiCard rotulo="Investimento em Ads" valor={brl(a.ads)} variacao={v(a.ads, p?.ads)} melhorQuando="neutro" referencia={p ? `Anterior: ${brl(p.ads)}` : "Sem período anterior"} />
           <KpiCard rotulo="ROAS" valor={a.roas != null ? `${num(a.roas, 2)}x` : "Sem dado"} variacao={v(a.roas, p?.roas)} referencia="Vendas por Ads ÷ investimento" />
         </div>
       </section>
+      {reputacao && <div className="lg:col-span-4 min-w-0">{reputacao}</div>}
+      </div>
 
-      <section aria-label="Tráfego e aquisição" className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="ds-kpi rounded-2xl p-5 lg:col-span-2 min-w-0">
+      <section aria-label="Tráfego e aquisição" className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div className="ds-glass-surface rounded-2xl p-5 lg:col-span-8 min-w-0">
           <h2 className="ds-rotulo mb-3">2 · Investimento em Ads × visitas · {periodo}</h2>
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
@@ -75,7 +79,7 @@ export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?:
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:col-span-4">
           <KpiCard rotulo="Visitas totais" valor={num(a.visitas)} variacao={v(a.visitas, p?.visitas)} referencia={p ? `Anterior: ${num(p.visitas)}` : "Sem período anterior"} />
           <KpiCard rotulo="Custo por visita" valor={a.cpv != null ? brl(a.cpv, true) : "Sem dado"} variacao={v(a.cpv, p?.cpv)} melhorQuando="descer" referencia="Investimento ÷ visitas" />
           <KpiCard rotulo="Receita por visita" valor={a.receitaVisita != null ? brl(a.receitaVisita, true) : "Sem dado"} variacao={v(a.receitaVisita, p?.receitaVisita)} referencia="TGMV ÷ visitas · CVR no funil" />

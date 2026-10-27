@@ -1,5 +1,10 @@
 # Roadmap
 
+## Visão geral — diagnóstico composto (27/10)
+- [x] Unificar resultado e reputação no topo, mantendo fontes e períodos separados.
+- [x] Organizar tráfego, Clips e funil; aplicar vidro, proporções e raios sem inventar métricas ausentes.
+- [x] Conferir GMABSOLUTA conectada, histórico e dois temas; sem erros ou transbordamento. Ads/Clips completos e abandono por etapa não disponíveis no resumo API.
+
 ## Refinamento pós-reversão (27/10)
 - [x] Comparar com a versão anterior ao kit e manter navegação, superfícies e dados anteriores.
 - [x] Unificar DM Sans, peso dos números e contraste de títulos, legendas e alertas no vidro branco.
