@@ -1,5 +1,11 @@
 # Roadmap
 
+## Auditoria do vidro — aplicação em etapas (27/10)
+- [ ] Etapa 1: corrigir a precedência do vidro do menu e verificar contraste de itens e grupos nos dois temas.
+- [ ] Etapa 2: camadas aninhadas e bordas — aguarda revisão da primeira etapa por Samir.
+- [ ] Etapa 3: reflexo e uniformidade do blur — aguarda etapa anterior.
+- [ ] Etapa 4: harmonização das cores dos gráficos — aguarda etapa anterior.
+
 ## Visão geral — diagnóstico composto (27/10)
 - [x] Unificar resultado e reputação no topo, mantendo fontes e períodos separados.
 - [x] Organizar tráfego, Clips e funil; aplicar vidro, proporções e raios sem inventar métricas ausentes.
