@@ -98,7 +98,8 @@ const AppRoutes = () => {
 
   return (
     <>
-      {/* Fundo Glass Verde vem do CSS (ambiente fixo) */}
+      {/* Auth owns its canvas; authenticated pages share the same background. */}
+      {user && <AuraBackground />}
       <AuraReveal />
       <GlassPointer />
       <div className="relative z-10">
