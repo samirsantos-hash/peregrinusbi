@@ -382,14 +382,14 @@ const Index = () => {
   }, [dateRange]);
 
   return (
-    <div className="min-h-screen">
-      <div className="relative z-10 max-w-[1760px] mx-auto px-3 sm:px-5 xl:px-6 py-4 sm:py-6 space-y-4">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card !rounded-[32px] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+    <div className="panel-workspace min-h-screen">
+      <div className="panel-container relative z-10 max-w-[1760px] mx-auto px-3 sm:px-5 xl:px-6 py-4 sm:py-6 space-y-4">
+        <motion.header initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="panel-topbar px-4 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <AguiaLogo className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
             <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-primary shrink-0" />
             <div className="min-w-0">
-              <p className="text-sm sm:text-xl font-bold tracking-tight truncate">
+              <p className="text-sm sm:text-lg font-semibold tracking-normal truncate">
                 <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
                 <span className="sm:hidden">Peregrinus BI</span>
               </p>
@@ -459,7 +459,7 @@ const Index = () => {
               </AlertDialogContent>
             </AlertDialog>
           </div>
-        </motion.div>
+        </motion.header>
 
         {isLoading &&
           <div className="flex items-center justify-center py-12">
@@ -493,7 +493,7 @@ const Index = () => {
                   mobileAberto={menuAberto}
                   onMobileChange={setMenuAberto}
                 />
-                <div className="relative z-0 flex-1 min-w-0 space-y-4">
+                <div className="panel-content relative z-0 flex-1 min-w-0 space-y-4">
                   <SecaoHeader
                     ativa={activeTab}
                     loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}

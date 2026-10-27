@@ -87,7 +87,7 @@ export default function KpiVidro({
       className={cn(
         "kpi-vidro noite-vidro flex h-full min-w-0 flex-col justify-between gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 sm:p-5",
         "shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.3)] backdrop-blur-xl",
-        "transition-all duration-200 hover:border-white/15",
+        "transition-transform duration-150",
         className,
       )}
     >
@@ -99,8 +99,8 @@ export default function KpiVidro({
         {/* Valor: encolhe por container query antes de truncar (ver .kpi-vidro-valor) */}
         <p
           className={cn(
-            "kpi-vidro-valor truncate font-semibold tracking-tight text-white tabular-nums leading-none",
-            focal ? "text-[clamp(26px,2.2vw,34px)]" : "text-[clamp(22px,1.8vw,28px)]",
+            "kpi-vidro-valor truncate font-medium tracking-normal text-foreground tabular-nums leading-none",
+            focal ? "text-[32px]" : "text-[28px]",
           )}
           title={valor}
         >

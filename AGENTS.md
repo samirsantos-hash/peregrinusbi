@@ -34,5 +34,6 @@
 - Subdiretórios têm o próprio AGENTS.md (ex.: supabase/functions/AGENTS.md com as regras das funções do ML); leia antes de alterar arquivos lá.
 - Operational summary surfaces and typography are scoped by `.operacao-resumo` using global CSS tokens and shared KpiCard, so presentation changes never alter reputation thresholds or logistics calculations.
 - Protected pages share `.peregrinus-panel` glass tokens; `GlassPointer` delegates pointer reflections once per animation frame to shared surfaces, excluding login and preserving data, status colors and reduced-motion preferences.
+- HTML design references are adapted through the shared panel tokens and workspace classes, never by embedding their demo pages or replacing live workflows; navigation and filters stay outside pointer tilt to preserve reading and input stability.
 - Promotion rebate reading, expiry warnings and rebate-based recommendation live only in pure `src/lib/promocoesAnalise.ts`, so Oportunidades and future screens share one rule.
 - Advertising dependence and synergy share `src/lib/sinergiaPublicidade.ts`: ratios of same-date totals, paired Pearson with at least seven observations and nonconstant series, never causal claims or inferred organic sales; API uses the paid-order summary window, separately from imports.

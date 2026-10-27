@@ -34,11 +34,11 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
       onClick={() => onSelect(tab.id)}
       aria-current={ativo ? "page" : undefined}
       className={cn(
-        "relative w-full flex items-center gap-2.5 h-9 rounded-md text-[13px] font-medium transition-colors",
+        "panel-nav-item relative w-full flex items-center gap-2.5 h-10 rounded-lg text-[13px] font-medium transition-transform duration-150 active:scale-[0.98]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-surface-alt",
         recolhida ? "justify-center px-0" : "px-3",
         ativo
-          ? "bg-primary/10 text-primary hover:text-primary"
+          ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
           : "text-foreground/80 hover:bg-muted/50 hover:text-foreground",
       )}
     >
@@ -106,7 +106,7 @@ function Conteudo({
   } as SellerTab;
   return (
     <nav aria-label="Seções do painel" className="flex h-full flex-col">
-      <div className="flex-1 overflow-y-auto px-2 pb-3">
+      <div className="flex-1 overflow-y-auto px-3 pb-4">
         {GRUPOS.map((g) => (
           <div key={g.titulo} className="mt-5 first:mt-2">
             {!recolhida && (
@@ -196,10 +196,9 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
       {/* Desktop / tablet */}
       <aside
         className={cn(
-          "painel-navigation hidden lg:block shrink-0 sticky self-start top-0 z-30 glass-card !rounded-[32px] top-4 overflow-hidden",
-          recolhida ? "w-[56px]" : "w-[224px]",
+          "painel-navigation panel-sidebar hidden lg:block shrink-0 sticky self-start top-4 z-30 overflow-hidden",
+          recolhida ? "w-[64px]" : "w-[224px]",
         )}
-        style={{ height: "100vh" }}
       >
         <Conteudo
           ativa={ativa}
