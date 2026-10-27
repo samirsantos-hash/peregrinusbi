@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 import ResumoExecutivo from "@/components/dashboard/ResumoExecutivo";
 import ClipsResumo from "@/components/dashboard/ClipsResumo";
-import FunilResumoReal from "@/components/dashboard/FunilResumoReal";
-import ResumoReputacao from "@/components/dashboard/ResumoReputacao";
+import FunilVendas from "@/components/dashboard/FunilVendas";
 import OperacaoResumo from "@/components/dashboard/OperacaoResumo";
 import DailyPerformanceChart from "@/components/dashboard/DailyPerformanceChart";
 import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
@@ -12,6 +11,22 @@ import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { ListingQuality } from "@/hooks/useListingsQuality";
 import type { EligibilityItem } from "@/hooks/useEligibility";
+
+/** Ponte causa→efeito entre blocos — metodologia de diagnóstico para o consultor. */
+function PonteDiagnostico({ de, para, porque }: { de: string; para: string; porque: string }) {
+  return (
+    <div className="painel-ponte" role="note">
+      <p className="painel-ponte-fluxo">
+        <span>{de}</span>
+        <span className="painel-ponte-seta" aria-hidden>
+          →
+        </span>
+        <span>{para}</span>
+      </p>
+      <p className="painel-ponte-porque">{porque}</p>
+    </div>
+  );
+}
 
 function Bloco({
   n,
@@ -33,7 +48,7 @@ function Bloco({
           {n} · {titulo}
           {periodo ? ` · ${periodo}` : ""}
         </h2>
-
+        {porque && <p className="painel-bloco-porque">{porque}</p>}
       </header>
       <div className="painel-bloco-corpo">{children}</div>
     </section>
@@ -75,22 +90,27 @@ export default function VisaoGeralSecao({
   custId,
 }: Props) {
   return (
-    <div className="visao-geral-modulo space-y-8">
+    <div className="painel-apple space-y-5">
       <header className="painel-apple-hero">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="ds-rotulo">Visão geral</p>
           <BotaoConexaoMl custId={custId} />
         </div>
-        <h2 className="text-xl font-semibold">Resultado, causas e tendências</h2>
-        {periodo && <p className="text-xs text-muted-foreground">Histórico importado · {periodo}</p>}
+        <h1 className="painel-apple-titulo">Resultado, causas e tendências</h1>
+        <p className="painel-apple-sub">
+          Metodologia em cadeia: o que vendeu → tráfego → ritmo → conversão → reputação e logística → sazonalidade.
+          {periodo ? ` Período ${periodo}.` : ""}
+        </p>
       </header>
 
       {/* 1 · Resultado + 2 · Tráfego (efeito e causa imediata) — uma única fonte de TGMV/Ads/ROAS */}
-      <ResumoExecutivo diario={diario as any} de={de} ate={ate} reputacao={(() => {
-        const ultimo = [...diario].sort((a, b) => a.date.localeCompare(b.date)).at(-1);
-        return <ResumoReputacao dados={ultimo ? { nivel: ultimo.repLevel, reclamacoes: ultimo.repClaimsRate, atrasos: ultimo.repDelayedRate, cancelamentos: ultimo.repCancellationsRate } : null} atualizadoEm={ultimo?.date} />;
-      })()} />
+      <ResumoExecutivo diario={diario as any} de={de} ate={ate} />
 
+      <PonteDiagnostico
+        de="Resultado e tráfego"
+        para="Ritmo diário"
+        porque="O total do período é o efeito. O gráfico diário mostra se veio de tendência sustentada ou de pico — isto por causa daquilo."
+      />
 
       <Bloco
         n={3}
@@ -103,6 +123,11 @@ export default function VisaoGeralSecao({
         </div>
       </Bloco>
 
+      <PonteDiagnostico
+        de="Visitas e Ads"
+        para="Clips"
+        porque="Parte do tráfego pode ser vídeo. Alta participação de Clips com CVR fraca aponta conteúdo — não só preço ou Ads."
+      />
 
       <Bloco n={4} titulo="Clips & vídeo" periodo={periodo} porque="Canal micro: contribuição ao TGMV. A CVR oficial permanece só no funil.">
         <ClipsResumo
@@ -115,20 +140,35 @@ export default function VisaoGeralSecao({
         />
       </Bloco>
 
+      <PonteDiagnostico
+        de="Visitas"
+        para="Funil"
+        porque="A conversão oficial é visitas → pedidos. Etapas estimadas no meio ajudam a hipotetizar abandono, sem inventar métrica."
+      />
 
       <Bloco n={5} titulo="Funil de conversão" periodo={periodo} porque="Onde a loja perde compradores — diagnóstico operacional.">
-        <FunilResumoReal visitas={diario.reduce((s, k) => s + (Number(k.visits) || 0), 0)} vendas={diario.reduce((s, k) => s + (Number(k.tsi) || 0), 0)} unidade="Unidades vendidas" />
+        <FunilVendas kpis={diario as any} periodo={periodo} indice={5} ocultarTitulo />
       </Bloco>
 
+      <PonteDiagnostico
+        de="Conversão"
+        para="Reputação e envios"
+        porque="Atrasos, cancelamentos e mix Full/Flex explicam parte da conversão fraca e risco de rebaixamento — causa operacional."
+      />
 
       <Bloco
         n={6}
-        titulo="Envios e logística"
+        titulo="Reputação, envios e logística"
         porque="Principais KPIs operacionais: termômetro, reclamações, atrasos, cancelamentos e participação Full/Flex/Agência."
       >
-        <OperacaoResumo diario={diario as any} somenteLogistica />
+        <OperacaoResumo diario={diario as any} />
       </Bloco>
 
+      <PonteDiagnostico
+        de="Período atual"
+        para="Sazonalidade"
+        porque="Comparar com o mesmo mês em anos anteriores separa tendência estrutural de efeito de calendário."
+      />
 
       <Bloco n={7} titulo="GMV mês vs mês" porque="Comparação anual do faturamento — contexto de sazonalidade.">
         <div className="painel-vidro rounded-2xl p-2">
@@ -136,6 +176,11 @@ export default function VisaoGeralSecao({
         </div>
       </Bloco>
 
+      <PonteDiagnostico
+        de="Ads × GMV"
+        para="Eficiência de escala"
+        porque="Se o investimento sobe mais que o GMV, a causa é ineficiência de mídia — não falta de demanda."
+      />
 
       <Bloco n={8} titulo="Diagnóstico Ads × GMV" porque="Correlação e elasticidade entre investimento e faturamento.">
         <div className="painel-vidro overflow-hidden rounded-2xl">

@@ -30,11 +30,11 @@ export default function SecaoHeader({ ativa, loja, contexto }: Props) {
   }, [ativa]);
 
   return (
-    <header className="painel-secao-header mb-6">
+    <header className="mb-6">
       <h1
         ref={h1Ref}
         tabIndex={-1}
-        className="ds-titulo-pagina text-foreground break-words outline-none"
+        className="text-[28px] leading-tight font-bold text-foreground break-words outline-none"
       >
         {label}
       </h1>
