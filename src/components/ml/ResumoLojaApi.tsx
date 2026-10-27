@@ -21,7 +21,7 @@ const delta = (atual: number | null, ant: number | null, pontos = false) =>
 function TooltipVidro({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md">
+    <div className="panel-glass-tooltip p-3 text-xs">
       <p className="text-muted-foreground tabular-nums">{label ? br(label) : ''}</p>
       <p className="mt-0.5 font-semibold tabular-nums">{brl(payload[0].value, true)}</p>
       <p className="text-muted-foreground">Faturamento pago</p>

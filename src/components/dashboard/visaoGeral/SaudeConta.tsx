@@ -74,7 +74,7 @@ function Termometro({ indice }: { indice: number }) {
           <span
             key={n.id}
             className={cn(
-              "h-2 flex-1 rounded-full transition-all duration-200",
+              "h-2 flex-1 rounded-full transition-opacity duration-200",
               ativo ? cn(n.cor, n.brilho, "ring-1 ring-white/30") : "bg-white/10",
             )}
           />
@@ -119,7 +119,7 @@ export default function SaudeConta({ custId, className }: { custId?: string; cla
       className={cn(
         "noite-vidro flex h-full min-w-0 flex-col rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5",
         "shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.3)] backdrop-blur-xl",
-        "transition-all duration-200 hover:border-white/15",
+        "transition-transform duration-200",
         className,
       )}
     >
