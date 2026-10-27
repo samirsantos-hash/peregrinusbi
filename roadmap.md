@@ -1,5 +1,9 @@
 # Roadmap
 
+## Vidro branco global (27/10)
+- [x] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
+- [x] Conferir Publicidade da GMABSOLUTA e Preço com sessão real, contraste nos dois temas, tela estreita sem transbordamento e movimento reduzido; demais seções recebem o estilo compartilhado.
+
 ## Organização macro → micro e Full (26/10)
 - [x] Ordenar navegação macro → micro; Resumo como abertura, detalhes por anúncio após indicadores de Qualidade, funil em Faturamento e produtos Full ao final.
 - [x] Priorizar indicadores reais da API no Resumo com 30 dias UTC completos, comparação anterior e histórico separado; leitura incompleta suspende totais.

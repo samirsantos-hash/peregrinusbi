@@ -932,3 +932,133 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   .painel-apple .glass-card:hover,
   .painel-apple .glass-card-highlight:hover { transform: none; }
 }
+
+/* Shared white-ice glass: protected sections only, never the login canvas. */
+:root {
+  --panel-glass-white: 0 0% 100%;
+  --panel-glass-ice: 210 20% 97%;
+  --panel-glass-ink: 240 6% 12%;
+  --panel-glass-muted: 215 12% 38%;
+  --panel-glass-edge: 210 16% 78%;
+  --panel-glass-shadow: 240 6% 5%;
+  --panel-glass-positive: 156 84% 26%;
+  --panel-glass-negative: 7 86% 45%;
+  --panel-glass-fill: linear-gradient(135deg,
+    hsl(var(--panel-glass-white) / .94),
+    hsl(var(--panel-glass-ice) / .83) 45%,
+    hsl(var(--panel-glass-white) / .72));
+  --panel-glass-reflection: linear-gradient(112deg,
+    transparent 25%, hsl(var(--panel-glass-white) / .48) 49%, transparent 73%);
+  --panel-glass-elevation: inset 0 1px 0 hsl(var(--panel-glass-white) / .95),
+    inset 0 -1px 0 hsl(var(--panel-glass-white) / .28),
+    0 2px 4px hsl(var(--panel-glass-shadow) / .06),
+    0 16px 36px -22px hsl(var(--panel-glass-shadow) / .36);
+}
+/* Older section banners use utility-built divs rather than the shared Card. */
+.peregrinus-panel div[class*="rounded"][class*="bg-card"][class*="border"] {
+  --foreground: var(--panel-glass-ink);
+  --card-foreground: var(--panel-glass-ink);
+  --ec-ink: var(--panel-glass-ink);
+  --muted-foreground: var(--panel-glass-muted);
+  --ec-text-sec: var(--panel-glass-muted);
+  --aura-gray-400: var(--panel-glass-muted);
+  --aura-gray-500: var(--panel-glass-muted);
+  --ok: var(--panel-glass-positive);
+  --emerald: var(--panel-glass-positive);
+  --ec-verde-txt: var(--panel-glass-positive);
+  --border: var(--panel-glass-edge);
+  background: var(--panel-glass-fill) !important;
+  border-color: hsl(var(--panel-glass-edge) / .5);
+  color: hsl(var(--panel-glass-ink));
+  backdrop-filter: blur(24px) saturate(110%);
+  -webkit-backdrop-filter: blur(24px) saturate(110%);
+  box-shadow: var(--panel-glass-elevation);
+}
+.light {
+  --panel-glass-fill: linear-gradient(135deg,
+    hsl(var(--panel-glass-white) / .86),
+    hsl(var(--panel-glass-ice) / .68) 45%,
+    hsl(var(--panel-glass-white) / .58));
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  --foreground: var(--panel-glass-ink);
+  --card-foreground: var(--panel-glass-ink);
+  --ec-ink: var(--panel-glass-ink);
+  --muted-foreground: var(--panel-glass-muted);
+  --ec-text-sec: var(--panel-glass-muted);
+  --aura-gray-400: var(--panel-glass-muted);
+  --aura-gray-500: var(--panel-glass-muted);
+  --primary: var(--panel-glass-positive);
+  --ec-verde-txt: var(--panel-glass-positive);
+  --emerald: var(--panel-glass-positive);
+  --neon-blue: var(--panel-glass-positive);
+  --ec-vermelho: var(--panel-glass-negative);
+  --ec-surface-2: 210 12% 91%;
+  --muted: 210 12% 91%;
+  --border: var(--panel-glass-edge);
+  position: relative;
+  min-width: 0;
+  background: var(--panel-glass-fill) !important;
+  border-color: hsl(var(--panel-glass-edge) / .5) !important;
+  color: hsl(var(--panel-glass-ink));
+  backdrop-filter: blur(24px) saturate(110%);
+  -webkit-backdrop-filter: blur(24px) saturate(110%);
+  box-shadow: var(--panel-glass-elevation);
+  transition: transform 180ms var(--curva-rapida);
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--panel-glass-reflection);
+  opacity: 0;
+  transform: translateX(0);
+  transition: opacity 180ms var(--curva-rapida);
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
+  opacity: .8;
+  background-position: center;
+  transform: none;
+  /* A broad continuous reflection follows the pointer without moving content. */
+  background-image: linear-gradient(112deg, transparent 25%,
+    hsl(var(--panel-glass-white) / .5) 49%, transparent 73%);
+  background-size: 160% 180%;
+  background-position: calc(var(--glass-x, 50%) - 150px) calc(var(--glass-y, 50%) - 120px);
+}
+.peregrinus-panel .glass-card { animation-name: panelGlassIn; }
+@keyframes panelGlassIn { from { opacity: 0; } to { opacity: 1; } }
+.peregrinus-panel .ds-kpi :is(.ds-numero-focal, .ds-numero-sec, .metric-value) {
+  color: hsl(var(--panel-glass-ink));
+  font-family: inherit;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 28px; }
+.peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 34px; }
+.peregrinus-panel .ds-kpi { container-type: inline-size; }
+@container (max-width: 140px) {
+  .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 20px; }
+  .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 24px; }
+}
+.peregrinus-panel .operacao-resumo .ds-kpi .ds-numero-focal { font-size: 20px; }
+.peregrinus-panel .ds-kpi :is(.ds-rotulo, .ds-nota) {
+  color: hsl(var(--panel-glass-muted)) !important;
+  letter-spacing: 0;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .peregrinus-panel .ds-kpi:hover { transform: translateY(-2px); }
+  .peregrinus-panel .glass-card:hover { transform: none; }
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):hover { transform: none; }
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after { display: none !important; }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
+    background: hsl(var(--panel-glass-ice)) !important;
+  }
+}
