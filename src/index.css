@@ -1669,11 +1669,36 @@ html body .peregrinus-panel .sinergia-operacional td { box-shadow: none; }
 
 /* Authoritative access-card finish: same material and interaction in sections. */
 :root {
+  --access-glass-deep: 183 72% 10%;
+  --access-glass-tint: 166 92% 24%;
+  --access-glass-light: 164 90% 33%;
+  --access-glass-panel-fill: linear-gradient(120deg,
+    hsl(var(--access-glass-deep) / .9),
+    hsl(var(--access-glass-tint) / .68) 45%,
+    hsl(var(--access-glass-deep) / .92));
+  --access-glass-panel-shadow: inset 0 1px 1px hsl(var(--panel-white) / .12),
+    inset 0 0 28px hsl(var(--access-glass-light) / .08),
+    0 8px 28px hsl(var(--panel-black) / .28);
   --access-glass-radius: 20px;
   --access-glass-hover-edge: hsl(var(--panel-positive) / .35);
   --access-glass-hover-shadow: var(--panel-shadow),
     0 0 0 1px hsl(var(--panel-positive) / .1),
     0 24px 50px -20px hsl(var(--panel-brand) / .25);
+}
+html.dark .peregrinus-panel {
+  --vidro-fundo: var(--access-glass-panel-fill);
+  --vidro-borda: hsl(var(--panel-positive) / .38);
+  --vidro-sombra: var(--access-glass-panel-shadow);
+  --panel-fill-nested: hsl(var(--access-glass-deep) / .35);
+}
+html.dark body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]),
+html.dark body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]):hover {
+  --vidro-fundo: var(--access-glass-panel-fill);
+  --vidro-borda: hsl(var(--panel-positive) / .38);
+  --vidro-sombra: var(--access-glass-panel-shadow);
+  background: var(--access-glass-panel-fill) !important;
+  border-color: hsl(var(--panel-positive) / .38) !important;
+  box-shadow: var(--access-glass-panel-shadow) !important;
 }
 html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])) {
   background: var(--vidro-fundo) !important;
