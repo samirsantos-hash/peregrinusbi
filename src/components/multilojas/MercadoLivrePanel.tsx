@@ -59,7 +59,7 @@ const MercadoLivrePanel = () => {
 
   const carregar = useCallback(async () => {
     setCarregando(true);
-    const { data, error } = await supabase.rpc("ml_contas_status");
+    const { data, error } = await supabase.rpc("ml_minhas_contas_status");
     if (!error) setContas((data as ContaML[]) ?? []);
     setCarregando(false);
   }, []);
@@ -98,6 +98,15 @@ const MercadoLivrePanel = () => {
           <RefreshCw className="w-3 h-3" /> atualizar
         </Button>
       </div>
+
+      <div role="alert" className="flex items-start gap-2 rounded-lg border border-warning/50 bg-warning/10 p-3 text-xs">
+        <AlertTriangle className="w-4 h-4 mt-px shrink-0 text-warning" />
+        <p>
+          <strong>É necessário estar com a conta master (principal) do Mercado Livre.</strong>{" "}
+          Contas de colaborador não conseguem autorizar a integração. Antes de conectar, saia de outras contas no Mercado Livre.
+        </p>
+      </div>
+
 
       {carregando ? (
         <div className="flex items-center gap-2 py-6 justify-center text-xs text-muted-foreground">
@@ -178,10 +187,6 @@ const MercadoLivrePanel = () => {
           </div>
         )}
       </div>
-      <p className="flex items-start gap-2 text-[11px] text-muted-foreground">
-        <AlertTriangle className="w-3.5 h-3.5 mt-px shrink-0" />
-        Faça login no Mercado Livre com a conta principal da loja. Contas de colaborador não conseguem autorizar.
-      </p>
     </div>
   );
 };
