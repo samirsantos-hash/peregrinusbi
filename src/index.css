@@ -1443,6 +1443,11 @@ html body .peregrinus-panel .kpi-vidro { justify-content: flex-start; gap: 16px;
 html body .peregrinus-panel .kpi-vidro-valor { font-size: 28px; font-weight: 500; line-height: 1.2; font-kerning: normal; color: hsl(var(--panel-text)); }
 @container (max-width: 160px) { html body .peregrinus-panel .kpi-vidro-valor { font-size: 20px !important; } }
 html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  --foreground: var(--panel-text);
+  --card-foreground: var(--panel-text);
+  --muted-foreground: var(--panel-text-secondary);
+  --ec-ink: var(--panel-text);
+  --ec-text-sec: var(--panel-text-secondary);
   --panel-glass-ink: var(--panel-text);
   --panel-glass-muted: var(--panel-text-secondary);
   position: relative;
