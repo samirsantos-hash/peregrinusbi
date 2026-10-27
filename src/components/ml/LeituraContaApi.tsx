@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { brl, num, pctFracao } from "@/lib/format";
 import { LOGISTICA } from "@/lib/mlRotulos";
 import { avaliarRuptura } from "@/lib/rupturaApi";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useContaMl } from "@/components/dashboard/RupturaApi";
 
 const NIVEL: Record<string, string> = { "5_green": "Verde", "4_light_green": "Verde-clara", "3_yellow": "Amarela", "2_orange": "Laranja", "1_red": "Vermelha" };
@@ -53,8 +54,9 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
     enabled: !!accountId,
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("ml_listings")
-        .select("item_id, titulo, estoque, preco, preco_original, saude, logistica").eq("account_id", accountId).eq("status", "active").limit(5000);
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any).from("ml_listings")
+        .select("item_id, titulo, estoque, preco, preco_original, saude, logistica").eq("account_id", accountId).eq("status", "active")
+        .order("item_id").range(de, ate));
       if (error) throw error;
       return (data ?? []) as any[];
     },
