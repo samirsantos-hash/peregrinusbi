@@ -20,6 +20,7 @@ const VS = `
 `;
 const FS = `
   precision highp float;
+  // linhas suaves
   uniform vec2 u_resolution;
   uniform float u_time;
   uniform vec2 u_mouse;
@@ -46,7 +47,6 @@ const FS = `
       color += vec3(0.02, 0.08, 0.05) * pow(rightGlow, 2.0) * 0.35;
 
       float particleNoise = fract(sin(dot(p + u_time * 0.015, vec2(12.9898, 78.233))) * 43758.5453);
-      color += vec3(0.70, 0.95, 0.82) * pow(particleNoise, 90.0) * 0.2 * u_intro;
 
       float radial = distance(p, center);
       float radialBurst = smoothstep(0.55, 0.0, radial);
@@ -116,11 +116,14 @@ const FS = `
           color += lineColor * intensity * edgeFade * lengthFade * localIntro;
       }
 
+      // Dither leve para evitar faixas no degradê escuro.
+      color += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
       gl_FragColor = vec4(color, 1.0);
   }
 `;
 
-const RENDER_SCALE = 0.5;
+// Resolução nativa (até 2x) para linhas contínuas, sem pixel.
+const RENDER_SCALE = typeof window !== "undefined" ? Math.min(2, window.devicePixelRatio || 1) : 1;
 const INTRO_MS = 3500;
 const easeInOutQuad = (t: number) =>
   t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; // GSAP power2.inOut
