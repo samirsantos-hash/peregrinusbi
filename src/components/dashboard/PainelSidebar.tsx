@@ -33,9 +33,9 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
       onClick={() => onSelect(tab.id)}
       aria-current={ativo ? "page" : undefined}
       className={cn(
-        "relative w-full flex items-center gap-2.5 h-9 rounded-md text-[13px] font-medium transition-colors",
+        "duo-nav-item relative w-full flex items-center gap-2.5 h-12 rounded-full text-[13px] font-medium",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-surface-alt",
-        recolhida ? "justify-center px-0" : "px-3",
+        recolhida ? "justify-center px-0" : "justify-start px-3",
         ativo
           ? "bg-primary/10 text-primary hover:text-primary"
           : "text-foreground/80 hover:bg-muted/50 hover:text-foreground",
@@ -101,14 +101,14 @@ function Conteudo({
     <nav aria-label="Seções do painel" className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto px-2 pb-3">
         {GRUPOS.map((g) => (
-          <div key={g.titulo} className="mt-5 first:mt-2">
+          <div key={g.titulo} className="duo-nav-group mt-5 first:mt-2">
             {!recolhida && (
               <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-normal text-muted-foreground">
                 {g.titulo}
                 {g.titulo === "Visão geral" && <NovidadeTip id="sidebar" />}
               </p>
             )}
-            <ul className="space-y-0.5">
+            <ul className="space-y-1">
               {g.ids.map((id) => {
                 const tab = porId(id);
                 if (!tab) return null;
@@ -181,10 +181,9 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
       {/* Desktop / tablet */}
       <aside
         className={cn(
-          "painel-navigation hidden lg:block shrink-0 sticky self-start top-0 z-30 glass-card !rounded-[32px] top-4 overflow-hidden",
-          recolhida ? "w-[56px]" : "w-[224px]",
+          "painel-navigation duo-rail hidden lg:block shrink-0 sticky self-start z-30 glass-card !rounded-[32px] top-4 overflow-hidden",
+          recolhida ? "w-[72px]" : "w-[240px]",
         )}
-        style={{ height: "100vh" }}
       >
         <Conteudo
           ativa={ativa}
@@ -198,7 +197,7 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
 
       {/* Drawer < 1024px */}
       <Sheet open={mobileAberto} onOpenChange={onMobileChange}>
-        <SheetContent side="left" className="painel-navigation w-[248px] p-0">
+        <SheetContent side="left" className="painel-navigation duo-mobile-sheet w-[280px] max-w-[calc(100vw-16px)] p-0">
           <div className="h-full pt-8">
             <Conteudo
               ativa={ativa}
