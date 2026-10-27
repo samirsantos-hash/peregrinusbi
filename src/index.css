@@ -1270,7 +1270,7 @@ html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
     0 12px 28px -20px hsl(var(--panel-black) / .5);
   --panel-nav-fill: hsl(var(--panel-surface) / .92);
   --panel-reflection: .14;
-  --panel-radius: 12px;
+  --panel-radius: 16px;
 }
 html.light {
   --panel-canvas: 0 0% 100%;
@@ -1427,8 +1427,8 @@ html body .peregrinus-panel .painel-noite :is(.text-white,.text-slate-200,.text-
 html body .peregrinus-panel .painel-noite :is(.text-slate-400,.text-slate-500) { color: hsl(var(--panel-text-secondary)); }
 html body .peregrinus-panel .painel-noite :is(.text-emerald-400,.text-emerald-500) { color: hsl(var(--panel-positive)); }
 html body .peregrinus-panel .painel-noite :is(.text-rose-400,.text-rose-500) { color: hsl(var(--panel-negative)); }
-html body .peregrinus-panel .kpi-vidro { justify-content: flex-start; gap: 16px; }
-html body .peregrinus-panel .kpi-vidro-valor { font-size: 28px; font-weight: 500; line-height: 1.2; }
+html body .peregrinus-panel .kpi-vidro { justify-content: flex-start; gap: 16px; min-height: 156px; }
+html body .peregrinus-panel .kpi-vidro-valor { font-size: 28px; font-weight: 500; line-height: 1.2; font-kerning: normal; }
 @container (max-width: 160px) { html body .peregrinus-panel .kpi-vidro-valor { font-size: 20px !important; } }
 html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]) {
   --panel-glass-ink: var(--panel-text);
@@ -1474,6 +1474,20 @@ html body .peregrinus-panel .ds-kpi :is(.ds-numero-focal,.ds-numero-sec,.metric-
   font-feature-settings: 'tnum' 1, 'lnum' 1;
 }
 html body .peregrinus-panel .ds-kpi :is(.ds-rotulo,.ds-nota) { color: hsl(var(--panel-text-secondary)); line-height: 1.5; }
+/* Readable shared metrics: scale by available card space, never viewport width. */
+.peregrinus-panel { font-optical-sizing: auto; font-kerning: normal; font-synthesis: none; }
+html body .peregrinus-panel .ds-kpi .ds-rotulo { font-size: 12px; text-transform: none; font-weight: 500; }
+html body .peregrinus-panel .ds-kpi .ds-nota { font-size: 12px; text-wrap: pretty; }
+html body .peregrinus-panel :is(.ds-kpi,.kpi-vidro) > * { position: relative; z-index: 1; }
+html body .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 26px; }
+html body .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 32px; }
+@container (max-width: 180px) {
+  html body .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 22px; }
+  html body .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 26px; }
+}
+@container (max-width: 140px) {
+  html body .peregrinus-panel .ds-kpi :is(.ds-numero-sec,.ds-numero-focal) { font-size: 20px; }
+}
 .peregrinus-panel .recharts-default-tooltip { background: hsl(var(--popover)) !important; color: hsl(var(--popover-foreground)) !important; border-color: var(--panel-stroke) !important; border-radius: 8px !important; }
 .peregrinus-panel .recharts-cartesian-grid line { stroke: hsl(var(--panel-line) / .5); }
 .peregrinus-panel .recharts-cartesian-axis-tick text { fill: hsl(var(--panel-text-secondary)); }
