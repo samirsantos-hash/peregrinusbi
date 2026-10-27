@@ -1,33 +1,5 @@
 # Roadmap
 
-## Remover cordas do dashboard (27/10)
-- [x] Retirar o fundo de cordas das páginas do painel, mantendo o efeito no login e o acabamento dos quadros; conferido na GMABSOLUTA nos dois temas, sem erros.
-
-## Pressão do Lovable Cloud (27/10)
-- [x] Conferir recursos, consultas e custos; leituras amplas por data são o gargalo provável.
-- [ ] Otimizações das leituras — aguardam aprovação; nenhuma alteração aplicada.
-- [ ] Ampliação Tiny → Mini — aprovação interrompida, não executada.
-
-## Identidade do login em todo o dashboard (27/10)
-- [x] Aplicar o fundo de cordas, vidro, tipografia e campos da tela de login às páginas protegidas, sem alterar dados ou navegação.
-- [x] Conferir login e Preço da GMABSOLUTA autenticada nos dois temas: um único fundo, reação ao mouse, sem transbordamento ou erros; regras de quadros aninhados preservadas.
-
-## Auditoria do vidro — aplicação em etapas (27/10)
-- [x] Etapa 1: preservar o vidro próprio do menu; contraste conferido nos dois temas (escuro: itens 15,15:1 e grupos 5,83:1).
-- [x] Etapa 2: quadros internos sem fundo/blur/sombra duplicados, bordas suaves e reflexo atrás do conteúdo; conferido no painel autenticado.
-- [ ] Etapa 3: reflexo e uniformidade do blur — aguarda etapa anterior.
-- [ ] Etapa 4: harmonização das cores dos gráficos — aguarda etapa anterior.
-
-## Visão geral — diagnóstico composto (27/10)
-- [x] Unificar resultado e reputação no topo, mantendo fontes e períodos separados.
-- [x] Organizar tráfego, Clips e funil; aplicar vidro, proporções e raios sem inventar métricas ausentes.
-- [x] Conferir GMABSOLUTA conectada, histórico e dois temas; sem erros ou transbordamento. Ads/Clips completos e abandono por etapa não disponíveis no resumo API.
-
-## Refinamento pós-reversão (27/10)
-- [x] Comparar com a versão anterior ao kit e manter navegação, superfícies e dados anteriores.
-- [x] Unificar DM Sans, peso dos números e contraste de títulos, legendas e alertas no vidro branco.
-- [x] Conferir Preço da GMABSOLUTA nos dois temas e largura reduzida: DM Sans carregada, valores reais preservados, reflexo ativo, sem transbordamento ou erros.
-
 ## Vidro branco global (27/10)
 - [x] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
 - [x] Conferir Publicidade da GMABSOLUTA e Preço com sessão real, contraste nos dois temas, tela estreita sem transbordamento e movimento reduzido; demais seções recebem o estilo compartilhado.

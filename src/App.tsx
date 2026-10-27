@@ -43,7 +43,7 @@ import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 import RodapeInstitucional from "./components/RodapeInstitucional";
 import AlertaInatividade from "./components/AlertaInatividade";
-import { AuraReveal } from "@/components/aura/AuraBackground";
+import { AuraBackground, AuraReveal } from "@/components/aura/AuraBackground";
 import AvisosGlobais from '@/components/AvisosGlobais';
 import { registrarAviso } from '@/lib/avisosDesenvolvedor';
 
@@ -98,6 +98,7 @@ const AppRoutes = () => {
 
   return (
     <>
+      {/* Fundo Glass Verde vem do CSS (ambiente fixo) */}
       <AuraReveal />
       <GlassPointer />
       <div className="relative z-10">

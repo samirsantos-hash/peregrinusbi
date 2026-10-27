@@ -389,7 +389,7 @@ const Index = () => {
             <AguiaLogo className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
             <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-primary shrink-0" />
             <div className="min-w-0">
-              <p className="text-sm sm:text-xl font-medium truncate">
+              <p className="text-sm sm:text-xl font-bold tracking-tight truncate">
                 <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
                 <span className="sm:hidden">Peregrinus BI</span>
               </p>
