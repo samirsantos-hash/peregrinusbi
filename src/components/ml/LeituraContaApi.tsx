@@ -10,6 +10,7 @@ import { LOGISTICA } from "@/lib/mlRotulos";
 import { avaliarRuptura } from "@/lib/rupturaApi";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useContaMl } from "@/components/dashboard/RupturaApi";
+import SinergiaPublicidadeApi from "@/components/ml/SinergiaPublicidade";
 
 const NIVEL: Record<string, string> = { "5_green": "Verde", "4_light_green": "Verde-clara", "3_yellow": "Amarela", "2_orange": "Laranja", "1_red": "Vermelha" };
 const soDigitos = (s: string) => String(s).replace(/\D/g, "");
@@ -203,6 +204,7 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
           </>)}
         </Bloco>
       </div>
+      <SinergiaPublicidadeApi custId={custId} compacto />
     </section>
   );
 }

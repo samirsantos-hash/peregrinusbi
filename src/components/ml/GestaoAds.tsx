@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useAnaliseMl } from "@/hooks/useAnaliseMl";
 import CampanhaGrafico, { type LinhaDiaCampanha } from "@/components/ml/ads/CampanhaGrafico";
+import SinergiaPublicidadeApi from "@/components/ml/SinergiaPublicidade";
 
 type Campanha = {
   id: string;
@@ -274,6 +275,8 @@ export default function GestaoAds({ custId }: { custId: string }) {
               {visao === "campanhas" ? "Voltar ao resumo" : `Campanhas (${num(data.campanhas.length)})`}
             </Button>
           </div>
+
+          <SinergiaPublicidadeApi custId={custId} />
 
           {/* Micro — campanhas */}
           {visao === "campanhas" && <section className="space-y-3">
