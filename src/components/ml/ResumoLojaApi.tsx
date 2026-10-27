@@ -6,6 +6,7 @@ import KpiVidro from '@/components/dashboard/visaoGeral/KpiVidro';
 import SaudeConta from '@/components/dashboard/visaoGeral/SaudeConta';
 import { RefreshCw } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import LeituraContaApi from './LeituraContaApi';
 
 type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number }[] };
 type Resposta = { atual: Total; anterior: Total; periodo: { inicio: string; fim: string }; consultadoEm: string };
@@ -179,6 +180,8 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
           />
         </div>
       </div>
+
+      <LeituraContaApi custId={custId} faturamento30d={a.faturamento} ticketDelta={delta(a.ticket, p.ticket)} />
 
       <details className="border-t border-white/[0.08] pt-3">
         <summary className="cursor-pointer text-sm text-slate-300 transition-colors hover:text-white">
