@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Corrigir vidro das seções pela Home (27/10)
-- [ ] Corrigir diferenças restantes de raio, borda e sombra ao passar o mouse; retirar inclinação e reflexo exclusivos do painel e comparar estilos completos com a Home.
+- [x] Corrigir raio, borda e sombra ao passar o mouse; retirar inclinação e reflexo exclusivos do painel. Comparação automática com a Home passou para as superfícies verificadas em Visão geral, Preço e Correlações; dois temas conferidos, sem transbordamento.
 - [x] Igualar composição das superfícies ao cartão de acesso, eliminar reflexos e camadas conflitantes; Visão geral, Preço e Correlações conferidas com AUTOPECASLONDRINA nos dois temas, sem transbordamento. Demais seções recebem os estilos compartilhados.
 
 ## Glass suave como o acesso (27/10)
