@@ -1267,7 +1267,7 @@ html:root .peregrinus-panel .painel-navigation[class] {
    Floating chart tooltips remain independent reading surfaces. */
 html:root .peregrinus-panel
   :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])
-  :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):not(.painel-navigation):not([role="tooltip"]):not(.recharts-tooltip-wrapper *) {
+  :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"], div[class*="rounded"][class*="bg-muted"][class*="border"]):not(.painel-navigation):not([role="tooltip"]):not(.recharts-tooltip-wrapper *) {
   background: transparent !important;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
