@@ -28,6 +28,9 @@ export function GlassPointer() {
         const rect = active.getBoundingClientRect();
         active.style.setProperty("--glass-x", `${x - rect.left}px`);
         active.style.setProperty("--glass-y", `${y - rect.top}px`);
+        const px = Math.min(1, Math.max(0, (x - rect.left) / (rect.width || 1)));
+        active.style.setProperty("--glass-angle", `${100 + px * 40}deg`);
+        active.style.setProperty("--glass-band", `${Math.round(px * 100)}%`);
         active.setAttribute("data-glass-active", "");
       });
     };

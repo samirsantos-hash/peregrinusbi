@@ -1188,14 +1188,31 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   transition: opacity 180ms var(--curva-rapida);
 }
 .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
-  opacity: .8;
-  background-position: center;
+  /* Localized mirror: sharp light spot + thin specular band angled by pointer. */
+  --espelho-forca: .35;
+  opacity: 1;
   transform: none;
-  /* A broad continuous reflection follows the pointer without moving content. */
-  background-image: var(--panel-glass-reflection-active);
-  background-size: 160% 180%;
-  background-position: calc(var(--glass-x, 50%) - 150px) calc(var(--glass-y, 50%) - 120px);
+  background:
+    radial-gradient(90px circle at var(--glass-x, 50%) var(--glass-y, 50%), rgba(255,255,255,var(--espelho-forca)), rgba(255,255,255,calc(var(--espelho-forca) * .25)) 40%, transparent 70%),
+    linear-gradient(var(--glass-angle, 115deg), transparent calc(var(--glass-band, 50%) - 6%), rgba(255,255,255,calc(var(--espelho-forca) * .3)) var(--glass-band, 50%), transparent calc(var(--glass-band, 50%) + 6%));
 }
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms var(--curva-rapida);
+  background: radial-gradient(160px circle at var(--glass-x, 50%) var(--glass-y, 50%), rgba(255,255,255,.7), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::before { opacity: 1; }
+html.light .peregrinus-panel [data-glass-active]::after { --espelho-forca: .55; }
+html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
 .peregrinus-panel .glass-card { animation-name: panelGlassIn; }
 @keyframes panelGlassIn { from { opacity: 0; } to { opacity: 1; } }
 .peregrinus-panel .ds-kpi :is(.ds-numero-focal, .ds-numero-sec, .metric-value) {
