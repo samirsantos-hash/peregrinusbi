@@ -1587,7 +1587,7 @@ html.light .resumo-visual-ref {
   --summary-reflection: linear-gradient(115deg, hsl(var(--panel-white) / .3), transparent 48%);
   --summary-grid: hsl(var(--panel-line) / .8);
 }
-html body .peregrinus-panel .resumo-visual-ref .noite-vidro {
+html body .peregrinus-panel .resumo-visual-ref :is(.noite-vidro, div.noite-vidro[class*="rounded"][class*="bg-card"][class*="border"]) {
   background: var(--summary-fill) !important;
   border: 1px solid var(--summary-edge) !important;
   border-radius: 16px;
