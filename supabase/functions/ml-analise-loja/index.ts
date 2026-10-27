@@ -12,7 +12,7 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full']) }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d']) }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
   // Reuse existing store visibility; developer status does not grant business access.
@@ -31,7 +31,7 @@ Deno.serve(async req => {
     return r.json();
   }
   try {
-    const periodo = janelaAnalise(), completo = janelaAnalise(new Date(), modo === 'resumo' ? 60 : 30);
+    const periodo = janelaAnalise(new Date(), modo === 'vendas7d' ? 7 : 30), completo = janelaAnalise(new Date(), modo === 'resumo' ? 60 : modo === 'vendas7d' ? 7 : 30);
     const orders: any[] = [];
     const MAX = 10000;
     const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(completo.inicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(completo.fim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
@@ -53,6 +53,10 @@ Deno.serve(async req => {
     orders.length = 0; orders.push(...unicos.values());
     if (orders.length < total) return json({ error: 'Não foi possível ler todos os pedidos do período; análise suspensa para não apresentar totais parciais.' }, 422);
     const atual = projetarPedidos(orders, periodo.inicio, periodo.fim);
+    if (modo === 'vendas7d') {
+      // Paid units per listing over the last 7 complete UTC days; no buyer data.
+      return json({ periodo, itens: atual.itens.map(i => ({ id: i.id, unidades: i.unidades })), consultadoEm: new Date().toISOString() });
+    }
     if (modo === 'resumo') {
       const anteriorFim = new Date(Date.parse(periodo.inicio) - 864e5).toISOString().slice(0, 10);
       const anterior = projetarPedidos(orders, completo.inicio, anteriorFim);

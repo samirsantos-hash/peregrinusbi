@@ -22,4 +22,9 @@ describe("avaliarRuptura", () => {
     expect(r.cobertura).toBeNull();
     expect(r.severidade).toBe("sem");
   });
+  it("zero venda paga em 7 dias sugere envio 0", () => {
+    const r = avaliarRuptura({ ...base, vendas7d: 0 });
+    expect(r.envio).toBe(0);
+    expect(r.cobertura).toBeNull();
+  });
 });
