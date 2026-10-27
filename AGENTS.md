@@ -33,7 +33,7 @@
 - Integrações de agentes (MCP) ficam em src/lib/mcp (uma ferramenta por arquivo, só leitura, cliente com o token OAuth do usuário para respeitar as permissões); a função mcp é gerada pelo plugin e só vai ao ar ao publicar.
 - Subdiretórios têm o próprio AGENTS.md (ex.: supabase/functions/AGENTS.md com as regras das funções do ML); leia antes de alterar arquivos lá.
 - Operational summary surfaces and typography are scoped by `.operacao-resumo` using global CSS tokens and shared KpiCard, so presentation changes never alter reputation thresholds or logistics calculations.
-- Access and protected surfaces share glass tokens and `--panel-backdrop`; `.peregrinus-panel` uses one soft `GlassPointer` reflection per frame and no nested blur, preserving login, status colors and reduced motion.
+- Access and protected surfaces share the authoritative access-card material and hover tokens; no panel-only pointer reflection or tilt, so section glass matches Home while preserving status colors and reduced motion.
 - HTML references use panel tokens; `.resumo-visual-ref` scopes overview finishes without changing data; navigation and filters never tilt.
 - Indicator summaries use security-invoker RPCs; portfolio batches always filter seller IDs and reject partial reads to preserve RLS and totals.
 - Promotion rebate reading, expiry warnings and rebate-based recommendation live only in pure `src/lib/promocoesAnalise.ts`, so Oportunidades and future screens share one rule.

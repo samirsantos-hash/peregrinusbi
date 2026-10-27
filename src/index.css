@@ -1666,3 +1666,38 @@ html body .peregrinus-panel [aria-label="Saúde da conta"] [role="img"] > span {
   box-shadow: none;
 }
 html body .peregrinus-panel .sinergia-operacional td { box-shadow: none; }
+
+/* Authoritative access-card finish: same material and interaction in sections. */
+:root {
+  --access-glass-radius: 20px;
+  --access-glass-hover-edge: hsl(var(--panel-positive) / .35);
+  --access-glass-hover-shadow: var(--panel-shadow),
+    0 0 0 1px hsl(var(--panel-positive) / .1),
+    0 24px 50px -20px hsl(var(--panel-brand) / .25);
+}
+html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])) {
+  background: var(--vidro-fundo) !important;
+  border: 1px solid var(--vidro-borda) !important;
+  border-radius: var(--access-glass-radius);
+  box-shadow: var(--vidro-sombra);
+  backdrop-filter: var(--panel-backdrop);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+  transform: none;
+  transition: transform 200ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
+}
+html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]))::before,
+html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]))::after {
+  content: none !important;
+  display: none !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])):hover {
+    background: var(--vidro-fundo) !important;
+    border-color: var(--access-glass-hover-edge) !important;
+    box-shadow: var(--access-glass-hover-shadow);
+    transform: translateY(-2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])) { transform: none !important; }
+}
