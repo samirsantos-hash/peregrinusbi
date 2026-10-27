@@ -5,7 +5,7 @@ import { useAnaliseMl } from '@/hooks/useAnaliseMl';
 import KpiVidro from '@/components/dashboard/visaoGeral/KpiVidro';
 import SaudeConta from '@/components/dashboard/visaoGeral/SaudeConta';
 import { RefreshCw } from 'lucide-react';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import LeituraContaApi from './LeituraContaApi';
 
 type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number }[] };
@@ -30,7 +30,7 @@ function TooltipVidro({ active, payload, label }: { active?: boolean; payload?: 
 }
 
 const Rotulo = ({ children }: { children: React.ReactNode }) => (
-  <p className="truncate text-xs font-medium uppercase tracking-wider text-slate-400">{children}</p>
+  <h4 className="text-sm font-semibold tracking-normal text-foreground">{children}</h4>
 );
 
 /**
@@ -45,11 +45,11 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
   if (q.error || q.erroConexao || !q.data) {
     return (
       <section className="painel-noite space-y-3">
-        <h3 className="text-base font-semibold text-white">Resumo Mercado Livre</h3>
-        <p className="text-sm text-slate-300">{q.error?.message ?? 'Não foi possível confirmar a fonte da loja.'}</p>
+        <h3 className="text-base font-semibold text-foreground">Resumo Mercado Livre</h3>
+        <p className="text-sm text-muted-foreground">{q.error?.message ?? 'Não foi possível confirmar a fonte da loja.'}</p>
         <Button variant="outline" onClick={() => q.refetch()}>Tentar novamente</Button>
-        <details className="border-t border-white/[0.08] pt-3">
-          <summary className="cursor-pointer text-sm text-slate-300">Histórico importado · fonte separada</summary>
+        <details className="border-t border-border pt-3">
+          <summary className="cursor-pointer text-sm text-muted-foreground">Histórico importado · fonte separada</summary>
           <div className="mt-4">{historico}</div>
         </details>
       </section>
@@ -63,21 +63,18 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
 
   return (
     <section className="painel-noite space-y-5">
-      {/* Cabeçalho enxuto: título + metadados em chips, uma linha */}
+      {/* Cabeçalho da referência: título e período, sem cápsulas adicionais. */}
       <header className="painel-noite-cabeca">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <h3 className="painel-noite-titulo">Resultado da loja</h3>
-          <span className="noite-chip">Mercado Livre</span>
-          <span className="noite-chip" title={`${br(periodo.inicio)} a ${br(periodo.fim)}`}>
-            {br(periodo.inicio).slice(0, 5)} – {br(periodo.fim).slice(0, 5)}
-          </span>
-          <span className="noite-chip">30 dias UTC</span>
-          <span className="noite-chip" title={consulta.toLocaleString('pt-BR')}>consulta {horaConsulta}</span>
+        <div className="min-w-0 space-y-1">
+          <h3 className="painel-noite-titulo">Resultado da loja · Mercado Livre</h3>
+          <p className="text-xs leading-5 text-muted-foreground tabular-nums">
+            {br(periodo.inicio)} a {br(periodo.fim)} · 30 dias UTC completos · consulta {consulta.toLocaleDateString('pt-BR')}, {horaConsulta} · independente do calendário histórico
+          </p>
         </div>
         <Button
           size="icon"
           variant="outline"
-          className="h-8 w-8 shrink-0 border-white/10 bg-white/[0.04] text-slate-200 hover:border-white/20 hover:bg-white/[0.08] hover:text-white"
+          className="h-9 w-9 shrink-0 border-border bg-card text-foreground"
           aria-label="Consultar resumo novamente"
           disabled={q.isFetching}
           onClick={() => q.refetch()}
@@ -87,10 +84,10 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
       </header>
 
       {/* Nível superior: Macro (8) × Saúde operacional (4) — mesma altura */}
-      <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-8">
           <Rotulo>Resumo executivo</Rotulo>
-          <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-3 2xl:grid-cols-4">
+          <div className="grid auto-rows-fr grid-cols-2 gap-3 xl:grid-cols-4">
             <KpiVidro focal rotulo="Faturamento pago" valor={brl(a.faturamento)} delta={delta(a.faturamento, p.faturamento)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Pedidos pagos" valor={num(a.pedidos)} delta={delta(a.pedidos, p.pedidos)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Ticket por pedido" valor={a.ticket == null ? 'Sem dado' : brl(a.ticket)} delta={delta(a.ticket, p.ticket)} periodo={PERIODO_DELTA} />
@@ -98,8 +95,7 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
           </div>
         </div>
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-4">
-          <Rotulo>Saúde operacional</Rotulo>
-          <SaudeConta custId={custId} className="flex-1" />
+          <SaudeConta custId={custId} />
         </div>
       </div>
 
@@ -107,23 +103,16 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
       <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
         <div className="noite-vidro flex min-h-[320px] min-w-0 flex-col rounded-xl border border-border bg-card p-5 transition-transform duration-150 lg:col-span-8">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h4 className="truncate text-sm font-semibold tracking-tight text-white">Evolução diária do faturamento pago</h4>
-            <span className="noite-chip">{a.serie.length} dias</span>
+            <h4 className="text-sm font-semibold tracking-normal text-foreground">Evolução diária do faturamento pago</h4>
           </div>
-          <div className="mt-3 min-h-[220px] flex-1">
+          <div className="mt-4 h-[250px] min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={a.serie} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="vg-faturamento" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" />
+              <LineChart data={a.serie} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
                 <XAxis
                   dataKey="data"
                   tickFormatter={(d: string) => br(d).slice(0, 5)}
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                   axisLine={false}
                   tickLine={false}
                   interval="preserveStartEnd"
@@ -132,30 +121,29 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
                 <YAxis
                   tickFormatter={(v: number) => brlCurto(v)}
                   width={70}
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
                   axisLine={false}
                   tickLine={false}
                 />
-                <Tooltip content={<TooltipVidro />} cursor={{ stroke: 'rgba(255,255,255,0.15)', strokeDasharray: '3 3' }} />
-                <Area
-                  type="monotone"
+                <Tooltip content={<TooltipVidro />} cursor={{ stroke: 'hsl(var(--border))', strokeDasharray: '3 3' }} />
+                <Line
+                  type="linear"
                   dataKey="faturamento"
                   stroke="hsl(var(--chart-1))"
                   strokeWidth={2}
-                  fill="url(#vg-faturamento)"
                   dot={false}
                   activeDot={{ r: 4, fill: 'hsl(var(--chart-1))', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
                   connectNulls={false}
                 />
-              </AreaChart>
+              </LineChart>
             </ResponsiveContainer>
           </div>
-          <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/5 pt-3 text-xs text-slate-400">
+          <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
             <span className="tabular-nums">
-              Cancelados: <span className="font-medium text-slate-200">{num(a.cancelados)}</span> pedidos
+              Cancelados: <span className="font-medium text-foreground">{num(a.cancelados)}</span> pedidos
             </span>
             <span className="tabular-nums">
-              Taxa: <span className={`font-medium ${taxaCanc != null && taxaCanc >= 0.02 ? 'text-rose-400' : 'text-slate-200'}`}>{pctFracao(taxaCanc, 2)}</span>
+              Taxa: <span className={`font-medium ${taxaCanc != null && taxaCanc >= 0.02 ? 'text-destructive' : 'text-foreground'}`}>{pctFracao(taxaCanc, 2)}</span>
             </span>
             {delta(a.cancelados, p.cancelados) != null && (
               <span className="tabular-nums">{num(delta(a.cancelados, p.cancelados), 1)}% {PERIODO_DELTA}</span>
@@ -168,7 +156,6 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
             valor={a.visitas == null ? 'Sem dado' : num(a.visitas)}
             delta={delta(a.visitas, p.visitas)}
             periodo={PERIODO_DELTA}
-            nota="todos os anúncios"
           />
           <KpiVidro
             rotulo="Conversão por pedido"
@@ -176,15 +163,14 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
             delta={delta(a.conversao, p.conversao, true)}
             deltaPontos
             periodo={PERIODO_DELTA}
-            nota="pedidos ÷ visitas"
           />
         </div>
       </div>
 
       <LeituraContaApi custId={custId} faturamento30d={a.faturamento} ticketDelta={delta(a.ticket, p.ticket)} />
 
-      <details className="border-t border-white/[0.08] pt-3">
-        <summary className="cursor-pointer text-sm text-slate-300 transition-colors hover:text-white">
+      <details className="border-t border-border pt-3">
+        <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
           Histórico e diagnóstico importados · fonte separada
         </summary>
         <div className="space-y-4 pt-4">{historico}</div>

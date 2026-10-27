@@ -1,5 +1,8 @@
 # Roadmap
 
+## Retomar áreas da Visão geral (27/10)
+- [ ] Restaurar a disposição do resumo executivo e da evolução diária conforme as duas imagens, preservando dados reais e saúde da conta; validar na loja conectada.
+
 ## Identidade do acesso no painel inteiro
 - [x] Unificar superfícies, campos, botões e tipografia com o HTML do acesso nas páginas protegidas, sem cordas ou mudanças nos dados; Visão geral GMABSOLUTA conferida nos dois temas e em tela estreita. Estilos compartilhados aplicados às demais seções, sem auditoria individual de todas elas.
 
