@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, Plug } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -97,6 +98,12 @@ function Conteudo({
   mostrarToggle: boolean;
 }) {
   const tabAlertas = porId(ID_ALERTAS);
+  const navigate = useNavigate();
+  const tabIntegracao = {
+    id: "integracao", label: "Integração", icon: Plug, order: 11.5,
+    descricao: "Conectar contas do Mercado Livre",
+    juniorTip: "Gere o link de integração e autorize a loja no Mercado Livre.",
+  } as SellerTab;
   return (
     <nav aria-label="Seções do painel" className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto px-2 pb-3">
@@ -122,6 +129,14 @@ function Conteudo({
                   />
                 );
               })}
+              {g.ids.includes("correlacoes") && (
+                <ItemNav
+                  tab={tabIntegracao}
+                  ativo={false}
+                  recolhida={recolhida}
+                  onSelect={() => navigate("/integracoes")}
+                />
+              )}
             </ul>
           </div>
         ))}
