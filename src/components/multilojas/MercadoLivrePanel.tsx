@@ -114,7 +114,7 @@ const MercadoLivrePanel = () => {
         </div>
       ) : !contas.length ? (
         <p className="text-xs text-muted-foreground py-4 text-center">
-          Nenhuma conta conectada. Conecte para importar vendas e custos diretamente do Mercado Livre.
+          Você ainda não conectou sua conta. Conecte para importar vendas e custos diretamente do Mercado Livre.
         </p>
       ) : (
         <div className="overflow-x-auto">
