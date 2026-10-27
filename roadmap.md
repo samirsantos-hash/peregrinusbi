@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Glass suave como o acesso (27/10)
-- [ ] Suavizar superfícies, bordas, reflexos e contraste decorativo do painel; conferir Visão geral e Publicidade com dados reais.
+- [x] Suavizar superfícies, bordas, reflexos e contraste decorativo do painel; Visão geral, Correlações e Publicidade conferidas na AUTOPECASLONDRINA, incluindo 536px sem transbordamento. Dados e fórmulas preservados; Build OK.
 
 ## Gráfico combinado e matriz de sinergia (27/10)
 - [x] Mostrar síntese com gráfico combinado e correlações na Visão geral e versão detalhada em Publicidade e Correlações, com fórmulas e fontes separadas; AUTOPECASLONDRINA conferida nas três seções e agrupamento semanal acionado.
