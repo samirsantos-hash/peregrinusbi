@@ -1279,3 +1279,66 @@ html:root .peregrinus-panel
   :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):not([role="tooltip"]):not(.recharts-tooltip-wrapper *)::after {
   display: none !important;
 }
+
+/* Login is the shared visual reference; dashboard data/layout remain unchanged. */
+:root {
+  --access-field-fill: hsl(var(--aura-white) / .03);
+  --access-field-edge: hsl(var(--aura-white) / .14);
+  --access-blur: 22px;
+  --access-navigation-active: 156 84% 26%;
+}
+.light {
+  --access-field-fill: hsl(var(--panel-glass-white) / .3);
+  --access-field-edge: hsl(var(--panel-glass-edge) / .55);
+}
+.peregrinus-panel {
+  --panel-glass-fill: var(--vidro-fundo);
+  --panel-navigation-fill: var(--vidro-fundo);
+  --panel-glass-elevation: var(--vidro-sombra);
+  min-height: 100vh;
+}
+.dark .peregrinus-panel {
+  --panel-glass-ink: var(--aura-white);
+  --panel-glass-muted: var(--aura-gray-300);
+  --panel-glass-positive: var(--aura-emerald-300);
+  --panel-glass-negative: var(--aura-red-400);
+  --panel-glass-inner-edge: hsl(var(--aura-white) / .12);
+}
+.peregrinus-panel > :first-child,
+.peregrinus-panel .painel-apple {
+  background: transparent;
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  --muted: var(--aura-fill);
+  --ec-surface-2: var(--aura-fill);
+  border-color: var(--vidro-borda) !important;
+  backdrop-filter: blur(var(--access-blur)) saturate(170%);
+  -webkit-backdrop-filter: blur(var(--access-blur)) saturate(170%);
+}
+html:root .peregrinus-panel .painel-navigation[class] {
+  border-color: var(--vidro-borda) !important;
+  box-shadow: var(--vidro-sombra);
+}
+.peregrinus-panel .painel-navigation button[aria-current="page"] {
+  background: hsl(var(--access-navigation-active));
+  color: hsl(var(--panel-glass-white));
+}
+.peregrinus-panel .visao-geral-modulo {
+  --overview-glass-fill: var(--vidro-fundo);
+  --overview-glass-edge: var(--vidro-borda);
+  --overview-glass-shadow: var(--vidro-sombra);
+}
+.peregrinus-panel :is(h1, .ds-titulo-pagina) {
+  font-weight: 400;
+  font-kerning: normal;
+  line-height: 1.28;
+}
+.login-template-field,
+.peregrinus-panel :is(textarea, select, [role="combobox"]) {
+  background: var(--access-field-fill);
+  border-color: var(--access-field-edge);
+  color: hsl(var(--foreground));
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0;
+}
+.login-template-field::placeholder { color: hsl(var(--muted-foreground)); }
