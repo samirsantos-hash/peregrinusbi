@@ -77,6 +77,7 @@ import { NovidadesPrompt } from "@/components/novidades/novidades";
 import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
 import ResumoLojaApi from "@/components/ml/ResumoLojaApi";
+import ResumoSinergiaCorrelacoes from "@/components/ml/SinergiaPublicidade";
 import FullProdutosApi from "@/components/pock/FullProdutosApi";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
@@ -657,7 +658,8 @@ const Index = () => {
                   <TabsContent value="metas" className="mt-0">
                     <MetasPanel sellerId={selectedSeller} kpis={allKpisMonthly} />
                   </TabsContent>
-                  <TabsContent value="correlacoes" className="mt-0">
+                  <TabsContent value="correlacoes" className="mt-0 space-y-5">
+                    <ResumoSinergiaCorrelacoes custId={sellerCustIdMap[selectedSeller]} />
                     <CorrelacaoPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="alertas-riscos" className="mt-0">

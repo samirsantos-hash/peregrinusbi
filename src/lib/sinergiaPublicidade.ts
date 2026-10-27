@@ -1,8 +1,18 @@
-export type PontoPublicidade = { data: string; investimento: number | null; faturamento: number | null; receitaAds: number | null };
+export type PontoPublicidade = { data: string; investimento: number | null; faturamento: number | null; receitaAds: number | null; visitas?: number | null; cancelamentos?: number | null };
 export type ResultadoSinergia = ReturnType<typeof calcularSinergiaPublicidade>;
 
 const valido = (v: number | null): v is number => v != null && Number.isFinite(v) && v >= 0;
 const razao = (a: number | null, b: number | null) => valido(a) && valido(b) && b > 0 ? a / b : null;
+
+export function pearsonPareado(pares: [number | null | undefined, number | null | undefined][]) {
+  const ps = pares.filter((p): p is [number, number] => p[0] != null && p[1] != null && Number.isFinite(p[0]) && Number.isFinite(p[1]));
+  if (ps.length < 7) return null;
+  const mx = ps.reduce((s, p) => s + p[0], 0) / ps.length;
+  const my = ps.reduce((s, p) => s + p[1], 0) / ps.length;
+  let xy = 0, xx = 0, yy = 0;
+  for (const [a, b] of ps) { const x = a - mx, y = b - my; xy += x * y; xx += x * x; yy += y * y; }
+  return xx > 0 && yy > 0 ? Math.max(-1, Math.min(1, xy / Math.sqrt(xx * yy))) : null;
+}
 
 /** Same-date observations only. Attribution is exposure, never incremental or causal sales. */
 export function calcularSinergiaPublicidade(pontos: PontoPublicidade[]) {

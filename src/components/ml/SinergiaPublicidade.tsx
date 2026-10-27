@@ -6,6 +6,8 @@ import { fetchAllRows } from "@/lib/fetchAllRows";
 import { calcularSinergiaPublicidade, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
 import { num, pctFracao } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import GraficoPublicidadeSerie from "@/components/dashboard/GraficoPublicidadeSerie";
+import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 
 export function SinergiaIndicadores({ pontos, compacto = false, fonte }: { pontos: PontoPublicidade[]; compacto?: boolean; fonte: string }) {
   const r = calcularSinergiaPublicidade(pontos);
@@ -16,6 +18,8 @@ export function SinergiaIndicadores({ pontos, compacto = false, fonte }: { ponto
   return <section aria-label="Sinergia e dependência de publicidade" className="space-y-3 border-t border-border/50 pt-4">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
+    <GraficoPublicidadeSerie pontos={pontos} compacto={compacto} />
+    <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />
     <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{r.participacao == null ? "Sem dado" : pctFracao(r.participacao, 1)}</dd></div>
       <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{r.tacos == null ? "Sem dado" : pctFracao(r.tacos, 2)}</dd></div>
@@ -27,13 +31,14 @@ export function SinergiaIndicadores({ pontos, compacto = false, fonte }: { ponto
     {compacto && <p className="text-xs text-muted-foreground">{num(r.observacoes)} observações pareadas · associação não é causalidade.</p>}
     {!compacto && <div className="space-y-1 text-xs text-muted-foreground">
       <p>Participação = receita atribuída ÷ faturamento; TACOS = investimento ÷ faturamento. Razões dos totais das mesmas datas, sem média de percentuais.</p>
+      <p>ROAS = soma das vendas atribuídas a Ads ÷ soma do investimento. Faturamento total ÷ Ads não é ROAS.</p>
       <p>Pearson usa {num(r.observacoes)} observações pareadas; mínimo de 7. Valores de −1 a +1 indicam associação inversa ou direta, não causalidade.</p>
     </div>}
     <p className="text-xs text-muted-foreground">Atribuição não mede vendas incrementais nem prevê o que aconteceria ao desligar campanhas.</p>
   </section>;
 }
 
-type Resumo = { periodo: { inicio: string; fim: string }; atual: { serie: { data: string; faturamento: number }[] } };
+type Resumo = { periodo: { inicio: string; fim: string }; atual: { serie: { data: string; faturamento: number; cancelados?: number; visitas?: number }[] } };
 type Linha = { dia: string; campaign_id: number; cost: number | null; total_amount: number | null };
 
 /** Reuses paid-order summary; reads only campaign metrics on those exact UTC dates. */
@@ -60,7 +65,7 @@ export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, c
   const pontos = (resumo.data?.atual.serie ?? []).map(d => {
     const ls = (diario.data ?? []).filter(l => l.dia === d.data);
     const soma = (campo: "cost" | "total_amount") => ls.length && ls.every(l => l[campo] != null && Number.isFinite(Number(l[campo]))) ? ls.reduce((s, l) => s + Number(l[campo]), 0) : null;
-    return { data: d.data, faturamento: d.faturamento, investimento: soma("cost"), receitaAds: soma("total_amount") };
+    return { data: d.data, faturamento: d.faturamento, investimento: soma("cost"), receitaAds: soma("total_amount"), visitas: d.visitas ?? null, cancelamentos: d.cancelados ?? null };
   });
   return <SinergiaIndicadores pontos={pontos} compacto={compacto} fonte={periodo
     ? `Mercado Livre · ${periodo.inicio.split("-").reverse().join("/")} a ${periodo.fim.split("-").reverse().join("/")} · dias completos UTC${resumo.error || diario.error ? " · leitura indisponível" : ""}`
