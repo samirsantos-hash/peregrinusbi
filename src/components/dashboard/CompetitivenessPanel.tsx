@@ -430,14 +430,14 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             tooltip: `Contagem real de VISITAS no período. ${RESSALVA_VOLUME_BPC} ${TOOLTIP_BPC}`,
           },
         ].map((m, i) => (
-          <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-4">
-            <div className="flex items-center gap-1.5 mb-1">
-              <m.icon className="w-3.5 h-3.5 text-muted-foreground" />
-              <p className="metric-label">{m.label}</p>
+          <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.2 }} className="ds-kpi rounded-2xl p-5 min-w-0">
+            <div className="flex items-center gap-1.5 mb-2">
+              <m.icon className="w-3.5 h-3.5 ds-rotulo shrink-0" />
+              <p className="ds-rotulo text-[11px] font-medium uppercase truncate">{m.label}</p>
               <TooltipInfo text={m.tooltip} />
             </div>
             <div className="flex items-center gap-2">
-              <p className={`metric-value ${m.color}`} style={(m as any).inlineStyle}>{m.value}</p>
+              <p className="ds-numero-sec tabular-nums" style={(m as any).alert ? (m as any).inlineStyle : undefined}>{m.value}</p>
               {sampleWarning && m.label === "% Não Competitivo" && (
                 <span className="status-badge text-[10px] bg-muted/40 text-muted-foreground border-border/40">
                   {sampleWarning}
