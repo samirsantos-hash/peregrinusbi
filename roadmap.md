@@ -69,3 +69,9 @@
 - [ ] Gráficos: período parcial hachurado, ordenação por valor, pizzas >4 fatias → tabela, connectNulls=false
 - [ ] Revisar ~440 toFixed restantes fora de "%"/"x" para format.ts
 - [x] Levar cartões branco gelo + setas boas/ruins às demais seções (sem publicar)
+
+## Ads, Oportunidades e Clips (26/10)
+- [x] Setas vs período anterior de mesma duração em todos os KPIs de Product Ads, incluindo TACOS (TACOS só na janela de 30 dias).
+- [x] Botão Campanhas: tabela sob demanda e gráfico diário da campanha clicada (investimento, vendas, ROAS, ACOS, TACOS, cliques, CPC, CTR).
+- [x] Oportunidades: promoções via API com investimento da loja, rebate do ML, recomendação pelo maior rebate e aviso amarelo até 7 dias; sem API segue a planilha.
+- [x] Radar de qualidade/Clips movido para a aba Clips.
