@@ -13,12 +13,14 @@
     --aura-black: 0 0% 0%;
     --aura-white: 0 0% 100%;
     --aura-gray-300: 216 12% 84%;    /* #D1D5DB */
-    --aura-gray-400: 0 0% 72%;    /* #9CA3AF texto secundário */
-    --aura-gray-500: 0 0% 62%;     /* #6B7280 rótulos */
-    --aura-line: 30 6% 30%;           /* ≈ border-white/10 sobre preto */
-    --aura-glass: 30 5% 20%;           /* ≈ bg-white/[0.03] */
-    --aura-fill: 30 5% 24%;            /* ≈ bg-white/5 */
-    --aura-raise: 30 5% 28%;           /* ≈ bg-white/[0.06] */
+    /* Cinzas frios (slate) sobre o canvas #0B0F17: evita o tom quente/marrom
+       que distorcia o vidro. slate-400 (#94a3b8) ≈ 7,3:1 sobre o canvas. */
+    --aura-gray-400: 215 20% 65%;    /* #94A3B8 texto secundário */
+    --aura-gray-500: 215 16% 57%;    /* #7C8AA0 rótulos */
+    --aura-line: 222 18% 20%;        /* ≈ border-white/8 sobre #0B0F17 */
+    --aura-glass: 222 30% 9%;        /* superfície de vidro */
+    --aura-fill: 222 24% 12%;        /* ≈ bg-white/5 */
+    --aura-raise: 222 24% 15%;       /* ≈ bg-white/[0.06] */
     --aura-cyan-200: 155 62% 75%;    /* #A5F3FC */
     --aura-cyan-300: 155 63% 53%;    /* #67E8F9 */
     --aura-cyan-400: 156 79% 37%;    /* #22D3EE */
@@ -46,11 +48,11 @@
     --ec-laranja: var(--aura-orange-400);
     --ec-amarelo: var(--aura-yellow-400);
 
-    --background: 40 8% 13%;
+    --background: 222 35% 7%;        /* #0B0F17 */
     --foreground: var(--aura-white);
     --card: var(--aura-glass);
     --card-foreground: var(--aura-white);
-    --popover: 40 4% 9%;
+    --popover: 222 30% 8%;
     --popover-foreground: var(--aura-white);
     --primary: var(--aura-cyan-400);
     --primary-foreground: var(--aura-white);
@@ -66,9 +68,9 @@
     --input: var(--aura-line);
     --ring: var(--aura-cyan-400);
     --radius: 1rem;
-    --vidro-fundo: linear-gradient(155deg, rgba(255,255,255,.10) 0%, rgba(20,20,22,.38) 45%, rgba(0,0,0,.52) 100%);
-    --vidro-borda: rgba(255,255,255,.14);
-    --vidro-sombra: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.4), 0 30px 60px -24px rgba(0,0,0,.7);
+    --vidro-fundo: linear-gradient(155deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.035) 45%, rgba(255,255,255,.05) 100%);
+    --vidro-borda: rgba(255,255,255,.08);
+    --vidro-sombra: inset 0 1px 1px rgba(255,255,255,.06), 0 8px 24px rgba(0,0,0,.3);
     --cartao-sombra: 0 10px 24px -14px rgba(0,0,0,.55);
     --curva: cubic-bezier(.23,1,.32,1);
 
@@ -199,17 +201,19 @@
   html.light { background-color: #F8F9FA; }
   html.light ::selection { color: hsl(222 47% 11%); }
   html {
-    background-color: #08090A;
+    color-scheme: dark;
+    background-color: #0B0F17;
     background-image:
-      radial-gradient(60% 40% at 50% -5%, rgba(255,255,255,.10), transparent 62%),
-      radial-gradient(35% 55% at 4% 60%, rgba(20,168,108,.16), transparent 70%),
-      radial-gradient(30% 50% at 98% 35%, rgba(255,255,255,.06), transparent 70%),
-      radial-gradient(18% 30% at 8% 100%, rgba(20,168,108,.22), transparent 70%),
-      linear-gradient(180deg, #17191A 0%, #0F1011 50%, #08090A 100%);
+      radial-gradient(60% 40% at 50% -5%, rgba(255,255,255,.06), transparent 62%),
+      radial-gradient(35% 55% at 4% 60%, rgba(16,185,129,.10), transparent 70%),
+      radial-gradient(30% 50% at 98% 35%, rgba(255,255,255,.04), transparent 70%),
+      radial-gradient(18% 30% at 8% 100%, rgba(16,185,129,.14), transparent 70%),
+      linear-gradient(180deg, #121826 0%, #0E131C 50%, #0B0F17 100%);
     background-attachment: fixed;
     scroll-behavior: smooth;
   }
   html.light {
+    color-scheme: light;
     background-image:
       radial-gradient(60% 40% at 50% -5%, rgba(255,255,255,1), transparent 62%),
       radial-gradient(35% 55% at 4% 60%, rgba(20,168,108,.10), transparent 70%),
@@ -260,11 +264,15 @@
     transition: background-position 1.1s var(--curva), opacity .4s ease;
   }
   .glass-card:hover::after { background-position: -20% 0; opacity: 1; }
-  /* Nível 3 do Glass Verde: cartão branco opaco para números */
+  /* Nível 3 do Glass Verde: cartão para números. Vidro escuro no tema padrão;
+     branco opaco só no tema claro. */
   .cartao-branco {
-    background: #FFFFFF; color: #0A0A0A; border-radius: 16px; box-shadow: var(--cartao-sombra);
+    background: rgb(255 255 255 / 0.05); color: #fff; border-radius: 16px;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.3);
     transition: transform 200ms var(--curva);
   }
+  .light .cartao-branco { background: #FFFFFF; color: #0A0A0A; border-color: rgb(15 23 42 / 0.06); box-shadow: var(--cartao-sombra); }
   .cartao-branco:hover { transform: translateY(-4px); }
   @media (prefers-reduced-motion: reduce) { .cartao-branco:hover { transform: none; } }
   .glass-card-highlight {
@@ -436,7 +444,7 @@
 /* ── Sistema de gráficos: tooltip de vidro, legenda e eixos no padrão Aura ── */
 @layer components {
   .recharts-default-tooltip {
-    background: rgba(16,16,15,.72) !important;
+    background: rgb(11 15 23 / 0.9) !important;
     border: 1px solid rgb(255 255 255 / 0.1) !important;
     border-radius: 16px !important;
     color: hsl(var(--foreground)) !important;
@@ -577,6 +585,16 @@
 .light .bg-white\/5, .light .bg-white\/\[0\.03\], .light .bg-white\/\[0\.06\], .light .bg-white\/10 { background-color: rgb(15 23 42 / 0.04); }
 .light .border-white\/5, .light .border-white\/10, .light .border-white\/40 { border-color: hsl(200 18% 86%); }
 .light .text-white { color: hsl(222 47% 11%); }
+/* Tons de status calibrados para o escuro (400/300) escurecem no claro para manter AA. */
+.light :is(.text-emerald-400, .text-emerald-300) { color: hsl(160 84% 28%); }
+.light :is(.text-rose-400, .text-rose-300) { color: hsl(347 77% 40%); }
+.light :is(.text-amber-400, .text-amber-300, .text-amber-200\/90, .text-amber-200\/80) { color: hsl(32 95% 34%); }
+.light .text-sky-300 { color: hsl(199 89% 32%); }
+.light :is(.text-slate-400, .text-slate-300) { color: hsl(215 16% 40%); }
+/* Abas: no claro, a aba ativa ganha tinta escura e fundo cinza em vez de branco. */
+.light [role="tab"] { color: hsl(215 16% 40%); }
+.light [role="tab"]:hover, .light [role="tab"][data-state="active"] { color: hsl(222 47% 11%); }
+.light [role="tab"][data-state="active"] { background-color: rgb(15 23 42 / 0.07); }
 .light .ds-hachura { background-image: repeating-linear-gradient(135deg, rgb(15 23 42 / 0.06) 0 4px, transparent 4px 8px); }
 
 /* Identidade Multilojas: escopo visual compartilhado entre todas as seções. */
@@ -619,23 +637,37 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   .glass-card:hover, [role="tab"]:active { transform: none; }
 }
 
-/* ── Cartão de indicador: branco gelo, número proporcional, seta de tendência ── */
+/* ── Cartão de indicador: vidro escuro calibrado (tema padrão), número proporcional,
+      seta de tendência. O tema claro recebe o branco gelo logo abaixo. ── */
 .ds-kpi {
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.3);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition: transform 200ms var(--curva-rapida), border-color 200ms ease, box-shadow 200ms var(--curva-rapida);
+  will-change: transform;
+}
+.ds-kpi:hover { transform: translateY(-2px); border-color: rgb(255 255 255 / 0.15); }
+.ds-kpi .ds-rotulo { color: hsl(215 20% 65%); letter-spacing: 0.08em; }
+.ds-kpi .ds-nota { color: hsl(215 20% 65%); }
+.ds-kpi .ds-numero-focal { font-size: clamp(26px, 2.4vw, 34px); font-weight: 600; letter-spacing: -0.03em; color: #fff; }
+.ds-kpi .ds-numero-sec { font-size: clamp(22px, 1.9vw, 28px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; color: #fff; }
+.ds-seta { display: inline-flex; align-items: center; justify-content: center; height: 22px; width: 22px; border-radius: 9999px; align-self: center; background: rgb(255 255 255 / 0.06); color: #cbd5e1; }
+.ds-seta-bom { background: rgb(16 185 129 / 0.12); color: #34d399; }
+.ds-seta-ruim { background: rgb(244 63 94 / 0.12); color: #fb7185; }
+@media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
+/* Tema claro: branco gelo com sombra fria */
+.light .ds-kpi {
   background: hsl(210 20% 97%);
   border: 1px solid rgb(15 23 42 / 0.06);
   box-shadow: 0 1px 1px rgb(15 23 42 / 0.04), 0 4px 8px -2px rgb(15 23 42 / 0.06), 0 16px 32px -16px rgb(15 23 42 / 0.18);
-  transition: transform 200ms var(--curva-rapida), box-shadow 200ms var(--curva-rapida);
-  will-change: transform;
 }
-.ds-kpi:hover { transform: translateY(-2px); box-shadow: 0 1px 1px rgb(15 23 42 / 0.04), 0 8px 16px -4px rgb(15 23 42 / 0.10), 0 24px 44px -18px rgb(15 23 42 / 0.28); }
-.ds-kpi .ds-rotulo { color: hsl(215 16% 40%); letter-spacing: 0.08em; }
-.ds-kpi .ds-nota { color: hsl(215 14% 42%); }
-.ds-kpi .ds-numero-focal { font-size: clamp(26px, 2.4vw, 34px); font-weight: 600; letter-spacing: -0.03em; color: hsl(222 47% 11%); }
-.ds-kpi .ds-numero-sec { font-size: clamp(22px, 1.9vw, 28px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; color: hsl(222 47% 11%); }
-.ds-seta { display: inline-flex; align-items: center; justify-content: center; height: 22px; width: 22px; border-radius: 9999px; align-self: center; background: hsl(215 16% 90%); color: hsl(215 16% 35%); }
-.ds-seta-bom { background: rgb(20 168 108 / 0.12); color: #0B7A4D; }
-.ds-seta-ruim { background: rgb(214 36 16 / 0.10); color: #D62410; }
-@media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
+.light .ds-kpi:hover { border-color: rgb(15 23 42 / 0.10); box-shadow: 0 1px 1px rgb(15 23 42 / 0.04), 0 8px 16px -4px rgb(15 23 42 / 0.10), 0 24px 44px -18px rgb(15 23 42 / 0.28); }
+.light .ds-kpi .ds-rotulo { color: hsl(215 16% 40%); }
+.light .ds-kpi .ds-nota { color: hsl(215 14% 42%); }
+.light .ds-kpi .ds-numero-focal, .light .ds-kpi .ds-numero-sec { color: hsl(222 47% 11%); }
+.light .ds-seta { background: hsl(215 16% 90%); color: hsl(215 16% 35%); }
 
 /*
  * Painel Noite (Visão geral) — módulo de vidro escuro calibrado.
@@ -1031,20 +1063,47 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --muted-foreground: var(--panel-glass-muted);
   --primary: var(--panel-glass-positive);
   --brand-blue: var(--panel-glass-positive);
-  --muted: 210 12% 91%;
+  --muted: var(--panel-glass-fill-2);
   --background: var(--panel-glass-ice);
   --border: var(--panel-glass-edge);
-  background: linear-gradient(135deg,
-    hsl(var(--panel-glass-white) / .96),
-    hsl(var(--panel-glass-ice) / .9) 55%,
-    hsl(var(--panel-glass-white) / .82)) !important;
+  background: var(--panel-glass-nav-fill) !important;
   color: hsl(var(--panel-glass-ink));
   backdrop-filter: blur(28px) saturate(105%);
   -webkit-backdrop-filter: blur(28px) saturate(105%);
 }
 .painel-navigation button { letter-spacing: 0; }
+/*
+ * Vidro do painel protegido (todas as seções, abas e banners).
+ * :root = vidro escuro calibrado (canvas #0B0F17, superfícies white/4–6, borda
+ * white/8, texto branco + slate-400). `.light` = branco gelo. Os componentes
+ * só leem estes tokens, então a troca de tema não exige mudança de markup.
+ */
 :root {
   --panel-glass-white: 0 0% 100%;
+  --panel-glass-ice: 222 30% 9%;          /* superfície opaca de apoio / fallback */
+  --panel-glass-ink: 0 0% 100%;
+  --panel-glass-muted: 215 20% 65%;       /* slate-400 */
+  --panel-glass-edge: 222 16% 24%;        /* usada a 50% ≈ white/8 */
+  --panel-glass-shadow: 0 0% 0%;
+  --panel-glass-positive: 158 64% 52%;    /* emerald-400 */
+  --panel-glass-negative: 350 89% 60%;    /* rose-500 */
+  --panel-glass-fill-2: 222 24% 14%;      /* --muted / --ec-surface-2 dentro do vidro */
+  --panel-glass-fill: linear-gradient(135deg,
+    hsl(var(--panel-glass-white) / .06),
+    hsl(var(--panel-glass-white) / .035) 45%,
+    hsl(var(--panel-glass-white) / .05));
+  --panel-glass-nav-fill: linear-gradient(135deg,
+    hsl(222 30% 12% / .94),
+    hsl(222 32% 9% / .9) 55%,
+    hsl(222 30% 12% / .94));
+  --panel-glass-reflection: linear-gradient(112deg,
+    transparent 25%, hsl(var(--panel-glass-white) / .10) 49%, transparent 73%);
+  --panel-glass-reflection-active: linear-gradient(112deg,
+    transparent 25%, hsl(var(--panel-glass-white) / .10) 49%, transparent 73%);
+  --panel-glass-elevation: inset 0 1px 1px hsl(var(--panel-glass-white) / .06),
+    0 8px 24px hsl(var(--panel-glass-shadow) / .3);
+}
+.light {
   --panel-glass-ice: 210 20% 97%;
   --panel-glass-ink: 240 6% 12%;
   --panel-glass-muted: 215 12% 38%;
@@ -1052,12 +1111,19 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --panel-glass-shadow: 240 6% 5%;
   --panel-glass-positive: 156 84% 26%;
   --panel-glass-negative: 7 86% 45%;
+  --panel-glass-fill-2: 210 12% 91%;
   --panel-glass-fill: linear-gradient(135deg,
-    hsl(var(--panel-glass-white) / .94),
-    hsl(var(--panel-glass-ice) / .83) 45%,
-    hsl(var(--panel-glass-white) / .72));
+    hsl(var(--panel-glass-white) / .86),
+    hsl(var(--panel-glass-ice) / .68) 45%,
+    hsl(var(--panel-glass-white) / .58));
+  --panel-glass-nav-fill: linear-gradient(135deg,
+    hsl(var(--panel-glass-white) / .96),
+    hsl(var(--panel-glass-ice) / .9) 55%,
+    hsl(var(--panel-glass-white) / .82));
   --panel-glass-reflection: linear-gradient(112deg,
     transparent 25%, hsl(var(--panel-glass-white) / .48) 49%, transparent 73%);
+  --panel-glass-reflection-active: linear-gradient(112deg,
+    transparent 25%, hsl(var(--panel-glass-white) / .5) 49%, transparent 73%);
   --panel-glass-elevation: inset 0 1px 0 hsl(var(--panel-glass-white) / .95),
     inset 0 -1px 0 hsl(var(--panel-glass-white) / .28),
     0 2px 4px hsl(var(--panel-glass-shadow) / .06),
@@ -1083,12 +1149,6 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   -webkit-backdrop-filter: blur(24px) saturate(110%);
   box-shadow: var(--panel-glass-elevation);
 }
-.light {
-  --panel-glass-fill: linear-gradient(135deg,
-    hsl(var(--panel-glass-white) / .86),
-    hsl(var(--panel-glass-ice) / .68) 45%,
-    hsl(var(--panel-glass-white) / .58));
-}
 .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
   --foreground: var(--panel-glass-ink);
   --card-foreground: var(--panel-glass-ink);
@@ -1102,8 +1162,8 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --emerald: var(--panel-glass-positive);
   --neon-blue: var(--panel-glass-positive);
   --ec-vermelho: var(--panel-glass-negative);
-  --ec-surface-2: 210 12% 91%;
-  --muted: 210 12% 91%;
+  --ec-surface-2: var(--panel-glass-fill-2);
+  --muted: var(--panel-glass-fill-2);
   --border: var(--panel-glass-edge);
   position: relative;
   min-width: 0;
@@ -1132,8 +1192,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   background-position: center;
   transform: none;
   /* A broad continuous reflection follows the pointer without moving content. */
-  background-image: linear-gradient(112deg, transparent 25%,
-    hsl(var(--panel-glass-white) / .5) 49%, transparent 73%);
+  background-image: var(--panel-glass-reflection-active);
   background-size: 160% 180%;
   background-position: calc(var(--glass-x, 50%) - 150px) calc(var(--glass-y, 50%) - 120px);
 }
@@ -1161,6 +1220,9 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .peregrinus-panel .ds-kpi:hover { transform: translateY(-2px); }
   .peregrinus-panel .glass-card:hover { transform: none; }
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco):hover {
+    border-color: hsl(var(--panel-glass-edge) / .95) !important;
+  }
 }
 @media (hover: none), (prefers-reduced-motion: reduce) {
   .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):hover { transform: none; }

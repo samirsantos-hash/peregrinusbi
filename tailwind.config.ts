@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 export default {
   darkMode: ["class"],
@@ -92,7 +93,9 @@ export default {
         "warn-soft": "hsl(var(--warn-soft))",
         ok: "hsl(var(--ok))",
         "neon-blue-glow": "hsl(var(--neon-blue-glow))",
-        emerald: "hsl(var(--emerald))",
+        // `emerald` segue como token do tema (text-emerald), mas a escala padrão
+        // (emerald-400, emerald-500/10…) precisa existir para os selos de status.
+        emerald: { ...colors.emerald, DEFAULT: "hsl(var(--emerald))" },
         "emerald-glow": "hsl(var(--emerald-glow))",
         warning: "hsl(var(--warning))",
         "glass-border": "hsl(var(--glass-border))",

@@ -12,15 +12,15 @@ function hasClipData(visitasClips: number, siClips: number, ordersClips: number)
 
 function statusClip(visitas: number, orders: number, mediaOrders: number): { label: string; className: string } {
   if (visitas <= 0 && orders <= 0) {
-    return { label: "Sem alcance", className: "bg-amber-100 text-amber-800" };
+    return { label: "Sem alcance", className: "bg-amber-400/15 text-amber-300" };
   }
   if (orders >= Math.max(3, mediaOrders)) {
-    return { label: "Campeão", className: "bg-emerald-100 text-emerald-800" };
+    return { label: "Campeão", className: "bg-emerald-400/15 text-emerald-300" };
   }
   if (orders < 3) {
-    return { label: "Baixa conversão", className: "bg-slate-100 text-slate-600" };
+    return { label: "Baixa conversão", className: "bg-muted text-muted-foreground" };
   }
-  return { label: "Ativo", className: "bg-sky-100 text-sky-800" };
+  return { label: "Ativo", className: "bg-sky-400/15 text-sky-300" };
 }
 
 /**
@@ -119,7 +119,7 @@ export default function ClipsResumo({
       )}
 
       {!temPeriodo ? (
-        <div className="ds-kpi rounded-xl p-5 text-sm text-slate-600">
+        <div className="ds-kpi rounded-xl p-5 text-sm text-muted-foreground">
           Sem atividade de clips no período. Quando houver visitas ou TGMV via vídeo, o resumo aparece aqui.
         </div>
       ) : (
@@ -149,23 +149,23 @@ export default function ClipsResumo({
 
           {topClips.length > 0 && (
             <div className="ds-kpi rounded-xl overflow-hidden">
-              <div className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 border-b border-slate-200/80">
+              <div className="flex flex-wrap items-baseline justify-between gap-2 px-4 py-3 border-b border-border">
                 <div className="flex items-center gap-2">
-                  <Video className="h-3.5 w-3.5 text-slate-500" />
-                  <p className="text-xs font-medium text-slate-600">Vídeos com maior tração</p>
+                  <Video className="h-3.5 w-3.5 text-muted-foreground" />
+                  <p className="text-xs font-medium text-foreground">Vídeos com maior tração</p>
                 </div>
-                <p className="text-[10px] text-slate-400">
+                <p className="text-[10px] text-muted-foreground/80">
                   Snapshot por MLB · base de qualidade (não é o somatório do período)
                 </p>
               </div>
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-border">
                 {topClips.map((c) => (
                   <li key={c.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-slate-800" title={c.nome}>
+                      <p className="truncate font-medium text-foreground" title={c.nome}>
                         {c.nome}
                       </p>
-                      <p className="tabular-nums text-[11px] text-slate-500 font-mono">
+                      <p className="tabular-nums text-[11px] text-muted-foreground font-mono">
                         {num(c.visitas)} visitas · {num(c.pedidos)} conversões
                       </p>
                     </div>
@@ -177,7 +177,7 @@ export default function ClipsResumo({
                         href={c.link}
                         target="_blank"
                         rel="noreferrer"
-                        className="shrink-0 text-slate-400 hover:text-slate-700"
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
                         aria-label={`Abrir anúncio ${c.id}`}
                       >
                         <ExternalLink className="h-3.5 w-3.5" />

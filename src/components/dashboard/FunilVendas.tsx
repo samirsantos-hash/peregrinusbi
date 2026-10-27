@@ -41,7 +41,7 @@ export default function FunilVendas({
     return (
       <section aria-label="Funil de conversão" className="space-y-3">
         {!ocultarTitulo && <h2 className="ds-rotulo">{titulo}</h2>}
-        <div className="ds-kpi rounded-xl p-5 text-sm text-slate-600">
+        <div className="ds-kpi rounded-xl p-5 text-sm text-muted-foreground">
           Sem visitas no período — carregue a base de visitas para ver a conversão.
         </div>
       </section>
@@ -94,8 +94,8 @@ export default function FunilVendas({
                 <div
                   className={`absolute inset-0 border transition-colors duration-150 ${
                     eMaiorDrop
-                      ? "border-amber-400/70 bg-gradient-to-b from-amber-100 to-amber-50/80"
-                      : "border-slate-200/90 bg-gradient-to-b from-white to-slate-50/90"
+                      ? "border-amber-400/60 bg-gradient-to-b from-amber-400/20 to-amber-400/5"
+                      : "border-border bg-muted/50"
                   }`}
                   style={{
                     clipPath: `polygon(0 0, 100% 0, ${100 - recuo}% 100%, ${recuo}% 100%)`,
@@ -103,19 +103,19 @@ export default function FunilVendas({
                   }}
                 />
                 <div className="relative flex max-w-full items-center gap-1.5">
-                  <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-slate-500">{e.nome}</p>
+                  <p className="truncate text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground">{e.nome}</p>
                   {e.fonte === "estimativa" && (
-                    <span className="shrink-0 rounded bg-slate-200/80 px-1.5 py-px text-[9px] font-medium uppercase tracking-wide text-slate-600">
+                    <span className="shrink-0 rounded bg-muted px-1.5 py-px text-[9px] font-medium uppercase tracking-wide text-muted-foreground">
                       estimativa
                     </span>
                   )}
                 </div>
-                <p className="relative max-w-full truncate text-xl font-semibold tabular-nums font-mono leading-tight text-slate-900">
+                <p className="relative max-w-full truncate text-xl font-semibold tabular-nums font-mono leading-tight text-foreground">
                   <NumeroAnimado valor={num(e.valor)} />
                 </p>
-                {e.nota && <p className="relative max-w-full truncate text-[10px] text-slate-400">{e.nota}</p>}
+                {e.nota && <p className="relative max-w-full truncate text-[10px] text-muted-foreground/80">{e.nota}</p>}
                 {i > 0 && (
-                  <p className={`relative max-w-full truncate text-[10px] leading-tight tabular-nums font-mono ${eMaiorDrop ? "text-amber-700 font-medium" : "text-slate-500"}`}>
+                  <p className={`relative max-w-full truncate text-[10px] leading-tight tabular-nums font-mono ${eMaiorDrop ? "text-amber-400 font-medium" : "text-muted-foreground"}`}>
                     {pct(daAnterior * 100, 2)} da etapa anterior
                     {eMaiorDrop ? " · maior abandono" : ""}
                   </p>
@@ -126,30 +126,30 @@ export default function FunilVendas({
         </div>
 
         <div className="space-y-3">
-          <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-            <p className="text-[11px] uppercase tracking-[0.1em] text-slate-500">Conversão final</p>
-            <p className="text-3xl font-semibold tabular-nums font-mono tracking-tight text-slate-900">
+          <div className="rounded-xl border border-border bg-card/60 p-4 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]">
+            <p className="text-[11px] uppercase tracking-[0.1em] text-muted-foreground">Conversão final</p>
+            <p className="text-3xl font-semibold tabular-nums font-mono tracking-tight text-foreground">
               <NumeroAnimado valor={cvr != null ? pct(cvr * 100, 2) : "—"} />
             </p>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-muted-foreground">
               unidades ÷ visitas
               {cvr != null ? ` · a cada 100 visitas, ${num(cvr * 100, 1)} unidades` : ""}
             </p>
           </div>
 
           {maiorAbandono && (
-            <div className="rounded-xl border border-amber-200/80 bg-amber-50/80 p-3.5 text-xs">
-              <p className="font-medium text-amber-900">
+            <div className="rounded-xl border border-amber-400/30 bg-amber-400/10 p-3.5 text-xs">
+              <p className="font-medium text-amber-300">
                 {maiorAbandono.estimado ? "Maior queda estimada" : "Maior abandono"}
               </p>
-              <p className="mt-0.5 text-amber-800/90">
+              <p className="mt-0.5 text-amber-200/90">
                 {maiorAbandono.de} → {maiorAbandono.para}
               </p>
-              <p className="mt-1 tabular-nums font-mono text-amber-900">
+              <p className="mt-1 tabular-nums font-mono text-amber-300">
                 {pct(maiorAbandono.taxa * 100, 1)} de queda · {num(maiorAbandono.perdidos)} não avançaram
               </p>
               {maiorAbandono.estimado && (
-                <p className="mt-1.5 text-[10px] leading-snug text-amber-800/80">
+                <p className="mt-1.5 text-[10px] leading-snug text-amber-200/80">
                   Inclui etapa estimada — a conversão oficial é só visitas → pedidos.
                 </p>
               )}
@@ -163,9 +163,9 @@ export default function FunilVendas({
               ["Receita / visita", brl(receitaVisita, true)],
               ["BPC médio", d.bpcMedio != null ? num(d.bpcMedio, 2) : "Sem dado"],
             ].map(([k, v]) => (
-              <div key={k} className="rounded-lg border border-slate-200/80 bg-white p-2.5 transition-colors duration-150 hover:border-slate-300">
-                <dt className="text-[11px] text-slate-500">{k}</dt>
-                <dd className="font-medium tabular-nums font-mono text-slate-800">
+              <div key={k} className="rounded-lg border border-border bg-card/60 p-2.5 transition-colors duration-150 hover:border-white/15">
+                <dt className="text-[11px] text-muted-foreground">{k}</dt>
+                <dd className="font-medium tabular-nums font-mono text-foreground">
                   <NumeroAnimado valor={String(v)} />
                 </dd>
               </div>
