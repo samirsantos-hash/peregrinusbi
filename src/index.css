@@ -1262,18 +1262,18 @@ html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
   --panel-date: 54 100% 50%;
   --panel-white: 0 0% 100%;
   --panel-black: 0 0% 0%;
-  --panel-fill: hsl(var(--panel-white) / .05);
-  --panel-fill-hover: hsl(var(--panel-white) / .05);
-  --panel-stroke-hover: hsl(var(--panel-white) / .14);
+  --panel-fill: hsl(var(--panel-white) / .035);
+  --panel-fill-hover: hsl(var(--panel-white) / .045);
+  --panel-stroke-hover: hsl(var(--panel-white) / .1);
   --panel-divider: hsl(var(--panel-white) / .06);
   --panel-tooltip: hsl(var(--panel-surface) / .85);
   --panel-fill-nested: hsl(var(--panel-white) / .025);
   --panel-stroke: hsl(var(--panel-white) / .08);
-  --panel-shadow: inset 0 1px 1px hsl(var(--panel-white) / .06),
-    0 8px 24px hsl(var(--panel-black) / .3);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .045),
+    0 4px 24px hsl(var(--panel-black) / .2);
   --panel-nav-fill: hsl(var(--panel-surface) / .92);
-  --panel-reflection: .14;
-  --panel-radius: 20px;
+  --panel-reflection: .055;
+  --panel-radius: 16px;
 }
 html.light {
   --panel-canvas: 0 0% 100%;
@@ -1295,7 +1295,7 @@ html.light {
     0 2px 6px -2px hsl(var(--panel-black) / .04),
     0 12px 28px -20px hsl(var(--panel-black) / .12);
   --panel-nav-fill: hsl(var(--panel-white) / .9);
-  --panel-reflection: .28;
+  --panel-reflection: .12;
 }
 html.dark, html.light {
   --background: var(--panel-canvas);
@@ -1451,8 +1451,8 @@ html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-gl
   border-radius: var(--panel-radius);
   color: hsl(var(--panel-text));
   box-shadow: var(--panel-shadow);
-  backdrop-filter: blur(22px) saturate(170%);
-  -webkit-backdrop-filter: blur(22px) saturate(170%);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
   transform: none;
   transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
   animation: panelGlassIn 200ms var(--curva-rapida) both;
@@ -1473,7 +1473,7 @@ html body .peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.cartao-br
   inset: 0;
   pointer-events: none;
   border-radius: inherit;
-  background: radial-gradient(100px circle at var(--glass-x,50%) var(--glass-y,50%),hsl(var(--panel-white) / var(--panel-reflection)),transparent 75%);
+  background: radial-gradient(240px circle at var(--glass-x,50%) var(--glass-y,50%),hsl(var(--panel-white) / var(--panel-reflection)),transparent 75%);
   opacity: 0;
   transition: opacity 160ms var(--curva-rapida);
 }
@@ -1573,19 +1573,19 @@ html body .peregrinus-panel :is(.panel-sidebar,.painel-navigation) {
 
 /* Screenshot finish limited to the two overview bands, not global glass. */
 .resumo-visual-ref {
-  --summary-fill: linear-gradient(160deg, hsl(var(--panel-white) / .065), hsl(var(--panel-white) / .025) 45%, hsl(var(--panel-black) / .16));
-  --summary-edge: hsl(var(--panel-white) / .12);
-  --summary-shadow: inset 0 1px 1px hsl(var(--panel-white) / .1), inset 0 -1px 0 hsl(var(--panel-black) / .18), 0 4px 24px hsl(var(--panel-black) / .35);
-  --summary-reflection: linear-gradient(115deg, hsl(var(--panel-white) / .035), transparent 48%);
-  --summary-grid: hsl(var(--panel-white) / .32);
+  --summary-fill: var(--panel-fill);
+  --summary-edge: var(--panel-stroke);
+  --summary-shadow: var(--panel-shadow);
+  --summary-reflection: linear-gradient(180deg, hsl(var(--panel-white) / .012), transparent 60%);
+  --summary-grid: hsl(var(--panel-white) / .12);
   --chart-1: var(--panel-positive);
 }
 html.light .resumo-visual-ref {
-  --summary-fill: linear-gradient(160deg, hsl(var(--panel-white) / .9), hsl(var(--panel-surface) / .6));
-  --summary-edge: hsl(var(--panel-line) / .65);
-  --summary-shadow: inset 0 1px 1px hsl(var(--panel-white)), 0 4px 24px hsl(var(--panel-black) / .06);
-  --summary-reflection: linear-gradient(115deg, hsl(var(--panel-white) / .3), transparent 48%);
-  --summary-grid: hsl(var(--panel-line) / .8);
+  --summary-fill: var(--panel-fill);
+  --summary-edge: var(--panel-stroke);
+  --summary-shadow: var(--panel-shadow);
+  --summary-reflection: linear-gradient(180deg, hsl(var(--panel-white) / .12), transparent 60%);
+  --summary-grid: hsl(var(--panel-line) / .5);
 }
 html body .peregrinus-panel .resumo-visual-ref :is(.noite-vidro, div.noite-vidro[class*="rounded"][class*="bg-card"][class*="border"]) {
   background: var(--summary-fill) !important;
@@ -1646,3 +1646,9 @@ html body .peregrinus-panel .resumo-visual-ref .recharts-cartesian-grid line {
 
 .sinergia-operacional { padding-top: 16px; border-top: 1px solid var(--panel-divider); }
 .sinergia-operacional td { backdrop-filter: blur(24px); box-shadow: inset 0 1px 0 hsl(var(--panel-white) / .05); }
+
+/* Subtle reputation highlights retain the official status color. */
+html body .peregrinus-panel [aria-label="Saúde da conta"] [role="img"] > span {
+  box-shadow: none;
+}
+html body .peregrinus-panel .sinergia-operacional td { box-shadow: none; }
