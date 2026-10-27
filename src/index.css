@@ -1046,6 +1046,11 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --warn: var(--panel-glass-negative);
   --warning: var(--panel-glass-negative);
   --attention-text: var(--panel-glass-muted);
+  --price-hot: var(--panel-glass-negative);
+  --price-cool: var(--panel-glass-positive);
+  --chart-4: var(--panel-glass-muted);
+  --series-4: var(--panel-glass-muted);
+  --axis: var(--panel-glass-muted);
   --ec-surface-2: 210 12% 91%;
   --muted: 210 12% 91%;
   --border: var(--panel-glass-edge);

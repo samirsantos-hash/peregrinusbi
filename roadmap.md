@@ -3,7 +3,7 @@
 ## Refinamento pós-reversão (27/10)
 - [x] Comparar com a versão anterior ao kit e manter navegação, superfícies e dados anteriores.
 - [x] Unificar DM Sans, peso dos números e contraste de títulos, legendas e alertas no vidro branco.
-- [ ] Conferir Preço com loja real nos dois temas e largura reduzida.
+- [x] Conferir Preço da GMABSOLUTA nos dois temas e largura reduzida: DM Sans carregada, valores reais preservados, reflexo ativo, sem transbordamento ou erros.
 
 ## Vidro branco global (27/10)
 - [x] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
