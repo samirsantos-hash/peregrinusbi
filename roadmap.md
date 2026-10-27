@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Refino visual do painel (27/10)
-- [ ] Melhorar distribuição dos KPIs, leitura em DM Sans e contraste das comparações, preservando vidro, dados e integrações; conferir os dois temas e tela estreita.
+- [x] Melhorar distribuição dos KPIs, leitura em DM Sans e contraste das comparações, preservando vidro, dados e integrações; GMABSOLUTA conferida nos dois temas, tela de 536px sem transbordamento e movimento reduzido sem inclinação. Correção de contraste dos números no tema claro validada visualmente.
 
 ## Otimização de indicadores (27/10)
 - [x] Restringir carteiras grandes no servidor, sequenciar páginas sem consultas especulativas; classificação, tendências, últimos KPIs, verticais e consolidação mensal por RPC com RLS do usuário; mix lê último snapshot e contagem mantém 45 dias.
