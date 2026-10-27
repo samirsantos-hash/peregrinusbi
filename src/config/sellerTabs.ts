@@ -51,7 +51,7 @@ export const SELLER_TABS: SellerTab[] = [
   { id: "opportunities", label: "Oportunidades", icon: Gift, order: 8,
     descricao: "Onde há receita não capturada",
     juniorTip: "CDP = combustível do algoritmo. Item elegível sem opt-in = dinheiro na mesa." },
-  { id: "reputation", label: "Reputação", icon: HeartPulse, order: 9,
+  { id: "reputation", label: "Reputação", icon: HeartPulse, order: 1.2,
     descricao: "Reclamações, atrasos, cancelamentos e disputas",
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
   { id: "perguntas", label: "Perguntas", icon: MessageCircleQuestion, order: 9.5,
@@ -77,9 +77,9 @@ export function getSecao(id: string) {
 }
 
 export const GRUPOS_SECOES = [
-  { titulo: "Visão geral", ids: ["efficiency"] },
+  { titulo: "Visão geral", ids: ["efficiency", "reputation"] },
   { titulo: "Desempenho comercial", ids: ["competitiveness", "publicidade", "opportunities", "clips"] },
-  { titulo: "Operação e anúncios", ids: ["logistics", "reputation", "quality", "perguntas"] },
+  { titulo: "Operação e anúncios", ids: ["logistics", "quality", "perguntas"] },
   { titulo: "Planejamento", ids: ["pock", "metas", "correlacoes"] },
 ];
 
