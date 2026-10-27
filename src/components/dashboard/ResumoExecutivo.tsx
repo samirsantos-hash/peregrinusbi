@@ -3,6 +3,7 @@ import { ResponsiveContainer, ComposedChart, Area, Line, XAxis, YAxis, Tooltip, 
 import { KpiCard } from "@/components/ds";
 import { brl, num, pct } from "@/lib/format";
 import { adicionarDiasIso, diasInclusive, formatarPeriodoBr } from "@/lib/periodoResumo";
+import { SinergiaIndicadores } from "@/components/ml/SinergiaPublicidade";
 
 type K = { date: string; gmv?: number; tgmv?: number; revenue?: number; adsInvestment?: number; tgmvPads?: number; visits?: number; tsi?: number };
 
@@ -48,6 +49,7 @@ export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?:
 
   return (
     <div className="space-y-5">
+      <SinergiaIndicadores compacto fonte={`Histórico importado · ${periodo}`} pontos={d.serie.map(k => ({ data: k.date.slice(0, 10), investimento: k.adsInvestment ?? null, faturamento: k.tgmv ?? null, receitaAds: k.tgmvPads ?? null }))} />
       <section aria-label="Resultado da loja">
         <h2 className="ds-rotulo mb-2">1 · Resultado da loja · {periodo}</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

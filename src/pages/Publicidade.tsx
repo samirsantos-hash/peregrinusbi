@@ -18,6 +18,7 @@ import { chamarFuncaoMl, dataHoraBr, useContasMl } from "@/lib/mlFuncoes";
 import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel } from "@/lib/adsAnalise";
 import { useDesenvolvedor } from '@/hooks/useDesenvolvedor';
 import { registrarAviso } from '@/lib/avisosDesenvolvedor';
+import SinergiaPublicidadeApi from '@/components/ml/SinergiaPublicidade';
 
 /** Janela de comparação: 30 dias contra os 30 anteriores (a API guarda 90). */
 const DIAS = 30;
@@ -189,6 +190,7 @@ export default function Publicidade() {
 
         {estado.data?.status === "ativo" && (
           <>
+            <SinergiaPublicidadeApi accountId={contaId} />
             {dados.isLoading && <Carregando texto="Montando o painel de publicidade…" />}
             {dados.isError && <EmptyState falta="Não foi possível carregar os dados de publicidade." acao="Recarregue a página ou clique em Atualizar." />}
             {painel && (
