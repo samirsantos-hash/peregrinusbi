@@ -1285,6 +1285,7 @@ html:root .peregrinus-panel
   --access-field-fill: hsl(var(--aura-white) / .03);
   --access-field-edge: hsl(var(--aura-white) / .14);
   --access-blur: 22px;
+  --access-navigation-active: 156 84% 26%;
 }
 .light {
   --access-field-fill: hsl(var(--panel-glass-white) / .3);
@@ -1317,6 +1318,10 @@ html:root .peregrinus-panel
 html:root .peregrinus-panel .painel-navigation[class] {
   border-color: var(--vidro-borda) !important;
   box-shadow: var(--vidro-sombra);
+}
+.peregrinus-panel .painel-navigation button[aria-current="page"] {
+  background: hsl(var(--access-navigation-active));
+  color: hsl(var(--panel-glass-white));
 }
 .peregrinus-panel .visao-geral-modulo {
   --overview-glass-fill: var(--vidro-fundo);

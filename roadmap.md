@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Identidade do login em todo o dashboard (27/10)
-- [ ] Aplicar o fundo de cordas, vidro, tipografia e campos da tela de login às páginas protegidas, sem alterar dados ou navegação.
-- [ ] Conferir login e painel autenticado nos dois temas, reação ao mouse e quadros aninhados.
+- [x] Aplicar o fundo de cordas, vidro, tipografia e campos da tela de login às páginas protegidas, sem alterar dados ou navegação.
+- [x] Conferir login e Preço da GMABSOLUTA autenticada nos dois temas: um único fundo, reação ao mouse, sem transbordamento ou erros; regras de quadros aninhados preservadas.
 
 ## Auditoria do vidro — aplicação em etapas (27/10)
 - [x] Etapa 1: preservar o vidro próprio do menu; contraste conferido nos dois temas (escuro: itens 15,15:1 e grupos 5,83:1).
