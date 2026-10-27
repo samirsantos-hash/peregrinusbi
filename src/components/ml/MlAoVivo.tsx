@@ -97,7 +97,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       {secao === "reputacao" && <Reputacao r={d("reputacao")} p={d("perguntas")} />}
       {secao === "qualidade" && <><Qualidade a={d("anuncios")} /><CompararAnuncios key={custId} custId={custId} itens={d("anuncios")?.itens ?? []} /></>}
       {secao === "logistica" && <Logistica e={d("envios")} />}
-      {secao === "oportunidades" && <Promocoes p={d("promocoes")} />}
+      {secao === "oportunidades" && <PromocoesApi custId={custId} resumo={d("promocoes")} />}
       {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
     </section>
   );
