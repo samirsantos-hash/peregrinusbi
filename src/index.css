@@ -985,10 +985,11 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
     hsl(var(--panel-glass-white) / .96),
     hsl(var(--panel-glass-ice) / .84) 58%,
     hsl(var(--panel-glass-white) / .94));
+  --panel-glass-opacity: .20;
   --panel-glass-fill: linear-gradient(135deg,
-    hsl(var(--panel-glass-white) / .96),
-    hsl(var(--panel-glass-ice) / .86) 45%,
-    hsl(var(--panel-glass-white) / .92));
+    hsl(var(--panel-glass-white) / var(--panel-glass-opacity)),
+    hsl(var(--panel-glass-ice) / var(--panel-glass-opacity)) 45%,
+    hsl(var(--panel-glass-white) / var(--panel-glass-opacity)));
   --panel-glass-reflection: linear-gradient(112deg,
     transparent 25%, hsl(var(--panel-glass-white) / .48) 49%, transparent 73%);
   --panel-glass-elevation: inset 0 1px 0 hsl(var(--panel-glass-white) / .95),
@@ -1023,9 +1024,9 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 }
 .light {
   --panel-glass-fill: linear-gradient(135deg,
-    hsl(var(--panel-glass-white) / .86),
-    hsl(var(--panel-glass-ice) / .68) 45%,
-    hsl(var(--panel-glass-white) / .58));
+    hsl(var(--panel-glass-white) / var(--panel-glass-opacity)),
+    hsl(var(--panel-glass-ice) / var(--panel-glass-opacity)) 45%,
+    hsl(var(--panel-glass-white) / var(--panel-glass-opacity)));
 }
 .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
   --foreground: var(--panel-glass-ink);
@@ -1064,6 +1065,12 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   -webkit-backdrop-filter: blur(24px) saturate(110%);
   box-shadow: var(--panel-glass-elevation);
   transition: transform 180ms var(--curva-rapida);
+}
+.dark .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):not(.painel-navigation) {
+  --panel-glass-ink: var(--aura-white);
+  --panel-glass-muted: var(--aura-gray-300);
+  --panel-glass-positive: var(--aura-emerald-300);
+  --panel-glass-negative: var(--aura-red-400);
 }
 .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after {
   content: "" !important;
