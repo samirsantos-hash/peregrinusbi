@@ -238,7 +238,7 @@ const DashboardHeader = ({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4">
+      className="panel-filterbar space-y-4">
 
       <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 xl:gap-4 w-full min-w-0">
         {/* Left - Store selector + Date */}
@@ -252,7 +252,7 @@ const DashboardHeader = ({
                   variant="outline"
                   role="combobox"
                   aria-expanded={storeOpen}
-                  className="w-full sm:w-auto sm:min-w-[300px] sm:max-w-[560px] max-w-full h-auto min-h-10 py-1.5 justify-between glass-card border-glass-border bg-card/60 font-normal"
+                  className="panel-control w-full sm:w-auto sm:min-w-[300px] sm:max-w-[560px] max-w-full h-auto min-h-10 py-1.5 justify-between border-border bg-card font-normal"
                 >
                   {selectedSellerObj ? (
                     <span className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-left min-w-0">
@@ -274,7 +274,7 @@ const DashboardHeader = ({
                       </span>
                       <span className="mx-1 text-border">|</span>
                       <span className="text-xs text-muted-foreground mr-1">ID:</span>
-                      <span className="text-xs font-mono break-all tnum">{selectedSellerObj.custId}</span>
+                      <span className="text-xs break-all tnum">{selectedSellerObj.custId}</span>
                       <span
                         role="button"
                         tabIndex={0}
@@ -296,7 +296,7 @@ const DashboardHeader = ({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[340px] p-0 bg-card border-glass-border" align="start">
+              <PopoverContent className="w-[340px] max-w-[calc(100vw-24px)] p-0 bg-popover border-border" align="start">
                 <Command
                   className="bg-transparent"
                   filter={(value, search) => {
@@ -339,7 +339,7 @@ const DashboardHeader = ({
                             <span className="font-medium">{s.nickname}</span>
                             <span className="mx-1 text-border">|</span>
                             <span className="text-xs text-muted-foreground">ID:</span>
-                            <span className="text-xs font-mono">{s.custId}</span>
+                            <span className="text-xs tabular-nums">{s.custId}</span>
                           </div>
                         </CommandItem>
                       ))}
@@ -357,7 +357,7 @@ const DashboardHeader = ({
                 <Button
                   variant="outline"
                   className={cn(
-                    "h-9 justify-start gap-2 glass-card border-glass-border bg-card/60 font-normal text-xs",
+                    "panel-control min-h-10 justify-start gap-2 border-border bg-card font-normal text-xs",
                     auditoria.vazio && "border-destructive/50 text-destructive",
                   )}
                   title="Selecionar período no calendário"
@@ -436,7 +436,7 @@ const DashboardHeader = ({
                 size="icon"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className="glass-card border-glass-border bg-card/60 h-9 w-9"
+                className="panel-control border-border bg-card h-10 w-10"
                 title="Atualizar dados"
               >
                 <RefreshCw className={cn("h-4 w-4 text-neon-blue", isRefreshing && "animate-spin")} />

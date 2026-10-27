@@ -17,7 +17,7 @@ export function GlassPointer() {
     const move = (event: PointerEvent) => {
       if (!media.matches || event.pointerType === "touch") { clear(); return; }
       const target = event.target instanceof Element ? event.target.closest<HTMLElement>(surfaces) : null;
-      if (!target?.closest(".peregrinus-panel")) { clear(); return; }
+      if (!target?.closest(".peregrinus-panel") || target.closest(".painel-navigation, .panel-topbar, .panel-filterbar") || target.matches("button, [role='button']")) { clear(); return; }
       if (active !== target) { clear(); active = target; }
       x = event.clientX;
       y = event.clientY;
@@ -32,8 +32,8 @@ export function GlassPointer() {
         active.style.setProperty("--glass-angle", `${100 + px * 40}deg`);
         active.style.setProperty("--glass-band", `${Math.round(px * 100)}%`);
         const py = Math.min(1, Math.max(0, (y - rect.top) / (rect.height || 1)));
-        // Small 3D tilt: max 2.5deg, larger cards tilt less.
-        const k = rect.width > 600 ? 0.4 : 1;
+        // Keep large analytical surfaces stable; only individual cards tilt.
+        const k = rect.width > 600 || rect.height > 400 ? 0 : 0.45;
         active.style.setProperty("--glass-rx", `${((0.5 - py) * 5 * k).toFixed(2)}deg`);
         active.style.setProperty("--glass-ry", `${((px - 0.5) * 5 * k).toFixed(2)}deg`);
         active.setAttribute("data-glass-active", "");
