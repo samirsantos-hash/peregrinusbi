@@ -1555,6 +1555,7 @@ export type Database = {
       }
       ml_accounts: {
         Row: {
+          conectado_por: string | null
           created_at: string | null
           id: string
           last_sync_daily_at: string | null
@@ -1565,6 +1566,7 @@ export type Database = {
           tenant_id: string
         }
         Insert: {
+          conectado_por?: string | null
           created_at?: string | null
           id?: string
           last_sync_daily_at?: string | null
@@ -1575,6 +1577,7 @@ export type Database = {
           tenant_id: string
         }
         Update: {
+          conectado_por?: string | null
           created_at?: string | null
           id?: string
           last_sync_daily_at?: string | null
@@ -4582,6 +4585,20 @@ export type Database = {
       }
       ml_e_consultor: { Args: { p_user_id: string }; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
+      ml_minhas_contas_status: {
+        Args: never
+        Returns: {
+          account_id: string
+          jobs_concluidos: number
+          jobs_total: number
+          ml_user_id: number
+          nickname: string
+          site_id: string
+          status: string
+          tem_token: boolean
+          token_expira_em: string
+        }[]
+      }
       ml_notificacao_lida: { Args: { p_id: string }; Returns: undefined }
       ml_pode_carregar: { Args: never; Returns: boolean }
       ml_pode_gerir_conta: { Args: { p_account_id: string }; Returns: boolean }
