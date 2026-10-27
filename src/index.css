@@ -957,6 +957,24 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   letter-spacing: 0;
   text-align: center;
 }
+.painel-navigation,
+.peregrinus-panel .painel-navigation {
+  --foreground: var(--panel-glass-ink);
+  --muted-foreground: var(--panel-glass-muted);
+  --primary: var(--panel-glass-positive);
+  --brand-blue: var(--panel-glass-positive);
+  --muted: 210 12% 91%;
+  --background: var(--panel-glass-ice);
+  --border: var(--panel-glass-edge);
+  background: linear-gradient(135deg,
+    hsl(var(--panel-glass-white) / .96),
+    hsl(var(--panel-glass-ice) / .9) 55%,
+    hsl(var(--panel-glass-white) / .82)) !important;
+  color: hsl(var(--panel-glass-ink));
+  backdrop-filter: blur(28px) saturate(105%);
+  -webkit-backdrop-filter: blur(28px) saturate(105%);
+}
+.painel-navigation button { letter-spacing: 0; }
 :root {
   --panel-glass-white: 0 0% 100%;
   --panel-glass-ice: 210 20% 97%;
