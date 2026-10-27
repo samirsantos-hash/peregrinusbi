@@ -1266,8 +1266,9 @@ html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
   --panel-fill-nested: hsl(var(--panel-white) / .025);
   --panel-stroke: hsl(var(--panel-white) / .12);
   --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .08),
-    0 2px 4px hsl(var(--panel-black) / .12),
-    0 12px 28px -20px hsl(var(--panel-black) / .5);
+    inset 0 -1px 0 hsl(var(--panel-white) / .025),
+    0 4px 12px -6px hsl(var(--panel-black) / .28),
+    0 16px 32px -24px hsl(var(--panel-black) / .45);
   --panel-nav-fill: hsl(var(--panel-surface) / .92);
   --panel-reflection: .14;
   --panel-radius: 16px;
@@ -1282,10 +1283,11 @@ html.light {
   --panel-positive: 156 84% 26%;
   --panel-fill: hsl(var(--panel-surface) / .8);
   --panel-fill-nested: hsl(var(--panel-white) / .55);
-  --panel-stroke: hsl(var(--panel-line));
+  --panel-stroke: hsl(var(--panel-line) / .8);
   --panel-shadow: inset 0 1px 0 hsl(var(--panel-white)),
-    0 2px 4px hsl(var(--panel-black) / .03),
-    0 12px 28px -20px hsl(var(--panel-black) / .16);
+    inset 0 -1px 0 hsl(var(--panel-black) / .025),
+    0 2px 6px -2px hsl(var(--panel-black) / .04),
+    0 12px 28px -20px hsl(var(--panel-black) / .12);
   --panel-nav-fill: hsl(var(--panel-white) / .9);
   --panel-reflection: .28;
 }
@@ -1401,6 +1403,9 @@ html body .peregrinus-panel .painel-noite {
   --noite-vidro-forte: var(--panel-fill);
   --noite-borda: var(--panel-stroke);
   --noite-borda-forte: hsl(var(--panel-brand) / .35);
+  --noite-sombra: var(--panel-shadow);
+  --noite-luz: hsl(var(--panel-white) / .08);
+  --noite-vidro-suave: var(--panel-fill-nested);
   --noite-tinta: hsl(var(--panel-text));
   --noite-sec: hsl(var(--panel-text-secondary));
   --noite-sec-2: hsl(var(--panel-text-secondary));
@@ -1476,6 +1481,10 @@ html body .peregrinus-panel .ds-kpi :is(.ds-numero-focal,.ds-numero-sec,.metric-
 html body .peregrinus-panel .ds-kpi :is(.ds-rotulo,.ds-nota) { color: hsl(var(--panel-text-secondary)); line-height: 1.5; }
 /* Readable shared metrics: scale by available card space, never viewport width. */
 .peregrinus-panel { font-optical-sizing: auto; font-kerning: normal; font-synthesis: none; }
+html body .peregrinus-panel .painel-noite-cabeca { gap: 12px; padding-bottom: 16px; }
+html body .peregrinus-panel .painel-noite-titulo { letter-spacing: 0; font-weight: 500; }
+html body .peregrinus-panel .kpi-vidro-valor { font-feature-settings: 'tnum' 1, 'lnum' 1; }
+html body .peregrinus-panel :is(.noite-chip,.ds-seta) { box-shadow: none; }
 html body .peregrinus-panel .ds-kpi .ds-rotulo { font-size: 12px; text-transform: none; font-weight: 500; }
 html body .peregrinus-panel .ds-kpi .ds-nota { font-size: 12px; text-wrap: pretty; }
 html body .peregrinus-panel :is(.ds-kpi,.kpi-vidro) > * { position: relative; z-index: 1; }
