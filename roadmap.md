@@ -1,9 +1,5 @@
 # Roadmap
 
-## Layout Duo Kit (27/10)
-- [x] Adaptar navegação, superfícies e espaçamentos da referência iOS27 Duo Kit sem alterar a paleta, dados ou acessos; adaptação CSS/DOM, sem compositor experimental.
-- [x] Conferir navegação autenticada Preço/Publicidade, temas e telas largas/estreitas; menu fecha após seleção, sem transbordamento ou erros.
-
 ## Vidro branco global (27/10)
 - [x] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
 - [x] Conferir Publicidade da GMABSOLUTA e Preço com sessão real, contraste nos dois temas, tela estreita sem transbordamento e movimento reduzido; demais seções recebem o estilo compartilhado.
