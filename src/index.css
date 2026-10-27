@@ -1428,7 +1428,7 @@ html body .peregrinus-panel .painel-noite :is(.text-slate-400,.text-slate-500) {
 html body .peregrinus-panel .painel-noite :is(.text-emerald-400,.text-emerald-500) { color: hsl(var(--panel-positive)); }
 html body .peregrinus-panel .painel-noite :is(.text-rose-400,.text-rose-500) { color: hsl(var(--panel-negative)); }
 html body .peregrinus-panel .kpi-vidro { justify-content: flex-start; gap: 16px; min-height: 156px; }
-html body .peregrinus-panel .kpi-vidro-valor { font-size: 28px; font-weight: 500; line-height: 1.2; font-kerning: normal; }
+html body .peregrinus-panel .kpi-vidro-valor { font-size: 28px; font-weight: 500; line-height: 1.2; font-kerning: normal; color: hsl(var(--panel-text)); }
 @container (max-width: 160px) { html body .peregrinus-panel .kpi-vidro-valor { font-size: 20px !important; } }
 html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]) {
   --panel-glass-ink: var(--panel-text);
