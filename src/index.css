@@ -966,10 +966,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --muted: 210 12% 91%;
   --background: var(--panel-glass-ice);
   --border: var(--panel-glass-edge);
-  background: linear-gradient(135deg,
-    hsl(var(--panel-glass-white) / .96),
-    hsl(var(--panel-glass-ice) / .9) 55%,
-    hsl(var(--panel-glass-white) / .82)) !important;
+  background: var(--panel-navigation-fill) !important;
   color: hsl(var(--panel-glass-ink));
   backdrop-filter: blur(28px) saturate(105%);
   -webkit-backdrop-filter: blur(28px) saturate(105%);
@@ -984,10 +981,14 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --panel-glass-shadow: 240 6% 5%;
   --panel-glass-positive: 156 84% 26%;
   --panel-glass-negative: 7 86% 45%;
+  --panel-navigation-fill: linear-gradient(155deg,
+    hsl(var(--panel-glass-white) / .96),
+    hsl(var(--panel-glass-ice) / .84) 58%,
+    hsl(var(--panel-glass-white) / .94));
   --panel-glass-fill: linear-gradient(135deg,
-    hsl(var(--panel-glass-white) / .94),
-    hsl(var(--panel-glass-ice) / .83) 45%,
-    hsl(var(--panel-glass-white) / .72));
+    hsl(var(--panel-glass-white) / .96),
+    hsl(var(--panel-glass-ice) / .86) 45%,
+    hsl(var(--panel-glass-white) / .92));
   --panel-glass-reflection: linear-gradient(112deg,
     transparent 25%, hsl(var(--panel-glass-white) / .48) 49%, transparent 73%);
   --panel-glass-elevation: inset 0 1px 0 hsl(var(--panel-glass-white) / .95),
@@ -1077,7 +1078,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   transition: opacity 180ms var(--curva-rapida);
 }
 .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
-  opacity: .8;
+  opacity: .22;
   background-position: center;
   transform: none;
   /* A broad continuous reflection follows the pointer without moving content. */
@@ -1169,7 +1170,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 
 /* Overview composition keeps the pre-kit layout and the Peregrinus palette. */
 .visao-geral-modulo {
-  --overview-glass-fill: linear-gradient(135deg, hsl(var(--panel-glass-white) / .8), hsl(var(--panel-glass-ice) / .68));
+  --overview-glass-fill: var(--panel-glass-fill);
   --overview-glass-edge: hsl(var(--panel-glass-white) / .6);
   --overview-glass-shadow: inset 0 1px 1px hsl(var(--panel-glass-white) / .7),
     0 1px 2px hsl(var(--panel-glass-shadow) / .02), 0 8px 24px hsl(var(--panel-glass-shadow) / .04);
@@ -1206,3 +1207,33 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 .reputacao-regua [data-faixa="3"] { background: hsl(var(--reputation-fourth)); }
 .reputacao-regua [data-faixa="4"] { background: hsl(var(--reputation-last)); }
 .reputacao-regua [data-atual="true"] { opacity: 1; outline: 2px solid hsl(var(--panel-glass-ink)); outline-offset: 3px; }
+
+/* Contrast belongs to the surface, not the outer dark/light canvas. */
+.peregrinus-panel .panel-tabs {
+  --foreground: var(--panel-glass-ink);
+  --muted-foreground: var(--panel-glass-muted);
+  --primary: var(--panel-glass-positive);
+  --primary-foreground: var(--panel-glass-white);
+  background: var(--panel-navigation-fill);
+  border-color: hsl(var(--panel-glass-edge) / .5);
+  box-shadow: var(--panel-glass-elevation);
+}
+.painel-navigation button[aria-current="page"] {
+  background: hsl(var(--panel-glass-positive));
+  color: hsl(var(--panel-glass-white));
+  box-shadow: inset 0 1px 0 hsl(var(--panel-glass-white) / .24);
+}
+.painel-navigation button[aria-current="page"] > span[aria-hidden] { background: hsl(var(--panel-glass-white) / .8); }
+.painel-navigation button:not([aria-current="page"]) { color: hsl(var(--panel-glass-ink)); }
+.painel-navigation button:not([aria-current="page"]):hover { background: hsl(var(--panel-glass-positive) / .1); }
+.light {
+  --panel-navigation-fill: linear-gradient(155deg, hsl(var(--panel-glass-white) / .86), hsl(var(--panel-glass-ice) / .65) 58%, hsl(var(--panel-glass-white) / .8));
+}
+.peregrinus-panel :is(.glass-card, .painel-navigation).painel-navigation {
+  background: var(--panel-navigation-fill) !important;
+  border-color: hsl(var(--panel-glass-white) / .64) !important;
+  box-shadow: inset 0 1px 0 hsl(var(--panel-glass-white) / .95),
+    inset 1px 0 0 hsl(var(--panel-glass-white) / .38),
+    inset 0 -1px 0 hsl(var(--panel-glass-edge) / .24),
+    0 12px 32px -20px hsl(var(--panel-glass-shadow) / .42);
+}
