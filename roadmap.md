@@ -1,5 +1,9 @@
 # Roadmap
 
+## Otimização de indicadores (27/10)
+- [ ] Restringir leituras às lojas solicitadas, evitar rajadas paralelas e carregar só os snapshots necessários sem alterar cálculos históricos.
+- [ ] Conferir resultados e carga; alterações no servidor e validação real aguardam Lovable Cloud disponível. Mini já foi iniciado, não solicitar nova mudança.
+
 ## Estrutura visual enviada (27/10)
 - [x] Adaptar estrutura do catálogo HTML ao painel: superfícies neutras, navegação, controles e hierarquia, preservando DM Sans, identidade Peregrinus, dados e integrações.
 - [x] Conferir GMABSOLUTA com dados reais, navegação para Preço, reflexo localizado, gráfico nos dois temas e tela estreita sem transbordamento; 19 testes de cálculo passaram. Outras telas recebem estilos compartilhados, sem auditoria individual.
