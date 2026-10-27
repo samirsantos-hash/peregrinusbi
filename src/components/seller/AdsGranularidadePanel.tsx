@@ -216,42 +216,6 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
         </div>
       </div>
 
-      {/* ── Tabela por período ───────────────────────────────────────── */}
-      {serie.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-border/40 bg-card/60">
-          <table className="w-full text-xs">
-            <thead className="border-b border-border/40 text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">Período</th>
-                <th className="px-3 py-2 text-right font-medium">Investimento</th>
-                <th className="px-3 py-2 text-right font-medium">GMV Ads</th>
-                <th className="px-3 py-2 text-right font-medium">Pedidos Ads</th>
-                <th className="px-3 py-2 text-right font-medium">ROAS</th>
-                <th className="px-3 py-2 text-right font-medium">ACOS</th>
-                <th className="px-3 py-2 text-right font-medium">TACOS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {serie
-                .slice()
-                .reverse()
-                .map((b) => (
-                  <tr key={b.key} className="border-b border-border/20 last:border-0">
-                    <td className="px-3 py-2 text-foreground">{b.label}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{fmtBRL(b.inv)}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{fmtBRL(b.gmv_ads)}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.tsi_ads.toLocaleString("pt-BR")}</td>
-                    <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums" style={{ color: corRoas(b.roas) }}>
-                      {b.roas.toFixed(2).replace(".", ",")}x
-                    </td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.acos.toFixed(1).replace(".", ",")}%</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.tacos.toFixed(1).replace(".", ",")}%</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      )}
 
       {/* ── Produtos mais vendidos ───────────────────────────────────── */}
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">
