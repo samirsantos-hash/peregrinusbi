@@ -1248,8 +1248,8 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 .light {
   --panel-navigation-fill: linear-gradient(155deg, hsl(var(--panel-glass-white) / .86), hsl(var(--panel-glass-ice) / .65) 58%, hsl(var(--panel-glass-white) / .8));
 }
-/* Match the legacy surface selector's specificity so navigation keeps its own contrast. */
-:root .peregrinus-panel .painel-navigation[class] {
+/* Override the utility-built surface selector, including its element specificity. */
+html:root .peregrinus-panel .painel-navigation[class] {
   background: var(--panel-navigation-fill) !important;
   border-color: hsl(var(--panel-glass-white) / .64) !important;
   backdrop-filter: blur(28px) saturate(105%);
