@@ -1039,6 +1039,11 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 }
 .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 28px; }
 .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 34px; }
+.peregrinus-panel .ds-kpi { container-type: inline-size; }
+@container (max-width: 140px) {
+  .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 20px; }
+  .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 24px; }
+}
 .peregrinus-panel .operacao-resumo .ds-kpi .ds-numero-focal { font-size: 20px; }
 .peregrinus-panel .ds-kpi :is(.ds-rotulo, .ds-nota) {
   color: hsl(var(--panel-glass-muted)) !important;

@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Vidro branco global (27/10)
-- [ ] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
-- [ ] Conferir seções com sessão real, contraste nos dois temas e movimento reduzido.
+- [x] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
+- [x] Conferir Publicidade da GMABSOLUTA e Preço com sessão real, contraste nos dois temas, tela estreita sem transbordamento e movimento reduzido; demais seções recebem o estilo compartilhado.
 
 ## Organização macro → micro e Full (26/10)
 - [x] Ordenar navegação macro → micro; Resumo como abertura, detalhes por anúncio após indicadores de Qualidade, funil em Faturamento e produtos Full ao final.
