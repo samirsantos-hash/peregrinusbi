@@ -1,5 +1,9 @@
 # Roadmap
 
+## Vidro branco global (27/10)
+- [ ] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
+- [ ] Conferir seções com sessão real, contraste nos dois temas e movimento reduzido.
+
 ## Organização macro → micro e Full (26/10)
 - [x] Ordenar navegação macro → micro; Resumo como abertura, detalhes por anúncio após indicadores de Qualidade, funil em Faturamento e produtos Full ao final.
 - [x] Priorizar indicadores reais da API no Resumo com 30 dias UTC completos, comparação anterior e histórico separado; leitura incompleta suspende totais.
