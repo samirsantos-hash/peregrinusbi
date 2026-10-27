@@ -1,5 +1,10 @@
 # Roadmap
 
+## Refinamento pós-reversão (27/10)
+- [x] Comparar com a versão anterior ao kit e manter navegação, superfícies e dados anteriores.
+- [x] Unificar DM Sans, peso dos números e contraste de títulos, legendas e alertas no vidro branco.
+- [ ] Conferir Preço com loja real nos dois temas e largura reduzida.
+
 ## Vidro branco global (27/10)
 - [x] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
 - [x] Conferir Publicidade da GMABSOLUTA e Preço com sessão real, contraste nos dois temas, tela estreita sem transbordamento e movimento reduzido; demais seções recebem o estilo compartilhado.
