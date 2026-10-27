@@ -1233,3 +1233,73 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
     background: hsl(var(--panel-glass-ice)) !important;
   }
 }
+
+/* ===== Identidade EcomConsult (paleta oficial) ===== */
+html.dark {
+  --background: 0 0% 4%;
+  --foreground: 0 0% 100%;
+  --muted-foreground: 0 0% 75%;
+  --card: 0 0% 8%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 8%;
+  --popover-foreground: 0 0% 100%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --primary: 156 79% 37%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 54 100% 50%;
+  --accent-foreground: 0 0% 4%;
+  --destructive: 6 86% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 156 79% 37%;
+  --radius: 0.75rem;
+  --chart-1: 156 79% 37%;
+  --chart-2: 0 0% 100%;
+  --chart-3: 156 47% 57%;
+  --chart-4: 0 0% 55%;
+  --chart-5: 156 79% 27%;
+}
+html.dark body {
+  background-color: #0A0A0A;
+  background-image: radial-gradient(circle at 0% 0%, rgba(20,168,108,0.16), transparent 45%);
+  background-attachment: fixed;
+}
+html.light {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 4%;
+  --muted-foreground: 0 0% 35%;
+  --card: 0 0% 95%;
+  --card-foreground: 0 0% 4%;
+  --border: 0 0% 85%;
+  --input: 0 0% 85%;
+  --primary: 156 79% 37%;
+  --primary-foreground: 0 0% 100%;
+  --accent: 45 100% 35%;
+  --destructive: 6 86% 45%;
+  --destructive-foreground: 0 0% 100%;
+  --ring: 156 79% 37%;
+}
+html.dark .peregrinus-panel .glass-card,
+html.dark .peregrinus-panel .cartao-branco {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 12px;
+  transition: border-color 160ms cubic-bezier(0.16,1,0.3,1);
+}
+html.dark .peregrinus-panel .glass-card:hover,
+html.dark .peregrinus-panel .cartao-branco:hover { border-color: rgba(20,168,108,0.5); }
+html.light .peregrinus-panel .glass-card,
+html.light .peregrinus-panel .cartao-branco {
+  background: #F3F3F3; border: 1px solid #D9D9D9; backdrop-filter: none; border-radius: 12px;
+}
+.peregrinus-panel h1, .peregrinus-panel h2, .peregrinus-panel .ds-titulo-pagina {
+  font-weight: 800; letter-spacing: -0.03em; line-height: 1.05;
+}
+.peregrinus-panel .recharts-cartesian-grid line { stroke: hsl(var(--foreground) / 0.1); }
+.peregrinus-panel .recharts-cartesian-axis-tick text { fill: hsl(var(--foreground) / 0.75); }
+body::after {
+  content: ""; position: fixed; left: 0; right: 0; bottom: 0; height: 4px;
+  background: #14A86C; pointer-events: none; z-index: 60;
+}
