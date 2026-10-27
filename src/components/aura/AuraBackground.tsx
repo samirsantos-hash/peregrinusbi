@@ -27,6 +27,7 @@ const FS = `
   uniform float u_intro;
   uniform float u_burst;
   uniform float u_scroll;
+  uniform float u_light;
 
   float random(float n) { return fract(sin(n) * 43758.5453123); }
 
@@ -111,11 +112,20 @@ const FS = `
           lineColor += vec3(0.23, 0.83, 0.58) * centerPush * u_burst * 0.7;
           
           float coreGlow = smoothstep(0.015, 0.0, distToLine);
-          lineColor += vec3(0.85, 1.0, 0.92) * coreGlow * 0.5;
+          lineColor += vec3(0.85, 1.0, 0.92) * coreGlow * 0.5 * (1.0 - u_light);
+          // Modo claro: fios verdes da marca com parte em amarelo.
+          vec3 claro = mix(vec3(0.05, 0.50, 0.32), vec3(0.08, 0.66, 0.42), random(seed + 1.0));
+          claro = mix(claro, vec3(1.0, 0.85, 0.0), step(0.72, random(seed + 3.0)));
+          lineColor = mix(lineColor, claro, u_light);
           
           color += lineColor * intensity * edgeFade * lengthFade * localIntro;
       }
 
+      if (u_light > 0.5) {
+          float a = clamp(max(color.r, max(color.g, color.b)), 0.0, 1.0);
+          vec3 tom = color / max(a, 0.001);
+          color = mix(vec3(0.965, 0.972, 0.968), tom, smoothstep(0.0, 0.9, a) * 0.9);
+      }
       // Dither leve para evitar faixas no degradê escuro.
       color += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
       gl_FragColor = vec4(color, 1.0);
@@ -197,6 +207,8 @@ export function AuraBackground() {
     const uIntro = gl.getUniformLocation(program, "u_intro");
     const uBurst = gl.getUniformLocation(program, "u_burst");
     const uScroll = gl.getUniformLocation(program, "u_scroll");
+    const uLight = gl.getUniformLocation(program, "u_light");
+    const ehClaro = () => document.documentElement.classList.contains("light") ? 1 : 0;
 
     let mouseX = window.innerWidth / 2;
     let mouseY = window.innerHeight / 2;
@@ -228,6 +240,7 @@ export function AuraBackground() {
       gl.uniform1f(uIntro, intro);
       gl.uniform1f(uBurst, 0);
       gl.uniform1f(uScroll, scroll);
+      gl.uniform1f(uLight, ehClaro());
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     };
 

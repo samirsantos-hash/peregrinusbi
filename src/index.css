@@ -567,7 +567,7 @@
 }
 .light .glass-card::after { background-image: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.7) 48%, transparent 66%); }
 .light .glass-card-highlight { border-color: rgb(8 145 178 / 0.35); }
-.light .aura-canvas { opacity: 0.12; filter: invert(1) hue-rotate(180deg); }
+.light .aura-canvas { opacity: 1; }
 .light .bg-black\/40, .light .bg-black\/60, .light .bg-black\/70, .light .bg-black\/80 { background-color: rgb(255 255 255 / 0.85); }
 .light .bg-white\/5, .light .bg-white\/\[0\.03\], .light .bg-white\/\[0\.06\], .light .bg-white\/10 { background-color: rgb(15 23 42 / 0.04); }
 .light .border-white\/5, .light .border-white\/10, .light .border-white\/40 { border-color: hsl(200 18% 86%); }
