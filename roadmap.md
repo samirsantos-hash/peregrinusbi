@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Gráfico combinado e matriz de sinergia (27/10)
-- [ ] Mostrar síntese com gráfico combinado e correlações na Visão geral e a versão detalhada em Publicidade, com fórmulas e fontes alinhadas.
-- [ ] Corrigir matriz legada para não converter dados ausentes ou séries constantes em correlação zero; testar regras e conferir dados reais.
+- [x] Mostrar síntese com gráfico combinado e correlações na Visão geral e versão detalhada em Publicidade e Correlações, com fórmulas e fontes separadas; AUTOPECASLONDRINA conferida nas três seções e agrupamento semanal acionado.
+- [x] Corrigir matriz legada para não converter dados ausentes ou séries constantes em correlação zero; 10 testes passaram. API: Ads × faturamento r=0,42, visitas diárias indisponíveis; manter Sem dado. Build OK.
 
 ## Retomar áreas da Visão geral (27/10)
 - [x] Reproduzir cores, textura vítrea, bordas, proporções e comparações das referências nas duas áreas, sem alterar dados; AUTOPECASLONDRINA conferida em 1280px e 536px sem transbordamento, vidro com blur 24px/saturação 150%, bordas 16px e gráfico visível. Build OK.
