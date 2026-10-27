@@ -40,22 +40,22 @@ const FS = `
       vec3 color = vec3(0.0);
 
       float bgGlow = max(0.0, 1.0 - distance(p, vec2(-0.1, 0.5)));
-      color += vec3(0.02, 0.12, 0.15) * pow(bgGlow, 2.0) * 0.5 * u_intro;
+      color += vec3(0.02, 0.10, 0.06) * pow(bgGlow, 2.0) * 0.5 * u_intro;
 
       float rightGlow = max(0.0, 1.0 - distance(p, vec2(1.08, 0.35)));
-      color += vec3(0.02, 0.10, 0.12) * pow(rightGlow, 2.0) * 0.35;
+      color += vec3(0.02, 0.08, 0.05) * pow(rightGlow, 2.0) * 0.35;
 
       float particleNoise = fract(sin(dot(p + u_time * 0.015, vec2(12.9898, 78.233))) * 43758.5453);
-      color += vec3(0.6, 0.8, 1.0) * pow(particleNoise, 90.0) * 0.2 * u_intro;
+      color += vec3(0.70, 0.95, 0.82) * pow(particleNoise, 90.0) * 0.2 * u_intro;
 
       float radial = distance(p, center);
       float radialBurst = smoothstep(0.55, 0.0, radial);
-      color += vec3(0.05, 0.15, 0.18) * radialBurst * 0.4 * u_burst;
+      color += vec3(0.04, 0.16, 0.10) * radialBurst * 0.4 * u_burst;
 
       float ring1 = abs(radial - (0.08 + u_burst * 0.26));
       float ring2 = abs(radial - (0.18 + u_burst * 0.32));
       float burstRing = smoothstep(0.035, 0.0, ring1) + smoothstep(0.05, 0.0, ring2);
-      color += vec3(0.40, 0.90, 0.95) * burstRing * 0.22 * u_burst;
+      color += vec3(0.23, 0.83, 0.58) * burstRing * 0.22 * u_burst;
 
       float globalDriftY = sin(p.x * 2.0 - u_time * 0.4) * 0.15;
       float globalDriftX = cos(p.y * 1.5 + u_time * 0.3) * 0.05;
@@ -102,16 +102,16 @@ const FS = `
           float edgeFade = smoothstep(1.0, 0.1, p.x);
           float lengthFade = smoothstep(u_intro * 1.5, (u_intro * 1.5) - 0.35, p.x);
           
-          vec3 colDeepAqua = vec3(0.05, 0.60, 0.65);
-          vec3 colTeal = vec3(0.10, 0.85, 0.75);
-          vec3 colBrightCyan = vec3(0.20, 0.95, 0.85);
+          vec3 colDeepAqua = vec3(0.05, 0.50, 0.32);
+          vec3 colTeal = vec3(0.08, 0.66, 0.42);
+          vec3 colBrightCyan = vec3(0.23, 0.83, 0.58);
           
           vec3 lineColor = mix(colDeepAqua, colTeal, random(seed + 1.0));
           lineColor = mix(lineColor, colBrightCyan, random(seed + 2.0) * 0.4);
-          lineColor += vec3(0.4, 0.9, 1.0) * centerPush * u_burst * 0.7;
+          lineColor += vec3(0.23, 0.83, 0.58) * centerPush * u_burst * 0.7;
           
           float coreGlow = smoothstep(0.015, 0.0, distToLine);
-          lineColor += vec3(0.8, 0.9, 1.0) * coreGlow * 0.5;
+          lineColor += vec3(0.85, 1.0, 0.92) * coreGlow * 0.5;
           
           color += lineColor * intensity * edgeFade * lengthFade * localIntro;
       }
@@ -260,9 +260,9 @@ export function AuraBackground() {
         aria-hidden
         className="pointer-events-none fixed inset-0 z-[1] overflow-hidden"
       >
-        <div className="blob blob-1 absolute top-[8%] left-[-10rem] w-[30rem] h-[30rem] rounded-full bg-cyan-600/10 blur-[140px]" />
-        <div className="blob blob-2 absolute top-[30%] right-[-10rem] w-[28rem] h-[28rem] rounded-full bg-teal-600/10 blur-[140px]" />
-        <div className="blob blob-3 absolute bottom-[-8rem] left-[20%] w-[26rem] h-[26rem] rounded-full bg-cyan-400/10 blur-[140px]" />
+        <div className="blob blob-1 absolute top-[8%] left-[-10rem] w-[30rem] h-[30rem] rounded-full bg-primary/10 blur-[140px]" />
+        <div className="blob blob-2 absolute top-[30%] right-[-10rem] w-[28rem] h-[28rem] rounded-full bg-primary/10 blur-[140px]" />
+        <div className="blob blob-3 absolute bottom-[-8rem] left-[20%] w-[26rem] h-[26rem] rounded-full bg-primary/5 blur-[140px]" />
       </div>
     </>
   );
