@@ -109,7 +109,7 @@ const StockoutRiskPanel = ({ sellerId, custId }: Props) => {
     );
   };
 
-  if (conta.data) return <RupturaApi accountId={conta.data} planilha={items} />;
+  if (conta.data) return <RupturaApi accountId={conta.data} custId={custId} planilha={items} />;
 
   if (isLoading || conta.isLoading) {
     return (

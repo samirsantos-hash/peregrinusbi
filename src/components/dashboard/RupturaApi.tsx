@@ -33,7 +33,7 @@ export function useContaMl(custId?: string) {
   });
 }
 
-export default function RupturaApi({ accountId, planilha }: { accountId: string; planilha: EligibilityItem[] }) {
+export default function RupturaApi({ accountId, custId, planilha }: { accountId: string; custId?: string; planilha: EligibilityItem[] }) {
   const [filtro, setFiltro] = useState<"risco" | "todos" | "qualidade" | "promo">("risco");
   const q = useQuery({
     queryKey: ["ruptura-api", accountId],
@@ -51,10 +51,27 @@ export default function RupturaApi({ accountId, planilha }: { accountId: string;
     },
   });
 
+  // Vendas pagas reais por anúncio (7 dias UTC completos) direto do Mercado Livre.
+  const vendasApi = useQuery({
+    queryKey: ["ruptura-vendas7d", custId],
+    enabled: !!custId,
+    staleTime: 10 * 60_000,
+    retry: 1,
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke("ml-analise-loja", { body: { cust_id: custId, modo: "vendas7d" } });
+      if (error || !data?.itens) throw error ?? new Error("sem vendas");
+      return data.itens as { id: string; unidades: number }[];
+    },
+  });
+  const fonteApi = !!vendasApi.data;
+
   const linhas = useMemo(() => {
     if (!q.data) return [];
     const vendas = new Map<string, number>();
-    for (const it of planilha) {
+    if (vendasApi.data) {
+      for (const it of vendasApi.data) vendas.set(soDigitos(it.id), it.unidades);
+      for (const a of q.data.anuncios) if (!vendas.has(soDigitos(a.item_id))) vendas.set(soDigitos(a.item_id), 0);
+    } else for (const it of planilha) {
       const k = soDigitos(it.itemId);
       vendas.set(k, Math.max(vendas.get(k) ?? 0, it.pedidos7d || 0));
     }
@@ -71,9 +88,9 @@ export default function RupturaApi({ accountId, planilha }: { accountId: string;
       const r = { critical: 0, warn: 1, ok: 2, sem: 3 } as const;
       return r[x.severidade] - r[y.severidade] || (y.vendas7d ?? 0) - (x.vendas7d ?? 0);
     });
-  }, [q.data, planilha]);
+  }, [q.data, planilha, vendasApi.data]);
 
-  if (q.isLoading) return <Skeleton className="h-64 w-full" />;
+  if (q.isLoading || vendasApi.isLoading) return <Skeleton className="h-64 w-full" />;
   if (q.error) return <p className="text-sm text-muted-foreground">Não foi possível ler os anúncios do Mercado Livre.</p>;
 
   const vis = linhas.filter((l) =>
@@ -149,7 +166,7 @@ export default function RupturaApi({ accountId, planilha }: { accountId: string;
         </table>
         {!vis.length && <p className="text-sm text-muted-foreground py-4">Nenhum anúncio neste filtro.</p>}
       </div>
-      <p className="text-[11px] text-muted-foreground">Estoque, preço, qualidade, perguntas e promoções vêm do Mercado Livre. O ritmo de venda dos últimos 7 dias vem da planilha mais recente; sem ele, cobertura e envio ficam "Sem dado". Envio cobre 28 dias no ritmo atual, descontando o estoque.</p>
+      <p className="text-[11px] text-muted-foreground">{fonteApi ? "Estoque, preço, vendas pagas dos últimos 7 dias, qualidade, perguntas e promoções vêm do Mercado Livre." : "Estoque, preço, qualidade, perguntas e promoções vêm do Mercado Livre. As vendas por anúncio não puderam ser lidas agora; o ritmo dos últimos 7 dias vem da planilha mais recente."} Envio cobre 28 dias no ritmo atual, descontando o estoque.</p>
     </div>
   );
 }

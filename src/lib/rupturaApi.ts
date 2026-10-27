@@ -34,7 +34,9 @@ export function avaliarRuptura(e: EntradaRuptura): LinhaRuptura {
   const qualidade = normalizarQualidade(e.saude);
   const diaria = e.vendas7d != null && e.vendas7d > 0 ? e.vendas7d / 7 : null;
   const cobertura = diaria != null && e.estoque != null ? Math.round((e.estoque / diaria) * 10) / 10 : null;
-  const envio = diaria != null && e.estoque != null ? Math.max(0, Math.ceil(diaria * ALVO_DIAS) - e.estoque) : null;
+  // Zero paid sales observed in 7 days is a real number: nothing to send.
+  const envio = e.vendas7d === 0 && e.estoque != null ? 0
+    : diaria != null && e.estoque != null ? Math.max(0, Math.ceil(diaria * ALVO_DIAS) - e.estoque) : null;
   const valorEnvio = envio != null && e.preco != null ? envio * e.preco : null;
   const severidade: LinhaRuptura["severidade"] =
     cobertura == null ? "sem" : cobertura < 7 ? "critical" : cobertura < 14 ? "warn" : "ok";
