@@ -378,7 +378,7 @@ const Index = () => {
     if (!dateRange?.from) return null;
     const fromStr = formatDateString(dateRange.from);
     const toStr = formatDateString(dateRange.to || dateRange.from);
-    return `Exibindo de ${fromStr} até ${toStr}`;
+    return formatarPeriodoBr(fromStr, toStr);
   }, [dateRange]);
 
   return (

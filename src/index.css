@@ -638,93 +638,141 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 @media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
 
 /*
- * Painel Apple (Visão geral) — uma escada de cinza neutro + vidro fosco.
+ * Painel Noite (Visão geral) — módulo de vidro escuro calibrado.
  *
- * Distorção anterior: canvas azulado (#eef0f4) × branco 72% × vidro Aura escuro
- * (bg-card / !bg-card/95 vazando) × saturate 1.7 × shimmer ::after = brancos
- * “sujos” competindo com branco puro.
+ * Canvas aveludado #0B0F17; superfícies translúcidas white/4 + blur; borda
+ * white/8 com luz interna; sombra profunda. Texto secundário em slate-400
+ * (#94a3b8 sobre #0B0F17 ≈ 7,3:1, WCAG AA). Tokens do app são remapeados
+ * aqui para que gráficos, bordas e `bg-card` herdem o mesmo vidro.
  *
- * Opções avaliadas:
- *  A) Surfaces opacas só — harmônico, perde profundidade do glass
- *  B) Vidro alto blur/baixa opacidade — belo, mas só funciona em fundo claro
- *     e vaza o tema escuro do app se o canvas não isolar
- *  C) Canvas opaco neutro + tokens remapeados + um só tom de vidro (escolhido)
- *
- * Escada (mesma família, zero matiz azul/verde):
- *  #ffffff → #fbfbfd → #f5f5f7 → #ebebed
+ * Especificidade: as regras globais `.peregrinus-panel :is(.ds-kpi, …)` usam
+ * `!important`; dentro deste módulo as sobrescrevemos com um nível a mais
+ * (`.peregrinus-panel .painel-noite …`) para manter o vidro escuro.
  */
-.painel-apple {
-  /* Escada local (Apple system gray) */
-  --apple-white: #ffffff;
-  --apple-surface: #fbfbfd;
-  --apple-canvas: #f5f5f7;
-  --apple-wash: #ebebed;
-  --apple-glass: rgb(255 255 255 / 0.78);
-  --apple-glass-soft: rgb(255 255 255 / 0.52);
-  --apple-glass-edge: rgb(255 255 255 / 0.92);
-  --apple-stroke: rgb(0 0 0 / 0.06);
-  --apple-stroke-strong: rgb(0 0 0 / 0.1);
-  --apple-ink: #1d1d1f;
-  --apple-sec: #6e6e73;
-  --apple-blur: 14px;
+.painel-noite {
+  --noite-canvas: #0b0f17;
+  --noite-canvas-2: #0e131c;
+  --noite-vidro: rgb(255 255 255 / 0.04);
+  --noite-vidro-forte: rgb(255 255 255 / 0.07);
+  --noite-vidro-suave: rgb(255 255 255 / 0.025);
+  --noite-borda: rgb(255 255 255 / 0.08);
+  --noite-borda-forte: rgb(255 255 255 / 0.15);
+  --noite-luz: rgb(255 255 255 / 0.06);
+  --noite-tinta: #ffffff;
+  --noite-sec: #94a3b8;   /* slate-400 */
+  --noite-sec-2: #cbd5e1; /* slate-300 */
+  --noite-blur: 20px;
+  --noite-sombra:
+    inset 0 1px 1px rgb(255 255 255 / 0.06),
+    0 8px 24px rgb(0 0 0 / 0.3);
 
-  /* Remapeia tokens do app: bg-card / text-muted / border deixam de ser Aura escuro */
-  --background: 240 5% 96%;
-  --foreground: 240 6% 10%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 6% 10%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 6% 10%;
-  --secondary: 240 5% 96%;
-  --secondary-foreground: 240 6% 10%;
-  --muted: 240 5% 94%;
-  --muted-foreground: 240 4% 46%;
-  --accent: 240 5% 94%;
-  --accent-foreground: 240 6% 10%;
-  --border: 240 6% 90%;
-  --input: 240 6% 90%;
-  --glass: 0 0% 100%;
-  --glass-border: 240 6% 90%;
-  --vidro-fundo: rgb(255 255 255 / 0.78);
-  --vidro-borda: rgb(0 0 0 / 0.06);
-  --vidro-sombra:
-    0 1px 0 rgb(255 255 255 / 0.92) inset,
-    0 1px 2px rgb(0 0 0 / 0.03),
-    0 8px 24px -14px rgb(0 0 0 / 0.12);
+  /* Tokens do app dentro do módulo (HSL sem alfa, como o restante do tema) */
+  --background: 222 35% 7%;
+  --foreground: 0 0% 100%;
+  --card: 222 30% 9%;
+  --card-foreground: 0 0% 100%;
+  --popover: 222 30% 9%;
+  --popover-foreground: 0 0% 100%;
+  --secondary: 222 24% 12%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 222 24% 12%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 222 24% 14%;
+  --accent-foreground: 0 0% 100%;
+  --border: 222 18% 18%;
+  --input: 222 18% 18%;
+  --glass: 222 30% 9%;
+  --glass-border: 222 18% 18%;
+  --grid: 222 16% 20%;
+  --axis: 215 20% 65%;
+  --ec-ink: 0 0% 100%;
+  --ec-text-sec: 215 20% 65%;
+  --ec-surface-2: 222 24% 14%;
+  --ec-verde-txt: 158 64% 52%;  /* emerald-400 */
+  --ec-vermelho: 350 89% 60%;   /* rose-500 */
+  --ec-laranja: 27 96% 61%;     /* orange-400 */
+  --ec-ambar: 43 96% 56%;       /* amber-400 */
+  --vidro-fundo: var(--noite-vidro);
+  --vidro-borda: var(--noite-borda);
+  --vidro-sombra: var(--noite-sombra);
 
-  color: var(--apple-ink);
-  color-scheme: light;
+  color: var(--noite-tinta);
+  color-scheme: dark;
   isolation: isolate;
+  min-width: 0;
   border-radius: 1.25rem;
   padding: 1.25rem 1.15rem 1.5rem;
-  /* Opaco: isola o tema escuro — evita leite cinza no blur */
-  background: linear-gradient(180deg, var(--apple-surface) 0%, var(--apple-canvas) 100%);
-  border: 1px solid var(--apple-stroke);
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgb(16 185 129 / 0.06), transparent 55%),
+    linear-gradient(180deg, var(--noite-canvas-2) 0%, var(--noite-canvas) 100%);
+  border: 1px solid var(--noite-borda);
   box-shadow:
-    0 1px 0 rgb(255 255 255 / 0.9) inset,
-    0 10px 36px -18px rgb(0 0 0 / 0.12);
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 24px 60px -30px rgb(0 0 0 / 0.6);
 }
-.painel-apple-hero {
-  margin-bottom: 0.35rem;
-  padding: 0.2rem 0.1rem 0.85rem;
-  border-bottom: 1px solid var(--apple-stroke);
+/* Módulo aninhado (histórico dentro do resumo da API): sem segundo canvas */
+.painel-noite .painel-noite {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
-.painel-apple-titulo {
-  margin-top: 0.15rem;
-  font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+.painel-noite-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--noite-borda);
+}
+.painel-noite-titulo {
+  font-size: 0.9375rem;
   font-weight: 600;
-  letter-spacing: -0.03em;
-  color: var(--apple-ink);
-  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--noite-tinta);
+  line-height: 1.3;
 }
-.painel-apple-sub {
-  margin-top: 0.35rem;
-  max-width: 42rem;
-  font-size: 0.8125rem;
-  line-height: 1.45;
-  color: var(--apple-sec);
+/* Chip de metadado: discreto, legível, nunca quebra */
+.noite-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: var(--noite-vidro);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  color: var(--noite-sec-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
 }
-/* Wrapper: sem segundo branco — o card interno carrega o vidro */
+/* Superfície vítrea genérica (cards novos usam utilitários; esta é a base CSS) */
+.noite-vidro {
+  position: relative;
+  min-width: 0;
+  border-radius: 1rem;
+  border: 1px solid var(--noite-borda);
+  background: var(--noite-vidro);
+  backdrop-filter: blur(var(--noite-blur));
+  -webkit-backdrop-filter: blur(var(--noite-blur));
+  box-shadow: var(--noite-sombra);
+  transition: border-color 200ms ease, background-color 200ms ease, transform 200ms var(--curva-rapida);
+}
+.noite-vidro:hover { border-color: var(--noite-borda-forte); }
+/* KPI de vidro: o valor encolhe conforme a largura do card antes de truncar (break-ui) */
+.kpi-vidro { container-type: inline-size; }
+@container (max-width: 200px) { .kpi-vidro .kpi-vidro-valor { font-size: 22px !important; } }
+@container (max-width: 160px) { .kpi-vidro .kpi-vidro-valor { font-size: 19px !important; } }
+@container (max-width: 125px) { .kpi-vidro .kpi-vidro-valor { font-size: 16px !important; letter-spacing: -0.01em; } }
+/* Wrapper: sem segundo vidro — o card interno carrega a superfície */
 .painel-vidro {
   background: transparent;
   border: none;
@@ -732,70 +780,130 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
-.painel-apple .ds-kpi,
-.painel-apple .glass-card,
-.painel-apple .glass-card-highlight {
-  background: var(--apple-glass) !important;
-  backdrop-filter: blur(var(--apple-blur)) saturate(1.04);
-  -webkit-backdrop-filter: blur(var(--apple-blur)) saturate(1.04);
-  border: 1px solid var(--apple-stroke) !important;
-  border-radius: 1rem;
-  box-shadow: var(--vidro-sombra);
+/* Cards legados (ds-kpi / glass-card / Card) dentro do módulo → vidro escuro.
+   Um nível acima de `.peregrinus-panel :is(...)` para vencer os !important. */
+.painel-noite .ds-kpi,
+.painel-noite .glass-card,
+.painel-noite .glass-card-highlight,
+.painel-noite .ds-glass-surface,
+.painel-noite .cartao-branco,
+.painel-noite div[class*="rounded"][class*="bg-card"][class*="border"],
+.peregrinus-panel .painel-noite .ds-kpi,
+.peregrinus-panel .painel-noite .glass-card,
+.peregrinus-panel .painel-noite .glass-card-highlight,
+.peregrinus-panel .painel-noite .ds-glass-surface,
+.peregrinus-panel .painel-noite .cartao-branco,
+.peregrinus-panel .painel-noite div[class*="rounded"][class*="bg-card"][class*="border"] {
+  --foreground: 0 0% 100%;
+  --card-foreground: 0 0% 100%;
+  --ec-ink: 0 0% 100%;
+  --muted-foreground: 215 20% 65%;
+  --ec-text-sec: 215 20% 65%;
+  --aura-gray-400: 215 20% 65%;
+  --aura-gray-500: 215 20% 65%;
+  --primary: 158 64% 52%;
+  --ec-verde-txt: 158 64% 52%;
+  --emerald: 158 64% 52%;
+  --ok: 158 64% 52%;
+  --neon-blue: 158 64% 52%;
+  --ec-vermelho: 350 89% 60%;
+  --ec-surface-2: 222 24% 14%;
+  --muted: 222 24% 14%;
+  --border: 222 18% 18%;
   position: relative;
-  color: var(--apple-ink);
+  min-width: 0;
+  color: var(--noite-tinta);
+  background: var(--noite-vidro) !important;
+  border: 1px solid var(--noite-borda) !important;
+  border-radius: 1rem;
+  backdrop-filter: blur(var(--noite-blur));
+  -webkit-backdrop-filter: blur(var(--noite-blur));
+  box-shadow: var(--noite-sombra);
+  transition: border-color 200ms ease, background-color 200ms ease, transform 200ms var(--curva-rapida), box-shadow 200ms var(--curva-rapida);
 }
-.painel-apple .glass-card::after,
-.painel-apple .glass-card-highlight::after {
-  display: none !important;
-  content: none !important;
+.painel-noite .cartao-branco,
+.peregrinus-panel .painel-noite .cartao-branco { color: var(--noite-tinta); }
+.peregrinus-panel .painel-noite .ds-kpi:hover,
+.peregrinus-panel .painel-noite .glass-card:hover,
+.peregrinus-panel .painel-noite .glass-card-highlight:hover,
+.peregrinus-panel .painel-noite .ds-glass-surface:hover {
+  border-color: var(--noite-borda-forte) !important;
+  background: var(--noite-vidro-forte) !important;
+  box-shadow: var(--noite-sombra);
 }
-.painel-apple .ds-kpi:hover,
-.painel-apple .glass-card:hover,
-.painel-apple .glass-card-highlight:hover {
-  border-color: var(--apple-stroke-strong) !important;
-  background: rgb(255 255 255 / 0.9) !important;
-  box-shadow:
-    0 1px 0 var(--apple-white) inset,
-    0 1px 2px rgb(0 0 0 / 0.04),
-    0 12px 28px -12px rgb(0 0 0 / 0.13);
-  transform: translateY(-1px);
+/* Reflexo do ponteiro (GlassPointer): branco 50% é cegante no escuro → 10% */
+.peregrinus-panel .painel-noite :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after {
+  background-image: linear-gradient(112deg, transparent 25%, rgb(255 255 255 / 0.10) 49%, transparent 73%);
 }
-.painel-apple .ds-numero-focal,
-.painel-apple .ds-numero-sec,
-.painel-apple .metric-value {
+.peregrinus-panel .painel-noite :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
+  opacity: .9;
+  background-image: linear-gradient(112deg, transparent 25%, rgb(255 255 255 / 0.10) 49%, transparent 73%);
+}
+/* Tipografia: números brancos e tabulares; rótulos slate-400 legíveis */
+.painel-noite .ds-numero-focal,
+.painel-noite .ds-numero-sec,
+.painel-noite .metric-value,
+.peregrinus-panel .painel-noite .ds-kpi :is(.ds-numero-focal, .ds-numero-sec, .metric-value) {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  color: var(--apple-ink);
+  color: var(--noite-tinta);
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
-.painel-apple .ds-rotulo,
-.painel-apple .ds-nota,
-.painel-apple .metric-label,
-.painel-apple .text-muted-foreground {
-  color: var(--apple-sec) !important;
+.painel-noite .ds-rotulo,
+.painel-noite .ds-nota,
+.painel-noite .metric-label,
+.painel-noite .text-muted-foreground,
+.peregrinus-panel .painel-noite .ds-kpi :is(.ds-rotulo, .ds-nota) {
+  color: var(--noite-sec) !important;
 }
-/* Borders utilitárias: mesma família de stroke (sem verde/ciano Aura) */
-.painel-apple .border-border,
-.painel-apple .border-glass-border {
-  border-color: var(--apple-stroke) !important;
+.painel-noite .ds-rotulo,
+.peregrinus-panel .painel-noite .ds-kpi .ds-rotulo {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
+.painel-noite .ds-seta { background: rgb(255 255 255 / 0.06); color: var(--noite-sec-2); }
+.painel-noite .ds-seta-bom { background: rgb(16 185 129 / 0.12); color: #34d399; }
+.painel-noite .ds-seta-ruim { background: rgb(244 63 94 / 0.12); color: #fb7185; }
+.painel-noite .border-border,
+.painel-noite .border-glass-border {
+  border-color: var(--noite-borda) !important;
+}
+/* Recharts dentro do módulo: eixos legíveis, grade discreta */
+.painel-noite .recharts-cartesian-axis-tick-value { fill: var(--noite-sec) !important; }
+.painel-noite .recharts-cartesian-grid line { stroke: rgb(255 255 255 / 0.05) !important; }
+.painel-noite .recharts-legend-item-text { color: var(--noite-sec-2) !important; }
+.painel-noite .recharts-default-tooltip {
+  background: rgb(11 15 23 / 0.92) !important;
+  border: 1px solid var(--noite-borda) !important;
+  border-radius: 0.75rem !important;
+  color: var(--noite-tinta) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.painel-noite .recharts-default-tooltip .recharts-tooltip-label { color: var(--noite-sec-2) !important; }
 .painel-bloco-cabeca { margin-bottom: 0.65rem; }
 .painel-bloco-porque {
   margin-top: 0.25rem;
   font-size: 0.75rem;
-  line-height: 1.4;
-  color: var(--apple-sec);
+  line-height: 1.45;
+  color: var(--noite-sec);
 }
-/* Ponte: mesmo branco da família, um degrau mais aberto */
+/* Ponte causa→efeito: vidro mais suave que os cards */
 .painel-ponte {
   display: grid;
   gap: 0.2rem;
   padding: 0.7rem 0.95rem;
   border-radius: 0.85rem;
-  background: var(--apple-glass-soft);
-  border: 1px solid var(--apple-stroke);
-  backdrop-filter: blur(10px) saturate(1.02);
-  -webkit-backdrop-filter: blur(10px) saturate(1.02);
-  box-shadow: 0 1px 0 var(--apple-glass-edge) inset;
+  background: var(--noite-vidro-suave);
+  border: 1px solid var(--noite-borda);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 var(--noite-luz);
 }
 .painel-ponte-fluxo {
   display: flex;
@@ -804,25 +912,25 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   gap: 0.4rem;
   font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--apple-ink);
+  color: var(--noite-sec-2);
 }
-.painel-ponte-seta { color: var(--apple-sec); font-weight: 500; }
+.painel-ponte-seta { color: var(--noite-sec); font-weight: 500; }
 .painel-ponte-porque {
   font-size: 0.75rem;
-  line-height: 1.4;
-  color: var(--apple-sec);
+  line-height: 1.45;
+  color: var(--noite-sec);
 }
-/* Mix de envio — tons da escada gelo (sem ciano Aura) */
+/* Mix de envio */
 .painel-mix-envio {
   padding: 0.75rem 0.95rem;
   border-radius: 0.85rem;
-  background: var(--apple-glass-soft);
-  border: 1px solid var(--apple-stroke);
-  backdrop-filter: blur(10px) saturate(1.02);
-  -webkit-backdrop-filter: blur(10px) saturate(1.02);
-  box-shadow: 0 1px 0 var(--apple-glass-edge) inset;
+  background: var(--noite-vidro-suave);
+  border: 1px solid var(--noite-borda);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 var(--noite-luz);
 }
 .painel-mix-envio-cabeca {
   display: flex;
@@ -832,105 +940,65 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   margin-bottom: 0.55rem;
   font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--apple-sec);
+  color: var(--noite-sec);
 }
 .painel-mix-envio-trilha {
   display: flex;
   height: 0.5rem;
   border-radius: 999px;
   overflow: hidden;
-  background: var(--apple-wash);
+  background: rgb(255 255 255 / 0.06);
 }
-.painel-mix-envio-full { background: #1d1d1f; min-width: 0; }
-.painel-mix-envio-flex { background: #6e6e73; min-width: 0; }
-.painel-mix-envio-outros { background: #c7c7cc; min-width: 0; }
-/* Resumo operacional: superfícies gelo locais, sem alterar o tema do painel. */
-.operacao-resumo {
-  --operacao-superficie: 210 20% 97%;
-  --operacao-tinta: 240 6% 12%;
-  --operacao-secundario: 240 4% 40%;
-  --operacao-borda: 240 6% 78%;
-  --operacao-reflexo: 0 0% 100%;
-  --operacao-sombra: 240 6% 8%;
-  --operacao-full: 156 79% 37%;
-  --operacao-flex: 240 4% 46%;
-  --operacao-outros: 240 6% 78%;
-  --operacao-card-sombra: inset 0 1px 0 hsl(var(--operacao-reflexo) / .8),
-    0 1px 2px hsl(var(--operacao-sombra) / .02),
-    0 4px 12px hsl(var(--operacao-sombra) / .03);
-  --ec-verde-txt: 156 84% 26%;
-  --ec-vermelho: 7 86% 45%;
-  --ec-laranja: 7 86% 45%;
-  --ec-ambar: 240 4% 40%;
-  --ec-surface-2: 240 5% 92%;
-}
-.operacao-resumo .ds-kpi {
-  background: hsl(var(--operacao-superficie) / .78) !important;
-  border: 1px solid hsl(var(--operacao-borda) / .4) !important;
-  border-radius: 12px;
+.painel-mix-envio-full { background: #34d399; min-width: 0; }
+.painel-mix-envio-flex { background: #94a3b8; min-width: 0; }
+.painel-mix-envio-outros { background: rgb(255 255 255 / 0.18); min-width: 0; }
+/* Resumo operacional dentro do módulo */
+.operacao-resumo .ds-kpi,
+.peregrinus-panel .painel-noite .operacao-resumo .ds-kpi {
   padding: 20px;
   min-height: 148px;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: var(--operacao-card-sombra);
-  transition: transform 180ms var(--curva-rapida);
 }
-.operacao-resumo .ds-kpi:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--operacao-card-sombra);
-}
-.operacao-resumo .ds-kpi .ds-rotulo {
-  color: hsl(var(--operacao-secundario)) !important;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0;
-}
-.operacao-resumo .ds-kpi .ds-nota {
-  color: hsl(var(--operacao-secundario)) !important;
-  font-size: 12px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
+.operacao-resumo .ds-kpi .ds-nota { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .operacao-resumo .ds-kpi .ds-numero-sec,
-.operacao-resumo .ds-kpi .ds-numero-focal {
-  font-family: inherit;
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: 0;
+.operacao-resumo .ds-kpi .ds-numero-focal,
+.peregrinus-panel .painel-noite .operacao-resumo .ds-kpi :is(.ds-numero-sec, .ds-numero-focal) {
+  font-size: 26px;
   line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-  color: hsl(var(--operacao-tinta));
-  overflow-wrap: anywhere;
-  min-width: 0;
 }
-.operacao-resumo .ds-kpi .ds-numero-focal { font-size: 20px; }
-.operacao-resumo .ds-kpi .ds-numero-sec + span {
-  letter-spacing: 0;
-  border-radius: 4px;
-}
-.operacao-resumo .painel-mix-envio-trilha { height: 8px; background: hsl(var(--muted)); }
-.operacao-resumo .painel-mix-envio-full,
-.operacao-resumo .operacao-mix-full { background: hsl(var(--operacao-full)); }
-.operacao-resumo .painel-mix-envio-flex,
-.operacao-resumo .operacao-mix-flex { background: hsl(var(--operacao-flex)); }
-.operacao-resumo .painel-mix-envio-outros,
-.operacao-resumo .operacao-mix-outros { background: hsl(var(--operacao-outros)); }
-@media (prefers-reduced-motion: reduce) {
-  .operacao-resumo .ds-kpi:hover { transform: none; }
-}
+.operacao-resumo .ds-kpi .ds-numero-focal,
+.peregrinus-panel .painel-noite .operacao-resumo .ds-kpi .ds-numero-focal { font-size: 20px; }
+.operacao-resumo .ds-kpi .ds-numero-sec + span { letter-spacing: 0; border-radius: 4px; }
+.operacao-resumo .painel-mix-envio-trilha { height: 8px; }
+.operacao-resumo .operacao-mix-full { background: #34d399; }
+.operacao-resumo .operacao-mix-flex { background: #94a3b8; }
+.operacao-resumo .operacao-mix-outros { background: rgb(255 255 255 / 0.18); }
 /* Compat: alias antigo */
 .resumo-growth {
   border-radius: 1.25rem;
   padding: 1rem;
-  background: linear-gradient(180deg, #fbfbfd 0%, #f5f5f7 100%);
-  border: 1px solid rgb(0 0 0 / 0.06);
+  background: linear-gradient(180deg, #0e131c 0%, #0b0f17 100%);
+  border: 1px solid rgb(255 255 255 / 0.08);
 }
-@media (prefers-reduced-motion: reduce) {
-  .painel-apple .ds-kpi:hover,
-  .painel-apple .glass-card:hover,
-  .painel-apple .glass-card-highlight:hover { transform: none; }
+/* Movimento: só em ponteiro fino; nunca com reduzir movimento */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .peregrinus-panel .painel-noite .ds-kpi:hover,
+  .painel-noite .noite-vidro:hover { transform: translateY(-1px); }
+  .peregrinus-panel .painel-noite .glass-card:hover { transform: none; }
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .painel-noite .ds-kpi:hover,
+  .painel-noite .glass-card:hover,
+  .painel-noite .glass-card-highlight:hover,
+  .painel-noite .noite-vidro:hover,
+  .peregrinus-panel .painel-noite .ds-kpi:hover { transform: none; }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .painel-noite .noite-vidro,
+  .peregrinus-panel .painel-noite .ds-kpi,
+  .peregrinus-panel .painel-noite .glass-card,
+  .peregrinus-panel .painel-noite .ds-glass-surface { background: rgb(17 23 33 / 0.96) !important; }
 }
 
 /* Shared white-ice glass: protected sections only, never the login canvas. */

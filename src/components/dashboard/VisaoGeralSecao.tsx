@@ -90,17 +90,17 @@ export default function VisaoGeralSecao({
   custId,
 }: Props) {
   return (
-    <div className="painel-apple space-y-5">
-      <header className="painel-apple-hero">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="ds-rotulo">Visão geral</p>
-          <BotaoConexaoMl custId={custId} />
+    <div className="painel-noite space-y-5">
+      {/* Cabeçalho enxuto: o <h1> da página já é o SecaoHeader; aqui só rótulo + chips */}
+      <header className="painel-noite-cabeca">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <h2 className="painel-noite-titulo">Histórico e diagnóstico</h2>
+          {periodo ? <span className="noite-chip">{periodo}</span> : null}
+          <span className="noite-chip" title="Cadeia: resultado → tráfego → ritmo → conversão → operação → sazonalidade">
+            causa → efeito
+          </span>
         </div>
-        <h1 className="painel-apple-titulo">Resultado, causas e tendências</h1>
-        <p className="painel-apple-sub">
-          Metodologia em cadeia: o que vendeu → tráfego → ritmo → conversão → reputação e logística → sazonalidade.
-          {periodo ? ` Período ${periodo}.` : ""}
-        </p>
+        <BotaoConexaoMl custId={custId} />
       </header>
 
       {/* 1 · Resultado + 2 · Tráfego (efeito e causa imediata) — uma única fonte de TGMV/Ads/ROAS */}
