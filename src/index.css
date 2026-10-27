@@ -1698,6 +1698,9 @@ html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.
     box-shadow: var(--access-glass-hover-shadow) !important;
     transform: translateY(-2px) !important;
   }
+  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .noite-vidro:hover {
+    border: 1px solid var(--access-glass-hover-edge) !important;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])) { transform: none !important; }
