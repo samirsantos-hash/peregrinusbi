@@ -987,6 +987,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
     hsl(var(--panel-glass-white) / .94));
   --panel-glass-opacity: .30;
   --panel-glass-reflection-opacity: .242;
+  --panel-glass-inner-edge: hsl(var(--panel-glass-edge) / .28);
   --panel-font-scale: .9;
   --panel-glass-fill: linear-gradient(135deg,
     hsl(var(--panel-glass-white) / var(--panel-glass-opacity)),
@@ -1059,6 +1060,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --muted: 210 12% 91%;
   --border: var(--panel-glass-edge);
   position: relative;
+  isolation: isolate;
   min-width: 0;
   background: var(--panel-glass-fill) !important;
   border-color: hsl(var(--panel-glass-edge) / .5) !important;
@@ -1079,6 +1081,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   display: block !important;
   position: absolute;
   inset: 0;
+  z-index: -1;
   border-radius: inherit;
   pointer-events: none;
   background: var(--panel-glass-reflection);
@@ -1258,4 +1261,21 @@ html:root .peregrinus-panel .painel-navigation[class] {
     inset 1px 0 0 hsl(var(--panel-glass-white) / .38),
     inset 0 -1px 0 hsl(var(--panel-glass-edge) / .24),
     0 12px 32px -20px hsl(var(--panel-glass-shadow) / .42);
+}
+
+/* A nested frame shares its parent's glass instead of adding another white layer.
+   Floating chart tooltips remain independent reading surfaces. */
+html:root .peregrinus-panel
+  :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])
+  :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"], div[class*="rounded"][class*="bg-muted"][class*="border"]):not(.painel-navigation):not([role="tooltip"]):not(.recharts-tooltip-wrapper *) {
+  background: transparent !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  border-color: var(--panel-glass-inner-edge) !important;
+}
+html:root .peregrinus-panel
+  :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])
+  :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):not([role="tooltip"]):not(.recharts-tooltip-wrapper *)::after {
+  display: none !important;
 }
