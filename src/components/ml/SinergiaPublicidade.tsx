@@ -11,28 +11,20 @@ import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 
 export function SinergiaIndicadores({ pontos, compacto = false, fonte }: { pontos: PontoPublicidade[]; compacto?: boolean; fonte: string }) {
   const r = calcularSinergiaPublicidade(pontos);
-  const leitura = r.correlacao == null ? "Sem base suficiente ou variação para avaliar a relação."
-    : Math.abs(r.correlacao) < 0.4 ? "Investimento e faturamento apresentam pouca associação linear."
-    : r.correlacao > 0 ? "Investimento e faturamento se movem na mesma direção."
-    : "Investimento e faturamento se movem em direções opostas.";
   return <section aria-label="Sinergia e dependência de publicidade" className="space-y-3 border-t border-border/50 pt-4">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
     <GraficoPublicidadeSerie pontos={pontos} compacto={compacto} />
     <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />
-    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{r.participacao == null ? "Sem dado" : pctFracao(r.participacao, 1)}</dd></div>
       <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{r.tacos == null ? "Sem dado" : pctFracao(r.tacos, 2)}</dd></div>
-      <div><dt className="text-xs text-muted-foreground">Sinergia investimento × faturamento · r</dt><dd className="text-xl font-medium tabular-nums">{r.correlacao == null ? "Sem dado" : num(r.correlacao, 2)}</dd></div>
     </dl>
-    <p className="text-sm">{r.participacao != null ? `${pctFracao(r.participacao, 1)} do faturamento corresponde à receita atribuída a Ads. ` : ""}{leitura}</p>
     {r.atribuicaoIncompativel && <p className="text-xs text-muted-foreground">A receita atribuída supera o faturamento pago; participação indisponível por diferença de atribuição.</p>}
     {(r.investimento == null || r.receitaAds == null) && <p className="text-xs text-muted-foreground">Faltam métricas de publicidade em parte das datas. Participação e TACOS aguardam cobertura completa; dias ausentes não representam gasto zero.</p>}
-    {compacto && <p className="text-xs text-muted-foreground">{num(r.observacoes)} observações pareadas · associação não é causalidade.</p>}
     {!compacto && <div className="space-y-1 text-xs text-muted-foreground">
       <p>Participação = receita atribuída ÷ faturamento; TACOS = investimento ÷ faturamento. Razões dos totais das mesmas datas, sem média de percentuais.</p>
       <p>ROAS = soma das vendas atribuídas a Ads ÷ soma do investimento. Faturamento total ÷ Ads não é ROAS.</p>
-      <p>Pearson usa {num(r.observacoes)} observações pareadas; mínimo de 7. Valores de −1 a +1 indicam associação inversa ou direta, não causalidade.</p>
     </div>}
     <p className="text-xs text-muted-foreground">Atribuição não mede vendas incrementais nem prevê o que aconteceria ao desligar campanhas.</p>
   </section>;
