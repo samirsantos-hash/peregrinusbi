@@ -93,7 +93,10 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
   const mix = Object.entries((env?.mix ?? {}) as Record<string, { pedidos: number; faturamento: number }>).sort((a, b) => b[1].faturamento - a[1].faturamento);
   const totMix = mix.reduce((s, [, v]) => s + v.faturamento, 0);
   const full = mix.find(([k]) => k === "fulfillment")?.[1].faturamento ?? 0;
-  const partFull = totMix ? full / totMix : null;
+  // "sem_info" = modalidade não informada pelo ML: fica fora da base do Full para não inventar 0%.
+  const semInfo = mix.find(([k]) => k === "sem_info")?.[1].faturamento ?? 0;
+  const baseConhecida = totMix - semInfo;
+  const partFull = baseConhecida > 0 && semInfo / (totMix || 1) < 0.5 ? full / baseConhecida : null;
 
   // Ruptura: vendas pagas 7d por anúncio.
   const v7 = new Map<string, number>((vendas.data ?? []).map((i) => [soDigitos(i.id), i.unidades]));
@@ -168,7 +171,7 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
                 return (
                   <div key={k} className="space-y-1">
                     <div className="flex justify-between gap-2 text-xs tabular-nums">
-                      <span className="truncate">{LOGISTICA[k] ?? "Outro"}</span>
+                      <span className="truncate">{k === "sem_info" ? "Não informada" : LOGISTICA[k] ?? "Outro"}</span>
                       <span className="text-muted-foreground">{pctFracao(p)} · {num(v.pedidos)} pedidos</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-primary transition-[width] duration-200" style={{ width: `${p * 100}%` }} /></div>
