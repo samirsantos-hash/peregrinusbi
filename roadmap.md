@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sinergia e dependência de publicidade
+- [ ] Incluir cálculos compartilhados de participação atribuída a Ads, TACOS e associação investimento × faturamento, com períodos alinhados e dados ausentes preservados.
+- [ ] Mostrar detalhes em Publicidade e síntese na Visão geral; testar cálculos e conferir uma loja real.
+
 ## Vidro branco global (27/10)
 - [x] Unificar quadros e banners com branco gelo translúcido e reflexo que acompanha o mouse, preservando dados e cores de alerta.
 - [x] Conferir Publicidade da GMABSOLUTA e Preço com sessão real, contraste nos dois temas, tela estreita sem transbordamento e movimento reduzido; demais seções recebem o estilo compartilhado.
