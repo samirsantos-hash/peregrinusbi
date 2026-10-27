@@ -18,7 +18,7 @@ const ativa = (s: string | null) => (s ?? "").toLowerCase() === "active";
 type GrupoResumo = PainelAds["grupos"][number];
 
 /** Detalhe expandido: série diária da campanha e estatísticas do anúncio principal lidas ao vivo. */
-function DetalheCampanha({ c, contaId, custId, item, i }: { c: CampanhaLinha; contaId: string; custId: string; item: GrupoResumo | null; i: any }) {
+function DetalheCampanha({ c, contaId, custId, item, i, somas }: { c: CampanhaLinha; contaId: string; custId: string; item: GrupoResumo | null; i: any; somas?: { impressoes: number; cliques: number; unidades: number } }) {
   const serie = useQuery({
     queryKey: ["ads-camp-serie", contaId, c.campaign_id],
     queryFn: async () => {
@@ -46,15 +46,15 @@ function DetalheCampanha({ c, contaId, custId, item, i }: { c: CampanhaLinha; co
     ["Visitas do anúncio", sd(e?.visitas == null ? "Sem dado" : num(e.visitas))],
     ["Conversão do anúncio", sd(e?.conversao == null ? "Sem dado" : pctFracao(e.conversao, 2))],
     ["Pedidos pagos", sd(e?.pedidos == null ? "Sem dado" : num(e.pedidos))],
-    ["Impressões", num(i?.impressoes)],
-    ["Cliques", num(i?.cliques)],
+    ["Impressões", num(somas?.impressoes)],
+    ["Cliques", num(somas?.cliques)],
     ["CTR", pctFracao(i?.ctr, 2)],
     ["CPC", brl(i?.cpc, true)],
     ["Investimento", brl(i?.investimento, true)],
     ["Receita de Ads", brl(i?.receita, true)],
     ["ROAS", vezes(i?.roas)],
     ["ACOS", pctFracao(i?.acos)],
-    ["Unidades por Ads", num(i?.unidades)],
+    ["Unidades por Ads", num(somas?.unidades)],
   ];
   return (
     <div className="space-y-5 p-5">
@@ -223,7 +223,7 @@ export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { pain
                   </tr>
                   {exp && (
                     <tr className="border-t border-border bg-muted/10">
-                      <td colSpan={14}><DetalheCampanha c={c} contaId={contaId} custId={custId} item={g} i={i} /></td>
+                      <td colSpan={14}><DetalheCampanha c={c} contaId={contaId} custId={custId} item={g} i={i} somas={m?.somas} /></td>
                     </tr>
                   )}
                   </Fragment>
