@@ -19,6 +19,7 @@ export default {
         mono: ["\"DM Sans\"", "ui-sans-serif", "system-ui", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"], // números em DM Sans com tabular-nums
       },
       colors: {
+        "ml-amarelo": "hsl(var(--ml-amarelo))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
