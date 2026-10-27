@@ -1,5 +1,9 @@
 # Roadmap
 
+## Identidade do login em todo o dashboard (27/10)
+- [ ] Aplicar o fundo de cordas, vidro, tipografia e campos da tela de login às páginas protegidas, sem alterar dados ou navegação.
+- [ ] Conferir login e painel autenticado nos dois temas, reação ao mouse e quadros aninhados.
+
 ## Auditoria do vidro — aplicação em etapas (27/10)
 - [x] Etapa 1: preservar o vidro próprio do menu; contraste conferido nos dois temas (escuro: itens 15,15:1 e grupos 5,83:1).
 - [x] Etapa 2: quadros internos sem fundo/blur/sombra duplicados, bordas suaves e reflexo atrás do conteúdo; conferido no painel autenticado.
