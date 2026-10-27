@@ -31,6 +31,11 @@ export function GlassPointer() {
         const px = Math.min(1, Math.max(0, (x - rect.left) / (rect.width || 1)));
         active.style.setProperty("--glass-angle", `${100 + px * 40}deg`);
         active.style.setProperty("--glass-band", `${Math.round(px * 100)}%`);
+        const py = Math.min(1, Math.max(0, (y - rect.top) / (rect.height || 1)));
+        // Small 3D tilt: max 2.5deg, larger cards tilt less.
+        const k = rect.width > 600 ? 0.4 : 1;
+        active.style.setProperty("--glass-rx", `${((0.5 - py) * 5 * k).toFixed(2)}deg`);
+        active.style.setProperty("--glass-ry", `${((px - 0.5) * 5 * k).toFixed(2)}deg`);
         active.setAttribute("data-glass-active", "");
       });
     };
