@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { transformKpi, type SellerKPI } from "@/hooks/useSellerData";
-import { fetchScopedRows } from "@/lib/scopedRows";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 /** Colunas somáveis (volume/valor) */
 const SUM_COLS = [
@@ -38,8 +38,8 @@ export interface CarteiraConsolidado {
 }
 
 async function fetchAll(ids: string[]): Promise<any[]> {
-  const { data, error } = await import("@/lib/fetchAllRows").then(({ fetchAllRows }) => fetchAllRows<any>((from, to) =>
-    supabase.rpc("indicadores_carteira", { p_seller_ids: ids }).order("is_latest").order("data").order("seller_id").range(from, to)));
+  const { data, error } = await fetchAllRows<any>((from, to) =>
+    supabase.rpc("indicadores_carteira", { p_seller_ids: ids }).order("is_latest").order("data").order("seller_id").range(from, to));
   if (error) throw error;
   return data;
 }
