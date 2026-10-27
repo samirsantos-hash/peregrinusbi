@@ -21,7 +21,7 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
   return <section className="visao-geral-modulo space-y-8 py-2">
     <div className="flex flex-wrap justify-between items-center gap-2"><div><h3 className="text-base font-semibold">Resultado da loja · Mercado Livre</h3><p className="text-xs text-muted-foreground">{br(periodo.inicio)} a {br(periodo.fim)} · 30 dias UTC completos · consulta {new Date(q.data.consultadoEm).toLocaleString('pt-BR')} · independente do calendário histórico</p></div><Button size="icon" variant="outline" aria-label="Consultar resumo novamente" disabled={q.isFetching} onClick={() => q.refetch()}><RefreshCw className={`h-4 w-4 ${q.isFetching ? 'animate-spin' : ''}`} /></Button></div>
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-    <div className="lg:col-span-8 space-y-3"><h3 className="text-base font-semibold">Resumo executivo</h3><div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
+    <div className="lg:col-span-8 space-y-3"><h3 className="text-base font-semibold">Resumo executivo</h3><div className="grid grid-cols-2 2xl:grid-cols-4 gap-3">
       <KpiCard rotulo="Faturamento pago" valor={brl(a.faturamento)} referencia={variacao(a.faturamento, p.faturamento)} variacao={d(a.faturamento, p.faturamento)} melhorQuando="subir" focal />
       <KpiCard rotulo="Pedidos pagos" valor={num(a.pedidos)} referencia={variacao(a.pedidos, p.pedidos)} variacao={d(a.pedidos, p.pedidos)} melhorQuando="subir" />
       <KpiCard rotulo="Ticket por pedido" valor={a.ticket == null ? 'Sem dado' : brl(a.ticket)} referencia={variacao(a.ticket, p.ticket)} variacao={d(a.ticket, p.ticket)} melhorQuando="subir" />

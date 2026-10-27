@@ -52,7 +52,7 @@ export default function ResumoExecutivo({ diario, de, ate, reputacao }: { diario
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
       <section aria-label="Resultado da loja" className={reputacao ? 'lg:col-span-8 space-y-3' : 'lg:col-span-12 space-y-3'}>
         <h2 className="text-base font-semibold mb-2">Resumo executivo · {periodo}</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 2xl:grid-cols-4 gap-3">
           <KpiCard focal rotulo="TGMV" valor={brl(a.tgmv)} variacao={v(a.tgmv, p?.tgmv)} referencia={p ? `Anterior: ${brl(p.tgmv)}` : "Sem período anterior"} />
           <KpiCard rotulo="GMV faturado" valor={brl(a.gmv)} variacao={v(a.gmv, p?.gmv)} referencia={a.tgmv > 0 ? `${pct((a.gmv / a.tgmv) * 100, 1)} do TGMV` : "Sem dado"} />
           <KpiCard rotulo="Investimento em Ads" valor={brl(a.ads)} variacao={v(a.ads, p?.ads)} melhorQuando="neutro" referencia={p ? `Anterior: ${brl(p.ads)}` : "Sem período anterior"} />

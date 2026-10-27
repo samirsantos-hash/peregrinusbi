@@ -39,11 +39,11 @@ export default function ResumoReputacao({ dados, atualizadoEm }: { dados?: Reput
         { nome: 'Reclamações', valor: dados?.reclamacoes },
         { nome: 'Atrasos', valor: dados?.atrasos },
         { nome: 'Cancelamentos', valor: dados?.cancelamentos },
-      ].map(m => <div key={m.nome} className="min-w-0"><dt className="text-xs text-muted-foreground break-words">{m.nome}</dt><dd className="mt-1 text-base font-semibold tabular-nums break-words">{pctFracao(m.valor, 2)}</dd></div>)}
+      ].map(m => <div key={m.nome} className="min-w-0"><dt className="text-[10px] text-muted-foreground">{m.nome}</dt><dd className="mt-1 text-base font-semibold tabular-nums break-words">{pctFracao(m.valor, 2)}</dd></div>)}
     </dl>
     <footer className="border-t border-border pt-3 space-y-1 text-xs text-muted-foreground">
       <p>Restrições da conta: não consultadas</p>
-      <p>{dados?.periodo ? `Janela oficial: ${dados.periodo}` : 'Último retrato de reputação disponível'}{atualizadoEm ? ` · ${new Date(atualizadoEm).toLocaleDateString('pt-BR')}` : ''}</p>
+      <p>{dados?.periodo ? `Janela oficial: ${dados.periodo.replace(/days?/g, 'dias')}` : 'Último retrato de reputação disponível'}{atualizadoEm ? ` · ${new Date(atualizadoEm).toLocaleDateString('pt-BR')}` : ''}</p>
     </footer>
   </section>;
 }
