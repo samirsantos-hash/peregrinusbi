@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Estrutura visual enviada (27/10)
-- [ ] Adaptar estrutura do catálogo HTML ao painel: superfícies neutras, navegação, controles e hierarquia, preservando DM Sans, identidade Peregrinus, dados e integrações.
-- [ ] Conferir painel com dados reais, navegação, reflexo localizado e os dois temas.
+- [x] Adaptar estrutura do catálogo HTML ao painel: superfícies neutras, navegação, controles e hierarquia, preservando DM Sans, identidade Peregrinus, dados e integrações.
+- [x] Conferir GMABSOLUTA com dados reais, navegação para Preço, reflexo localizado, gráfico nos dois temas e tela estreita sem transbordamento; 19 testes de cálculo passaram. Outras telas recebem estilos compartilhados, sem auditoria individual.
 
 ## Sinergia e dependência de publicidade
 - [x] Incluir cálculos compartilhados de participação atribuída a Ads, TACOS e associação investimento × faturamento, com períodos alinhados e dados ausentes preservados.
