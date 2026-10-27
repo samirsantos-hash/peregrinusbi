@@ -2,7 +2,7 @@
 
 ## Auditoria do vidro — aplicação em etapas (27/10)
 - [x] Etapa 1: preservar o vidro próprio do menu; contraste conferido nos dois temas (escuro: itens 15,15:1 e grupos 5,83:1).
-- [ ] Etapa 2: camadas aninhadas e bordas — aguarda revisão da primeira etapa por Samir.
+- [ ] Etapa 2: remover branco/blur/sombra duplicados, suavizar bordas internas e manter conteúdo acima do reflexo; conferir nos dois temas.
 - [ ] Etapa 3: reflexo e uniformidade do blur — aguarda etapa anterior.
 - [ ] Etapa 4: harmonização das cores dos gráficos — aguarda etapa anterior.
 

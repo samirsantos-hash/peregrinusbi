@@ -16,8 +16,16 @@ export function GlassPointer() {
     };
     const move = (event: PointerEvent) => {
       if (!media.matches || event.pointerType === "touch") { clear(); return; }
-      const target = event.target instanceof Element ? event.target.closest<HTMLElement>(surfaces) : null;
+      let target = event.target instanceof Element ? event.target.closest<HTMLElement>(surfaces) : null;
       if (!target?.closest(".peregrinus-panel")) { clear(); return; }
+      // Nested frames share one outer reflection; floating tooltips keep their own surface.
+      if (!target.closest('.recharts-tooltip-wrapper, [role="tooltip"]')) {
+        let parent = target.parentElement?.closest<HTMLElement>(surfaces);
+        while (parent?.closest(".peregrinus-panel")) {
+          target = parent;
+          parent = parent.parentElement?.closest<HTMLElement>(surfaces);
+        }
+      }
       if (active !== target) { clear(); active = target; }
       x = event.clientX;
       y = event.clientY;
