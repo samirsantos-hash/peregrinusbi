@@ -37,14 +37,14 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-surface-alt",
         recolhida ? "justify-center px-0" : "px-3",
         ativo
-          ? "bg-brand-blue/[0.12] text-brand-blue"
-          : "text-muted-alt hover:bg-muted/[0.35]",
+          ? "bg-primary/10 text-primary hover:text-primary"
+          : "text-foreground/80 hover:bg-muted/50 hover:text-foreground",
       )}
     >
       {ativo && (
-        <span className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r bg-brand-blue" aria-hidden />
+        <span className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r bg-primary" aria-hidden />
       )}
-      <Icone className={cn("h-4 w-4 shrink-0", ativo ? "text-brand-blue" : "text-muted-alt")} />
+      <Icone className="h-4 w-4 shrink-0" />
       {!recolhida && <span className="truncate">{tab.label}</span>}
       {badge ? (
         <span
@@ -103,7 +103,7 @@ function Conteudo({
         {GRUPOS.map((g) => (
           <div key={g.titulo} className="mt-5 first:mt-2">
             {!recolhida && (
-              <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.06em] text-muted-alt">
+              <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-normal text-muted-foreground">
                 {g.titulo}
                 {g.titulo === "Visão geral" && <NovidadeTip id="sidebar" />}
               </p>
@@ -134,7 +134,7 @@ function Conteudo({
             onClick={onToggle}
             aria-label={recolhida ? "Expandir navegação" : "Recolher navegação"}
             className={cn(
-              "w-full flex items-center gap-2.5 h-9 rounded-md text-[13px] font-medium text-muted-alt hover:bg-muted/[0.35] transition-colors",
+              "w-full flex items-center gap-2.5 h-9 rounded-md text-[13px] font-medium text-foreground/80 hover:bg-muted/50 transition-colors",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-surface-alt",
               recolhida ? "justify-center px-0" : "px-3",
             )}
@@ -181,7 +181,7 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
       {/* Desktop / tablet */}
       <aside
         className={cn(
-          "hidden lg:block shrink-0 sticky self-start top-0 z-30 glass-card !rounded-[32px] top-4 overflow-hidden",
+          "painel-navigation hidden lg:block shrink-0 sticky self-start top-0 z-30 glass-card !rounded-[32px] top-4 overflow-hidden",
           recolhida ? "w-[56px]" : "w-[224px]",
         )}
         style={{ height: "100vh" }}
@@ -198,7 +198,7 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
 
       {/* Drawer < 1024px */}
       <Sheet open={mobileAberto} onOpenChange={onMobileChange}>
-        <SheetContent side="left" className="w-[248px] p-0 bg-surface-alt">
+        <SheetContent side="left" className="painel-navigation w-[248px] p-0">
           <div className="h-full pt-8">
             <Conteudo
               ativa={ativa}
