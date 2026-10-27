@@ -1,5 +1,8 @@
 # Roadmap
 
+## Corrigir vidro das seções pela Home (27/10)
+- [ ] Igualar composição das superfícies ao cartão de acesso, eliminar reflexos e camadas conflitantes e conferir seções com dados reais nos dois temas.
+
 ## Glass suave como o acesso (27/10)
 - [x] Suavizar superfícies, bordas, reflexos e contraste decorativo do painel; Visão geral, Correlações e Publicidade conferidas na AUTOPECASLONDRINA, incluindo 536px sem transbordamento. Dados e fórmulas preservados; Build OK.
 
