@@ -618,7 +618,6 @@ const Index = () => {
                           {/* 2. Evolução e diagnóstico */}
                           <div className="grid grid-cols-1 gap-5 items-stretch">
                             <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
-                            <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
                           </div>
                           {/* 3. Ação por anúncio */}
                           <MlAoVivo secao="qualidade" custId={sellerCustIdMap[selectedSeller]} />
@@ -629,9 +628,10 @@ const Index = () => {
                       );
                     })()}
                   </TabsContent>
-                  <TabsContent value="clips" className="mt-0">
+                  <TabsContent value="clips" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="clips" />}
                     <ClipsAudiencePanel kpis={displayKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} dataGranularity={granularity} />
+                    {!isConsolidado && <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />}
                   </TabsContent>
                   <TabsContent value="opportunities" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="opportunities" />}

@@ -1,5 +1,6 @@
 // Bloco "Direto do Mercado Livre": mostra, em cada aba, o tema importado pela
 // conexão da própria loja (ml_sync_tema). Só aparece quando a loja está conectada.
+import PromocoesApi from "@/components/ml/PromocoesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
@@ -240,25 +241,6 @@ function Logistica({ e }: { e: any }) {
         );
       })}
     </div>
-  );
-}
-
-function Promocoes({ p }: { p: any }) {
-  if (!p) return null;
-  return (
-    <>
-      <Grade>
-        <KpiCard focal rotulo="Promoções ativas" valor={num(p.ativas)} referencia={`${num(p.total)} disponíveis para a loja`} />
-      </Grade>
-      <ul className="text-xs divide-y divide-border">
-        {(p.lista ?? []).slice(0, 12).map((x: any) => (
-          <li key={x.id} className="py-1.5 flex justify-between gap-2">
-            <span>{x.nome ?? x.tipo}</span>
-            <span className="text-muted-foreground">{x.status === "started" ? "Ativa" : x.status === "pending" ? "Programada" : "Disponível"}{x.fim ? ` · até ${new Date(x.fim).toLocaleDateString("pt-BR")}` : ""}</span>
-          </li>
-        ))}
-      </ul>
-    </>
   );
 }
 
