@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { JuniorModeProvider } from "@/hooks/useJuniorMode";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GlassPointer } from "@/components/ds/GlassPointer";
 import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -77,10 +78,10 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   if (adminOnly && !isAdmin && !isGerente) return <Navigate to="/" replace />;
 
   return (
-    <>
+    <div className="peregrinus-panel min-w-0">
       {children}
       <RodapeInstitucional />
-    </>
+    </div>
   );
 }
 
@@ -99,6 +100,7 @@ const AppRoutes = () => {
     <>
       {/* Fundo Glass Verde vem do CSS (ambiente fixo) */}
       <AuraReveal />
+      <GlassPointer />
       <div className="relative z-10">
       <Routes>
       <Route path="/auth" element={user ? <Navigate to={oauthReturnPath(new URLSearchParams(window.location.search).get("next"))} replace /> : <Auth />} />
