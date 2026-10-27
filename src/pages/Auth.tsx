@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo-peregrinus.webp";
 import logoAuth from "@/assets/logo-auth.webp";
+import { AuraBackground } from "@/components/aura/AuraBackground";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -37,8 +38,9 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="glass-card p-8 w-full max-w-sm space-y-6 animate-fade-in">
+    <div className="relative min-h-screen flex items-center justify-center px-4 bg-background">
+      <AuraBackground />
+      <div className="relative z-10 glass-card p-8 w-full max-w-sm space-y-6 animate-fade-in">
 
 
         <div className="text-center space-y-3">
