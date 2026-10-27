@@ -4471,6 +4471,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      indicadores_carteira: {
+        Args: { p_seller_ids: string[] }
+        Returns: {
+          data: string
+          is_latest: boolean
+          metrics: Json
+          seller_id: string
+        }[]
+      }
       indicadores_classificacao: {
         Args: { p_seller_ids: string[] }
         Returns: {
