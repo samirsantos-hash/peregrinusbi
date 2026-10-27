@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Otimização de indicadores (27/10)
-- [ ] Restringir leituras às lojas solicitadas, evitar rajadas paralelas e carregar só os snapshots necessários sem alterar cálculos históricos.
-- [ ] Conferir resultados e carga; alterações no servidor e validação real aguardam Lovable Cloud disponível. Mini já foi iniciado, não solicitar nova mudança.
+- [x] Restringir carteiras grandes no servidor, sequenciar páginas sem consultas especulativas; classificação, tendências, últimos KPIs, verticais e consolidação mensal por RPC com RLS do usuário; mix lê último snapshot e contagem mantém 45 dias.
+- [x] Cloud disponível em Mini (mudança anterior concluída); 23 testes passaram, GMABSOLUTA conferida e amostra de 100 lojas: 742 linhas históricas → 118 linhas de carteira, totais sem diferença; classificação 451 linhas e inclinação equivalente. Não atribuída melhora de latência/custo à otimização; falta janela representativa de produção, sem bloqueio da entrega.
 
 ## Estrutura visual enviada (27/10)
 - [x] Adaptar estrutura do catálogo HTML ao painel: superfícies neutras, navegação, controles e hierarquia, preservando DM Sans, identidade Peregrinus, dados e integrações.
