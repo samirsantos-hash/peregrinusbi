@@ -43,7 +43,7 @@ import { ContextoNavegacaoProvider } from "./contexts/ContextoNavegacao";
 import NotificationsBell from "./components/portfolios/NotificationsBell";
 import RodapeInstitucional from "./components/RodapeInstitucional";
 import AlertaInatividade from "./components/AlertaInatividade";
-import { AuraBackground, AuraReveal } from "@/components/aura/AuraBackground";
+import { AuraReveal } from "@/components/aura/AuraBackground";
 import AvisosGlobais from '@/components/AvisosGlobais';
 import { registrarAviso } from '@/lib/avisosDesenvolvedor';
 
@@ -98,8 +98,6 @@ const AppRoutes = () => {
 
   return (
     <>
-      {/* Auth owns its canvas; authenticated pages share the same background. */}
-      {user && <AuraBackground />}
       <AuraReveal />
       <GlassPointer />
       <div className="relative z-10">
