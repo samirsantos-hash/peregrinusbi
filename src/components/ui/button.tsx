@@ -10,11 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "aura-cta",
-        destructive: "border border-red-500/20 bg-red-500/10 text-red-300 hover:bg-red-500/20",
-        outline: "border border-white/10 bg-transparent text-white backdrop-blur-sm hover:bg-white/5",
-        secondary: "border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06]",
-        ghost: "text-gray-400 hover:bg-white/5 hover:text-white",
-        link: "text-cyan-300 underline-offset-4 hover:text-white hover:underline",
+        destructive: "border border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/20",
+        outline: "border border-border bg-transparent text-foreground backdrop-blur-sm hover:bg-muted/50",
+        secondary: "border border-border bg-secondary/40 text-foreground hover:bg-secondary/60",
+        ghost: "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+        link: "text-primary underline-offset-4 hover:text-foreground hover:underline",
       },
       size: {
         default: "h-10 px-4 py-2",
