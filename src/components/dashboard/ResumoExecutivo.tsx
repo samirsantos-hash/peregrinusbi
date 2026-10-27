@@ -5,7 +5,7 @@ import { brl, num, pct } from "@/lib/format";
 import { adicionarDiasIso, diasInclusive, formatarPeriodoBr } from "@/lib/periodoResumo";
 import { SinergiaIndicadores } from "@/components/ml/SinergiaPublicidade";
 
-type K = { date: string; gmv?: number; tgmv?: number; revenue?: number; adsInvestment?: number; tgmvPads?: number; visits?: number; tsi?: number };
+type K = { date: string; gmv?: number; tgmv?: number; revenue?: number; adsInvestment?: number; tgmvPads?: number; visits?: number; tsi?: number; repCancellationsRate?: number };
 
 const soma = (ks: K[], f: (k: K) => number | undefined) => ks.reduce((a, k) => a + (Number(f(k)) || 0), 0);
 const variacao = (a: number, b: number) => (b > 0 ? ((a - b) / b) * 100 : null);
@@ -49,7 +49,7 @@ export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?:
 
   return (
     <div className="space-y-5">
-      <SinergiaIndicadores compacto fonte={`Histórico importado · ${periodo}`} pontos={d.serie.map(k => ({ data: k.date.slice(0, 10), investimento: k.adsInvestment ?? null, faturamento: k.tgmv ?? null, receitaAds: k.tgmvPads ?? null }))} />
+      <SinergiaIndicadores compacto fonte={`Histórico importado · ${periodo}`} pontos={d.serie.map(k => ({ data: k.date.slice(0, 10), investimento: k.adsInvestment ?? null, faturamento: k.tgmv ?? null, receitaAds: k.tgmvPads ?? null, visitas: k.visits ?? null, cancelamentos: k.repCancellationsRate ?? null }))} />
       <section aria-label="Resultado da loja">
         <h2 className="ds-rotulo mb-2">1 · Resultado da loja · {periodo}</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
