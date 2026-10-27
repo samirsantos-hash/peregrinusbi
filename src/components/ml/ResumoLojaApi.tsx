@@ -21,10 +21,10 @@ const delta = (atual: number | null, ant: number | null, pontos = false) =>
 function TooltipVidro({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0B0F17]/90 px-3 py-2 text-xs shadow-[0_8px_24px_rgba(0,0,0,0.4)] backdrop-blur-md">
-      <p className="text-slate-300 tabular-nums">{label ? br(label) : ''}</p>
-      <p className="mt-0.5 font-semibold text-white tabular-nums">{brl(payload[0].value, true)}</p>
-      <p className="text-slate-400">Faturamento pago</p>
+    <div className="rounded-lg border border-border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-md">
+      <p className="text-muted-foreground tabular-nums">{label ? br(label) : ''}</p>
+      <p className="mt-0.5 font-semibold tabular-nums">{brl(payload[0].value, true)}</p>
+      <p className="text-muted-foreground">Faturamento pago</p>
     </div>
   );
 }
@@ -105,7 +105,7 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
 
       {/* Nível inferior: Evolução (8) × Funil (4) — colunas fecham na mesma linha */}
       <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
-        <div className="noite-vidro flex min-h-[320px] min-w-0 flex-col rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.3)] backdrop-blur-xl transition-all duration-200 hover:border-white/15 lg:col-span-8">
+        <div className="noite-vidro flex min-h-[320px] min-w-0 flex-col rounded-xl border border-border bg-card p-5 transition-transform duration-150 lg:col-span-8">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h4 className="truncate text-sm font-semibold tracking-tight text-white">Evolução diária do faturamento pago</h4>
             <span className="noite-chip">{a.serie.length} dias</span>
@@ -115,8 +115,8 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
               <AreaChart data={a.serie} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="vg-faturamento" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#14A86C" stopOpacity={0.28} />
-                    <stop offset="100%" stopColor="#14A86C" stopOpacity={0} />
+                    <stop offset="0%" stopColor="hsl(var(--chart-1))" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" />
@@ -140,11 +140,11 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
                 <Area
                   type="monotone"
                   dataKey="faturamento"
-                  stroke="#3BD394"
+                  stroke="hsl(var(--chart-1))"
                   strokeWidth={2}
                   fill="url(#vg-faturamento)"
                   dot={false}
-                  activeDot={{ r: 4, fill: '#3BD394', stroke: '#0B0F17', strokeWidth: 2 }}
+                  activeDot={{ r: 4, fill: 'hsl(var(--chart-1))', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
                   connectNulls={false}
                 />
               </AreaChart>
