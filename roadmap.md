@@ -1,5 +1,10 @@
 # Roadmap
 
+## Visão geral — diagnóstico composto (27/10)
+- [ ] Unificar resultado e reputação no topo, mantendo fontes e períodos separados.
+- [ ] Organizar tráfego, Clips e funil; aplicar vidro, proporções e raios sem inventar métricas ausentes.
+- [ ] Conferir loja conectada, histórico e contraste nos dois temas.
+
 ## Refinamento pós-reversão (27/10)
 - [x] Comparar com a versão anterior ao kit e manter navegação, superfícies e dados anteriores.
 - [x] Unificar DM Sans, peso dos números e contraste de títulos, legendas e alertas no vidro branco.
