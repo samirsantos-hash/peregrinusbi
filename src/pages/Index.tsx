@@ -546,6 +546,7 @@ const Index = () => {
                               benchmark={verticalBenchmark}
                               sellerId={selectedSeller || undefined}
                               dataGranularity={granularity === "daily" ? "daily" : "consolidated"}
+                              custId={sellerCustIdMap[selectedSeller]}
                             />
                           );
                         })()}

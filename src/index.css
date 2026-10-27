@@ -604,6 +604,7 @@
 
 /* ── Movimento tátil (padrão do painel) ──
    Microinterações 100–200ms; entradas de janelas/menus 200–350ms; só transform e opacity. */
+:root { --ml-amarelo: 54 100% 50%; }
 :root { --curva-rapida: cubic-bezier(0.16, 1, 0.3, 1); }
 [data-state].animate-in, [data-state].animate-out { animation-duration: 220ms; animation-timing-function: var(--curva-rapida); }
 [role="dialog"][data-state].animate-in { animation-duration: 280ms; }

@@ -6,6 +6,7 @@ import OperacaoResumo from "@/components/dashboard/OperacaoResumo";
 import DailyPerformanceChart from "@/components/dashboard/DailyPerformanceChart";
 import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
 import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
+import BotaoConexaoMl from "@/components/ml/BotaoConexaoMl";
 import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { ListingQuality } from "@/hooks/useListingsQuality";
@@ -66,6 +67,7 @@ type Props = {
   benchmark?: unknown;
   sellerId?: string;
   dataGranularity?: "consolidated" | "daily";
+  custId?: string;
 };
 
 /**
@@ -85,11 +87,15 @@ export default function VisaoGeralSecao({
   benchmark,
   sellerId,
   dataGranularity = "daily",
+  custId,
 }: Props) {
   return (
     <div className="painel-apple space-y-5">
       <header className="painel-apple-hero">
-        <p className="ds-rotulo">Visão geral</p>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="ds-rotulo">Visão geral</p>
+          <BotaoConexaoMl custId={custId} />
+        </div>
         <h1 className="painel-apple-titulo">Resultado, causas e tendências</h1>
         <p className="painel-apple-sub">
           Metodologia em cadeia: o que vendeu → tráfego → ritmo → conversão → reputação e logística → sazonalidade.
