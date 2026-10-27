@@ -99,6 +99,13 @@
       "when": 1793130612354,
       "tag": "0013_scoped_indicator_read_summaries",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793130714035,
+      "tag": "0014_scoped_portfolio_trends",
+      "breakpoints": true
     }
   ]
 }

@@ -4488,6 +4488,15 @@ export type Database = {
           visits: number
         }[]
       }
+      indicadores_tendencias: {
+        Args: { p_seller_ids: string[] }
+        Returns: {
+          ads_trend: number
+          seller_id: string
+          tgmv_trend: number
+          visits_trend: number
+        }[]
+      }
       indicadores_ultimos: {
         Args: { p_seller_ids: string[] }
         Returns: {
