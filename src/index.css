@@ -1262,13 +1262,15 @@ html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
   --panel-date: 54 100% 50%;
   --panel-white: 0 0% 100%;
   --panel-black: 0 0% 0%;
-  --panel-fill: hsl(var(--panel-white) / .05);
+  --panel-fill: hsl(var(--panel-white) / .035);
+  --panel-fill-hover: hsl(var(--panel-white) / .05);
+  --panel-stroke-hover: hsl(var(--panel-white) / .14);
+  --panel-divider: hsl(var(--panel-white) / .06);
+  --panel-tooltip: hsl(var(--panel-surface) / .85);
   --panel-fill-nested: hsl(var(--panel-white) / .025);
-  --panel-stroke: hsl(var(--panel-white) / .12);
-  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .08),
-    inset 0 -1px 0 hsl(var(--panel-white) / .025),
-    0 4px 12px -6px hsl(var(--panel-black) / .28),
-    0 16px 32px -24px hsl(var(--panel-black) / .45);
+  --panel-stroke: hsl(var(--panel-white) / .08);
+  --panel-shadow: inset 0 1px 1px hsl(var(--panel-white) / .08),
+    0 4px 24px hsl(var(--panel-black) / .35);
   --panel-nav-fill: hsl(var(--panel-surface) / .92);
   --panel-reflection: .14;
   --panel-radius: 16px;
@@ -1282,6 +1284,10 @@ html.light {
   --panel-line: 0 0% 85%;
   --panel-positive: 156 84% 26%;
   --panel-fill: hsl(var(--panel-surface) / .8);
+  --panel-fill-hover: hsl(var(--panel-white) / .9);
+  --panel-stroke-hover: hsl(var(--panel-line));
+  --panel-divider: hsl(var(--panel-line) / .6);
+  --panel-tooltip: hsl(var(--panel-white) / .9);
   --panel-fill-nested: hsl(var(--panel-white) / .55);
   --panel-stroke: hsl(var(--panel-line) / .8);
   --panel-shadow: inset 0 1px 0 hsl(var(--panel-white)),
@@ -1445,14 +1451,15 @@ html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-gl
   border-radius: var(--panel-radius);
   color: hsl(var(--panel-text));
   box-shadow: var(--panel-shadow);
-  backdrop-filter: blur(16px) saturate(105%);
-  -webkit-backdrop-filter: blur(16px) saturate(105%);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
   transform: none;
   transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
   animation: panelGlassIn 200ms var(--curva-rapida) both;
 }
 html body .peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.cartao-branco) :is(.ds-kpi,.glass-card,.ds-glass-surface,.cartao-branco) {
   background: var(--panel-fill-nested) !important;
+  border-radius: 12px;
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
@@ -1483,7 +1490,26 @@ html body .peregrinus-panel .ds-kpi :is(.ds-rotulo,.ds-nota) { color: hsl(var(--
 .peregrinus-panel { font-optical-sizing: auto; font-kerning: normal; font-synthesis: none; }
 html body .peregrinus-panel .painel-noite-cabeca { gap: 12px; padding-bottom: 16px; }
 html body .peregrinus-panel .painel-noite-titulo { letter-spacing: 0; font-weight: 500; }
-html body .peregrinus-panel .kpi-vidro-valor { font-feature-settings: 'tnum' 1, 'lnum' 1; }
+html body .peregrinus-panel .kpi-vidro-valor { font-feature-settings: 'tnum' 1, 'lnum' 1; font-weight: 600; }
+html.dark .peregrinus-panel { --panel-canvas: 222 35% 7%; background-color: hsl(var(--panel-canvas)); }
+html body .peregrinus-panel .painel-noite-cabeca { border-color: var(--panel-divider); }
+html body .peregrinus-panel .ds-kpi :is(.ds-numero-sec,.ds-numero-focal) { font-weight: 600; }
+html body .peregrinus-panel .kpi-vidro > p:first-child { text-transform: uppercase; font-size: 12px; }
+html body .peregrinus-panel .panel-glass-tooltip {
+  background: var(--panel-tooltip);
+  border: 1px solid var(--panel-stroke);
+  border-radius: 12px;
+  color: hsl(var(--panel-text));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--panel-shadow);
+}
+@media (hover: hover) and (pointer: fine) {
+  html body .peregrinus-panel :is(.ds-kpi,.kpi-vidro,.noite-vidro):hover {
+    background: var(--panel-fill-hover) !important;
+    border-color: var(--panel-stroke-hover) !important;
+  }
+}
 html body .peregrinus-panel :is(.noite-chip,.ds-seta) { box-shadow: none; }
 html body .peregrinus-panel .ds-kpi .ds-rotulo { font-size: 12px; text-transform: none; font-weight: 500; }
 html body .peregrinus-panel .ds-kpi .ds-nota { font-size: 12px; text-wrap: pretty; }
