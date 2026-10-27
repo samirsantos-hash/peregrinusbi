@@ -17,12 +17,14 @@ export function SinergiaIndicadores({ pontos, compacto = false, fonte }: { ponto
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
     <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{pctFracao(r.participacao, 1)}</dd></div>
-      <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{pctFracao(r.tacos, 2)}</dd></div>
+      <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{r.participacao == null ? "Sem dado" : pctFracao(r.participacao, 1)}</dd></div>
+      <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{r.tacos == null ? "Sem dado" : pctFracao(r.tacos, 2)}</dd></div>
       <div><dt className="text-xs text-muted-foreground">Sinergia investimento × faturamento · r</dt><dd className="text-xl font-medium tabular-nums">{r.correlacao == null ? "Sem dado" : num(r.correlacao, 2)}</dd></div>
     </dl>
     <p className="text-sm">{r.participacao != null ? `${pctFracao(r.participacao, 1)} do faturamento corresponde à receita atribuída a Ads. ` : ""}{leitura}</p>
     {r.atribuicaoIncompativel && <p className="text-xs text-muted-foreground">A receita atribuída supera o faturamento pago; participação indisponível por diferença de atribuição.</p>}
+    {(r.investimento == null || r.receitaAds == null) && <p className="text-xs text-muted-foreground">Faltam métricas de publicidade em parte das datas. Participação e TACOS aguardam cobertura completa; dias ausentes não representam gasto zero.</p>}
+    {compacto && <p className="text-xs text-muted-foreground">{num(r.observacoes)} observações pareadas · associação não é causalidade.</p>}
     {!compacto && <div className="space-y-1 text-xs text-muted-foreground">
       <p>Participação = receita atribuída ÷ faturamento; TACOS = investimento ÷ faturamento. Razões dos totais das mesmas datas, sem média de percentuais.</p>
       <p>Pearson usa {num(r.observacoes)} observações pareadas; mínimo de 7. Valores de −1 a +1 indicam associação inversa ou direta, não causalidade.</p>
