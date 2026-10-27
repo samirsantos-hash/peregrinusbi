@@ -114,8 +114,8 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
               <AreaChart data={a.serie} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="vg-faturamento" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.28} />
-                    <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                    <stop offset="0%" stopColor="#14A86C" stopOpacity={0.28} />
+                    <stop offset="100%" stopColor="#14A86C" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.05)" strokeDasharray="3 3" />
@@ -139,11 +139,11 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
                 <Area
                   type="monotone"
                   dataKey="faturamento"
-                  stroke="#34d399"
+                  stroke="#3BD394"
                   strokeWidth={2}
                   fill="url(#vg-faturamento)"
                   dot={false}
-                  activeDot={{ r: 4, fill: '#34d399', stroke: '#0B0F17', strokeWidth: 2 }}
+                  activeDot={{ r: 4, fill: '#3BD394', stroke: '#0B0F17', strokeWidth: 2 }}
                   connectNulls={false}
                 />
               </AreaChart>

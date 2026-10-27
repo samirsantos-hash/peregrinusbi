@@ -19,7 +19,7 @@ const NIVEIS = [
   { id: "2_orange", rotulo: "Laranja", cor: "bg-orange-400", brilho: "shadow-[0_0_12px_rgba(251,146,60,0.55)]" },
   { id: "3_yellow", rotulo: "Amarela", cor: "bg-amber-400", brilho: "shadow-[0_0_12px_rgba(251,191,36,0.55)]" },
   { id: "4_light_green", rotulo: "Verde-clara", cor: "bg-lime-400", brilho: "shadow-[0_0_12px_rgba(163,230,53,0.55)]" },
-  { id: "5_green", rotulo: "Verde", cor: "bg-emerald-400", brilho: "shadow-[0_0_12px_rgba(52,211,153,0.6)]" },
+  { id: "5_green", rotulo: "Verde", cor: "bg-emerald-400", brilho: "shadow-[0_0_12px_rgba(59,211,148,0.6)]" },
 ] as const;
 
 const MEDALHA: Record<string, string> = { platinum: "MercadoLíder Platinum", gold: "MercadoLíder Gold", silver: "MercadoLíder" };

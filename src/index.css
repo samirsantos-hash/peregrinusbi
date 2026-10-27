@@ -26,8 +26,8 @@
     --aura-cyan-400: 156 79% 37%;    /* #22D3EE */
     --aura-teal-400: 156 80% 28%;    /* #2DD4BF */
     --aura-emerald-300: 156 72% 67%; /* #6EE7B7 */
-    --aura-emerald-400: 155 63% 53%; /* #34D399 */
-    --aura-emerald-500: 156 79% 37%; /* #10B981 */
+    --aura-emerald-400: 155 63% 53%; /* #3BD394 — verde vivo da Home (fios do Aura) */
+    --aura-emerald-500: 156 79% 37%; /* #14A86C — verde da marca (botão e halo da Home) */
     /* Status do BI (o Aura não tem; tons ajustados para fundo escuro) */
     --aura-red-400: 7 86% 55%;       /* #F87171 */
     --aura-red-500: 7 86% 45%;       /* #EF4444 */
@@ -141,7 +141,7 @@
     --aura-gray-300: 215 15% 70%;
 
     --ec-ink: 222 47% 11%;
-    --ec-verde-txt: 160 84% 28%;
+    --ec-verde-txt: 156 84% 26%;
     --ec-vermelho: 0 72% 46%;
     --ec-ambar: 32 95% 36%;
     --ec-laranja: 24 90% 45%;
@@ -205,9 +205,9 @@
     background-color: #0B0F17;
     background-image:
       radial-gradient(60% 40% at 50% -5%, rgba(255,255,255,.06), transparent 62%),
-      radial-gradient(35% 55% at 4% 60%, rgba(16,185,129,.10), transparent 70%),
+      radial-gradient(35% 55% at 4% 60%, rgba(20,168,108,.10), transparent 70%),
       radial-gradient(30% 50% at 98% 35%, rgba(255,255,255,.04), transparent 70%),
-      radial-gradient(18% 30% at 8% 100%, rgba(16,185,129,.14), transparent 70%),
+      radial-gradient(18% 30% at 8% 100%, rgba(20,168,108,.14), transparent 70%),
       linear-gradient(180deg, #121826 0%, #0E131C 50%, #0B0F17 100%);
     background-attachment: fixed;
     scroll-behavior: smooth;
@@ -586,7 +586,7 @@
 .light .border-white\/5, .light .border-white\/10, .light .border-white\/40 { border-color: hsl(200 18% 86%); }
 .light .text-white { color: hsl(222 47% 11%); }
 /* Tons de status calibrados para o escuro (400/300) escurecem no claro para manter AA. */
-.light :is(.text-emerald-400, .text-emerald-300) { color: hsl(160 84% 28%); }
+.light :is(.text-emerald-400, .text-emerald-300) { color: hsl(156 84% 26%); }
 .light :is(.text-rose-400, .text-rose-300) { color: hsl(347 77% 40%); }
 .light :is(.text-amber-400, .text-amber-300, .text-amber-200\/90, .text-amber-200\/80) { color: hsl(32 95% 34%); }
 .light .text-sky-300 { color: hsl(199 89% 32%); }
@@ -654,7 +654,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 .ds-kpi .ds-numero-focal { font-size: clamp(26px, 2.4vw, 34px); font-weight: 600; letter-spacing: -0.03em; color: #fff; }
 .ds-kpi .ds-numero-sec { font-size: clamp(22px, 1.9vw, 28px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; color: #fff; }
 .ds-seta { display: inline-flex; align-items: center; justify-content: center; height: 22px; width: 22px; border-radius: 9999px; align-self: center; background: rgb(255 255 255 / 0.06); color: #cbd5e1; }
-.ds-seta-bom { background: rgb(16 185 129 / 0.12); color: #34d399; }
+.ds-seta-bom { background: rgb(20 168 108 / 0.14); color: #3bd394; }
 .ds-seta-ruim { background: rgb(244 63 94 / 0.12); color: #fb7185; }
 @media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
 /* Tema claro: branco gelo com sombra fria */
@@ -720,7 +720,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --ec-ink: 0 0% 100%;
   --ec-text-sec: 215 20% 65%;
   --ec-surface-2: 222 24% 14%;
-  --ec-verde-txt: 158 64% 52%;  /* emerald-400 */
+  --ec-verde-txt: 155 63% 53%;  /* #3BD394, verde da Home */
   --ec-vermelho: 350 89% 60%;   /* rose-500 */
   --ec-laranja: 27 96% 61%;     /* orange-400 */
   --ec-ambar: 43 96% 56%;       /* amber-400 */
@@ -735,7 +735,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   border-radius: 1.25rem;
   padding: 1.25rem 1.15rem 1.5rem;
   background:
-    radial-gradient(120% 80% at 0% 0%, rgb(16 185 129 / 0.06), transparent 55%),
+    radial-gradient(120% 80% at 0% 0%, rgb(20 168 108 / 0.07), transparent 55%),
     linear-gradient(180deg, var(--noite-canvas-2) 0%, var(--noite-canvas) 100%);
   border: 1px solid var(--noite-borda);
   box-shadow:
@@ -833,11 +833,11 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --ec-text-sec: 215 20% 65%;
   --aura-gray-400: 215 20% 65%;
   --aura-gray-500: 215 20% 65%;
-  --primary: 158 64% 52%;
-  --ec-verde-txt: 158 64% 52%;
-  --emerald: 158 64% 52%;
-  --ok: 158 64% 52%;
-  --neon-blue: 158 64% 52%;
+  --primary: 155 63% 53%;
+  --ec-verde-txt: 155 63% 53%;
+  --emerald: 155 63% 53%;
+  --ok: 155 63% 53%;
+  --neon-blue: 155 63% 53%;
   --ec-vermelho: 350 89% 60%;
   --ec-surface-2: 222 24% 14%;
   --muted: 222 24% 14%;
@@ -899,7 +899,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   letter-spacing: 0.06em;
 }
 .painel-noite .ds-seta { background: rgb(255 255 255 / 0.06); color: var(--noite-sec-2); }
-.painel-noite .ds-seta-bom { background: rgb(16 185 129 / 0.12); color: #34d399; }
+.painel-noite .ds-seta-bom { background: rgb(20 168 108 / 0.14); color: #3bd394; }
 .painel-noite .ds-seta-ruim { background: rgb(244 63 94 / 0.12); color: #fb7185; }
 .painel-noite .border-border,
 .painel-noite .border-glass-border {
@@ -983,7 +983,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   overflow: hidden;
   background: rgb(255 255 255 / 0.06);
 }
-.painel-mix-envio-full { background: #34d399; min-width: 0; }
+.painel-mix-envio-full { background: #3bd394; min-width: 0; }
 .painel-mix-envio-flex { background: #94a3b8; min-width: 0; }
 .painel-mix-envio-outros { background: rgb(255 255 255 / 0.18); min-width: 0; }
 /* Resumo operacional dentro do módulo */
@@ -1003,7 +1003,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 .peregrinus-panel .painel-noite .operacao-resumo .ds-kpi .ds-numero-focal { font-size: 20px; }
 .operacao-resumo .ds-kpi .ds-numero-sec + span { letter-spacing: 0; border-radius: 4px; }
 .operacao-resumo .painel-mix-envio-trilha { height: 8px; }
-.operacao-resumo .operacao-mix-full { background: #34d399; }
+.operacao-resumo .operacao-mix-full { background: #3bd394; }
 .operacao-resumo .operacao-mix-flex { background: #94a3b8; }
 .operacao-resumo .operacao-mix-outros { background: rgb(255 255 255 / 0.18); }
 /* Compat: alias antigo */
@@ -1085,7 +1085,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   --panel-glass-muted: 215 20% 65%;       /* slate-400 */
   --panel-glass-edge: 222 16% 24%;        /* usada a 50% ≈ white/8 */
   --panel-glass-shadow: 0 0% 0%;
-  --panel-glass-positive: 158 64% 52%;    /* emerald-400 */
+  --panel-glass-positive: 155 63% 53%;    /* #3BD394, verde da Home */
   --panel-glass-negative: 350 89% 60%;    /* rose-500 */
   --panel-glass-fill-2: 222 24% 14%;      /* --muted / --ec-surface-2 dentro do vidro */
   --panel-glass-fill: linear-gradient(135deg,
