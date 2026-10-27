@@ -1346,3 +1346,39 @@ html.light .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multi
 @media (prefers-reduced-motion: reduce) {
   .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco)[data-glass-active] { transform: none; }
 }
+
+/* Cores dos cards conforme identidade EcomConsult (prevalece sobre o vidro anterior) */
+html.dark body .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  --panel-glass-ink: 0 0% 100%;
+  --panel-glass-muted: 0 0% 75%;
+  background: rgba(255,255,255,0.05) !important;
+  background-image: none !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-radius: 12px;
+  color: #FFFFFF;
+}
+html.dark body .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):hover {
+  border-color: rgba(20,168,108,0.5) !important;
+}
+html.dark body .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) :is(.ds-numero-focal, .ds-numero-sec, .metric-value) { color: #FFFFFF; }
+html.dark body .peregrinus-panel :is(.ds-kpi, .glass-card, .cartao-branco) :is(.ds-rotulo, .ds-nota) { color: rgba(255,255,255,0.75); }
+/* Quadros dentro de quadros não somam camadas */
+html.dark body .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) :is(.ds-kpi, .glass-card, .ds-glass-surface, .cartao-branco) {
+  background: rgba(255,255,255,0.03) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.light body .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  --panel-glass-ink: 0 0% 4%;
+  --panel-glass-muted: 0 0% 35%;
+  background: #F3F3F3 !important;
+  background-image: none !important;
+  border: 1px solid #D9D9D9 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 12px;
+  color: #0A0A0A;
+}
+html.light body .peregrinus-panel :is(.ds-kpi, .glass-card, .cartao-branco):hover { border-color: rgba(20,168,108,0.5) !important; }
