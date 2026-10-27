@@ -1262,18 +1262,18 @@ html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
   --panel-date: 54 100% 50%;
   --panel-white: 0 0% 100%;
   --panel-black: 0 0% 0%;
-  --panel-fill: hsl(var(--panel-white) / .035);
+  --panel-fill: hsl(var(--panel-white) / .05);
   --panel-fill-hover: hsl(var(--panel-white) / .05);
   --panel-stroke-hover: hsl(var(--panel-white) / .14);
   --panel-divider: hsl(var(--panel-white) / .06);
   --panel-tooltip: hsl(var(--panel-surface) / .85);
   --panel-fill-nested: hsl(var(--panel-white) / .025);
   --panel-stroke: hsl(var(--panel-white) / .08);
-  --panel-shadow: inset 0 1px 1px hsl(var(--panel-white) / .08),
-    0 4px 24px hsl(var(--panel-black) / .35);
+  --panel-shadow: inset 0 1px 1px hsl(var(--panel-white) / .06),
+    0 8px 24px hsl(var(--panel-black) / .3);
   --panel-nav-fill: hsl(var(--panel-surface) / .92);
   --panel-reflection: .14;
-  --panel-radius: 16px;
+  --panel-radius: 20px;
 }
 html.light {
   --panel-canvas: 0 0% 100%;
@@ -1451,8 +1451,8 @@ html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-gl
   border-radius: var(--panel-radius);
   color: hsl(var(--panel-text));
   box-shadow: var(--panel-shadow);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(170%);
+  -webkit-backdrop-filter: blur(22px) saturate(170%);
   transform: none;
   transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
   animation: panelGlassIn 200ms var(--curva-rapida) both;
@@ -1491,7 +1491,7 @@ html body .peregrinus-panel .ds-kpi :is(.ds-rotulo,.ds-nota) { color: hsl(var(--
 html body .peregrinus-panel .painel-noite-cabeca { gap: 12px; padding-bottom: 16px; }
 html body .peregrinus-panel .painel-noite-titulo { letter-spacing: 0; font-weight: 500; }
 html body .peregrinus-panel .kpi-vidro-valor { font-feature-settings: 'tnum' 1, 'lnum' 1; font-weight: 600; }
-html.dark .peregrinus-panel { --panel-canvas: 222 35% 7%; background-color: hsl(var(--panel-canvas)); }
+html.dark .peregrinus-panel { background-color: hsl(var(--panel-canvas)); }
 html body .peregrinus-panel .painel-noite-cabeca { border-color: var(--panel-divider); }
 html body .peregrinus-panel .ds-kpi :is(.ds-numero-sec,.ds-numero-focal) { font-weight: 600; }
 html body .peregrinus-panel .kpi-vidro > p:first-child { text-transform: uppercase; font-size: 12px; }
@@ -1535,3 +1535,38 @@ html body .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 32px; }
   html body .peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.cartao-branco,.noite-vidro)::after,
   html body .peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.cartao-branco,.noite-vidro)::before { display: none !important; }
 }
+
+/* Access-screen identity shared by protected pages, without its WebGL scene. */
+.peregrinus-panel {
+  min-height: 100svh;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+html body .peregrinus-panel :is(h1,.ds-titulo-pagina) { font-weight: 400; }
+html body .peregrinus-panel :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),textarea,select,button[role="combobox"]) {
+  background: var(--panel-fill-nested);
+  color: hsl(var(--panel-text));
+  border: 1px solid var(--panel-stroke);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.peregrinus-panel :is(input,textarea)::placeholder { color: hsl(var(--panel-text-secondary)); opacity: 1; }
+.peregrinus-panel :is(input,textarea,select,button,a):focus-visible {
+  outline: 2px solid hsl(var(--panel-brand));
+  outline-offset: 3px;
+}
+html body .peregrinus-panel button.aura-cta {
+  background: hsl(var(--panel-action));
+  color: hsl(var(--panel-white));
+  border: 1px solid hsl(var(--panel-brand));
+  border-radius: 999px;
+}
+html body .peregrinus-panel button.aura-cta::before,
+html body .peregrinus-panel button.aura-cta::after { content: none; }
+html body .peregrinus-panel :is(.panel-sidebar,.painel-navigation) {
+  background: var(--panel-fill) !important;
+  box-shadow: var(--panel-shadow);
+}
+.peregrinus-panel label { font-weight: 500; }
