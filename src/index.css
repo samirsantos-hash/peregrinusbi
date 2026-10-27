@@ -1691,6 +1691,15 @@ html.dark .peregrinus-panel {
   --vidro-sombra: var(--access-glass-panel-shadow);
   --panel-fill-nested: hsl(var(--access-glass-deep) / .35);
 }
+html.dark body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]),
+html.dark body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]):hover {
+  --vidro-fundo: var(--access-glass-panel-fill);
+  --vidro-borda: hsl(var(--panel-positive) / .38);
+  --vidro-sombra: var(--access-glass-panel-shadow);
+  background: var(--access-glass-panel-fill) !important;
+  border-color: hsl(var(--panel-positive) / .38) !important;
+  box-shadow: var(--access-glass-panel-shadow) !important;
+}
 html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])) {
   background: var(--vidro-fundo) !important;
   border: 1px solid var(--vidro-borda) !important;
