@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { brl, num, pctFracao } from "@/lib/format";
 import { LOGISTICA } from "@/lib/mlRotulos";
 import { avaliarRuptura } from "@/lib/rupturaApi";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useContaMl } from "@/components/dashboard/RupturaApi";
 
 const NIVEL: Record<string, string> = { "5_green": "Verde", "4_light_green": "Verde-clara", "3_yellow": "Amarela", "2_orange": "Laranja", "1_red": "Vermelha" };
@@ -53,8 +54,9 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
     enabled: !!accountId,
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await (supabase as any).from("ml_listings")
-        .select("item_id, titulo, estoque, preco, preco_original, saude, logistica").eq("account_id", accountId).eq("status", "active").limit(5000);
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any).from("ml_listings")
+        .select("item_id, titulo, estoque, preco, preco_original, saude, logistica").eq("account_id", accountId).eq("status", "active")
+        .order("item_id").range(de, ate));
       if (error) throw error;
       return (data ?? []) as any[];
     },
@@ -93,7 +95,10 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
   const mix = Object.entries((env?.mix ?? {}) as Record<string, { pedidos: number; faturamento: number }>).sort((a, b) => b[1].faturamento - a[1].faturamento);
   const totMix = mix.reduce((s, [, v]) => s + v.faturamento, 0);
   const full = mix.find(([k]) => k === "fulfillment")?.[1].faturamento ?? 0;
-  const partFull = totMix ? full / totMix : null;
+  // "sem_info" = modalidade não informada pelo ML: fica fora da base do Full para não inventar 0%.
+  const semInfo = mix.find(([k]) => k === "sem_info")?.[1].faturamento ?? 0;
+  const baseConhecida = totMix - semInfo;
+  const partFull = baseConhecida > 0 && semInfo / (totMix || 1) < 0.5 ? full / baseConhecida : null;
 
   // Ruptura: vendas pagas 7d por anúncio.
   const v7 = new Map<string, number>((vendas.data ?? []).map((i) => [soDigitos(i.id), i.unidades]));
@@ -168,7 +173,7 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
                 return (
                   <div key={k} className="space-y-1">
                     <div className="flex justify-between gap-2 text-xs tabular-nums">
-                      <span className="truncate">{LOGISTICA[k] ?? "Outro"}</span>
+                      <span className="truncate">{k === "sem_info" ? "Não informada" : LOGISTICA[k] ?? "Outro"}</span>
                       <span className="text-muted-foreground">{pctFracao(p)} · {num(v.pedidos)} pedidos</span>
                     </div>
                     <div className="h-1.5 rounded-full bg-muted"><div className="h-1.5 rounded-full bg-primary transition-[width] duration-200" style={{ width: `${p * 100}%` }} /></div>
