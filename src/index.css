@@ -985,7 +985,9 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
     hsl(var(--panel-glass-white) / .96),
     hsl(var(--panel-glass-ice) / .84) 58%,
     hsl(var(--panel-glass-white) / .94));
-  --panel-glass-opacity: .20;
+  --panel-glass-opacity: .30;
+  --panel-glass-reflection-opacity: .242;
+  --panel-font-scale: .9;
   --panel-glass-fill: linear-gradient(135deg,
     hsl(var(--panel-glass-white) / var(--panel-glass-opacity)),
     hsl(var(--panel-glass-ice) / var(--panel-glass-opacity)) 45%,
@@ -1085,7 +1087,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   transition: opacity 180ms var(--curva-rapida);
 }
 .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
-  opacity: .22;
+  opacity: var(--panel-glass-reflection-opacity);
   background-position: center;
   transform: none;
   /* A broad continuous reflection follows the pointer without moving content. */
@@ -1103,14 +1105,14 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }
-.peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 28px; }
-.peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 34px; }
+.peregrinus-panel .ds-kpi .ds-numero-sec { font-size: calc(28px * var(--panel-font-scale)); }
+.peregrinus-panel .ds-kpi .ds-numero-focal { font-size: calc(34px * var(--panel-font-scale)); }
 .peregrinus-panel .ds-kpi { container-type: inline-size; }
 @container (max-width: 140px) {
-  .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 20px; }
-  .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 24px; }
+  .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: calc(20px * var(--panel-font-scale)); }
+  .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: calc(24px * var(--panel-font-scale)); }
 }
-.peregrinus-panel .operacao-resumo .ds-kpi .ds-numero-focal { font-size: 20px; }
+.peregrinus-panel .operacao-resumo .ds-kpi .ds-numero-focal { font-size: calc(20px * var(--panel-font-scale)); }
 .peregrinus-panel .ds-kpi :is(.ds-rotulo, .ds-nota) {
   color: hsl(var(--panel-glass-muted)) !important;
   letter-spacing: 0;
@@ -1121,8 +1123,8 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   font-kerning: normal;
   font-synthesis: none;
   letter-spacing: 0;
-  --panel-kpi-label-size: 11px;
-  --panel-kpi-note-size: 12px;
+  --panel-kpi-label-size: calc(11px * var(--panel-font-scale));
+  --panel-kpi-note-size: calc(12px * var(--panel-font-scale));
 }
 .peregrinus-panel :is(h1, h2, h3, h4, h5, h6, .ds-titulo-pagina, .ds-numero-focal, .ds-numero-sec, .metric-value, .ds-rotulo, .metric-label) {
   letter-spacing: 0;
@@ -1147,12 +1149,22 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   line-height: 1.5;
 }
 .peregrinus-panel .painel-secao-header .ds-titulo-pagina {
-  font-size: 28px;
+  font-size: calc(28px * var(--panel-font-scale));
   font-weight: 500;
   line-height: 1.25;
   color: hsl(var(--foreground));
 }
 .peregrinus-panel :is(.ds-titulo-bloco, .ds-corpo, .ds-nota) { letter-spacing: 0; }
+.peregrinus-panel :is(.glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) .text-xs { font-size: calc(.75rem * var(--panel-font-scale)); }
+.peregrinus-panel :is(.glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) .text-sm { font-size: calc(.875rem * var(--panel-font-scale)); }
+.peregrinus-panel :is(.glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) .text-base { font-size: calc(1rem * var(--panel-font-scale)); }
+.peregrinus-panel :is(.glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) .text-lg { font-size: calc(1.125rem * var(--panel-font-scale)); }
+.peregrinus-panel :is(.glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) .text-xl { font-size: calc(1.25rem * var(--panel-font-scale)); }
+.peregrinus-panel :is(.glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) .text-2xl { font-size: calc(1.5rem * var(--panel-font-scale)); }
+.peregrinus-panel :is(.glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco) .text-3xl { font-size: calc(1.875rem * var(--panel-font-scale)); }
+.peregrinus-panel .ds-titulo-bloco { font-size: calc(14px * var(--panel-font-scale)); }
+.peregrinus-panel .ds-corpo { font-size: calc(13px * var(--panel-font-scale)); }
+.peregrinus-panel .ds-nota { font-size: calc(11px * var(--panel-font-scale)); }
 .peregrinus-panel .ds-seta-bom {
   background: hsl(var(--panel-glass-positive) / .1);
   color: hsl(var(--panel-glass-positive));
