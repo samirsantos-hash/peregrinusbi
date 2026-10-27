@@ -9,6 +9,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { brl, num, pctFracao } from "@/lib/format";
 import { useSouConsultor } from "@/lib/mlFuncoes";
 import { cn } from "@/lib/utils";
+import { fetchAllRows } from "@/lib/fetchAllRows";
+import { useAnaliseMl } from "@/hooks/useAnaliseMl";
+import CampanhaGrafico, { type LinhaDiaCampanha } from "@/components/ml/ads/CampanhaGrafico";
 
 type Campanha = {
   id: string;
@@ -83,21 +86,47 @@ export default function GestaoAds({ custId }: { custId: string }) {
   });
 
   /** Faturamento 30d do ML (ml_sync_tema) — denominador do TACOS da loja. */
-  const { data: faturamento30d } = useQuery({
+  const { data: vendasTema } = useQuery({
     queryKey: ["ml-faturamento-30d", custId],
     staleTime: 5 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ml_sync_tema")
-        .select("dados")
+        .select("dados, account_id")
         .eq("cust_id", custId)
         .eq("tema", "vendas")
         .maybeSingle();
       if (error) throw error;
-      const fat = Number((data?.dados as { faturamento_30d?: unknown } | null)?.faturamento_30d);
-      return Number.isFinite(fat) && fat > 0 ? fat : null;
+      const dados = data?.dados as { faturamento_30d?: unknown; serie?: { data: string; faturamento: number }[] } | null;
+      const fat = Number(dados?.faturamento_30d);
+      return {
+        fat: Number.isFinite(fat) && fat > 0 ? fat : null,
+        serie: dados?.serie ?? [],
+        accountId: (data as { account_id?: string } | null)?.account_id ?? null,
+      };
     },
   });
+  const faturamento30d = vendasTema?.fat ?? null;
+  const accountId = vendasTema?.accountId ?? null;
+
+  /** Série diária gravada por campanha: período anterior de mesma duração e gráfico da campanha. */
+  const { data: diario } = useQuery({
+    queryKey: ["ml-ads-diario", accountId, dias],
+    enabled: !!accountId,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const desde = new Date(Date.now() - (2 * dias + 2) * 86_400_000).toISOString().slice(0, 10);
+      const r = await fetchAllRows<LinhaDiaCampanha>((de, ate) => (supabase as any).from("ml_ads_metrics_daily")
+        .select("campaign_id, dia, cost, total_amount, clicks, prints, units_quantity")
+        .eq("account_id", accountId).eq("nivel", "campanha").gte("dia", desde)
+        .order("dia").order("campaign_id").range(de, ate));
+      if (r.error) throw r.error;
+      return r.data;
+    },
+  });
+  const analise = useAnaliseMl<{ atual: { faturamento: number }; anterior: { faturamento: number } }>(dias === 30 ? custId : undefined, "resumo");
+  const [visao, setVisao] = useState<"resumo" | "campanhas">("resumo");
+  const [selecionada, setSelecionada] = useState<string | null>(null);
 
   const campanhas = useMemo(() => {
     const lista = (data?.campanhas ?? []).filter((c) => status === "todas" || c.status === status);
