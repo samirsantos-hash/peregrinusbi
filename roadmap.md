@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Identidade do acesso no painel inteiro
-- [ ] Unificar superfícies, campos, botões e tipografia com o HTML do acesso, sem cordas ou mudanças nos dados; conferir navegação e temas.
+- [x] Unificar superfícies, campos, botões e tipografia com o HTML do acesso nas páginas protegidas, sem cordas ou mudanças nos dados; Visão geral GMABSOLUTA conferida nos dois temas e em tela estreita. Estilos compartilhados aplicados às demais seções, sem auditoria individual de todas elas.
 
 ## Refino visual do painel (27/10)
 - [x] Aplicar especificação de vidro fumado enviada: superfície 3,5%, borda 8%, bisel, blur, etiquetas, tooltips e base escura no painel; GMABSOLUTA conferida nos dois temas e tela estreita sem transbordamento; dados e movimento reduzido preservados. Sem brilho roxo ou transition-all.
