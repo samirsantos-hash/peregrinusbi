@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { calcularSinergiaPublicidade, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
+import { calcularSinergiaPublicidade, pearsonPareado, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
 const pontos = (n = 7): PontoPublicidade[] => Array.from({ length: n }, (_, i) => ({ data: `2026-10-${i + 1}`, investimento: i + 1, faturamento: (i + 1) * 10, receitaAds: (i + 1) * 4 }));
 describe("sinergia de publicidade", () => {
+  it("matriz exclui pares ausentes sem deslocar as séries", () => {
+    expect(pearsonPareado([[1, 2], [2, 4], [null, 99], [3, 6], [4, 8], [5, 10], [6, 12], [7, 14]])).toBeCloseTo(1);
+  });
+  it("matriz não transforma série constante em zero", () => {
+    expect(pearsonPareado(Array.from({ length: 7 }, (_, i) => [0, i]))).toBeNull();
+  });
+  it("matriz exige sete pares", () => {
+    expect(pearsonPareado(Array.from({ length: 6 }, (_, i) => [i, i * 2]))).toBeNull();
+  });
   it("calcula dependência atribuída e TACOS pelos totais", () => {
     const r = calcularSinergiaPublicidade([...pontos(), { data: "2026-10-08", investimento: 20, faturamento: 1000, receitaAds: 10 }]);
     expect(r.participacao).toBeCloseTo(122 / 1280); expect(r.tacos).toBeCloseTo(48 / 1280);

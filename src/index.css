@@ -1643,3 +1643,6 @@ html body .peregrinus-panel .resumo-visual-ref .recharts-cartesian-grid line {
 @media (max-width: 639px) {
   html body .peregrinus-panel .resumo-visual-ref .kpi-vidro { padding: 16px; }
 }
+
+.sinergia-operacional { padding-top: 16px; border-top: 1px solid var(--panel-divider); }
+.sinergia-operacional td { backdrop-filter: blur(24px); box-shadow: inset 0 1px 0 hsl(var(--panel-white) / .05); }

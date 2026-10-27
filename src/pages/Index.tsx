@@ -77,6 +77,7 @@ import { NovidadesPrompt } from "@/components/novidades/novidades";
 import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
 import ResumoLojaApi from "@/components/ml/ResumoLojaApi";
+import ResumoSinergiaCorrelacoes from "@/components/ml/SinergiaPublicidade";
 import FullProdutosApi from "@/components/pock/FullProdutosApi";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
