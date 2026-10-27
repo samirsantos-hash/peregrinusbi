@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchScopedRows } from "@/lib/scopedRows";
 
 export interface ClusterPercentile {
   cluster: string;
@@ -114,12 +115,9 @@ export function useClusterBenchmark(sellerId: string | undefined, sellerCluster:
       for (let i = 0; i < peerSellerIds.length; i += PAGE) {
         const batch = peerSellerIds.slice(i, i + PAGE);
         // Get latest month per peer
-        const { data } = await supabase
-          .from("sellers_kpi")
-          .select("seller_id, tgmv_lc, inv_pads, tgmv_lc_pads, tsi, visits, data")
-          .in("seller_id", batch)
-          .order("data", { ascending: false });
-        if (data) peerKpis = peerKpis.concat(data);
+        const data = await fetchScopedRows<any>(batch, (ids, from, to) =>
+          supabase.rpc("indicadores_ultimos", { p_seller_ids: ids }).range(from, to));
+        peerKpis = peerKpis.concat(data);
       }
 
       // Deduplicate: keep latest per seller
@@ -204,12 +202,9 @@ export function useClusterBenchmark(sellerId: string | undefined, sellerCluster:
             let catKpis: any[] = [];
             for (let i = 0; i < catPeerIds.length; i += PAGE) {
               const batch = catPeerIds.slice(i, i + PAGE);
-              const { data } = await supabase
-                .from("sellers_kpi")
-                .select("seller_id, tgmv_lc, data")
-                .in("seller_id", batch)
-                .order("data", { ascending: false });
-              if (data) catKpis = catKpis.concat(data);
+              const data = await fetchScopedRows<any>(batch, (ids, from, to) =>
+                supabase.rpc("indicadores_ultimos", { p_seller_ids: ids }).range(from, to));
+              catKpis = catKpis.concat(data);
             }
 
             const latestCatPeer = new Map<string, number>();
