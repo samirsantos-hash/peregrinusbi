@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Retomar áreas da Visão geral (27/10)
+- [ ] Reproduzir cores, textura vítrea, bordas, proporções e comparações das referências nas duas áreas, sem alterar dados.
 - [x] Restaurar a disposição do resumo executivo e da evolução diária conforme as duas imagens, preservando dados reais e saúde da conta; AUTOPECASLONDRINA conferida com seis indicadores e gráfico diário renderizado, sem alterar cálculos. Build OK.
 
 ## Identidade do acesso no painel inteiro

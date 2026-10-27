@@ -83,6 +83,7 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
         </Button>
       </header>
 
+      <div className="resumo-visual-ref space-y-8">
       {/* Nível superior: Macro (8) × Saúde operacional (4) — mesma altura */}
       <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-8">
@@ -167,6 +168,7 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
         </div>
       </div>
 
+      </div>
       <LeituraContaApi custId={custId} faturamento30d={a.faturamento} ticketDelta={delta(a.ticket, p.ticket)} />
 
       <details className="border-t border-border pt-3">
