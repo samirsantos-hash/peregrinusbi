@@ -1018,7 +1018,7 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   transform: translateX(0);
   transition: opacity 180ms var(--curva-rapida);
 }
-.peregrinus-panel [data-glass-active]::after {
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
   opacity: .8;
   background-position: center;
   transform: none;
