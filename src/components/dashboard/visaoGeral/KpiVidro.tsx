@@ -19,7 +19,7 @@ type DeltaProps = {
 export function DeltaCapsula({ delta, pontos = false, melhorQuando = "subir", periodo, className }: DeltaProps) {
   if (delta == null || !Number.isFinite(delta)) {
     return (
-      <span className={cn("noite-chip shrink-0 text-slate-400", className)} title="Sem comparação anterior">
+      <span className={cn("noite-chip shrink-0 text-muted-foreground", className)} title="Sem comparação anterior">
         Sem comparação
       </span>
     );
@@ -34,9 +34,9 @@ export function DeltaCapsula({ delta, pontos = false, melhorQuando = "subir", pe
       <span
         className={cn(
           "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border px-2 py-0.5 text-xs font-medium tabular-nums leading-5",
-          bom === true && "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
-          bom === false && "border-rose-500/20 bg-rose-500/10 text-rose-400",
-          bom === null && "border-white/10 bg-white/5 text-slate-300",
+          bom === true && "border-ec-verde-txt/20 bg-ec-verde-txt/10 text-ec-verde-txt",
+          bom === false && "border-destructive/20 bg-destructive/10 text-destructive",
+          bom === null && "border-border bg-muted/50 text-muted-foreground",
           className,
         )}
         aria-label={`${estavel ? "Estável" : sobe ? "Subiu" : "Caiu"} ${valor}${periodo ? ` ${periodo}` : ""}${
@@ -47,7 +47,7 @@ export function DeltaCapsula({ delta, pontos = false, melhorQuando = "subir", pe
         {valor}
       </span>
       {/* Período fora da cápsula: quebra de linha natural em vez de truncar o delta */}
-      {periodo ? <span className="min-w-0 text-xs leading-5 text-slate-400">{periodo}</span> : null}
+      {periodo ? <span className="min-w-0 text-xs leading-5 text-muted-foreground">{periodo}</span> : null}
     </>
   );
 }
@@ -85,14 +85,14 @@ export default function KpiVidro({
   return (
     <div
       className={cn(
-        "kpi-vidro noite-vidro flex h-full min-w-0 flex-col justify-between gap-4 rounded-2xl border border-white/[0.08] bg-white/[0.04] p-4 sm:p-5",
-        "shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.3)] backdrop-blur-xl",
+        "kpi-vidro noite-vidro flex h-full min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5",
+        "backdrop-blur-xl",
         "transition-transform duration-150",
         className,
       )}
     >
       {/* Rótulo: até 2 linhas antes de cortar — nunca esconde a palavra inteira */}
-      <p className="line-clamp-2 text-[11px] font-medium uppercase leading-snug tracking-wider text-slate-400 [overflow-wrap:anywhere] sm:text-xs" title={rotulo}>
+      <p className="line-clamp-2 text-xs font-medium leading-snug tracking-normal text-muted-foreground" title={rotulo}>
         {rotulo}
       </p>
       <div className="min-w-0 space-y-3">
@@ -108,7 +108,7 @@ export default function KpiVidro({
         </p>
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <DeltaCapsula delta={delta} pontos={deltaPontos} melhorQuando={melhorQuando} periodo={periodo} />
-          {nota ? <span className="min-w-0 truncate text-xs leading-5 text-slate-400">{nota}</span> : null}
+          {nota ? <span className="min-w-0 text-xs leading-5 text-muted-foreground">{nota}</span> : null}
         </div>
       </div>
     </div>
