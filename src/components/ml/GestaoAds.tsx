@@ -9,6 +9,9 @@ import { useAuth } from "@/hooks/useAuth";
 import { brl, num, pctFracao } from "@/lib/format";
 import { useSouConsultor } from "@/lib/mlFuncoes";
 import { cn } from "@/lib/utils";
+import { fetchAllRows } from "@/lib/fetchAllRows";
+import { useAnaliseMl } from "@/hooks/useAnaliseMl";
+import CampanhaGrafico, { type LinhaDiaCampanha } from "@/components/ml/ads/CampanhaGrafico";
 
 type Campanha = {
   id: string;
@@ -83,21 +86,47 @@ export default function GestaoAds({ custId }: { custId: string }) {
   });
 
   /** Faturamento 30d do ML (ml_sync_tema) — denominador do TACOS da loja. */
-  const { data: faturamento30d } = useQuery({
+  const { data: vendasTema } = useQuery({
     queryKey: ["ml-faturamento-30d", custId],
     staleTime: 5 * 60_000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("ml_sync_tema")
-        .select("dados")
+        .select("dados, account_id")
         .eq("cust_id", custId)
         .eq("tema", "vendas")
         .maybeSingle();
       if (error) throw error;
-      const fat = Number((data?.dados as { faturamento_30d?: unknown } | null)?.faturamento_30d);
-      return Number.isFinite(fat) && fat > 0 ? fat : null;
+      const dados = data?.dados as { faturamento_30d?: unknown; serie?: { data: string; faturamento: number }[] } | null;
+      const fat = Number(dados?.faturamento_30d);
+      return {
+        fat: Number.isFinite(fat) && fat > 0 ? fat : null,
+        serie: dados?.serie ?? [],
+        accountId: (data as { account_id?: string } | null)?.account_id ?? null,
+      };
     },
   });
+  const faturamento30d = vendasTema?.fat ?? null;
+  const accountId = vendasTema?.accountId ?? null;
+
+  /** Série diária gravada por campanha: período anterior de mesma duração e gráfico da campanha. */
+  const { data: diario } = useQuery({
+    queryKey: ["ml-ads-diario", accountId, dias],
+    enabled: !!accountId,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const desde = new Date(Date.now() - (2 * dias + 2) * 86_400_000).toISOString().slice(0, 10);
+      const r = await fetchAllRows<LinhaDiaCampanha>((de, ate) => (supabase as any).from("ml_ads_metrics_daily")
+        .select("campaign_id, dia, cost, total_amount, clicks, prints, units_quantity")
+        .eq("account_id", accountId).eq("nivel", "campanha").gte("dia", desde)
+        .order("dia").order("campaign_id").range(de, ate));
+      if (r.error) throw r.error;
+      return r.data;
+    },
+  });
+  const analise = useAnaliseMl<{ atual: { faturamento: number }; anterior: { faturamento: number } }>(dias === 30 ? custId : undefined, "resumo");
+  const [visao, setVisao] = useState<"resumo" | "campanhas">("resumo");
+  const [selecionada, setSelecionada] = useState<string | null>(null);
 
   const campanhas = useMemo(() => {
     const lista = (data?.campanhas ?? []).filter((c) => status === "todas" || c.status === status);
@@ -119,6 +148,35 @@ export default function GestaoAds({ custId }: { custId: string }) {
       : dias === 30
         ? `Investimento ÷ faturamento ML 30d (${brl(faturamento30d)})`
         : `Investimento (${dias}d) ÷ faturamento ML 30d (${brl(faturamento30d)}) · janelas distintas`;
+
+  /** Somas gravadas no período atual e no anterior de mesma duração (mesma fonte nos dois lados). */
+  const comp = useMemo(() => {
+    const ini = data?.periodo?.inicio, fim = data?.periodo?.fim;
+    if (!diario?.length || !ini || !fim) return null;
+    const menos = (iso: string, n: number) => new Date(Date.parse(`${iso}T00:00:00Z`) - n * 86_400_000).toISOString().slice(0, 10);
+    const antIni = menos(ini, dias), antFim = menos(ini, 1);
+    const somar = (a: string, b: string) => {
+      const ls = diario.filter((l) => l.dia >= a && l.dia <= b);
+      const t = { custo: 0, receita: 0, cliques: 0, impressoes: 0, unidades: 0, dias: new Set(ls.map((l) => l.dia)).size };
+      for (const l of ls) { t.custo += +l.cost || 0; t.receita += +l.total_amount || 0; t.cliques += +l.clicks || 0; t.impressoes += +l.prints || 0; t.unidades += +l.units_quantity || 0; }
+      return t;
+    };
+    const a = somar(ini, fim), b = somar(antIni, antFim);
+    if (!b.dias) return null;
+    const rz = (x: number, y: number) => (y > 0 ? x / y : null);
+    const ind = (t: typeof a, fat: number | null) => ({
+      investimento: t.custo, vendas: t.receita, roas: rz(t.receita, t.custo), acos: rz(t.custo, t.receita),
+      cpc: rz(t.custo, t.cliques), ctr: rz(t.cliques, t.impressoes), tacos: fat ? rz(t.custo, fat) : null,
+    });
+    const fa = analise.data?.atual?.faturamento ?? null, fb = analise.data?.anterior?.faturamento ?? null;
+    return { atual: ind(a, dias === 30 ? fa : null), anterior: ind(b, dias === 30 ? fb : null), antIni, antFim };
+  }, [diario, data?.periodo?.inicio, data?.periodo?.fim, dias, analise.data]);
+  const dv = (k: "investimento" | "vendas" | "roas" | "acos" | "cpc" | "ctr" | "tacos") => {
+    const x = comp?.atual[k], y = comp?.anterior[k];
+    return x == null || y == null || y === 0 ? null : (x / y - 1) * 100;
+  };
+  const antTxt = comp ? ` · vs ${comp.antIni.split("-").reverse().slice(0, 2).join("/")} a ${comp.antFim.split("-").reverse().slice(0, 2).join("/")}` : " · sem período anterior gravado";
+  const campSel = selecionada ? (data?.campanhas ?? []).find((c) => c.id === selecionada) ?? null : null;
 
   return (
     <div className="space-y-5">
@@ -166,40 +224,59 @@ export default function GestaoAds({ custId }: { custId: string }) {
               focal
               rotulo="Investimento"
               valor={brl(r?.investimento, true)}
-              referencia={`${num(data.campanhas.length)} campanhas no período`}
+              referencia={`${num(data.campanhas.length)} campanhas${antTxt}`}
+              variacao={dv("investimento")}
+              melhorQuando="neutro"
             />
             <KpiCard
               rotulo="Vendas por Ads"
               valor={brl(r?.vendas)}
               referencia={`${num(r?.unidades)} unidades atribuídas`}
+              variacao={dv("vendas")}
+              melhorQuando="subir"
             />
             <KpiCard
               rotulo="ROAS"
               valor={r?.roas == null ? "Sem dado" : `${num(r.roas, 2)}x`}
               referencia="Vendas Ads ÷ investimento"
+              variacao={dv("roas")}
+              melhorQuando="subir"
             />
             <KpiCard
               rotulo="ACOS"
               valor={pctFracao(r?.acos, 1)}
               referencia="Investimento ÷ vendas Ads"
+              variacao={dv("acos")}
               melhorQuando="descer"
             />
             <KpiCard
               rotulo="TACOS"
               valor={pctFracao(tacos, 1)}
               referencia={tacosRef}
+              variacao={dv("tacos")}
               melhorQuando="descer"
             />
             <KpiCard
               rotulo="CPC"
               valor={r?.cpc == null ? "Sem dado" : brl(r.cpc, true)}
               referencia={`${num(r?.cliques)} cliques · CTR ${pctFracao(r?.ctr, 2)}`}
+              variacao={dv("cpc")}
               melhorQuando="descer"
             />
           </div>
 
+          <div className="flex items-center justify-between gap-2 rounded-xl border border-border/60 p-3">
+            <p className="text-xs text-muted-foreground">
+              {visao === "resumo" ? `${num(data.campanhas.length)} campanhas · abra para ver a tabela e o gráfico de cada uma` : "Clique numa campanha para ver o gráfico dela"}
+            </p>
+            <Button size="sm" variant={visao === "campanhas" ? "default" : "outline"} className="active:scale-[0.98]"
+              onClick={() => { setVisao(visao === "campanhas" ? "resumo" : "campanhas"); setSelecionada(null); }}>
+              {visao === "campanhas" ? "Voltar ao resumo" : `Campanhas (${num(data.campanhas.length)})`}
+            </Button>
+          </div>
+
           {/* Micro — campanhas */}
-          <section className="space-y-3">
+          {visao === "campanhas" && <section className="space-y-3">
             <div className="flex flex-wrap items-end justify-between gap-2">
               <div>
                 <RotuloSecao>2 · Campanhas · {per}</RotuloSecao>
@@ -222,6 +299,14 @@ export default function GestaoAds({ custId }: { custId: string }) {
               </div>
             </div>
 
+            {campSel && (
+              <CampanhaGrafico
+                nome={campSel.nome}
+                linhas={(diario ?? []).filter((l) => String(l.campaign_id) === campSel.id)}
+                faturamentoDia={vendasTema?.serie ?? []}
+                aoFechar={() => setSelecionada(null)}
+              />
+            )}
             <div className="overflow-x-auto rounded-md border border-border [border-width:0.5px]">
               <table className="w-full text-xs tnum">
                 <thead className="text-left text-muted-foreground">
@@ -266,7 +351,8 @@ export default function GestaoAds({ custId }: { custId: string }) {
                                 ? "Na meta"
                                 : "Sem meta";
                     return (
-                      <tr key={c.id}>
+                      <tr key={c.id} onClick={() => setSelecionada(c.id === selecionada ? null : c.id)}
+                        className={cn("cursor-pointer transition-colors hover:bg-muted/40", c.id === selecionada && "bg-primary/10")}>
                         <td className="p-2 font-medium max-w-[220px]">
                           <span className="block truncate" title={c.nome}>
                             {c.nome}
@@ -308,7 +394,7 @@ export default function GestaoAds({ custId }: { custId: string }) {
             {!data.completo && (
               <p className="text-xs text-muted-foreground">Mostrando as primeiras 1.000 campanhas da API.</p>
             )}
-          </section>
+          </section>}
         </>
       )}
     </div>
