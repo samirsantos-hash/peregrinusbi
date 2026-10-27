@@ -954,6 +954,26 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
     0 2px 4px hsl(var(--panel-glass-shadow) / .06),
     0 16px 36px -22px hsl(var(--panel-glass-shadow) / .36);
 }
+/* Older section banners use utility-built divs rather than the shared Card. */
+.peregrinus-panel div[class*="rounded"][class*="bg-card"][class*="border"] {
+  --foreground: var(--panel-glass-ink);
+  --card-foreground: var(--panel-glass-ink);
+  --ec-ink: var(--panel-glass-ink);
+  --muted-foreground: var(--panel-glass-muted);
+  --ec-text-sec: var(--panel-glass-muted);
+  --aura-gray-400: var(--panel-glass-muted);
+  --aura-gray-500: var(--panel-glass-muted);
+  --ok: var(--panel-glass-positive);
+  --emerald: var(--panel-glass-positive);
+  --ec-verde-txt: var(--panel-glass-positive);
+  --border: var(--panel-glass-edge);
+  background: var(--panel-glass-fill) !important;
+  border-color: hsl(var(--panel-glass-edge) / .5);
+  color: hsl(var(--panel-glass-ink));
+  backdrop-filter: blur(24px) saturate(110%);
+  -webkit-backdrop-filter: blur(24px) saturate(110%);
+  box-shadow: var(--panel-glass-elevation);
+}
 .light {
   --panel-glass-fill: linear-gradient(135deg,
     hsl(var(--panel-glass-white) / .86),
