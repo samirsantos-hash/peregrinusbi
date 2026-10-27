@@ -21,8 +21,6 @@ const AVG_COLS = [
   "ll_price_score", "ll_stock_availability_score", "ll_free_shipping_score", "ll_promotions_score",
 ] as const;
 
-const SELECT = ["seller_id", "data", ...SUM_COLS, ...AVG_COLS].join(", ");
-
 export interface LojaDiagnostico {
   sellerId: string;
   nickname: string;
@@ -40,8 +38,10 @@ export interface CarteiraConsolidado {
 }
 
 async function fetchAll(ids: string[]): Promise<any[]> {
-  return fetchScopedRows(ids, (batch, from, to) => supabase.from("sellers_kpi")
-    .select(SELECT).in("seller_id", batch).order("seller_id").order("data").order("id").range(from, to));
+  const { data, error } = await import("@/lib/fetchAllRows").then(({ fetchAllRows }) => fetchAllRows<any>((from, to) =>
+    supabase.rpc("indicadores_carteira", { p_seller_ids: ids }).order("is_latest").order("data").order("seller_id").range(from, to)));
+  if (error) throw error;
+  return data;
 }
 
 function num(v: any) {
@@ -68,7 +68,13 @@ export function useCarteiraConsolidado(
       const byDate = new Map<string, { sum: Record<string, number>; avg: Record<string, { s: number; n: number }> }>();
       const lastBySeller = new Map<string, any>();
 
-      for (const r of rows) {
+      for (const entry of rows) {
+        const r = entry.metrics;
+        if (entry.is_latest) {
+          lastBySeller.set(entry.seller_id, r);
+          continue;
+        }
+        r.data = entry.data;
         const d = r.data as string;
         if (!d) continue;
         let bucket = byDate.get(d);
@@ -85,8 +91,6 @@ export function useCarteiraConsolidado(
             bucket.avg[c] = a;
           }
         }
-        const prev = lastBySeller.get(r.seller_id);
-        if (!prev || String(prev.data) < d) lastBySeller.set(r.seller_id, r);
       }
 
       const kpis: SellerKPI[] = [...byDate.entries()]
