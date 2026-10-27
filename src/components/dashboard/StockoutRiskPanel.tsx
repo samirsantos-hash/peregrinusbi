@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import TooltipInfo from "./TooltipInfo";
 import { useEligibility, type EligibilityItem } from "@/hooks/useEligibility";
+import RupturaApi, { useContaMl } from "./RupturaApi";
 
 interface Props {
   sellerId?: string;
+  custId?: string;
 }
 
 type Row = EligibilityItem & {
@@ -65,8 +67,9 @@ const sevLabel: Record<Row["severidade"], string> = {
   ok: "Cobertura ok",
 };
 
-const StockoutRiskPanel = ({ sellerId }: Props) => {
+const StockoutRiskPanel = ({ sellerId, custId }: Props) => {
   const { data: items = [], isLoading } = useEligibility(sellerId);
+  const conta = useContaMl(custId);
   const [copied, setCopied] = useState<string | null>(null);
   const [onlyRisk, setOnlyRisk] = useState(true);
 
@@ -106,7 +109,9 @@ const StockoutRiskPanel = ({ sellerId }: Props) => {
     );
   };
 
-  if (isLoading) {
+  if (conta.data) return <RupturaApi accountId={conta.data} planilha={items} />;
+
+  if (isLoading || conta.isLoading) {
     return (
       <div className="glass-card p-6 text-center text-sm text-muted-foreground">
         Carregando itens…
