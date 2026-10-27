@@ -12,7 +12,7 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d']) }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d']) }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
   // Reuse existing store visibility; developer status does not grant business access.
@@ -53,9 +53,9 @@ Deno.serve(async req => {
     orders.length = 0; orders.push(...unicos.values());
     if (orders.length < total) return json({ error: 'Não foi possível ler todos os pedidos do período; análise suspensa para não apresentar totais parciais.' }, 422);
     const atual = projetarPedidos(orders, periodo.inicio, periodo.fim);
-    if (modo === 'vendas7d') {
-      // Paid units per listing over the last 7 complete UTC days; no buyer data.
-      return json({ periodo, itens: atual.itens.map(i => ({ id: i.id, unidades: i.unidades })), consultadoEm: new Date().toISOString() });
+    if (modo === 'vendas7d' || modo === 'vendas30d') {
+      // Paid units and revenue per listing over complete UTC days; no buyer data.
+      return json({ periodo, itens: atual.itens.map(i => ({ id: i.id, unidades: i.unidades, faturamento: Math.round(i.faturamento * 100) / 100 })), consultadoEm: new Date().toISOString() });
     }
     if (modo === 'resumo') {
       const anteriorFim = new Date(Date.parse(periodo.inicio) - 864e5).toISOString().slice(0, 10);
