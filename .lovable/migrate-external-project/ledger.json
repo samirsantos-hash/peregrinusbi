@@ -1,0 +1,12 @@
+{
+  "source": "Peregrinus_escurro_html.zip",
+  "scope": "Design-reference adaptation, not replacement of the existing application",
+  "capabilities": [
+    {"capability":"Visual structure and components","source":"Static Asimov HTML catalogue","outcome":"adapt","status":"in_progress","next_action":"Adapt shared Peregrinus surfaces, navigation and controls; preserve brand and live data"},
+    {"capability":"Schema, records and auth identities","source":"No database or authentication in archive","outcome":"preserve_existing","status":"not_applicable","next_action":null},
+    {"capability":"Authorization and Mercado Livre integrations","source":"Existing Peregrinus application","outcome":"preserve_existing","status":"unchanged","next_action":null},
+    {"capability":"External endpoints, payments, callbacks and schedules","source":"Archive contains demonstrative marketing links only","outcome":"exclude_demo","status":"not_applicable","next_action":null},
+    {"capability":"Assets and theme variants","source":"Asimov branding, fonts and backgrounds","outcome":"adapt_patterns_only","status":"in_progress","next_action":"Keep Peregrinus eagle, DM Sans and black/green palette; do not import marketing content or dashboard background scenes"},
+    {"capability":"Verification","source":"Authenticated live preview","outcome":"verify","status":"pending","next_action":"Check populated dashboard, navigation, pointer reflection and both themes"}
+  ]
+}
