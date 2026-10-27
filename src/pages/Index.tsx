@@ -657,7 +657,8 @@ const Index = () => {
                   <TabsContent value="metas" className="mt-0">
                     <MetasPanel sellerId={selectedSeller} kpis={allKpisMonthly} />
                   </TabsContent>
-                  <TabsContent value="correlacoes" className="mt-0">
+                  <TabsContent value="correlacoes" className="mt-0 space-y-5">
+                    <ResumoSinergiaCorrelacoes custId={sellerCustIdMap[selectedSeller]} />
                     <CorrelacaoPanel kpis={displayKpis} />
                   </TabsContent>
                   <TabsContent value="alertas-riscos" className="mt-0">
