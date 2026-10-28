@@ -5,6 +5,7 @@ import { requireEnv } from '../_shared/env.ts';
 import { tokenAtual } from '../_shared/mlTokenAtual.ts';
 import { janelaAnalise, projetarPedidos } from '../_shared/mlAnaliseLoja.ts';
 import { lerQualidade } from '../_shared/mlMelhorias.ts';
+import { amostraCampanhas } from '../_shared/mlCampanhasDiagnostico.ts';
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -39,7 +40,7 @@ Deno.serve(async req => {
     if (!Array.isArray(first.results) || !Number.isFinite(first.paging?.total)) throw new Error('Cobertura de pedidos não confirmada.');
     if (modo === 'campanhasDiagnostico') {
       // Bounded capability check, never a performance series or raw-order response.
-      const amostra = first.results.filter((o: any) => o.status === 'paid').slice(0, 20);
+      const amostra = amostraCampanhas(first.results);
       const { data: promos } = await db.from('ml_promotions').select('promotion_id').eq('account_id', conta.id);
       const { data: ofertas } = await db.from('ml_promotion_items').select('offer_id, promotion_id, item_id').eq('account_id', conta.id).limit(1000);
       const ids = new Set((promos ?? []).map(p => String(p.promotion_id)));
