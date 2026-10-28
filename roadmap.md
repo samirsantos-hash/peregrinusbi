@@ -1,5 +1,8 @@
 # Roadmap
 
+## Gráficos no celular (28/10)
+- [ ] Ajustar margens, eixos e legendas de áreas e barras à largura disponível, sem cortar valores ou alterar dados; conferir com loja real em celular e desktop.
+
 ## Proporção do título e briefing (28/10)
 - [x] Comparar a referência e corrigir a hierarquia em DM Sans: título 26/32px, resumo 14/24px, etiquetas 12/16px e títulos de bloco 18/24px; DGSULCHEVROLET conferida em 1143 e 536px nos dois temas, sem transbordamento ou erros. Fonte carregada, Home com medidas idênticas e build OK; números e cálculos preservados.
 
