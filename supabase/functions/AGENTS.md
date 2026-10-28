@@ -1,6 +1,7 @@
 # Regras das funções do Mercado Livre
 
 - `ml-analise-loja` reads the own-store API on demand over complete UTC days, returning paid revenue/orders/units and cancellation rates separately; it rejects incomplete order coverage, returns no raw orders or buyer data, and never writes ML or business data. Full candidates use original photo dimensions and current ML performance; missing evidence remains null.
+- Promotion attribution diagnostics expose only allowlisted field names and counts from a bounded paid-order sample; discount supplier IDs and current membership are not validated historical attribution, so no campaign series is inferred.
 
 - Ads synchronization reports controlled operational warnings to developer-only `developer_alerts`, including scheduled runs, without copying raw upstream payloads or tokens; monitoring never changes Mercado Livre state.
 

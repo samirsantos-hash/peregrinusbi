@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Campanhas promocionais por venda (28/10)
-- [ ] Confirmar contrato da API para campanha aplicada em cada venda, sem inferir pela adesão atual — documentação consultada não confirmou o vínculo; validação autenticada do recurso de descontos pendente.
-- [ ] Consultar e agregar dias completos por promoção; gráfico de linhas com pedidos, unidades e faturamento, lacunas explícitas e fontes separadas da planilha.
+- [x] Testar recurso de descontos com sessão real: AUTOPECASLONDRINA, 20 pedidos, 17 leituras e 3 respostas 404; identificadores de campanha/oferta presentes, nenhuma correspondência nas promoções locais verificadas. Sem expor pedidos/compradores.
+- [ ] Gráfico por promoção bloqueado: falta contrato validado de correspondência entre desconto da venda e promoção, incluindo descontos combinados; não inferir pela adesão atual.
+- [x] Exibir limitação e verificação sob demanda em Oportunidades, mantendo médias importadas separadas de uma série diária da API.
 
 ## Vidro lateral, topo e carregamento (28/10)
 - [x] Aplicar transparência e contorno da referência no topo e lateral; unificar fontes e números, preservando Home (estilos comparados antes/depois).
