@@ -1829,3 +1829,7 @@ html body .peregrinus-panel .recharts-default-tooltip { background: var(--panel-
 @media (prefers-reduced-motion: reduce) {
   html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.cartao-branco,.noite-vidro,.cart-card):hover { transform: none !important; }
 }
+@media (max-width: 639px) {
+  html body .peregrinus-panel [role="tablist"] { max-width: 100%; height: auto; flex-wrap: wrap; justify-content: flex-start; }
+  html body .peregrinus-panel .recharts-wrapper { overflow: clip; }
+}
