@@ -23,7 +23,7 @@
 - Listas completas de lojas no frontend usam `fetchAllRows` (src/lib/fetchAllRows.ts) com ordem estável; o servidor corta em 1000 linhas e lojas além disso sumiam das buscas.
 - A revisão de planilhas com IA (Admin → Revisão IA) detecta inconsistências com regras determinísticas no navegador (src/lib/revisaoPlanilha.ts) e envia só os alertas à função `revisar-planilha` (só admin) para o modelo resumir; o modelo nunca inventa achados nem grava dados.
 - A leitura de carteira (modelo Deep Dive) não tem tela própria: `CarteiraNaSecao` entra nas seções existentes do painel quando nenhuma loja está selecionada; cálculo em funções puras em src/lib/carteiraDeepDive/calculo.ts (mesma janela de dias) e limites só em src/config/limiaresCarteira.ts.
-- index.html declara `lang="pt-BR"` e bloqueia tradução automática (`translate="no"`, meta google notranslate): o tradutor do navegador altera o DOM e derruba o React com erro de insertBefore.
+- index.html: `lang="pt-BR"`, `translate="no"` e meta notranslate; o tradutor altera o DOM e derruba o React (insertBefore).
 - Sistema de Design Peregrinus: tokens só em src/index.css (`:root` = tema claro padrão, `.dark` opcional; cores legadas são aliases da paleta `--ec-*`), formatação numérica só em src/lib/format.ts (utils/formatters.ts delega) e componentes base em src/components/ds (KpiCard, BandBar, TargetBar, Alert, EmptyState, PageHeader); medidores circulares renderizam BandBar.
 - Indicadores Pock derivados (Taxa de Venda vs mediana do mesmo subcluster, Favorabilidade ponderada pelas metas de src/config/limiaresCarteira.ts) ficam em src/lib/pockIndicadores.ts; a função `recomendar-seller` só redige texto a partir das métricas enviadas, sem ler nem gravar dados.
 - A "Referência da vertical" do GrowthPotentialPanel é a mediana (faixa P25–P75) dos índices mensais dos pares da mesma vertical, sem o próprio seller, calculada em src/lib/referenciaVertical.ts; com menos de 5 pares não há curva, para evitar comparação circular.
@@ -38,4 +38,4 @@
 - Indicator summaries use security-invoker RPCs; portfolio batches always filter seller IDs and reject partial reads to preserve RLS and totals.
 - Promotion rebate reading, expiry warnings and rebate-based recommendation live only in pure `src/lib/promocoesAnalise.ts`, so Oportunidades and future screens share one rule.
 - Advertising charts and matrices share `src/lib/sinergiaPublicidade.ts`: same-date totals, nullable paired Pearson (≥7, nonconstant), no causal claims; `SinergiaIndicadores` shares summary/detail charts, keeping API windows separate from imports.
-- O fundo de chuva do painel é o shader original da referência em src/components/chuva, montado só dentro de .peregrinus-panel no modo escuro; a tela de acesso mantém as cordas, para não misturar os dois fundos.
+- Chuva do painel: shader original em src/components/chuva, só em .peregrinus-panel escuro; acesso mantém as cordas.
