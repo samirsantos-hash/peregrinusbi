@@ -1,5 +1,9 @@
 # Roadmap
 
+## Ranking de vídeos no espaço de cobertura (28/10)
+- [x] Adicionar lista com alternância entre conversão e visitas via Clips no espaço livre; cálculo por última medição pareada, três testes passaram.
+- [ ] Verificar ranking populado — banco não possui anúncios com visitas via Clips e pedidos medidos; conferir estado sem dado sem distribuir totais da loja.
+
 ## Produtos e campanhas elegíveis (28/10)
 - [x] Limitar a lista a dez produtos com expansão e recolhimento; três testes passaram.
 - [x] Produtos sincronizados e campanhas elegíveis ao vivo em AUTOPECASLONDRINA: 10/20/10 linhas conferidas. Planilhas preservadas em 2ELETRO INFO: 10 linhas e expansão/recolhimento conferidos, sem erros de página.
