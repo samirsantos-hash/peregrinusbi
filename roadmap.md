@@ -1,5 +1,8 @@
 # Roadmap
 
+## Proporção dos cartões executivos (28/10)
+- [x] Aplicar dimensões da variante compacta do HTML, números legíveis e comparações alinhadas; duas colunas até haver espaço para quatro. Dados reais conferidos em 1280, 1143 e 536px, sem erros; Home não alterada.
+
 ## Ranking de vídeos no espaço de cobertura (28/10)
 - [x] Adicionar lista com alternância entre conversão e visitas via Clips no espaço livre; cálculo por última medição pareada, três testes passaram.
 - [x] AUTOPECASLONDRINA: espaço e alternância conferidos, sem erros; ausência de dados explícita. Ranking populado não verificável: banco não possui anúncios com visitas via Clips e pedidos medidos; nunca distribuir totais da loja.
