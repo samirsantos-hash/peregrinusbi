@@ -1,4 +1,5 @@
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -40,6 +41,7 @@ const METRICAS: { val: Metrica; label: string }[] = [
 ];
 
 const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
+  const mobile = useIsMobile();
   const [granularidade, setGranularidade] = useState<Granularidade>("semana");
   const [metrica, setMetrica] = useState<Metrica>("inv");
 
@@ -163,12 +165,14 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
             Sem dados diários de Ads no intervalo selecionado.
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={serie} barCategoryGap="35%" barGap={4} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+          <ResponsiveContainer width="100%" height={mobile ? 360 : 320}>
+            <ComposedChart data={serie} barCategoryGap="35%" barGap={4} margin={{ top: 12, right: 8, bottom: 12, left: 8 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} interval="preserveStartEnd" />
+              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} interval="preserveStartEnd" minTickGap={40} height={40} padding={{ left: 12, right: 12 }} />
               <YAxis
                 yAxisId="brl"
+                width={76}
+                tickCount={mobile ? 4 : 5}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v) => fmtBRLCompact(Number(v))}
@@ -176,6 +180,9 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
               />
               <YAxis
                 yAxisId="sec"
+                hide={metrica === "inv"}
+                width={44}
+                tickCount={mobile ? 4 : 5}
                 axisLine={false}
                 tickLine={false}
                 orientation="right"

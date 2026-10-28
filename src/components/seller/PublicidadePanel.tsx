@@ -1,5 +1,6 @@
 import { calcularTendencia } from "@/lib/tendencia";
 import TendenciaChip from "@/components/charts/TendenciaChip";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -47,6 +48,7 @@ type Props = {
 };
 
 const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname, diario = [], variante = "completo" }: Props) => {
+  const mobile = useIsMobile();
   const [grafico, setGrafico] = useState<"roas_acos" | "investimento">("roas_acos");
   const soEvolucao = variante === "evolucao";
 
@@ -152,7 +154,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
               {soEvolucao ? "3 · " : ""}Evolução histórica ({m.historico.length} {m.historico.length === 1 ? "mês" : "meses"})
               <TendenciaChip t={calcularTendencia(m.historico.map((d) => Number(d.gmv_ads) || 0))} className="ml-2 normal-case tracking-normal" />
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {([
                 ["roas_acos", "ACOS / TACOS"],
                 ["investimento", "Investimento vs GMV Ads"],
@@ -176,11 +178,11 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           {grafico === "roas_acos" ? (
             <AcosTacosChart pontos={m.historico} />
           ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={m.historico} barCategoryGap="35%" barGap={4} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+            <ResponsiveContainer width="100%" height={mobile ? 340 : 300}>
+              <ComposedChart data={m.historico} barCategoryGap="35%" barGap={4} margin={{ top: 12, right: 16, bottom: 12, left: 8 }}>
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => String(v).slice(2)} />
-                <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
+                <XAxis dataKey="mes" interval="preserveStartEnd" minTickGap={40} height={36} padding={{ left: 12, right: 12 }} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} tickFormatter={(v) => String(v).slice(2)} />
+                <YAxis width={76} tickCount={mobile ? 4 : 5} tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} />
                 <Tooltip
                   contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
                   formatter={(value: any, name: any) => [

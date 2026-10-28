@@ -1866,7 +1866,18 @@ html body .peregrinus-panel .recharts-default-tooltip { background: var(--panel-
 }
 @media (max-width: 639px) {
   html body .peregrinus-panel [role="tablist"] { max-width: 100%; height: auto; flex-wrap: wrap; justify-content: flex-start; }
-  html body .peregrinus-panel .recharts-wrapper { overflow: clip; }
+  html body .peregrinus-panel .recharts-wrapper { overflow: visible; }
+  html body .peregrinus-panel .recharts-default-legend {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 12px;
+  }
+  html body .peregrinus-panel .recharts-default-legend .recharts-legend-item {
+    display: inline-flex !important; align-items: center; max-width: 100%; margin-right: 0 !important;
+    white-space: normal; line-height: 20px;
+  }
+  html body .peregrinus-panel .recharts-legend-item-text { font-size: 12px; overflow-wrap: anywhere; }
+  html body .peregrinus-panel .recharts-legend-item svg { flex-shrink: 0; }
+  html body .peregrinus-panel .recharts-tooltip-wrapper { max-width: calc(100vw - 48px); }
+  html body .peregrinus-panel .panel-glass-tooltip { white-space: normal; overflow-wrap: anywhere; }
 }
 
 /* Chuva de luz da referência no painel (nunca na tela de acesso). Cores = verde Peregrinus. */
