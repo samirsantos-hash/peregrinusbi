@@ -2041,6 +2041,20 @@ html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-v
 html body .peregrinus-panel .panel-section-header {
   font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
+html body .peregrinus-panel .panel-section-header[data-secao="efficiency"] {
+  --panel-type-page-title: 32px;
+  --panel-type-page-leading: 40px;
+  --panel-type-body: 16px;
+  --panel-type-body-leading: 28px;
+  --panel-type-label: 13px;
+}
+html body .peregrinus-panel .panel-section-header :is(.panel-section-title,.panel-section-briefing,.panel-section-meta) {
+  font-family: inherit;
+}
+html body .peregrinus-panel .panel-section-summary-label {
+  font-weight: 600;
+  color: hsl(var(--panel-text));
+}
 html body .peregrinus-panel :is(.panel-section-title, .ds-titulo-pagina) {
   font-size: var(--panel-type-page-title);
   line-height: var(--panel-type-page-leading);
