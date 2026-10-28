@@ -1,5 +1,9 @@
 # Roadmap
 
+## Referência design-system em todo o painel (28/10)
+- [ ] Uniformizar superfícies, controles, tabelas e janelas pela referência, preservando Home, identidade e dados.
+- [ ] Conferir todas as seções e páginas acessíveis com conta real, incluindo temas e largura estreita; registrar bloqueios reais.
+
 ## Corrigir vidro das seções pela Home (27/10)
 - [x] Aplicar material verde translúcido inspirado no resultado visual da captura da Home, sem cordas; cartões e gráfico da AUTOPECASLONDRINA conferidos na Visão geral, sem erros de execução. Estilo compartilhado nas demais seções.
 - [x] Corrigir raio, borda e sombra ao passar o mouse; retirar inclinação e reflexo exclusivos do painel. Comparação automática com a Home passou para as superfícies verificadas em Visão geral, Preço e Correlações; dois temas conferidos, sem transbordamento.
