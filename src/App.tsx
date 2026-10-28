@@ -7,6 +7,7 @@ import { JuniorModeProvider } from "@/hooks/useJuniorMode";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlassPointer } from "@/components/ds/GlassPointer";
+import { ChuvaPainel } from "@/components/chuva/ChuvaPainel";
 import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -79,6 +80,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 
   return (
     <div className="peregrinus-panel min-w-0">
+      <ChuvaPainel />
       {children}
       <RodapeInstitucional />
     </div>

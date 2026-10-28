@@ -1844,3 +1844,14 @@ html body .peregrinus-panel .recharts-default-tooltip { background: var(--panel-
   html body .peregrinus-panel [role="tablist"] { max-width: 100%; height: auto; flex-wrap: wrap; justify-content: flex-start; }
   html body .peregrinus-panel .recharts-wrapper { overflow: clip; }
 }
+
+/* Chuva de luz da referência no painel (nunca na tela de acesso). Cores = verde Peregrinus. */
+.chuva-painel {
+  --ui-accent: #14A86C; --ui-accent-dark: #0E7F51; --ui-accent-light: #3BD394;
+  --ui-accent-glow: #3BD394; --ui-accent-rgb-space: 20 168 108;
+  --cadence-rain-shader-alpha: .5; --cadence-rain-accent-glow: .35;
+}
+html:not(.dark) .chuva-painel { display: none; }
+html.dark body .peregrinus-panel { background-color: transparent !important; }
+html.dark body:has(.chuva-painel) { background-color: #050505; }
+html.dark .peregrinus-panel > :not(.chuva-painel) { position: relative; z-index: 1; }
