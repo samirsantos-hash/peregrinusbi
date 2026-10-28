@@ -5,20 +5,25 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { chamarFuncaoMl } from '@/lib/mlFuncoes';
 import { num } from '@/lib/format';
-
-type Diagnostico = {
-  periodo: { inicio: string; fim: string };
-  diagnostico: { consultados: number; disponiveis: number; indisponiveis: number; comCampanha: number; campanhaReconhecida: number; ofertaReconhecida: number };
-};
+import { supabase } from '@/integrations/supabase/client';
+import { leituraCampanhas, type DiagnosticoCampanhas } from '@/lib/campanhasLeitura';
 
 export default function CampanhasAtribuicaoApi({ custId }: { custId?: string }) {
   const [consultar, setConsultar] = useState(false);
+  const conta = useQuery({
+    queryKey: ['ml-nome-campanhas', custId], enabled: !!custId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('ml_accounts').select('nickname').eq('ml_user_id', Number(custId)).maybeSingle();
+      if (error) throw error;
+      return data?.nickname ?? null;
+    }, staleTime: 300_000,
+  });
   const q = useQuery({
     queryKey: ['ml-campanhas-atribuicao-diagnostico', custId],
     enabled: !!custId && consultar,
     retry: false,
     staleTime: 300_000,
-    queryFn: () => chamarFuncaoMl<Diagnostico>('ml-analise-loja', { cust_id: custId, modo: 'campanhasDiagnostico' }),
+    queryFn: () => chamarFuncaoMl<DiagnosticoCampanhas>('ml-analise-loja', { cust_id: custId, modo: 'campanhasDiagnostico' }),
   });
   if (!custId) return null;
   return <section className="space-y-3 border-t border-border pt-4" aria-label="Campanhas aplicadas nas vendas">
@@ -32,6 +37,10 @@ export default function CampanhasAtribuicaoApi({ custId }: { custId?: string }) 
       <p className="text-sm text-muted-foreground">Série diária indisponível: o vínculo entre os descontos das vendas e as promoções ainda não está confirmado.</p>
       <p className="text-xs text-muted-foreground tabular-nums">Amostra: {num(q.data.diagnostico.consultados)} pedidos pagos consultados · {num(q.data.diagnostico.disponiveis)} com leitura de descontos · {num(q.data.diagnostico.indisponiveis)} sem leitura disponível.</p>
       <p className="text-xs text-muted-foreground">Amostra não representa o desempenho do período; não há distribuição estimada de vendas entre campanhas.</p>
+      <div className="space-y-2 border-t border-border pt-3" aria-label="Leitura personalizada das campanhas">
+        <h4 className="text-sm font-medium">Leitura de {conta.data ?? 'esta loja'}</h4>
+        {leituraCampanhas(q.data, conta.data ?? 'Esta loja').map((texto, i) => <p key={i} className="text-sm leading-relaxed text-muted-foreground">{texto}</p>)}
+      </div>
     </> : <p className="text-sm text-muted-foreground">Sem atribuição confirmada por promoção. As médias do histórico abaixo não são vendas diárias da API.</p>}
   </section>;
 }
