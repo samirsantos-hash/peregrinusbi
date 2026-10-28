@@ -1772,3 +1772,4 @@ html.dark body:has(.peregrinus-panel) {
     #0A0A0A fixed;
 }
 html.dark body .peregrinus-panel { background: transparent !important; }
+html.dark body div:has(> .relative.z-10 > .peregrinus-panel) { background: transparent !important; }
