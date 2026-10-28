@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Produtos e campanhas elegíveis (28/10)
-- [ ] Limitar a lista a dez produtos com expansão e recolhimento.
-- [ ] Mostrar produtos e campanhas elegíveis sincronizados do ML nas lojas conectadas; manter planilhas nas demais e verificar a troca de origem.
+- [x] Limitar a lista a dez produtos com expansão e recolhimento; três testes passaram.
+- [x] Produtos sincronizados e campanhas elegíveis ao vivo em AUTOPECASLONDRINA: 10/20/10 linhas conferidas. Planilhas preservadas em 2ELETRO INFO: 10 linhas e expansão/recolhimento conferidos, sem erros de página.
 
 ## Campanhas promocionais por venda (28/10)
 - [x] Testar recurso de descontos com sessão real: AUTOPECASLONDRINA, 20 pedidos, 17 leituras e 3 respostas 404; identificadores de campanha/oferta presentes, nenhuma correspondência nas promoções locais verificadas. Sem expor pedidos/compradores.
