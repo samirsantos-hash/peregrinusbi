@@ -1,5 +1,10 @@
 # Roadmap
 
+## Referência design-system em todo o painel (28/10)
+- [x] Uniformizar vidro, controles, tabelas, carteira legada, detalhes por nível e menus pela referência; Home conferida com estilos idênticos, dados e identidade preservados.
+- [x] Conferir 13 seções da AUTOPECASLONDRINA, 11 páginas principais, abas de Admin/gestão/ML e 13 abas de Multilojas; temas e 536px verificados. Corrigir transbordamento em Oportunidades, Perguntas e gestão; nenhum erro de execução.
+- [ ] Conferir conteúdo analítico de Carteira de dados — leitura permaneceu carregando; CPP exibiu ausência de arquivo. Grupo/programa/anúncio detalhado sem vínculo/dados navegáveis na loja testada; loja e categoria conferidas. Não alterar leitura ou importar dados como parte do ajuste visual.
+
 ## Corrigir vidro das seções pela Home (27/10)
 - [x] Aplicar material verde translúcido inspirado no resultado visual da captura da Home, sem cordas; cartões e gráfico da AUTOPECASLONDRINA conferidos na Visão geral, sem erros de execução. Estilo compartilhado nas demais seções.
 - [x] Corrigir raio, borda e sombra ao passar o mouse; retirar inclinação e reflexo exclusivos do painel. Comparação automática com a Home passou para as superfícies verificadas em Visão geral, Preço e Correlações; dois temas conferidos, sem transbordamento.

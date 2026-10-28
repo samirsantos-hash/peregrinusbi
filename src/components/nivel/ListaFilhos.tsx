@@ -32,14 +32,14 @@ export default function ListaFilhos({ itens, unidadeGap, vazio, reconciliacao, s
   const visiveis = expandido ? ordenados : ordenados.slice(0, 10);
 
   if (!ordenados.length) {
-    return <div className="rounded-lg border border-border p-8 text-center text-sm text-muted-foreground">{vazio}</div>;
+    return <div className="ds-glass-surface rounded-lg border border-border p-8 text-center text-sm text-muted-foreground">{vazio}</div>;
   }
 
   const somaFilhos = ordenados.reduce((s, i) => s + (i.valor ?? 0), 0);
   const unidade = ordenados[0]?.unidade ?? "BRL";
 
   return (
-    <div className="rounded-lg border border-border overflow-hidden">
+    <div className="ds-glass-surface rounded-lg border border-border overflow-hidden">
       <div className="divide-y divide-border">
         {visiveis.map((i) => {
           const Linha = semNavegacao ? "div" : "button";
