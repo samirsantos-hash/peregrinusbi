@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
@@ -51,6 +52,7 @@ interface LogisticsPanelProps {
 const COLORS = ["hsl(var(--ec-verde))", "hsl(var(--ok))", "hsl(var(--series-3))", "hsl(var(--ec-ambar))"];
 
 const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = [] }: LogisticsPanelProps) => {
+  const mobile = useIsMobile();
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
     if (!acc[k.productId] || k.date > acc[k.productId].date) acc[k.productId] = k;
     return acc;
@@ -291,8 +293,8 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             </h3>
             <TooltipInfo text="Evolução temporal do share de GMV por canal logístico. Acompanhe a migração para Full ao longo do tempo." />
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={evolutionData}>
+          <ResponsiveContainer width="100%" height={mobile ? 320 : 280}>
+            <AreaChart data={evolutionData} margin={{ top: 12, right: 16, bottom: 12, left: 8 }}>
               <defs>
                 <linearGradient id="gradFullLog" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.3} />
@@ -313,15 +315,19 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                 tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 interval="preserveStartEnd"
-                angle={evolutionData.length > 8 ? -45 : 0}
-                textAnchor={evolutionData.length > 8 ? "end" : "middle"}
-                height={evolutionData.length > 8 ? 50 : 30}
+                minTickGap={40}
+                padding={{ left: 12, right: 12 }}
+                angle={!mobile && evolutionData.length > 8 ? -45 : 0}
+                textAnchor={!mobile && evolutionData.length > 8 ? "end" : "middle"}
+                height={!mobile && evolutionData.length > 8 ? 50 : 36}
               />
               <YAxis
                 tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 tickFormatter={(v) => `${v}%`}
                 domain={[0, 100]}
+                width={48}
+                tickCount={mobile ? 4 : 5}
               />
               <Tooltip content={<EvolutionTooltip />} />
               <Area type="monotone" dataKey="% Full" stroke="hsl(var(--ec-verde))" fill="url(#gradFullLog)" strokeWidth={2} />

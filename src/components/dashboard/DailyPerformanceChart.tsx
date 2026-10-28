@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   ComposedChart, Area, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, Brush, ReferenceLine
@@ -145,6 +146,7 @@ function ChartTooltipContent({ active, payload, vista }: { active?: boolean; pay
 }
 
 const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
+  const mobile = useIsMobile();
   const baseData = useMemo(() => fillGaps(kpis), [kpis]);
   const tend = useMemo(() => calcularTendencia(baseData.map((d) => d.tgmv)), [baseData]);
   const chartData = useMemo(
@@ -263,8 +265,8 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
         ))}
       </div>
 
-      <ResponsiveContainer width="100%" height={typeof window !== "undefined" && window.innerWidth < 640 ? 260 : 340}>
-        <ComposedChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+      <ResponsiveContainer width="100%" height={mobile ? 360 : 340}>
+        <ComposedChart data={chartData} margin={{ top: 12, right: 12, left: 8, bottom: 12 }}>
           <defs>
             <linearGradient id="gradTgmv" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={corFat} stopOpacity={0.18} />
@@ -279,10 +281,11 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
             axisLine={false}
             tickLine={false}
-            interval={xInterval}
-            angle={chartData.length > 15 ? -45 : 0}
-            textAnchor={chartData.length > 15 ? "end" : "middle"}
-            height={chartData.length > 15 ? 50 : 30}
+            interval={mobile ? "preserveStartEnd" : xInterval}
+            minTickGap={40}
+            angle={!mobile && chartData.length > 15 ? -45 : 0}
+            textAnchor={!mobile && chartData.length > 15 ? "end" : "middle"}
+            height={!mobile && chartData.length > 15 ? 50 : 36}
             padding={isSinglePoint ? { left: 50, right: 50 } : undefined}
           />
 
@@ -294,6 +297,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
             tickLine={false}
             tickFormatter={(v) => fmtNumCompact(v)}
             width={55}
+            tickCount={mobile ? 4 : 5}
           />
 
           {!modoUnidades && (
@@ -306,6 +310,7 @@ const DailyPerformanceChart = ({ kpis }: DailyPerformanceChartProps) => {
               tickLine={false}
               tickFormatter={(v) => fmtNumCompact(v)}
               width={55}
+              tickCount={mobile ? 4 : 5}
             />
           )}
 

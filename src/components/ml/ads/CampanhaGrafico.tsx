@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { X } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
-import { brl, num, pctFracao } from "@/lib/format";
+import { brl, brlCurto, num, pctFracao } from "@/lib/format";
 
 export type LinhaDiaCampanha = {
   campaign_id: number | string;
@@ -47,7 +47,7 @@ export default function CampanhaGrafico({ nome, linhas, faturamentoDia, aoFechar
       tacos: f != null && f > 0 ? c / f : null,
     };
   }), [linhas, fat]);
-  const def = METRICAS.find((x) => x.id === m)!;
+  const def = METRICAS.find((x) => x.id === m) ?? METRICAS[0];
 
   return (
     <div className="glass-card rounded-2xl p-4 space-y-3">
@@ -68,7 +68,7 @@ export default function CampanhaGrafico({ nome, linhas, faturamentoDia, aoFechar
       ) : (
         <div className="h-60">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={serie}>
+            <AreaChart data={serie} margin={{ top: 12, right: 16, bottom: 8, left: 8 }}>
               <defs>
                 <linearGradient id="gCamp" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.35} />
@@ -76,8 +76,8 @@ export default function CampanhaGrafico({ nome, linhas, faturamentoDia, aoFechar
                 </linearGradient>
               </defs>
               <CartesianGrid stroke="hsl(var(--grid))" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" minTickGap={16} />
-              <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" width={64} tickFormatter={(v) => def.fmt(v)} />
+              <XAxis dataKey="dia" tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" minTickGap={40} interval="preserveStartEnd" height={36} padding={{ left: 12, right: 12 }} />
+              <YAxis tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" width={76} tickCount={4} tickFormatter={(v) => m === "vendas" || m === "investimento" ? brlCurto(v) : def.fmt(v)} />
               <Tooltip formatter={(v: number) => [def.fmt(v), def.rotulo]} />
               <Area type="monotone" dataKey={m} stroke="hsl(var(--ec-verde))" strokeWidth={2} fill="url(#gCamp)" connectNulls={false} isAnimationActive={false} />
             </AreaChart>

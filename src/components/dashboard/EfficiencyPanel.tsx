@@ -1,4 +1,5 @@
 import { analiseDiaria, type DiaAnalise } from "@/lib/analiseDiaria";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
@@ -119,6 +120,7 @@ const BenchmarkBarTooltip = ({ active, payload, label }: any) => {
 };
 
 const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, dataGranularity = "daily", campaign, benchmark, sellerId, sellerCluster, semDiario = false }: EfficiencyPanelProps) => {
+  const mobile = useIsMobile();
 
   const { data: portfolioBenchmark, loading: portfolioLoading } = usePortfolioBenchmark();
   const { data: clusterBenchmarkData } = useClusterBenchmark(sellerId, sellerCluster);
@@ -514,8 +516,8 @@ const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, data
           </div>
         </div>
         <p className="text-xs text-muted-foreground mb-3">Série diária: {diario?.diasComDado ?? 0} de {diario?.dias ?? 0} dias com registro. Lacunas permanecem sem ligação; faixas hachuradas indicam meses incompletos.</p>
-        {!diario?.diasComDado ? <p className="text-sm text-muted-foreground">Sem dados diários no período selecionado.</p> : <ResponsiveContainer width="100%" height={280}>
-          <AreaChart data={adsData}>
+        {!diario?.diasComDado ? <p className="text-sm text-muted-foreground">Sem dados diários no período selecionado.</p> : <ResponsiveContainer width="100%" height={mobile ? 340 : 280}>
+          <AreaChart data={adsData} margin={{ top: 12, right: 8, bottom: 12, left: 8 }}>
             <defs>
               <pattern id="parcialEff" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M-1,1 l2,-2 M0,6 l6,-6 M5,7 l2,-2" stroke="hsl(var(--ec-ambar))" strokeOpacity={0.3} /></pattern>
               <linearGradient id="gradBlueEff" x1="0" y1="0" x2="0" y2="1">
@@ -533,18 +535,24 @@ const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, data
               tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
               axisLine={false}
               interval="preserveStartEnd"
-              angle={allDates.length > 6 ? -45 : 0}
-              textAnchor={allDates.length > 6 ? "end" : "middle"}
-              height={allDates.length > 6 ? 50 : 30}
+              minTickGap={40}
+              padding={{ left: 12, right: 12 }}
+              angle={!mobile && allDates.length > 6 ? -45 : 0}
+              textAnchor={!mobile && allDates.length > 6 ? "end" : "middle"}
+              height={!mobile && allDates.length > 6 ? 50 : 36}
             />
             <YAxis
               yAxisId="gmv"
+              width={60}
+              tickCount={mobile ? 4 : 5}
               tick={{ fill: "hsl(var(--neon-blue))", fontSize: 11 }}
               axisLine={false}
               tickFormatter={(v) => numCurto(v)}
             />
             <YAxis
               yAxisId="ads"
+              width={60}
+              tickCount={mobile ? 4 : 5}
               orientation="right"
               tick={{ fill: "hsl(var(--ec-laranja))", fontSize: 11 }}
               axisLine={false}
