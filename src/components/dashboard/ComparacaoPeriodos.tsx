@@ -26,7 +26,7 @@ export default function ComparacaoPeriodos({ sellerId, de, ate, ultimaData }: Pr
     ate: format(addDays(parseISO(inicio), -1), "yyyy-MM-dd"),
   });
   const validos = totalPeriodo([], a).valido && totalPeriodo([], b).valido;
-  const { data = [], isFetching, error } = useQuery({
+  const { data = [], isFetching, error, refetch } = useQuery({
     queryKey: ["comparacao-periodos", sellerId, a.de, a.ate, b.de, b.ate],
     enabled: !!sellerId && validos,
     queryFn: async () => {
@@ -70,7 +70,7 @@ export default function ComparacaoPeriodos({ sellerId, de, ate, ultimaData }: Pr
         ))}
       </div>
       {!validos && <p role="alert" className="text-destructive">Selecione início e fim válidos; o fim não pode ser anterior ao início.</p>}
-      {error && <div role="alert" className="flex flex-wrap items-center gap-3 text-destructive">Não foi possível carregar a comparação.<Button variant="outline" size="sm" onClick={() => window.location.reload()}>Tentar novamente</Button></div>}
+      {error && <div role="alert" className="flex flex-wrap items-center gap-3 text-destructive">Não foi possível carregar a comparação.<Button variant="outline" size="sm" onClick={() => void refetch()}>Tentar novamente</Button></div>}
       <div aria-live="polite" aria-busy={isFetching} className="min-w-0">
         <table className="w-full table-fixed text-left">
           <caption className="pb-3 text-left text-sm text-muted-foreground">Histórico diário importado · {isFetching ? "Carregando…" : "Variação de B em relação a A"}</caption>
