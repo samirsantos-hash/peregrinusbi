@@ -33,12 +33,12 @@ export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
   }, [ativa]);
 
   return (
-    <header className="mb-5 min-w-0">
+    <header className="mb-5 min-w-0 font-['DM_Sans',sans-serif]">
       <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1.5">
         <h1
           ref={h1Ref}
           tabIndex={-1}
-          className="text-[28px] leading-tight font-bold tracking-tight text-foreground break-words outline-none"
+          className="text-[28px] leading-[1.2] font-medium tracking-[-0.01em] text-foreground break-words outline-none"
         >
           {label}
         </h1>
@@ -59,7 +59,7 @@ export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
         )}
       </div>
       {descricao && (
-        <p className="mt-1 text-[13px] font-normal text-muted-foreground break-words">{descricao}</p>
+        <p className={resumo ? "mt-2 max-w-[72ch] text-[14px] leading-[1.6] font-normal tabular-nums text-muted-foreground break-words" : "mt-1 text-[13px] font-normal text-muted-foreground break-words"}>{descricao}</p>
       )}
       <span aria-live="polite" className="sr-only">{`${label} carregado`}</span>
     </header>
