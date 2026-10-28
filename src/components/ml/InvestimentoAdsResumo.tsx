@@ -38,9 +38,9 @@ export default function InvestimentoAdsResumo({ custId, periodo, anteriorPeriodo
   return <>
     <KpiVidro rotulo="Investimento em Ads" valor={atual ? `${num(atual.share, 2)}%` : 'Sem dado'}
       delta={delta} deltaPontos melhorQuando="neutro" periodo="vs 30 dias anteriores"
-      nota={atual ? <>{brl(atual.investimento)} investidos · meta interna 3%<br />{faixa?.tier ? `Atende investimento do Tier ${faixa.tier}` : 'Abaixo do requisito do Tier 3'}</> : cobertura} />
+      nota={atual ? <>{brl(atual.investimento)} investidos · meta interna 3%<br />{faixa?.tier ? `Atende investimento do Tier ${faixa.tier}` : 'Abaixo do requisito do Tier 3'}</> : <>Meta interna: 3% do faturamento<br />{cobertura}</>} />
     <KpiVidro rotulo="Atingimento da meta Ads" valor={atual ? `${num(atual.atingimento, 1)}%` : 'Sem dado'}
       delta={metaDelta} deltaPontos melhorQuando="neutro" periodo="vs 30 dias anteriores"
-      nota={<>{atual ? <>Meta de 3%: {brl(atual.meta)}<br />{atual.falta > 0 ? `Faltam ${brl(atual.falta)}` : 'Meta interna atingida'}<br /></> : <>{cobertura}<br /></>}Tier 1 ≥ 2,5% · Tier 2 ≥ 1,25% · Tier 3 ≥ 0,5%<br />Somente requisito financeiro; não define o tier da loja.</>} />
+      nota={<>Meta de 3%: {Number.isFinite(faturamento) && faturamento > 0 ? brl(faturamento * 0.03) : 'Sem dado'}<br />{atual ? <>{atual.falta > 0 ? `Faltam ${brl(atual.falta)}` : 'Meta interna atingida'}<br /></> : <>{cobertura}<br /></>}Tier 1 ≥ 2,5% · Tier 2 ≥ 1,25% · Tier 3 ≥ 0,5%<br />Somente requisito financeiro; não define o tier da loja.</>} />
   </>;
 }
