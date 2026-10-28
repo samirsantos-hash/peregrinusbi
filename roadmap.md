@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Proporção do título e briefing (28/10)
-- [ ] Comparar a tipografia do HTML e corrigir a hierarquia de títulos, resumo e etiquetas em DM Sans, preservando números e Home; conferir com loja real e tela estreita.
+- [x] Comparar a referência e corrigir a hierarquia em DM Sans: título 26/32px, resumo 14/24px, etiquetas 12/16px e títulos de bloco 18/24px; DGSULCHEVROLET conferida em 1143 e 536px nos dois temas, sem transbordamento ou erros. Fonte carregada, Home com medidas idênticas e build OK; números e cálculos preservados.
 
 ## Gráficos minimalistas (28/10)
 - [x] Suavizar cores e contornos, retirar brilho pesado e limitar barras de publicidade a 20px; AUTOPECASLONDRINA conferida na Visão geral e Publicidade, sem transbordamento a 536px; dez testes passaram, Home fora dos seletores.
