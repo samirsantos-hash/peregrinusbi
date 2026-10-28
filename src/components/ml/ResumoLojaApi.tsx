@@ -101,9 +101,9 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
       {/* Nível superior: Macro (8) × Saúde operacional (4) — mesma altura */}
       <div className="space-y-3">
         <Rotulo>Resumo executivo</Rotulo>
-      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-12">
+      <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-8">
-          <div className="grid auto-rows-fr grid-cols-2 gap-3 2xl:grid-cols-4">
+          <div className="grid h-full auto-rows-fr grid-cols-2 gap-3 2xl:grid-cols-4">
             <KpiVidro focal rotulo="Faturamento pago" valor={brl(a.faturamento)} delta={delta(a.faturamento, p.faturamento)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Pedidos pagos" valor={num(a.pedidos)} delta={delta(a.pedidos, p.pedidos)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Ticket por pedido" valor={a.ticket == null ? 'Sem dado' : brl(a.ticket)} delta={delta(a.ticket, p.ticket)} periodo={PERIODO_DELTA} />

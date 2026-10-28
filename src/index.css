@@ -1945,3 +1945,13 @@ html body .peregrinus-panel .panel-skeleton {
 @media (prefers-reduced-motion: reduce) {
   html body .peregrinus-panel .panel-skeleton { animation: none; opacity: .8; }
 }
+
+/* Resumo executivo: números maiores, proporcionais e centralizados (28/10) */
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro.noite-vidro {
+  align-items: center; justify-content: center; text-align: center; gap: 14px;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro > div { display: flex; flex-direction: column; align-items: center; width: 100%; }
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes { align-items: center !important; justify-content: center; }
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor {
+  font-size: clamp(30px, 14cqi, 48px) !important; line-height: 1.1; max-width: 100%;
+}
