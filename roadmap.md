@@ -1,5 +1,9 @@
 # Roadmap
 
+## Atribuição real e leitura personalizada (28/10)
+- [ ] Validar correspondência entre descontos das vendas e ofertas da própria loja; publicar série apenas com cobertura completa e vínculos exatos.
+- [ ] Explicar o gráfico de forma personalizada por loja, período e cobertura, sem inventar atribuição ou causalidade.
+
 ## Proporção dos cartões executivos (28/10)
 - [x] Aplicar dimensões da variante compacta do HTML, números legíveis e comparações alinhadas; duas colunas até haver espaço para quatro. Dados reais conferidos em 1280, 1143 e 536px, sem erros; Home não alterada.
 
