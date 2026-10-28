@@ -141,6 +141,7 @@ Contrato próprio (uma pergunta por vez), com a mesma idempotência das ações 
 #### `ml-promotions-item`
 
 - Entrada: `{ account_id, item_id }` com JWT.
+- Oportunidades: conta visível com `status=active` usa produtos de `ml_listings` (ativos/pausados, ordenação estável por vendidos/item_id), dez inicialmente e expansão de dez em dez. Cada produto consulta esta função em sequência; só `candidate`/`candidated` são campanhas elegíveis. Erros aparecem por produto, sem tratá-los como ausência de campanha. Preço/estoque são da cópia sincronizada; promoções são ao vivo. Sem conta ativa usa a planilha, dez produtos com expansão/recolhimento; nenhuma inferência de vendas atribuídas.
 - Saída: `200 { item: { item_id, titulo, preco, status }, promocoes: [{ promotion_id, tipo, status, preco, preco_original, offer_id, min, max, sugerido, nome, inicio, fim, meli_pct, vendedor_pct, estoque_min, estoque_max, nome_tipo, preco_por, pode: { aderir, alterar, sair }, motivo_sair }] }`.
 - Erros: 400, 401, 403, 502.
 
