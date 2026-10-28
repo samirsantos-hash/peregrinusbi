@@ -1,5 +1,8 @@
 # Roadmap
 
+## Modo claro do catálogo (28/10)
+- [x] Adaptar o material do catálogo (sem tema claro próprio) em vidro branco, textura delicada e verde da Home nas superfícies compartilhadas e menus. AUTOPECASLONDRINA conferida em Visão geral, Preço, Publicidade, Logística, Qualidade, Clips e Correlações; gráficos carregados, 536px sem transbordamento, modo escuro preservado, Home com estilos idênticos na comparação, nenhum erro de execução e build OK. Dados não alterados.
+
 ## Gráficos no celular (28/10)
 - [x] Remover recorte das legendas, permitir quebra de linha e ajustar margens, datas e eixos em áreas e barras; AUTOPECASLONDRINA conferida em Publicidade a 320/375/390/1280px e área de Logística a 375px, sem cortes nos eixos ou transbordamento; dez testes passaram e build OK. Dados e Home preservados.
 
