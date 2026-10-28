@@ -1730,3 +1730,38 @@ html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.
 @media (prefers-reduced-motion: reduce) {
   html body :is(.glass-card, .peregrinus-panel :is(.ds-kpi,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])) { transform: none !important; }
 }
+
+/* Catálogo enviado (28/10): vidro transparente, borda fina, brilho no topo; só no painel, nunca na tela de acesso. */
+html.dark .peregrinus-panel {
+  --access-glass-panel-fill: linear-gradient(180deg,
+    hsl(var(--panel-white) / .07),
+    hsl(var(--panel-white) / .025) 40%,
+    hsl(var(--access-glass-tint) / .06));
+  --access-glass-panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .1),
+    0 1px 2px hsl(var(--panel-black) / .3),
+    0 12px 32px -12px hsl(var(--panel-black) / .45);
+  --access-glass-hover-edge: hsl(var(--panel-positive) / .3);
+  --access-glass-hover-shadow: inset 0 1px 0 hsl(var(--panel-white) / .14),
+    0 0 0 1px hsl(var(--panel-positive) / .08),
+    0 20px 44px -18px hsl(var(--panel-brand) / .3);
+  --panel-fill-nested: hsl(var(--panel-white) / .03);
+  background:
+    radial-gradient(60% 40% at 15% 0%, hsl(var(--access-glass-tint) / .22), transparent 70%),
+    radial-gradient(50% 35% at 90% 10%, hsl(var(--access-glass-light) / .12), transparent 70%),
+    var(--panel-canvas, #0A0A0A);
+  background-attachment: fixed;
+}
+html.dark body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]),
+html.dark body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]):hover {
+  border-color: hsl(var(--panel-white) / .1) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  html.dark body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]):hover {
+    border-color: var(--access-glass-hover-edge) !important;
+    box-shadow: var(--access-glass-hover-shadow) !important;
+  }
+}
+html body .peregrinus-panel :is(button, [role="tab"], a, input, select, textarea):focus-visible {
+  outline: 2px solid hsl(var(--panel-positive) / .7);
+  outline-offset: 2px;
+}
