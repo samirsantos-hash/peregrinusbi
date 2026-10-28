@@ -552,6 +552,30 @@
   .recharts-tooltip-cursor { stroke: hsl(var(--primary) / 0.5); stroke-dasharray: 3 3; }
   .recharts-bar-rectangle path { transition: filter .2s, opacity .2s; }
   .recharts-bar-rectangle:hover path { filter: brightness(1.25) drop-shadow(0 0 6px hsl(var(--primary) / .6)); }
+
+  /* Textura de vidro do design-system.html nos gráficos do painel (Home intocada) */
+  .peregrinus-panel .recharts-bar-rectangle path {
+    fill-opacity: .62;
+    stroke: rgb(255 255 255 / .16);
+    stroke-width: 1px;
+    stroke-opacity: 1;
+    paint-order: stroke;
+  }
+  .peregrinus-panel .recharts-bar-rectangle:hover path {
+    fill-opacity: .82;
+    filter: drop-shadow(0 0 10px hsl(var(--panel-positive, 155 62% 53%) / .35));
+  }
+  .peregrinus-panel .recharts-area-area { fill-opacity: .18; mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.25) 100%); }
+  .peregrinus-panel .recharts-line-curve { filter: drop-shadow(0 0 6px currentColor); }
+  .peregrinus-panel .recharts-cartesian-grid line { stroke: rgb(255 255 255 / .06); }
+  .peregrinus-panel .recharts-cartesian-axis-line,
+  .peregrinus-panel .recharts-cartesian-axis-tick-line { stroke: rgb(255 255 255 / .1); }
+  .peregrinus-panel .recharts-cartesian-axis-tick-value { fill: hsl(var(--panel-text-secondary, var(--muted-foreground))); font-size: 12px; }
+  .peregrinus-panel .recharts-legend-item-text { color: hsl(var(--panel-text-secondary, var(--muted-foreground))) !important; font-size: 13px; }
+  .peregrinus-panel .recharts-legend-icon { opacity: .8; }
+  .peregrinus-panel .recharts-tooltip-cursor { fill: rgb(255 255 255 / .04); }
+  html:not(.dark) .peregrinus-panel .recharts-bar-rectangle path { stroke: rgb(0 0 0 / .08); fill-opacity: .72; }
+  html:not(.dark) .peregrinus-panel .recharts-cartesian-grid line { stroke: rgb(0 0 0 / .07); }
 }
 
 /* Cartões reagem ao mouse: leve elevação, borda e brilho ciano */
