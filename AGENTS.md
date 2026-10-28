@@ -38,3 +38,4 @@
 - Indicator summaries use security-invoker RPCs; portfolio batches always filter seller IDs and reject partial reads to preserve RLS and totals.
 - Promotion rebate reading, expiry warnings and rebate-based recommendation live only in pure `src/lib/promocoesAnalise.ts`, so Oportunidades and future screens share one rule.
 - Advertising charts and matrices share `src/lib/sinergiaPublicidade.ts`: same-date totals, nullable paired Pearson (≥7, nonconstant), no causal claims; `SinergiaIndicadores` shares summary/detail charts, keeping API windows separate from imports.
+- O fundo de chuva do painel é o shader original da referência em src/components/chuva, montado só dentro de .peregrinus-panel no modo escuro; a tela de acesso mantém as cordas, para não misturar os dois fundos.
