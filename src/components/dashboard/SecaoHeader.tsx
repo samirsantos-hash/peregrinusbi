@@ -8,11 +8,14 @@ interface Props {
   loja?: string | null;
   /** linha de contexto (ex.: período) */
   contexto?: string | null;
+  /** substitui a descrição fixa (ex.: briefing do período) */
+  resumo?: string | null;
 }
 
 /** Título da seção — único <h1> da página, com foco e anúncio em troca de seção. */
-export default function SecaoHeader({ ativa, loja, contexto }: Props) {
-  const { label, descricao } = getSecao(ativa);
+export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
+  const { label, descricao: fixa } = getSecao(ativa);
+  const descricao = resumo || fixa;
   const h1Ref = useRef<HTMLHeadingElement>(null);
   const primeiro = useRef(true);
 
