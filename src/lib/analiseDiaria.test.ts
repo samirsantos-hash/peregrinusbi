@@ -1,7 +1,26 @@
 import { describe, it, expect } from "vitest";
-import { analiseDiaria, faixaInvestimento, investimento30d } from "./analiseDiaria";
+import { analiseDiaria, faixaInvestimento, investimento30d, metaInvestimentoAds } from "./analiseDiaria";
 
 describe("melhorias aprovadas CND27", () => {
+  it('meta interna é 3% do faturamento, ponderada pelo total', () => {
+    const r = metaInvestimentoAds([{ dia: '2026-10-01', cost: 10 }, { dia: '2026-10-02', cost: 50 }], '2026-10-01', '2026-10-02', 2000);
+    expect(r?.meta).toBe(60);
+    expect(r?.share).toBe(3);
+    expect(r?.atingimento).toBe(100);
+    expect(r?.falta).toBe(0);
+  });
+  it('distância monetária à meta não confunde Tier 1 com meta interna', () => {
+    const r = metaInvestimentoAds([{ dia: '2026-10-01', cost: 25 }], '2026-10-01', '2026-10-01', 1000);
+    expect(r?.faixa?.tier).toBe(1);
+    expect(r?.faixa?.metaPeregrinus).toBe(false);
+    expect(r?.falta).toBe(5);
+  });
+  it('cobertura ausente, custo nulo ou faturamento zero não viram investimento zero', () => {
+    expect(metaInvestimentoAds([{ dia: '2026-10-01', cost: 0 }], '2026-10-01', '2026-10-02', 1000)).toBeNull();
+    expect(metaInvestimentoAds([{ dia: '2026-10-01', cost: null }], '2026-10-01', '2026-10-01', 1000)).toBeNull();
+    expect(metaInvestimentoAds([{ dia: '2026-10-01', cost: 0 }], '2026-10-01', '2026-10-01', 0)).toBeNull();
+    expect(metaInvestimentoAds([{ dia: '2026-10-01', cost: 0 }], '2026-10-01', '2026-10-01', 1000)?.share).toBe(0);
+  });
   it("média inclui dias sem venda, mediana e recorde usam a série diária", () => {
     const a = analiseDiaria([
       { date: "2026-10-06", revenue: 0 }, { date: "2026-10-07", revenue: 5904.72 },
