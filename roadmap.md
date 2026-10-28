@@ -1,5 +1,8 @@
 # Roadmap
 
+## Gráficos no celular (28/10)
+- [x] Remover recorte das legendas, permitir quebra de linha e ajustar margens, datas e eixos em áreas e barras; AUTOPECASLONDRINA conferida em Publicidade a 320/375/390/1280px e área de Logística a 375px, sem cortes nos eixos ou transbordamento; dez testes passaram e build OK. Dados e Home preservados.
+
 ## Proporção do título e briefing (28/10)
 - [x] Comparar a referência e corrigir a hierarquia em DM Sans: título 26/32px, resumo 14/24px, etiquetas 12/16px e títulos de bloco 18/24px; DGSULCHEVROLET conferida em 1143 e 536px nos dois temas, sem transbordamento ou erros. Fonte carregada, Home com medidas idênticas e build OK; números e cálculos preservados.
 

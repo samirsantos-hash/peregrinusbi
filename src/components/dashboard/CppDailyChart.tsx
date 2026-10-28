@@ -1,4 +1,5 @@
 import { brlCurto, numCurto } from "@/lib/format";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -60,6 +61,7 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export default function CppDailyChart({ data, title = "Evolução Diária" }: Props) {
+  const mobile = useIsMobile();
   const [metric, setMetric] = useState<Metric>("gmv");
   const cfg = METRIC_CONFIG[metric];
   const showBrush = data.length > 60;
@@ -67,7 +69,7 @@ export default function CppDailyChart({ data, title = "Evolução Diária" }: Pr
 
   return (
     <Card className="bg-card border-border">
-      <CardHeader className="pb-2 flex flex-row items-center justify-between">
+      <CardHeader className="pb-2 flex flex-row flex-wrap gap-2 items-center justify-between">
         <CardTitle className="text-sm font-semibold uppercase tracking-wider text-foreground">
           {title}
         </CardTitle>
@@ -86,7 +88,7 @@ export default function CppDailyChart({ data, title = "Evolução Diária" }: Pr
       <CardContent>
         <div className="h-[260px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data} margin={{ left: 10, right: 10 }}>
+            <AreaChart data={data} margin={{ top: 12, bottom: 8, left: 8, right: 16 }}>
               <defs>
                 <linearGradient id="cppDailyGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={cfg.color} stopOpacity={0.3} />
@@ -97,13 +99,17 @@ export default function CppDailyChart({ data, title = "Evolução Diária" }: Pr
               <XAxis
                 dataKey="date"
                 tickFormatter={fmtDateLabel}
+                interval="preserveStartEnd"
+                minTickGap={40}
+                height={36}
                 tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                 padding={isSingleDay ? { left: 50, right: 50 } : undefined}
               />
               <YAxis
                 tick={{ fill: "hsl(var(--axis))", fontSize: 11 }}
                 tickFormatter={(v) => metric === "gmv" ? fmtCompact(v) : metric === "roas" ? `${v.toFixed(0).replace(".", ",")}x` : fmtNum(v)}
-                width={60}
+                width={76}
+                tickCount={mobile ? 4 : 5}
               />
               <Tooltip content={<CustomTooltip />} cursor={{ stroke: "hsl(var(--primary))", strokeDasharray: "3 3" }} />
               {(() => {
@@ -173,7 +179,7 @@ export default function CppDailyChart({ data, title = "Evolução Diária" }: Pr
             </AreaChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex justify-center gap-4 mt-1 text-[10px] text-muted-foreground">
+        <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-2 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
             <span className="w-3 h-0.5 rounded" style={{ background: cfg.color }} /> {cfg.label}
           </span>

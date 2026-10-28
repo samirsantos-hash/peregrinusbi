@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { brl, brlCurto, num } from "@/lib/format";
 import type { PontoPublicidade } from "@/lib/sinergiaPublicidade";
 
 export default function GraficoPublicidadeSerie({ pontos, compacto = false }: { pontos: PontoPublicidade[]; compacto?: boolean }) {
+  const mobile = useIsMobile();
   const [semanal, setSemanal] = useState(false);
   const grupos = new Map<string, PontoPublicidade[]>();
   for (const p of pontos) {
@@ -28,11 +30,11 @@ export default function GraficoPublicidadeSerie({ pontos, compacto = false }: { 
     </div>
     <div className={compacto ? "h-[220px]" : "h-[340px]"}>
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={serie} barCategoryGap="35%" margin={{ top: 8, right: 0, bottom: 4, left: 0 }}>
+        <ComposedChart data={serie} barCategoryGap="35%" margin={{ top: 12, right: 8, bottom: 8, left: 8 }}>
           <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
-          <XAxis dataKey="data" tickFormatter={d => d.slice(5).split('-').reverse().join('/')} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} minTickGap={30} />
-          <YAxis yAxisId="faturamento" width={55} tickFormatter={brlCurto} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-          <YAxis yAxisId="ads" orientation="right" width={50} tickFormatter={brlCurto} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+          <XAxis dataKey="data" tickFormatter={d => d.slice(5).split('-').reverse().join('/')} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={mobile ? 40 : 30} height={36} padding={{ left: 12, right: 12 }} />
+          <YAxis yAxisId="faturamento" width={70} tickCount={mobile ? 4 : 5} tickFormatter={brlCurto} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+          <YAxis yAxisId="ads" orientation="right" width={65} tickCount={mobile ? 4 : 5} tickFormatter={brlCurto} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
           <YAxis yAxisId="roas" hide domain={[0, 'auto']} />
           <Tooltip content={({ active, payload, label }) => {
             const p = payload?.[0]?.payload;
