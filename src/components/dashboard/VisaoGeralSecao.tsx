@@ -143,7 +143,7 @@ export default function VisaoGeralSecao({
       <PonteDiagnostico
         de="Visitas"
         para="Funil"
-        porque="A conversão oficial é visitas → pedidos. Etapas estimadas no meio ajudam a hipotetizar abandono, sem inventar métrica."
+        porque="Só etapas reais: visitas → unidades vendidas. Carrinho e checkout não são informados pelo Mercado Livre."
       />
 
       <Bloco n={5} titulo="Funil de conversão" periodo={periodo} porque="Onde a loja perde compradores — diagnóstico operacional.">

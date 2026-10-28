@@ -1,8 +1,7 @@
 /**
  * Funil de 5 etapas para o Resumo (Growth).
  * Visitas e PDP vêm da mesma fonte real (no ML, visita ≈ abertura da PDP).
- * ATC e Checkout são interpolação geométrica entre PDP e pedidos — sempre
- * rotulados como estimativa; não inventam conversão além do que a base mede.
+ * Só etapas reais: a base não mede carrinho nem checkout, então não aparecem.
  */
 
 export type FonteEtapa = "real" | "estimativa";
@@ -33,7 +32,9 @@ export interface FunilCincoEtapas {
   maiorAbandono: AbandonoFunil | null;
 }
 
+/** Mantida apenas para referência histórica; não usada. */
 /** Interpolação geométrica: V × (P/V)^t, com t ∈ (0,1). */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function geom(visitas: number, pedidos: number, t: number): number {
   if (visitas <= 0 || pedidos <= 0) return 0;
   const ratio = Math.min(1, pedidos / visitas);
@@ -55,38 +56,15 @@ export function funilCincoEtapas(visitas: number, pedidos: number): FunilCincoEt
   // Pedidos não podem superar visitas no desenho do funil (protege base inconsistente).
   const P = V > 0 ? Math.min(Pbruto, V) : Pbruto;
 
-  const atc = Math.round(geom(V, P, 1 / 3));
-  const checkout = Math.round(geom(V, P, 2 / 3));
 
   const etapas: EtapaFunil5[] = [
-    { id: "visitas", nome: "Visitas totais", valor: Math.round(V), fonte: "real" },
-    {
-      id: "pdp",
-      nome: "Visualização de produto",
-      valor: Math.round(V),
-      fonte: "real",
-      nota: "No ML, visita = abertura da PDP",
-    },
-    {
-      id: "atc",
-      nome: "Add to cart",
-      valor: atc,
-      fonte: "estimativa",
-      nota: "Estimativa entre PDP e pedido",
-    },
-    {
-      id: "checkout",
-      nome: "Checkout iniciado",
-      valor: checkout,
-      fonte: "estimativa",
-      nota: "Estimativa entre carrinho e pedido",
-    },
+    { id: "visitas", nome: "Visitas", valor: Math.round(V), fonte: "real", nota: "Aberturas do anúncio (dado real)" },
     {
       id: "pedidos",
-      nome: "Pedidos concluídos",
+      nome: "Unidades vendidas",
       valor: Math.round(P),
       fonte: "real",
-      nota: "Unidades vendidas (TSI)",
+      nota: "Vendas registradas (dado real)",
     },
   ];
 
