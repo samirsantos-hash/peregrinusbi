@@ -76,6 +76,7 @@ import { NovidadesPrompt } from "@/components/novidades/novidades";
 import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
 import ResumoLojaApi from "@/components/ml/ResumoLojaApi";
+import CampanhasAtribuicaoApi from "@/components/ml/CampanhasAtribuicaoApi";
 import ResumoSinergiaCorrelacoes from "@/components/ml/SinergiaPublicidade";
 import FullProdutosApi from "@/components/pock/FullProdutosApi";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
@@ -638,6 +639,7 @@ const Index = () => {
                     {isConsolidado && <CarteiraNaSecao secao="opportunities" />}
                     <JuniorActionBanner abaId="opportunities" dados={dadosJunior} />
                     <MlAoVivo secao="oportunidades" custId={sellerCustIdMap[selectedSeller]} />
+                    <CampanhasAtribuicaoApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
                     <CampanhasDesempenho items={eligibilityItems || []} />
                     <CampanhasCofinanciadasPanel items={eligibilityItems || []} />
                     <OpportunitiesPanel items={eligibilityItems || []} />
