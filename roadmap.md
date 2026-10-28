@@ -1,5 +1,8 @@
 # Roadmap
 
+## Investimento e tiers na Visão geral (28/10)
+- [ ] Preencher os dois espaços com investimento Ads frente à meta interna de 3% e requisito financeiro dos tiers; mesmos 30 dias, fontes reais, comparação anterior e testes.
+
 ## Comparação entre períodos na Visão geral
 - [x] Dois intervalos independentes na Visão geral, faturamento/visitas/unidades lado a lado, inversão e variação B × A; histórico diário paginado e cobertura explícita, sem misturar API. Seis testes passaram; AUTOPECASLONDRINA 28/09–12/10 × 13–27/10: R$65.138 × R$68.536, 11.026 × 10.855 visitas, 589 × 544 unidades. Inversão e erro de datas conferidos, dois temas e 536px sem transbordamento; build OK.
 
