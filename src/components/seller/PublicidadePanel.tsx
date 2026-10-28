@@ -81,7 +81,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
 
   return (
     <div className="space-y-5">
-      <SinergiaIndicadores fonte={`Histórico importado · ${fromDate} a ${toDate}`} pontos={diario.filter(d => d.date.slice(0, 10) >= fromDate && d.date.slice(0, 10) <= toDate).map(d => ({ data: d.date.slice(0, 10), investimento: d.adsInvestment ?? null, faturamento: d.tgmv ?? null, receitaAds: d.tgmvPads ?? null, visitas: d.visits ?? null, cancelamentos: d.repCancellationsRate ?? null }))} />
+      {!soEvolucao && <SinergiaIndicadores fonte={`Histórico importado · ${fromDate} a ${toDate}`} pontos={diario.filter(d => d.date.slice(0, 10) >= fromDate && d.date.slice(0, 10) <= toDate).map(d => ({ data: d.date.slice(0, 10), investimento: d.adsInvestment ?? null, faturamento: d.tgmv ?? null, receitaAds: d.tgmvPads ?? null, visitas: d.visits ?? null, cancelamentos: d.repCancellationsRate ?? null }))} />}
       {/* Banner sem dados */}
       {semDados && !soEvolucao && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
