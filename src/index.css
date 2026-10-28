@@ -1887,11 +1887,11 @@ html.dark .peregrinus-panel > :not(.chuva-painel) { position: relative; z-index:
   --panel-type-body: 14px;
   --panel-type-nav: 13px;
   --panel-type-title: 18px;
-  --panel-type-number: 28px;
-  --panel-type-number-small: 20px;
-  --panel-type-summary-number: 24px;
-  --panel-type-summary-number-small: 20px;
-  --panel-type-summary-number-compact: 18px;
+  --panel-type-number: clamp(28px, 15cqi, 38px);
+  --panel-type-number-small: clamp(22px, 15cqi, 30px);
+  --panel-type-summary-number: clamp(30px, 16cqi, 42px);
+  --panel-type-summary-number-small: clamp(24px, 16cqi, 32px);
+  --panel-type-summary-number-compact: clamp(20px, 16cqi, 26px);
   -webkit-font-smoothing: antialiased;
   text-shadow: none;
 }
