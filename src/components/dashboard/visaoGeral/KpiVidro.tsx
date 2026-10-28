@@ -107,7 +107,7 @@ export default function KpiVidro({
         >
           <NumeroAnimado valor={valor} />
         </p>
-        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+        <div className="kpi-vidro-detalhes flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <DeltaCapsula delta={delta} pontos={deltaPontos} melhorQuando={melhorQuando} periodo={periodo} />
           {nota ? <span className="min-w-0 text-xs leading-5 text-muted-foreground">{nota}</span> : null}
         </div>

@@ -1618,9 +1618,10 @@ html body .peregrinus-panel .resumo-visual-ref .noite-vidro::before {
   content: none;
 }
 html body .peregrinus-panel .resumo-visual-ref .kpi-vidro {
-  min-height: 148px;
-  padding: 20px;
+  min-height: 0;
+  padding: 22px 16px 20px;
   gap: 12px;
+  border-radius: 22px !important;
 }
 html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor {
   font-size: 28px;
@@ -1887,8 +1888,25 @@ html body .peregrinus-panel :is(.kpi-vidro-valor,.ds-numero-focal,.ds-numero-sec
   -webkit-text-stroke: 0;
 }
 html body .peregrinus-panel .resumo-visual-ref .kpi-vidro > p:first-child { font-size: var(--panel-type-label); text-transform: none; }
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro.noite-vidro {
+  border-radius: 22px !important;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes > span {
+  font-size: var(--panel-type-label);
+  line-height: 1.5;
+}
 @container (max-width: 200px) {
   html body .peregrinus-panel :is(.kpi-vidro-valor,.ds-numero-focal,.ds-numero-sec) { font-size: var(--panel-type-number-small) !important; }
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: 24px !important; }
+}
+@container (max-width: 160px) {
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-number-small) !important; }
 }
 html body .peregrinus-panel .panel-skeleton {
   border: 1px solid var(--panel-stroke);
