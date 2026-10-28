@@ -1741,36 +1741,37 @@ body:has(.peregrinus-panel) {
 }
 html.light body:has(.peregrinus-panel) {
   /* Light adaptation of the catalogue material, scoped away from Home. */
-  --panel-canvas: 150 12% 96%;
+  --panel-canvas: 150 10% 91%;
   --panel-surface: 150 10% 98%;
   --panel-raised: 150 9% 93%;
   --panel-text: 160 8% 12%;
   --panel-text-secondary: 160 4% 36%;
   --panel-line: 150 8% 82%;
   --panel-positive: 156 84% 26%;
-  --panel-backdrop: blur(24px) saturate(125%);
-  --panel-fill: linear-gradient(165deg, hsl(var(--panel-white) / .96), hsl(var(--panel-white) / .7)),
-    linear-gradient(180deg, hsl(var(--panel-brand) / .04), transparent 48%);
-  --panel-stroke: hsl(var(--panel-text) / .09);
+  --panel-backdrop: blur(24px) saturate(145%);
+  --panel-fill: linear-gradient(155deg, hsl(var(--panel-white) / .6), hsl(var(--panel-white) / .22) 52%, hsl(var(--panel-white) / .36)),
+    linear-gradient(180deg, hsl(var(--panel-brand) / .025), transparent 48%);
+  --panel-stroke: hsl(var(--panel-white) / .78);
   --panel-stroke-hover: hsl(var(--panel-action) / .24);
   --panel-divider: hsl(var(--panel-text) / .08);
-  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white)),
-    inset 0 -1px 0 hsl(var(--panel-text) / .025),
-    0 2px 4px -2px hsl(var(--panel-text) / .04),
-    0 16px 32px -24px hsl(var(--panel-text) / .16);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .95),
+    inset 1px 0 0 hsl(var(--panel-white) / .42),
+    inset 0 -1px 0 hsl(var(--panel-text) / .045),
+    0 4px 12px -8px hsl(var(--panel-text) / .12),
+    0 20px 40px -28px hsl(var(--panel-text) / .24);
   --panel-hover-shadow: var(--panel-shadow), 0 12px 28px -22px hsl(var(--panel-action) / .18);
   --panel-fill-hover: var(--panel-fill);
-  --panel-fill-nested: hsl(var(--panel-white) / .58);
-  --panel-nav-fill: linear-gradient(165deg, hsl(var(--panel-white) / .88), hsl(var(--panel-white) / .68)),
-    linear-gradient(180deg, hsl(var(--panel-brand) / .04), transparent);
+  --panel-fill-nested: hsl(var(--panel-white) / .22);
+  --panel-nav-fill: linear-gradient(155deg, hsl(var(--panel-white) / .64), hsl(var(--panel-white) / .3)),
+    linear-gradient(180deg, hsl(var(--panel-brand) / .035), transparent);
   --panel-active-fill: hsl(var(--panel-brand) / .08);
   --panel-active-edge: hsl(var(--panel-action) / .18);
-  --panel-tooltip: hsl(var(--panel-white) / .97);
+  --panel-tooltip: hsl(var(--panel-surface) / .86);
   --panel-chart-grid: hsl(var(--panel-text) / .09);
   --panel-canvas-texture: repeating-linear-gradient(118deg,
     hsl(var(--panel-white) / .12) 0 1px, transparent 1px 4px);
-  --panel-canvas-light: linear-gradient(155deg,
-    hsl(var(--panel-white) / .72), hsl(var(--panel-brand) / .025) 48%, transparent);
+  --panel-canvas-light: linear-gradient(125deg,
+    hsl(var(--panel-white) / .72), transparent 35%, hsl(var(--panel-brand) / .075) 65%, hsl(var(--panel-white) / .36));
   --sidebar-background: var(--panel-surface);
   --sidebar-foreground: var(--panel-text);
   --sidebar-accent: var(--panel-raised);
