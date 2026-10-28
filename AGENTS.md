@@ -38,4 +38,4 @@
 - Indicator summaries use security-invoker RPCs; portfolio batches always filter seller IDs and reject partial reads to preserve RLS and totals.
 - Promotion rebate rules use `src/lib/promocoesAnalise.ts`. Product opportunities use scoped listings/live item promotions for active ML accounts, otherwise spreadsheets; API errors never trigger fallback.
 - Advertising charts and matrices share `src/lib/sinergiaPublicidade.ts`: same-date totals, nullable paired Pearson (≥7, nonconstant), no causal claims; `SinergiaIndicadores` shares summary/detail charts, keeping API windows separate from imports.
-- Panel rain; login ropes. Clips ranking uses paired item measures via src/lib/clipsRanking.ts, never seller totals.
+- Panel rain; login ropes. Clips use paired item metrics. campanhasLeitura explains scoped samples, never daily attribution.
