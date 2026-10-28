@@ -1648,7 +1648,7 @@ html body .peregrinus-panel .resumo-visual-ref .kpi-vidro {
   border-radius: 22px !important;
 }
 html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor {
-  font-size: 28px;
+  font-size: var(--panel-type-summary-number);
   font-weight: 500;
   line-height: 1.2;
 }
@@ -1674,10 +1674,10 @@ html body .peregrinus-panel .resumo-visual-ref .recharts-cartesian-grid line {
   stroke: var(--summary-grid) !important;
 }
 @container (max-width: 170px) {
-  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: 24px !important; }
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-summary-number-small) !important; }
 }
 @container (max-width: 135px) {
-  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: 20px !important; }
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-summary-number-compact) !important; }
 }
 @media (max-width: 639px) {
   html body .peregrinus-panel .resumo-visual-ref .kpi-vidro { padding: 16px; }
@@ -1889,6 +1889,9 @@ html.dark .peregrinus-panel > :not(.chuva-painel) { position: relative; z-index:
   --panel-type-title: 18px;
   --panel-type-number: 28px;
   --panel-type-number-small: 20px;
+  --panel-type-summary-number: 24px;
+  --panel-type-summary-number-small: 20px;
+  --panel-type-summary-number-compact: 18px;
   -webkit-font-smoothing: antialiased;
   text-shadow: none;
 }
@@ -1927,10 +1930,10 @@ html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes > 
 }
 @container (max-width: 200px) {
   html body .peregrinus-panel :is(.kpi-vidro-valor,.ds-numero-focal,.ds-numero-sec) { font-size: var(--panel-type-number-small) !important; }
-  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: 24px !important; }
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-summary-number-small) !important; }
 }
 @container (max-width: 160px) {
-  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-number-small) !important; }
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-summary-number-compact) !important; }
 }
 html body .peregrinus-panel .panel-skeleton {
   border: 1px solid var(--panel-stroke);
