@@ -59,17 +59,17 @@ export default function FunilVendas({
       {!ocultarTitulo && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <h2 className="ds-rotulo">{titulo}</h2>
-          <TooltipInfo text="Visitas e PDP são dados reais (no ML a visita é a abertura da PDP). Add to cart e checkout são estimativas geométricas entre PDP e pedidos — não vêm da base. Pedidos = unidades (TSI). O maior abandono entre etapas estimadas não substitui diagnóstico com dado real." />
+          <TooltipInfo text="Só etapas medidas: visitas e unidades vendidas. O Mercado Livre não informa carrinho nem checkout, então essas etapas não são mostradas." />
         </div>
       )}
       {ocultarTitulo && (
         <div className="mb-3 flex justify-end">
-          <TooltipInfo text="Visitas e PDP são dados reais (no ML a visita é a abertura da PDP). Add to cart e checkout são estimativas geométricas entre PDP e pedidos — não vêm da base. Pedidos = unidades (TSI)." />
+          <TooltipInfo text="Só etapas medidas: visitas e unidades vendidas. O Mercado Livre não informa carrinho nem checkout, então essas etapas não são mostradas." />
         </div>
       )}
 
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2 flex flex-col items-center gap-1.5" role="img" aria-label="Funil de cinco etapas">
+        <div className="lg:col-span-2 flex flex-col items-center gap-1.5" role="img" aria-label="Funil de etapas reais">
           {etapas.map((e, i) => {
             const w = larg(i);
             const prox = i < etapas.length - 1 ? larg(i + 1) : w * 0.9;
