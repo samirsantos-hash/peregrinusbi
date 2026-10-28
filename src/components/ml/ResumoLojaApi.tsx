@@ -41,7 +41,21 @@ const Rotulo = ({ children }: { children: React.ReactNode }) => (
 export default function ResumoLojaApi({ custId, historico }: { custId?: string; historico: React.ReactNode }) {
   const q = useAnaliseMl<Resposta>(custId, 'resumo');
   if (!custId || (!q.verificandoConexao && !q.conectada && !q.erroConexao)) return <>{historico}</>;
-  if (q.verificandoConexao || q.isLoading) return <Skeleton className="h-64 w-full rounded-2xl" />;
+  if (q.verificandoConexao || q.isLoading) return (
+    <div className="space-y-5" role="status" aria-label="Carregando resumo da loja">
+      <Skeleton className="h-12 w-full" />
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <div className="grid grid-cols-2 gap-3 lg:col-span-8 xl:grid-cols-4">
+          {Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-[156px] w-full" />)}
+        </div>
+        <Skeleton className="h-[196px] w-full lg:col-span-4" />
+      </div>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <Skeleton className="h-[320px] w-full lg:col-span-8" />
+        <Skeleton className="h-[320px] w-full lg:col-span-4" />
+      </div>
+    </div>
+  );
   if (q.error || q.erroConexao || !q.data) {
     return (
       <section className="painel-noite space-y-3">
