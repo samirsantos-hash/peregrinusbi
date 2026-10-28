@@ -41,6 +41,7 @@ import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
 import VisaoGeralSecao from "@/components/dashboard/VisaoGeralSecao";
 import { formatarPeriodoBr } from "@/lib/periodoResumo";
+import { briefingPeriodo } from "@/lib/briefingPeriodo";
 import { ABA_ALIAS } from "@/config/sellerTabs";
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
@@ -498,6 +499,9 @@ const Index = () => {
                     ativa={activeTab}
                     loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
                     contexto={dateDebugLabel}
+                    resumo={activeTab === "efficiency" && !isConsolidado && dateRange?.from
+                      ? briefingPeriodo(allKpisDaily as any, formatDateString(dateRange.from), formatDateString(dateRange.to ?? dateRange.from))
+                      : null}
                   />
                   <AvisoSemOperacao
                     kpis={displayKpis}
