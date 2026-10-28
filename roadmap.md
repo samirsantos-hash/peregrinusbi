@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Comparação entre períodos na Visão geral
-- [ ] Adicionar dois intervalos independentes, faturamento, visitas e unidades lado a lado, com cobertura explícita, sem misturar API e histórico; testar cálculos e conferir com loja real.
+- [x] Dois intervalos independentes na Visão geral, faturamento/visitas/unidades lado a lado, inversão e variação B × A; histórico diário paginado e cobertura explícita, sem misturar API. Seis testes passaram; AUTOPECASLONDRINA 28/09–12/10 × 13–27/10: R$65.138 × R$68.536, 11.026 × 10.855 visitas, 589 × 544 unidades. Inversão e erro de datas conferidos, dois temas e 536px sem transbordamento; build OK.
 
 ## Modo claro do catálogo (28/10)
 - [x] Reforçar o efeito vidro: transparência de 22–60%, desfoque 24px, bisel branco e fundo levemente contrastante; títulos legíveis, sete seções conferidas com dados reais, Home idêntica, 536px sem transbordamento e build OK.
