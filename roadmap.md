@@ -1,5 +1,8 @@
 # Roadmap
 
+## Gráficos minimalistas (28/10)
+- [x] Suavizar cores e contornos, retirar brilho pesado e limitar barras de publicidade a 20px; AUTOPECASLONDRINA conferida na Visão geral e Publicidade, sem transbordamento a 536px; dez testes passaram, Home fora dos seletores.
+
 ## Atribuição real e leitura personalizada (28/10)
 - [ ] Série por promoção bloqueada: contrato de vínculo histórico não confirmado; nova leitura real da AUTOPECASLONDRINA teve 20 pedidos, 17 leituras e nenhuma correspondência local. Não inferir por participação atual ou identificadores de outra origem.
 - [x] Leitura personalizada por loja, período e cobertura em Oportunidades; AUTOPECASLONDRINA conferida na tela com 85% de cobertura da amostra, cinco testes passaram e build OK. Sem atribuição ou causalidade inventadas.

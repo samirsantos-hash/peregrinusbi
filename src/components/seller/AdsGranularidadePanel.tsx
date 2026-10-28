@@ -164,16 +164,20 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={serie} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+            <ComposedChart data={serie} barCategoryGap="35%" barGap={4} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} interval="preserveStartEnd" />
+              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} interval="preserveStartEnd" />
               <YAxis
                 yAxisId="brl"
+                axisLine={false}
+                tickLine={false}
                 tickFormatter={(v) => fmtBRLCompact(Number(v))}
                 tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
               />
               <YAxis
                 yAxisId="sec"
+                axisLine={false}
+                tickLine={false}
                 orientation="right"
                 tickFormatter={(v) => (metrica === "roas" ? `${Number(v).toFixed(0).replace(".", ",")}x` : `${Number(v).toFixed(0).replace(".", ",")}%`)}
                 tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
@@ -194,8 +198,8 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                   n === "inv" ? "Investimento" : n === "gmv_ads" ? "GMV via Ads" : n === "roas" ? "ROAS" : n === "acos" ? "ACOS %" : "TACOS %"
                 }
               />
-              <Bar yAxisId="brl" dataKey="gmv_ads" name="gmv_ads" fill="hsl(var(--primary))" fillOpacity={0.9} radius={[2, 2, 0, 0]} />
-              <Bar yAxisId="brl" dataKey="inv" name="inv" fill="hsl(var(--ec-laranja))" fillOpacity={1} radius={[2, 2, 0, 0]} />
+              <Bar yAxisId="brl" dataKey="gmv_ads" name="gmv_ads" fill="hsl(var(--panel-positive))" maxBarSize={20} radius={[2, 2, 0, 0]} />
+              <Bar yAxisId="brl" dataKey="inv" name="inv" fill="hsl(var(--panel-text-secondary))" maxBarSize={20} radius={[2, 2, 0, 0]} />
               {metrica !== "inv" && (
                 <Line
                   yAxisId="sec"
@@ -212,7 +216,7 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
         )}
 
         <div className="mt-3 text-[10px] text-muted-foreground">
-          Barras coloridas pelo ROAS do período (verde = eficiente, vermelho = crítico). Fonte: base diária de KPIs (INV_PADS, TGMV_LC_PADS, TGMV_LC).
+          Verde: faturamento via Ads · Cinza: investimento. Fonte: histórico diário importado, no período selecionado.
         </div>
       </div>
 

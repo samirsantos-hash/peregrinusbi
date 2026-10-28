@@ -177,7 +177,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
             <AcosTacosChart pontos={m.historico} />
           ) : (
             <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={m.historico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+              <ComposedChart data={m.historico} barCategoryGap="35%" barGap={4} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
                 <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
                 <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => String(v).slice(2)} />
                 <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
@@ -194,12 +194,12 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
                   return <ReferenceLine y={med} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
                     label={{ value: `Média GMV Ads ${fmtBRLCompact(med)}`, position: "insideTopLeft", fill: "hsl(var(--media))", fontSize: 10 }} />;
                 })()}
-                <Bar dataKey="inv" fill="hsl(var(--series-2))">
+                <Bar dataKey="inv" fill="hsl(var(--series-2))" maxBarSize={20} radius={[2, 2, 0, 0]}>
                   {m.historico.map((d, i) => (
                     <Cell key={`inv-${i}`} fill={corRoas(d.roas)} fillOpacity={0.55} />
                   ))}
                 </Bar>
-                <Bar dataKey="gmv_ads" fill="hsl(var(--ok))">
+                <Bar dataKey="gmv_ads" fill="hsl(var(--ok))" maxBarSize={20} radius={[2, 2, 0, 0]}>
                   {m.historico.map((d, i) => (
                     <Cell key={`gmv-${i}`} fill={corRoas(d.roas)} />
                   ))}

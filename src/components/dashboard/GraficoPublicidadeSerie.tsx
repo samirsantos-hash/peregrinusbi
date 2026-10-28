@@ -28,7 +28,7 @@ export default function GraficoPublicidadeSerie({ pontos, compacto = false }: { 
     </div>
     <div className={compacto ? "h-[220px]" : "h-[340px]"}>
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={serie} margin={{ top: 8, right: 0, bottom: 4, left: 0 }}>
+        <ComposedChart data={serie} barCategoryGap="35%" margin={{ top: 8, right: 0, bottom: 4, left: 0 }}>
           <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
           <XAxis dataKey="data" tickFormatter={d => d.slice(5).split('-').reverse().join('/')} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} minTickGap={30} />
           <YAxis yAxisId="faturamento" width={55} tickFormatter={brlCurto} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
@@ -45,7 +45,7 @@ export default function GraficoPublicidadeSerie({ pontos, compacto = false }: { 
               <p>ROAS: {p.roas == null ? 'Sem dado' : `${num(p.roas, 2)}x`}</p>
             </div>;
           }} />
-          <Bar yAxisId="faturamento" dataKey="faturamento" fill="hsl(var(--panel-positive))" fillOpacity={.65} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false} />
+          <Bar yAxisId="faturamento" dataKey="faturamento" fill="hsl(var(--panel-positive))" radius={[2, 2, 0, 0]} maxBarSize={20} isAnimationActive={false} />
           <Line yAxisId="ads" dataKey="investimento" stroke="hsl(var(--panel-text-secondary))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
           <Line yAxisId="roas" dataKey="roas" stroke="hsl(var(--panel-text))" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls={false} isAnimationActive={false} />
         </ComposedChart>

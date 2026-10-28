@@ -553,29 +553,24 @@
   .recharts-bar-rectangle path { transition: filter .2s, opacity .2s; }
   .recharts-bar-rectangle:hover path { filter: brightness(1.25) drop-shadow(0 0 6px hsl(var(--primary) / .6)); }
 
-  /* Textura de vidro do design-system.html nos gráficos do painel (Home intocada) */
-  .peregrinus-panel .recharts-bar-rectangle path {
-    fill-opacity: .62;
-    stroke: rgb(255 255 255 / .16);
-    stroke-width: 1px;
-    stroke-opacity: 1;
-    paint-order: stroke;
+  /* Minimal chart finish; series colors retain their meaning, Home stays intact. */
+  html body .peregrinus-panel .recharts-bar-rectangle path {
+    fill-opacity: var(--panel-chart-bar-opacity);
+    stroke: none;
+    filter: none;
+    transition: opacity .15s ease;
   }
-  .peregrinus-panel .recharts-bar-rectangle:hover path {
-    fill-opacity: .82;
-    filter: drop-shadow(0 0 10px hsl(var(--panel-positive, 155 62% 53%) / .35));
-  }
-  .peregrinus-panel .recharts-area-area { fill-opacity: .18; mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.25) 100%); }
-  .peregrinus-panel .recharts-line-curve { filter: drop-shadow(0 0 6px currentColor); }
-  .peregrinus-panel .recharts-cartesian-grid line { stroke: rgb(255 255 255 / .06); }
-  .peregrinus-panel .recharts-cartesian-axis-line,
-  .peregrinus-panel .recharts-cartesian-axis-tick-line { stroke: rgb(255 255 255 / .1); }
-  .peregrinus-panel .recharts-cartesian-axis-tick-value { fill: hsl(var(--panel-text-secondary, var(--muted-foreground))); font-size: 12px; }
-  .peregrinus-panel .recharts-legend-item-text { color: hsl(var(--panel-text-secondary, var(--muted-foreground))) !important; font-size: 13px; }
-  .peregrinus-panel .recharts-legend-icon { opacity: .8; }
-  .peregrinus-panel .recharts-tooltip-cursor { fill: rgb(255 255 255 / .04); }
-  html:not(.dark) .peregrinus-panel .recharts-bar-rectangle path { stroke: rgb(0 0 0 / .08); fill-opacity: .72; }
-  html:not(.dark) .peregrinus-panel .recharts-cartesian-grid line { stroke: rgb(0 0 0 / .07); }
+  html body .peregrinus-panel .recharts-bar-rectangle:hover path { opacity: .88; }
+  html body .peregrinus-panel .recharts-area-area { fill-opacity: .1; mask-image: linear-gradient(180deg, #000 0%, transparent 100%); }
+  html body .peregrinus-panel :is(.recharts-line-curve,.recharts-area-curve) { filter: none; stroke-width: 1.5px; transition: none; }
+  html body .peregrinus-panel .recharts-active-dot circle { filter: none; animation: none; }
+  html body .peregrinus-panel .recharts-cartesian-grid line { stroke: var(--panel-chart-grid) !important; stroke-width: .5px; }
+  html body .peregrinus-panel .recharts-cartesian-axis-line,
+  html body .peregrinus-panel .recharts-cartesian-axis-tick-line { stroke: var(--panel-divider); }
+  .peregrinus-panel .recharts-cartesian-axis-tick-value { fill: hsl(var(--panel-text-secondary)); font-size: 12px; font-family: 'DM Sans', sans-serif; font-variant-numeric: tabular-nums; }
+  .peregrinus-panel .recharts-legend-item-text { color: hsl(var(--panel-text-secondary)) !important; font-size: 12px; }
+  .peregrinus-panel .recharts-legend-icon { opacity: .65; }
+  html body .peregrinus-panel .recharts-tooltip-cursor { fill: var(--panel-fill-nested); stroke: var(--panel-divider); }
 }
 
 /* Cartões reagem ao mouse: leve elevação, borda e brilho ciano */
@@ -1286,6 +1281,8 @@ html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
   --panel-date: 54 100% 50%;
   --panel-white: 0 0% 100%;
   --panel-black: 0 0% 0%;
+  --panel-chart-bar-opacity: .58;
+  --panel-chart-grid: hsl(var(--panel-text-secondary) / .1);
   --panel-fill: hsl(var(--panel-white) / .035);
   --panel-fill-hover: hsl(var(--panel-white) / .045);
   --panel-stroke-hover: hsl(var(--panel-white) / .1);
@@ -1301,6 +1298,8 @@ html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
   --panel-backdrop: blur(22px) saturate(170%);
 }
 html.light {
+  --panel-chart-bar-opacity: .7;
+  --panel-chart-grid: hsl(var(--panel-text-secondary) / .12);
   --panel-canvas: 0 0% 100%;
   --panel-surface: 0 0% 96%;
   --panel-raised: 0 0% 93%;
