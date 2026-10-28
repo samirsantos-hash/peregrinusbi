@@ -33,12 +33,12 @@ export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
   }, [ativa]);
 
   return (
-    <header className="mb-5 min-w-0 font-['DM_Sans',sans-serif]">
-      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1.5">
+    <header className="panel-section-header mb-5 min-w-0 font-sans">
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
         <h1
           ref={h1Ref}
           tabIndex={-1}
-          className="text-[28px] leading-[1.2] font-medium tracking-[-0.01em] text-foreground break-words outline-none"
+          className="panel-section-title break-words outline-none"
         >
           {label}
         </h1>
@@ -46,12 +46,12 @@ export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
         {(loja || contexto) && (
           <p className="flex min-w-0 flex-wrap items-center gap-1.5" aria-label="Contexto da seção">
             {loja && (
-              <span className="inline-flex max-w-[16rem] items-center truncate rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[11px] font-medium text-muted-foreground" title={loja}>
+              <span className="panel-section-meta inline-flex max-w-[16rem] items-center truncate rounded-full border border-border/60 bg-muted/40 px-2 py-1" title={loja}>
                 {loja}
               </span>
             )}
             {contexto && (
-              <span className="inline-flex max-w-full items-center truncate rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground" title={contexto}>
+              <span className="panel-section-meta inline-flex max-w-full items-center truncate rounded-full border border-border/60 bg-muted/40 px-2 py-1 tabular-nums" title={contexto}>
                 {contexto}
               </span>
             )}
@@ -59,7 +59,7 @@ export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
         )}
       </div>
       {descricao && (
-        <p className={resumo ? "mt-2 max-w-[72ch] text-[14px] leading-[1.6] font-normal tabular-nums text-muted-foreground break-words" : "mt-1 text-[13px] font-normal text-muted-foreground break-words"}>{descricao}</p>
+        <p className="panel-section-briefing mt-3 font-normal tabular-nums break-words">{descricao}</p>
       )}
       <span aria-live="polite" className="sr-only">{`${label} carregado`}</span>
     </header>

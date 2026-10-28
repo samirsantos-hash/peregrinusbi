@@ -1884,6 +1884,11 @@ html.dark .peregrinus-panel > :not(.chuva-painel) { position: relative; z-index:
 .peregrinus-panel {
   --panel-type-label: 12px;
   --panel-type-body: 14px;
+  --panel-type-page-title: 26px;
+  --panel-type-page-leading: 32px;
+  --panel-type-section-title: 18px;
+  --panel-type-section-leading: 24px;
+  --panel-type-body-leading: 24px;
   --panel-type-nav: 13px;
   --panel-type-title: 18px;
   --panel-type-number: clamp(28px, 15cqi, 38px);
@@ -1953,4 +1958,39 @@ html body .peregrinus-panel .resumo-visual-ref .kpi-vidro > div { display: flex;
 html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes { align-items: center !important; justify-content: center; }
 html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor {
   font-size: clamp(30px, 14cqi, 48px) !important; line-height: 1.1; max-width: 100%;
+}
+
+/* Hierarquia editorial do painel: medidas fixas, sem interferir na Home ou nos KPIs. */
+html body .peregrinus-panel .panel-section-header {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+html body .peregrinus-panel :is(.panel-section-title, .ds-titulo-pagina) {
+  font-size: var(--panel-type-page-title);
+  line-height: var(--panel-type-page-leading);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: hsl(var(--panel-text));
+}
+html body .peregrinus-panel .panel-section-meta {
+  font-size: var(--panel-type-label);
+  line-height: 16px;
+  font-weight: 400;
+  color: hsl(var(--panel-text-secondary));
+}
+html body .peregrinus-panel .panel-section-briefing {
+  max-width: 88ch;
+  font-size: var(--panel-type-body);
+  line-height: var(--panel-type-body-leading);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-wrap: pretty;
+  color: hsl(var(--panel-text-secondary));
+}
+html body .peregrinus-panel :is(.painel-noite-titulo, .ds-titulo-bloco),
+html body .peregrinus-panel .resumo-visual-ref > :is(section, div) > header h3 {
+  font-size: var(--panel-type-section-title);
+  line-height: var(--panel-type-section-leading);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: hsl(var(--panel-text));
 }
