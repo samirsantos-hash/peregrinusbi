@@ -1,5 +1,9 @@
 # Roadmap
 
+## Campanhas promocionais por venda (28/10)
+- [ ] Confirmar contrato da API para campanha aplicada em cada venda, sem inferir pela adesão atual — documentação consultada não confirmou o vínculo; validação autenticada do recurso de descontos pendente.
+- [ ] Consultar e agregar dias completos por promoção; gráfico de linhas com pedidos, unidades e faturamento, lacunas explícitas e fontes separadas da planilha.
+
 ## Vidro lateral, topo e carregamento (28/10)
 - [x] Aplicar transparência e contorno da referência no topo e lateral; unificar fontes e números, preservando Home (estilos comparados antes/depois).
 - [x] Suavizar indicadores e placeholders com duração proporcional, sem alterar consultas; AUTOPECASLONDRINA conferida com valores finais, dois temas e movimento reduzido, sem transbordamento ou erros; quatro testes passaram.
