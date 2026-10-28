@@ -40,7 +40,10 @@ Deno.serve(async req => {
     if (modo === 'campanhasDiagnostico') {
       // Bounded capability check, never a performance series or raw-order response.
       const amostra = first.results.filter((o: any) => o.status === 'paid').slice(0, 20);
-      const diagnostico = { consultados: 0, disponiveis: 0, indisponiveis: 0, comDetalhes: 0, comCampanha: 0, comOferta: 0, comItem: 0, comQuantidade: 0, status: {} as Record<string, number>, campos: [] as string[] };
+      const { data: promos } = await db.from('ml_promotions').select('promotion_id').eq('account_id', conta.id);
+      const { data: ofertas } = await db.from('ml_promotion_items').select('offer_id, promotion_id, item_id').eq('account_id', conta.id).limit(1000);
+      const ids = new Set((promos ?? []).map(p => String(p.promotion_id)));
+      const diagnostico = { consultados: 0, disponiveis: 0, indisponiveis: 0, comDetalhes: 0, comCampanha: 0, comOferta: 0, comItem: 0, comQuantidade: 0, campanhaReconhecida: 0, ofertaReconhecida: 0, campanhasNumericas: 0, status: {} as Record<string, number>, campos: [] as string[] };
       const campos = new Set<string>();
       const permitidos = ['details', 'type', 'items', 'id', 'quantity', 'amounts', 'total', 'seller', 'supplier', 'campaign_id', 'offer_id', 'promotion_id', 'funding_mode'];
       for (const o of amostra) {
@@ -57,7 +60,12 @@ Deno.serve(async req => {
           let campanha = false, oferta = false, item = false, quantidade = false;
           for (const detail of details) {
             for (const key of Object.keys(detail ?? {})) if (permitidos.includes(key)) campos.add(key);
-            campanha ||= typeof detail.supplier?.campaign_id === 'string' || typeof detail.campaign_id === 'string' || typeof detail.promotion_id === 'string';
+            const cid = detail.supplier?.campaign_id ?? detail.campaign_id ?? detail.promotion_id;
+            campanha ||= (typeof cid === 'string' || typeof cid === 'number') && String(cid).length > 0;
+            if (typeof cid === 'number') diagnostico.campanhasNumericas++;
+            if (cid != null && ids.has(String(cid))) diagnostico.campanhaReconhecida++;
+            const oid = detail.supplier?.offer_id ?? detail.offer_id;
+            if (oid != null && (ofertas ?? []).some(f => String(f.offer_id) === String(oid) && (detail.items ?? []).some((i: any) => i.id === f.item_id))) diagnostico.ofertaReconhecida++;
             oferta ||= typeof detail.supplier?.offer_id === 'string' || typeof detail.offer_id === 'string';
             for (const key of Object.keys(detail.supplier ?? {})) if (permitidos.includes(key)) campos.add('supplier.' + key);
             for (const i of Array.isArray(detail.items) ? detail.items : []) {
