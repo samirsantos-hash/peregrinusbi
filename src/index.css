@@ -1888,6 +1888,9 @@ html body .peregrinus-panel :is(.kpi-vidro-valor,.ds-numero-focal,.ds-numero-sec
   -webkit-text-stroke: 0;
 }
 html body .peregrinus-panel .resumo-visual-ref .kpi-vidro > p:first-child { font-size: var(--panel-type-label); text-transform: none; }
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro.noite-vidro {
+  border-radius: 22px !important;
+}
 html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes {
   display: flex;
   flex-direction: column;
