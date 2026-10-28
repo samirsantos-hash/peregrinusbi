@@ -1,5 +1,9 @@
 # Roadmap
 
+## Vidro lateral, topo e carregamento (28/10)
+- [x] Aplicar transparência e contorno da referência no topo e lateral; unificar fontes e números, preservando Home (estilos comparados antes/depois).
+- [x] Suavizar indicadores e placeholders com duração proporcional, sem alterar consultas; AUTOPECASLONDRINA conferida com valores finais, dois temas e movimento reduzido, sem transbordamento ou erros; quatro testes passaram.
+
 ## Referência design-system em todo o painel (28/10)
 - [x] Uniformizar vidro, controles, tabelas, carteira legada, detalhes por nível e menus pela referência; Home conferida com estilos idênticos, dados e identidade preservados.
 - [x] Conferir 13 seções da AUTOPECASLONDRINA, 11 páginas principais, abas de Admin/gestão/ML e 13 abas de Multilojas; temas e 536px verificados. Corrigir transbordamento em Oportunidades, Perguntas e gestão; nenhum erro de execução.

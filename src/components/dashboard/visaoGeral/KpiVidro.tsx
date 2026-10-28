@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { num } from "@/lib/format";
+import NumeroAnimado from "@/components/ds/NumeroAnimado";
 
 export type MelhorQuando = "subir" | "descer" | "neutro";
 
@@ -104,7 +105,7 @@ export default function KpiVidro({
           )}
           title={valor}
         >
-          {valor}
+          <NumeroAnimado valor={valor} />
         </p>
         <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <DeltaCapsula delta={delta} pontos={deltaPontos} melhorQuando={melhorQuando} periodo={periodo} />
