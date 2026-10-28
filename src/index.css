@@ -1765,3 +1765,10 @@ html body .peregrinus-panel :is(button, [role="tab"], a, input, select, textarea
   outline: 2px solid hsl(var(--panel-positive) / .7);
   outline-offset: 2px;
 }
+html.dark body:has(.peregrinus-panel) {
+  background:
+    radial-gradient(60% 40% at 15% 0%, hsl(var(--access-glass-tint) / .22), transparent 70%),
+    radial-gradient(50% 35% at 90% 10%, hsl(var(--access-glass-light) / .12), transparent 70%),
+    #0A0A0A fixed;
+}
+html.dark body .peregrinus-panel { background: transparent !important; }
