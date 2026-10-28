@@ -1793,6 +1793,14 @@ html.light:has(.peregrinus-panel) #root {
 html.light body .peregrinus-panel .resumo-visual-ref {
   --summary-grid: var(--panel-chart-grid);
 }
+html.light body .peregrinus-panel :is(.noite-vidro,.glass-card,.ds-kpi,.ds-glass-surface,.cartao-branco) {
+  --foreground: var(--panel-text);
+  --card-foreground: var(--panel-text);
+  --muted-foreground: var(--panel-text-secondary);
+}
+html.light body .peregrinus-panel :is(h1,h2,h3,h4,h5,h6) {
+  color: hsl(var(--panel-text));
+}
 html.light body .peregrinus-panel :is(.ds-seta-bom, .ds-seta-ruim) {
   color: hsl(var(--panel-positive));
   background: hsl(var(--panel-positive) / .08);
