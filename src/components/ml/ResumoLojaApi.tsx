@@ -7,9 +7,10 @@ import SaudeConta from '@/components/dashboard/visaoGeral/SaudeConta';
 import { RefreshCw } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import LeituraContaApi from './LeituraContaApi';
+import InvestimentoAdsResumo from './InvestimentoAdsResumo';
 
 type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number }[] };
-type Resposta = { atual: Total; anterior: Total; periodo: { inicio: string; fim: string }; consultadoEm: string };
+type Resposta = { atual: Total; anterior: Total; periodo: { inicio: string; fim: string }; anteriorPeriodo: { inicio: string; fim: string }; consultadoEm: string };
 
 const br = (s: string) => s.split('-').reverse().join('/');
 const PERIODO_DELTA = 'vs 30 dias anteriores';
@@ -103,11 +104,12 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
         <Rotulo>Resumo executivo</Rotulo>
       <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-8">
-          <div className="grid h-full auto-rows-fr grid-cols-2 gap-3 2xl:grid-cols-4">
+          <div className="grid h-full auto-rows-fr grid-cols-2 gap-3 2xl:grid-cols-3">
             <KpiVidro focal rotulo="Faturamento pago" valor={brl(a.faturamento)} delta={delta(a.faturamento, p.faturamento)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Pedidos pagos" valor={num(a.pedidos)} delta={delta(a.pedidos, p.pedidos)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Ticket por pedido" valor={a.ticket == null ? 'Sem dado' : brl(a.ticket)} delta={delta(a.ticket, p.ticket)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Unidades vendidas" valor={num(a.unidades)} delta={delta(a.unidades, p.unidades)} periodo={PERIODO_DELTA} />
+            <InvestimentoAdsResumo custId={custId} periodo={periodo} anteriorPeriodo={q.data.anteriorPeriodo} faturamento={a.faturamento} faturamentoAnterior={p.faturamento} />
           </div>
         </div>
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-4">

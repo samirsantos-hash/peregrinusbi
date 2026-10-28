@@ -1,5 +1,8 @@
 # Roadmap
 
+## Investimento e tiers na Visão geral (28/10)
+- [x] Dois cartões no resumo: investimento/faturamento e atingimento da meta interna de 3%, com requisitos financeiros Tier 1/2/3 separados. Mesmas datas UTC do resumo e anterior, custos diários por campanha paginados; ausência de cobertura não vira zero. Quinze testes passaram; AUTOPECASLONDRINA conferida autenticada em 1280/536px, sem erros/transbordamento; custo indisponível por cobertura incompleta, meta monetária calculável pelo faturamento real. Fluxo com custo completo não verificável nesta loja.
+
 ## Comparação entre períodos na Visão geral
 - [x] Dois intervalos independentes na Visão geral, faturamento/visitas/unidades lado a lado, inversão e variação B × A; histórico diário paginado e cobertura explícita, sem misturar API. Seis testes passaram; AUTOPECASLONDRINA 28/09–12/10 × 13–27/10: R$65.138 × R$68.536, 11.026 × 10.855 visitas, 589 × 544 unidades. Inversão e erro de datas conferidos, dois temas e 536px sem transbordamento; build OK.
 

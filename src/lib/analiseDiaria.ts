@@ -67,6 +67,28 @@ export function faixaInvestimento(share: number | null) {
   return { tier, alerta: share < 0.5, metaPeregrinus: share >= 3, proximo, distancia: proximo === null ? 0 : proximo - share };
 }
 
+/** Campaign-level API costs, on every calendar date; missing is never zero. */
+export function metaInvestimentoAds(rows: { dia: string; cost: number | null }[], inicio: string, fim: string, faturamento: number) {
+  const de = timestamp(inicio), ate = timestamp(fim);
+  if (de === null || ate === null || ate < de || ate - de > 366 * DIA || !Number.isFinite(faturamento) || faturamento <= 0) return null;
+  const dias = new Map<string, number | null>();
+  for (const row of rows) {
+    if (row.dia < inicio || row.dia > fim) continue;
+    const anterior = dias.get(row.dia);
+    const valido = row.cost != null && Number.isFinite(row.cost) && row.cost >= 0;
+    dias.set(row.dia, !valido || anterior === null ? null : (anterior ?? 0) + Number(row.cost));
+  }
+  let investimento = 0;
+  for (let t = de; t <= ate; t += DIA) {
+    const custo = dias.get(new Date(t).toISOString().slice(0, 10));
+    if (custo == null) return null;
+    investimento += custo;
+  }
+  const share = investimento / faturamento * 100;
+  const meta = faturamento * 0.03;
+  return { investimento, share, meta, falta: Math.max(0, meta - investimento), atingimento: investimento / meta * 100, faixa: faixaInvestimento(share) };
+}
+
 export function investimento30d(rows: DiaAnalise[]) {
   const datas = rows.filter((r) => timestamp(r.date) !== null).map((r) => r.date.slice(0, 10)).sort();
   const fim = timestamp(datas[datas.length - 1] ?? "");
