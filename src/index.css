@@ -1669,6 +1669,28 @@ html body .peregrinus-panel .sinergia-operacional td { box-shadow: none; }
 
 /* Design-system reference: one authoritative material for every protected surface.
    Home retains its existing access styles; portals inherit only on panel pages. */
+body:not(:has(.peregrinus-panel)) .glass-card {
+  background: var(--vidro-fundo) !important;
+  border: 1px solid var(--vidro-borda) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--vidro-sombra) !important;
+  backdrop-filter: var(--panel-backdrop) !important;
+  -webkit-backdrop-filter: var(--panel-backdrop) !important;
+  transform: none !important;
+  transition: transform 200ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
+}
+body:not(:has(.peregrinus-panel)) .glass-card::before,
+body:not(:has(.peregrinus-panel)) .glass-card::after { content: none !important; display: none !important; }
+@media (hover: hover) and (pointer: fine) {
+  body:not(:has(.peregrinus-panel)) .glass-card:hover {
+    border-color: hsl(var(--panel-positive) / .35) !important;
+    box-shadow: var(--panel-shadow), 0 0 0 1px hsl(var(--panel-positive) / .1), 0 24px 50px -20px hsl(var(--panel-brand) / .25) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body:not(:has(.peregrinus-panel)) .glass-card { transform: none !important; }
+}
 body:has(.peregrinus-panel) {
   --panel-card-radius: 24px;
   --panel-control-radius: 8px;
