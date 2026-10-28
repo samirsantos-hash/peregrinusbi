@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { chamarFuncaoMl } from '@/lib/mlFuncoes';
@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 type Promo = { promotion_id: string | null; tipo: string; nome: string | null; nome_tipo: string; status: string; sugerido: number | null; vendedor_pct: number | null; meli_pct: number | null };
 export default function ProdutosCampanhasApi({ accountId }: { accountId: string }) {
+  const client = useQueryClient();
   const [limite, setLimite] = useState(PRODUTOS_INICIAIS);
   const lista = useQuery({ queryKey: ['ml-produtos-elegibilidade', accountId, limite], staleTime: 300_000, queryFn: async () => {
     const { data, error, count } = await supabase.from('ml_listings').select('item_id,titulo,link,estoque,preco,synced_at', { count: 'exact' })
@@ -24,7 +25,7 @@ export default function ProdutosCampanhasApi({ accountId }: { accountId: string 
     // Sequential calls avoid bursts against seller-promotions; cached earlier rows are reused.
     for (const itemId of ids) {
       try {
-        const r = await chamarFuncaoMl<{ promocoes: Promo[] }>('ml-promotions-item', { account_id: accountId, item_id: itemId });
+        const r = await client.fetchQuery({ queryKey: ['ml-campanhas-elegiveis-item', accountId, itemId], staleTime: 300_000, retry: false, queryFn: () => chamarFuncaoMl<{ promocoes: Promo[] }>('ml-promotions-item', { account_id: accountId, item_id: itemId }) });
         resultado[itemId] = { lista: r.promocoes.filter(p => campanhaElegivel(p.status)) };
       } catch (e) { resultado[itemId] = { lista: [], erro: e instanceof Error ? e.message : 'Consulta indisponível' }; }
     }
@@ -33,7 +34,7 @@ export default function ProdutosCampanhasApi({ accountId }: { accountId: string 
   return <section className="glass-card p-5 space-y-4" aria-label="Tabela de produtos Mercado Livre">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div><h3 className="text-sm font-semibold uppercase">Tabela de produtos</h3><p className="text-xs text-muted-foreground">Mercado Livre · produtos sincronizados · campanhas elegíveis consultadas ao vivo</p></div>
-      <Button variant="outline" size="sm" disabled={lista.isFetching || campanhas.isFetching} onClick={() => { void lista.refetch(); void campanhas.refetch(); }}><RefreshCw className="mr-2 h-4 w-4" />Atualizar campanhas</Button>
+      <Button variant="outline" size="sm" disabled={lista.isFetching || campanhas.isFetching} onClick={async () => { await client.invalidateQueries({ queryKey: ['ml-campanhas-elegiveis-item', accountId] }); void lista.refetch(); void campanhas.refetch(); }}><RefreshCw className="mr-2 h-4 w-4" />Atualizar campanhas</Button>
     </div>
     {lista.isLoading ? <Skeleton className="h-60 w-full" /> : lista.error ? <p role="alert" className="text-sm text-destructive">{lista.error.message}</p> : <>
       <p className="text-xs text-muted-foreground">{num(lista.data?.itens.length ?? 0)} de {num(lista.data?.total ?? 0)} produtos</p>
