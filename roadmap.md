@@ -1,5 +1,8 @@
 # Roadmap
 
+## Modo claro do catálogo (28/10)
+- [ ] Aplicar vidro branco, textura delicada, contraste e verde da Home em todas as superfícies compartilhadas do painel; conferir navegação, gráficos, telas estreitas e preservação da Home e do modo escuro.
+
 ## Gráficos no celular (28/10)
 - [x] Remover recorte das legendas, permitir quebra de linha e ajustar margens, datas e eixos em áreas e barras; AUTOPECASLONDRINA conferida em Publicidade a 320/375/390/1280px e área de Logística a 375px, sem cortes nos eixos ou transbordamento; dez testes passaram e build OK. Dados e Home preservados.
 
