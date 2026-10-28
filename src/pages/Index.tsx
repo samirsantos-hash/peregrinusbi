@@ -25,6 +25,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import SecaoHeader from "@/components/dashboard/SecaoHeader";
+import ComparacaoPeriodos from "@/components/dashboard/ComparacaoPeriodos";
 import AvisoSemOperacao from "@/components/dashboard/AvisoSemOperacao";
 
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
@@ -524,6 +525,13 @@ const Index = () => {
                   transition={{ duration: 0.15 }}
                   className="mt-0">
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
+                    {!isConsolidado && selectedSeller && <ComparacaoPeriodos
+                      key={selectedSeller}
+                      sellerId={selectedSeller}
+                      de={dateRange?.from ? formatDateString(dateRange.from) : undefined}
+                      ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined}
+                      ultimaData={allKpisDaily.at(-1)?.date}
+                    />}
                     <NovidadesPrompt />
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     <ResumoLojaApi custId={sellerCustIdMap[selectedSeller]} historico={

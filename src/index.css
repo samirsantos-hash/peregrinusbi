@@ -2038,6 +2038,14 @@ html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-v
 }
 
 /* Hierarquia editorial do painel: medidas fixas, sem interferir na Home ou nos KPIs. */
+.peregrinus-panel .comparacao-periodos-valor {
+  font-size: 24px;
+  line-height: 32px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 639px) {
+  .peregrinus-panel .comparacao-periodos-valor { font-size: 18px; line-height: 24px; }
+}
 html body .peregrinus-panel .panel-section-header {
   font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
