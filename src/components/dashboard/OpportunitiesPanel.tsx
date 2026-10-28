@@ -14,9 +14,15 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TooltipInfo from "./TooltipInfo";
 import { type EligibilityItem } from "@/hooks/useEligibility";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
+import ProdutosCampanhasApi from '@/components/ml/ProdutosCampanhasApi';
+import { fonteProdutos, produtosVisiveis, PRODUTOS_INICIAIS } from '@/lib/produtosCampanhas';
 
 interface OpportunitiesPanelProps {
   items: EligibilityItem[];
+  custId?: string;
 }
 
 // Campaign type abbreviation map
@@ -153,7 +159,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
     return result;
   }, [scored, catFilter, actionFilter, searchQuery, sortBy]);
 
-  const displayed = showAll ? filtered : filtered.slice(0, 20);
+  const displayed = produtosVisiveis(filtered, showAll);
 
   // BLOCO 3: Profile cards
   const profileCards = useMemo(() => {
@@ -446,11 +452,11 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
             </tbody>
           </table>
         </div>
-        {!showAll && filtered.length > 20 && (
+        {filtered.length > PRODUTOS_INICIAIS && (
           <div className="flex justify-center mt-4">
-            <Button variant="outline" size="sm" onClick={() => setShowAll(true)} className="gap-1.5 text-xs">
+            <Button variant="outline" size="sm" onClick={() => setShowAll(v => !v)} className="gap-1.5 text-xs">
               <ChevronDown className="w-3.5 h-3.5" />
-              Ver mais ({filtered.length - 20} restantes)
+              {showAll ? 'Recolher' : `Expandir (${filtered.length - PRODUTOS_INICIAIS} restantes)`}
             </Button>
           </div>
         )}
@@ -459,4 +465,14 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
   );
 };
 
-export default OpportunitiesPanel;
+export default function ProdutosOportunidades(props: OpportunitiesPanelProps) {
+  const conexao = useQuery({ queryKey: ['ml-conta-produtos', props.custId], enabled: !!props.custId, retry: false, queryFn: async () => {
+    const { data, error } = await supabase.from('ml_accounts').select('id,status').eq('ml_user_id', Number(props.custId)).maybeSingle();
+    if (error) throw error;
+    return data;
+  }});
+  if (props.custId && conexao.isLoading) return <Skeleton className="h-60 w-full" />;
+  if (conexao.error) return <p role="alert" className="text-sm text-destructive">Não foi possível verificar a conexão da loja. Tente novamente.</p>;
+  if (conexao.data && fonteProdutos(conexao.data) === 'api') return <ProdutosCampanhasApi key={conexao.data.id} accountId={conexao.data.id} />;
+  return <><p className="text-xs text-muted-foreground">Fonte: planilhas de elegibilidade</p><OpportunitiesPanel key={props.custId ?? 'carteira'} items={props.items} /></>;
+}

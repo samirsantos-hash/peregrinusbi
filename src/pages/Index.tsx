@@ -642,7 +642,7 @@ const Index = () => {
                     <CampanhasAtribuicaoApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
                     <CampanhasDesempenho items={eligibilityItems || []} />
                     <CampanhasCofinanciadasPanel items={eligibilityItems || []} />
-                    <OpportunitiesPanel items={eligibilityItems || []} />
+                    <OpportunitiesPanel items={eligibilityItems || []} custId={sellerCustIdMap[selectedSeller]} />
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="reputation" dados={dadosJunior} />

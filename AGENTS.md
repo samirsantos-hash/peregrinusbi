@@ -36,6 +36,6 @@
 - Protected surfaces use panel-scoped tokens; Home stays unchanged. Button exposes its variant. KPI counts share useNumeroAnimado (React-owned text), preventing DOM mutation and mismatched timing.
 - HTML references use panel tokens; `.resumo-visual-ref` scopes overview finishes without changing data; navigation and filters never tilt.
 - Indicator summaries use security-invoker RPCs; portfolio batches always filter seller IDs and reject partial reads to preserve RLS and totals.
-- Promotion rebate reading, expiry warnings and rebate-based recommendation live only in pure `src/lib/promocoesAnalise.ts`, so Oportunidades and future screens share one rule.
+- Promotion rebate rules use `src/lib/promocoesAnalise.ts`. Product opportunities use scoped listings/live item promotions for active ML accounts, otherwise spreadsheets; API errors never trigger fallback.
 - Advertising charts and matrices share `src/lib/sinergiaPublicidade.ts`: same-date totals, nullable paired Pearson (≥7, nonconstant), no causal claims; `SinergiaIndicadores` shares summary/detail charts, keeping API windows separate from imports.
-- Chuva do painel: shader original em src/components/chuva, só em .peregrinus-panel escuro; acesso mantém as cordas.
+- Rain uses src/components/chuva only in the dark panel; login keeps ropes.
