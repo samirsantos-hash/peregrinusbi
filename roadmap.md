@@ -2,7 +2,7 @@
 
 ## Ranking de vídeos no espaço de cobertura (28/10)
 - [x] Adicionar lista com alternância entre conversão e visitas via Clips no espaço livre; cálculo por última medição pareada, três testes passaram.
-- [ ] Verificar ranking populado — banco não possui anúncios com visitas via Clips e pedidos medidos; conferir estado sem dado sem distribuir totais da loja.
+- [x] AUTOPECASLONDRINA: espaço e alternância conferidos, sem erros; ausência de dados explícita. Ranking populado não verificável: banco não possui anúncios com visitas via Clips e pedidos medidos; nunca distribuir totais da loja.
 
 ## Produtos e campanhas elegíveis (28/10)
 - [x] Limitar a lista a dez produtos com expansão e recolhimento; três testes passaram.
