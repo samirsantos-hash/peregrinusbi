@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { EligibilityItem } from "@/hooks/useEligibility";
 import type { ListingQuality } from "@/hooks/useListingsQuality";
+import ClipsRanking from './ClipsRanking';
 
 interface ClipsAudiencePanelProps {
   kpis: SellerKPI[];
@@ -593,8 +594,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
             </h3>
             <TooltipInfo text="Proporção de anúncios únicos (MLBs) que possuem dados de performance de Clips ativos (visitas, impressões ou pedidos via clip) vs. anúncios sem nenhum dado de clips." />
           </div>
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-[200px] h-[200px]">
+          <div className="grid grid-cols-1 xl:grid-cols-[200px_minmax(0,1fr)_minmax(0,1.3fr)] items-center gap-6">
+            <div className="w-[200px] h-[200px] mx-auto">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -620,7 +621,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex-1 space-y-3">
+            <div className="min-w-0 space-y-3">
               {effectiveCoverage.mode === "items" ? (
                 <>
                   <p className="text-sm text-foreground">
@@ -667,6 +668,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                 </p>
               )}
             </div>
+            <ClipsRanking itens={listingsQuality ?? []} nomes={dedupedEligibility} />
           </div>
         </div>
       )}
