@@ -1,5 +1,9 @@
 # Roadmap
 
+## Atribuição real e leitura personalizada (28/10)
+- [ ] Série por promoção bloqueada: contrato de vínculo histórico não confirmado; nova leitura real da AUTOPECASLONDRINA teve 20 pedidos, 17 leituras e nenhuma correspondência local. Não inferir por participação atual ou identificadores de outra origem.
+- [x] Leitura personalizada por loja, período e cobertura em Oportunidades; AUTOPECASLONDRINA conferida na tela com 85% de cobertura da amostra, cinco testes passaram e build OK. Sem atribuição ou causalidade inventadas.
+
 ## Proporção dos cartões executivos (28/10)
 - [x] Aplicar dimensões da variante compacta do HTML, números legíveis e comparações alinhadas; duas colunas até haver espaço para quatro. Dados reais conferidos em 1280, 1143 e 536px, sem erros; Home não alterada.
 
