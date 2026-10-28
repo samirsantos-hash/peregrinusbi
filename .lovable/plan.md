@@ -10,6 +10,7 @@ A pasta traz o catálogo visual "Asimov" (página de vitrine, catálogo de compo
 - Aplicado em todas as seções do painel, conferindo Visão geral, Publicidade, Preço, Correlações, Full e Admin nos dois temas.
 
 ## O que fica de fora (regras já combinadas)
+- A tela de acesso (Home, e-mail e senha) não muda em nada.
 - Fontes Inter, Voltaire e Instrument Serif: continua só DM Sans.
 - Os 16 temas de outras cores (laranja, roxo, rosa, azul etc.): proibidos; fica só verde.
 - Logo, textos, links e formulário da Asimov.
