@@ -2145,12 +2145,27 @@ html body .peregrinus-panel :is(.panel-topbar,.panel-sidebar,.cart-header,.cart-
   -webkit-backdrop-filter: var(--panel-backdrop);
   box-shadow: var(--panel-shadow);
 }
-html body .peregrinus-panel .panel-sidebar nav > div:first-child > div > p {
+body:has(.peregrinus-panel) :is(.panel-sidebar,[data-ui-surface="sheet"].painel-navigation) nav > div:first-child > div > p {
   font-size: var(--panel-type-label);
   line-height: 1.5;
   margin-bottom: 8px;
   text-transform: none;
 }
+body:has(.peregrinus-panel) [data-ui-surface="sheet"].painel-navigation {
+  background: var(--panel-nav-fill) !important;
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"] .panel-nav-item {
+  color: hsl(var(--panel-text-secondary));
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--panel-control-radius);
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"] .panel-nav-item[aria-current="page"] {
+  color: hsl(var(--panel-positive)) !important;
+  background: var(--panel-active-fill) !important;
+  border-color: var(--panel-active-edge);
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"] .panel-nav-item[aria-current="page"] > span[aria-hidden] { display: none; }
 html body .peregrinus-panel :is(h1:not(.panel-section-title),.ds-titulo-pagina) {
   font-size: var(--panel-type-page-title);
   line-height: var(--panel-type-page-leading);
