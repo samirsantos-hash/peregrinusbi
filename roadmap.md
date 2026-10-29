@@ -1,5 +1,9 @@
 # Roadmap
 
+## Apple Design no painel inteiro (29/10)
+- [x] Materiais por hierarquia, DM Sans, feedback imediato, superfícies estáveis e menus com entrada/saída coerentes; Home e dados preservados.
+- [x] AUTOPECASLONDRINA: 13 seções nos dois temas, 11 páginas adicionais, menu lateral a 536px e navegação até Preço; sem transbordamento nas seções, nenhum erro de execução, 31 testes passaram, build OK e Home com estilos idênticos. Movimento reduzido sem pulsação; contraste ampliado sem blur. CPP sem arquivo; Multilojas e Carteira de dados ainda carregando; detalhes de grupo/programa/anúncio não verificados por falta de vínculo navegável. Não alterar consultas como parte do visual.
+
 ## Investimento e tiers na Visão geral (28/10)
 - [x] Dois cartões no resumo: investimento/faturamento e atingimento da meta interna de 3%, com requisitos financeiros Tier 1/2/3 separados. Mesmas datas UTC do resumo e anterior, custos diários por campanha paginados; ausência de cobertura não vira zero. Quinze testes passaram; AUTOPECASLONDRINA conferida autenticada em 1280/536px, sem erros/transbordamento; custo indisponível por cobertura incompleta, meta monetária calculável pelo faturamento real. Fluxo com custo completo não verificável nesta loja.
 

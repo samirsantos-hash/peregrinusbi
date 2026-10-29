@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, AlertTriangle, Plug } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { SELLER_TABS, GRUPOS_SECOES, type SellerTab } from "@/config/sellerTabs";
 import { NovidadeTip } from "@/components/novidades/novidades";
 import { Button } from "@/components/ui/button";
@@ -213,6 +213,8 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
       {/* Drawer < 1024px */}
       <Sheet open={mobileAberto} onOpenChange={onMobileChange}>
         <SheetContent side="left" className="painel-navigation w-[248px] p-0">
+          <SheetTitle className="sr-only">Seções do painel</SheetTitle>
+          <SheetDescription className="sr-only">Navegação entre as seções da loja selecionada.</SheetDescription>
           <div className="h-full pt-8">
             <Conteudo
               ativa={ativa}

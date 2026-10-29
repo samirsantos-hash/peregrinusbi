@@ -33,7 +33,7 @@
 - Integrações de agentes (MCP) ficam em src/lib/mcp (uma ferramenta por arquivo, só leitura, cliente com o token OAuth do usuário para respeitar as permissões); a função mcp é gerada pelo plugin e só vai ao ar ao publicar.
 - Subdiretórios têm o próprio AGENTS.md (ex.: supabase/functions/AGENTS.md com as regras das funções do ML); leia antes de alterar arquivos lá.
 - Operational summary surfaces and typography are scoped by `.operacao-resumo` using global CSS tokens and shared KpiCard, so presentation changes never alter reputation thresholds or logistics calculations.
-- Panel surfaces, light texture and portals use scoped tokens to preserve Home. Button exposes its variant. KPI counts use useNumeroAnimado to avoid DOM mutation and mismatched timing.
+- Panel/portal materials, motion and accessibility use scoped tokens to preserve Home. Surface data attributes distinguish sheets/dialogs; useNumeroAnimado owns KPI counts to avoid DOM mutation.
 - HTML references use panel tokens; `.resumo-visual-ref` scopes overview finishes without changing data; navigation and filters never tilt.
 - Indicator summaries use security-invoker RPCs; portfolio batches always filter seller IDs and reject partial reads to preserve RLS and totals.
 - Promotion rebate rules use `src/lib/promocoesAnalise.ts`. Product opportunities use scoped listings/live item promotions for active ML accounts, otherwise spreadsheets; API errors never trigger fallback.
