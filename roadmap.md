@@ -1,5 +1,9 @@
 # Roadmap
 
+## Flex em Logística (29/10)
+- [ ] Incluir aba Flex com filtro mensal, capital paulista ou todas as lojas acessíveis, faturamento, unidades, evolução e tabela por loja; ausência de dados explícita e comparação mensal consistente.
+- [ ] Testar cálculos e conferir fluxo autenticado em computador e celular, preservando Home e Logística existente.
+
 ## TACOS e gráfico das campanhas (29/10)
 - [x] TACOS na tabela e detalhes sobre faturamento pago da loja nas mesmas datas UTC completas; vendas atribuídas e investimento juntos em linhas distintas, sem transformar lacunas em zero. Gráfico agregado também usa linhas.
 - [x] 95 testes distintos passaram. AUTOPECASLONDRINA: campanha MLB5476651802, investimento R$351,61, receita Ads R$1.307,52, TACOS 0,27%; duas linhas e TACOS diário conferidos, celular 390px, sem erros de execução; build OK.
