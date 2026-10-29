@@ -184,7 +184,7 @@ Contrato próprio (uma pergunta por vez), com a mesma idempotência das ações 
 - Entrada: `{ account_id }` com JWT, ou `x-refresh-secret` com `{ account_id? }`.
 - Saída: `200 { janela, contas: [{ account_id, ml_user_id, status, anunciantes, campanhas, anuncios, dias_lidos, dias_pendentes, erros }] }`. `status`: `ativo`, `sem_product_ads`, `sem_token`, `erro`, `adiado`.
 - Erros: 400 sem `account_id` com JWT, 401, 403, 405.
-- Campanhas e anúncios a cada chamada; métrica diária por campanha 1 vez a cada 20 h; métrica por anúncio dia a dia, retomando por `ml_ads_dias_sync`. Janela de 90 dias. Cron de hora em hora.
+- Campanhas e anúncios a cada chamada; custos por campanha têm prioridade sobre histórico por anúncio. Retoma primeiro campanhas com datas/custos ausentes, depois as leituras mais antigas; falhas de paginação/gravação ou série incompleta impedem marcar a conta completa. Métrica por campanha até cada 20 h (lacunas ignoram a espera), por anúncio dia a dia via `ml_ads_dias_sync`. Janela de 90 dias; cron de hora em hora. `dias_pendentes` inclui campanhas interrompidas por tempo; ausência nunca vira zero.
 - Erros e leituras parciais também gravam avisos controlados em `developer_alerts`, sem corpos de resposta ou tokens. Só o perfil `desenvolvedor` lê os diagnósticos; demais usuários recebem apenas estado genérico de atualização incompleta.
 
 #### `ml-ads-action` (lote)

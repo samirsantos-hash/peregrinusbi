@@ -28,6 +28,7 @@ import {
   lerAnunciantes,
   metricasPorGrupo,
   serieDiaria,
+  ordenarCampanhasAds,
 } from "../_shared/mlAds.ts";
 
 const API = "https://api.mercadolibre.com";
@@ -159,7 +160,7 @@ Deno.serve(async (req) => {
       const vistas = new Map<number, Record<string, unknown>>();
       for (const status of ["active", "paused"]) {
         const lote = await paginar(token, `${API}/advertising/${a.site_id}/advertisers/${a.advertiser_id}/product_ads/campaigns/search?filters[status]=${status}`);
-        if (!lote.ok) erros.push(lote.erro);
+        if (!lote.ok) { erros.push(lote.erro); campanhasCompletas = false; }
         for (const c of lote.items) {
           const id = num(c.id);
           if (id != null) vistas.set(id, c);
@@ -210,9 +211,21 @@ Deno.serve(async (req) => {
       if (linhasGrupo.length) await admin.from("ml_ads_ads").upsert(linhasGrupo);
       anuncios += linhasGrupo.length;
 
-      for (const campanha of linhasCampanha) {
-        if (lerCampanhas) {
-          if (semTempo()) { campanhasCompletas = false; break; }
+      // Complete campaign costs first; ad-group history must not starve later campaigns.
+      const custos: { campaign_id: number; dia: string; cost: number | null; synced_at: string }[] = [];
+      for (let offset = 0; ; offset += 1000) {
+        const { data: pagina, error: erroCustos } = await admin.from('ml_ads_metrics_daily')
+          .select('campaign_id,dia,cost,synced_at').eq('account_id', conta.id).eq('nivel', 'campanha')
+          .gte('dia', janela.date_from).lte('dia', janela.date_to).order('campaign_id').order('dia').range(offset, offset + 999);
+        if (erroCustos) { campanhasCompletas = false; erros.push('Falha na leitura da cobertura de campanhas.'); break; }
+        custos.push(...(pagina ?? []));
+        if ((pagina?.length ?? 0) < 1000) break;
+      }
+      const cobertura = ordenarCampanhasAds(linhasCampanha, custos, janela);
+      let faltamCampanhas = cobertura.incompletas;
+      for (const campanha of cobertura.ordenadas) {
+        if (lerCampanhas || cobertura.incompletas > 0) {
+          if (semTempo()) { campanhasCompletas = false; pendentes += faltamCampanhas; break; }
           const detalhe = await buscarMl(
             `${API}/advertising/${a.site_id}/product_ads/campaigns/${campanha.campaign_id}?date_from=${janela.date_from}&date_to=${janela.date_to}&metrics=${METRICAS}&aggregation_type=DAILY`,
             token, fetch, V2,
@@ -222,10 +235,19 @@ Deno.serve(async (req) => {
             campanhasCompletas = false;
           } else {
             const pontos = serieDiaria(detalhe.json).map((p) => linhaMetrica(conta.id, "campanha", campanha.campaign_id, 0, p.dia, p.metricas));
-            if (pontos.length) await admin.from("ml_ads_metrics_daily").upsert(pontos);
+            const confirmacao = ordenarCampanhasAds([campanha], pontos, janela);
+            if (confirmacao.incompletas > 0) { campanhasCompletas = false; erros.push('Cobertura diária incompleta na campanha.'); }
+            if (pontos.length) {
+              const { error: erroGravar } = await admin.from("ml_ads_metrics_daily").upsert(pontos);
+              if (erroGravar) { campanhasCompletas = false; erros.push('Falha ao guardar custos diários.'); }
+              else if (confirmacao.incompletas === 0) faltamCampanhas = Math.max(0, faltamCampanhas - 1);
+            }
           }
         }
+      }
 
+      for (const campanha of linhasCampanha) {
+        if (semTempo()) break;
         const { data: lidosRows } = await admin.from("ml_ads_dias_sync").select("dia, synced_at")
           .eq("account_id", conta.id).eq("campaign_id", campanha.campaign_id).gte("dia", janela.date_from);
         const lidos = new Map<string, string>((lidosRows ?? []).map((r) => [r.dia as string, r.synced_at as string]));

@@ -4,6 +4,7 @@
 - Promotion attribution diagnostics expose only allowlisted field names and counts from a bounded paid-order sample; discount supplier IDs and current membership are not validated historical attribution, so no campaign series is inferred.
 
 - Ads synchronization reports controlled operational warnings to developer-only `developer_alerts`, including scheduled runs, without copying raw upstream payloads or tokens; monitoring never changes Mercado Livre state.
+- Campaign costs run before ad-group backfills, resuming missing/oldest confirmed daily reads; only complete persisted costs can close account coverage, preventing repeated early campaigns from starving later ones.
 
 - A busca de concorrentes (`ml-busca-concorrentes`, aba Preço) usa token de aplicativo do ML e o catálogo (`/products/search` + `/products/:id/items`), chamadas sequenciais: `/sites/MLB/search` responde 403 para aplicativos e chamadas paralelas dão 429.
 - `ml-importar-anuncios` (só admin) lê MLBs conhecidos por cust_id e consulta `/items` em lotes de 20, gravando em `ml_anuncios`; com token de aplicativo o ML responde 403 para anúncios de terceiros, então só funciona com token da própria loja conectada.
