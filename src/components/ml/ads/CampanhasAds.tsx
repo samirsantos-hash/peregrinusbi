@@ -50,7 +50,7 @@ function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, ta
     ["Unidades por Ads", num(somas?.unidades)],
   ];
   return (
-    <div className="space-y-5 p-5">
+    <div className="w-full max-w-[calc(100vw-72px)] space-y-5 p-3 sm:p-5">
       <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-6">
         {kpis.map(([r, v]) => (
           <div key={r} className="space-y-1">
