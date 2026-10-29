@@ -20,7 +20,7 @@ export type SecaoMl = "resumo" | "reputacao" | "qualidade" | "logistica" | "opor
 
 const TEMAS: Record<SecaoMl, string[]> = {
   resumo: ["vendas", "visitas"],
-  reputacao: ["reputacao", "perguntas"],
+  reputacao: ["reputacao", "perguntas", "vendas"],
   qualidade: ["anuncios"],
   logistica: ["envios"],
   oportunidades: ["promocoes"],
@@ -95,7 +95,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
         <p key={t} className="text-xs text-muted-foreground">Este dado não veio do Mercado Livre na última atualização.</p>
       ) : null)}
       {secao === "resumo" && <Resumo vendas={d("vendas")} visitas={d("visitas")} />}
-      {secao === "reputacao" && <Reputacao r={d("reputacao")} p={d("perguntas")} />}
+      {secao === "reputacao" && <Reputacao r={d("reputacao")} p={d("perguntas")} vendas={d("vendas")} />}
       {secao === "qualidade" && <><Qualidade a={d("anuncios")} /><CompararAnuncios key={custId} custId={custId} itens={d("anuncios")?.itens ?? []} /></>}
       {secao === "logistica" && <Logistica e={d("envios")} />}
       {secao === "oportunidades" && <PromocoesApi custId={custId} resumo={d("promocoes")} />}
@@ -144,6 +144,21 @@ function Resumo({ vendas, visitas }: { vendas: any; visitas: any }) {
           </ResponsiveContainer>
         </div>
       )}
+      <GraficoCancelamentos serie={serie} />
+    </>
+  );
+}
+
+function serieCancelamentos(vendas: any) {
+  return (vendas?.serie ?? []).map((x: any) => {
+    const tot = (x.pedidos ?? 0) + (x.cancelados ?? 0);
+    return { ...x, taxa: tot ? ((x.cancelados ?? 0) / tot) * 100 : null, label: x.data.slice(8, 10) + "/" + x.data.slice(5, 7) };
+  });
+}
+
+function GraficoCancelamentos({ serie }: { serie: any[] }) {
+  return (
+    <>
       {serie.length > 0 && (
         <div className="h-56">
           <p className="mb-1 text-xs text-muted-foreground">Pedidos, cancelamentos e taxa de cancelamento por dia</p>
@@ -166,8 +181,8 @@ function Resumo({ vendas, visitas }: { vendas: any; visitas: any }) {
   );
 }
 
-function Reputacao({ r, p }: { r: any; p: any }) {
-  if (!r && !p) return null;
+function Reputacao({ r, p, vendas }: { r: any; p: any; vendas: any }) {
+  if (!r && !p && !vendas) return null;
   return (
     <>
       <Grade>
@@ -182,6 +197,7 @@ function Reputacao({ r, p }: { r: any; p: any }) {
           <KpiCard rotulo="Tempo de resposta" valor={p.mediana_horas_resposta == null ? "Sem dado" : p.mediana_horas_resposta < 1 ? `${num(p.mediana_horas_resposta * 60)} min` : `${num(p.mediana_horas_resposta, 1)} h`} referencia="mediana das últimas 50" />
         </Grade>
       )}
+      <GraficoCancelamentos serie={serieCancelamentos(vendas)} />
     </>
   );
 }
