@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Line, LineChart, Legend, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { brl, brlCurto, num, pctFracao } from "@/lib/format";
+import { serieCampanha } from "@/lib/campanhaEvolucao";
 
 export type LinhaDiaCampanha = {
   campaign_id: number | string;
@@ -14,10 +15,9 @@ export type LinhaDiaCampanha = {
   units_quantity: number | null;
 };
 
-type Metrica = "investimento" | "vendas" | "roas" | "acos" | "tacos" | "cliques" | "cpc" | "ctr";
+type Metrica = "conjunto" | "roas" | "acos" | "tacos" | "cliques" | "cpc" | "ctr";
 const METRICAS: { id: Metrica; rotulo: string; fmt: (v: number | null) => string }[] = [
-  { id: "investimento", rotulo: "Investimento", fmt: (v) => brl(v, true) },
-  { id: "vendas", rotulo: "Vendas", fmt: (v) => brl(v, true) },
+  { id: "conjunto", rotulo: "Vendas e investimento", fmt: (v) => brl(v, true) },
   { id: "roas", rotulo: "ROAS", fmt: (v) => (v == null ? "Sem dado" : `${num(v, 2)}x`) },
   { id: "acos", rotulo: "ACOS", fmt: (v) => pctFracao(v, 1) },
   { id: "tacos", rotulo: "TACOS", fmt: (v) => pctFracao(v, 2) },
@@ -26,31 +26,19 @@ const METRICAS: { id: Metrica; rotulo: string; fmt: (v: number | null) => string
   { id: "ctr", rotulo: "CTR", fmt: (v) => pctFracao(v, 2) },
 ];
 
-const rz = (a: number, b: number) => (b > 0 ? a / b : null);
-
-/** Evolução diária de uma campanha, uma métrica por vez (linha verde única). */
+/** Same-date campaign sales and spend, with nullable auxiliary indicators. */
 export default function CampanhaGrafico({ nome, linhas, faturamentoDia, aoFechar }: {
   nome: string;
   linhas: LinhaDiaCampanha[];
   faturamentoDia: { data: string; faturamento: number }[];
   aoFechar: () => void;
 }) {
-  const [m, setM] = useState<Metrica>("investimento");
-  const fat = useMemo(() => new Map(faturamentoDia.map((f) => [f.data.slice(0, 10), f.faturamento])), [faturamentoDia]);
-  const serie = useMemo(() => [...linhas].sort((a, b) => a.dia.localeCompare(b.dia)).map((l) => {
-    const c = +(l.cost ?? 0), v = +(l.total_amount ?? 0), k = +(l.clicks ?? 0), p = +(l.prints ?? 0);
-    const f = fat.get(l.dia);
-    return {
-      dia: `${l.dia.slice(8, 10)}/${l.dia.slice(5, 7)}`,
-      investimento: c, vendas: v, cliques: k,
-      roas: rz(v, c), acos: rz(c, v), cpc: rz(c, k), ctr: rz(k, p),
-      tacos: f != null && f > 0 ? c / f : null,
-    };
-  }), [linhas, fat]);
+  const [m, setM] = useState<Metrica>("conjunto");
+  const serie = useMemo(() => serieCampanha(linhas, faturamentoDia), [linhas, faturamentoDia]);
   const def = METRICAS.find((x) => x.id === m) ?? METRICAS[0];
 
   return (
-    <div className="glass-card rounded-2xl p-4 space-y-3">
+    <div className="min-w-0 space-y-3" aria-label="Evolução diária da campanha">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="ds-rotulo">Campanha selecionada</p>
@@ -66,21 +54,19 @@ export default function CampanhaGrafico({ nome, linhas, faturamentoDia, aoFechar
       {serie.length === 0 ? (
         <p className="text-sm text-muted-foreground">Sem métricas diárias gravadas desta campanha no período. Use Atualizar em Publicidade.</p>
       ) : (
-        <div className="h-60">
+        <div className="h-[320px] min-w-0">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={serie} margin={{ top: 12, right: 16, bottom: 8, left: 8 }}>
-              <defs>
-                <linearGradient id="gCamp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="hsl(var(--ec-verde))" stopOpacity={0} />
-                </linearGradient>
-              </defs>
+            <LineChart data={serie} margin={{ top: 12, right: 16, bottom: 8, left: 0 }}>
               <CartesianGrid stroke="hsl(var(--grid))" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="dia" tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" minTickGap={40} interval="preserveStartEnd" height={36} padding={{ left: 12, right: 12 }} />
-              <YAxis tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" width={76} tickCount={4} tickFormatter={(v) => m === "vendas" || m === "investimento" ? brlCurto(v) : def.fmt(v)} />
-              <Tooltip formatter={(v: number) => [def.fmt(v), def.rotulo]} />
-              <Area type="monotone" dataKey={m} stroke="hsl(var(--ec-verde))" strokeWidth={2} fill="url(#gCamp)" connectNulls={false} isAnimationActive={false} />
-            </AreaChart>
+              <XAxis dataKey="dia" tickFormatter={v => v.slice(5).split('-').reverse().join('/')} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" minTickGap={40} interval="preserveStartEnd" height={36} padding={{ left: 12, right: 12 }} />
+              <YAxis tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" width={76} tickCount={4} tickFormatter={(v) => m === "conjunto" ? brlCurto(v) : def.fmt(v)} />
+              <Tooltip labelFormatter={v => String(v).split('-').reverse().join('/')} formatter={(v: number, name: string) => [def.fmt(v), name]} />
+              <Legend iconType="plainline" />
+              {m === "conjunto" ? <>
+                <Line name="Vendas atribuídas a Ads" type="monotone" dataKey="vendas" stroke="hsl(var(--panel-positive))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
+                <Line name="Investimento" type="monotone" dataKey="investimento" stroke="hsl(var(--panel-text-secondary))" strokeDasharray="5 3" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
+              </> : <Line name={def.rotulo} type="monotone" dataKey={m} stroke="hsl(var(--panel-positive))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />}
+            </LineChart>
           </ResponsiveContainer>
         </div>
       )}

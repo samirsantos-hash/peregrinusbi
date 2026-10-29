@@ -1,5 +1,9 @@
 # Roadmap
 
+## TACOS e gráfico das campanhas (29/10)
+- [x] TACOS na tabela e detalhes sobre faturamento pago da loja nas mesmas datas UTC completas; vendas atribuídas e investimento juntos em linhas distintas, sem transformar lacunas em zero. Gráfico agregado também usa linhas.
+- [x] 95 testes distintos passaram. AUTOPECASLONDRINA: campanha MLB5476651802, investimento R$351,61, receita Ads R$1.307,52, TACOS 0,27%; duas linhas e TACOS diário conferidos, celular 390px, sem erros de execução; build OK.
+
 ## Completar custos diários de Ads (29/10)
 - [x] Corrigir interrupção/reinício pelas primeiras campanhas: custos por campanha antes do histórico por anúncio, retomada das lacunas e leituras antigas; erros e custos ausentes não fecham cobertura. Rotina disponível, sem escrita no ML; 91 testes passaram.
 - [x] AUTOPECASLONDRINA: 95 campanhas × 90 dias = 8.550 custos reais, nenhum null; 60 dias comparáveis completos (2.850 linhas por período). 29/09–28/10: R$3.581,59, 2,73% do faturamento, atingimento 91,0%; anterior R$3.901,51. Dois cartões conferidos na tela após animação, sem erros. Histórico por anúncio ainda tem dias pendentes, sem afetar esses cartões; outras lojas seguem a retomada automática, não verificadas individualmente.

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Button } from "@/components/ui/button";
 import { brl, brlCurto, num } from "@/lib/format";
 import type { PontoPublicidade } from "@/lib/sinergiaPublicidade";
@@ -47,12 +47,12 @@ export default function GraficoPublicidadeSerie({ pontos, compacto = false }: { 
               <p>ROAS: {p.roas == null ? 'Sem dado' : `${num(p.roas, 2)}x`}</p>
             </div>;
           }} />
-          <Bar yAxisId="faturamento" dataKey="faturamento" fill="hsl(var(--panel-positive))" radius={[2, 2, 0, 0]} maxBarSize={20} isAnimationActive={false} />
+          <Line yAxisId="faturamento" dataKey="faturamento" stroke="hsl(var(--panel-positive))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
           <Line yAxisId="ads" dataKey="investimento" stroke="hsl(var(--panel-text-secondary))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
           <Line yAxisId="roas" dataKey="roas" stroke="hsl(var(--panel-text))" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls={false} isAnimationActive={false} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>
-    <p className="text-xs text-muted-foreground">Faturamento: barras verdes · Ads: linha cinza · ROAS: linha pontilhada, escala própria em x.</p>
+    <p className="text-xs text-muted-foreground">Faturamento: linha verde, eixo esquerdo · Investimento Ads: linha cinza, eixo direito · ROAS: linha pontilhada, escala própria em x.</p>
   </div>;
 }
