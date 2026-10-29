@@ -85,7 +85,7 @@ export default function Publicidade() {
           grupos: grupos.data,
           settings: settings.data,
           faturamento: typeof fat === "number" && Number.isFinite(fat) ? fat : null,
-        }, undefined, DIAS),
+        }, new Date(Date.now() - 86_400_000).toISOString().slice(0, 10), DIAS),
         faturamentoEm: (vendas.data?.atualizado_em ?? null) as string | null,
       };
     },
