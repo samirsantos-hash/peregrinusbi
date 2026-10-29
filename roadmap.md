@@ -1,5 +1,9 @@
 # Roadmap
 
+## Completar custos diários de Ads (29/10)
+- [ ] Diagnosticar lacunas e retomar a leitura real de campanhas, sem escrever no Mercado Livre.
+- [ ] Validar 60 dias completos, custo real e os dois indicadores na Visão geral; nunca substituir lacunas por zero.
+
 ## Apple Design no painel inteiro (29/10)
 - [x] Materiais por hierarquia, DM Sans, feedback imediato, superfícies estáveis e menus com entrada/saída coerentes; Home e dados preservados.
 - [x] AUTOPECASLONDRINA: 13 seções nos dois temas, 11 páginas adicionais, menu lateral a 536px e navegação até Preço; sem transbordamento nas seções, nenhum erro de execução, 31 testes passaram, build OK e Home com estilos idênticos. Movimento reduzido sem pulsação; contraste ampliado sem blur. CPP sem arquivo; Multilojas e Carteira de dados ainda carregando; detalhes de grupo/programa/anúncio não verificados por falta de vínculo navegável. Não alterar consultas como parte do visual.
