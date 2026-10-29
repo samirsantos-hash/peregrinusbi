@@ -38,4 +38,4 @@
 - Indicator summaries use security-invoker RPCs; portfolio batches always filter seller IDs and reject partial reads to preserve RLS and totals.
 - Promotion rebate rules use `src/lib/promocoesAnalise.ts`. Product opportunities use scoped listings/live item promotions for active ML accounts, otherwise spreadsheets; API errors never trigger fallback.
 - Ads charts use sinergiaPublicidade: same-date totals, nullable Pearson ≥7, no causality, API/imports separate. Overview goal uses metaInvestimentoAds: paginated campaign costs on summary dates, gaps=null, financial tiers≠internal goal.
-- Panel rain; login ropes. Clips pair metrics. comparacaoPeriodos: paginated daily imports, nulls/coverage; no API/monthly blends.
+- Panel rain; login ropes. Clips pair metrics. Campaign TACOS: same-date store revenue, gaps=null; no API/import blends.
