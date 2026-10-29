@@ -42,6 +42,9 @@ const MercadoLivrePanel = () => {
   const [rotulo, setRotulo] = useState("");
   const [convite, setConvite] = useState<string | null>(null);
   const [gerando, setGerando] = useState(false);
+  const [busca, setBusca] = useState("");
+  const termo = busca.trim().toLowerCase();
+  const filtradas = contas.filter((c) => !termo || `${c.nickname ?? ""} ${c.ml_user_id} ${rotuloStatus(c).txt}`.toLowerCase().includes(termo));
 
   const gerarConvite = async () => {
     setGerando(true);
@@ -117,11 +120,16 @@ const MercadoLivrePanel = () => {
           Você ainda não conectou sua conta. Conecte para importar vendas e custos diretamente do Mercado Livre.
         </p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-[11px]">
-            <thead className="text-muted-foreground">
-              <tr className="border-b border-border/40">
-                <th className="text-left py-1.5">Apelido</th>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <Input type="search" aria-label="Buscar loja integrada" placeholder="Buscar por apelido, ID ou situação" value={busca} onChange={(e) => setBusca(e.target.value)} className="h-9 w-full sm:w-80 text-sm" />
+            <span className="text-xs text-muted-foreground tabular-nums">{filtradas.length} de {contas.length} lojas</span>
+          </div>
+        <div className="overflow-x-auto rounded-lg border border-border">
+          <table className="w-full text-sm border-collapse">
+            <thead className="text-muted-foreground bg-muted/40">
+              <tr className="border-b border-border [&>th]:px-3 [&>th]:py-2.5 [&>th]:font-medium [&>th]:border-r [&>th]:border-border [&>th:last-child]:border-r-0">
+                <th className="text-left">Apelido</th>
                 <th className="text-left">ID Mercado Livre</th>
                 <th className="text-left">Loja vinculada</th>
                 <th className="text-left">Situação</th>
@@ -131,15 +139,15 @@ const MercadoLivrePanel = () => {
               </tr>
             </thead>
             <tbody>
-              {contas.map((c) => {
+              {filtradas.map((c) => {
                 const s = rotuloStatus(c);
                 return (
-                  <tr key={c.account_id} className="border-b border-border/20">
-                    <td className="py-1.5">{c.nickname || "—"}</td>
+                  <tr key={c.account_id} className="border-b border-border last:border-b-0 even:bg-muted/20 hover:bg-muted/40 [&>td]:px-3 [&>td]:py-2 [&>td]:border-r [&>td]:border-border [&>td:last-child]:border-r-0">
+                    <td className="font-medium">{c.nickname || "—"}</td>
                     <td className="tabular-nums">{c.ml_user_id}</td>
                     <td className="text-muted-foreground">{c.site_id || "—"}</td>
                     <td>
-                      <span className={`rounded-full border px-2 py-0.5 ${s.cls}`}>{s.txt}</span>
+                      <span className={`rounded-full border px-2 py-0.5 text-xs ${s.cls}`}>{s.txt}</span>
                     </td>
                     <td className="text-right tabular-nums">{expiraEm(c.token_expira_em)}</td>
                     <td className="text-right tabular-nums">
@@ -158,6 +166,8 @@ const MercadoLivrePanel = () => {
               })}
             </tbody>
           </table>
+          {!filtradas.length && <p className="py-4 text-center text-sm text-muted-foreground">Nenhuma loja encontrada para “{busca}”.</p>}
+        </div>
         </div>
       )}
 
