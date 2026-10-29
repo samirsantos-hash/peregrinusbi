@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchAllRows } from '@/lib/fetchAllRows';
-import { capitalPaulista, mesAnterior, resumoFlex, type FlexCidade, type FlexLoja, type FlexMes } from '@/lib/flexDesempenho';
+import { capitalPaulista, mesAnterior, resumoFlex, serieFlexLoja, type FlexCidade, type FlexLoja, type FlexMes } from '@/lib/flexDesempenho';
 import { brl, delta, num, pct } from '@/lib/format';
 import { KpiCard } from '@/components/ds';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ export default function FlexDesempenho({ lojas }: { lojas: FlexLoja[] }) {
   const [escopo, setEscopo] = useState('capital');
   const [mes, setMes] = useState(() => mesAnterior(mesHoje()));
   const [busca, setBusca] = useState('');
+  const [lojaGrafico, setLojaGrafico] = useState('');
   const cadastro = useQuery({
     queryKey: ['flex-cidades'], staleTime: 300000,
     queryFn: async () => {
@@ -57,6 +59,8 @@ export default function FlexDesempenho({ lojas }: { lojas: FlexLoja[] }) {
     const r = resumoFlex(selecionadas, consulta.data ?? [], m);
     return { mes: nomeMes(m), faturamento: r.faturamento.valor, cobertura: `${r.faturamento.cobertura}/${selecionadas.length} lojas` };
   });
+  const lojaSel = selecionadas.find(l => l.id === lojaGrafico) ?? resumo.linhas[0];
+  const serieLoja = lojaSel ? serieFlexLoja(consulta.data ?? [], lojaSel.id, meses.slice(1)).map(p => ({ ...p, rotulo: nomeMes(p.mes) })) : [];
   const linhas = resumo.linhas.filter(l => `${l.nickname} ${l.custId}`.toLowerCase().includes(busca.toLowerCase()));
   const carregando = cadastro.isPending || (ids.length > 0 && consulta.isPending);
   const erro = cadastro.isError || consulta.isError;
@@ -85,6 +89,23 @@ export default function FlexDesempenho({ lojas }: { lojas: FlexLoja[] }) {
             <Tooltip formatter={(v, _nome, item) => [brl(Number(v), true), `Faturamento Flex · ${item.payload.cobertura}`]} /><Bar dataKey="faturamento" name="Faturamento Flex" fill="hsl(var(--ec-verde))" maxBarSize={20} radius={[2, 2, 0, 0]} isAnimationActive={false} />
           </BarChart></ResponsiveContainer></div>
         </div>
+        {lojaSel && <div className="space-y-3 min-w-0">
+          <div className="flex flex-wrap justify-between items-end gap-3"><div><h3 className="ds-titulo-bloco">Flex por loja</h3><p className="ds-nota">Faturamento Flex, restante do faturamento total e crescimento mensal do Flex. Mês sem medição fica vazio.</p></div>
+            <Select value={lojaSel.id} onValueChange={setLojaGrafico}><SelectTrigger aria-label="Loja do gráfico Flex" className="w-full sm:w-64"><SelectValue /></SelectTrigger><SelectContent>{resumo.linhas.map(l => <SelectItem key={l.id} value={l.id}>{l.nickname}</SelectItem>)}</SelectContent></Select></div>
+          <div className="h-56 w-full min-w-0"><p className="mb-1 text-xs text-muted-foreground">Faturamento Flex, faturamento total e crescimento mensal do Flex</p><ResponsiveContainer>
+            <ComposedChart data={serieLoja} margin={{ left: 0, right: 8, top: 8 }}>
+              <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+              <XAxis dataKey="rotulo" tick={{ fontSize: 11 }} interval="preserveStartEnd" />
+              <YAxis yAxisId="v" tick={{ fontSize: 11 }} width={72} tickFormatter={v => brl(Number(v), true)} />
+              <YAxis yAxisId="c" orientation="right" tick={{ fontSize: 11 }} width={48} tickFormatter={v => `${num(v)}%`} />
+              <Tooltip formatter={(v, n, item) => v == null ? ['Sem dado', n] : n === 'Crescimento do Flex' ? [delta(Number(v)), n] : n === 'Faturamento Flex' ? [`${brl(Number(v), true)} · ${pct(item.payload.participacao, 1)} do total`, n] : [brl(Number(v), true), `${n} (total ${item.payload.total == null ? 'sem dado' : brl(item.payload.total, true)})`]} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar yAxisId="v" dataKey="flex" name="Faturamento Flex" stackId="t" fill="hsl(var(--primary))" isAnimationActive={false} />
+              <Bar yAxisId="v" dataKey="outras" name="Demais modalidades" stackId="t" fill="hsl(var(--muted-foreground) / 0.35)" isAnimationActive={false} />
+              <Line yAxisId="c" type="monotone" dataKey="crescimento" name="Crescimento do Flex" stroke="hsl(var(--foreground))" strokeWidth={1.5} dot={false} connectNulls isAnimationActive={false} />
+            </ComposedChart>
+          </ResponsiveContainer></div>
+        </div>}
         <div className="space-y-4"><div className="flex flex-wrap justify-between items-center gap-3"><h3 className="ds-titulo-bloco">Faturamento por loja</h3><Input aria-label="Buscar loja no Flex" placeholder="Buscar loja ou Cust ID" value={busca} onChange={e => setBusca(e.target.value)} className="w-full sm:w-64" /></div>
           <div className="overflow-x-auto"><table className="w-full text-sm tabular-nums"><thead><tr className="border-b border-border text-muted-foreground"><th className="text-left py-3 pr-4 font-medium">Loja</th><th className="text-right py-3 px-3 font-medium whitespace-nowrap">Faturamento Flex</th><th className="text-right py-3 px-3 font-medium">Unidades</th><th className="text-right py-3 px-3 font-medium">Participação</th><th className="text-right py-3 pl-3 font-medium whitespace-nowrap">Vs. mês anterior</th></tr></thead>
             <tbody>{linhas.map(l => <tr key={l.id} className="border-b border-border"><td className="py-4 pr-4 min-w-48"><span className="font-medium">{l.nickname}</span><span className="block text-xs text-muted-foreground">{l.custId}</span></td><td className="text-right px-3 whitespace-nowrap">{l.faturamento === null ? 'Sem dado' : brl(l.faturamento, true)}</td><td className="text-right px-3">{l.unidades === null ? 'Sem dado' : num(l.unidades)}</td><td className="text-right px-3">{pct(l.participacao, 2)}</td><td className={`text-right pl-3 whitespace-nowrap ${l.variacao !== null && l.variacao < 0 ? 'text-destructive' : l.variacao !== null && l.variacao > 0 ? 'text-emerald' : 'text-muted-foreground'}`}>{delta(l.variacao)}</td></tr>)}</tbody>

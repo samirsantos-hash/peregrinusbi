@@ -44,3 +44,17 @@ export function resumoFlex(lojas: FlexLoja[], dados: FlexMes[], mes: number) {
     variacaoFaturamento: faturamento.completa && faturamentoAnterior.completa ? variacaoFlex(faturamento.valor, faturamentoAnterior.valor) : null,
     variacaoUnidades: unidades.completa && unidadesAnterior.completa ? variacaoFlex(unidades.valor, unidadesAnterior.valor) : null };
 }
+/** Série mensal de uma loja: Flex, restante do faturamento total e crescimento mês a mês do Flex. Sem medição = null. */
+export function serieFlexLoja(dados: FlexMes[], sellerId: string, meses: number[]) {
+  const finito = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+  const indice = new Map(dados.filter(d => d.seller_id === sellerId).map(d => [d.tim_month_id, d]));
+  return meses.map(mes => {
+    const d = indice.get(mes), a = indice.get(mesAnterior(mes));
+    const flex = finito(d?.tgmv_lc_flex) ? d.tgmv_lc_flex : null;
+    const total = finito(d?.tgmv_lc) ? d.tgmv_lc : null;
+    return { mes, flex, total,
+      outras: flex !== null && total !== null ? Math.max(total - flex, 0) : null,
+      participacao: flex !== null && total !== null && total > 0 ? flex / total * 100 : null,
+      crescimento: variacaoFlex(flex, finito(a?.tgmv_lc_flex) ? a.tgmv_lc_flex : null) };
+  });
+}

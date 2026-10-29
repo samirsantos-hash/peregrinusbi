@@ -41,3 +41,16 @@ describe('desempenho Flex por loja', () => {
     expect(r.unidades.valor).toBeNull();
   });
 });
+import { serieFlexLoja } from '@/lib/flexDesempenho';
+describe('serieFlexLoja', () => {
+  it('compara Flex com total e calcula crescimento sem inventar meses', () => {
+    const d = [
+      { seller_id: 'a', tim_month_id: 202608, tgmv_lc: 1000, tgmv_lc_flex: 100, tsi_flex: 1 },
+      { seller_id: 'a', tim_month_id: 202609, tgmv_lc: 1000, tgmv_lc_flex: 150, tsi_flex: 1 },
+    ];
+    const [ago, set, out] = serieFlexLoja(d, 'a', [202608, 202609, 202610]);
+    expect(ago.crescimento).toBeNull();
+    expect(set).toMatchObject({ flex: 150, outras: 850, participacao: 15, crescimento: 50 });
+    expect(out.flex).toBeNull();
+  });
+});
