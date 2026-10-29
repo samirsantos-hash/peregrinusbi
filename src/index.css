@@ -2093,3 +2093,142 @@ html body .peregrinus-panel .resumo-visual-ref > :is(section, div) > header h3 {
   letter-spacing: 0;
   color: hsl(var(--panel-text));
 }
+
+/* Apple Design: panel-only materials and interaction hierarchy. Home is untouched. */
+body:has(.peregrinus-panel) {
+  --panel-backdrop: blur(24px) saturate(150%);
+  --panel-fill: linear-gradient(165deg, hsl(var(--panel-white) / .035), hsl(var(--panel-white) / .015)), hsl(var(--panel-surface) / .4);
+  --panel-fill-hover: var(--panel-fill);
+  --panel-stroke: hsl(var(--panel-white) / .08);
+  --panel-stroke-hover: hsl(var(--panel-positive) / .22);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .08), 0 4px 24px hsl(var(--panel-black) / .2);
+  --panel-hover-shadow: var(--panel-shadow);
+  --panel-nav-fill: linear-gradient(165deg, hsl(var(--panel-white) / .045), hsl(var(--panel-white) / .015)), hsl(var(--panel-surface) / .58);
+  --panel-tooltip: hsl(var(--panel-surface) / .9);
+  --panel-scrim: hsl(var(--panel-black) / .48);
+  --panel-motion-press: 100ms;
+  --panel-motion-surface: 240ms;
+}
+html.light body:has(.peregrinus-panel) {
+  --panel-fill: linear-gradient(155deg, hsl(var(--panel-white) / .6), hsl(var(--panel-white) / .24) 52%, hsl(var(--panel-white) / .38));
+  --panel-fill-hover: var(--panel-fill);
+  --panel-stroke: hsl(var(--panel-white) / .78);
+  --panel-stroke-hover: hsl(var(--panel-action) / .24);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .95), inset 1px 0 0 hsl(var(--panel-white) / .42), 0 8px 24px -16px hsl(var(--panel-text) / .18);
+  --panel-nav-fill: linear-gradient(155deg, hsl(var(--panel-white) / .66), hsl(var(--panel-white) / .34));
+  --panel-tooltip: hsl(var(--panel-surface) / .94);
+  --panel-scrim: hsl(var(--panel-black) / .3);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  font-synthesis: none;
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) :is(button,input,textarea,select,label,h1,h2,h3,h4,p,span) {
+  font-family: inherit;
+  letter-spacing: 0;
+}
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.cartao-branco,.noite-vidro,.cart-card):hover {
+  transform: none !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+/* Inner groups separate content without stacking multiple blurred materials. */
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.noite-vidro,.cart-card) :is(.ds-kpi,.glass-card,.ds-glass-surface,.noite-vidro,.cart-card) {
+  background: var(--panel-fill-nested) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html body .peregrinus-panel :is(.panel-topbar,.panel-sidebar,.cart-header,.cart-tabs-sticky) {
+  backdrop-filter: var(--panel-backdrop);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+  box-shadow: var(--panel-shadow);
+}
+html body .peregrinus-panel .panel-sidebar nav > div:first-child > div > p {
+  font-size: var(--panel-type-label);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  text-transform: none;
+}
+html body .peregrinus-panel :is(h1:not(.panel-section-title),.ds-titulo-pagina) {
+  font-size: var(--panel-type-page-title);
+  line-height: var(--panel-type-page-leading);
+  font-weight: 500;
+  text-wrap: balance;
+}
+html body .peregrinus-panel :is(.ds-titulo-bloco,.painel-noite-titulo) {
+  font-size: var(--panel-type-section-title);
+  line-height: var(--panel-type-section-leading);
+}
+html body .peregrinus-panel :is(table td,table th) {
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+html body .peregrinus-panel table th { font-weight: 500; }
+/* Press feedback starts on pointer-down. No input is locked during transitions. */
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) :is([data-ui-button],button[role="tab"],.panel-nav-item,.cart-tabbtn) {
+  transition: transform var(--panel-motion-press) var(--curva-rapida), opacity 160ms var(--curva-rapida) !important;
+  touch-action: manipulation;
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"]) :is([data-ui-button],button[role="tab"],.panel-nav-item,.cart-tabbtn):active:not(:disabled) {
+  transform: scale(.98);
+  opacity: .85;
+}
+body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"],[role="menu"],[role="listbox"],[role="tooltip"],[data-radix-popper-content-wrapper] > div) {
+  backdrop-filter: var(--panel-backdrop);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+  box-shadow: var(--panel-shadow);
+  color: hsl(var(--panel-text));
+}
+body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"]) {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+body:has(.peregrinus-panel) [data-ui-overlay] {
+  background: var(--panel-scrim);
+  backdrop-filter: blur(4px);
+  animation-duration: 160ms;
+}
+body:has(.peregrinus-panel) [data-ui-surface="dialog"] {
+  animation-duration: var(--panel-motion-surface);
+  animation-timing-function: var(--curva-rapida);
+  --tw-enter-translate-x: 0;
+  --tw-enter-translate-y: 0;
+  --tw-exit-translate-x: 0;
+  --tw-exit-translate-y: 0;
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"] {
+  animation-duration: var(--panel-motion-surface);
+  animation-timing-function: var(--curva-rapida);
+  transition-property: transform, opacity;
+  max-height: 100dvh;
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"][data-side="left"] { border-radius: 0 16px 16px 0 !important; }
+body:has(.peregrinus-panel) [data-ui-surface="sheet"][data-side="right"] { border-radius: 16px 0 0 16px !important; }
+@media (pointer: coarse) {
+  :is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"]) :is([data-ui-button],button[role="tab"],.panel-nav-item) { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .peregrinus-panel :is(.animate-in,.animate-pulse,.glass-card,.ds-kpi,.noite-vidro,.panel-skeleton) { animation: none !important; }
+  :is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"]) :is([data-ui-button],button[role="tab"],.panel-nav-item,.cart-tabbtn):active { transform: none !important; }
+  body:has(.peregrinus-panel) :is([data-ui-surface],[data-ui-overlay],[data-radix-popper-content-wrapper] > div) {
+    --tw-enter-translate-x: 0 !important; --tw-enter-translate-y: 0 !important;
+    --tw-exit-translate-x: 0 !important; --tw-exit-translate-y: 0 !important;
+    --tw-enter-scale: 1 !important; --tw-exit-scale: 1 !important;
+    animation-duration: 100ms !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  body:has(.peregrinus-panel) {
+    --panel-fill: hsl(var(--panel-surface));
+    --panel-fill-hover: hsl(var(--panel-surface));
+    --panel-fill-nested: hsl(var(--panel-raised));
+    --panel-nav-fill: hsl(var(--panel-surface));
+    --panel-tooltip: hsl(var(--panel-surface));
+    --panel-stroke: hsl(var(--panel-text-secondary) / .5);
+    --panel-backdrop: none;
+  }
+}
