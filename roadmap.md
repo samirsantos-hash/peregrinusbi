@@ -1,8 +1,8 @@
 # Roadmap
 
 ## TACOS e gráfico das campanhas (29/10)
-- [ ] Expor TACOS na tabela e detalhes, com faturamento da loja nas mesmas datas; vendas atribuídas e investimento juntos em linhas distintas, sem transformar lacunas em zero.
-- [ ] Testar cálculos e conferir campanha real no painel.
+- [x] TACOS na tabela e detalhes sobre faturamento pago da loja nas mesmas datas UTC completas; vendas atribuídas e investimento juntos em linhas distintas, sem transformar lacunas em zero. Gráfico agregado também usa linhas.
+- [x] 95 testes distintos passaram. AUTOPECASLONDRINA: campanha MLB5476651802, investimento R$351,61, receita Ads R$1.307,52, TACOS 0,27%; duas linhas e TACOS diário conferidos, celular 390px, sem erros de execução; build OK.
 
 ## Completar custos diários de Ads (29/10)
 - [x] Corrigir interrupção/reinício pelas primeiras campanhas: custos por campanha antes do histórico por anúncio, retomada das lacunas e leituras antigas; erros e custos ausentes não fecham cobertura. Rotina disponível, sem escrita no ML; 91 testes passaram.
