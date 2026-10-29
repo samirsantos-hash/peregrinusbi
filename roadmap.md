@@ -1,5 +1,9 @@
 # Roadmap
 
+## Apple Design no painel inteiro (29/10)
+- [ ] Unificar materiais por hierarquia, tipografia DM Sans, feedback imediato e movimento discreto, preservando Home e dados.
+- [ ] Revisar navegação, seções, páginas e menus com sessão real nos dois temas; conferir acessibilidade e registrar limitações.
+
 ## Investimento e tiers na Visão geral (28/10)
 - [x] Dois cartões no resumo: investimento/faturamento e atingimento da meta interna de 3%, com requisitos financeiros Tier 1/2/3 separados. Mesmas datas UTC do resumo e anterior, custos diários por campanha paginados; ausência de cobertura não vira zero. Quinze testes passaram; AUTOPECASLONDRINA conferida autenticada em 1280/536px, sem erros/transbordamento; custo indisponível por cobertura incompleta, meta monetária calculável pelo faturamento real. Fluxo com custo completo não verificável nesta loja.
 
