@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Flex em Logística (29/10)
-- [ ] Incluir aba Flex com filtro mensal, capital paulista ou todas as lojas acessíveis, faturamento, unidades, evolução e tabela por loja; ausência de dados explícita e comparação mensal consistente.
-- [ ] Testar cálculos e conferir fluxo autenticado em computador e celular, preservando Home e Logística existente.
+- [x] Aba Flex com filtro mensal, capital paulista ou todas as lojas acessíveis, faturamento, unidades, evolução com cobertura por mês e tabela por loja; ausência explícita e comparação mensal completa.
+- [x] Cinco testes passaram; sessão real: quatro lojas da capital, três medidas, setembro R$8.401,95 e 78 unidades; mês agosto, todas as lojas e busca conferidos, 536px sem transbordamento, build OK e sem erros de execução. Home e resumo logístico preservados.
 
 ## TACOS e gráfico das campanhas (29/10)
 - [x] TACOS na tabela e detalhes sobre faturamento pago da loja nas mesmas datas UTC completas; vendas atribuídas e investimento juntos em linhas distintas, sem transformar lacunas em zero. Gráfico agregado também usa linhas.
