@@ -111,6 +111,7 @@ const Index = () => {
   const abaRaw = searchParams.get("aba") || "efficiency";
   const activeTab = ABA_ALIAS[abaRaw] ?? abaRaw;
   const [menuAberto, setMenuAberto] = useState(false);
+  const [paginaLogistica, setPaginaLogistica] = useState("resumo-logistica");
   const setActiveTab = useCallback(
     (tab: string) => {
       const next = new URLSearchParams(searchParams);
@@ -593,7 +594,7 @@ const Index = () => {
                     )}
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0 space-y-5">
-                    <Tabs defaultValue="resumo-logistica" className="space-y-5">
+                    <Tabs value={paginaLogistica} onValueChange={setPaginaLogistica} className="space-y-5">
                     <TabsList aria-label="Páginas de Logística">
                       <TabsTrigger value="resumo-logistica">Resumo</TabsTrigger>
                       <TabsTrigger value="flex">Flex</TabsTrigger>

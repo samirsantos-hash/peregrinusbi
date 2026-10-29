@@ -55,7 +55,7 @@ export default function FlexDesempenho({ lojas }: { lojas: FlexLoja[] }) {
   const resumo = resumoFlex(selecionadas, consulta.data ?? [], mes);
   const serie = meses.slice(1).map(m => {
     const r = resumoFlex(selecionadas, consulta.data ?? [], m);
-    return { mes: nomeMes(m), faturamento: r.faturamento.completa ? r.faturamento.valor : null };
+    return { mes: nomeMes(m), faturamento: r.faturamento.valor, cobertura: `${r.faturamento.cobertura}/${selecionadas.length} lojas` };
   });
   const linhas = resumo.linhas.filter(l => `${l.nickname} ${l.custId}`.toLowerCase().includes(busca.toLowerCase()));
   const carregando = cadastro.isPending || (ids.length > 0 && consulta.isPending);
@@ -79,10 +79,10 @@ export default function FlexDesempenho({ lojas }: { lojas: FlexLoja[] }) {
           <KpiCard rotulo={`Unidades Flex${resumo.unidades.completa ? '' : ' · parcial'}`} valor={resumo.unidades.valor === null ? 'Sem dado' : num(resumo.unidades.valor)} referencia={referencia(resumo.variacaoUnidades)} variacao={resumo.variacaoUnidades} />
           <KpiCard rotulo="Participação no faturamento" valor={resumo.participacao === null ? 'Sem dado' : pct(resumo.participacao, 2)} referencia="Faturamento Flex ÷ faturamento total das mesmas lojas" />
         </div>
-        <div className="space-y-3 min-w-0"><h3 className="ds-titulo-bloco">Evolução do faturamento Flex</h3><p className="ds-nota">Meses sem cobertura de todas as lojas ficam sem barra.</p>
+        <div className="space-y-3 min-w-0"><h3 className="ds-titulo-bloco">Evolução do faturamento Flex</h3><p className="ds-nota">Soma das lojas com medição em cada mês; a cobertura pode variar. Ausência não é venda zero.</p>
           <div className="h-72 w-full min-w-0"><ResponsiveContainer width="100%" height="100%"><BarChart data={serie} margin={{ top: 12, right: 12, bottom: 12, left: 8 }} barCategoryGap="35%">
             <CartesianGrid vertical={false} stroke="hsl(var(--border))" /><XAxis dataKey="mes" minTickGap={24} tick={{ fontSize: 12 }} /><YAxis width={82} tickFormatter={v => num(v)} tick={{ fontSize: 12 }} />
-            <Tooltip formatter={v => [brl(Number(v), true), 'Faturamento Flex']} /><Bar dataKey="faturamento" name="Faturamento Flex" fill="hsl(var(--ec-verde))" maxBarSize={20} radius={[2, 2, 0, 0]} isAnimationActive={false} />
+            <Tooltip formatter={(v, _nome, item) => [brl(Number(v), true), `Faturamento Flex · ${item.payload.cobertura}`]} /><Bar dataKey="faturamento" name="Faturamento Flex" fill="hsl(var(--ec-verde))" maxBarSize={20} radius={[2, 2, 0, 0]} isAnimationActive={false} />
           </BarChart></ResponsiveContainer></div>
         </div>
         <div className="space-y-4"><div className="flex flex-wrap justify-between items-center gap-3"><h3 className="ds-titulo-bloco">Faturamento por loja</h3><Input aria-label="Buscar loja no Flex" placeholder="Buscar loja ou Cust ID" value={busca} onChange={e => setBusca(e.target.value)} className="w-full sm:w-64" /></div>
