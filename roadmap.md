@@ -1,5 +1,8 @@
 # Roadmap
 
+## Atualizar novas lojas integradas (29/10)
+- [ ] Identificar contas recém-conectadas, executar sincronizações existentes de leitura e conferir cobertura e pendências, sem alterar dados no Mercado Livre.
+
 ## Flex em Logística (29/10)
 - [x] Aba Flex com filtro mensal, capital paulista ou todas as lojas acessíveis, faturamento, unidades, evolução com cobertura por mês e tabela por loja; ausência explícita e comparação mensal completa.
 - [x] Cinco testes passaram; sessão real: quatro lojas da capital, três medidas, setembro R$8.401,95 e 78 unidades; mês agosto, todas as lojas e busca conferidos, 536px sem transbordamento, build OK e sem erros de execução. Home e resumo logístico preservados.
