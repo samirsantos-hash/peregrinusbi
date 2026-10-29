@@ -1,5 +1,9 @@
 # Roadmap
 
+## Atualizar novas lojas integradas (29/10)
+- [x] Atualizar os oito temas do resumo das 19 contas conectadas desde 27/10; GREATPOOL e BELLOSHOPLTDA concluíram após repetir falha temporária. Conferido por leitura persistida e tela Integrações autenticada, sem escrita no Mercado Livre.
+- [ ] Ads de POWERPLACEACESSORIOS, POWERPLACEBATERIAS e RUMOBATERIAS continuam com erro da API. Cargas detalhadas de anúncios, perguntas, promoções e Ads bloqueadas: acesso atual recusado por ml_pode_gerir_conta (403); históricos mensais continuam pendentes. Não contornar permissões nem declarar cobertura completa.
+
 ## Flex em Logística (29/10)
 - [x] Aba Flex com filtro mensal, capital paulista ou todas as lojas acessíveis, faturamento, unidades, evolução com cobertura por mês e tabela por loja; ausência explícita e comparação mensal completa.
 - [x] Cinco testes passaram; sessão real: quatro lojas da capital, três medidas, setembro R$8.401,95 e 78 unidades; mês agosto, todas as lojas e busca conferidos, 536px sem transbordamento, build OK e sem erros de execução. Home e resumo logístico preservados.
