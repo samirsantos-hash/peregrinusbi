@@ -30,6 +30,7 @@ import AvisoSemOperacao from "@/components/dashboard/AvisoSemOperacao";
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
+import FlexDesempenho from "@/components/dashboard/FlexDesempenho";
 import UpliftFullPanel from "@/components/seller/UpliftFullPanel";
 import StockoutRiskPanel from "@/components/dashboard/StockoutRiskPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
@@ -110,6 +111,7 @@ const Index = () => {
   const abaRaw = searchParams.get("aba") || "efficiency";
   const activeTab = ABA_ALIAS[abaRaw] ?? abaRaw;
   const [menuAberto, setMenuAberto] = useState(false);
+  const [paginaLogistica, setPaginaLogistica] = useState("resumo-logistica");
   const setActiveTab = useCallback(
     (tab: string) => {
       const next = new URLSearchParams(searchParams);
@@ -592,12 +594,21 @@ const Index = () => {
                     )}
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0 space-y-5">
+                    <Tabs value={paginaLogistica} onValueChange={setPaginaLogistica} className="space-y-5">
+                    <TabsList aria-label="Páginas de Logística">
+                      <TabsTrigger value="resumo-logistica">Resumo</TabsTrigger>
+                      <TabsTrigger value="flex">Flex</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="resumo-logistica" className="space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="logistics" />}
                     <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
                     <MlAoVivo secao="logistica" custId={sellerCustIdMap[selectedSeller]} />
                     <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} eligibilityItems={eligibilityItems || []} />
                     <UpliftFullPanel custId={sellerCustIdMap[selectedSeller]} />
                     <StockoutRiskPanel sellerId={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
+                    </TabsContent>
+                    <TabsContent value="flex"><FlexDesempenho lojas={hasRealData ? sellers : []} /></TabsContent>
+                    </Tabs>
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
