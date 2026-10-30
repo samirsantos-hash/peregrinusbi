@@ -1,5 +1,6 @@
 import { calcularTendencia } from "@/lib/tendencia";
 import TendenciaChip from "@/components/charts/TendenciaChip";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -30,6 +31,7 @@ import {
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 import AdsGranularidadePanel from "./AdsGranularidadePanel";
 import AcosTacosChart from "./AcosTacosChart";
+import { SinergiaIndicadores } from "@/components/ml/SinergiaPublicidade";
 
 type Props = {
   sellerUuid: string;
@@ -37,10 +39,18 @@ type Props = {
   fromDate: string; // YYYY-MM-DD
   toDate: string;   // YYYY-MM-DD
   sellerNickname?: string;
+  diario?: { date: string; adsInvestment?: number; tgmv?: number; tgmvPads?: number; visits?: number; repCancellationsRate?: number }[];
+  /**
+   * completo = KPIs + scores + gráfico + granular (legado).
+   * evolucao = só meso/micro histórico (gráfico + scores + margem), sem repetir big numbers do Product Ads ao vivo.
+   */
+  variante?: "completo" | "evolucao";
 };
 
-const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname }: Props) => {
+const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname, diario = [], variante = "completo" }: Props) => {
+  const mobile = useIsMobile();
   const [grafico, setGrafico] = useState<"roas_acos" | "investimento">("roas_acos");
+  const soEvolucao = variante === "evolucao";
 
   const { data: m, isLoading } = useQuery({
     queryKey: ["publicidade", sellerUuid, custId, fromDate, toDate],
@@ -73,15 +83,17 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
 
   return (
     <div className="space-y-5">
+      {!soEvolucao && <SinergiaIndicadores fonte={`Histórico importado · ${fromDate} a ${toDate}`} pontos={diario.filter(d => d.date.slice(0, 10) >= fromDate && d.date.slice(0, 10) <= toDate).map(d => ({ data: d.date.slice(0, 10), investimento: d.adsInvestment ?? null, faturamento: d.tgmv ?? null, receitaAds: d.tgmvPads ?? null, visitas: d.visits ?? null, cancelamentos: d.repCancellationsRate ?? null }))} />}
       {/* Banner sem dados */}
-      {semDados && (
+      {semDados && !soEvolucao && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
-          ⚠️ Nenhum investimento em Ads (PADS) detectado para {sellerNickname ?? "este seller"} no período.
+          Nenhum investimento em Ads (PADS) detectado para {sellerNickname ?? "este seller"} no período do calendário.
           Verifique se há campanhas ativas no Mercado Ads.
         </div>
       )}
 
-      {/* ── KPI Cards principais ─────────────────────────────────────── */}
+      {/* ── KPI Cards principais (só no modo completo — evita eco com Product Ads ao vivo) ── */}
+      {!soEvolucao && (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           titulo="ROAS"
@@ -131,13 +143,99 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           </div>
         </div>
       </div>
+      )}
 
+
+      {/* ── Gráfico de evolução (antes dos scores: Macro→Micro) ──────── */}
+      {m.historico.length >= 1 && (
+        <div className="rounded-xl border border-border/40 bg-card/60 p-5">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {soEvolucao ? "3 · " : ""}Evolução histórica ({m.historico.length} {m.historico.length === 1 ? "mês" : "meses"})
+              <TendenciaChip t={calcularTendencia(m.historico.map((d) => Number(d.gmv_ads) || 0))} className="ml-2 normal-case tracking-normal" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {([
+                ["roas_acos", "ACOS / TACOS"],
+                ["investimento", "Investimento vs GMV Ads"],
+              ] as const).map(([g, label]) => (
+                <button
+                  key={g}
+                  onClick={() => setGrafico(g)}
+                  className="rounded-lg border px-3 py-1.5 text-xs transition-colors"
+                  style={{
+                    background: grafico === g ? "hsl(var(--border))" : "transparent",
+                    borderColor: grafico === g ? "hsl(var(--series-2))" : "hsl(var(--border))",
+                    color: grafico === g ? "hsl(var(--series-4))" : "hsl(var(--muted-foreground))",
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {grafico === "roas_acos" ? (
+            <AcosTacosChart pontos={m.historico} />
+          ) : (
+            <ResponsiveContainer width="100%" height={mobile ? 340 : 300}>
+              <ComposedChart data={m.historico} barCategoryGap="35%" barGap={4} margin={{ top: 12, right: 16, bottom: 12, left: 8 }}>
+                <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
+                <XAxis dataKey="mes" interval="preserveStartEnd" minTickGap={40} height={36} padding={{ left: 12, right: 12 }} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} tickFormatter={(v) => String(v).slice(2)} />
+                <YAxis width={76} tickCount={mobile ? 4 : 5} tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} />
+                <Tooltip
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
+                  formatter={(value: any, name: any) => [
+                    fmtBRL(Number(value)),
+                    name === "inv" ? "Investimento" : "GMV via Ads",
+                  ]}
+                />
+                <Legend formatter={(n) => (n === "inv" ? "Investimento" : "GMV via Ads")} />
+                {m.historico.length >= 2 && (() => {
+                  const med = m.historico.reduce((a, d) => a + (Number(d.gmv_ads) || 0), 0) / m.historico.length;
+                  return <ReferenceLine y={med} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
+                    label={{ value: `Média GMV Ads ${fmtBRLCompact(med)}`, position: "insideTopLeft", fill: "hsl(var(--media))", fontSize: 10 }} />;
+                })()}
+                <Bar dataKey="inv" fill="hsl(var(--series-2))" maxBarSize={20} radius={[2, 2, 0, 0]}>
+                  {m.historico.map((d, i) => (
+                    <Cell key={`inv-${i}`} fill={corRoas(d.roas)} fillOpacity={0.55} />
+                  ))}
+                </Bar>
+                <Bar dataKey="gmv_ads" fill="hsl(var(--ok))" maxBarSize={20} radius={[2, 2, 0, 0]}>
+                  {m.historico.map((d, i) => (
+                    <Cell key={`gmv-${i}`} fill={corRoas(d.roas)} />
+                  ))}
+                </Bar>
+              </ComposedChart>
+            </ResponsiveContainer>
+          )}
+
+          {/* Legenda de cores por performance ROAS */}
+          {grafico !== "roas_acos" && (
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
+            <span className="font-semibold uppercase tracking-wider">Cor por ROAS do mês:</span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--ok))" }} /> Excelente (≥ {BENCHMARKS_ADS.roas.excelente}x)
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--emerald-glow))" }} /> Bom (≥ {BENCHMARKS_ADS.roas.bom}x)
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--attention-text))" }} /> Atenção (≥ {BENCHMARKS_ADS.roas.atencao}x)
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--crit))" }} /> Crítico (&lt; {BENCHMARKS_ADS.roas.atencao}x)
+            </span>
+          </div>
+          )}
+        </div>
+      )}
 
       {/* ── Scores ML ────────────────────────────────────────────────── */}
       {algumScore && (
         <div className="rounded-xl border border-border/40 bg-card/60 p-5">
           <div className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Scores ML — PADS (avaliação do algoritmo)
+            {soEvolucao ? "4 · Scores ML (PADS)" : "Scores ML — PADS (avaliação do algoritmo)"}
           </div>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {scores.map(({ label, val, ok, warn }) =>
@@ -169,99 +267,10 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
         </div>
       )}
 
-      {/* ── Gráfico de evolução ──────────────────────────────────────── */}
-      {m.historico.length >= 1 && (
-        <div className="rounded-xl border border-border/40 bg-card/60 p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Evolução histórica ({m.historico.length} {m.historico.length === 1 ? "mês" : "meses"})
-              <TendenciaChip t={calcularTendencia(m.historico.map((d) => Number(d.gmv_ads) || 0))} className="ml-2 normal-case tracking-normal" />
-            </div>
-            <div className="flex gap-2">
-              {([
-                ["roas_acos", "ACOS / TACOS"],
-                ["investimento", "Investimento vs GMV Ads"],
-              ] as const).map(([g, label]) => (
-                <button
-                  key={g}
-                  onClick={() => setGrafico(g)}
-                  className="rounded-lg border px-3 py-1.5 text-xs transition-colors"
-                  style={{
-                    background: grafico === g ? "hsl(var(--border))" : "transparent",
-                    borderColor: grafico === g ? "hsl(var(--series-2))" : "hsl(var(--border))",
-                    color: grafico === g ? "hsl(var(--series-4))" : "hsl(var(--muted-foreground))",
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {grafico === "roas_acos" ? (
-            <AcosTacosChart pontos={m.historico} />
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <ComposedChart data={m.historico} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-                <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-                <XAxis dataKey="mes" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => String(v).slice(2)} />
-                <YAxis tickFormatter={(v) => fmtBRLCompact(Number(v))} tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
-                <Tooltip
-                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 12 }}
-                  formatter={(value: any, name: any) => [
-                    fmtBRL(Number(value)),
-                    name === "inv" ? "Investimento" : "GMV via Ads",
-                  ]}
-                />
-                <Legend formatter={(n) => (n === "inv" ? "Investimento" : "GMV via Ads")} />
-                {m.historico.length >= 2 && (() => {
-                  const med = m.historico.reduce((a, d) => a + (Number(d.gmv_ads) || 0), 0) / m.historico.length;
-                  return <ReferenceLine y={med} stroke="hsl(var(--media))" strokeWidth={1.5} strokeDasharray="6 4"
-                    label={{ value: `Média GMV Ads ${fmtBRLCompact(med)}`, position: "insideTopLeft", fill: "hsl(var(--media))", fontSize: 10 }} />;
-                })()}
-                <Bar dataKey="inv" fill="hsl(var(--series-2))">
-                  {m.historico.map((d, i) => (
-                    <Cell key={`inv-${i}`} fill={corRoas(d.roas)} fillOpacity={0.55} />
-                  ))}
-                </Bar>
-                <Bar dataKey="gmv_ads" fill="hsl(var(--ok))">
-                  {m.historico.map((d, i) => (
-                    <Cell key={`gmv-${i}`} fill={corRoas(d.roas)} />
-                  ))}
-                </Bar>
-              </ComposedChart>
-            </ResponsiveContainer>
-          )}
-
-          {/* Legenda de cores por performance ROAS */}
-          {grafico !== "roas_acos" && (
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
-            <span className="font-semibold uppercase tracking-wider">Cor por ROAS do mês:</span>
-            <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--ok))" }} /> Excelente (≥ {BENCHMARKS_ADS.roas.excelente}x)
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--emerald-glow))" }} /> Bom (≥ {BENCHMARKS_ADS.roas.bom}x)
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--attention-text))" }} /> Atenção (≥ {BENCHMARKS_ADS.roas.atencao}x)
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full" style={{ background: "hsl(var(--crit))" }} /> Crítico (&lt; {BENCHMARKS_ADS.roas.atencao}x)
-            </span>
-          </div>
-          )}
-        </div>
-      )}
-
-
-      {/* ── Granularidade de investimento em Ads ─────────────────────── */}
-      <AdsGranularidadePanel sellerUuid={sellerUuid} fromDate={fromDate} toDate={toDate} />
-
       {/* ── Impacto do TACOS na margem ───────────────────────────────── */}
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">
         <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Impacto do TACOS na margem
+          {soEvolucao ? "5 · Impacto do TACOS na margem" : "Impacto do TACOS na margem"}
         </div>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {[
@@ -293,10 +302,13 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           })}
         </div>
         <div className="mt-3 text-xs text-muted-foreground">
-          TACOS atual: <span className="font-mono tabular-nums">{m.tacos.toFixed(1).replace(".", ",")}%</span> do GMV total consumido por Ads.
+          TACOS (base PADS do calendário): <span className="font-mono tabular-nums">{m.tacos.toFixed(1).replace(".", ",")}%</span> do GMV total consumido por Ads.
           Margem líquida = margem bruta estimada − TACOS.
         </div>
       </div>
+
+      {/* ── Granularidade (último nível) ─────────────────────────────── */}
+      <AdsGranularidadePanel sellerUuid={sellerUuid} fromDate={fromDate} toDate={toDate} />
     </div>
   );
 };

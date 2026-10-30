@@ -1,4 +1,5 @@
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -40,6 +41,7 @@ const METRICAS: { val: Metrica; label: string }[] = [
 ];
 
 const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
+  const mobile = useIsMobile();
   const [granularidade, setGranularidade] = useState<Granularidade>("semana");
   const [metrica, setMetrica] = useState<Metrica>("inv");
 
@@ -163,17 +165,26 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
             Sem dados diários de Ads no intervalo selecionado.
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={320}>
-            <ComposedChart data={serie} margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
+          <ResponsiveContainer width="100%" height={mobile ? 360 : 320}>
+            <ComposedChart data={serie} barCategoryGap="35%" barGap={4} margin={{ top: 12, right: 8, bottom: 12, left: 8 }}>
               <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-              <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} interval="preserveStartEnd" />
+              <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} interval="preserveStartEnd" minTickGap={40} height={40} padding={{ left: 12, right: 12 }} />
               <YAxis
                 yAxisId="brl"
+                width={76}
+                tickCount={mobile ? 4 : 5}
+                axisLine={false}
+                tickLine={false}
                 tickFormatter={(v) => fmtBRLCompact(Number(v))}
                 tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
               />
               <YAxis
                 yAxisId="sec"
+                hide={metrica === "inv"}
+                width={44}
+                tickCount={mobile ? 4 : 5}
+                axisLine={false}
+                tickLine={false}
                 orientation="right"
                 tickFormatter={(v) => (metrica === "roas" ? `${Number(v).toFixed(0).replace(".", ",")}x` : `${Number(v).toFixed(0).replace(".", ",")}%`)}
                 tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
@@ -194,8 +205,8 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
                   n === "inv" ? "Investimento" : n === "gmv_ads" ? "GMV via Ads" : n === "roas" ? "ROAS" : n === "acos" ? "ACOS %" : "TACOS %"
                 }
               />
-              <Bar yAxisId="brl" dataKey="gmv_ads" name="gmv_ads" fill="hsl(var(--primary))" fillOpacity={0.9} radius={[2, 2, 0, 0]} />
-              <Bar yAxisId="brl" dataKey="inv" name="inv" fill="hsl(var(--ec-laranja))" fillOpacity={1} radius={[2, 2, 0, 0]} />
+              <Bar yAxisId="brl" dataKey="gmv_ads" name="gmv_ads" fill="hsl(var(--panel-positive))" maxBarSize={20} radius={[2, 2, 0, 0]} />
+              <Bar yAxisId="brl" dataKey="inv" name="inv" fill="hsl(var(--panel-text-secondary))" maxBarSize={20} radius={[2, 2, 0, 0]} />
               {metrica !== "inv" && (
                 <Line
                   yAxisId="sec"
@@ -212,46 +223,10 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
         )}
 
         <div className="mt-3 text-[10px] text-muted-foreground">
-          Barras coloridas pelo ROAS do período (verde = eficiente, vermelho = crítico). Fonte: base diária de KPIs (INV_PADS, TGMV_LC_PADS, TGMV_LC).
+          Verde: faturamento via Ads · Cinza: investimento. Fonte: histórico diário importado, no período selecionado.
         </div>
       </div>
 
-      {/* ── Tabela por período ───────────────────────────────────────── */}
-      {serie.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-border/40 bg-card/60">
-          <table className="w-full text-xs">
-            <thead className="border-b border-border/40 text-muted-foreground">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium">Período</th>
-                <th className="px-3 py-2 text-right font-medium">Investimento</th>
-                <th className="px-3 py-2 text-right font-medium">GMV Ads</th>
-                <th className="px-3 py-2 text-right font-medium">Pedidos Ads</th>
-                <th className="px-3 py-2 text-right font-medium">ROAS</th>
-                <th className="px-3 py-2 text-right font-medium">ACOS</th>
-                <th className="px-3 py-2 text-right font-medium">TACOS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {serie
-                .slice()
-                .reverse()
-                .map((b) => (
-                  <tr key={b.key} className="border-b border-border/20 last:border-0">
-                    <td className="px-3 py-2 text-foreground">{b.label}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{fmtBRL(b.inv)}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{fmtBRL(b.gmv_ads)}</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.tsi_ads.toLocaleString("pt-BR")}</td>
-                    <td className="px-3 py-2 text-right font-mono font-semibold tabular-nums" style={{ color: corRoas(b.roas) }}>
-                      {b.roas.toFixed(2).replace(".", ",")}x
-                    </td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.acos.toFixed(1).replace(".", ",")}%</td>
-                    <td className="px-3 py-2 text-right font-mono tabular-nums">{b.tacos.toFixed(1).replace(".", ",")}%</td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      )}
 
       {/* ── Produtos mais vendidos ───────────────────────────────────── */}
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">

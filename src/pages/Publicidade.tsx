@@ -18,6 +18,7 @@ import { chamarFuncaoMl, dataHoraBr, useContasMl } from "@/lib/mlFuncoes";
 import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel } from "@/lib/adsAnalise";
 import { useDesenvolvedor } from '@/hooks/useDesenvolvedor';
 import { registrarAviso } from '@/lib/avisosDesenvolvedor';
+import SinergiaPublicidadeApi from '@/components/ml/SinergiaPublicidade';
 
 /** Janela de comparação: 30 dias contra os 30 anteriores (a API guarda 90). */
 const DIAS = 30;
@@ -84,7 +85,7 @@ export default function Publicidade() {
           grupos: grupos.data,
           settings: settings.data,
           faturamento: typeof fat === "number" && Number.isFinite(fat) ? fat : null,
-        }, undefined, DIAS),
+        }, new Date(Date.now() - 86_400_000).toISOString().slice(0, 10), DIAS),
         faturamentoEm: (vendas.data?.atualizado_em ?? null) as string | null,
       };
     },
@@ -189,6 +190,7 @@ export default function Publicidade() {
 
         {estado.data?.status === "ativo" && (
           <>
+            <SinergiaPublicidadeApi accountId={contaId} />
             {dados.isLoading && <Carregando texto="Montando o painel de publicidade…" />}
             {dados.isError && <EmptyState falta="Não foi possível carregar os dados de publicidade." acao="Recarregue a página ou clique em Atualizar." />}
             {painel && (
@@ -202,7 +204,7 @@ export default function Publicidade() {
                   <VisaoGeralAds painel={painel} faturamentoEm={dados.data?.faturamentoEm ?? null} aoVerAnuncios={(filtro) => mudar({ aba: "anuncios", filtro })} />
                 </TabsContent>
                 <TabsContent value="campanhas" className="mt-4">
-                  <CampanhasAds painel={painel} acao={acao} />
+                  <CampanhasAds painel={painel} acao={acao} custId={String(contas.data?.find((c) => c.id === contaId)?.ml_user_id ?? "")} contaId={contaId} />
                 </TabsContent>
                 <TabsContent value="anuncios" className="mt-4">
                   <AnunciosAds

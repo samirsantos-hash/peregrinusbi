@@ -5,6 +5,7 @@ import { monthKey, monthKeyFromTimMonthId } from "@/lib/dates";
 import { classificarCrescimento, type ClassificacaoSust } from "@/lib/sustentabilidade";
 import { decompor } from "@/lib/decomposicao";
 import { inclinacaoLog, type SerieMensal } from "@/lib/forecast";
+import { fetchScopedRows } from "@/lib/scopedRows";
 
 export interface LojaClassificada {
   sellerId: string;
@@ -123,24 +124,12 @@ export function useClassificacaoLojas() {
       type Row = {
         seller_id: string; data: string | null; tim_month_id: number | null;
         tgmv_lc: any; gmv_lc: any; tsi: any; visits: any; inv_pads: any;
-        rep_current_level: string | null; rep_cancellations_rate: any; ll_stock_availability_score: any;
+        rep_current_level: string | null; rep_cancellations_rate: any; ll_stock_availability_score: any; meses_total: number;
       };
-      const all: Row[] = [];
-      const pageSize = 1000;
-      let from = 0;
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { data, error } = await supabase
-          .from("sellers_kpi")
-          .select("seller_id, data, tim_month_id, tgmv_lc, gmv_lc, tsi, visits, inv_pads, rep_current_level, rep_cancellations_rate, ll_stock_availability_score")
-          .order("data", { ascending: true })
-          .range(from, from + pageSize - 1);
-        if (error) throw error;
-        if (!data || data.length === 0) break;
-        all.push(...(data as any));
-        if (data.length < pageSize) break;
-        from += pageSize;
-      }
+      const all = await fetchScopedRows<Row>([...meta.keys()], (ids, from, to) =>
+        supabase.rpc("indicadores_classificacao", { p_seller_ids: ids }).range(from, to),
+      );
+      const monthCounts = new Map(all.map(r => [r.seller_id, Number(r.meses_total)]));
 
       // 3) group by seller -> month
       const bySeller = new Map<string, Map<string, { receita: number; visitas: number; tsi: number; invAds: number; repLevel: string | null; bs: number; oos: number; nOos: number; nBs: number }>>();
@@ -235,7 +224,7 @@ export function useClassificacaoLojas() {
           receitaUlt: last.receita,
           visitasUlt: last.visitas,
           crUlt: last.visitas > 0 ? (last.tsi / last.visitas) * 100 : 0,
-          meses: sorted.length,
+          meses: monthCounts.get(sellerId) ?? sorted.length,
         });
       });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { diasPendentes, janelaMetricasAds, lerAnunciantes, lerMetricas, metricasPorGrupo, serieDiaria } from "../../supabase/functions/_shared/mlAds";
+import { diasPendentes, janelaMetricasAds, lerAnunciantes, lerMetricas, metricasPorGrupo, serieDiaria, ordenarCampanhasAds } from "../../supabase/functions/_shared/mlAds";
 import { buscarMl, enviarMl } from "../../supabase/functions/_shared/mlHttp";
 import { entraNaBusca, lerAnuncio, ordemDeLeitura } from "../../supabase/functions/_shared/mlAnuncios";
 import { estadoPergunta, lerListaPerguntas, lerPergunta, motivoSemResposta, validarResposta } from "../../supabase/functions/_shared/mlPerguntas";
@@ -156,6 +156,17 @@ describe("idempotência", () => {
 });
 
 describe("Product Ads", () => {
+  it("retoma campanhas sem custo completo antes das já lidas e não aceita null como zero", () => {
+    const janela = { date_from: '2026-10-27', date_to: '2026-10-28' };
+    const rows = [
+      { campaign_id: 1, dia: '2026-10-27', cost: 10, synced_at: '2026-10-29T02:00:00Z' },
+      { campaign_id: 1, dia: '2026-10-28', cost: 0, synced_at: '2026-10-29T02:00:00Z' },
+      { campaign_id: 2, dia: '2026-10-27', cost: null, synced_at: '2026-10-29T02:00:00Z' },
+    ];
+    const r = ordenarCampanhasAds([{ campaign_id: 1 }, { campaign_id: 2 }, { campaign_id: 3 }], rows, janela);
+    expect(r.ordenadas.map(c => c.campaign_id)).toEqual([3, 2, 1]);
+    expect(r.incompletas).toBe(2);
+  });
   it("pede os 90 dias que a API permite, no calendário de São Paulo", () => {
     const janela = janelaMetricasAds(new Date("2026-10-21T15:00:00.000Z"));
     expect(janela.date_to).toBe("2026-10-21");

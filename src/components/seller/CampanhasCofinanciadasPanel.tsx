@@ -209,7 +209,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
       </div>
 
       {/* Tabela de itens */}
-      <div className="glass-card p-3">
+      <div className="glass-card p-3 overflow-x-auto">
         <div className="grid grid-cols-[2.2fr_1.2fr_70px_90px_90px_110px_90px] gap-2 px-2 py-2 text-[10px] uppercase tracking-wider text-muted-foreground font-medium border-b border-border">
           <div>Anúncio</div>
           <div>Código campanha</div>

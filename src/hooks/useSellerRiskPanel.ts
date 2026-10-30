@@ -8,6 +8,7 @@ import {
   type RiskSellerResult,
 } from "@/lib/risk/riskAggregator";
 import { fetchDominantVerticals } from "@/lib/risk/verticalOf";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 export interface RiskPanelData {
   results: RiskSellerResult[];
@@ -43,15 +44,15 @@ export function useSellerRiskPanel() {
       const prior = toIso(shift(currentDate, -2));
       const distinct = [current, closed, prior];
 
-      const { data: kpis, error: kErr } = await supabase
+      const { data: kpis, error: kErr } = await fetchAllRows((from, to) => supabase
         .from("sellers_kpi")
         .select(
           "seller_id, data, tgmv_lc, bpc, rep_claims_rate, rep_delayed_ht_rate, sellers!inner(id, nickname, cust_id)",
         )
-        .in("data", [current, closed, prior]);
+        .in("data", [current, closed, prior]).order("seller_id").order("data").order("id").range(from, to));
       if (kErr) throw kErr;
 
-      const verticalOf = await fetchDominantVerticals();
+      const verticalOf = await fetchDominantVerticals([...new Set(kpis.map((r: any) => String(r.seller_id)))]);
 
       type Snap = {
         sellerId: string;

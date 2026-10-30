@@ -47,8 +47,9 @@ Deno.serve(async (req) => {
     const end = new Date(); end.setUTCHours(0, 0, 0, 0);
     const start = new Date(end.getTime() - 30 * 864e5);
     const from = start.toISOString(), to = new Date(end.getTime() - 1).toISOString();
-    const visits = await get(`/items/${itemId}/visits?date_from=${from.slice(0, 10)}&date_to=${to.slice(0, 10)}`);
-    const visitas = parseItemVisits(visits, itemId);
+    // Documented endpoint: /items/visits?ids=…&date_from=…&date_to=… (array with total_visits).
+    let visitas = parseItemVisits(await get(`/items/visits?ids=${itemId}&date_from=${from.slice(0, 10)}&date_to=${to.slice(0, 10)}`), itemId);
+    if (visitas == null) visitas = parseItemVisits(await get(`/items/${itemId}/visits/time_window?last=30&unit=day&ending=${to.slice(0, 10)}`), itemId);
     const orders: any[] = [];
     let completo = true;
     for (let offset = 0; offset < 1000; offset += 50) {

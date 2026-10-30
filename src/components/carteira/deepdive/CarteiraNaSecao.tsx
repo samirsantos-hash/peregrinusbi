@@ -72,8 +72,9 @@ export default function CarteiraNaSecao({ secao }: { secao: SecaoCarteira }) {
   return (
     <section className="space-y-4 rounded-lg border border-border/50 bg-card/30 p-4">
       {titulo}
-      {secao === "efficiency" && kpis({ volume: false, carteira: true, alavancasVisiveis: [] })}
-      {secao === "executive" && kpis({ volume: true, carteira: false, alavancasVisiveis: [] })}
+      {/* Visão geral unificada: volume (ex-Faturamento) + carteira (ex-Resumo) numa faixa */}
+      {secao === "efficiency" && kpis({ volume: true, carteira: true, alavancasVisiveis: [] })}
+      {secao === "executive" && kpis({ volume: true, carteira: true, alavancasVisiveis: [] })}
       {ALAVANCAS[secao] && kpis({ volume: false, carteira: false, alavancasVisiveis: ALAVANCAS[secao] })}
       {secao === "competitiveness" && <CurvaAPreco />}
       {secao === "alertas-riscos" && (

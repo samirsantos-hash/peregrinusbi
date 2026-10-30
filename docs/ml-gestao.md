@@ -72,6 +72,8 @@ Confirmação (só a chave; o servidor usa o que gravou na prévia):
 - Somente leitura do ML com token da própria conta e renovação compartilhada. Sem gravação de dados de negócio; retorna apenas agregados, nunca compradores ou pedidos brutos.
 - Período: 30 dias UTC completos. Resumo consulta também os 30 dias anteriores. Receita = soma de quantidade × preço em pedidos pagos, unidades separadas de pedidos; cancelamento = cancelados ÷ (pagos + cancelados). Outros status não entram.
 - Resumo: `{ periodo, anteriorPeriodo, atual, anterior, consultadoEm }`; totais incluem faturamento, pedidos, unidades, cancelados, ticket, visitas, conversao, taxaCancelamento e serie diária. Visitas/conversão ficam null se faltar qualquer dia da janela.
+- `modo: "campanhasDiagnostico"`: valida disponibilidade de `/orders/{id}/discounts` em até 20 pedidos pagos da primeira página dos 30 dias UTC completos, orçamento 75 s e timeout 5 s por desconto. Retorna `{ periodo, diagnostico, amostra: true, atribuicaoConfirmada: false, consultadoEm }`; contagens de leituras, identificadores presentes/reconhecidos e nomes de campos estritamente permitidos. Nunca retorna pedidos, IDs de vendas ou payloads de descontos. Correspondência local é apenas diagnóstico (até 1.000 ofertas atuais, não prova atribuição histórica). A amostra não é série diária nem total do período; 404 e falhas não significam desconto zero. Tela Oportunidades mostra a limitação sem fabricar gráfico.
+- A leitura personalizada em Oportunidades usa `src/lib/campanhasLeitura.ts`, nome da conta visível, período e contagens retornadas. Explica cobertura da amostra e correspondências sem chamá-las de atribuição; não calcula desempenho, custo por venda ou causalidade a partir dessa amostra. Não usa IA para inferir identificadores ausentes.
 - Full: `{ periodo, candidatos, universoVendido, limite: 20, consultadoEm, elegibilidadeFull: null }`. Até 20 anúncios vendidos fora de fulfillment, com MLB, título, SKU, estoque/status atuais, receita/unidades pagas, série diária completa, saúde, pendências ML e dimensões originais das fotos. Universo limitado explicitamente; pesos não são envio nem elegibilidade.
 - Frontend usa quadprog para minimizar risco de oscilação da receita diária combinado à média, com pesos long-only que somam 100% e limite de 40% por anúncio (50% com dois). Só calcula com ao menos dois anúncios ativos com estoque e 30 datas alinhadas; alertas não inventam resolução ou lucro.
 - Erros: 400 entrada inválida; 401 sem sessão; 403 sem loja visível; 404 desconectada; 409 autorização indisponível; 422 mais de 1.000 pedidos (suspende totais, não exibe parcial); 502 cobertura/API/tempo não confirmados.
@@ -140,6 +142,7 @@ Contrato próprio (uma pergunta por vez), com a mesma idempotência das ações 
 #### `ml-promotions-item`
 
 - Entrada: `{ account_id, item_id }` com JWT.
+- Oportunidades: conta visível com `status=active` usa produtos de `ml_listings` (ativos/pausados, ordenação estável por vendidos/item_id), dez inicialmente e expansão de dez em dez. Cada produto consulta esta função em sequência; só `candidate`/`candidated` são campanhas elegíveis. Erros aparecem por produto, sem tratá-los como ausência de campanha. Preço/estoque são da cópia sincronizada; promoções são ao vivo. Sem conta ativa usa a planilha, dez produtos com expansão/recolhimento; nenhuma inferência de vendas atribuídas.
 - Saída: `200 { item: { item_id, titulo, preco, status }, promocoes: [{ promotion_id, tipo, status, preco, preco_original, offer_id, min, max, sugerido, nome, inicio, fim, meli_pct, vendedor_pct, estoque_min, estoque_max, nome_tipo, preco_por, pode: { aderir, alterar, sair }, motivo_sair }] }`.
 - Erros: 400, 401, 403, 502.
 
@@ -181,7 +184,7 @@ Contrato próprio (uma pergunta por vez), com a mesma idempotência das ações 
 - Entrada: `{ account_id }` com JWT, ou `x-refresh-secret` com `{ account_id? }`.
 - Saída: `200 { janela, contas: [{ account_id, ml_user_id, status, anunciantes, campanhas, anuncios, dias_lidos, dias_pendentes, erros }] }`. `status`: `ativo`, `sem_product_ads`, `sem_token`, `erro`, `adiado`.
 - Erros: 400 sem `account_id` com JWT, 401, 403, 405.
-- Campanhas e anúncios a cada chamada; métrica diária por campanha 1 vez a cada 20 h; métrica por anúncio dia a dia, retomando por `ml_ads_dias_sync`. Janela de 90 dias. Cron de hora em hora.
+- Campanhas e anúncios a cada chamada; custos por campanha têm prioridade sobre histórico por anúncio. Retoma primeiro campanhas com datas/custos ausentes, depois as leituras mais antigas; falhas de paginação/gravação ou série incompleta impedem marcar a conta completa. Métrica por campanha até cada 20 h (lacunas ignoram a espera), por anúncio dia a dia via `ml_ads_dias_sync`. Janela de 90 dias; cron de hora em hora. `dias_pendentes` inclui campanhas interrompidas por tempo; ausência nunca vira zero.
 - Erros e leituras parciais também gravam avisos controlados em `developer_alerts`, sem corpos de resposta ou tokens. Só o perfil `desenvolvedor` lê os diagnósticos; demais usuários recebem apenas estado genérico de atualização incompleta.
 
 #### `ml-ads-action` (lote)

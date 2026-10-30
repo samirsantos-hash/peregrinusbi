@@ -12,6 +12,7 @@ import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
+import { useJuniorMode } from "@/hooks/useJuniorMode";
 
 
 /* ------------------------------------------------------------------ */
@@ -92,6 +93,7 @@ const DashboardHeader = ({
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
 
   const { playClick } = useSoundFeedback();
+  const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
   const baseCal = calendarKpis && calendarKpis.length > 0 ? calendarKpis : allKpis;
@@ -238,7 +240,7 @@ const DashboardHeader = ({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4">
+      className="panel-filterbar space-y-4">
 
       <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 xl:gap-4 w-full min-w-0">
         {/* Left - Store selector + Date */}
@@ -252,7 +254,7 @@ const DashboardHeader = ({
                   variant="outline"
                   role="combobox"
                   aria-expanded={storeOpen}
-                  className="w-full sm:w-auto sm:min-w-[300px] sm:max-w-[560px] max-w-full h-auto min-h-10 py-1.5 justify-between glass-card border-glass-border bg-card/60 font-normal"
+                  className="panel-control w-full sm:w-auto sm:min-w-[300px] sm:max-w-[560px] max-w-full h-auto min-h-10 py-1.5 justify-between border-border bg-card font-normal"
                 >
                   {selectedSellerObj ? (
                     <span className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-left min-w-0">
@@ -274,7 +276,7 @@ const DashboardHeader = ({
                       </span>
                       <span className="mx-1 text-border">|</span>
                       <span className="text-xs text-muted-foreground mr-1">ID:</span>
-                      <span className="text-xs font-mono break-all tnum">{selectedSellerObj.custId}</span>
+                      <span className="text-xs break-all tnum">{selectedSellerObj.custId}</span>
                       <span
                         role="button"
                         tabIndex={0}
@@ -296,7 +298,7 @@ const DashboardHeader = ({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[340px] p-0 bg-card border-glass-border" align="start">
+              <PopoverContent className="w-[340px] max-w-[calc(100vw-24px)] p-0 bg-popover border-border" align="start">
                 <Command
                   className="bg-transparent"
                   filter={(value, search) => {
@@ -339,7 +341,7 @@ const DashboardHeader = ({
                             <span className="font-medium">{s.nickname}</span>
                             <span className="mx-1 text-border">|</span>
                             <span className="text-xs text-muted-foreground">ID:</span>
-                            <span className="text-xs font-mono">{s.custId}</span>
+                            <span className="text-xs tabular-nums">{s.custId}</span>
                           </div>
                         </CommandItem>
                       ))}
@@ -357,7 +359,7 @@ const DashboardHeader = ({
                 <Button
                   variant="outline"
                   className={cn(
-                    "h-9 justify-start gap-2 glass-card border-glass-border bg-card/60 font-normal text-xs",
+                    "panel-control min-h-10 justify-start gap-2 border-border bg-card font-normal text-xs",
                     auditoria.vazio && "border-destructive/50 text-destructive",
                   )}
                   title="Selecionar período no calendário"
@@ -372,7 +374,7 @@ const DashboardHeader = ({
                     <button
                       key={p.label}
                       onClick={() => aplicarPreset(p)}
-                      className="px-2 py-1 text-[11px] rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      className="px-2 py-1 text-[11px] rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-transform duration-[120ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]"
                     >
                       {p.label}
                     </button>
@@ -386,7 +388,7 @@ const DashboardHeader = ({
                       setCalOpen(false);
                     }}
                     className={cn(
-                      "px-2 py-1 text-[11px] rounded-md",
+                      "px-2 py-1 text-[11px] rounded-md transition-transform duration-[120ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]",
                       activePeriod === "all"
                         ? "bg-primary/15 text-primary"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
@@ -430,13 +432,24 @@ const DashboardHeader = ({
 
 
             {/* Refresh button */}
+            <Button
+              variant="outline"
+              onClick={toggleJunior}
+              aria-label="Modo didático"
+              aria-pressed={juniorMode}
+              className="panel-control border-border bg-card min-h-10 gap-2 text-xs"
+              title={juniorMode ? "Ocultar orientações didáticas" : "Mostrar orientações didáticas"}
+            >
+              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+              {juniorMode ? "Modo Didático" : "Modo Avançado"}
+            </Button>
             {onRefresh && (
               <Button
                 variant="outline"
                 size="icon"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className="glass-card border-glass-border bg-card/60 h-9 w-9"
+                className="panel-control border-border bg-card h-10 w-10"
                 title="Atualizar dados"
               >
                 <RefreshCw className={cn("h-4 w-4 text-neon-blue", isRefreshing && "animate-spin")} />

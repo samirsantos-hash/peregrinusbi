@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
+import { ChevronLeft, ChevronRight, AlertTriangle, Plug } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { SELLER_TABS, GRUPOS_SECOES, type SellerTab } from "@/config/sellerTabs";
 import { NovidadeTip } from "@/components/novidades/novidades";
 import { Button } from "@/components/ui/button";
@@ -33,18 +34,18 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
       onClick={() => onSelect(tab.id)}
       aria-current={ativo ? "page" : undefined}
       className={cn(
-        "relative w-full flex items-center gap-2.5 h-9 rounded-md text-[13px] font-medium transition-colors",
+        "panel-nav-item relative w-full flex items-center gap-2.5 h-10 rounded-lg text-[13px] font-medium transition-transform duration-150 active:scale-[0.98]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-surface-alt",
         recolhida ? "justify-center px-0" : "px-3",
         ativo
-          ? "bg-brand-blue/[0.12] text-brand-blue"
-          : "text-muted-alt hover:bg-muted/[0.35]",
+          ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
+          : "text-foreground/80 hover:bg-muted/50 hover:text-foreground",
       )}
     >
       {ativo && (
-        <span className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r bg-brand-blue" aria-hidden />
+        <span className="absolute left-0 top-1 bottom-1 w-[3px] rounded-r bg-primary" aria-hidden />
       )}
-      <Icone className={cn("h-4 w-4 shrink-0", ativo ? "text-brand-blue" : "text-muted-alt")} />
+      <Icone className="h-4 w-4 shrink-0" />
       {!recolhida && <span className="truncate">{tab.label}</span>}
       {badge ? (
         <span
@@ -97,13 +98,19 @@ function Conteudo({
   mostrarToggle: boolean;
 }) {
   const tabAlertas = porId(ID_ALERTAS);
+  const navigate = useNavigate();
+  const tabIntegracao = {
+    id: "integracao", label: "Integração", icon: Plug, order: 11.5,
+    descricao: "Conectar contas do Mercado Livre",
+    juniorTip: "Gere o link de integração e autorize a loja no Mercado Livre.",
+  } as SellerTab;
   return (
     <nav aria-label="Seções do painel" className="flex h-full flex-col">
-      <div className="flex-1 overflow-y-auto px-2 pb-3">
+      <div className="flex-1 overflow-y-auto px-3 pb-4">
         {GRUPOS.map((g) => (
           <div key={g.titulo} className="mt-5 first:mt-2">
             {!recolhida && (
-              <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.06em] text-muted-alt">
+              <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-normal text-muted-foreground">
                 {g.titulo}
                 {g.titulo === "Visão geral" && <NovidadeTip id="sidebar" />}
               </p>
@@ -122,6 +129,14 @@ function Conteudo({
                   />
                 );
               })}
+              {g.ids.includes("correlacoes") && (
+                <ItemNav
+                  tab={tabIntegracao}
+                  ativo={false}
+                  recolhida={recolhida}
+                  onSelect={() => navigate("/integracoes")}
+                />
+              )}
             </ul>
           </div>
         ))}
@@ -134,7 +149,7 @@ function Conteudo({
             onClick={onToggle}
             aria-label={recolhida ? "Expandir navegação" : "Recolher navegação"}
             className={cn(
-              "w-full flex items-center gap-2.5 h-9 rounded-md text-[13px] font-medium text-muted-alt hover:bg-muted/[0.35] transition-colors",
+              "w-full flex items-center gap-2.5 h-9 rounded-md text-[13px] font-medium text-foreground/80 hover:bg-muted/50 transition-colors",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 focus-visible:ring-offset-surface-alt",
               recolhida ? "justify-center px-0" : "px-3",
             )}
@@ -181,10 +196,9 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
       {/* Desktop / tablet */}
       <aside
         className={cn(
-          "hidden lg:block shrink-0 sticky self-start top-0 z-30 glass-card !rounded-[32px] top-4 overflow-hidden",
-          recolhida ? "w-[56px]" : "w-[224px]",
+          "painel-navigation panel-sidebar hidden lg:block shrink-0 sticky self-start top-4 z-30 overflow-hidden",
+          recolhida ? "w-[64px]" : "w-[224px]",
         )}
-        style={{ height: "100vh" }}
       >
         <Conteudo
           ativa={ativa}
@@ -198,7 +212,9 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
 
       {/* Drawer < 1024px */}
       <Sheet open={mobileAberto} onOpenChange={onMobileChange}>
-        <SheetContent side="left" className="w-[248px] p-0 bg-surface-alt">
+        <SheetContent side="left" className="painel-navigation w-[248px] p-0">
+          <SheetTitle className="sr-only">Seções do painel</SheetTitle>
+          <SheetDescription className="sr-only">Navegação entre as seções da loja selecionada.</SheetDescription>
           <div className="h-full pt-8">
             <Conteudo
               ativa={ativa}

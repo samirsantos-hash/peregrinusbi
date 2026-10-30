@@ -19,6 +19,7 @@ export default {
         mono: ["\"DM Sans\"", "ui-sans-serif", "system-ui", "sans-serif", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"], // números em DM Sans com tabular-nums
       },
       colors: {
+        "ml-amarelo": "hsl(var(--ml-amarelo))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -91,7 +92,23 @@ export default {
         "warn-soft": "hsl(var(--warn-soft))",
         ok: "hsl(var(--ok))",
         "neon-blue-glow": "hsl(var(--neon-blue-glow))",
-        emerald: "hsl(var(--emerald))",
+        // `emerald` segue como token do tema (text-emerald); a escala numérica
+        // usa os verdes da Home (fios do Aura: #0E7F51 → #14A86C → #3BD394) para
+        // que painel e tela inicial tenham o mesmo verde.
+        emerald: {
+          DEFAULT: "hsl(var(--emerald))",
+          50: "#EAFAF2",
+          100: "#D2F4E4",
+          200: "#A9EACC",
+          300: "#6EE7B7",
+          400: "#3BD394",
+          500: "#14A86C",
+          600: "#0E7F51",
+          700: "#0B6641",
+          800: "#084D31",
+          900: "#063A26",
+          950: "#04261A",
+        },
         "emerald-glow": "hsl(var(--emerald-glow))",
         warning: "hsl(var(--warning))",
         "glass-border": "hsl(var(--glass-border))",

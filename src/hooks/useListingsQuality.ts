@@ -24,6 +24,9 @@ export interface ListingQuality {
   visitasClips: number;
   siClips: number;
   ordersClips: number;
+  /** Nullable originals for rankings; missing measurements must not become zero. */
+  clipsVisitasMedidas?: number | null;
+  clipsPedidosMedidos?: number | null;
   tgmvLcClips: number;
   /** Computed average of all LL scores */
   avgScore: number;
@@ -108,6 +111,8 @@ export function useListingsQuality(sellerId: string | undefined) {
           visitasClips: n(row.visitas_clips),
           siClips: n(row.si_clips),
           ordersClips: n(row.orders_clips),
+          clipsVisitasMedidas: row.visitas_clips == null || !Number.isFinite(Number(row.visitas_clips)) ? null : Number(row.visitas_clips),
+          clipsPedidosMedidos: row.orders_clips == null || !Number.isFinite(Number(row.orders_clips)) ? null : Number(row.orders_clips),
           tgmvLcClips: n(row.tgmv_lc_clips),
           avgScore,
           issues: getIssues(row),

@@ -13,19 +13,21 @@
     --aura-black: 0 0% 0%;
     --aura-white: 0 0% 100%;
     --aura-gray-300: 216 12% 84%;    /* #D1D5DB */
-    --aura-gray-400: 0 0% 72%;    /* #9CA3AF texto secundário */
-    --aura-gray-500: 0 0% 62%;     /* #6B7280 rótulos */
-    --aura-line: 30 6% 30%;           /* ≈ border-white/10 sobre preto */
-    --aura-glass: 30 5% 20%;           /* ≈ bg-white/[0.03] */
-    --aura-fill: 30 5% 24%;            /* ≈ bg-white/5 */
-    --aura-raise: 30 5% 28%;           /* ≈ bg-white/[0.06] */
+    /* Cinzas frios (slate) sobre o canvas #0B0F17: evita o tom quente/marrom
+       que distorcia o vidro. slate-400 (#94a3b8) ≈ 7,3:1 sobre o canvas. */
+    --aura-gray-400: 215 20% 65%;    /* #94A3B8 texto secundário */
+    --aura-gray-500: 215 16% 57%;    /* #7C8AA0 rótulos */
+    --aura-line: 222 18% 20%;        /* ≈ border-white/8 sobre #0B0F17 */
+    --aura-glass: 222 30% 9%;        /* superfície de vidro */
+    --aura-fill: 222 24% 12%;        /* ≈ bg-white/5 */
+    --aura-raise: 222 24% 15%;       /* ≈ bg-white/[0.06] */
     --aura-cyan-200: 155 62% 75%;    /* #A5F3FC */
     --aura-cyan-300: 155 63% 53%;    /* #67E8F9 */
     --aura-cyan-400: 156 79% 37%;    /* #22D3EE */
     --aura-teal-400: 156 80% 28%;    /* #2DD4BF */
     --aura-emerald-300: 156 72% 67%; /* #6EE7B7 */
-    --aura-emerald-400: 155 63% 53%; /* #34D399 */
-    --aura-emerald-500: 156 79% 37%; /* #10B981 */
+    --aura-emerald-400: 155 63% 53%; /* #3BD394 — verde vivo da Home (fios do Aura) */
+    --aura-emerald-500: 156 79% 37%; /* #14A86C — verde da marca (botão e halo da Home) */
     /* Status do BI (o Aura não tem; tons ajustados para fundo escuro) */
     --aura-red-400: 7 86% 55%;       /* #F87171 */
     --aura-red-500: 7 86% 45%;       /* #EF4444 */
@@ -46,11 +48,11 @@
     --ec-laranja: var(--aura-orange-400);
     --ec-amarelo: var(--aura-yellow-400);
 
-    --background: 40 8% 13%;
+    --background: 222 35% 7%;        /* #0B0F17 */
     --foreground: var(--aura-white);
     --card: var(--aura-glass);
     --card-foreground: var(--aura-white);
-    --popover: 40 4% 9%;
+    --popover: 222 30% 8%;
     --popover-foreground: var(--aura-white);
     --primary: var(--aura-cyan-400);
     --primary-foreground: var(--aura-white);
@@ -66,9 +68,9 @@
     --input: var(--aura-line);
     --ring: var(--aura-cyan-400);
     --radius: 1rem;
-    --vidro-fundo: linear-gradient(155deg, rgba(255,255,255,.10) 0%, rgba(20,20,22,.38) 45%, rgba(0,0,0,.52) 100%);
-    --vidro-borda: rgba(255,255,255,.14);
-    --vidro-sombra: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(0,0,0,.4), 0 30px 60px -24px rgba(0,0,0,.7);
+    --vidro-fundo: linear-gradient(155deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,.035) 45%, rgba(255,255,255,.05) 100%);
+    --vidro-borda: rgba(255,255,255,.08);
+    --vidro-sombra: inset 0 1px 1px rgba(255,255,255,.06), 0 8px 24px rgba(0,0,0,.3);
     --cartao-sombra: 0 10px 24px -14px rgba(0,0,0,.55);
     --curva: cubic-bezier(.23,1,.32,1);
 
@@ -139,12 +141,12 @@
     --aura-gray-300: 215 15% 70%;
 
     --ec-ink: 222 47% 11%;
-    --ec-verde-txt: 160 84% 28%;
+    --ec-verde-txt: 156 84% 26%;
     --ec-vermelho: 0 72% 46%;
     --ec-ambar: 32 95% 36%;
     --ec-laranja: 24 90% 45%;
 
-    --background: 200 30% 97%;
+    --background: 210 17% 98%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -153,16 +155,16 @@
     --primary: 157 80% 28%;
     --primary-foreground: 0 0% 100%;
     --secondary-foreground: 222 47% 11%;
-    --muted-foreground: 215 14% 38%;
+    --muted-foreground: 215 19% 35%;
     --accent-foreground: 222 47% 11%;
     --ring: 157 80% 28%;
 
     --brand-navy: 222 47% 11%;
-    --brand-blue: 192 85% 36%;
-    --brand-accent: 174 72% 32%;
-    --brand-purple: 190 80% 40%;
-    --neon-blue: 190 90% 36%;
-    --neon-blue-glow: 188 86% 45%;
+    --brand-blue: 157 80% 28%;
+    --brand-accent: 157 70% 30%;
+    --brand-purple: 157 60% 34%;
+    --neon-blue: 157 80% 30%;
+    --neon-blue-glow: 155 60% 40%;
     --emerald: 160 84% 30%;
     --emerald-glow: 158 64% 40%;
     --warning: 32 95% 40%;
@@ -196,25 +198,27 @@
     scrollbar-width: thin;
     scrollbar-color: rgb(255 255 255 / 0.12) transparent;
   }
-  html.light { background-color: hsl(200 30% 97%); }
+  html.light { background-color: #F8F9FA; }
   html.light ::selection { color: hsl(222 47% 11%); }
   html {
-    background-color: #08090A;
+    color-scheme: dark;
+    background-color: #0B0F17;
     background-image:
-      radial-gradient(60% 40% at 50% -5%, rgba(255,255,255,.10), transparent 62%),
-      radial-gradient(35% 55% at 4% 60%, rgba(20,168,108,.16), transparent 70%),
-      radial-gradient(30% 50% at 98% 35%, rgba(255,255,255,.06), transparent 70%),
-      radial-gradient(18% 30% at 8% 100%, rgba(20,168,108,.22), transparent 70%),
-      linear-gradient(180deg, #17191A 0%, #0F1011 50%, #08090A 100%);
+      radial-gradient(60% 40% at 50% -5%, rgba(255,255,255,.06), transparent 62%),
+      radial-gradient(35% 55% at 4% 60%, rgba(20,168,108,.10), transparent 70%),
+      radial-gradient(30% 50% at 98% 35%, rgba(255,255,255,.04), transparent 70%),
+      radial-gradient(18% 30% at 8% 100%, rgba(20,168,108,.14), transparent 70%),
+      linear-gradient(180deg, #121826 0%, #0E131C 50%, #0B0F17 100%);
     background-attachment: fixed;
     scroll-behavior: smooth;
   }
   html.light {
+    color-scheme: light;
     background-image:
       radial-gradient(60% 40% at 50% -5%, rgba(255,255,255,1), transparent 62%),
       radial-gradient(35% 55% at 4% 60%, rgba(20,168,108,.10), transparent 70%),
       radial-gradient(30% 50% at 98% 35%, rgba(200,210,215,.45), transparent 70%),
-      linear-gradient(180deg, #F4F6F7 0%, #E9EDEF 60%, #E1E6E8 100%);
+      linear-gradient(180deg, #F8F9FA 0%, #F1F3F5 60%, #ECEFF1 100%);
   }
   body {
     @apply text-foreground font-sans antialiased;
@@ -248,23 +252,27 @@
     border-radius: 20px;
     border: 1px solid var(--vidro-borda);
     background: var(--vidro-fundo);
-    -webkit-backdrop-filter: blur(22px) saturate(170%);
-    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: var(--panel-backdrop);
+    backdrop-filter: var(--panel-backdrop);
     box-shadow: var(--vidro-sombra);
   }
   /* Reflexo que desliza pelo vidro ao passar o mouse */
   .glass-card::after {
     content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.09) 48%, transparent 66%);
+    background: none;
     background-size: 250% 100%; background-position: 120% 0; opacity: 0;
     transition: background-position 1.1s var(--curva), opacity .4s ease;
   }
   .glass-card:hover::after { background-position: -20% 0; opacity: 1; }
-  /* Nível 3 do Glass Verde: cartão branco opaco para números */
+  /* Nível 3 do Glass Verde: cartão para números. Vidro escuro no tema padrão;
+     branco opaco só no tema claro. */
   .cartao-branco {
-    background: #FFFFFF; color: #0A0A0A; border-radius: 16px; box-shadow: var(--cartao-sombra);
+    background: rgb(255 255 255 / 0.05); color: #fff; border-radius: 16px;
+    border: 1px solid rgb(255 255 255 / 0.08);
+    box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.3);
     transition: transform 200ms var(--curva);
   }
+  .light .cartao-branco { background: #FFFFFF; color: #0A0A0A; border-color: rgb(15 23 42 / 0.06); box-shadow: var(--cartao-sombra); }
   .cartao-branco:hover { transform: translateY(-4px); }
   @media (prefers-reduced-motion: reduce) { .cartao-branco:hover { transform: none; } }
   .glass-card-highlight {
@@ -436,7 +444,7 @@
 /* ── Sistema de gráficos: tooltip de vidro, legenda e eixos no padrão Aura ── */
 @layer components {
   .recharts-default-tooltip {
-    background: rgba(16,16,15,.72) !important;
+    background: rgb(11 15 23 / 0.9) !important;
     border: 1px solid rgb(255 255 255 / 0.1) !important;
     border-radius: 16px !important;
     color: hsl(var(--foreground)) !important;
@@ -544,6 +552,25 @@
   .recharts-tooltip-cursor { stroke: hsl(var(--primary) / 0.5); stroke-dasharray: 3 3; }
   .recharts-bar-rectangle path { transition: filter .2s, opacity .2s; }
   .recharts-bar-rectangle:hover path { filter: brightness(1.25) drop-shadow(0 0 6px hsl(var(--primary) / .6)); }
+
+  /* Minimal chart finish; series colors retain their meaning, Home stays intact. */
+  html body .peregrinus-panel .recharts-bar-rectangle path {
+    fill-opacity: var(--panel-chart-bar-opacity);
+    stroke: none;
+    filter: none;
+    transition: opacity .15s ease;
+  }
+  html body .peregrinus-panel .recharts-bar-rectangle:hover path { opacity: .88; }
+  html body .peregrinus-panel .recharts-area-area { fill-opacity: .1; mask-image: linear-gradient(180deg, #000 0%, transparent 100%); }
+  html body .peregrinus-panel :is(.recharts-line-curve,.recharts-area-curve) { filter: none; stroke-width: 1.5px; transition: none; }
+  html body .peregrinus-panel .recharts-active-dot circle { filter: none; animation: none; }
+  html body .peregrinus-panel .recharts-cartesian-grid line { stroke: var(--panel-chart-grid) !important; stroke-width: .5px; }
+  html body .peregrinus-panel .recharts-cartesian-axis-line,
+  html body .peregrinus-panel .recharts-cartesian-axis-tick-line { stroke: var(--panel-divider); }
+  .peregrinus-panel .recharts-cartesian-axis-tick-value { fill: hsl(var(--panel-text-secondary)); font-size: 12px; font-family: 'DM Sans', sans-serif; font-variant-numeric: tabular-nums; }
+  .peregrinus-panel .recharts-legend-item-text { color: hsl(var(--panel-text-secondary)) !important; font-size: 12px; }
+  .peregrinus-panel .recharts-legend-icon { opacity: .65; }
+  html body .peregrinus-panel .recharts-tooltip-cursor { fill: var(--panel-fill-nested); stroke: var(--panel-divider); }
 }
 
 /* Cartões reagem ao mouse: leve elevação, borda e brilho ciano */
@@ -561,17 +588,32 @@
 
 /* ── Modo claro: vidro branco translúcido ── */
 .light {
-  --vidro-fundo: linear-gradient(155deg, rgba(255,255,255,.85) 0%, rgba(255,255,255,.60) 50%, rgba(255,255,255,.45) 100%);
-  --vidro-borda: rgba(255,255,255,.9);
-  --vidro-sombra: inset 0 1px 0 rgba(255,255,255,1), 0 1px 2px rgb(15 23 42 / 0.05), 0 20px 40px -22px rgb(15 23 42 / 0.25);
+  --vidro-fundo: linear-gradient(155deg, rgba(255,255,255,.94) 0%, rgba(255,255,255,.90) 100%);
+  --vidro-borda: rgb(226 232 240 / 0.8);
+  --vidro-sombra: 0 1px 3px rgba(0,0,0,.03), 0 8px 24px rgba(0,0,0,.04);
 }
-.light .glass-card::after { background-image: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.7) 48%, transparent 66%); }
-.light .glass-card-highlight { border-color: rgb(8 145 178 / 0.35); }
-.light .aura-canvas { opacity: 0.12; filter: invert(1) hue-rotate(180deg); }
+.light .glass-card::after { background-image: none; }
+.light .glass-card-highlight { border-color: rgb(14 127 81 / 0.35); }
+/* Contraste no modo claro: números escuros, legendas legíveis, setas sem neon. */
+.light .ds-seta-bom { background: rgb(236 253 245); color: rgb(4 120 87); box-shadow: inset 0 0 0 1px rgb(167 243 208 / 0.6); }
+.light .ds-seta-ruim { background: rgb(255 241 242); color: rgb(190 18 60); box-shadow: inset 0 0 0 1px rgb(254 205 211 / 0.6); }
+.light .ds-seta { font-weight: 600; }
+.light input::placeholder, .light textarea::placeholder { color: rgb(148 163 184); }
+.light .aura-canvas { opacity: 1; }
 .light .bg-black\/40, .light .bg-black\/60, .light .bg-black\/70, .light .bg-black\/80 { background-color: rgb(255 255 255 / 0.85); }
 .light .bg-white\/5, .light .bg-white\/\[0\.03\], .light .bg-white\/\[0\.06\], .light .bg-white\/10 { background-color: rgb(15 23 42 / 0.04); }
 .light .border-white\/5, .light .border-white\/10, .light .border-white\/40 { border-color: hsl(200 18% 86%); }
 .light .text-white { color: hsl(222 47% 11%); }
+/* Tons de status calibrados para o escuro (400/300) escurecem no claro para manter AA. */
+.light :is(.text-emerald-400, .text-emerald-300) { color: hsl(156 84% 26%); }
+.light :is(.text-rose-400, .text-rose-300) { color: hsl(347 77% 40%); }
+.light :is(.text-amber-400, .text-amber-300, .text-amber-200\/90, .text-amber-200\/80) { color: hsl(32 95% 34%); }
+.light .text-sky-300 { color: hsl(199 89% 32%); }
+.light :is(.text-slate-400, .text-slate-300) { color: hsl(215 16% 40%); }
+/* Abas: no claro, a aba ativa ganha tinta escura e fundo cinza em vez de branco. */
+.light [role="tab"] { color: hsl(215 16% 40%); }
+.light [role="tab"]:hover, .light [role="tab"][data-state="active"] { color: hsl(222 47% 11%); }
+.light [role="tab"][data-state="active"] { background-color: rgb(15 23 42 / 0.07); }
 .light .ds-hachura { background-image: repeating-linear-gradient(135deg, rgb(15 23 42 / 0.06) 0 4px, transparent 4px 8px); }
 
 /* Identidade Multilojas: escopo visual compartilhado entre todas as seções. */
@@ -599,6 +641,7 @@
 
 /* ── Movimento tátil (padrão do painel) ──
    Microinterações 100–200ms; entradas de janelas/menus 200–350ms; só transform e opacity. */
+:root { --ml-amarelo: 54 100% 50%; }
 :root { --curva-rapida: cubic-bezier(0.16, 1, 0.3, 1); }
 [data-state].animate-in, [data-state].animate-out { animation-duration: 220ms; animation-timing-function: var(--curva-rapida); }
 [role="dialog"][data-state].animate-in { animation-duration: 280ms; }
@@ -613,20 +656,1594 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   .glass-card:hover, [role="tab"]:active { transform: none; }
 }
 
-/* ── Cartão de indicador: branco gelo, número proporcional, seta de tendência ── */
+/* ── Cartão de indicador: vidro escuro calibrado (tema padrão), número proporcional,
+      seta de tendência. O tema claro recebe o branco gelo logo abaixo. ── */
 .ds-kpi {
+  background: rgb(255 255 255 / 0.04);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  box-shadow: inset 0 1px 1px rgb(255 255 255 / 0.06), 0 8px 24px rgb(0 0 0 / 0.3);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  transition: transform 200ms var(--curva-rapida), border-color 200ms ease, box-shadow 200ms var(--curva-rapida);
+  will-change: transform;
+}
+.ds-kpi:hover { transform: translateY(-2px); border-color: rgb(255 255 255 / 0.15); }
+.ds-kpi .ds-rotulo { color: hsl(215 20% 65%); letter-spacing: 0.08em; }
+.ds-kpi .ds-nota { color: hsl(215 20% 65%); }
+.ds-kpi .ds-numero-focal { font-size: clamp(26px, 2.4vw, 34px); font-weight: 600; letter-spacing: -0.03em; color: #fff; }
+.ds-kpi .ds-numero-sec { font-size: clamp(22px, 1.9vw, 28px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; color: #fff; }
+.ds-seta { display: inline-flex; align-items: center; justify-content: center; height: 22px; width: 22px; border-radius: 9999px; align-self: center; background: rgb(255 255 255 / 0.06); color: #cbd5e1; }
+.ds-seta-bom { background: rgb(20 168 108 / 0.14); color: #3bd394; }
+.ds-seta-ruim { background: rgb(244 63 94 / 0.12); color: #fb7185; }
+@media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
+/* Tema claro: branco gelo com sombra fria */
+.light .ds-kpi {
   background: hsl(210 20% 97%);
   border: 1px solid rgb(15 23 42 / 0.06);
   box-shadow: 0 1px 1px rgb(15 23 42 / 0.04), 0 4px 8px -2px rgb(15 23 42 / 0.06), 0 16px 32px -16px rgb(15 23 42 / 0.18);
-  transition: transform 200ms var(--curva-rapida), box-shadow 200ms var(--curva-rapida);
-  will-change: transform;
 }
-.ds-kpi:hover { transform: translateY(-2px); box-shadow: 0 1px 1px rgb(15 23 42 / 0.04), 0 8px 16px -4px rgb(15 23 42 / 0.10), 0 24px 44px -18px rgb(15 23 42 / 0.28); }
-.ds-kpi .ds-rotulo { color: hsl(215 16% 40%); letter-spacing: 0.08em; }
-.ds-kpi .ds-nota { color: hsl(215 14% 42%); }
-.ds-kpi .ds-numero-focal { font-size: clamp(26px, 2.4vw, 34px); font-weight: 600; letter-spacing: -0.03em; color: hsl(222 47% 11%); }
-.ds-kpi .ds-numero-sec { font-size: clamp(22px, 1.9vw, 28px); font-weight: 600; letter-spacing: -0.03em; line-height: 1.15; color: hsl(222 47% 11%); }
-.ds-seta { display: inline-flex; align-items: center; justify-content: center; height: 22px; width: 22px; border-radius: 9999px; align-self: center; background: hsl(215 16% 90%); color: hsl(215 16% 35%); }
-.ds-seta-bom { background: rgb(20 168 108 / 0.12); color: #0B7A4D; }
-.ds-seta-ruim { background: rgb(214 36 16 / 0.10); color: #D62410; }
-@media (prefers-reduced-motion: reduce) { .ds-kpi:hover { transform: none; } }
+.light .ds-kpi:hover { border-color: rgb(15 23 42 / 0.10); box-shadow: 0 1px 1px rgb(15 23 42 / 0.04), 0 8px 16px -4px rgb(15 23 42 / 0.10), 0 24px 44px -18px rgb(15 23 42 / 0.28); }
+.light .ds-kpi .ds-rotulo { color: hsl(215 16% 40%); }
+.light .ds-kpi .ds-nota { color: hsl(215 14% 42%); }
+.light .ds-kpi .ds-numero-focal, .light .ds-kpi .ds-numero-sec { color: hsl(222 47% 11%); }
+.light .ds-seta { background: hsl(215 16% 90%); color: hsl(215 16% 35%); }
+
+/*
+ * Painel Noite (Visão geral) — módulo de vidro escuro calibrado.
+ *
+ * Canvas aveludado #0B0F17; superfícies translúcidas white/4 + blur; borda
+ * white/8 com luz interna; sombra profunda. Texto secundário em slate-400
+ * (#94a3b8 sobre #0B0F17 ≈ 7,3:1, WCAG AA). Tokens do app são remapeados
+ * aqui para que gráficos, bordas e `bg-card` herdem o mesmo vidro.
+ *
+ * Especificidade: as regras globais `.peregrinus-panel :is(.ds-kpi, …)` usam
+ * `!important`; dentro deste módulo as sobrescrevemos com um nível a mais
+ * (`.peregrinus-panel .painel-noite …`) para manter o vidro escuro.
+ */
+.painel-noite {
+  --noite-canvas: #0b0f17;
+  --noite-canvas-2: #0e131c;
+  --noite-vidro: rgb(255 255 255 / 0.04);
+  --noite-vidro-forte: rgb(255 255 255 / 0.07);
+  --noite-vidro-suave: rgb(255 255 255 / 0.025);
+  --noite-borda: rgb(255 255 255 / 0.08);
+  --noite-borda-forte: rgb(255 255 255 / 0.15);
+  --noite-luz: rgb(255 255 255 / 0.06);
+  --noite-tinta: #ffffff;
+  --noite-sec: #94a3b8;   /* slate-400 */
+  --noite-sec-2: #cbd5e1; /* slate-300 */
+  --noite-blur: 20px;
+  --noite-sombra:
+    inset 0 1px 1px rgb(255 255 255 / 0.06),
+    0 8px 24px rgb(0 0 0 / 0.3);
+
+  /* Tokens do app dentro do módulo (HSL sem alfa, como o restante do tema) */
+  --background: 222 35% 7%;
+  --foreground: 0 0% 100%;
+  --card: 222 30% 9%;
+  --card-foreground: 0 0% 100%;
+  --popover: 222 30% 9%;
+  --popover-foreground: 0 0% 100%;
+  --secondary: 222 24% 12%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 222 24% 12%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 222 24% 14%;
+  --accent-foreground: 0 0% 100%;
+  --border: 222 18% 18%;
+  --input: 222 18% 18%;
+  --glass: 222 30% 9%;
+  --glass-border: 222 18% 18%;
+  --grid: 222 16% 20%;
+  --axis: 215 20% 65%;
+  --ec-ink: 0 0% 100%;
+  --ec-text-sec: 215 20% 65%;
+  --ec-surface-2: 222 24% 14%;
+  --ec-verde-txt: 155 63% 53%;  /* #3BD394, verde da Home */
+  --ec-vermelho: 350 89% 60%;   /* rose-500 */
+  --ec-laranja: 27 96% 61%;     /* orange-400 */
+  --ec-ambar: 43 96% 56%;       /* amber-400 */
+  --vidro-fundo: var(--noite-vidro);
+  --vidro-borda: var(--noite-borda);
+  --vidro-sombra: var(--noite-sombra);
+
+  color: var(--noite-tinta);
+  color-scheme: dark;
+  isolation: isolate;
+  min-width: 0;
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.15rem 1.5rem;
+  background:
+    radial-gradient(120% 80% at 0% 0%, rgb(20 168 108 / 0.07), transparent 55%),
+    linear-gradient(180deg, var(--noite-canvas-2) 0%, var(--noite-canvas) 100%);
+  border: 1px solid var(--noite-borda);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 24px 60px -30px rgb(0 0 0 / 0.6);
+}
+/* Módulo aninhado (histórico dentro do resumo da API): sem segundo canvas */
+.painel-noite .painel-noite {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.painel-noite-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 0.75rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--noite-borda);
+}
+.painel-noite-titulo {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--noite-tinta);
+  line-height: 1.3;
+}
+/* Chip de metadado: discreto, legível, nunca quebra */
+.noite-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  max-width: 100%;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background: var(--noite-vidro);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.01em;
+  color: var(--noite-sec-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+/* Superfície vítrea genérica (cards novos usam utilitários; esta é a base CSS) */
+.noite-vidro {
+  position: relative;
+  min-width: 0;
+  border-radius: 1rem;
+  border: 1px solid var(--noite-borda);
+  background: var(--noite-vidro);
+  backdrop-filter: blur(var(--noite-blur));
+  -webkit-backdrop-filter: blur(var(--noite-blur));
+  box-shadow: var(--noite-sombra);
+  transition: border-color 200ms ease, background-color 200ms ease, transform 200ms var(--curva-rapida);
+}
+.noite-vidro:hover { border-color: var(--noite-borda-forte); }
+/* KPI de vidro: o valor encolhe conforme a largura do card antes de truncar (break-ui) */
+.kpi-vidro { container-type: inline-size; }
+@container (max-width: 200px) { .kpi-vidro .kpi-vidro-valor { font-size: 22px !important; } }
+@container (max-width: 160px) { .kpi-vidro .kpi-vidro-valor { font-size: 19px !important; } }
+@container (max-width: 125px) { .kpi-vidro .kpi-vidro-valor { font-size: 16px !important; letter-spacing: -0.01em; } }
+/* Wrapper: sem segundo vidro — o card interno carrega a superfície */
+.painel-vidro {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+/* Cards legados (ds-kpi / glass-card / Card) dentro do módulo → vidro escuro.
+   Um nível acima de `.peregrinus-panel :is(...)` para vencer os !important. */
+.painel-noite .ds-kpi,
+.painel-noite .glass-card,
+.painel-noite .glass-card-highlight,
+.painel-noite .ds-glass-surface,
+.painel-noite .cartao-branco,
+.painel-noite div[class*="rounded"][class*="bg-card"][class*="border"],
+.peregrinus-panel .painel-noite .ds-kpi,
+.peregrinus-panel .painel-noite .glass-card,
+.peregrinus-panel .painel-noite .glass-card-highlight,
+.peregrinus-panel .painel-noite .ds-glass-surface,
+.peregrinus-panel .painel-noite .cartao-branco,
+.peregrinus-panel .painel-noite div[class*="rounded"][class*="bg-card"][class*="border"] {
+  --foreground: 0 0% 100%;
+  --card-foreground: 0 0% 100%;
+  --ec-ink: 0 0% 100%;
+  --muted-foreground: 215 20% 65%;
+  --ec-text-sec: 215 20% 65%;
+  --aura-gray-400: 215 20% 65%;
+  --aura-gray-500: 215 20% 65%;
+  --primary: 155 63% 53%;
+  --ec-verde-txt: 155 63% 53%;
+  --emerald: 155 63% 53%;
+  --ok: 155 63% 53%;
+  --neon-blue: 155 63% 53%;
+  --ec-vermelho: 350 89% 60%;
+  --ec-surface-2: 222 24% 14%;
+  --muted: 222 24% 14%;
+  --border: 222 18% 18%;
+  position: relative;
+  min-width: 0;
+  color: var(--noite-tinta);
+  background: var(--noite-vidro) !important;
+  border: 1px solid var(--noite-borda) !important;
+  border-radius: 1rem;
+  backdrop-filter: blur(var(--noite-blur));
+  -webkit-backdrop-filter: blur(var(--noite-blur));
+  box-shadow: var(--noite-sombra);
+  transition: border-color 200ms ease, background-color 200ms ease, transform 200ms var(--curva-rapida), box-shadow 200ms var(--curva-rapida);
+}
+.painel-noite .cartao-branco,
+.peregrinus-panel .painel-noite .cartao-branco { color: var(--noite-tinta); }
+.peregrinus-panel .painel-noite .ds-kpi:hover,
+.peregrinus-panel .painel-noite .glass-card:hover,
+.peregrinus-panel .painel-noite .glass-card-highlight:hover,
+.peregrinus-panel .painel-noite .ds-glass-surface:hover {
+  border-color: var(--noite-borda-forte) !important;
+  background: var(--noite-vidro-forte) !important;
+  box-shadow: var(--noite-sombra);
+}
+/* Reflexo do ponteiro (GlassPointer): branco 50% é cegante no escuro → 10% */
+.peregrinus-panel .painel-noite :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after {
+  background-image: none;
+}
+.peregrinus-panel .painel-noite :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
+  opacity: .9;
+  background-image: none;
+}
+/* Tipografia: números brancos e tabulares; rótulos slate-400 legíveis */
+.painel-noite .ds-numero-focal,
+.painel-noite .ds-numero-sec,
+.painel-noite .metric-value,
+.peregrinus-panel .painel-noite .ds-kpi :is(.ds-numero-focal, .ds-numero-sec, .metric-value) {
+  font-family: inherit;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--noite-tinta);
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.painel-noite .ds-rotulo,
+.painel-noite .ds-nota,
+.painel-noite .metric-label,
+.painel-noite .text-muted-foreground,
+.peregrinus-panel .painel-noite .ds-kpi :is(.ds-rotulo, .ds-nota) {
+  color: var(--noite-sec) !important;
+}
+.painel-noite .ds-rotulo,
+.peregrinus-panel .painel-noite .ds-kpi .ds-rotulo {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.painel-noite .ds-seta { background: rgb(255 255 255 / 0.06); color: var(--noite-sec-2); }
+.painel-noite .ds-seta-bom { background: rgb(20 168 108 / 0.14); color: #3bd394; }
+.painel-noite .ds-seta-ruim { background: rgb(244 63 94 / 0.12); color: #fb7185; }
+.painel-noite .border-border,
+.painel-noite .border-glass-border {
+  border-color: var(--noite-borda) !important;
+}
+/* Recharts dentro do módulo: eixos legíveis, grade discreta */
+.painel-noite .recharts-cartesian-axis-tick-value { fill: var(--noite-sec) !important; }
+.painel-noite .recharts-cartesian-grid line { stroke: rgb(255 255 255 / 0.05) !important; }
+.painel-noite .recharts-legend-item-text { color: var(--noite-sec-2) !important; }
+.painel-noite .recharts-default-tooltip {
+  background: rgb(11 15 23 / 0.92) !important;
+  border: 1px solid var(--noite-borda) !important;
+  border-radius: 0.75rem !important;
+  color: var(--noite-tinta) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.painel-noite .recharts-default-tooltip .recharts-tooltip-label { color: var(--noite-sec-2) !important; }
+.painel-bloco-cabeca { margin-bottom: 0.65rem; }
+.painel-bloco-porque {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--noite-sec);
+}
+/* Ponte causa→efeito: vidro mais suave que os cards */
+.painel-ponte {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.7rem 0.95rem;
+  border-radius: 0.85rem;
+  background: var(--noite-vidro-suave);
+  border: 1px solid var(--noite-borda);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 var(--noite-luz);
+}
+.painel-ponte-fluxo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--noite-sec-2);
+}
+.painel-ponte-seta { color: var(--noite-sec); font-weight: 500; }
+.painel-ponte-porque {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--noite-sec);
+}
+/* Mix de envio */
+.painel-mix-envio {
+  padding: 0.75rem 0.95rem;
+  border-radius: 0.85rem;
+  background: var(--noite-vidro-suave);
+  border: 1px solid var(--noite-borda);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: inset 0 1px 0 var(--noite-luz);
+}
+.painel-mix-envio-cabeca {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--noite-sec);
+}
+.painel-mix-envio-trilha {
+  display: flex;
+  height: 0.5rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgb(255 255 255 / 0.06);
+}
+.painel-mix-envio-full { background: #3bd394; min-width: 0; }
+.painel-mix-envio-flex { background: #94a3b8; min-width: 0; }
+.painel-mix-envio-outros { background: rgb(255 255 255 / 0.18); min-width: 0; }
+/* Resumo operacional dentro do módulo */
+.operacao-resumo .ds-kpi,
+.peregrinus-panel .painel-noite .operacao-resumo .ds-kpi {
+  padding: 20px;
+  min-height: 148px;
+}
+.operacao-resumo .ds-kpi .ds-nota { font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.operacao-resumo .ds-kpi .ds-numero-sec,
+.operacao-resumo .ds-kpi .ds-numero-focal,
+.peregrinus-panel .painel-noite .operacao-resumo .ds-kpi :is(.ds-numero-sec, .ds-numero-focal) {
+  font-size: 26px;
+  line-height: 1.2;
+}
+.operacao-resumo .ds-kpi .ds-numero-focal,
+.peregrinus-panel .painel-noite .operacao-resumo .ds-kpi .ds-numero-focal { font-size: 20px; }
+.operacao-resumo .ds-kpi .ds-numero-sec + span { letter-spacing: 0; border-radius: 4px; }
+.operacao-resumo .painel-mix-envio-trilha { height: 8px; }
+.operacao-resumo .operacao-mix-full { background: #3bd394; }
+.operacao-resumo .operacao-mix-flex { background: #94a3b8; }
+.operacao-resumo .operacao-mix-outros { background: rgb(255 255 255 / 0.18); }
+/* Compat: alias antigo */
+.resumo-growth {
+  border-radius: 1.25rem;
+  padding: 1rem;
+  background: linear-gradient(180deg, #0e131c 0%, #0b0f17 100%);
+  border: 1px solid rgb(255 255 255 / 0.08);
+}
+/* Movimento: só em ponteiro fino; nunca com reduzir movimento */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .peregrinus-panel .painel-noite .ds-kpi:hover,
+  .painel-noite .noite-vidro:hover { transform: translateY(-1px); }
+  .peregrinus-panel .painel-noite .glass-card:hover { transform: none; }
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .painel-noite .ds-kpi:hover,
+  .painel-noite .glass-card:hover,
+  .painel-noite .glass-card-highlight:hover,
+  .painel-noite .noite-vidro:hover,
+  .peregrinus-panel .painel-noite .ds-kpi:hover { transform: none; }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .painel-noite .noite-vidro,
+  .peregrinus-panel .painel-noite .ds-kpi,
+  .peregrinus-panel .painel-noite .glass-card,
+  .peregrinus-panel .painel-noite .ds-glass-surface { background: rgb(17 23 33 / 0.96) !important; }
+}
+
+/* Shared white-ice glass: protected sections only, never the login canvas. */
+.auth-title {
+  margin-inline: auto;
+  max-width: 100%;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 400;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  font-synthesis: none;
+  letter-spacing: 0;
+  line-height: 1.28;
+  text-align: center;
+  text-wrap: balance;
+  -webkit-font-smoothing: antialiased;
+}
+.auth-title span { margin-top: 4px; }
+.auth-subtitle {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-align: center;
+}
+.painel-navigation,
+.peregrinus-panel .painel-navigation {
+  --foreground: var(--panel-glass-ink);
+  --muted-foreground: var(--panel-glass-muted);
+  --primary: var(--panel-glass-positive);
+  --brand-blue: var(--panel-glass-positive);
+  --muted: var(--panel-glass-fill-2);
+  --background: var(--panel-glass-ice);
+  --border: var(--panel-glass-edge);
+  background: var(--panel-glass-nav-fill) !important;
+  color: hsl(var(--panel-glass-ink));
+  backdrop-filter: blur(28px) saturate(105%);
+  -webkit-backdrop-filter: blur(28px) saturate(105%);
+}
+.painel-navigation button { letter-spacing: 0; }
+/*
+ * Vidro do painel protegido (todas as seções, abas e banners).
+ * :root = vidro escuro calibrado (canvas #0B0F17, superfícies white/4–6, borda
+ * white/8, texto branco + slate-400). `.light` = branco gelo. Os componentes
+ * só leem estes tokens, então a troca de tema não exige mudança de markup.
+ */
+:root {
+  --panel-glass-white: 0 0% 100%;
+  --panel-glass-ice: 222 30% 9%;          /* superfície opaca de apoio / fallback */
+  --panel-glass-ink: 0 0% 100%;
+  --panel-glass-muted: 215 20% 65%;       /* slate-400 */
+  --panel-glass-edge: 222 16% 24%;        /* usada a 50% ≈ white/8 */
+  --panel-glass-shadow: 0 0% 0%;
+  --panel-glass-positive: 155 63% 53%;    /* #3BD394, verde da Home */
+  --panel-glass-negative: 350 89% 60%;    /* rose-500 */
+  --panel-glass-fill-2: 222 24% 14%;      /* --muted / --ec-surface-2 dentro do vidro */
+  --panel-glass-fill: linear-gradient(135deg,
+    hsl(var(--panel-glass-white) / .06),
+    hsl(var(--panel-glass-white) / .035) 45%,
+    hsl(var(--panel-glass-white) / .05));
+  --panel-glass-nav-fill: linear-gradient(135deg,
+    hsl(222 30% 12% / .94),
+    hsl(222 32% 9% / .9) 55%,
+    hsl(222 30% 12% / .94));
+  --panel-glass-reflection: none;
+  --panel-glass-reflection-active: none;
+  --panel-glass-elevation: inset 0 1px 1px hsl(var(--panel-glass-white) / .06),
+    0 8px 24px hsl(var(--panel-glass-shadow) / .3);
+}
+.light {
+  --panel-glass-ice: 210 20% 97%;
+  --panel-glass-ink: 240 6% 12%;
+  --panel-glass-muted: 215 12% 38%;
+  --panel-glass-edge: 210 16% 78%;
+  --panel-glass-shadow: 240 6% 5%;
+  --panel-glass-positive: 156 84% 26%;
+  --panel-glass-negative: 7 86% 45%;
+  --panel-glass-fill-2: 210 12% 91%;
+  --panel-glass-fill: linear-gradient(135deg,
+    hsl(var(--panel-glass-white) / .86),
+    hsl(var(--panel-glass-ice) / .68) 45%,
+    hsl(var(--panel-glass-white) / .58));
+  --panel-glass-nav-fill: linear-gradient(135deg,
+    hsl(var(--panel-glass-white) / .96),
+    hsl(var(--panel-glass-ice) / .9) 55%,
+    hsl(var(--panel-glass-white) / .82));
+  --panel-glass-reflection: none;
+  --panel-glass-reflection-active: none;
+  --panel-glass-elevation: inset 0 1px 0 hsl(var(--panel-glass-white) / .95),
+    inset 0 -1px 0 hsl(var(--panel-glass-white) / .28),
+    0 2px 4px hsl(var(--panel-glass-shadow) / .06),
+    0 16px 36px -22px hsl(var(--panel-glass-shadow) / .36);
+}
+/* Older section banners use utility-built divs rather than the shared Card. */
+.peregrinus-panel div[class*="rounded"][class*="bg-card"][class*="border"] {
+  --foreground: var(--panel-glass-ink);
+  --card-foreground: var(--panel-glass-ink);
+  --ec-ink: var(--panel-glass-ink);
+  --muted-foreground: var(--panel-glass-muted);
+  --ec-text-sec: var(--panel-glass-muted);
+  --aura-gray-400: var(--panel-glass-muted);
+  --aura-gray-500: var(--panel-glass-muted);
+  --ok: var(--panel-glass-positive);
+  --emerald: var(--panel-glass-positive);
+  --ec-verde-txt: var(--panel-glass-positive);
+  --border: var(--panel-glass-edge);
+  background: var(--panel-glass-fill) !important;
+  border-color: hsl(var(--panel-glass-edge) / .5);
+  color: hsl(var(--panel-glass-ink));
+  backdrop-filter: blur(24px) saturate(110%);
+  -webkit-backdrop-filter: blur(24px) saturate(110%);
+  box-shadow: var(--panel-glass-elevation);
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  --foreground: var(--panel-glass-ink);
+  --card-foreground: var(--panel-glass-ink);
+  --ec-ink: var(--panel-glass-ink);
+  --muted-foreground: var(--panel-glass-muted);
+  --ec-text-sec: var(--panel-glass-muted);
+  --aura-gray-400: var(--panel-glass-muted);
+  --aura-gray-500: var(--panel-glass-muted);
+  --primary: var(--panel-glass-positive);
+  --ec-verde-txt: var(--panel-glass-positive);
+  --emerald: var(--panel-glass-positive);
+  --neon-blue: var(--panel-glass-positive);
+  --ec-vermelho: var(--panel-glass-negative);
+  --ec-surface-2: var(--panel-glass-fill-2);
+  --muted: var(--panel-glass-fill-2);
+  --border: var(--panel-glass-edge);
+  position: relative;
+  min-width: 0;
+  background: var(--panel-glass-fill) !important;
+  border-color: hsl(var(--panel-glass-edge) / .5) !important;
+  color: hsl(var(--panel-glass-ink));
+  backdrop-filter: blur(24px) saturate(110%);
+  -webkit-backdrop-filter: blur(24px) saturate(110%);
+  box-shadow: var(--panel-glass-elevation);
+  transition: transform 180ms var(--curva-rapida);
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--panel-glass-reflection);
+  opacity: 0;
+  transform: translateX(0);
+  transition: opacity 180ms var(--curva-rapida);
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
+  /* Localized mirror: sharp light spot + thin specular band angled by pointer. */
+  --espelho-forca: .35;
+  opacity: 1;
+  transform: none;
+  background:
+    radial-gradient(90px circle at var(--glass-x, 50%) var(--glass-y, 50%), rgba(255,255,255,var(--espelho-forca)), rgba(255,255,255,calc(var(--espelho-forca) * .25)) 40%, transparent 70%);
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 150ms var(--curva-rapida);
+  background: radial-gradient(160px circle at var(--glass-x, 50%) var(--glass-y, 50%), rgba(255,255,255,.7), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::before { opacity: 1; }
+html.light .peregrinus-panel [data-glass-active]::after { --espelho-forca: .55; }
+html.light .peregrinus-panel [data-glass-active]::before { opacity: .6; }
+.peregrinus-panel .glass-card { animation-name: panelGlassIn; }
+@keyframes panelGlassIn { from { opacity: 0; } to { opacity: 1; } }
+.peregrinus-panel .ds-kpi :is(.ds-numero-focal, .ds-numero-sec, .metric-value) {
+  color: hsl(var(--panel-glass-ink));
+  font-family: inherit;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 28px; }
+.peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 34px; }
+.peregrinus-panel .ds-kpi { container-type: inline-size; }
+@container (max-width: 140px) {
+  .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 20px; }
+  .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 24px; }
+}
+.peregrinus-panel .operacao-resumo .ds-kpi .ds-numero-focal { font-size: 20px; }
+.peregrinus-panel .ds-kpi :is(.ds-rotulo, .ds-nota) {
+  color: hsl(var(--panel-glass-muted)) !important;
+  letter-spacing: 0;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .peregrinus-panel .ds-kpi:hover { transform: translateY(-2px); }
+  .peregrinus-panel .glass-card:hover { transform: none; }
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco):hover {
+    border-color: hsl(var(--panel-glass-edge) / .95) !important;
+  }
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]):hover { transform: none; }
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"])::after { display: none !important; }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .peregrinus-panel :is(.ds-kpi, .glass-card, .ds-glass-surface, .multilojas-chart, .cartao-branco, div[class*="rounded"][class*="bg-card"][class*="border"]) {
+    background: hsl(var(--panel-glass-ice)) !important;
+  }
+}
+
+/* Reference catalogue adaptation: neutral foundations, compact navigation,
+   translucent repeated items; all brand and state colors remain Peregrinus. */
+:root {
+  --panel-canvas: 0 0% 4%;
+  --panel-surface: 0 0% 8%;
+  --panel-raised: 0 0% 12%;
+  --panel-text: 0 0% 96%;
+  --panel-text-secondary: 0 0% 72%;
+  --panel-line: 0 0% 24%;
+  --panel-brand: 156 79% 37%;
+  --panel-action: 156 80% 28%;
+  --panel-positive: 155 63% 53%;
+  --panel-negative: 6 86% 45%;
+  --panel-date: 54 100% 50%;
+  --panel-white: 0 0% 100%;
+  --panel-black: 0 0% 0%;
+  --panel-chart-bar-opacity: .58;
+  --panel-chart-grid: hsl(var(--panel-text-secondary) / .1);
+  --panel-fill: hsl(var(--panel-white) / .035);
+  --panel-fill-hover: hsl(var(--panel-white) / .045);
+  --panel-stroke-hover: hsl(var(--panel-white) / .1);
+  --panel-divider: hsl(var(--panel-white) / .06);
+  --panel-tooltip: hsl(var(--panel-surface) / .85);
+  --panel-fill-nested: hsl(var(--panel-white) / .025);
+  --panel-stroke: hsl(var(--panel-white) / .08);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .045),
+    0 4px 24px hsl(var(--panel-black) / .2);
+  --panel-nav-fill: hsl(var(--panel-surface) / .92);
+  --panel-reflection: .055;
+  --panel-radius: 16px;
+  --panel-backdrop: blur(22px) saturate(170%);
+}
+html.light {
+  --panel-chart-bar-opacity: .7;
+  --panel-chart-grid: hsl(var(--panel-text-secondary) / .12);
+  --panel-canvas: 0 0% 100%;
+  --panel-surface: 0 0% 96%;
+  --panel-raised: 0 0% 93%;
+  --panel-text: 0 0% 4%;
+  --panel-text-secondary: 0 0% 35%;
+  --panel-line: 0 0% 85%;
+  --panel-positive: 156 84% 26%;
+  --panel-fill: hsl(var(--panel-surface) / .8);
+  --panel-fill-hover: hsl(var(--panel-white) / .9);
+  --panel-stroke-hover: hsl(var(--panel-line));
+  --panel-divider: hsl(var(--panel-line) / .6);
+  --panel-tooltip: hsl(var(--panel-white) / .9);
+  --panel-fill-nested: hsl(var(--panel-white) / .55);
+  --panel-stroke: hsl(var(--panel-line) / .8);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white)),
+    inset 0 -1px 0 hsl(var(--panel-black) / .025),
+    0 2px 6px -2px hsl(var(--panel-black) / .04),
+    0 12px 28px -20px hsl(var(--panel-black) / .12);
+  --panel-nav-fill: hsl(var(--panel-white) / .9);
+  --panel-reflection: .12;
+}
+html.dark, html.light {
+  --background: var(--panel-canvas);
+  --foreground: var(--panel-text);
+  --card: var(--panel-surface);
+  --card-foreground: var(--panel-text);
+  --popover: var(--panel-surface);
+  --popover-foreground: var(--panel-text);
+  --muted: var(--panel-raised);
+  --muted-foreground: var(--panel-text-secondary);
+  --secondary: var(--panel-raised);
+  --secondary-foreground: var(--panel-text);
+  --accent: var(--panel-raised);
+  --accent-foreground: var(--panel-text);
+  --primary: var(--panel-action);
+  --primary-foreground: var(--panel-white);
+  --destructive: var(--panel-negative);
+  --destructive-foreground: var(--panel-white);
+  --border: var(--panel-line);
+  --input: var(--panel-line);
+  --ring: var(--panel-brand);
+  --radius: .5rem;
+  --ec-ink: var(--panel-text);
+  --ec-text-sec: var(--panel-text-secondary);
+  --ec-line: var(--panel-line);
+  --ec-surface: var(--panel-surface);
+  --ec-surface-2: var(--panel-raised);
+  --ec-verde-txt: var(--panel-positive);
+  --ec-vermelho: var(--panel-negative);
+  --aura-line: var(--panel-line);
+  --aura-glass: var(--panel-surface);
+  --aura-fill: var(--panel-raised);
+  --aura-raise: var(--panel-raised);
+  --aura-gray-400: var(--panel-text-secondary);
+  --aura-gray-500: var(--panel-text-secondary);
+  --aura-red-400: var(--panel-negative);
+  --aura-orange-400: var(--panel-negative);
+  --ec-laranja: var(--panel-negative);
+  --price-hot: var(--panel-negative);
+  --warn: var(--panel-negative);
+  --ec-ambar: var(--panel-date);
+  --attention: var(--panel-date);
+  --attention-text: var(--panel-text);
+  --panel-glass-ice: var(--panel-surface);
+  --panel-glass-ink: var(--panel-text);
+  --panel-glass-muted: var(--panel-text-secondary);
+  --panel-glass-edge: var(--panel-line);
+  --panel-glass-positive: var(--panel-positive);
+  --panel-glass-negative: var(--panel-negative);
+  --panel-glass-fill-2: var(--panel-raised);
+  --panel-glass-fill: var(--panel-fill);
+  --panel-glass-nav-fill: var(--panel-nav-fill);
+  --panel-glass-elevation: var(--panel-shadow);
+  --vidro-fundo: var(--panel-fill);
+  --vidro-borda: var(--panel-stroke);
+  --vidro-sombra: var(--panel-shadow);
+  --noite-canvas: hsl(var(--panel-canvas));
+  --noite-canvas-2: hsl(var(--panel-surface));
+  --noite-tinta: hsl(var(--panel-text));
+  --noite-sec: hsl(var(--panel-text-secondary));
+  --noite-vidro: var(--panel-fill);
+  --noite-borda: var(--panel-stroke);
+  --chart-1: var(--panel-brand);
+  --chart-2: var(--panel-text-secondary);
+  --chart-3: var(--panel-positive);
+  --chart-4: var(--panel-text);
+  --chart-5: var(--panel-line);
+  --axis: var(--panel-text-secondary);
+  --grid: var(--panel-line);
+}
+html, html.light, html.dark, html body, html #root {
+  background-color: hsl(var(--panel-canvas));
+  background-image: none;
+}
+body::after { content: none; }
+.peregrinus-panel :is(h1,h2,h3,h4,h5,h6,p,span,button,label,td,th) {
+  letter-spacing: 0;
+}
+.peregrinus-panel :is(h1,h2,.ds-titulo-pagina) {
+  font-weight: 600;
+  line-height: 1.25;
+  text-wrap: balance;
+}
+.panel-container { padding-top: 0; }
+.panel-topbar {
+  background: var(--panel-nav-fill);
+  border-bottom: 1px solid var(--panel-stroke);
+  min-height: 80px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.panel-topbar button { border-radius: 8px; }
+.panel-filterbar { padding-block: 8px; }
+.panel-control { border-radius: 8px; box-shadow: none; }
+.peregrinus-panel .panel-sidebar {
+  height: calc(100dvh - 32px);
+  border: 1px solid var(--panel-stroke);
+  border-radius: var(--panel-radius);
+  box-shadow: none;
+}
+.painel-navigation .panel-nav-item[aria-current="page"] {
+  color: hsl(var(--panel-white));
+  background: hsl(var(--panel-action));
+}
+.painel-navigation .panel-nav-item[aria-current="page"] > span[aria-hidden] { display: none; }
+.panel-content { padding: 4px 0 24px; }
+html body .peregrinus-panel .painel-noite {
+  --noite-canvas: hsl(var(--panel-canvas));
+  --noite-canvas-2: hsl(var(--panel-surface));
+  --noite-vidro: var(--panel-fill);
+  --noite-vidro-forte: var(--panel-fill);
+  --noite-borda: var(--panel-stroke);
+  --noite-borda-forte: var(--panel-stroke-hover);
+  --noite-sombra: var(--panel-shadow);
+  --noite-luz: hsl(var(--panel-white) / .08);
+  --noite-vidro-suave: var(--panel-fill-nested);
+  --noite-tinta: hsl(var(--panel-text));
+  --noite-sec: hsl(var(--panel-text-secondary));
+  --noite-sec-2: hsl(var(--panel-text-secondary));
+  --foreground: var(--panel-text);
+  --card: var(--panel-surface);
+  --card-foreground: var(--panel-text);
+  --muted-foreground: var(--panel-text-secondary);
+  --ec-ink: var(--panel-text);
+  --ec-text-sec: var(--panel-text-secondary);
+  --ec-surface-2: var(--panel-raised);
+  --ec-verde-txt: var(--panel-positive);
+  --ec-vermelho: var(--panel-negative);
+  --ec-laranja: var(--panel-negative);
+  --border: var(--panel-line);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: hsl(var(--panel-text));
+  color-scheme: inherit;
+}
+html body .peregrinus-panel .painel-noite :is(.text-white,.text-slate-200,.text-slate-300) { color: hsl(var(--panel-text)); }
+html body .peregrinus-panel .painel-noite :is(.text-slate-400,.text-slate-500) { color: hsl(var(--panel-text-secondary)); }
+html body .peregrinus-panel .painel-noite :is(.text-emerald-400,.text-emerald-500) { color: hsl(var(--panel-positive)); }
+html body .peregrinus-panel .painel-noite :is(.text-rose-400,.text-rose-500) { color: hsl(var(--panel-negative)); }
+html body .peregrinus-panel .kpi-vidro { justify-content: flex-start; gap: 16px; min-height: 156px; }
+html body .peregrinus-panel .kpi-vidro-valor { font-size: 28px; font-weight: 500; line-height: 1.2; font-kerning: normal; color: hsl(var(--panel-text)); }
+@container (max-width: 160px) { html body .peregrinus-panel .kpi-vidro-valor { font-size: 20px !important; } }
+html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  --foreground: var(--panel-text);
+  --card-foreground: var(--panel-text);
+  --muted-foreground: var(--panel-text-secondary);
+  --ec-ink: var(--panel-text);
+  --ec-text-sec: var(--panel-text-secondary);
+  --panel-glass-ink: var(--panel-text);
+  --panel-glass-muted: var(--panel-text-secondary);
+  position: relative;
+  min-width: 0;
+  background: var(--panel-fill) !important;
+  border: 1px solid var(--panel-stroke) !important;
+  border-radius: var(--panel-radius);
+  color: hsl(var(--panel-text));
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: var(--panel-backdrop);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+  transform: none;
+  transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
+  animation: panelGlassIn 200ms var(--curva-rapida) both;
+}
+html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]) :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  background: var(--panel-fill-nested) !important;
+  border-radius: 12px;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html body .peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.cartao-branco,.noite-vidro)[data-glass-active] {
+  transform: perspective(1200px) rotateX(var(--glass-rx,0deg)) rotateY(var(--glass-ry,0deg));
+}
+html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(240px circle at var(--glass-x,50%) var(--glass-y,50%),hsl(var(--panel-white) / var(--panel-reflection)),transparent 75%);
+  opacity: 0;
+  transition: opacity 160ms var(--curva-rapida);
+}
+html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])[data-glass-active]::after {
+  opacity: 1;
+  background: radial-gradient(240px circle at var(--glass-x,50%) var(--glass-y,50%),hsl(var(--panel-white) / var(--panel-reflection)),transparent 75%);
+}
+/* One soft reflection only; legacy masked edges must not layer over content. */
+html body .peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,div[class*="rounded"][class*="bg-card"][class*="border"])::before {
+  content: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  html body .peregrinus-panel :is(.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco):hover {
+    border-color: var(--panel-stroke-hover) !important;
+    box-shadow: var(--panel-shadow);
+  }
+}
+html body .peregrinus-panel .ds-kpi :is(.ds-numero-focal,.ds-numero-sec,.metric-value) {
+  color: hsl(var(--panel-text));
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+html body .peregrinus-panel .ds-kpi :is(.ds-rotulo,.ds-nota) { color: hsl(var(--panel-text-secondary)); line-height: 1.5; }
+/* Readable shared metrics: scale by available card space, never viewport width. */
+.peregrinus-panel { font-optical-sizing: auto; font-kerning: normal; font-synthesis: none; }
+html body .peregrinus-panel .painel-noite-cabeca { gap: 12px; padding-bottom: 16px; }
+html body .peregrinus-panel .painel-noite-titulo { letter-spacing: 0; font-weight: 500; }
+html body .peregrinus-panel .kpi-vidro-valor { font-feature-settings: 'tnum' 1, 'lnum' 1; font-weight: 600; }
+html.dark .peregrinus-panel { background-color: hsl(var(--panel-canvas)); }
+html body .peregrinus-panel .painel-noite-cabeca { border-color: var(--panel-divider); }
+html body .peregrinus-panel .ds-kpi :is(.ds-numero-sec,.ds-numero-focal) { font-weight: 600; }
+html body .peregrinus-panel .kpi-vidro > p:first-child { text-transform: uppercase; font-size: 12px; }
+html body .peregrinus-panel .panel-glass-tooltip {
+  background: var(--panel-tooltip);
+  border: 1px solid var(--panel-stroke);
+  border-radius: 12px;
+  color: hsl(var(--panel-text));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--panel-shadow);
+}
+@media (hover: hover) and (pointer: fine) {
+  html body .peregrinus-panel :is(.ds-kpi,.kpi-vidro,.noite-vidro):hover {
+    background: var(--panel-fill-hover) !important;
+    border-color: var(--panel-stroke-hover) !important;
+  }
+}
+html body .peregrinus-panel :is(.noite-chip,.ds-seta) { box-shadow: none; }
+html body .peregrinus-panel .ds-kpi .ds-rotulo { font-size: 12px; text-transform: none; font-weight: 500; }
+html body .peregrinus-panel .ds-kpi .ds-nota { font-size: 12px; text-wrap: pretty; }
+html body .peregrinus-panel :is(.ds-kpi,.kpi-vidro) > * { position: relative; z-index: 1; }
+html body .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 26px; }
+html body .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 32px; }
+@container (max-width: 180px) {
+  html body .peregrinus-panel .ds-kpi .ds-numero-sec { font-size: 22px; }
+  html body .peregrinus-panel .ds-kpi .ds-numero-focal { font-size: 26px; }
+}
+@container (max-width: 140px) {
+  html body .peregrinus-panel .ds-kpi :is(.ds-numero-sec,.ds-numero-focal) { font-size: 20px; }
+}
+.peregrinus-panel .recharts-default-tooltip { background: hsl(var(--popover)) !important; color: hsl(var(--popover-foreground)) !important; border-color: var(--panel-stroke) !important; border-radius: 8px !important; }
+.peregrinus-panel .recharts-cartesian-grid line { stroke: hsl(var(--panel-line) / .5); }
+.peregrinus-panel .recharts-cartesian-axis-tick text { fill: hsl(var(--panel-text-secondary)); }
+@media (max-width: 639px) {
+  .panel-topbar { padding-inline: 4px; gap: 12px; }
+  .panel-filterbar { padding-block: 4px; }
+}
+@media (prefers-reduced-motion: reduce), (hover: none) {
+  html body .peregrinus-panel [data-glass-active] { transform: none; }
+  html body .peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.cartao-branco,.noite-vidro)::after,
+  html body .peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.cartao-branco,.noite-vidro)::before { display: none !important; }
+}
+
+/* Access-screen identity shared by protected pages, without its WebGL scene. */
+.peregrinus-panel {
+  min-height: 100svh;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+html body .peregrinus-panel :is(h1,.ds-titulo-pagina) { font-weight: 400; }
+html body .peregrinus-panel :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),textarea,select,button[role="combobox"]) {
+  background: var(--panel-fill-nested);
+  color: hsl(var(--panel-text));
+  border: 1px solid var(--panel-stroke);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.peregrinus-panel :is(input,textarea)::placeholder { color: hsl(var(--panel-text-secondary)); opacity: 1; }
+.peregrinus-panel :is(input,textarea,select,button,a):focus-visible {
+  outline: 2px solid hsl(var(--panel-brand));
+  outline-offset: 3px;
+}
+html body .peregrinus-panel button.aura-cta {
+  background: hsl(var(--panel-action));
+  color: hsl(var(--panel-white));
+  border: 1px solid hsl(var(--panel-brand));
+  border-radius: 999px;
+}
+html body .peregrinus-panel button.aura-cta::before,
+html body .peregrinus-panel button.aura-cta::after { content: none; }
+html body .peregrinus-panel :is(.panel-sidebar,.painel-navigation) {
+  background: var(--panel-fill) !important;
+  box-shadow: var(--panel-shadow);
+}
+.peregrinus-panel label { font-weight: 500; }
+
+/* Screenshot finish limited to the two overview bands, not global glass. */
+.resumo-visual-ref {
+  --summary-fill: var(--panel-fill);
+  --summary-edge: var(--panel-stroke);
+  --summary-shadow: var(--panel-shadow);
+  --summary-reflection: linear-gradient(180deg, hsl(var(--panel-white) / .012), transparent 60%);
+  --summary-grid: hsl(var(--panel-white) / .12);
+  --chart-1: var(--panel-positive);
+}
+html.light .resumo-visual-ref {
+  --summary-fill: var(--panel-fill);
+  --summary-edge: var(--panel-stroke);
+  --summary-shadow: var(--panel-shadow);
+  --summary-reflection: linear-gradient(180deg, hsl(var(--panel-white) / .12), transparent 60%);
+  --summary-grid: hsl(var(--panel-line) / .5);
+}
+html body .peregrinus-panel .resumo-visual-ref :is(.noite-vidro, div.noite-vidro[class*="rounded"][class*="bg-card"][class*="border"]) {
+  background: var(--summary-fill) !important;
+  border: 1px solid var(--summary-edge) !important;
+  border-radius: 16px;
+  box-shadow: var(--summary-shadow);
+  backdrop-filter: var(--panel-backdrop);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+}
+html body .peregrinus-panel .resumo-visual-ref .noite-vidro::before {
+  content: none;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro {
+  min-height: 0;
+  padding: 22px 16px 20px;
+  gap: 12px;
+  border-radius: 22px !important;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor {
+  font-size: var(--panel-type-summary-number);
+  font-weight: 500;
+  line-height: 1.2;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro > p:first-child {
+  font-size: 11px;
+  font-weight: 500;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro span[aria-label] {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  gap: 6px;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro span[aria-label] svg {
+  width: 20px;
+  height: 20px;
+  padding: 2px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+html body .peregrinus-panel .resumo-visual-ref .recharts-cartesian-grid line {
+  stroke: var(--summary-grid) !important;
+}
+@container (max-width: 170px) {
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-summary-number-small) !important; }
+}
+@container (max-width: 135px) {
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-summary-number-compact) !important; }
+}
+@media (max-width: 639px) {
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro { padding: 16px; }
+}
+
+.sinergia-operacional { padding-top: 16px; border-top: 1px solid var(--panel-divider); }
+.sinergia-operacional td { backdrop-filter: blur(24px); box-shadow: inset 0 1px 0 hsl(var(--panel-white) / .05); }
+
+/* Subtle reputation highlights retain the official status color. */
+html body .peregrinus-panel [aria-label="Saúde da conta"] [role="img"] > span {
+  box-shadow: none;
+}
+html body .peregrinus-panel .sinergia-operacional td { box-shadow: none; }
+
+/* Design-system reference: one authoritative material for every protected surface.
+   Home retains its existing access styles; portals inherit only on panel pages. */
+body:not(:has(.peregrinus-panel)) .glass-card {
+  background: var(--vidro-fundo) !important;
+  border: 1px solid var(--vidro-borda) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--vidro-sombra) !important;
+  backdrop-filter: var(--panel-backdrop) !important;
+  -webkit-backdrop-filter: var(--panel-backdrop) !important;
+  transform: none !important;
+  transition: transform 200ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
+}
+body:not(:has(.peregrinus-panel)) .glass-card::before,
+body:not(:has(.peregrinus-panel)) .glass-card::after { content: none !important; display: none !important; }
+@media (hover: hover) and (pointer: fine) {
+  body:not(:has(.peregrinus-panel)) .glass-card:hover {
+    border-color: hsl(var(--panel-positive) / .35) !important;
+    box-shadow: var(--panel-shadow), 0 0 0 1px hsl(var(--panel-positive) / .1), 0 24px 50px -20px hsl(var(--panel-brand) / .25) !important;
+    transform: translateY(-2px) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body:not(:has(.peregrinus-panel)) .glass-card { transform: none !important; }
+}
+body:has(.peregrinus-panel) {
+  --panel-card-radius: 24px;
+  --panel-control-radius: 8px;
+  --panel-backdrop: blur(19px) saturate(140%);
+  --panel-fill: linear-gradient(180deg, hsl(var(--panel-brand) / .05), transparent 42%),
+    linear-gradient(165deg, hsl(var(--panel-white) / .045), hsl(var(--panel-white) / .009)),
+    hsl(var(--panel-surface) / .62);
+  --panel-stroke: hsl(var(--panel-white) / .077);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .09),
+    inset 0 -1px 0 hsl(var(--panel-black) / .22),
+    inset 0 0 48px -24px hsl(var(--panel-brand) / .12),
+    0 26px 60px -32px hsl(var(--panel-black) / .92);
+  --panel-stroke-hover: hsl(var(--panel-brand) / .34);
+  --panel-hover-shadow: inset 0 1px 0 hsl(var(--panel-white) / .12),
+    0 24px 50px hsl(var(--panel-black) / .6),
+    0 0 34px -16px hsl(var(--panel-positive) / .6);
+  --panel-fill-nested: hsl(var(--panel-white) / .02);
+  --panel-nav-fill: linear-gradient(165deg, hsl(var(--panel-white) / .05), hsl(var(--panel-white) / .015)), hsl(var(--panel-surface) / .28);
+  --panel-active-fill: hsl(var(--panel-brand) / .09);
+  --panel-active-edge: hsl(var(--panel-brand) / .26);
+  --panel-focus-shadow: 0 0 0 3px hsl(var(--panel-brand) / .1);
+  --panel-tooltip: hsl(var(--panel-surface) / .94);
+  background: hsl(var(--panel-canvas));
+}
+html.light body:has(.peregrinus-panel) {
+  /* Light adaptation of the catalogue material, scoped away from Home. */
+  --panel-canvas: 150 10% 91%;
+  --panel-surface: 150 10% 98%;
+  --panel-raised: 150 9% 93%;
+  --panel-text: 160 8% 12%;
+  --panel-text-secondary: 160 4% 36%;
+  --panel-line: 150 8% 82%;
+  --panel-positive: 156 84% 26%;
+  --panel-backdrop: blur(24px) saturate(145%);
+  --panel-fill: linear-gradient(155deg, hsl(var(--panel-white) / .6), hsl(var(--panel-white) / .22) 52%, hsl(var(--panel-white) / .36)),
+    linear-gradient(180deg, hsl(var(--panel-brand) / .025), transparent 48%);
+  --panel-stroke: hsl(var(--panel-white) / .78);
+  --panel-stroke-hover: hsl(var(--panel-action) / .24);
+  --panel-divider: hsl(var(--panel-text) / .08);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .95),
+    inset 1px 0 0 hsl(var(--panel-white) / .42),
+    inset 0 -1px 0 hsl(var(--panel-text) / .045),
+    0 4px 12px -8px hsl(var(--panel-text) / .12),
+    0 20px 40px -28px hsl(var(--panel-text) / .24);
+  --panel-hover-shadow: var(--panel-shadow), 0 12px 28px -22px hsl(var(--panel-action) / .18);
+  --panel-fill-hover: var(--panel-fill);
+  --panel-fill-nested: hsl(var(--panel-white) / .22);
+  --panel-nav-fill: linear-gradient(155deg, hsl(var(--panel-white) / .64), hsl(var(--panel-white) / .3)),
+    linear-gradient(180deg, hsl(var(--panel-brand) / .035), transparent);
+  --panel-active-fill: hsl(var(--panel-brand) / .08);
+  --panel-active-edge: hsl(var(--panel-action) / .18);
+  --panel-tooltip: hsl(var(--panel-surface) / .86);
+  --panel-chart-grid: hsl(var(--panel-text) / .09);
+  --panel-canvas-texture: repeating-linear-gradient(118deg,
+    hsl(var(--panel-white) / .12) 0 1px, transparent 1px 4px);
+  --panel-canvas-light: linear-gradient(125deg,
+    hsl(var(--panel-white) / .72), transparent 35%, hsl(var(--panel-brand) / .075) 65%, hsl(var(--panel-white) / .36));
+  --sidebar-background: var(--panel-surface);
+  --sidebar-foreground: var(--panel-text);
+  --sidebar-accent: var(--panel-raised);
+  --sidebar-accent-foreground: var(--panel-text);
+  --sidebar-border: var(--panel-line);
+  --emerald: var(--panel-positive);
+  --neon-blue: var(--panel-positive);
+  --warning: var(--panel-negative);
+  --warn-soft: var(--panel-negative);
+  --attention-text: var(--panel-text);
+  --price-cool: var(--panel-positive);
+  background: var(--panel-canvas-texture), var(--panel-canvas-light), hsl(var(--panel-canvas));
+  background-attachment: fixed;
+}
+html.light:has(.peregrinus-panel),
+html.light:has(.peregrinus-panel) #root {
+  background: transparent;
+}
+html.light body .peregrinus-panel .resumo-visual-ref {
+  --summary-grid: var(--panel-chart-grid);
+}
+html.light body .peregrinus-panel :is(.noite-vidro,.glass-card,.ds-kpi,.ds-glass-surface,.cartao-branco) {
+  --foreground: var(--panel-text);
+  --card-foreground: var(--panel-text);
+  --muted-foreground: var(--panel-text-secondary);
+}
+html.light body .peregrinus-panel :is(h1,h2,h3,h4,h5,h6) {
+  color: hsl(var(--panel-text));
+}
+html.light body .peregrinus-panel :is(.ds-seta-bom, .ds-seta-ruim) {
+  color: hsl(var(--panel-positive));
+  background: hsl(var(--panel-positive) / .08);
+  box-shadow: none;
+}
+html.light body .peregrinus-panel .ds-seta-ruim {
+  color: hsl(var(--panel-negative));
+  background: hsl(var(--panel-negative) / .07);
+}
+html.light body:has(.peregrinus-panel) ::selection {
+  background: hsl(var(--panel-brand) / .18);
+  color: hsl(var(--panel-text));
+}
+html body .peregrinus-panel {
+  --vidro-fundo: var(--panel-fill);
+  --vidro-borda: var(--panel-stroke);
+  --vidro-sombra: var(--panel-shadow);
+  --panel-glass-fill: var(--panel-fill);
+  --panel-glass-elevation: var(--panel-shadow);
+  background: transparent !important;
+}
+html body .peregrinus-panel > :is(.min-h-screen, .cart-page),
+html body .peregrinus-panel .cart-page { background: transparent; color: hsl(var(--panel-text)); }
+html body .peregrinus-panel section[class*="bg-card"][class*="border"] {
+  background: var(--panel-fill);
+  border-color: var(--panel-stroke);
+  border-radius: var(--panel-card-radius);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: var(--panel-backdrop);
+}
+html body .peregrinus-panel :is(p,li) { overflow-wrap: anywhere; }
+html.light body .peregrinus-panel :is(.text-amber-400,.text-amber-300,.text-amber-200\/90,.text-amber-200\/80) { color: hsl(var(--panel-text-secondary)); }
+html.light body .peregrinus-panel :is(.bg-amber-500\/10,.bg-amber-400\/10) { background: var(--panel-fill-nested); }
+html.light body .peregrinus-panel :is(.border-amber-500\/30,.border-amber-400\/30) { border-color: var(--panel-stroke); }
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha,div[class*="rounded"][class*="bg-card"][class*="border"]) {
+  background: var(--panel-fill) !important;
+  border: 1px solid var(--panel-stroke) !important;
+  border-radius: var(--panel-card-radius) !important;
+  box-shadow: var(--panel-shadow) !important;
+  backdrop-filter: var(--panel-backdrop) !important;
+  -webkit-backdrop-filter: var(--panel-backdrop) !important;
+  transform: none !important;
+  transition: transform 200ms var(--curva-rapida), opacity 200ms var(--curva-rapida);
+}
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro)::before,
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.multilojas-chart,.cartao-branco,.noite-vidro)::after {
+  content: none !important;
+  display: none !important;
+}
+html body .peregrinus-panel :is(.panel-topbar,.panel-sidebar,.painel-navigation,.cart-header,.cart-tabs-sticky) {
+  background: var(--panel-nav-fill) !important;
+  border: 1px solid var(--panel-stroke);
+  backdrop-filter: var(--panel-backdrop);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+  box-shadow: var(--panel-shadow);
+}
+html body .peregrinus-panel :is(.panel-sidebar,.panel-topbar) { border-radius: var(--panel-card-radius); }
+html body .peregrinus-panel :is([role="tablist"],.cart-tabnav) {
+  background: var(--panel-fill-nested) !important;
+  border: 1px solid var(--panel-stroke);
+  border-radius: var(--panel-control-radius);
+}
+html body .peregrinus-panel :is([role="tab"],.panel-nav-item,.cart-tabbtn) {
+  border: 1px solid transparent;
+  border-radius: var(--panel-control-radius);
+  background: transparent;
+  box-shadow: none;
+  color: hsl(var(--panel-text-secondary));
+  transition: transform 120ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
+}
+html body .peregrinus-panel :is([role="tab"][data-state="active"],.panel-nav-item[aria-current="page"],.cart-tabbtn.on) {
+  color: hsl(var(--panel-positive)) !important;
+  background: var(--panel-active-fill) !important;
+  border-color: var(--panel-active-edge);
+  box-shadow: inset 0 1px 0 hsl(var(--panel-white) / .03);
+}
+html body .peregrinus-panel :is([role="tab"],.panel-nav-item):hover { color: hsl(var(--panel-positive)); }
+/* Same controls inside Radix portals: page-scoped, not applied to Home. */
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),textarea,select,button[role="combobox"]) {
+  border: 1px solid var(--panel-stroke);
+  background: var(--panel-fill-nested);
+  color: hsl(var(--panel-text));
+  border-radius: 11px;
+  box-shadow: none;
+  transition: opacity 160ms var(--curva-rapida);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) :is(input,textarea,select,button[role="combobox"]):focus {
+  border-color: hsl(var(--panel-brand) / .45);
+  box-shadow: var(--panel-focus-shadow);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) [data-ui-button] {
+  border-radius: var(--panel-control-radius);
+  letter-spacing: 0;
+  transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"]) [data-ui-button="default"] {
+  background: hsl(var(--panel-action));
+  border: 1px solid hsl(var(--panel-brand) / .45);
+  color: hsl(var(--panel-white));
+  box-shadow: inset 0 1px 0 hsl(var(--panel-white) / .12), 0 4px 14px hsl(var(--panel-brand) / .12);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"]) [data-ui-button="default"]::before,
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"]) [data-ui-button="default"]::after { content: none; }
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"]) [data-ui-button="outline"] { border-color: var(--panel-stroke); background: var(--panel-fill-nested); }
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"]) [data-ui-button="default"]:hover { box-shadow: var(--panel-focus-shadow), 0 8px 24px -12px hsl(var(--panel-brand) / .45); }
+body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"],[role="menu"],[role="listbox"],[data-radix-popper-content-wrapper] > div) {
+  background: var(--panel-tooltip) !important;
+  color: hsl(var(--panel-text));
+  border: 1px solid var(--panel-stroke) !important;
+  border-radius: 18px !important;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: var(--panel-backdrop);
+  max-width: calc(100vw - 32px);
+}
+html body .peregrinus-panel :is(table th,table td) { border-color: var(--panel-divider); letter-spacing: 0; }
+html body .peregrinus-panel table th { color: hsl(var(--panel-text-secondary)); background: var(--panel-fill-nested); }
+html body .peregrinus-panel table tbody tr:hover { background: var(--panel-fill-nested); }
+html body .peregrinus-panel .recharts-default-tooltip { background: var(--panel-tooltip) !important; backdrop-filter: var(--panel-backdrop); box-shadow: var(--panel-shadow); }
+/* Containers and navigation are stationary; only repeated cards lift. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.cartao-branco,.noite-vidro,.cart-card):hover {
+    border-color: var(--panel-stroke-hover) !important;
+    box-shadow: var(--panel-hover-shadow) !important;
+    transform: translateY(-3px) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.cartao-branco,.noite-vidro,.cart-card):hover { transform: none !important; }
+}
+@media (max-width: 639px) {
+  html body .peregrinus-panel [role="tablist"] { max-width: 100%; height: auto; flex-wrap: wrap; justify-content: flex-start; }
+  html body .peregrinus-panel .recharts-wrapper { overflow: visible; }
+  html body .peregrinus-panel .recharts-default-legend {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 12px;
+  }
+  html body .peregrinus-panel .recharts-default-legend .recharts-legend-item {
+    display: inline-flex !important; align-items: center; max-width: 100%; margin-right: 0 !important;
+    white-space: normal; line-height: 20px;
+  }
+  html body .peregrinus-panel .recharts-legend-item-text { font-size: 12px; overflow-wrap: anywhere; }
+  html body .peregrinus-panel .recharts-legend-item svg { flex-shrink: 0; }
+  html body .peregrinus-panel .recharts-tooltip-wrapper { max-width: calc(100vw - 48px); }
+  html body .peregrinus-panel .panel-glass-tooltip { white-space: normal; overflow-wrap: anywhere; }
+}
+
+/* Chuva de luz da referência no painel (nunca na tela de acesso). Cores = verde Peregrinus. */
+.chuva-painel {
+  --ui-accent: #14A86C; --ui-accent-dark: #0E7F51; --ui-accent-light: #3BD394;
+  --ui-accent-glow: #3BD394; --ui-accent-rgb-space: 20 168 108;
+  --cadence-rain-shader-alpha: .5; --cadence-rain-accent-glow: .35;
+}
+html:not(.dark) .chuva-painel { display: none; }
+html.dark body .peregrinus-panel { background-color: transparent !important; }
+html.dark body:has(.chuva-painel) { background-color: #050505; }
+html.dark .peregrinus-panel > :not(.chuva-painel) { position: relative; z-index: 1; }
+
+/* Reference typography: clean strokes and stable, container-sized numbers. */
+.peregrinus-panel {
+  --panel-type-label: 12px;
+  --panel-type-body: 14px;
+  --panel-type-page-title: 26px;
+  --panel-type-page-leading: 32px;
+  --panel-type-section-title: 18px;
+  --panel-type-section-leading: 24px;
+  --panel-type-body-leading: 24px;
+  --panel-type-nav: 13px;
+  --panel-type-title: 18px;
+  --panel-type-number: clamp(28px, 15cqi, 38px);
+  --panel-type-number-small: clamp(22px, 15cqi, 30px);
+  --panel-type-summary-number: clamp(30px, 16cqi, 42px);
+  --panel-type-summary-number-small: clamp(24px, 16cqi, 32px);
+  --panel-type-summary-number-compact: clamp(20px, 16cqi, 26px);
+  -webkit-font-smoothing: antialiased;
+  text-shadow: none;
+}
+html body .peregrinus-panel :is(.panel-topbar,.panel-sidebar,.painel-noite,.ds-kpi) :is(p,span,h1,h2,h3,h4) {
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+  letter-spacing: 0;
+}
+html body .peregrinus-panel .panel-topbar > div:first-child p { font-size: var(--panel-type-title); line-height: 1.4; font-weight: 500; }
+html body .peregrinus-panel :is(.panel-nav-item,.panel-topbar button,.panel-control) { font-size: var(--panel-type-nav); font-weight: 500; }
+html body .peregrinus-panel .panel-sidebar nav > div:first-child > div > p { font-size: var(--panel-type-label); line-height: 1.5; }
+html body .peregrinus-panel :is(.kpi-vidro,.ds-kpi) { container-type: inline-size; }
+html body .peregrinus-panel :is(.kpi-vidro-valor,.ds-numero-focal,.ds-numero-sec,.metric-value) {
+  font-size: var(--panel-type-number);
+  font-weight: 500;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  letter-spacing: 0;
+  text-shadow: none;
+  -webkit-text-stroke: 0;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro > p:first-child { font-size: var(--panel-type-label); text-transform: none; }
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro.noite-vidro {
+  border-radius: 22px !important;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes > span {
+  font-size: var(--panel-type-label);
+  line-height: 1.5;
+}
+@container (max-width: 200px) {
+  html body .peregrinus-panel :is(.kpi-vidro-valor,.ds-numero-focal,.ds-numero-sec) { font-size: var(--panel-type-number-small) !important; }
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-summary-number-small) !important; }
+}
+@container (max-width: 160px) {
+  html body .peregrinus-panel .resumo-visual-ref .kpi-vidro-valor { font-size: var(--panel-type-summary-number-compact) !important; }
+}
+html body .peregrinus-panel .panel-skeleton {
+  border: 1px solid var(--panel-stroke);
+  border-radius: var(--panel-card-radius);
+  background: var(--panel-fill);
+  animation: panelLoading 1800ms ease-in-out infinite;
+}
+@keyframes panelLoading { 0%,100% { opacity: .55; } 50% { opacity: .95; } }
+@media (prefers-reduced-motion: reduce) {
+  html body .peregrinus-panel .panel-skeleton { animation: none; opacity: .8; }
+}
+
+/* Resumo executivo: números maiores, proporcionais e centralizados (28/10) */
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro.noite-vidro {
+  align-items: center; justify-content: center; text-align: center; gap: 14px;
+}
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro > div { display: flex; flex-direction: column; align-items: center; width: 100%; }
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes { align-items: center !important; justify-content: center; }
+html body .peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor {
+  font-size: clamp(30px, 14cqi, 48px) !important; line-height: 1.1; max-width: 100%;
+}
+
+/* Hierarquia editorial do painel: medidas fixas, sem interferir na Home ou nos KPIs. */
+.peregrinus-panel .comparacao-periodos-valor {
+  font-size: 24px;
+  line-height: 32px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 639px) {
+  .peregrinus-panel .comparacao-periodos-valor { font-size: 18px; line-height: 24px; }
+}
+html body .peregrinus-panel .panel-section-header {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+}
+html body .peregrinus-panel .panel-section-header[data-secao="efficiency"] {
+  --panel-type-page-title: 32px;
+  --panel-type-page-leading: 40px;
+  --panel-type-body: 16px;
+  --panel-type-body-leading: 28px;
+  --panel-type-label: 13px;
+}
+html body .peregrinus-panel .panel-section-header :is(.panel-section-title,.panel-section-briefing,.panel-section-meta) {
+  font-family: inherit;
+}
+html body .peregrinus-panel .panel-section-summary-label {
+  font-weight: 600;
+  color: hsl(var(--panel-text));
+}
+html body .peregrinus-panel :is(.panel-section-title, .ds-titulo-pagina) {
+  font-size: var(--panel-type-page-title);
+  line-height: var(--panel-type-page-leading);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: hsl(var(--panel-text));
+}
+html body .peregrinus-panel .panel-section-meta {
+  font-size: var(--panel-type-label);
+  line-height: 16px;
+  font-weight: 400;
+  color: hsl(var(--panel-text-secondary));
+}
+html body .peregrinus-panel .panel-section-briefing {
+  max-width: 88ch;
+  font-size: var(--panel-type-body);
+  line-height: var(--panel-type-body-leading);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-wrap: pretty;
+  color: hsl(var(--panel-text-secondary));
+}
+html body .peregrinus-panel :is(.painel-noite-titulo, .ds-titulo-bloco),
+html body .peregrinus-panel .resumo-visual-ref > :is(section, div) > header h3 {
+  font-size: var(--panel-type-section-title);
+  line-height: var(--panel-type-section-leading);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: hsl(var(--panel-text));
+}
+
+/* Apple Design: panel-only materials and interaction hierarchy. Home is untouched. */
+body:has(.peregrinus-panel) {
+  --panel-backdrop: blur(24px) saturate(150%);
+  --panel-fill: linear-gradient(165deg, hsl(var(--panel-white) / .035), hsl(var(--panel-white) / .015)), hsl(var(--panel-surface) / .4);
+  --panel-fill-hover: var(--panel-fill);
+  --panel-stroke: hsl(var(--panel-white) / .08);
+  --panel-stroke-hover: hsl(var(--panel-positive) / .22);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .08), 0 4px 24px hsl(var(--panel-black) / .2);
+  --panel-hover-shadow: var(--panel-shadow);
+  --panel-nav-fill: linear-gradient(165deg, hsl(var(--panel-white) / .045), hsl(var(--panel-white) / .015)), hsl(var(--panel-surface) / .58);
+  --panel-tooltip: hsl(var(--panel-surface) / .9);
+  --panel-scrim: hsl(var(--panel-black) / .48);
+  --panel-motion-press: 100ms;
+  --panel-motion-surface: 240ms;
+}
+html.light body:has(.peregrinus-panel) {
+  --panel-fill: linear-gradient(155deg, hsl(var(--panel-white) / .6), hsl(var(--panel-white) / .24) 52%, hsl(var(--panel-white) / .38));
+  --panel-fill-hover: var(--panel-fill);
+  --panel-stroke: hsl(var(--panel-white) / .78);
+  --panel-stroke-hover: hsl(var(--panel-action) / .24);
+  --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .95), inset 1px 0 0 hsl(var(--panel-white) / .42), 0 8px 24px -16px hsl(var(--panel-text) / .18);
+  --panel-nav-fill: linear-gradient(155deg, hsl(var(--panel-white) / .66), hsl(var(--panel-white) / .34));
+  --panel-tooltip: hsl(var(--panel-surface) / .94);
+  --panel-scrim: hsl(var(--panel-black) / .3);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-optical-sizing: auto;
+  font-kerning: normal;
+  font-synthesis: none;
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) :is(button,input,textarea,select,label,h1,h2,h3,h4,p,span) {
+  font-family: inherit;
+  letter-spacing: 0;
+}
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.cartao-branco,.noite-vidro,.cart-card):hover {
+  transform: none !important;
+  box-shadow: var(--panel-shadow) !important;
+}
+/* Inner groups separate content without stacking multiple blurred materials. */
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.ds-glass-surface,.noite-vidro,.cart-card) :is(.ds-kpi,.glass-card,.ds-glass-surface,.noite-vidro,.cart-card) {
+  background: var(--panel-fill-nested) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html body .peregrinus-panel :is(.panel-topbar,.panel-sidebar,.cart-header,.cart-tabs-sticky) {
+  backdrop-filter: var(--panel-backdrop);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+  box-shadow: var(--panel-shadow);
+}
+body:has(.peregrinus-panel) :is(.panel-sidebar,[data-ui-surface="sheet"].painel-navigation) nav > div:first-child > div > p {
+  font-size: var(--panel-type-label);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  text-transform: none;
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"].painel-navigation {
+  background: var(--panel-nav-fill) !important;
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"] .panel-nav-item {
+  color: hsl(var(--panel-text-secondary));
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--panel-control-radius);
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"] .panel-nav-item[aria-current="page"] {
+  color: hsl(var(--panel-positive)) !important;
+  background: var(--panel-active-fill) !important;
+  border-color: var(--panel-active-edge);
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"] .panel-nav-item[aria-current="page"] > span[aria-hidden] { display: none; }
+html body .peregrinus-panel :is(h1:not(.panel-section-title),.ds-titulo-pagina) {
+  font-size: var(--panel-type-page-title);
+  line-height: var(--panel-type-page-leading);
+  font-weight: 500;
+  text-wrap: balance;
+}
+html body .peregrinus-panel :is(.ds-titulo-bloco,.painel-noite-titulo) {
+  font-size: var(--panel-type-section-title);
+  line-height: var(--panel-type-section-leading);
+}
+html body .peregrinus-panel :is(table td,table th) {
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+html body .peregrinus-panel table th { font-weight: 500; }
+/* Press feedback starts on pointer-down. No input is locked during transitions. */
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"], body:has(.peregrinus-panel) [data-radix-popper-content-wrapper]) :is([data-ui-button],button[role="tab"],.panel-nav-item,.cart-tabbtn) {
+  transition: transform var(--panel-motion-press) var(--curva-rapida), opacity 160ms var(--curva-rapida) !important;
+  touch-action: manipulation;
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"]) :is([data-ui-button],button[role="tab"],.panel-nav-item,.cart-tabbtn):active:not(:disabled) {
+  transform: scale(.98);
+  opacity: .85;
+}
+body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"],[role="menu"],[role="listbox"],[role="tooltip"],[data-radix-popper-content-wrapper] > div) {
+  backdrop-filter: var(--panel-backdrop);
+  -webkit-backdrop-filter: var(--panel-backdrop);
+  box-shadow: var(--panel-shadow);
+  color: hsl(var(--panel-text));
+}
+body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"]) {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+body:has(.peregrinus-panel) [data-ui-overlay] {
+  background: var(--panel-scrim);
+  backdrop-filter: blur(4px);
+  animation-duration: 160ms;
+}
+body:has(.peregrinus-panel) [data-ui-surface="dialog"] {
+  animation-duration: var(--panel-motion-surface);
+  animation-timing-function: var(--curva-rapida);
+  --tw-enter-translate-x: 0;
+  --tw-enter-translate-y: 0;
+  --tw-exit-translate-x: 0;
+  --tw-exit-translate-y: 0;
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"] {
+  animation-duration: var(--panel-motion-surface);
+  animation-timing-function: var(--curva-rapida);
+  transition-property: transform, opacity;
+  max-height: 100dvh;
+}
+body:has(.peregrinus-panel) [data-ui-surface="sheet"][data-side="left"] { border-radius: 0 16px 16px 0 !important; }
+body:has(.peregrinus-panel) [data-ui-surface="sheet"][data-side="right"] { border-radius: 16px 0 0 16px !important; }
+@media (pointer: coarse) {
+  :is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"]) :is([data-ui-button],button[role="tab"],.panel-nav-item) { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .peregrinus-panel :is(.animate-in,.animate-pulse,.glass-card,.ds-kpi,.noite-vidro,.panel-skeleton) { animation: none !important; }
+  :is(.peregrinus-panel, body:has(.peregrinus-panel) [role="dialog"], body:has(.peregrinus-panel) [role="alertdialog"]) :is([data-ui-button],button[role="tab"],.panel-nav-item,.cart-tabbtn):active { transform: none !important; }
+  body:has(.peregrinus-panel) :is([data-ui-surface],[data-ui-overlay],[data-radix-popper-content-wrapper] > div) {
+    --tw-enter-translate-x: 0 !important; --tw-enter-translate-y: 0 !important;
+    --tw-exit-translate-x: 0 !important; --tw-exit-translate-y: 0 !important;
+    --tw-enter-scale: 1 !important; --tw-exit-scale: 1 !important;
+    animation-duration: 100ms !important;
+  }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  body:has(.peregrinus-panel) {
+    --panel-fill: hsl(var(--panel-surface));
+    --panel-fill-hover: hsl(var(--panel-surface));
+    --panel-fill-nested: hsl(var(--panel-raised));
+    --panel-nav-fill: hsl(var(--panel-surface));
+    --panel-tooltip: hsl(var(--panel-surface));
+    --panel-stroke: hsl(var(--panel-text-secondary) / .5);
+    --panel-backdrop: none;
+  }
+}

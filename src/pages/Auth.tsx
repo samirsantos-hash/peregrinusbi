@@ -6,8 +6,8 @@ import { Loader2, LogIn } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import logo from "@/assets/logo-peregrinus.webp";
-import logoAuth from "@/assets/logo-auth.webp";
+import logoAuth from "@/assets/logo-auth-transparent.png";
+import { AuraBackground } from "@/components/aura/AuraBackground";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
@@ -37,16 +37,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="glass-card p-8 w-full max-w-sm space-y-6 animate-fade-in">
+    <div className="relative min-h-screen flex items-center justify-center px-4 bg-background">
+      <AuraBackground />
+      <div className="relative z-10 glass-card p-8 w-full max-w-sm space-y-6 animate-fade-in">
 
 
         <div className="text-center space-y-3">
-          <div className="w-24 h-24 mx-auto rounded-xl bg-background/80 border border-border/50 p-3 flex items-center justify-center shadow-lg shadow-primary/10">
-            <img alt="Ecom Peregrinus" className="w-full h-full object-contain rounded-lg drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]" src={logoAuth} fetchPriority="high" decoding="async" width={128} height={128} />
+          <div className="w-24 h-24 mx-auto flex items-center justify-center">
+            <img alt="Ecom Peregrinus" className="w-full h-full object-contain brightness-0 dark:invert" src={logoAuth} fetchPriority="high" decoding="async" width={128} height={128} />
           </div>
-          <h1 className="font-medium tracking-tight font-mono px-0 text-2xl">Ecom Peregrinus — Acesso ao Painel</h1>
-          <p className="text-xs text-muted-foreground">Entre com suas credenciais</p>
+          <h1 className="auth-title">Ecom Peregrinus <span className="block">Acesso ao Painel</span></h1>
+          <p className="auth-subtitle text-muted-foreground">Entre com suas credenciais</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">

@@ -5,6 +5,7 @@ import { requireEnv } from '../_shared/env.ts';
 import { tokenAtual } from '../_shared/mlTokenAtual.ts';
 import { janelaAnalise, projetarPedidos } from '../_shared/mlAnaliseLoja.ts';
 import { lerQualidade } from '../_shared/mlMelhorias.ts';
+import { amostraCampanhas } from '../_shared/mlCampanhasDiagnostico.ts';
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -12,7 +13,7 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full']) }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico']) }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
   // Reuse existing store visibility; developer status does not grant business access.
@@ -31,12 +32,58 @@ Deno.serve(async req => {
     return r.json();
   }
   try {
-    const periodo = janelaAnalise(), completo = janelaAnalise(new Date(), modo === 'resumo' ? 60 : 30);
+    const periodo = janelaAnalise(new Date(), modo === 'vendas7d' ? 7 : 30), completo = janelaAnalise(new Date(), modo === 'resumo' ? 60 : modo === 'vendas7d' ? 7 : 30);
     const orders: any[] = [];
     const MAX = 10000;
     const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(completo.inicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(completo.fim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
     const first = await get(url(0));
     if (!Array.isArray(first.results) || !Number.isFinite(first.paging?.total)) throw new Error('Cobertura de pedidos não confirmada.');
+    if (modo === 'campanhasDiagnostico') {
+      // Bounded capability check, never a performance series or raw-order response.
+      const amostra = amostraCampanhas(first.results);
+      const { data: promos } = await db.from('ml_promotions').select('promotion_id').eq('account_id', conta.id);
+      const { data: ofertas } = await db.from('ml_promotion_items').select('offer_id, promotion_id, item_id').eq('account_id', conta.id).limit(1000);
+      const ids = new Set((promos ?? []).map(p => String(p.promotion_id)));
+      const diagnostico = { consultados: 0, disponiveis: 0, indisponiveis: 0, comDetalhes: 0, comCampanha: 0, comOferta: 0, comItem: 0, comQuantidade: 0, campanhaReconhecida: 0, ofertaReconhecida: 0, campanhasNumericas: 0, status: {} as Record<string, number>, campos: [] as string[] };
+      const campos = new Set<string>();
+      const permitidos = ['details', 'type', 'items', 'id', 'quantity', 'amounts', 'total', 'seller', 'supplier', 'campaign_id', 'offer_id', 'promotion_id', 'funding_mode'];
+      for (const o of amostra) {
+        if (Date.now() - started > 75_000) break;
+        diagnostico.consultados++;
+        try {
+          const res = await fetch(`https://api.mercadolibre.com/orders/${encodeURIComponent(String(o.id))}/discounts`, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(5000) });
+          diagnostico.status[String(res.status)] = (diagnostico.status[String(res.status)] ?? 0) + 1;
+          if (!res.ok) { diagnostico.indisponiveis++; continue; }
+          const d = await res.json();
+          diagnostico.disponiveis++;
+          const details = Array.isArray(d.details) ? d.details : [];
+          if (details.length) diagnostico.comDetalhes++;
+          let campanha = false, oferta = false, item = false, quantidade = false;
+          for (const detail of details) {
+            for (const key of Object.keys(detail ?? {})) if (permitidos.includes(key)) campos.add(key);
+            const cid = detail.supplier?.campaign_id ?? detail.campaign_id ?? detail.promotion_id;
+            campanha ||= (typeof cid === 'string' || typeof cid === 'number') && String(cid).length > 0;
+            if (typeof cid === 'number') diagnostico.campanhasNumericas++;
+            if (cid != null && ids.has(String(cid))) diagnostico.campanhaReconhecida++;
+            const oid = detail.supplier?.offer_id ?? detail.offer_id;
+            if (oid != null && (ofertas ?? []).some(f => String(f.offer_id) === String(oid) && (detail.items ?? []).some((i: any) => i.id === f.item_id))) diagnostico.ofertaReconhecida++;
+            oferta ||= typeof detail.supplier?.offer_id === 'string' || typeof detail.offer_id === 'string';
+            for (const key of Object.keys(detail.supplier ?? {})) if (permitidos.includes(key)) campos.add('supplier.' + key);
+            for (const i of Array.isArray(detail.items) ? detail.items : []) {
+              item ||= typeof i.id === 'string';
+              quantidade ||= typeof i.quantity === 'number';
+              for (const key of Object.keys(i ?? {})) if (permitidos.includes(key)) campos.add('items.' + key);
+            }
+          }
+          if (campanha) diagnostico.comCampanha++;
+          if (oferta) diagnostico.comOferta++;
+          if (item) diagnostico.comItem++;
+          if (quantidade) diagnostico.comQuantidade++;
+        } catch { diagnostico.indisponiveis++; }
+      }
+      diagnostico.campos = [...campos].sort();
+      return json({ periodo, diagnostico, amostra: true, atribuicaoConfirmada: false, consultadoEm: new Date().toISOString() });
+    }
     const total: number = first.paging.total;
     if (total > MAX) return json({ error: 'Há mais de 10.000 pedidos no período; análise suspensa para não apresentar totais parciais.' }, 422);
     orders.push(...first.results);
@@ -53,6 +100,10 @@ Deno.serve(async req => {
     orders.length = 0; orders.push(...unicos.values());
     if (orders.length < total) return json({ error: 'Não foi possível ler todos os pedidos do período; análise suspensa para não apresentar totais parciais.' }, 422);
     const atual = projetarPedidos(orders, periodo.inicio, periodo.fim);
+    if (modo === 'vendas7d' || modo === 'vendas30d') {
+      // Paid units and revenue per listing over complete UTC days; no buyer data.
+      return json({ periodo, itens: atual.itens.map(i => ({ id: i.id, unidades: i.unidades, faturamento: Math.round(i.faturamento * 100) / 100 })), consultadoEm: new Date().toISOString() });
+    }
     if (modo === 'resumo') {
       const anteriorFim = new Date(Date.parse(periodo.inicio) - 864e5).toISOString().slice(0, 10);
       const anterior = projetarPedidos(orders, completo.inicio, anteriorFim);

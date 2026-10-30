@@ -8,11 +8,14 @@ interface Props {
   loja?: string | null;
   /** linha de contexto (ex.: período) */
   contexto?: string | null;
+  /** substitui a descrição fixa (ex.: briefing do período) */
+  resumo?: string | null;
 }
 
 /** Título da seção — único <h1> da página, com foco e anúncio em troca de seção. */
-export default function SecaoHeader({ ativa, loja, contexto }: Props) {
-  const { label, descricao } = getSecao(ativa);
+export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
+  const { label, descricao: fixa } = getSecao(ativa);
+  const descricao = resumo || fixa;
   const h1Ref = useRef<HTMLHeadingElement>(null);
   const primeiro = useRef(true);
 
@@ -30,20 +33,35 @@ export default function SecaoHeader({ ativa, loja, contexto }: Props) {
   }, [ativa]);
 
   return (
-    <header className="mb-6">
-      <h1
-        ref={h1Ref}
-        tabIndex={-1}
-        className="text-[28px] leading-tight font-bold text-foreground break-words outline-none"
-      >
-        {label}
-      </h1>
+    <header className="panel-section-header mb-5 min-w-0 font-sans" data-secao={ativa}>
+      <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
+        <h1
+          ref={h1Ref}
+          tabIndex={-1}
+          className="panel-section-title break-words outline-none"
+        >
+          {label}
+        </h1>
+        {/* Metadados em chips discretos, uma linha: loja · período */}
+        {(loja || contexto) && (
+          <p className="flex min-w-0 flex-wrap items-center gap-1.5" aria-label="Contexto da seção">
+            {loja && (
+              <span className="panel-section-meta inline-flex max-w-[16rem] items-center truncate rounded-full border border-border/60 bg-muted/40 px-2 py-1" title={loja}>
+                {loja}
+              </span>
+            )}
+            {contexto && (
+              <span className="panel-section-meta inline-flex max-w-full items-center truncate rounded-full border border-border/60 bg-muted/40 px-2 py-1 tabular-nums" title={contexto}>
+                {contexto}
+              </span>
+            )}
+          </p>
+        )}
+      </div>
       {descricao && (
-        <p className="mt-1 text-[13px] font-normal text-muted-foreground break-words">{descricao}</p>
-      )}
-      {(loja || contexto) && (
-        <p className="mt-1 text-xs text-muted-foreground break-words">
-          {[loja, contexto].filter(Boolean).join(" · ")}
+        <p className="panel-section-briefing mt-3 font-normal tabular-nums break-words">
+          {resumo && <strong className="panel-section-summary-label">Resumo: </strong>}
+          {descricao}
         </p>
       )}
       <span aria-live="polite" className="sr-only">{`${label} carregado`}</span>
