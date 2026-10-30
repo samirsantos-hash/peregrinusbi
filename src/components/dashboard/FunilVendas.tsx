@@ -158,6 +158,10 @@ export default function FunilVendas({
 
           <dl className="grid grid-cols-2 gap-2 text-xs">
             {[
+              [
+                "Visitas sem compra (estim.)",
+                `${num(Math.max(0, d.visitas - d.unidades), 0)} · ${pct((Math.max(0, d.visitas - d.unidades) / d.visitas) * 100, 1)}`,
+              ],
               ["Faturamento", brl(d.fat)],
               ["Ticket / unidade", brl(ticket, true)],
               ["Receita / visita", brl(receitaVisita, true)],
