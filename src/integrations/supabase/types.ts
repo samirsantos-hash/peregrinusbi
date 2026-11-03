@@ -4389,18 +4389,21 @@ export type Database = {
       usuario_permissao_estado: {
         Row: {
           legado: boolean
+          permissoes_legadas: string[]
           revisado_em: string | null
           revisado_por: string | null
           user_id: string
         }
         Insert: {
           legado?: boolean
+          permissoes_legadas?: string[]
           revisado_em?: string | null
           revisado_por?: string | null
           user_id: string
         }
         Update: {
           legado?: boolean
+          permissoes_legadas?: string[]
           revisado_em?: string | null
           revisado_por?: string | null
           user_id?: string
