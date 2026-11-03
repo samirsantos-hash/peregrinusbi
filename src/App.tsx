@@ -11,6 +11,8 @@ import { ChuvaPainel } from "@/components/chuva/ChuvaPainel";
 import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import GuardaPermissao from '@/components/GuardaPermissao';
+import { useLocation } from 'react-router-dom';
 import { Loader2 } from "lucide-react";
 import { useSessionTracker } from "@/hooks/useSessionTracker";
 import Index from "./pages/Index";
@@ -63,6 +65,9 @@ const queryClient = new QueryClient({
 });
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
+  const { pathname } = useLocation();
+  const caminhos: Record<string, string | string[]> = { '/admin': ['usuarios.visualizar', 'carteiras.visualizar', 'dados.visualizar', 'integracoes.visualizar'], '/cpp': 'resumo.visualizar', '/gestao-carteira': 'carteiras.visualizar', '/carteira-dados': 'carteiras.visualizar', '/carteira': 'carteiras.visualizar', '/multilojas': 'multilojas.visualizar', '/integracoes': 'integracoes.visualizar', '/perguntas': 'perguntas.visualizar', '/anuncios': 'anuncios.visualizar', '/mercado': 'mercado.visualizar', '/publicidade': 'publicidade.visualizar' };
+  const permissao = caminhos[pathname] ?? (pathname.startsWith('/lojas/') || pathname.startsWith('/grupos/') ? 'carteiras.visualizar' : undefined);
   const { user, loading, isAdmin, isGerente, mustChangePassword } = useAuth();
   useSessionTracker(user);
 
@@ -76,12 +81,11 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 
   if (!user) return <Navigate to="/auth" replace />;
   if (mustChangePassword) return <Navigate to="/change-password" replace />;
-  if (adminOnly && !isAdmin && !isGerente) return <Navigate to="/" replace />;
 
   return (
     <div className="peregrinus-panel min-w-0">
       <ChuvaPainel />
-      {children}
+      {permissao ? <GuardaPermissao permissao={permissao}>{children}</GuardaPermissao> : children}
       <RodapeInstitucional />
     </div>
   );

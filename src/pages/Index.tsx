@@ -45,6 +45,9 @@ import VisaoGeralSecao from "@/components/dashboard/VisaoGeralSecao";
 import { formatarPeriodoBr } from "@/lib/periodoResumo";
 import { briefingPeriodo } from "@/lib/briefingPeriodo";
 import { ABA_ALIAS } from "@/config/sellerTabs";
+import { SECAO_PERMISSAO } from '@/lib/permissoes';
+import { usePermissoes } from '@/hooks/usePermissoes';
+import GuardaPermissao from '@/components/GuardaPermissao';
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
@@ -100,6 +103,7 @@ function formatDateString(date: Date): string {
 
 const Index = () => {
   const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
+  const { pode, data: permissoes } = usePermissoes();
   const souConsultor = useSouConsultor(user?.id);
   const { allowedSellers } = useMyAccess();
   // Piloto: consultores com acesso ao cliente MEGAJU também enxergam a rede consolidada.
@@ -111,6 +115,11 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const abaRaw = searchParams.get("aba") || "efficiency";
   const activeTab = ABA_ALIAS[abaRaw] ?? abaRaw;
+  useEffect(() => {
+    if (!permissoes || pode(`${SECAO_PERMISSAO[activeTab] ?? 'resumo'}.visualizar`)) return;
+    const primeira = Object.entries(SECAO_PERMISSAO).find(([, p]) => pode(`${p}.visualizar`));
+    if (primeira) { const next = new URLSearchParams(searchParams); next.set('aba', primeira[0]); setSearchParams(next, { replace: true }); }
+  }, [activeTab, permissoes, searchParams, setSearchParams]);
   const [menuAberto, setMenuAberto] = useState(false);
   const [paginaLogistica, setPaginaLogistica] = useState("resumo-logistica");
   const [paginaPreco, setPaginaPreco] = useState("resumo-preco");
@@ -519,7 +528,7 @@ const Index = () => {
                       <span>Seções</span>
                     </Button>
                   </div>
-              <AnimatePresence mode="wait">
+              <GuardaPermissao permissao={`${SECAO_PERMISSAO[activeTab] ?? 'resumo'}.visualizar`}><AnimatePresence mode="wait">
                 <motion.div
                   key={`${activeTab}-${selectedSeller}-${granularity}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
                   initial={{ opacity: 0 }}
@@ -693,7 +702,7 @@ const Index = () => {
                     <SellerRiskPanel />
                   </TabsContent>
                 </motion.div>
-              </AnimatePresence>
+              </AnimatePresence></GuardaPermissao>
                 </div>
               </div>
             </Tabs>
