@@ -127,6 +127,13 @@
       "when": 1793725209786,
       "tag": "0017_permissoes_individuais_master",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793725306698,
+      "tag": "0018_consultas_checklist_e_guardas",
+      "breakpoints": true
     }
   ]
 }

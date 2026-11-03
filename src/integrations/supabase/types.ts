@@ -4561,6 +4561,11 @@ export type Database = {
       }
       get_meus_grupos: { Args: never; Returns: string[] }
       get_perfil: { Args: never; Returns: string }
+      guard_permissao_tabela: {
+        Args: { p_escrita: boolean; p_tabela: string }
+        Returns: boolean
+      }
+      guard_tema_ml: { Args: { p_tema: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4846,6 +4851,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      permissoes_do_usuario: { Args: { p_user_id: string }; Returns: Json }
       qualidade_divergencias: {
         Args: { _mes: string }
         Returns: {
@@ -4908,6 +4914,13 @@ export type Database = {
       usuario_tem_permissao: {
         Args: { p_permissao: string; p_user_id: string }
         Returns: boolean
+      }
+      usuarios_revisao: {
+        Args: never
+        Returns: {
+          revisado: boolean
+          user_id: string
+        }[]
       }
     }
     Enums: {
