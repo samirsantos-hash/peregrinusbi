@@ -1,5 +1,7 @@
 # Architecture Rules
 
+- Feature capabilities use the central catalog and master-only audited approval RPCs; legacy capabilities are snapshotted independently of store scope, and UI, RLS and server checks compose without granting new roles or stores.
+
 - Market access validation uses a fixed developer/master-only account-scoped diagnostic with sanitized field-presence results; capability evidence must precede monitoring and never authorizes inferred competitor revenue.
 - Price competitor presentation reuses the read-only catalog search service and compares only one catalog product at a time; unverified third-party visits and conversion remain null, never derived from cumulative sold quantities.
 

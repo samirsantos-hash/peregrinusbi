@@ -4,6 +4,10 @@ Contratos das Edge Functions de gestão (Perguntas, Anúncios, Preço, Promoçõ
 
 ## Convenções
 
+**Liberações individuais (03/11/2026).** Somente as três contas master confirmadas podem aprovar ou revogar capacidades por `salvar_permissoes`. `minhas_permissoes` retorna `{master, legado, revisado, permissoes}`; `permissoes_do_usuario(p_user_id)` é exclusiva de master. Alterar exige visualizar. Usuários novos começam sem capacidades; existentes não revisados recebem o conjunto legado de suas funções anteriores, sem administração nova. Aprovar substitui atomicamente o conjunto e registra auditoria. As carteiras continuam limitando lojas.
+
+Consultas ML exigem a capacidade de leitura correspondente, e ações exigem `preco.alterar`, `publicidade.campanhas`, `publicidade.anuncios`, `promocoes.aplicar`, `promocoes.remover` ou `perguntas.responder`, além do acesso existente à conta. Prévia e confirmação verificam a capacidade; prévias anteriores sem metadados de Ads/promoção devem ser refeitas. Resposta sem liberação: 403 `{error: "Esta função não foi liberada pela conta master."}`. Importação exige `dados.importar`, atualização manual `integracoes.atualizar`, conexão `integracoes.conectar` e configurações `integracoes.configurar`. Rotinas usam o segredo validado, nunca JWT não verificado; o bootstrap público `setup-admin` está encerrado (403).
+
 **Quem chama.** Toda função de gestão aceita `POST` com o JWT do usuário (`Authorization: Bearer <access_token>`) e confere `ml_pode_gerir_conta(account_id)` no servidor: consultor (`super_admin`, `admin`, `gerente` ou carteira atribuída) e conta dentro de `allowed_cust_ids`. As funções de leitura periódica também aceitam o cabeçalho `x-refresh-secret` (cron), sem JWT; nesse caso `account_id` é opcional e vale para todas as contas ativas.
 
 **CORS.** `OPTIONS` responde 200 sem corpo, com `Access-Control-Allow-Origin: *` e os cabeçalhos `authorization, x-client-info, apikey, content-type, x-refresh-secret`.
