@@ -104,7 +104,7 @@ export default function VisaoGeralSecao({
       </header>
 
       {/* 1 · Resultado + 2 · Tráfego (efeito e causa imediata) — uma única fonte de TGMV/Ads/ROAS */}
-      <ResumoExecutivo diario={diario as any} de={de} ate={ate} />
+      <ResumoExecutivo diario={diario as any} de={de} ate={ate} custId={custId} />
 
       <PonteDiagnostico
         de="Resultado e tráfego"

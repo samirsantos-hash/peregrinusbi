@@ -28,7 +28,7 @@ function totais(ks: K[]) {
 }
 
 /** Seções 1 e 2 do Resumo: resultado (macro) e tráfego/aquisição (meso). CVR fica só no funil (S4). */
-export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?: string; ate?: string }) {
+export default function ResumoExecutivo({ diario, de, ate, custId }: { diario: K[]; de?: string; ate?: string; custId?: string }) {
   const d = useMemo(() => {
     const ord = [...diario].filter((k) => k.date).sort((a, b) => a.date.localeCompare(b.date));
     if (!ord.length) return null;
@@ -49,7 +49,7 @@ export default function ResumoExecutivo({ diario, de, ate }: { diario: K[]; de?:
 
   return (
     <div className="space-y-5">
-      <SinergiaIndicadores compacto fonte={`Histórico importado · ${periodo}`} pontos={d.serie.map(k => ({ data: k.date.slice(0, 10), investimento: k.adsInvestment ?? null, faturamento: k.tgmv ?? null, receitaAds: k.tgmvPads ?? null, visitas: k.visits ?? null, cancelamentos: k.repCancellationsRate ?? null }))} />
+      <SinergiaIndicadores compacto custId={custId} de={d.ini} ate={d.fim} fonte={`Histórico importado · ${periodo}`} pontos={d.serie.map(k => ({ data: k.date.slice(0, 10), investimento: k.adsInvestment ?? null, faturamento: k.tgmv ?? null, receitaAds: k.tgmvPads ?? null, visitas: k.visits ?? null, cancelamentos: k.repCancellationsRate ?? null }))} />
       <section aria-label="Resultado da loja">
         <h2 className="ds-rotulo mb-2">1 · Resultado da loja · {periodo}</h2>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

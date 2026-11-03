@@ -8,14 +8,16 @@ import { num, pctFracao } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import GraficoPublicidadeSerie from "@/components/dashboard/GraficoPublicidadeSerie";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
+import CancelamentosMensais from "@/components/ml/CancelamentosMensais";
 
-export function SinergiaIndicadores({ pontos, compacto = false, fonte }: { pontos: PontoPublicidade[]; compacto?: boolean; fonte: string }) {
+export function SinergiaIndicadores({ pontos, compacto = false, fonte, custId, de, ate }: { pontos: PontoPublicidade[]; compacto?: boolean; fonte: string; custId?: string; de?: string; ate?: string }) {
   const r = calcularSinergiaPublicidade(pontos);
   return <section aria-label="Sinergia e dependência de publicidade" className="space-y-3 border-t border-border/50 pt-4">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
     <GraficoPublicidadeSerie pontos={pontos} compacto={compacto} />
     <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />
+    <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
     <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{r.participacao == null ? "Sem dado" : pctFracao(r.participacao, 1)}</dd></div>
       <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{r.tacos == null ? "Sem dado" : pctFracao(r.tacos, 2)}</dd></div>
@@ -59,7 +61,7 @@ export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, c
     const soma = (campo: "cost" | "total_amount") => ls.length && ls.every(l => l[campo] != null && Number.isFinite(Number(l[campo]))) ? ls.reduce((s, l) => s + Number(l[campo]), 0) : null;
     return { data: d.data, faturamento: d.faturamento, investimento: soma("cost"), receitaAds: soma("total_amount"), visitas: d.visitas ?? null, cancelamentos: d.cancelados ?? null };
   });
-  return <SinergiaIndicadores pontos={pontos} compacto={compacto} fonte={periodo
+  return <SinergiaIndicadores pontos={pontos} compacto={compacto} custId={custId ?? vinculo.data} de={periodo?.inicio} ate={periodo?.fim} fonte={periodo
     ? `Mercado Livre · ${periodo.inicio.split("-").reverse().join("/")} a ${periodo.fim.split("-").reverse().join("/")} · dias completos UTC${resumo.error || diario.error ? " · leitura indisponível" : ""}`
     : "Mercado Livre · sem leitura de faturamento e publicidade no mesmo período"} />;
 }
