@@ -19,6 +19,7 @@ import MonitoramentoPrecoPanel from "@/components/seller/MonitoramentoPrecoPanel
 import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
+import { percentualPreco } from "@/lib/precoComparacao";
 
 const TOOLTIP_BPC =
   "BPC (Buy Price Competitive) compara o preço do seller com rivais quando o ML identifica produto equivalente. " +
@@ -376,6 +377,10 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
 
   // Detecta ausência de concorrentes reais (1/1 sellers)
   const semConcorrentes = !bpcData || bpcData.total <= 1;
+  const valorPreco = (valor: number, casas: number) => {
+    const percentual = percentualPreco(valor, monthlyTotals.totalPriceBands);
+    return percentual === null ? "Sem dados de preço" : `${fmtNum(percentual, casas)}%`;
+  };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -394,28 +399,28 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         {[
           {
             label: "Competitividade de Preço",
-            value: `${fmtNum(monthlyTotals.indiceCompetitividade, 0)}%`,
+            value: valorPreco(monthlyTotals.totalMatch + monthlyTotals.totalCheaper, 0),
             icon: TrendingUp,
             color: monthlyTotals.indiceCompetitividade >= 70 ? "emerald-text" : monthlyTotals.indiceCompetitividade >= 50 ? "warning-text" : "warning-text",
             tooltip: `Percentual de vezes que o ML comparou seu preço com o de um rival e seu preço estava igual ou mais barato. Calculado sobre o total de comparações de preço ativadas pelo algoritmo BPC — universo diferente do total de visitas. ${TOOLTIP_BPC}`,
           },
           {
             label: "% Mais Barato (rivais)",
-            value: `${fmtNum(monthlyTotals.pctCheaper, 1)}%`,
+            value: valorPreco(monthlyTotals.totalCheaper, 1),
             icon: TrendingUp,
             color: "emerald-text",
             tooltip: "% das comparações de preço onde seu preço estava mais barato que o rival. Denominador = total de comparações BPC, não total de visitas.",
           },
           {
             label: "% Preço Igual (rivais)",
-            value: `${fmtNum(monthlyTotals.pctMatch, 1)}%`,
+            value: valorPreco(monthlyTotals.totalMatch, 1),
             icon: Scale,
             color: "neon-text",
             tooltip: "% das comparações de preço onde seu preço estava no mesmo nível do rival. Denominador = soma das três colunas BPC (composição), não total de visitas.",
           },
           {
             label: "% Mais Caro (rivais)",
-            value: `${fmtNum(monthlyTotals.pctExpensive, 1)}%`,
+            value: valorPreco(monthlyTotals.totalExpensive, 1),
             icon: TrendingDown,
             color: monthlyTotals.pctExpensive < 20 ? "emerald-text" : "warning-text",
             tooltip: "% das comparações de preço onde o ML identificou que o seller estava mais caro que o rival. Acima de 30%: o algoritmo começa a rebaixar o anúncio progressivamente.",
@@ -437,7 +442,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               <TooltipInfo text={m.tooltip} />
             </div>
             <div className="flex items-center gap-2">
-              <p className="ds-numero-sec tabular-nums" style={(m as any).alert ? (m as any).inlineStyle : undefined}>{m.value}</p>
+              <p className={m.value === "Sem dados de preço" ? "text-sm font-medium text-muted-foreground leading-snug" : "ds-numero-sec tabular-nums"} style={(m as any).alert ? (m as any).inlineStyle : undefined}>{m.value}</p>
               {sampleWarning && m.label === "% Não Competitivo" && (
                 <span className="status-badge text-[10px] bg-muted/40 text-muted-foreground border-border/40">
                   {sampleWarning}

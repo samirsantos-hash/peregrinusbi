@@ -1,5 +1,8 @@
 # Roadmap
 
+## Ausência de comparação nos cartões de Preço (03/11)
+- [x] Quatro cartões sem denominador mostram ausência; zero real e visitas preservados. Três testes passaram, build OK; AMERICAFERRAMENTAS autenticada conferida por captura: quatro ausências e 67 visitas.
+
 ## Categorias e permissões por usuário (03/11)
 - [x] Confirmar somente Ana Paula, Fabrício e Samir como master; usuários existentes seguem o conjunto legado até revisão, novos sem liberações.
 - [x] Checklist por função em Administração → Usuários, visualizar/alterar separados, dependência leitura/ação, aprovação atômica exclusiva de master e auditoria; concessão direta bloqueada.
