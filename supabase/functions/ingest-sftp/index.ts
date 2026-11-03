@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "../_shared/env.ts";
 
@@ -79,6 +80,7 @@ function cell(raw: string, decimal: "." | ","): string | null {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const negado = await exigirPermissao(req, 'dados.importar', true); if (negado) return negado;
 
   const supabase = createClient(
     requireEnv("SUPABASE_URL"),

@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
-  const checklistNegado = await exigirPermissao(req, 'dados.importar', false); if (checklistNegado) return checklistNegado;
+  const checklistNegado = await exigirPermissao(req, 'dados.importar', true); if (checklistNegado) return checklistNegado;
 
   try {
     const supabaseUrl = requireEnv("SUPABASE_URL");
