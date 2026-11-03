@@ -1,5 +1,9 @@
 # Roadmap
 
+## Concorrentes na aba Preço (03/11)
+- [x] Preço → Concorrentes: busca, seleção de produto exato, tabela com linhas, preço atual/original, vendedor, Full/frete e diferença da mediana; visitas e conversão indisponíveis, sem estimar vendas de terceiros. Resumo preservado.
+- [x] Nove testes passaram e build OK; busca autenticada “pneu aro 15” retornou 11 ofertas, quatro do produto selecionado, R$384,75–R$445,74, mediana R$415,25. Tabela conferida por captura, sem erros de execução. Visitas/conversão de concorrentes continuam sem acesso confirmado.
+
 ## Plano de pesquisa de mercado baseado no documento AvantPro (03/11)
 - [x] Localizar os endpoints da API no código e no documento; mapa incluído no plano, distinguindo uso atual, restrições e caminhos ainda não validados. Consulta real de acesso fica na etapa 0.
 - [x] Preparar plano incremental, reaproveitando Mercado e Tendências, preservando o visual e rejeitando métricas não comprovadas de concorrentes.
