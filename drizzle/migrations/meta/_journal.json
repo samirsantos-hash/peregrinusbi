@@ -134,6 +134,13 @@
       "when": 1793725306698,
       "tag": "0018_consultas_checklist_e_guardas",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793725468983,
+      "tag": "0019_permissoes_rpc_e_escopo_lojas",
+      "breakpoints": true
     }
   ]
 }

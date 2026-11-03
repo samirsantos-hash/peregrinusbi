@@ -4550,6 +4550,7 @@ export type Database = {
           origem: string
         }[]
       }
+      checklist_escopo_loja: { Args: { p_cust: string }; Returns: boolean }
       get_allowed_cust_ids: { Args: never; Returns: string[] }
       get_data_coverage: {
         Args: never
