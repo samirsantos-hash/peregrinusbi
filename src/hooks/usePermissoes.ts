@@ -1,3 +1,4 @@
+import { useAuth } from '@/hooks/useAuth';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { podeExecutar, type EstadoPermissoes } from '@/lib/permissoes';
@@ -9,6 +10,7 @@ export const rpcPermissoes = async <T,>(nome: string, args: Record<string, unkno
   return data;
 };
 export function usePermissoes() {
-  const query = useQuery({ queryKey: ['minhas-permissoes'], queryFn: () => rpcPermissoes<EstadoPermissoes>('minhas_permissoes'), staleTime: 0, refetchInterval: 30_000 });
+  const { user } = useAuth();
+  const query = useQuery({ queryKey: ['minhas-permissoes', user?.id], enabled: !!user, queryFn: () => rpcPermissoes<EstadoPermissoes>('minhas_permissoes'), staleTime: 0, refetchInterval: 30_000 });
   return { ...query, master: query.data?.master ?? false, pode: (permissao: string) => podeExecutar(query.data, permissao) };
 }

@@ -1,3 +1,4 @@
+import { usePermissoes } from '@/hooks/usePermissoes';
 // Bloco "Direto do Mercado Livre": mostra, em cada aba, o tema importado pela
 // conexão da própria loja (ml_sync_tema). Só aparece quando a loja está conectada.
 import PromocoesApi from "@/components/ml/PromocoesApi";
@@ -37,7 +38,7 @@ const MEDALHA: Record<string, string> = { platinum: "Platinum", gold: "Gold", si
 const dataBr = (iso?: string | null) => (iso ? new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "");
 
 export default function MlAoVivo({ custId, secao }: { custId?: string; secao: SecaoMl }) {
-  const { isAdmin, isGerente } = useAuth();
+  const { pode } = usePermissoes();
   const qc = useQueryClient();
   const [atualizando, setAtualizando] = useState(false);
   const temas = TEMAS[secao];
@@ -84,7 +85,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
           <RotuloSecao>Direto do Mercado Livre</RotuloSecao>
           <p className="text-xs text-muted-foreground">Conta conectada · atualizado em {dataBr(ultima)}</p>
         </div>
-        {isAdmin && (
+        {pode('integracoes.atualizar') && (
           <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${atualizando ? "animate-spin" : ""}`} />
             {atualizando ? "Atualizando…" : "Atualizar"}
@@ -99,7 +100,7 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       {secao === "qualidade" && <><Qualidade a={d("anuncios")} /><CompararAnuncios key={custId} custId={custId} itens={d("anuncios")?.itens ?? []} /></>}
       {secao === "logistica" && <Logistica e={d("envios")} />}
       {secao === "oportunidades" && <PromocoesApi custId={custId} resumo={d("promocoes")} />}
-      {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
+      {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={pode('perguntas.responder')} />}
     </section>
   );
 }

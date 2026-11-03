@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Package, Copy, CheckCircle, ExternalLink, AlertTriangle, Download } from "lucide-react";
@@ -179,7 +180,8 @@ const StockoutRiskPanel = ({ sellerId, custId }: Props) => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
+              onClick={async () => {
+                if (!(await podeExportar())) return;
                 const rows = displayed.map((r) => ({
                   MLB: r.itemId,
                   "Título": r.itemName || "",

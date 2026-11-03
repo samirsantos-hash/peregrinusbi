@@ -141,6 +141,20 @@
       "when": 1793725468983,
       "tag": "0019_permissoes_rpc_e_escopo_lojas",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793726094490,
+      "tag": "0020_preservar_legado_e_proteger_master",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793726669525,
+      "tag": "0021_bloquear_gravacao_direta_checklist",
+      "breakpoints": true
     }
   ]
 }

@@ -333,7 +333,7 @@ const Admin = () => {
           <Button variant="outline" size="sm" onClick={signOut}>Sair</Button>
         </motion.div>
 
-        <Tabs defaultValue={isAdmin ? "users" : "portfolios"} className="w-full">
+        <Tabs defaultValue={pode('usuarios.visualizar') ? 'users' : pode('carteiras.visualizar') ? 'portfolios' : pode('dados.visualizar') ? 'upload' : 'integracoes'} className="w-full">
           <TabsList className="glass-card w-full flex-wrap justify-start gap-1 p-1 bg-card/60 h-auto">
             {isDesenvolvedor && <TabsTrigger value="avisos" className="flex items-center gap-2 px-4 py-2.5 text-sm"><Bell className="h-4 w-4" /> Avisos do desenvolvedor</TabsTrigger>}
             {(master || pode('usuarios.visualizar')) && (
@@ -342,29 +342,29 @@ const Admin = () => {
                 Gestão de Usuários
               </TabsTrigger>
             )}
-            {(isAdmin || isGerente) && (
+            {pode('dados.visualizar') && (
               <TabsTrigger value="upload" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Upload className="w-4 h-4" />
                 Upload de Dados
               </TabsTrigger>
             )}
-            <TabsTrigger value="portfolios" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+            {pode('carteiras.visualizar') && <TabsTrigger value="portfolios" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
               <Folder className="w-4 h-4" />
               Gestão de Carteiras
-            </TabsTrigger>
-            {isAdmin && (
+            </TabsTrigger>}
+            {pode('integracoes.visualizar') && (
               <TabsTrigger value="tokens" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <KeyRound className="w-4 h-4" />
                 Tokens de Acesso
               </TabsTrigger>
             )}
-            {isAdmin && (
+            {pode('dados.visualizar') && (
               <TabsTrigger value="revisao-ia" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Sparkles className="w-4 h-4" />
                 Revisão IA
               </TabsTrigger>
             )}
-            {isAdmin && (
+            {pode('integracoes.visualizar') && (
               <TabsTrigger value="integracoes" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Link2 className="w-4 h-4" />
                 Integrações
@@ -648,19 +648,19 @@ const Admin = () => {
             <PortfolioManager />
           </TabsContent>
 
-          {isAdmin && (
+          {pode('integracoes.visualizar') && (
             <TabsContent value="tokens" className="mt-5">
               <TokensDeAcessoTab />
             </TabsContent>
           )}
 
-          {isAdmin && (
+          {pode('dados.visualizar') && (
             <TabsContent value="revisao-ia" className="mt-5 space-y-4">
               <RevisaoPlanilhaIA />
             </TabsContent>
           )}
 
-          {isAdmin && (
+          {pode('integracoes.visualizar') && (
             <TabsContent value="integracoes" className="mt-5 space-y-4">
               <Card className="bg-card/60 border-border/50">
                 <CardHeader className="pb-2">

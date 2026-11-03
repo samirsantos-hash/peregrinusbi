@@ -39,8 +39,6 @@ Deno.serve(async (req) => {
     });
     const { data: u } = await sbUser.auth.getUser();
     if (!u?.user) return json({ error: "Faça login." }, 401);
-    const { data: adm } = await sbUser.rpc("is_admin");
-    if (!adm) return json({ error: "Só administradores podem atualizar." }, 403);
   }
 
   const body = await req.json().catch(() => ({}));

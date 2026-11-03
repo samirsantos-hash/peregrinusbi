@@ -36,5 +36,5 @@ export function alterarChecklist(atuais: string[], permissao: string, marcada: b
 export type EstadoPermissoes = { master: boolean; legado: boolean; revisado: boolean; permissoes: string[] };
 export function podeExecutar(estado: EstadoPermissoes | undefined, permissao: string) {
   if (!estado || !PERMISSOES_VALIDAS.includes(permissao)) return false;
-  return estado.master || estado.legado || (estado.permissoes.includes(permissao) && (!PERMISSAO_PAI[permissao] || estado.permissoes.includes(PERMISSAO_PAI[permissao])));
+  return estado.master || (estado.permissoes.includes(permissao) && (!PERMISSAO_PAI[permissao] || estado.permissoes.includes(PERMISSAO_PAI[permissao])));
 }

@@ -1,3 +1,4 @@
+import { usePermissoes } from '@/hooks/usePermissoes';
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,8 @@ export function AlterarPreco({ accountId, itens, aberto, aoFechar, aoConcluir }:
   aoFechar: () => void;
   aoConcluir: () => void;
 }) {
+  const { pode } = usePermissoes();
+  const alterar = pode('preco.alterar');
   const acao = useAcaoEmLote("ml-price-action", accountId, aoConcluir);
   const [tipo, setTipo] = useState<TipoRegra>("valor");
   const [valor, setValor] = useState("");
@@ -46,7 +49,7 @@ export function AlterarPreco({ accountId, itens, aberto, aoFechar, aoConcluir }:
   const valido = Number.isFinite(n) && (tipo === "valor" ? n > 0 : n !== 0);
 
   const revisar = () => {
-    if (!valido) return;
+    if (!alterar || !valido) return;
     aoFechar();
     if (um) acao.previa({ itens: [{ item_id: itens[0].item_id, preco_novo: n }] });
     else acao.previa({ item_ids: itens.map((i) => i.item_id), regra: { tipo, valor: n } });
@@ -86,7 +89,7 @@ export function AlterarPreco({ accountId, itens, aberto, aoFechar, aoConcluir }:
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={aoFechar}>Cancelar</Button>
-            <Button onClick={revisar} disabled={!valido || acao.estado.fase === "carregando"}>
+            <Button onClick={revisar} disabled={!alterar || !valido || acao.estado.fase === "carregando"}>
               {acao.estado.fase === "carregando" && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
               Revisar alteração
             </Button>

@@ -1,9 +1,9 @@
 # Roadmap
 
 ## Categorias e permissões por usuário (03/11)
-- [ ] Confirmar contas master e transição dos acessos atuais sem bloquear usuários por engano.
-- [ ] Preparar checklist por função com visualizar/alterar, concessão exclusiva de master e validação no servidor.
-- [ ] Aplicar permissões nas telas, leituras e ações; testar liberação, bloqueio e revogação com contas reais.
+- [x] Confirmar somente Ana Paula, Fabrício e Samir como master; usuários existentes seguem o conjunto legado até revisão, novos sem liberações.
+- [x] Checklist por função em Administração → Usuários, visualizar/alterar separados, dependência leitura/ação, aprovação atômica exclusiva de master e auditoria; concessão direta bloqueada.
+- [x] Aplicar guardas nas telas, tabelas, consultas e ações ML/importações/exportações; 11 testes passaram, build OK. Sessão master aprovou preço visualizar/alterar em usuário temporário e revogou; releitura persistida, tentativa de autopromoção/concessão negada, loja escondida e consulta direta recusada; tela bloqueada conferida, usuário temporário removido. Não houve escrita comercial ML. As três masters foram conferidas na base; somente Samir foi exercitado no navegador.
 
 ## Validar visitas e conversão concorrentes (03/11)
 - [x] Sonda protegida implantada e executada como master: oferta MLB5452621083 obtida do catálogo; ambos os caminhos de visitas responderam 403 com autorização de aplicativo, período 04/10–02/11. Nove testes passaram e build OK.
