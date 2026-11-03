@@ -1,5 +1,9 @@
 # Roadmap
 
+## Concorrentes na aba Preço (03/11)
+- [ ] Criar comparação com busca e preços retornados pelo serviço existente; visitas e conversão não confirmadas ficam indisponíveis, sem estimar vendas de terceiros.
+- [ ] Testar regras de ausência e conferir busca autenticada na tela; preservar visual e permissões existentes.
+
 ## Plano de pesquisa de mercado baseado no documento AvantPro (03/11)
 - [x] Localizar os endpoints da API no código e no documento; mapa incluído no plano, distinguindo uso atual, restrições e caminhos ainda não validados. Consulta real de acesso fica na etapa 0.
 - [x] Preparar plano incremental, reaproveitando Mercado e Tendências, preservando o visual e rejeitando métricas não comprovadas de concorrentes.
