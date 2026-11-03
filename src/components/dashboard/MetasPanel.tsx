@@ -237,6 +237,7 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          disabled={!podeAlterar}
                           aria-label={`Remover meta de ${rotuloMes(l.mes)}`}
                           onClick={() => remover.mutate({ id: l.id, sellerId })}
                         >

@@ -1,3 +1,4 @@
+import { usePermissoes } from '@/hooks/usePermissoes';
 import { Fragment, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Plus, AlertTriangle } from "lucide-react";
@@ -67,6 +68,8 @@ function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, ta
 }
 
 export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { painel: PainelAds; acao: AcaoEmLote; custId?: string; contaId?: string }) {
+  const { pode } = usePermissoes();
+  const alterar = pode('publicidade.campanhas');
   const [form, setForm] = useState<{ campanha: CampanhaLinha | null } | null>(null);
   const [aberta, setAberta] = useState<number | null>(null);
   const resumo = useAnaliseMl<{ periodo: { inicio: string; fim: string }; atual: { serie: FaturamentoDia[] } }>(custId || undefined, "resumo");
@@ -134,13 +137,13 @@ export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { pain
     (painel.porCampanha.get(b.campaign_id)?.atual.investimento ?? 0) - (painel.porCampanha.get(a.campaign_id)?.atual.investimento ?? 0));
 
   const alternar = (c: CampanhaLinha) =>
-    acao.previa({ tipo: "campanha_editar", campaign_id: c.campaign_id, campanha: { status: ativa(c.status) ? "paused" : "active" } });
+    alterar && acao.previa({ tipo: "campanha_editar", campaign_id: c.campaign_id, campanha: { status: ativa(c.status) ? "paused" : "active" } });
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground">Desempenho de {per}. Alterações passam por prévia, releem a campanha no Mercado Livre e ficam no histórico de auditoria.</p>
-        <Button size="sm" onClick={() => setForm({ campanha: null })}><Plus className="h-3.5 w-3.5 mr-1.5" /> Nova campanha</Button>
+        <Button size="sm" disabled={!alterar} onClick={() => setForm({ campanha: null })}><Plus className="h-3.5 w-3.5 mr-1.5" /> Nova campanha</Button>
       </div>
 
       {(resumo.isError || serie.isError) && <p className="text-sm text-destructive">Não foi possível completar a leitura de TACOS ou do gráfico. Os dados ausentes não representam zero.</p>}
@@ -225,8 +228,8 @@ export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { pain
                         : <span className="text-muted-foreground">—</span>}
                     </td>
                     <td className="pr-2 py-1 whitespace-nowrap text-right">
-                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setForm({ campanha: c })}>Editar</Button>
-                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => alternar(c)}>{ativa(c.status) ? "Pausar" : "Ativar"}</Button>
+                      <Button size="sm" variant="ghost" className="h-7 px-2" disabled={!alterar} onClick={() => setForm({ campanha: c })}>Editar</Button>
+                      <Button size="sm" variant="ghost" className="h-7 px-2" disabled={!alterar} onClick={() => alternar(c)}>{ativa(c.status) ? "Pausar" : "Ativar"}</Button>
                     </td>
                     <td className="pr-2 py-1">
                       <Button size="icon" variant="ghost" className="h-7 w-7" aria-expanded={exp} aria-label={exp ? "Recolher detalhes" : "Ver detalhes"} onClick={() => setAberta(exp ? null : c.campaign_id)}>
@@ -255,6 +258,7 @@ export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { pain
         aberto={!!form}
         aoFechar={() => setForm(null)}
         aoRevisar={(dados) => {
+          if (!alterar) return;
           const c = form?.campanha;
           setForm(null);
           if (c) acao.previa({ tipo: "campanha_editar", campaign_id: c.campaign_id, campanha: dados });
