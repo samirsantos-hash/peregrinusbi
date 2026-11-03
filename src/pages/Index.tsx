@@ -29,6 +29,7 @@ import AvisoSemOperacao from "@/components/dashboard/AvisoSemOperacao";
 
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
+import BuscaConcorrentes from "@/components/dashboard/BuscaConcorrentes";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
 import FlexDesempenho from "@/components/dashboard/FlexDesempenho";
 import UpliftFullPanel from "@/components/seller/UpliftFullPanel";
@@ -112,6 +113,7 @@ const Index = () => {
   const activeTab = ABA_ALIAS[abaRaw] ?? abaRaw;
   const [menuAberto, setMenuAberto] = useState(false);
   const [paginaLogistica, setPaginaLogistica] = useState("resumo-logistica");
+  const [paginaPreco, setPaginaPreco] = useState("resumo-preco");
   const setActiveTab = useCallback(
     (tab: string) => {
       const next = new URLSearchParams(searchParams);
@@ -571,9 +573,18 @@ const Index = () => {
                     <FullProdutosApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0 space-y-5">
+                    <Tabs value={paginaPreco} onValueChange={setPaginaPreco} className="space-y-5">
+                      <TabsList aria-label="Páginas de Preço">
+                        <TabsTrigger value="resumo-preco">Resumo</TabsTrigger>
+                        <TabsTrigger value="concorrentes">Concorrentes</TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="resumo-preco" className="space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="competitiveness" />}
                     <JuniorActionBanner abaId="competitiveness" dados={dadosJunior} />
                     <CompetitivenessPanel kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />
+                      </TabsContent>
+                      <TabsContent value="concorrentes"><BuscaConcorrentes /></TabsContent>
+                    </Tabs>
                   </TabsContent>
                   <TabsContent value="publicidade" className="mt-0 space-y-5">
                     {isConsolidado && <CarteiraNaSecao secao="publicidade" />}
