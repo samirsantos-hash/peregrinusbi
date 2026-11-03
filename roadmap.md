@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Ausência de comparação nos cartões de Preço (03/11)
-- [ ] Mostrar ausência nos quatro cartões sem denominador, preservar zero real e visitas; testar cálculo e conferir AMERICAFERRAMENTAS.
+- [x] Quatro cartões sem denominador mostram ausência; zero real e visitas preservados. Três testes passaram, build OK; AMERICAFERRAMENTAS autenticada conferida por captura: quatro ausências e 67 visitas.
 
 ## Categorias e permissões por usuário (03/11)
 - [x] Confirmar somente Ana Paula, Fabrício e Samir como master; usuários existentes seguem o conjunto legado até revisão, novos sem liberações.
