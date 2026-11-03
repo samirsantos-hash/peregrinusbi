@@ -3,7 +3,8 @@
 ## Plano de pesquisa de mercado baseado no documento AvantPro (03/11)
 - [x] Localizar os endpoints da API no código e no documento; mapa incluído no plano, distinguindo uso atual, restrições e caminhos ainda não validados. Consulta real de acesso fica na etapa 0.
 - [x] Preparar plano incremental, reaproveitando Mercado e Tendências, preservando o visual e rejeitando métricas não comprovadas de concorrentes.
-- [ ] Etapa 0 aprovada: executar diagnóstico limitado com conta autorizada e registrar matriz de disponibilidade; etapas seguintes aguardam “OK, próxima etapa”.
+- [x] Etapa 0: diagnóstico protegido implantado, 4 testes passaram; leituras reais master e chamada autenticada no navegador. Matriz em docs/ml-market-access.md: catálogo/tendências/visitas próprias/tarifas respondem; busca geral 403, ofertas de quatro produtos 404, limite do app 403. Sem escrita ML ou mudanças visuais.
+- [ ] Completar evidência de concorrentes e dimensionamento: bloqueado por ofertas 404 e limite do app 403; preço para ganhar exige amostra própria de catálogo. Não ativar coleta nem inferir vendidos/receita. Etapas 1–4 aguardam “OK, próxima etapa”.
 
 ## Atualizar novas lojas integradas (29/10)
 - [x] Atualizar os oito temas do resumo das 19 contas conectadas desde 27/10; GREATPOOL e BELLOSHOPLTDA concluíram após repetir falha temporária. Conferido por leitura persistida e tela Integrações autenticada, sem escrita no Mercado Livre.
