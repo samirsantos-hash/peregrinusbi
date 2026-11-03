@@ -20,6 +20,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "../_shared/env.ts";
 import { validarSettings } from "../_shared/mlGestao.ts";
+import { exigirPermissao } from '../_shared/permissoes.ts';
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -33,6 +34,7 @@ const COLUNAS = "account_id, meta_investimento_ads, acos_alvo, margem_minima, al
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "GET" && req.method !== "PATCH") return json({ error: "use GET ou PATCH" }, 405);
+  const negado = await exigirPermissao(req, req.method === 'PATCH' ? 'integracoes.configurar' : ['integracoes.visualizar', 'publicidade.visualizar']); if (negado) return negado;
 
   const url = requireEnv("SUPABASE_URL");
   const authHeader = req.headers.get("Authorization") ?? "";
