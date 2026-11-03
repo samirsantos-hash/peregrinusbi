@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "../_shared/env.ts";
 import { fetchAllSellers } from "../_shared/sellers.ts";
@@ -21,7 +22,8 @@ function parseBrInt(val: string): number {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders }
+  const checklistNegado = await exigirPermissao(req, 'dados.importar', false); if (checklistNegado) return checklistNegado;);
   }
 
   try {

@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
@@ -16,6 +17,7 @@ Deno.serve(async req => {
   const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico']) }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
+  const negado = await exigirPermissao(req, modo === 'full' ? 'full.visualizar' : modo === 'campanhasDiagnostico' ? 'promocoes.visualizar' : ['resumo.visualizar', 'reputacao.visualizar', 'publicidade.visualizar', 'correlacoes.visualizar']); if (negado) return negado;
   // Reuse existing store visibility; developer status does not grant business access.
   const { data: vis, error: visError } = await user.from('ml_sync_tema').select('account_id').eq('cust_id', cust_id).limit(1);
   if (visError || !vis?.length) return json({ error: 'Loja sem conexão disponível na sua carteira.' }, 403);
