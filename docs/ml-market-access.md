@@ -1,5 +1,11 @@
 # Etapa 0 — caminhos e disponibilidade da API de mercado
 
+## Evidência adicional — tela Concorrentes em Preço
+- Em 03/11/2026, busca autenticada por `pneu aro 15` via `ml-busca-concorrentes` (token de aplicativo do serviço existente) retornou HTTP 200 e 11 ofertas válidas.
+- Para o produto MLB38180701, quatro ofertas apresentaram preços de R$384,75 a R$445,74; mediana R$415,245 (exibição R$415,25). Preço informado R$349,90: diferença −15,7% da mediana.
+- Esta amostra confirma preços e ofertas para esta consulta, não elimina os 404 anteriores com token de loja nem comprova acesso universal. Visitas e conversão dos concorrentes continuam indisponíveis.
+- Tela conferida com sessão autenticada em Preço → Concorrentes, sem erros de execução; tabela agrupa um produto exato do catálogo, não mistura medianas de produtos diferentes. Serviço existente não foi alterado.
+
 ## Verificação real
 - Data: 03/11/2026, 14:04–14:06 UTC.
 - Conta autorizada: AUTOPECASLONDRINA, sessão master com autorização de gestão confirmada no servidor.
