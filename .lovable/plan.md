@@ -113,7 +113,7 @@ Base pública: `https://api.mercadolibre.com`. Todos os acessos passam pelo serv
 | Visitas próprias | `GET /items/visits?ids={item_id}&date_from={data}&date_to={data}` | Usado |
 | Histórico de visitas próprio | `GET /items/{item_id}/visits/time_window?last=30&unit=day&ending={data}` | Usado como alternativa |
 | Descoberta de categoria por termo | `GET /sites/MLB/domain_discovery/search?q={termo}` | Proposto; validar |
-| Reputação | `GET /users/{seller_id}` | Usado para a própria loja; validar acesso e campos de terceiros |
+| Reputação | `GET /users/{seller_id}` | Usado para a própria loja e apelidos de concorrentes; validar campos de reputação de terceiros |
 | Detalhes em lote | `GET /items?ids={ids}` | Usado para dados próprios; terceiros têm restrições registradas |
 | Sugestão de preço | `GET /suggestions/items/{item_id}/details` | Proposto; validar para anúncio próprio |
 | Frete | `GET /items/{item_id}/shipping_options` ou `GET /users/{seller_id}/shipping_options/free` | Propostos; validar parâmetros e significado dos custos |
