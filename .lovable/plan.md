@@ -28,6 +28,7 @@ Esses recursos serão ampliados, não recriados em uma página paralela.
 - Categoria, tendências e mais vendidos, distinguindo posições oficiais de rankings não disponíveis.
 - Ofertas comparáveis do catálogo: preço, vendedor, reputação/medalha, tipo de anúncio, modalidade de envio e frete grátis, quando disponíveis.
 - Faixa de preço mínimo, mediana e máximo; posição do anúncio próprio e quantidade de ofertas consideradas.
+- Identificar correspondência por catálogo, GTIN ou título; separar kits, condições e produtos diferentes e informar quando a consulta foi limitada ou truncada. Excluir a própria loja da referência de concorrentes.
 - Tabela com busca, ordenação, links externos seguros e exportação para Excel.
 - Dez ofertas iniciais com expansão, mantendo os padrões atuais do painel.
 - Data da consulta, categoria e cobertura visíveis; campos desconhecidos ficam indisponíveis, nunca zero.
@@ -79,6 +80,7 @@ Após validar as etapas anteriores, inserir resumos com acesso ao detalhe, sem d
 ## Detalhes técnicos
 - Reutilizar `/mercado`, `src/pages/Mercado.tsx`, `EstudoMercado`, `AbaTendencias`, `ml-market-study`, `ml-trends-sync`, `ml-busca-concorrentes` e os cálculos de `_shared/mlMercado.ts`.
 - Tokens exclusivamente nas funções do servidor, com o renovador compartilhado existente; chamadas sequenciais, lotes de até 20 itens, tratamento de 403/429 e limites de execução.
+- Consolidar o tratamento de falhas da busca existente antes de ampliar a coleta; diagnósticos devem guardar apenas códigos e contagens permitidos, nunca respostas brutas da API.
 - Reutilizar estudos e tendências persistidos. Introduzir monitoramento e medições apenas após a etapa 0, vinculados à conta e respeitando sua autorização atual: master vê todas; demais perfis somente contas autorizadas. Não copiar as políticas de “apenas dono” do documento, pois eliminariam a colaboração por carteira.
 - Novas tabelas em `public` com concessões explícitas e RLS; medições escritas somente pelo servidor e leituras protegidas, incluindo exportações e agregações. Histórico idempotente por conta, anúncio e data, preservando lacunas e precisão.
 - Links de entrada devem ser validados e convertidos em identificadores; não buscar URLs arbitrárias fornecidas pelo usuário.
