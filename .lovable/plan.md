@@ -96,3 +96,28 @@ Após validar as etapas anteriores, inserir resumos com acesso ao detalhe, sem d
 5. Distribuir resumos nas seções existentes.
 
 Não atribuir prazos ou prometer cobertura total antes dos testes de acesso e do dimensionamento das coletas.
+
+## Mapa inicial dos caminhos da API
+Base pública: `https://api.mercadolibre.com`. Todos os acessos passam pelo servidor com token autorizado; a presença de um caminho não garante acesso a dados de terceiros.
+
+| Finalidade | Caminho | Situação no projeto |
+|---|---|---|
+| Busca de catálogo | `GET /products/search?site_id=MLB&q={termo}` | Usado |
+| Produto e ofertas | `GET /products/{product_id}` e `GET /products/{product_id}/items` | Usados |
+| Categoria | `GET /categories/{category_id}` | Usado no estudo |
+| Tendências | `GET /trends/MLB` e `GET /trends/MLB/{category_id}` | Usados |
+| Mais vendidos | `GET /highlights/MLB/category/{category_id}` | Usado |
+| Destaque do anúncio/produto | `GET /highlights/MLB/item/{item_id}` e `GET /highlights/MLB/product/{product_id}` | Usados |
+| Competição do anúncio próprio | `GET /items/{item_id}/price_to_win?siteId=MLB&version=v2` | Usado |
+| Tarifas | `GET /sites/MLB/listing_prices` | Usado; parâmetros por cenário |
+| Visitas próprias | `GET /items/visits?ids={item_id}&date_from={data}&date_to={data}` | Usado |
+| Histórico de visitas próprio | `GET /items/{item_id}/visits/time_window?last=30&unit=day&ending={data}` | Usado como alternativa |
+| Descoberta de categoria por termo | `GET /sites/MLB/domain_discovery/search?q={termo}` | Proposto; validar |
+| Reputação de concorrente | `GET /users/{seller_id}` | Validar acesso e campos de terceiros |
+| Detalhes em lote | `GET /items?ids={ids}` | Usado para dados próprios; terceiros têm restrições registradas |
+| Sugestão de preço | `GET /suggestions/items/{item_id}/details` | Proposto; validar para anúncio próprio |
+| Frete | `GET /items/{item_id}/shipping_options` ou `GET /users/{seller_id}/shipping_options/free` | Propostos; validar parâmetros e significado dos custos |
+| Busca geral | `GET /sites/MLB/search?q={termo}` | Restrição 403 registrada; não sustenta ranking orgânico |
+| Visitas de terceiros | Caminhos de visitas citados no documento | Não confirmados; não usar para conversão de mercado |
+
+Os caminhos de visitas `/visits/items` citados no documento não serão copiados sem confirmação; o painel usa `/items/visits` para anúncios próprios.
