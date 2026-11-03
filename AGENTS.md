@@ -1,5 +1,7 @@
 # Architecture Rules
 
+- Price summary cards use `precoComparacao` to distinguish an absent comparison denominator from measured zero; visits and monthly source selection stay independent.
+
 - Feature capabilities use the central catalog and master-only audited approval RPCs; legacy capabilities are snapshotted independently of store scope, and UI, RLS and server checks compose without granting new roles or stores. Download handlers use the fresh permission export guard because revocations must apply before generating files.
 
 - Market access validation uses a fixed developer/master-only account-scoped diagnostic with sanitized field-presence results; capability evidence must precede monitoring and never authorizes inferred competitor revenue.
