@@ -61,7 +61,7 @@ export function useAuth() {
 
         if (!mounted) return;
 
-        setIsAdmin(rolesResult.data?.some((r) => r.role === "admin") ?? false);
+        setIsAdmin(rolesResult.data?.some((r) => r.role === "admin" || r.role === 'super_admin') ?? false);
         setIsGerente(rolesResult.data?.some((r) => r.role === "gerente") ?? false);
         setIsGestorLoja(rolesResult.data?.some((r) => r.role === "gestor_loja") ?? false);
 

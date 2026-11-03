@@ -1,3 +1,4 @@
+import { exigirPermissao, segredoRotina } from '../_shared/permissoes.ts';
 import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-sync-loja
 // Busca no Mercado Livre, com o token da própria loja conectada, os dados de cada
@@ -27,6 +28,7 @@ function segredoOk(a: string, b: string) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const negado = await exigirPermissao(req, 'integracoes.atualizar', true); if (negado) return negado;
   const URL_ = requireEnv("SUPABASE_URL");
   const db = createClient(URL_, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
 
@@ -45,6 +47,7 @@ Deno.serve(async (req) => {
   // Admin: copia a senha das rotinas do ambiente para o cofre do banco,
   // que é de onde a atualização programada a lê. O valor nunca sai do servidor.
   if (body.sincronizar_segredo) {
+    if (!segredoRotina(req)) { const cliente = createClient(URL_, requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } }); const { data: master } = await cliente.rpc('is_super_admin'); if (!master) return json({ error: 'Configuração reservada à master.' }, 403); }
     const { error } = await db.rpc("ml_set_trigger_secret", { p_value: requireEnv("REFRESH_TRIGGER_SECRET") });
     return json({ ok: !error, erro: error?.message ?? null }, error ? 500 : 200);
   }
@@ -74,6 +77,7 @@ Deno.serve(async (req) => {
   else return json({ error: "Informe account_id ou cust_id." }, 400);
   const { data: conta } = await q.maybeSingle();
   if (!conta) return json({ error: "Loja não conectada ao Mercado Livre." }, 404);
+  if (!rotina) { const cliente = createClient(URL_, requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } }); const { data: pode } = await cliente.rpc('ml_pode_gerir_conta', { p_account_id: conta.id }); if (!pode) return json({ error: 'Loja fora da sua carteira.' }, 403); }
 
   const tok = await tokenAtual(db, conta.id);
   if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) {

@@ -7,6 +7,8 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/
 import { SELLER_TABS, GRUPOS_SECOES, type SellerTab } from "@/config/sellerTabs";
 import { NovidadeTip } from "@/components/novidades/novidades";
 import { Button } from "@/components/ui/button";
+import { usePermissoes } from '@/hooks/usePermissoes';
+import { SECAO_PERMISSAO } from '@/lib/permissoes';
 
 const CHAVE = "peregrinus.sidebar.collapsed";
 
@@ -98,6 +100,7 @@ function Conteudo({
   mostrarToggle: boolean;
 }) {
   const tabAlertas = porId(ID_ALERTAS);
+  const { pode } = usePermissoes();
   const navigate = useNavigate();
   const tabIntegracao = {
     id: "integracao", label: "Integração", icon: Plug, order: 11.5,
@@ -107,7 +110,7 @@ function Conteudo({
   return (
     <nav aria-label="Seções do painel" className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        {GRUPOS.map((g) => (
+        {GRUPOS.filter(g => g.ids.some(id => pode(`${SECAO_PERMISSAO[id]}.visualizar`))).map((g) => (
           <div key={g.titulo} className="mt-5 first:mt-2">
             {!recolhida && (
               <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-normal text-muted-foreground">
@@ -118,7 +121,7 @@ function Conteudo({
             <ul className="space-y-0.5">
               {g.ids.map((id) => {
                 const tab = porId(id);
-                if (!tab) return null;
+                if (!tab || !pode(`${SECAO_PERMISSAO[id]}.visualizar`)) return null;
                 return (
                   <ItemNav
                     key={id}
@@ -129,7 +132,7 @@ function Conteudo({
                   />
                 );
               })}
-              {g.ids.includes("correlacoes") && (
+              {g.ids.includes("correlacoes") && pode('integracoes.visualizar') && (
                 <ItemNav
                   tab={tabIntegracao}
                   ativo={false}
@@ -158,7 +161,7 @@ function Conteudo({
             {!recolhida && <span>Recolher</span>}
           </Button>
         )}
-        {tabAlertas && (
+        {tabAlertas && pode('alertas.visualizar') && (
           <ul>
             <ItemNav
               tab={tabAlertas}

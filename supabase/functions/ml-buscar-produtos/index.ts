@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-buscar-produtos
 // Busca anúncios da própria loja conectada por título, SKU ou código MLB.
@@ -14,6 +15,7 @@ const API = "https://api.mercadolibre.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const checklistNegado = await exigirPermissao(req, ['qualidade.visualizar', 'anuncios.visualizar'], false); if (checklistNegado) return checklistNegado;
   const URL_ = requireEnv("SUPABASE_URL");
   const db = createClient(URL_, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
   const sbUser = createClient(URL_, requireEnv("SUPABASE_ANON_KEY"), {

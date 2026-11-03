@@ -6,6 +6,7 @@ import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireEnv } from "../_shared/env.ts";
+import { exigirPermissao } from '../_shared/permissoes.ts';
 
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -13,6 +14,7 @@ const API = "https://api.mercadolibre.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const negado = await exigirPermissao(req, 'perguntas.responder'); if (negado) return negado;
   const URL_ = requireEnv("SUPABASE_URL");
   const db = createClient(URL_, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
   const sbUser = createClient(URL_, requireEnv("SUPABASE_ANON_KEY"), {
@@ -31,6 +33,8 @@ Deno.serve(async (req) => {
 
   const { data: conta } = await db.from("ml_accounts").select("id").eq("status", "active").eq("ml_user_id", Number(cust)).maybeSingle();
   if (!conta) return json({ error: "Loja não conectada ao Mercado Livre." }, 404);
+  const { data: podeConta } = await sbUser.rpc('ml_pode_gerir_conta', { p_account_id: conta.id });
+  if (!podeConta) return json({ error: 'Loja fora da sua carteira.' }, 403);
   const tok = await tokenAtual(db, conta.id);
   if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) return json({ error: "Acesso da loja vencido; aguarde a renovação automática." }, 409);
   const ml = (path: string, init: RequestInit = {}) => fetch(API + path, {
@@ -68,7 +72,8 @@ Responda só com o texto da resposta.`;
       return json({ error: msg }, r.status);
     }
     let texto = "", buf = "";
-    const rd = r.body!.getReader(); const dec = new TextDecoder();
+    if (!r.body) return json({ error: 'Resposta da IA indisponível.' }, 502);
+    const rd = r.body.getReader(); const dec = new TextDecoder();
     for (;;) {
       const { done, value } = await rd.read(); if (done) break;
       buf += dec.decode(value, { stream: true });

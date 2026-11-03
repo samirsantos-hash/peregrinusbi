@@ -9,6 +9,7 @@ import { useEligibility } from "@/hooks/useEligibility";
 import { useMetasLoja, useSalvarMeta, useRemoverMeta } from "@/hooks/useMetasLoja";
 import { fmtBRL } from "@/utils/formatters";
 import type { SellerKPI } from "@/hooks/useSellerData";
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 interface Props {
   sellerId: string;
@@ -46,6 +47,7 @@ function numeroOuNull(v: string): number | null {
 }
 
 const MetasPanel = ({ sellerId, kpis }: Props) => {
+  const { pode } = usePermissoes();
   const { toast } = useToast();
   const { data: metas = [], isLoading } = useMetasLoja(sellerId);
   const salvar = useSalvarMeta();
@@ -137,7 +139,7 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
   return (
     <div className="space-y-5">
       {/* Formulário */}
-      <div className="rounded-lg border border-muted/20 bg-surface-alt p-4 sm:p-5">
+      <fieldset disabled={!pode('metas.alterar')} className="rounded-lg border border-muted/20 bg-surface-alt p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-4">
           <Target className="h-4 w-4 text-brand-blue" />
           <h3 className="text-sm font-semibold">Definir metas do mês</h3>
@@ -167,7 +169,7 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
             </Button>
           </div>
         </div>
-      </div>
+      </fieldset>
 
       {/* Comparativo meta x real */}
       <div className="rounded-lg border border-muted/20 bg-surface-alt p-4 sm:p-5">

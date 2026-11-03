@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-ads-sync
 // Lê Product Ads de cada conta conectada. Não escreve no Mercado Livre.
@@ -83,6 +84,7 @@ function linhaMetrica(accountId: string, nivel: "campanha" | "anuncio", campaign
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'integracoes.atualizar', true); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return resposta({ error: "use POST" }, 405);
   const inicio = Date.now();
 
