@@ -15,7 +15,7 @@ const API = "https://api.mercadolibre.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  const checklistNegado = await exigirPermissao(req, ['qualidade.visualizar', 'anuncios.visualizar'], false); if (checklistNegado) return checklistNegado;
+  const checklistNegado = await exigirPermissao(req, ['qualidade.visualizar', 'anuncios.visualizar', 'publicidade.visualizar'], false); if (checklistNegado) return checklistNegado;
   const URL_ = requireEnv("SUPABASE_URL");
   const db = createClient(URL_, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
   const sbUser = createClient(URL_, requireEnv("SUPABASE_ANON_KEY"), {
