@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Plano de pesquisa de mercado baseado no documento AvantPro (03/11)
+- [ ] Localizar os endpoints da API do documento e distinguir os já usados, restritos e pendentes de validação.
 - [x] Preparar plano incremental, reaproveitando Mercado e Tendências, preservando o visual e rejeitando métricas não comprovadas de concorrentes.
 - [ ] Iniciar somente a etapa 0 após aprovação do plano; etapas seguintes aguardam “OK, próxima etapa”. Nenhuma implantação iniciada.
 
