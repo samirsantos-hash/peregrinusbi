@@ -55,10 +55,15 @@ Deno.serve(async (req) => {
     const cat = typeof proprio.category_id === "string" && /^MLB\d+$/.test(proprio.category_id) ? proprio.category_id : null;
     const p = await ler("catalogo_busca", `/products/search?status=active&site_id=MLB&q=${encodeURIComponent(termo)}&limit=3`);
     const produtos = objeto(p).results;
-    const primeiro = Array.isArray(produtos) ? objeto(produtos[0]).id : null;
-    const produto = typeof proprio.catalog_product_id === "string" ? proprio.catalog_product_id : primeiro;
-    const ofertas = typeof produto === "string" && /^MLB\d+$/.test(produto) ? objeto(await ler("catalogo_ofertas", `/products/${produto}/items?limit=10`)).results : null;
-    const outro = Array.isArray(ofertas) ? ofertas.map(objeto).find((i) => String(i.seller_id) !== String(conta.conta.ml_user_id) && typeof i.item_id === "string" && /^MLB\d+$/.test(i.item_id)) : null;
+    const candidatos = [...new Set([proprio.catalog_product_id, ...(Array.isArray(produtos) ? produtos.map((p) => objeto(p).id) : [])])].filter((v): v is string => typeof v === "string" && /^MLB\d+$/.test(v)).slice(0, 4);
+    let produto: string | null = null;
+    let outro: Record<string, unknown> | undefined;
+    for (const id of candidatos) {
+      produto = id;
+      const ofertas = objeto(await ler("catalogo_ofertas", `/products/${id}/items?limit=10`)).results;
+      outro = Array.isArray(ofertas) ? ofertas.map(objeto).find((i) => String(i.seller_id) !== String(conta.conta.ml_user_id) && typeof i.item_id === "string" && /^MLB\d+$/.test(i.item_id)) : undefined;
+      if (outro || limitado) break;
+    }
     const pendente = (codigo: Codigo) => resultados.push({ codigo, status: null, situacao: "nao_confirmado", motivo: "amostra_necessaria_ausente" });
     if (body.grupo === "catalogo") {
       await ler("busca_geral", `/sites/MLB/search?q=${encodeURIComponent(termo)}&limit=1`);
@@ -82,7 +87,7 @@ Deno.serve(async (req) => {
       if (proprio.catalog_listing) await ler("price_to_win", `/items/${local.item_id}/price_to_win?siteId=MLB&version=v2`); else pendente("price_to_win");
       await ler("sugestoes", `/suggestions/items/${local.item_id}/details`);
       await ler("frete", `/items/${local.item_id}/shipping_options?zip_code=01001000`);
-      const appId = Deno.env.get("ML_APP_ID");
+      const appId = Deno.env.get("ML_APP_ID") ?? Deno.env.get("ML_CLIENT_ID");
       if (appId && /^\d+$/.test(appId)) await ler("limite_app", `/applications/${appId}`); else pendente("limite_app");
     }
     return resposta({ verificado_em: new Date().toISOString(), grupo: body.grupo, amostra: { proprio: local.item_id, concorrente: outro?.item_id ?? null, produto: produto ?? null, categoria: cat }, resultados, chamadas: resultados.filter((r) => objeto(r).status !== null).length, duracao_ms: Date.now() - inicio, limite_atingido: limitado, conclusao: "Teste pontual de disponibilidade; não valida precisão de vendas/estoque, custo de frete, volume de busca ou cobertura de mercado. Nenhuma escrita no Mercado Livre." });
