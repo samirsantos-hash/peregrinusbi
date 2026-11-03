@@ -5,6 +5,7 @@ describe("Validação de acesso ao mercado", () => {
   const account_id = "7b33ec83-180e-42ff-b76e-7b22dd46a37f";
   it("não aceita caminhos livres nem grupos desconhecidos", () => {
     expect(entradaValida({ account_id, grupo: "catalogo" })).toBe(true);
+    expect(entradaValida({ account_id, grupo: "concorrente_app" })).toBe(true);
     expect(entradaValida({ account_id, grupo: "catalogo", url: "https://example.com" })).toBe(false);
     expect(entradaValida({ account_id, grupo: "escrever" })).toBe(false);
   });

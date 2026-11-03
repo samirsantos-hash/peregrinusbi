@@ -1,5 +1,10 @@
 # Roadmap
 
+## Validar visitas e conversão concorrentes (03/11)
+- [x] Sonda protegida implantada e executada como master: oferta MLB5452621083 obtida do catálogo; ambos os caminhos de visitas responderam 403 com autorização de aplicativo, período 04/10–02/11. Nove testes passaram e build OK.
+- [x] Documentação de autorização/pedidos verificada: conversão exige pedidos pagos privados da conta comparada; não usar vendidos acumulados. Resultado registrado em docs/ml-market-access.md.
+- [ ] Mostrar visitas/conversão reais: bloqueado pelo 403 das visitas e falta de autorização da própria conta comparada para pedidos pagos. Tela mantém indisponível; não contornar permissões.
+
 ## Concorrentes na aba Preço (03/11)
 - [x] Preço → Concorrentes: busca, seleção de produto exato, tabela com linhas, preço atual/original, vendedor, Full/frete e diferença da mediana; visitas e conversão indisponíveis, sem estimar vendas de terceiros. Resumo preservado.
 - [x] Nove testes passaram e build OK; busca autenticada “pneu aro 15” retornou 11 ofertas, quatro do produto selecionado, R$384,75–R$445,74, mediana R$415,25. Tabela conferida por captura, sem erros de execução. Visitas/conversão de concorrentes continuam sem acesso confirmado.

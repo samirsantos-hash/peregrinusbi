@@ -1,5 +1,15 @@
 # Etapa 0 — caminhos e disponibilidade da API de mercado
 
+## Visitas de concorrente — teste de 03/11, 14:28 UTC
+- Sonda `concorrente_app`, autenticada pela conta master: catálogo retornou ofertas para MLB58098649 e selecionou o anúncio de terceiro MLB5452621083. Outro produto retornou 404, preservado como não confirmado.
+- Período: 04/10/2026–02/11/2026, 30 dias UTC completos.
+- `/items/MLB5452621083/visits/time_window?last=30&unit=day&ending=2026-11-02`: HTTP **403** com autorização de aplicativo.
+- `/items/visits?ids=MLB5452621083&date_from=2026-10-04&date_to=2026-11-02`: HTTP **403** com a mesma autorização. Nenhum valor de visitas foi obtido; não há conexão útil a ativar na tela com essa autorização.
+- Conversão permanece indisponível: requer pedidos pagos do anúncio no mesmo período, privados da conta autorizada. Não tentamos ler pedidos privados do concorrente nem usamos `sold_quantity` como substituto.
+- A documentação de [consultas avançadas](https://developers.mercadolivre.com.br/pt_br/recurso-visits/servico-consultas-avancadas) menciona visitas públicas, mas não confirma a matriz atual de permissões destes caminhos; os 403 são evidência desta amostra, não prova de impossibilidade universal.
+- [Autorização](https://developers.mercadolivre.com.br/pt_br/gerenciamento-de-vendas/autenticacao-e-autorizacao) limita recursos privados a usuários que concederam permissão. [Pedidos](https://developers.mercadolivre.com.br/en_us/items-and-searches/order-management) são registros de transações, distintos do contador acumulado do anúncio.
+- Diagnóstico implantado e testado; nove testes passaram e build OK. Tela preservada com preços reais e visitas/conversão indisponíveis. Para conversão real é necessária autorização da própria conta comparada e cobertura completa do período.
+
 ## Evidência adicional — tela Concorrentes em Preço
 - Em 03/11/2026, busca autenticada por `pneu aro 15` via `ml-busca-concorrentes` (token de aplicativo do serviço existente) retornou HTTP 200 e 11 ofertas válidas.
 - Para o produto MLB38180701, quatro ofertas apresentaram preços de R$384,75 a R$445,74; mediana R$415,245 (exibição R$415,25). Preço informado R$349,90: diferença −15,7% da mediana.
