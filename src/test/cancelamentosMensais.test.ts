@@ -33,6 +33,11 @@ describe('Cancelamentos reais por mês', () => {
   it('rejeita pedido fora do mês em vez de fechar cobertura incorreta', () => {
     expect(() => projetarCancelamentosMensais([order(1, 'cancelled', 25, '2026-09-30')], '2026-10-01', '2026-10-31')).toThrow();
   });
+  it('converte o fuso da API para UTC antes de agrupar no mês', () => {
+    const r = projetarCancelamentosMensais([order(1, 'cancelled', 25, '2026-09-30T21:30:00-03:00')], '2026-10-01', '2026-10-31');
+    expect(r.valorCancelado).toBe(25); expect(r.serie[0].cancelados).toBe(1);
+    expect(() => projetarCancelamentosMensais([order(2, 'cancelled', 25, 'data inválida')], '2026-10-01', '2026-10-31')).toThrow();
+  });
   it('compara mês parcial apenas aos mesmos dias do mês anterior', () => {
     const atual = { periodo: janelaMensal('2026-11', new Date('2026-11-03')), ...projetarCancelamentosMensais([order(1, 'cancelled', 30, '2026-11-01')], '2026-11-01', '2026-11-02'), coberturaCompleta: true } satisfies CancelamentoMensal;
     const anterior = { periodo: janelaMensal('2026-10', new Date('2026-11-03')), ...projetarCancelamentosMensais([order(2, 'cancelled', 20), order(3, 'cancelled', 100, '2026-10-03')], '2026-10-01', '2026-10-31'), coberturaCompleta: true } satisfies CancelamentoMensal;

@@ -29,7 +29,9 @@ export function projetarCancelamentosMensais(orders: any[], inicio: string, fim:
     const id = String(o.id);
     if (seen.has(id)) continue;
     seen.add(id);
-    const d = dias.get(o.date_created.slice(0, 10));
+    const timestamp = Date.parse(o.date_created);
+    if (!Number.isFinite(timestamp)) throw new Error('Data do pedido não confirmada.');
+    const d = dias.get(new Date(timestamp).toISOString().slice(0, 10));
     if (!d) throw new Error('Pedido fora do período solicitado.');
     if (o.status !== 'paid' && o.status !== 'cancelled') continue;
     // Use the same monetary field and currency for paid and cancelled orders.
