@@ -1,9 +1,10 @@
 # Roadmap
 
 ## Cancelamentos reais mensais (03/11)
-- [ ] Localizar pedidos e valores cancelados na base; usar API da própria loja se não houver cobertura.
-- [ ] Substituir síntese de correlação por valor cancelado mensal e proporção ao faturamento do mesmo mês, sem inferência por taxa e sem exigir variação.
-- [ ] Testar zero real, séries constantes, cobertura e escopo; conferir AMERICAFERRAMENTAS na tela.
+- [x] Base sem valores mensais identificados; leitura API própria com cobertura integral e limites UTC conferidos, sem escrita no ML.
+- [x] Síntese substituída por valor cancelado mensal e proporção ao faturamento pago do mês; comparação parcial usa mesmos dias anteriores.
+- [x] 26 testes passaram; build OK; AMERICAFERRAMENTAS exibe necessidade de conexão. AUTOPECASLONDRINA: outubro completo com 102 cancelados, R$12.706,86, faturamento pago R$135.157,73, proporção 9,40%; novembro parcial e comparação anterior conferidos.
+- [ ] Consultar valores reais da AMERICAFERRAMENTAS: depende de autorização/conexão ativa da loja ao Mercado Livre.
 
 ## Diagnósticos artificiais em Preço (03/11)
 - [x] Removidos adesão CDP fixa, score padrão 50 e alertas de tração sem preço/elegibilidade; cobertura sem inferir cluster/concorrentes, fonte planilha preservada. Seis testes e build OK; AMERICAFERRAMENTAS autenticada: quatro ausências, 67 visitas e alertas falsos de pedidos zero removidos. Importações antigas continuam sem distinguir ausência de zero; recuperar valores exige planilha original.
