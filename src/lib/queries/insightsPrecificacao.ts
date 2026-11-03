@@ -19,6 +19,10 @@ export type DadosMes = {
   totalBPC: number;
 };
 
+export function percentualForaCDP(adesao: number | null | undefined): number | null {
+  return adesao != null && Number.isFinite(adesao) && adesao >= 0 && adesao <= 100 ? 100 - adesao : null;
+}
+
 export function gerarInsights(
   historico: DadosMes[],
   dadosAtual: DadosMes,
@@ -31,6 +35,7 @@ export function gerarInsights(
   if (historico.length < 2 || dadosAtual.totalBPC <= 0) return insights;
 
   const atual = dadosAtual;
+  const foraCDP = percentualForaCDP(pctOptinCDP);
   const anterior = historico.at(-2);
   if (!anterior || anterior.totalBPC <= 0) return insights;
 
@@ -119,7 +124,7 @@ export function gerarInsights(
       identificado: `${atual.pctEquivalente.toFixed(0)}% das comparações mostram o seller com preço igual ao rival, mas apenas ${atual.pctMaisBarato.toFixed(0)}% mais barato. Quando os preços são iguais, o comprador decide por outros fatores: frete, reputação, CDP.`,
       porque:
         'Empate de preço é onde o CDP tem maior impacto. A tag "Oferta Imperdível" gerada pela CDP desempata a decisão de compra a favor do seller — sem precisar reduzir o preço base.',
-      investigar: `Verificar quantos itens com preço equivalente ao concorrente estão participando da CDP.${pctOptinCDP != null && Number.isFinite(pctOptinCDP) && pctOptinCDP >= 0 && pctOptinCDP <= 100 ? ` A planilha informa ${(100 - pctOptinCDP).toFixed(0)}% do catálogo fora da CDP.` : " A adesão do catálogo à CDP não foi informada na planilha."}`,
+      investigar: `Verificar quantos itens com preço equivalente ao concorrente estão participando da CDP.${foraCDP != null ? ` A planilha informa ${foraCDP.toFixed(0)}% do catálogo fora da CDP.` : " A adesão do catálogo à CDP não foi informada na planilha."}`,
       sugestao:
         "Ativar CDP nos itens que já têm preço equivalente ao rival. Nesses casos, o custo do desconto é mínimo (já está empatado) e o ganho de visibilidade pela tag é máximo. Priorizar itens com coparticipação do ML disponível.",
     });

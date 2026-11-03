@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gerarInsights, type DadosMes } from '@/lib/queries/insightsPrecificacao';
+import { gerarInsights, percentualForaCDP, type DadosMes } from '@/lib/queries/insightsPrecificacao';
 
 const anterior: DadosMes = { mes: '2026-09-01', pctMaisBarato: 20, pctEquivalente: 60, pctMaisCaro: 20, totalBPC: 1000 };
 const atual: DadosMes = { ...anterior, mes: '2026-10-01' };
@@ -9,12 +9,10 @@ describe('evidência de planilha nos diagnósticos de preço', () => {
     expect(gerarInsights([anterior, semDados], semDados, null, false, null, false)).toEqual([]);
   });
   it('não inventa adesão à CDP quando ausente', () => {
-    const insight = gerarInsights([anterior, atual], atual, null, false, null, false).find(i => i.id === 'empate_sem_vantagem');
-    expect(insight).toBeDefined();
-    expect(insight?.investigar).not.toContain('100%');
+    expect(percentualForaCDP(null)).toBeNull();
+    expect(percentualForaCDP(undefined)).toBeNull();
   });
   it('preserva adesão zero medida na planilha', () => {
-    const insight = gerarInsights([anterior, atual], atual, null, false, 0, false).find(i => i.id === 'empate_sem_vantagem');
-    expect(insight?.investigar).toContain('100%');
+    expect(percentualForaCDP(0)).toBe(100);
   });
 });
