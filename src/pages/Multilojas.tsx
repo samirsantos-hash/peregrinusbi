@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -305,7 +306,8 @@ const Multilojas = () => {
   const d = ctx!;
   const delta = (a: number, b: number) => (b ? (a - b) / b : NaN);
 
-  const exportarCsv = () => {
+  const exportarCsv = async () => {
+    if (!(await podeExportar())) return;
     const cols: (keyof PedidoML)[] = ["id", "dia", "loja", "mlb", "sku", "titulo", "uf", "cidade", "logi", "tipoAnun", "un", "gmv", "tarifa", "freteCusto", "estorno", "liq", "status"];
     const linhas = [linhaCsvSegura(cols), ...d.base.map((p) => linhaCsvSegura(cols.map((c) => p[c])))];
     const url = URL.createObjectURL(new Blob(["\ufeff" + linhas.join("\n")], { type: "text/csv;charset=utf-8" }));

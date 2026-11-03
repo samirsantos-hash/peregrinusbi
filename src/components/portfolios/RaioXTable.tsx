@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -222,6 +223,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
   };
 
   const handleExportExcel = async () => {
+    if (!(await podeExportar())) return;
     const XLSX = await import("xlsx");
     const rows = getExportRows(sorted, trends, roasShrink);
     const ws = XLSX.utils.json_to_sheet(rows);
@@ -232,6 +234,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
   };
 
   const handleExportPdf = async () => {
+    if (!(await podeExportar())) return;
     const { default: jsPDF } = await import("jspdf");
     const autoTable = (await import("jspdf-autotable")).default;
     const doc = new jsPDF({ orientation: "landscape" });

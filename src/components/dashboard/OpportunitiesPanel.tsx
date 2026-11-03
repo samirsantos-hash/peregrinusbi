@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo } from "react";
@@ -196,7 +197,8 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
     else setSelectedIds(new Set(displayed.map(i => i.id)));
   };
 
-  const exportSelected = () => {
+  const exportSelected = async () => {
+    if (!(await podeExportar())) return;
     const sel = displayed.filter(i => selectedIds.has(i.id));
     const csvLines = ["CAMPAIGN_ID_BEST;ITEM_ID"];
     sel.forEach(i => csvLines.push(linhaCsvSegura([i.campaignIdBest, i.itemId])));

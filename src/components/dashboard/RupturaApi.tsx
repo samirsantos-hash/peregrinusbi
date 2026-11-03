@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Download } from "lucide-react";
@@ -102,7 +103,8 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
   const warn = linhas.filter((l) => l.severidade === "warn").length;
   const valor = vis.reduce((s, l) => s + (l.valorEnvio ?? 0), 0);
 
-  const baixar = () => {
+  const baixar = async () => {
+    if (!(await podeExportar())) return;
     const ws = XLSX.utils.json_to_sheet(vis.map((l) => ({
       MLB: l.itemId, Título: l.titulo, "Vendas 7d": l.vendas7d ?? "", "Estoque (ML)": l.estoque ?? "", "Preço (ML)": l.preco ?? "",
       "Cobertura (dias)": l.cobertura ?? "", "Enviar p/ Full (4 sem.)": l.envio ?? "", "Valor do envio": l.valorEnvio ?? "",

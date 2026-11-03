@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useRef, useEffect, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -146,7 +147,8 @@ export default function KpiDetailPanel({
   );
 
   // CSV export for current chart
-  const handleExportCsv = useCallback(() => {
+  const handleExportCsv = useCallback(async () => {
+    if (!(await podeExportar())) return;
     let headers: string[] = [];
     let rows: string[][] = [];
     switch (kpiId) {

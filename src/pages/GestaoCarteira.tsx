@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
@@ -469,7 +470,8 @@ export default function GestaoCarteira() {
   };
 
   // Export CSV
-  const handleExport = () => {
+  const handleExport = async () => {
+    if (!(await podeExportar())) return;
     const headers = ["Status", "Nickname", "CustID", "Cluster", "Nível", "H/L", "UF", "TGMV", "Δ MoM%", "Score", "Dias Exp."];
     const csvRows = sortedSellers.map((s) => [
       s.worstAlert?.tipo ?? "OK",
