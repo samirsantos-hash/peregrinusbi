@@ -3255,6 +3255,59 @@ export type Database = {
           },
         ]
       }
+      permissao_catalogo: {
+        Row: {
+          chave: string
+          pai: string | null
+        }
+        Insert: {
+          chave: string
+          pai?: string | null
+        }
+        Update: {
+          chave?: string
+          pai?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissao_catalogo_pai_fkey"
+            columns: ["pai"]
+            isOneToOne: false
+            referencedRelation: "permissao_catalogo"
+            referencedColumns: ["chave"]
+          },
+        ]
+      }
+      permissoes_auditoria: {
+        Row: {
+          antes: string[]
+          aprovado_por: string
+          criado_em: string
+          depois: string[]
+          id: string
+          legado_anterior: boolean
+          user_id: string
+        }
+        Insert: {
+          antes: string[]
+          aprovado_por: string
+          criado_em?: string
+          depois: string[]
+          id?: string
+          legado_anterior: boolean
+          user_id: string
+        }
+        Update: {
+          antes?: string[]
+          aprovado_por?: string
+          criado_em?: string
+          depois?: string[]
+          id?: string
+          legado_anterior?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       portfolio_notifications: {
         Row: {
           added_cust_ids: string[]
@@ -4333,6 +4386,50 @@ export type Database = {
         }
         Relationships: []
       }
+      usuario_permissao_estado: {
+        Row: {
+          legado: boolean
+          revisado_em: string | null
+          revisado_por: string | null
+          user_id: string
+        }
+        Insert: {
+          legado?: boolean
+          revisado_em?: string | null
+          revisado_por?: string | null
+          user_id: string
+        }
+        Update: {
+          legado?: boolean
+          revisado_em?: string | null
+          revisado_por?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usuario_permissoes: {
+        Row: {
+          permissao: string
+          user_id: string
+        }
+        Insert: {
+          permissao: string
+          user_id: string
+        }
+        Update: {
+          permissao?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_permissoes_permissao_fkey"
+            columns: ["permissao"]
+            isOneToOne: false
+            referencedRelation: "permissao_catalogo"
+            referencedColumns: ["chave"]
+          },
+        ]
+      }
     }
     Views: {
       multilojas_carga_publica: {
@@ -4579,6 +4676,7 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      minhas_permissoes: { Args: never; Returns: Json }
       ml_ads_painel_grupos: {
         Args: { p_account_id: string; p_dias?: number }
         Returns: {
@@ -4797,7 +4895,20 @@ export type Database = {
         Args: { p_codigo: string; p_duracao_ms?: number; p_origem: string }
         Returns: undefined
       }
+      salvar_permissoes: {
+        Args: { p_permissoes: string[]; p_user_id: string }
+        Returns: undefined
+      }
       sou_desenvolvedor: { Args: never; Returns: boolean }
+      tem_permissao: { Args: { p_permissao: string }; Returns: boolean }
+      usuario_tem_alguma_permissao: {
+        Args: { p_permissoes: string[] }
+        Returns: boolean
+      }
+      usuario_tem_permissao: {
+        Args: { p_permissao: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role:

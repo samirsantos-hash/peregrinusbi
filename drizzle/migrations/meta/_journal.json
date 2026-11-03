@@ -120,6 +120,13 @@
       "when": 1793294918279,
       "tag": "0016_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793725209786,
+      "tag": "0017_permissoes_individuais_master",
+      "breakpoints": true
     }
   ]
 }
