@@ -1,5 +1,10 @@
 # Roadmap
 
+## Categorias e permissões por usuário (03/11)
+- [ ] Confirmar contas master e transição dos acessos atuais sem bloquear usuários por engano.
+- [ ] Preparar checklist por função com visualizar/alterar, concessão exclusiva de master e validação no servidor.
+- [ ] Aplicar permissões nas telas, leituras e ações; testar liberação, bloqueio e revogação com contas reais.
+
 ## Validar visitas e conversão concorrentes (03/11)
 - [x] Sonda protegida implantada e executada como master: oferta MLB5452621083 obtida do catálogo; ambos os caminhos de visitas responderam 403 com autorização de aplicativo, período 04/10–02/11. Nove testes passaram e build OK.
 - [x] Documentação de autorização/pedidos verificada: conversão exige pedidos pagos privados da conta comparada; não usar vendidos acumulados. Resultado registrado em docs/ml-market-access.md.
