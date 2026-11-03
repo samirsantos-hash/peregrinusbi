@@ -1,5 +1,8 @@
 # Roadmap
 
+## Plano de pesquisa de mercado baseado no documento AvantPro (03/11)
+- [ ] Preparar e apresentar plano incremental, reaproveitando Mercado e Tendências, sem alterar o aplicativo; aguarda conclusão da comparação e revisão do usuário.
+
 ## Atualizar novas lojas integradas (29/10)
 - [x] Atualizar os oito temas do resumo das 19 contas conectadas desde 27/10; GREATPOOL e BELLOSHOPLTDA concluíram após repetir falha temporária. Conferido por leitura persistida e tela Integrações autenticada, sem escrita no Mercado Livre.
 - [ ] Ads de POWERPLACEACESSORIOS, POWERPLACEBATERIAS e RUMOBATERIAS continuam com erro da API. Cargas detalhadas de anúncios, perguntas, promoções e Ads bloqueadas: acesso atual recusado por ml_pode_gerir_conta (403); históricos mensais continuam pendentes. Não contornar permissões nem declarar cobertura completa.
