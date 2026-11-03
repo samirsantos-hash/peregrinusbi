@@ -64,7 +64,7 @@ function detectarAnuncios(
   const byItem = new Map<string, QualityRow[]>();
   for (const r of history) {
     if (!byItem.has(r.item_id)) byItem.set(r.item_id, []);
-    byItem.get(r.item_id)!.push(r);
+    byItem.get(r.item_id)?.push(r);
   }
 
   // Baseline: média de pedidos_7d do próprio seller (proxy de tração relativa)
@@ -94,7 +94,7 @@ function detectarAnuncios(
     const promo = atual ? Number(atual.ll_promotions_score) || 0 : 0;
     const el = elMap.get(itemId);
     const pedidos = el?.pedidos7d || 0;
-    const semCDP = !el?.flagBestPromo && !el?.flagItemSOptin;
+    const semCDP = el != null && !el.flagBestPromo && !el.flagItemSOptin;
 
     const pctVsMedia =
       mediaPedidos > 0 ? ((pedidos - mediaPedidos) / mediaPedidos) * 100 : null;
@@ -136,10 +136,12 @@ function detectarAnuncios(
 
     // Tração muito abaixo da média do seller
     if (
+      el != null &&
+      precoAtual > 0 &&
       mediaPedidos > 0 &&
       pedidos < mediaPedidos * 0.4 &&
       pedidos < 5 &&
-      (precoAtual === 0 || precoAtual < 70)
+      precoAtual < 70
     ) {
       motivos.push(
         `Pedidos 7d (${pedidos}) muito abaixo da média da loja (${mediaPedidos.toFixed(1)})`

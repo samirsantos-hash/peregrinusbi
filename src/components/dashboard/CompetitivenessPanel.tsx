@@ -206,12 +206,13 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
     const totalSellers = src.length;
     const withPriceData = src.filter(k => (k.visitsMatch + k.visitsCheaper + k.visitsExpensive) > 0).length;
     if (totalSellers === 0) return null;
+    if (withPriceData === 0) return "Sem dados de preço no mês mais recente da planilha. Visitas não substituem comparações de preço.";
     const coverage = (withPriceData / totalSellers) * 100;
     if (coverage < 20) {
-      return `Dado de competitividade de preço disponível para menos de 20% dos sellers deste cluster. Resultado pode não ser representativo.`;
+      return `Comparações de preço disponíveis em ${withPriceData} de ${totalSellers} registros do mês na planilha. Resultado pode não ser representativo.`;
     }
     if (coverage < 60) {
-      return `Cobertura parcial: ${Math.round(coverage)}% dos sellers possuem dado de competitividade de preço.`;
+      return `Cobertura parcial: ${Math.round(coverage)}% dos registros do mês na planilha possuem comparações de preço.`;
     }
     return null;
   }, [latestMonthlyKpis, kpis]);
@@ -316,7 +317,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       if (k.upliftGmvM1 !== 0) { s.upliftGmvM1 += k.upliftGmvM1; s.upliftCount++; }
     }
 
-    const entries = Object.values(byDateMap).filter((s) => s.visits > 0);
+    const entries = Object.values(byDateMap).filter((s) => s.visits > 0 && s.visitsExpensive + s.visitsMatch + s.visitsCheaper > 0);
 
     const points = entries.map((s) => {
       const totalBands = s.visitsExpensive + s.visitsMatch + s.visitsCheaper;
@@ -376,7 +377,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       : null;
 
   // Detecta ausência de concorrentes reais (1/1 sellers)
-  const semConcorrentes = !bpcData || bpcData.total <= 1;
+  const semConcorrentes = monthlyTotals.totalPriceBands <= 0;
   const valorPreco = (valor: number, casas: number) => {
     const percentual = percentualPreco(valor, monthlyTotals.totalPriceBands);
     return percentual === null ? "Sem dados de preço" : `${fmtNum(percentual, casas)}%`;
@@ -540,7 +541,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       )}
 
       {/* ── Insights Estratégicos ── */}
-      <CompetitivenessInsights kpis={latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis} />
+      <CompetitivenessInsights kpis={(monthlyKpis.length > 0 ? monthlyKpis : kpis).filter(k => k.visitsExpensive + k.visitsMatch + k.visitsCheaper > 0)} />
 
       {/* ── Auditoria de Preço ── */}
       <PriceAuditTable kpis={kpis} sellerCustIdMap={sellerCustIdMap} />
@@ -556,7 +557,6 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       <InsightsPrecificacaoPanel
         historico={historicoInsights}
         dadosAtual={dadosAtualInsights}
-        pctOptinCDP={0}
       />
 
       {/* ── Planos de Ação por Segmento ── */}

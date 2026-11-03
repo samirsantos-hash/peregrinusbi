@@ -91,7 +91,7 @@ export interface InsightsPrecificacaoPanelProps {
   dadosAtual: DadosMes | null;
   priceScore?: number | null;
   temCDP?: boolean;
-  pctOptinCDP?: number;
+  pctOptinCDP?: number | null;
   isMercadoLider?: boolean;
 }
 
@@ -100,7 +100,7 @@ export function InsightsPrecificacaoPanel({
   dadosAtual,
   priceScore = null,
   temCDP = false,
-  pctOptinCDP = 0,
+  pctOptinCDP = null,
   isMercadoLider = false,
 }: InsightsPrecificacaoPanelProps) {
   const insights = useMemo(() => {

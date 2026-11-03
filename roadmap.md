@@ -1,5 +1,8 @@
 # Roadmap
 
+## Diagnósticos artificiais em Preço (03/11)
+- [ ] Remover adesão CDP fixa, classificação sem scores e alertas por anúncios sem elegibilidade; corrigir cobertura, preservar fonte planilha e validar.
+
 ## Ausência de comparação nos cartões de Preço (03/11)
 - [x] Quatro cartões sem denominador mostram ausência; zero real e visitas preservados. Três testes passaram, build OK; AMERICAFERRAMENTAS autenticada conferida por captura: quatro ausências e 67 visitas.
 
