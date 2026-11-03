@@ -43,7 +43,10 @@ Deno.serve(async req => {
     const periodo = mensal ?? janelaAnalise(new Date(), modo === 'vendas7d' ? 7 : 30), completo = mensal ?? janelaAnalise(new Date(), modo === 'resumo' ? 60 : modo === 'vendas7d' ? 7 : 30);
     const orders: any[] = [];
     const MAX = 10000;
-    const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(completo.inicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(completo.fim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
+    // Read a one-day envelope for monthly timezone boundaries, then bound in UTC.
+    const consultaInicio = mensal ? new Date(Date.parse(completo.inicio) - 864e5).toISOString().slice(0, 10) : completo.inicio;
+    const consultaFim = mensal ? new Date(Date.parse(completo.fim) + 864e5).toISOString().slice(0, 10) : completo.fim;
+    const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(consultaInicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(consultaFim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
     const first = await get(url(0));
     if (!Array.isArray(first.results) || !Number.isSafeInteger(first.paging?.total) || first.paging.total < 0) throw new Error('Cobertura de pedidos não confirmada.');
     if (modo === 'campanhasDiagnostico') {
@@ -109,7 +112,13 @@ Deno.serve(async req => {
     if (orders.length < total) return json({ error: 'Não foi possível ler todos os pedidos do período; análise suspensa para não apresentar totais parciais.' }, 422);
     if (mensal) {
       if (orders.length !== total || orders.some(o => String(o.seller?.id) !== cust_id)) return json({ error: 'Cobertura ou loja dos pedidos não confirmada.' }, 422);
-      const resultado = projetarCancelamentosMensais(orders, mensal.inicio, mensal.fim);
+      const limitados = orders.filter(o => {
+        const timestamp = Date.parse(o.date_created);
+        if (!Number.isFinite(timestamp)) throw new Error('Data do pedido não confirmada.');
+        const dia = new Date(timestamp).toISOString().slice(0, 10);
+        return dia >= mensal.inicio && dia <= mensal.fim;
+      });
+      const resultado = projetarCancelamentosMensais(limitados, mensal.inicio, mensal.fim);
       return json({ periodo: mensal, ...resultado, coberturaCompleta: true, fonte: 'api', consultadoEm: new Date().toISOString() });
     }
     const atual = projetarPedidos(orders, periodo.inicio, periodo.fim);
