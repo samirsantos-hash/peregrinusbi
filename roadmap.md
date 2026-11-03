@@ -1,5 +1,9 @@
 # Roadmap
 
+## Validar visitas e conversão concorrentes (03/11)
+- [ ] Testar visitas de uma oferta real com autorização de aplicativo; não preencher a tela sem comprovar métricas do mesmo período.
+- [ ] Verificar disponibilidade de pedidos pagos de terceiros para conversão; registrar qualquer bloqueio sem usar vendidos acumulados.
+
 ## Concorrentes na aba Preço (03/11)
 - [x] Preço → Concorrentes: busca, seleção de produto exato, tabela com linhas, preço atual/original, vendedor, Full/frete e diferença da mediana; visitas e conversão indisponíveis, sem estimar vendas de terceiros. Resumo preservado.
 - [x] Nove testes passaram e build OK; busca autenticada “pneu aro 15” retornou 11 ofertas, quatro do produto selecionado, R$384,75–R$445,74, mediana R$415,25. Tabela conferida por captura, sem erros de execução. Visitas/conversão de concorrentes continuam sem acesso confirmado.

@@ -1,12 +1,12 @@
 export const codigos = ["anuncio_proprio", "catalogo_busca", "catalogo_ofertas", "busca_geral", "categoria_termo", "tendencias", "mais_vendidos", "concorrente_item", "concorrente_lote", "concorrente_bulk", "concorrente_reputacao", "concorrente_visitas", "visitas_proprias", "tarifas", "price_to_win", "sugestoes", "frete", "limite_app"] as const;
 export type Codigo = typeof codigos[number];
 
-export function entradaValida(body: unknown): body is { account_id: string; grupo: "catalogo" | "concorrente" | "proprio" } {
+export function entradaValida(body: unknown): body is { account_id: string; grupo: "catalogo" | "concorrente" | "concorrente_app" | "proprio" } {
   if (!body || typeof body !== "object" || Array.isArray(body)) return false;
   const b = body as Record<string, unknown>;
   return Object.keys(b).every((k) => k === "account_id" || k === "grupo") &&
     typeof b.account_id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(b.account_id) &&
-    ["catalogo", "concorrente", "proprio"].includes(String(b.grupo));
+    ["catalogo", "concorrente", "concorrente_app", "proprio"].includes(String(b.grupo));
 }
 
 export const objeto = (v: unknown): Record<string, unknown> =>

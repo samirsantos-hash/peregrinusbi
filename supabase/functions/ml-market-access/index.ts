@@ -13,7 +13,7 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return resposta({ error: "Use POST." }, 405);
   try {
     const body = await req.json().catch(() => null);
-    if (!entradaValida(body)) return resposta({ error: "Informe account_id válido e grupo catalogo, concorrente ou proprio." }, 400);
+    if (!entradaValida(body)) return resposta({ error: "Informe account_id válido e grupo catalogo, concorrente, concorrente_app ou proprio." }, 400);
     const acesso = await exigirGestor(req, body.account_id);
     if (!acesso.ok) return resposta({ error: "Acesso à conta não autorizado." }, acesso.res.status);
     const cliente = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_ANON_KEY"), { global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } } });
@@ -29,6 +29,17 @@ Deno.serve(async (req) => {
     const inicio = Date.now();
     let limitado = false;
     const resultados: unknown[] = [];
+    let tokenLeitura = conta.token;
+    if (body.grupo === "concorrente_app") {
+      const r = await fetch(`${API}/oauth/token`, {
+        method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ grant_type: "client_credentials", client_id: requireEnv("ML_CLIENT_ID"), client_secret: requireEnv("ML_CLIENT_SECRET") }),
+        signal: AbortSignal.timeout(6_000),
+      });
+      const t = objeto(await r.json().catch(() => null));
+      if (!r.ok || typeof t.access_token !== "string") return resposta({ error: "Autorização de aplicativo indisponível." }, 502);
+      tokenLeitura = t.access_token;
+    }
     const ler = async (codigo: Codigo, caminho: string): Promise<unknown> => {
       if (limitado || Date.now() - inicio > 45_000) {
         resultados.push({ codigo, caminho, status: null, situacao: "nao_confirmado", motivo: "limite_da_execucao" });
@@ -36,7 +47,7 @@ Deno.serve(async (req) => {
       }
       const t = Date.now();
       try {
-        const r = await fetch(`${API}${caminho}`, { method: "GET", headers: { Authorization: `Bearer ${conta.token}`, Accept: "application/json" }, redirect: "error", signal: AbortSignal.timeout(6_000) });
+        const r = await fetch(`${API}${caminho}`, { method: "GET", headers: { Authorization: `Bearer ${tokenLeitura}`, Accept: "application/json" }, redirect: "error", signal: AbortSignal.timeout(6_000) });
         const json: unknown = await r.json().catch(() => null);
         const wrapper = Array.isArray(json) ? objeto(json[0]) : {};
         const interno = typeof wrapper.code === "number" ? wrapper.code : undefined;
@@ -49,6 +60,26 @@ Deno.serve(async (req) => {
         return null;
       }
     };
+    if (body.grupo === "concorrente_app") {
+      // Fixed known search sample; no arbitrary client item, path or seller ID.
+      const busca = objeto(await ler("catalogo_busca", "/products/search?status=active&site_id=MLB&q=pneu%20aro%2015&limit=3"));
+      let id: string | null = null;
+      for (const p of (Array.isArray(busca.results) ? busca.results : []).slice(0, 3)) {
+        const produto = objeto(p).id;
+        if (typeof produto !== "string" || !/^MLB\d+$/.test(produto)) continue;
+        const ofertas = objeto(await ler("catalogo_ofertas", `/products/${produto}/items?limit=10`));
+        const oferta = (Array.isArray(ofertas.results) ? ofertas.results : []).map(objeto).find((i) => typeof i.item_id === "string" && /^MLB\d+$/.test(i.item_id) && String(i.seller_id) !== String(conta.conta.ml_user_id));
+        if (typeof oferta?.item_id === "string") { id = oferta.item_id; break; }
+      }
+      const fim = new Date(); fim.setUTCHours(0, 0, 0, 0);
+      const ultimo = new Date(fim.getTime() - 86400000);
+      const primeiro = new Date(fim.getTime() - 30 * 86400000);
+      if (id) {
+        await ler("concorrente_visitas", `/items/${id}/visits/time_window?last=30&unit=day&ending=${ultimo.toISOString().slice(0, 10)}`);
+        await ler("concorrente_visitas", `/items/visits?ids=${id}&date_from=${primeiro.toISOString().slice(0, 10)}&date_to=${ultimo.toISOString().slice(0, 10)}`);
+      }
+      return resposta({ verificado_em: new Date().toISOString(), grupo: body.grupo, amostra: { concorrente: id }, periodo: { inicio: primeiro.toISOString().slice(0, 10), fim: ultimo.toISOString().slice(0, 10) }, resultados, conclusao: "Sonda de visitas com token de aplicativo; não fornece pedidos pagos nem autoriza cálculo de conversão." });
+    }
     const proprio = objeto(await ler("anuncio_proprio", `/items/${local.item_id}?include_attributes=all`));
     if (String(proprio.seller_id) !== String(conta.conta.ml_user_id)) return resposta({ error: "Não foi possível confirmar a propriedade da amostra.", resultados }, 409);
     const termo = String(proprio.title ?? "").slice(0, 90);
