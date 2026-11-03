@@ -1,5 +1,7 @@
 # Architecture Rules
 
+- Market access validation uses a fixed developer/master-only account-scoped diagnostic with sanitized field-presence results; capability evidence must precede monitoring and never authorizes inferred competitor revenue.
+
 - Dashboard macro-to-micro navigation groups live in `src/config/sellerTabs.ts`; preserve tab IDs for existing links and keep API summaries separate from imported historical analytics to prevent mixed definitions and periods.
 - Full product allocation uses `src/lib/fullBalanceamento.ts` with constrained quadprog mean-variance on complete daily paid revenue by MLB; it never treats seller series as product series or presents demand weights as financial returns, eligibility or shipment quantities.
 - Read-only `ml-analise-loja` projects paid orders into bounded aggregates with no buyer data, reuses store visibility, and rejects incomplete pagination; photo alerts require original dimensions, not thumbnail sizes.

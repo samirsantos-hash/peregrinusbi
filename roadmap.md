@@ -3,7 +3,7 @@
 ## Plano de pesquisa de mercado baseado no documento AvantPro (03/11)
 - [x] Localizar os endpoints da API no código e no documento; mapa incluído no plano, distinguindo uso atual, restrições e caminhos ainda não validados. Consulta real de acesso fica na etapa 0.
 - [x] Preparar plano incremental, reaproveitando Mercado e Tendências, preservando o visual e rejeitando métricas não comprovadas de concorrentes.
-- [ ] Iniciar somente a etapa 0 após aprovação do plano; etapas seguintes aguardam “OK, próxima etapa”. Nenhuma implantação iniciada.
+- [ ] Etapa 0 aprovada: executar diagnóstico limitado com conta autorizada e registrar matriz de disponibilidade; etapas seguintes aguardam “OK, próxima etapa”.
 
 ## Atualizar novas lojas integradas (29/10)
 - [x] Atualizar os oito temas do resumo das 19 contas conectadas desde 27/10; GREATPOOL e BELLOSHOPLTDA concluíram após repetir falha temporária. Conferido por leitura persistida e tela Integrações autenticada, sem escrita no Mercado Livre.

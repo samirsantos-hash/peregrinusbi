@@ -156,6 +156,14 @@ Contrato próprio (uma pergunta por vez), com a mesma idempotência das ações 
 
 ### Melhorias, mercado e tendências
 
+#### `ml-market-access`
+
+- Entrada: `{ account_id: UUID, grupo: "catalogo" | "concorrente" | "proprio" }`, JWT e acesso à conta; exclusivo de `super_admin` ou `desenvolvedor`, sem ampliar a carteira.
+- Saída: `{ verificado_em, grupo, amostra, resultados, chamadas, duracao_ms, limite_atingido, conclusao }`. Cada resultado inclui código fixo, caminho de GET, HTTP/status interno quando houver, situação, duração e somente presença de campos permitidos/contagem; nunca resposta bruta, tokens, compradores ou pedidos.
+- Até 45s antes de iniciar nova consulta, timeout de 6s, sequência com intervalo, sem repetição; 429 interrompe as próximas consultas. Somente amostra de anúncios ativos sincronizados da conta, com propriedade relida no ML. Nenhuma escrita no ML ou em dados de negócio; renovação de autorização segue o helper existente.
+- Erros: 400 entrada inválida/site, 401 sessão, 403 acesso/perfil, 405 método, 409 amostra/autorização, 500 falha controlada. Disponibilidade pontual não valida precisão de vendidos/estoque, receita, custo de frete ou cobertura histórica.
+- Relatório da etapa 0 em `docs/ml-market-access.md`; não habilita monitoramento nem fases seguintes.
+
 #### `ml-listing-improve`
 
 - Entrada com JWT: `{ account_id, item_id, forcar?: boolean }`. Saída: `200 { status: "gerado" | "sem_mudanca", melhoria }` (`melhoria` é a linha de `ml_listing_improvements`). Sem `forcar`, devolve a análise guardada se o anúncio não mudou.
