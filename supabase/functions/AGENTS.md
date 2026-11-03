@@ -1,5 +1,7 @@
 # Regras das funções do Mercado Livre
 
+- `ml-market-access` is a developer/master-only, account-authorized diagnostic using bounded allowlisted sequential GET probes; it returns only status, field presence and counts, never upstream payloads or inferred competitor sales, to validate market capabilities without changing ML or business data.
+
 - `ml-analise-loja` reads the own-store API on demand over complete UTC days, returning paid revenue/orders/units and cancellation rates separately; it rejects incomplete order coverage, returns no raw orders or buyer data, and never writes ML or business data. Full candidates use original photo dimensions and current ML performance; missing evidence remains null.
 - Promotion attribution diagnostics expose only allowlisted field names and counts from a bounded paid-order sample; discount supplier IDs and current membership are not validated historical attribution, so no campaign series is inferred.
 
