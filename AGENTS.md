@@ -1,6 +1,6 @@
 # Architecture Rules
 
-- Price summary cards use `precoComparacao` to distinguish an absent comparison denominator from measured zero; visits and monthly source selection stay independent.
+- Price summaries use `precoComparacao` to distinguish absence from measured zero; spreadsheet diagnostics require price evidence, unknown CDP stays null, and no score fallback may classify unmeasured listings.
 
 - Feature capabilities use the central catalog and master-only audited approval RPCs; legacy capabilities are snapshotted independently of store scope, and UI, RLS and server checks compose without granting new roles or stores. Download handlers use the fresh permission export guard because revocations must apply before generating files.
 

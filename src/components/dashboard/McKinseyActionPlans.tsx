@@ -14,14 +14,16 @@ interface Props {
 
 type Quadrant = "invest" | "seo" | "critical" | "maintain";
 
-function classifyItem(item: ListingQuality): Quadrant {
+function classifyItem(item: ListingQuality): Quadrant | null {
   // Força Competitiva = avg of offer scores (price, stock, shipping, promotions)
   const offerScores = [item.llPriceScore, item.llStockAvailabilityScore, item.llFreeShippingScore, item.llPromotionsScore].filter(s => s > 0);
-  const forcaCompetitiva = offerScores.length > 0 ? offerScores.reduce((a, b) => a + b, 0) / offerScores.length : 50;
+  if (offerScores.length === 0) return null;
+  const forcaCompetitiva = offerScores.reduce((a, b) => a + b, 0) / offerScores.length;
 
   // Atratividade = avg of content scores (pictures, title, description, tech specs)
   const contentScores = [item.llPicturesScore, item.llTitleScore, item.llDescriptionScore, item.llTechSpecsScore].filter(s => s > 0);
-  const atratividade = contentScores.length > 0 ? contentScores.reduce((a, b) => a + b, 0) / contentScores.length : 50;
+  if (contentScores.length === 0) return null;
+  const atratividade = contentScores.reduce((a, b) => a + b, 0) / contentScores.length;
 
   const threshold = 65;
   if (forcaCompetitiva >= threshold && atratividade >= threshold) return "invest";

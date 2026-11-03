@@ -1,5 +1,8 @@
 # Roadmap
 
+## Diagnósticos artificiais em Preço (03/11)
+- [x] Removidos adesão CDP fixa, score padrão 50 e alertas de tração sem preço/elegibilidade; cobertura sem inferir cluster/concorrentes, fonte planilha preservada. Seis testes e build OK; AMERICAFERRAMENTAS autenticada: quatro ausências, 67 visitas e alertas falsos de pedidos zero removidos. Importações antigas continuam sem distinguir ausência de zero; recuperar valores exige planilha original.
+
 ## Ausência de comparação nos cartões de Preço (03/11)
 - [x] Quatro cartões sem denominador mostram ausência; zero real e visitas preservados. Três testes passaram, build OK; AMERICAFERRAMENTAS autenticada conferida por captura: quatro ausências e 67 visitas.
 
