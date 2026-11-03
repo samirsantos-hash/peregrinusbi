@@ -7,6 +7,7 @@ import { tokenAtual } from '../_shared/mlTokenAtual.ts';
 import { janelaAnalise, projetarPedidos } from '../_shared/mlAnaliseLoja.ts';
 import { lerQualidade } from '../_shared/mlMelhorias.ts';
 import { amostraCampanhas } from '../_shared/mlCampanhasDiagnostico.ts';
+import { janelaMensal, projetarCancelamentosMensais } from './cancelamentosMensais.ts';
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -14,9 +15,14 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico']) }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais']), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
+  let mensal: ReturnType<typeof janelaMensal> | undefined;
+  if (modo === 'cancelamentosMensais') {
+    try { mensal = janelaMensal(body.data.mes ?? ''); }
+    catch (e) { return json({ error: e instanceof Error ? e.message : 'Informe um mês válido.' }, 400); }
+  }
   const negado = await exigirPermissao(req, modo === 'full' ? 'full.visualizar' : modo === 'campanhasDiagnostico' ? 'promocoes.visualizar' : ['resumo.visualizar', 'reputacao.visualizar', 'publicidade.visualizar', 'correlacoes.visualizar']); if (negado) return negado;
   // Reuse existing store visibility; developer status does not grant business access.
   const { data: vis, error: visError } = await user.from('ml_sync_tema').select('account_id').eq('cust_id', cust_id).limit(1);
@@ -34,12 +40,15 @@ Deno.serve(async req => {
     return r.json();
   }
   try {
-    const periodo = janelaAnalise(new Date(), modo === 'vendas7d' ? 7 : 30), completo = janelaAnalise(new Date(), modo === 'resumo' ? 60 : modo === 'vendas7d' ? 7 : 30);
+    const periodo = mensal ?? janelaAnalise(new Date(), modo === 'vendas7d' ? 7 : 30), completo = mensal ?? janelaAnalise(new Date(), modo === 'resumo' ? 60 : modo === 'vendas7d' ? 7 : 30);
     const orders: any[] = [];
     const MAX = 10000;
-    const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(completo.inicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(completo.fim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
+    // Read a one-day envelope for monthly timezone boundaries, then bound in UTC.
+    const consultaInicio = mensal ? new Date(Date.parse(completo.inicio) - 864e5).toISOString().slice(0, 10) : completo.inicio;
+    const consultaFim = mensal ? new Date(Date.parse(completo.fim) + 864e5).toISOString().slice(0, 10) : completo.fim;
+    const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(consultaInicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(consultaFim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
     const first = await get(url(0));
-    if (!Array.isArray(first.results) || !Number.isFinite(first.paging?.total)) throw new Error('Cobertura de pedidos não confirmada.');
+    if (!Array.isArray(first.results) || !Number.isSafeInteger(first.paging?.total) || first.paging.total < 0) throw new Error('Cobertura de pedidos não confirmada.');
     if (modo === 'campanhasDiagnostico') {
       // Bounded capability check, never a performance series or raw-order response.
       const amostra = amostraCampanhas(first.results);
@@ -94,13 +103,24 @@ Deno.serve(async req => {
     for (let i = 0; i < offsets.length; i += 10) {
       const pages = await Promise.all(offsets.slice(i, i + 10).map(o => get(url(o))));
       for (const p of pages) {
-        if (!Array.isArray(p.results)) throw new Error('Cobertura de pedidos não confirmada.');
+        if (!Array.isArray(p.results) || (mensal && p.paging?.total !== total)) throw new Error('Cobertura de pedidos não confirmada.');
         orders.push(...p.results);
       }
     }
     const unicos = new Map(orders.map(o => [o.id, o]));
     orders.length = 0; orders.push(...unicos.values());
     if (orders.length < total) return json({ error: 'Não foi possível ler todos os pedidos do período; análise suspensa para não apresentar totais parciais.' }, 422);
+    if (mensal) {
+      if (orders.length !== total || orders.some(o => String(o.seller?.id) !== cust_id)) return json({ error: 'Cobertura ou loja dos pedidos não confirmada.' }, 422);
+      const limitados = orders.filter(o => {
+        const timestamp = Date.parse(o.date_created);
+        if (!Number.isFinite(timestamp)) throw new Error('Data do pedido não confirmada.');
+        const dia = new Date(timestamp).toISOString().slice(0, 10);
+        return dia >= mensal.inicio && dia <= mensal.fim;
+      });
+      const resultado = projetarCancelamentosMensais(limitados, mensal.inicio, mensal.fim);
+      return json({ periodo: mensal, ...resultado, coberturaCompleta: true, fonte: 'api', consultadoEm: new Date().toISOString() });
+    }
     const atual = projetarPedidos(orders, periodo.inicio, periodo.fim);
     if (modo === 'vendas7d' || modo === 'vendas30d') {
       // Paid units and revenue per listing over complete UTC days; no buyer data.
