@@ -1,5 +1,8 @@
 # Roadmap
 
+## Visibilidade das integrações master (04/11)
+- [x] Quatro masters confirmadas, incluindo Vitória; lista completa independente de quem conectou, não-masters permanecem restritos ao proprietário. Doze testes passaram; Samir autenticado exibiu 39 contas (inclui demo desativada), com MERCALANI e demais ausentes visíveis. As quatro categorias foram conferidas na base; navegador exercitado somente como Samir.
+
 ## BPC calculado sobre dados reais (04/11)
 - [x] Índice de composição calculado pela soma das faixas importadas, com valores de origem e fórmula; distinto do BPC oficial importado e sem converter unidade desconhecida em visitas.
 - [x] Doze testes e build OK; AUTOPECASLONDRINA autenticada em 1280/536px: (9.253,20 + 19.998,00)/35.869,20 = 0,815; 587 visitas separadas, capturas sem transbordamento ou erros.

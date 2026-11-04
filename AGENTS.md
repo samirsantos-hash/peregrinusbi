@@ -1,5 +1,7 @@
 # Architecture Rules
 
+- Integration status lists use server-validated master visibility independent of the OAuth connector owner; non-master visibility remains owner-scoped to prevent accidental cross-store disclosure.
+
 - Price summaries use `precoComparacao` for null/zero, record coverage and the derived price index (cheap + equal)/all bands; imported BPC stays distinct and unknown band units never become visit counts. Spreadsheet diagnostics require price evidence, unknown CDP stays null, and no score fallback may classify unmeasured listings.
 
 - Feature capabilities use the central catalog and master-only audited approval RPCs; legacy capabilities are snapshotted independently of store scope, and UI, RLS and server checks compose without granting new roles or stores. Download handlers use the fresh permission export guard because revocations must apply before generating files.
