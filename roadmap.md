@@ -1,5 +1,9 @@
 # Roadmap
 
+## Plotagem de Preço (04/11)
+- [x] Decimal pt-BR do índice, índice importado separado da composição, cobertura por registros (não sellers/rivais), cartões sem títulos cortados e divisórias no diagnóstico; fonte planilha preservada. Percentual da tabela corrigido de faixas/visitas para faixas/comparações, sem alegar visitas perdidas ou rebaixamento automático.
+- [x] Nove testes passaram e build OK; AUTOPECASLONDRINA autenticada em 1280/536px: BPC 0,815, cobertura 1 de 1 registro e tabela 22,3% (antes 571,2% com denominador incompatível); capturas sem transbordamento ou erros de execução.
+
 ## Cancelamentos reais mensais (03/11)
 - [x] Base sem valores mensais identificados; leitura API própria com cobertura integral e limites UTC conferidos, sem escrita no ML.
 - [x] Síntese substituída por valor cancelado mensal e proporção ao faturamento pago do mês; comparação parcial usa mesmos dias anteriores.

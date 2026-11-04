@@ -8,6 +8,7 @@ import TooltipInfo from "./TooltipInfo";
 import TendenciaChip from "@/components/charts/TendenciaChip";
 import { calcularTendencia } from "@/lib/tendencia";
 import { fmtBRL, formatChartDate } from "@/utils/formatters";
+import { percentualPreco } from "@/lib/precoComparacao";
 
 /* Escala DIVERGENTE: quente = caro (ruim) · neutro = equivalente · frio = barato (bom).
  * Verde e vermelho são cores de status reservadas e não aparecem aqui. */
@@ -177,22 +178,25 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
   /* Camada acionável: ordenada por visitas (perde-se mais onde há tráfego),
    * nunca pela maior diferença de preço. */
   const itensCaros = useMemo(() => {
-    const map = new Map<string, { nome: string; visitas: number; caras: number; rivalSoma: number; rivalN: number }>();
+    const map = new Map<string, { nome: string; visitas: number; caras: number; comparacoes: number; rivalSoma: number; rivalN: number }>();
     for (const k of kpis) {
-      if (!(k.visitsExpensive > 0)) continue;
-      const cur = map.get(k.productId) || { nome: k.productName, visitas: 0, caras: 0, rivalSoma: 0, rivalN: 0 };
+      const comparacoes = k.visitsExpensive + k.visitsMatch + k.visitsCheaper;
+      if (!(comparacoes > 0)) continue;
+      const cur = map.get(k.productId) || { nome: k.productName, visitas: 0, caras: 0, comparacoes: 0, rivalSoma: 0, rivalN: 0 };
       cur.visitas += k.visits || 0;
       cur.caras += k.visitsExpensive || 0;
+      cur.comparacoes += comparacoes;
       if (k.minPriceRival > 0) { cur.rivalSoma += k.minPriceRival; cur.rivalN++; }
       map.set(k.productId, cur);
     }
     return [...map.entries()]
+      .filter(([, v]) => v.caras > 0)
       .map(([id, v]) => ({
         id,
         nome: v.nome,
         visitas: v.visitas,
         caras: v.caras,
-        pctCaro: v.visitas > 0 ? (v.caras / v.visitas) * 100 : 0,
+        pctCaro: percentualPreco(v.caras, v.comparacoes) ?? 0,
         rival: v.rivalN > 0 ? v.rivalSoma / v.rivalN : 0,
       }))
       .sort((a, b) => b.visitas - a.visitas);
@@ -281,7 +285,7 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
           <TooltipInfo text={tooltipBpc ? `${AJUDA}\n\n${tooltipBpc}` : AJUDA} />
         </div>
         <p className="text-[11px] text-muted-foreground mt-0.5">
-          Sobre as visitas com comparação de preço ativa (BPC)
+          Composição das faixas de preço da planilha — não representa percentual das visitas
         </p>
       </div>
 
@@ -444,10 +448,10 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
       {/* Camada acionável */}
       <div className="pt-2 border-t border-border/50">
         <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground mb-1">
-          Itens com preço acima do rival — top 10 por visitas perdidas
+          Registros com preço acima do rival — top 10 por visitas
         </h4>
         <p className="text-[11px] text-muted-foreground mb-2">
-          Ordenado por visitas (perde-se mais onde há mais tráfego), não pela maior diferença de preço.
+          Ordenado por visitas registradas; não mede visitas perdidas por preço.
         </p>
         {itensCaros.length === 0 ? (
           <p className="text-xs text-muted-foreground">Nenhum item com visitas em faixa de preço alto no período.</p>
@@ -458,7 +462,7 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
                 <tr className="text-muted-foreground text-left border-b border-border/50">
                   <th className="py-1.5 pr-3 font-medium">Item</th>
                   <th className="py-1.5 pr-3 font-medium text-right">Menor preço rival</th>
-                  <th className="py-1.5 pr-3 font-medium text-right">% visitas caras</th>
+                  <th className="py-1.5 pr-3 font-medium text-right">% comparações mais caras</th>
                   <th className="py-1.5 pr-3 font-medium text-right">Visitas do período</th>
                   <th className="py-1.5 font-medium">Ação</th>
                 </tr>
@@ -493,7 +497,7 @@ const PriceCompetitivenessChart = ({ kpis, granularity = "daily", tooltipBpc }: 
         )}
         <p className="text-[10px] text-muted-foreground mt-2">
           A base diária não traz preço próprio nem MLB por anúncio nessa fonte — a comparação usa o menor preço rival
-          informado pelo ML e o volume de visitas em faixa de preço alto.
+          informado na planilha e a composição das comparações de preço.
         </p>
       </div>
     </div>

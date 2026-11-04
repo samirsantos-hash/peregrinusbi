@@ -19,7 +19,7 @@ import MonitoramentoPrecoPanel from "@/components/seller/MonitoramentoPrecoPanel
 import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
-import { percentualPreco } from "@/lib/precoComparacao";
+import { coberturaPreco, percentualPreco } from "@/lib/precoComparacao";
 
 const TOOLTIP_BPC =
   "BPC (Buy Price Competitive) compara o preço do seller com rivais quando o ML identifica produto equivalente. " +
@@ -203,8 +203,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
   /* ── Cluster coverage warning ── */
   const clusterCoverageWarning = useMemo(() => {
     const src = latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis;
-    const totalSellers = src.length;
-    const withPriceData = src.filter(k => (k.visitsMatch + k.visitsCheaper + k.visitsExpensive) > 0).length;
+    const { total: totalSellers, comComparacao: withPriceData } = coberturaPreco(src);
     if (totalSellers === 0) return null;
     if (withPriceData === 0) return "Sem dados de preço no mês mais recente da planilha. Visitas não substituem comparações de preço.";
     const coverage = (withPriceData / totalSellers) * 100;
@@ -216,6 +215,8 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
     }
     return null;
   }, [latestMonthlyKpis, kpis]);
+
+  const priceCoverage = coberturaPreco(latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis);
 
   /* ── Totals from display kpis (for visits/GMV — these can use daily) ── */
   const totalVisits = kpis.reduce((s, k) => s + k.visits, 0);
@@ -371,7 +372,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       : "hsl(var(--ok))";
   const pctExpAlert =
     monthlyTotals.pctExpensive >= 30
-      ? "⚠️ Acima de 30% — o ML começa a rebaixar o anúncio"
+      ? "Preço acima do rival em 30% ou mais das comparações."
       : monthlyTotals.pctExpensive >= 20
       ? "→ Próximo do limite. Monitorar."
       : null;
@@ -396,7 +397,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       )}
 
       {/* Summary Cards — uses MONTHLY % */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {[
           {
             label: "Competitividade de Preço",
@@ -424,7 +425,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             value: valorPreco(monthlyTotals.totalExpensive, 1),
             icon: TrendingDown,
             color: monthlyTotals.pctExpensive < 20 ? "emerald-text" : "warning-text",
-            tooltip: "% das comparações de preço onde o ML identificou que o seller estava mais caro que o rival. Acima de 30%: o algoritmo começa a rebaixar o anúncio progressivamente.",
+            tooltip: "% das comparações de preço onde o preço da loja estava acima do rival. Esse percentual, isoladamente, não comprova queda de posição na busca.",
             alert: pctExpAlert,
             inlineStyle: { color: pctExpColor },
           },
@@ -437,9 +438,9 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
           },
         ].map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.2 }} className="ds-kpi rounded-2xl p-5 min-w-0">
-            <div className="flex items-center gap-1.5 mb-2">
+            <div className="flex items-start gap-1.5 mb-2 min-h-10">
               <m.icon className="w-3.5 h-3.5 ds-rotulo shrink-0" />
-              <p className="ds-rotulo text-[11px] font-medium uppercase truncate">{m.label}</p>
+              <p className="ds-rotulo text-xs font-medium leading-snug min-w-0 flex-1 break-words">{m.label}</p>
               <TooltipInfo text={m.tooltip} />
             </div>
             <div className="flex items-center gap-2">
@@ -472,9 +473,8 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             <TooltipInfo text={TOOLTIP_BPC} />
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Nenhum concorrente direto identificado pelo ML nesta categoria/período
-            ({bpcData.count}/{bpcData.total} seller). O índice BPC e o "Menor Preço
-            Rival" não têm referência externa válida.
+            Sem dados de preço no período da planilha. O índice isolado não comprova
+            uma comparação ativa nem a quantidade de concorrentes.
           </p>
           <p className="text-[11px] text-muted-foreground/70 mt-1">
             Isso pode indicar: produto de nicho sem concorrentes diretos no catálogo ML,
@@ -488,19 +488,19 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Índice de Competitividade de Preço (BPC)
             </h3>
-            <TooltipInfo text={`${TOOLTIP_BPC} Escala 0,5 (menos competitivo) a 1,0 (mais competitivo). Sellers com BPC entre 0,7 e 0,8 têm o maior GMV mediano da carteira (R$183k) e conversão de 5,0%.`} />
+            <TooltipInfo text="Índice BPC importado da planilha, apresentado pela mediana dos registros disponíveis. Não é o percentual calculado pela composição de preços dos cartões acima." />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 divide-y lg:divide-y-0 lg:divide-x divide-border">
             {/* BPC Value */}
-            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/20">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Índice de Competitividade de Preço
+            <div className="flex flex-col items-center gap-2 p-4 min-w-0 text-center">
+              <p className="text-xs text-muted-foreground">
+                Índice BPC da planilha (mediana)
               </p>
               <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? 'hsl(var(--emerald))' : bpcData.median >= 0.7 ? 'hsl(var(--ok))' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text))' : 'hsl(var(--crit))' }}>
-                {bpcData.median.toFixed(3)}
+                {fmtNum(bpcData.median, 3)}
               </p>
               <p className="text-[11px] text-muted-foreground text-center leading-snug">
-                = {fmtNum(monthlyTotals.indiceCompetitividade, 1)}% das comparações sem preço mais caro
+                Composição de preço: {fmtNum(monthlyTotals.indiceCompetitividade, 1)}% igual ou mais barato
                 <br />
                 ({fmtNum(monthlyTotals.pctMatch, 1)}% mesmo preço + {fmtNum(monthlyTotals.pctCheaper, 1)}% mais barato)
               </p>
@@ -513,28 +513,29 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
               </span>
             </div>
             {/* MIN_PRICE_RIVAL */}
-            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/20">
-              <p className="text-3xl font-bold font-mono text-foreground">
+            <div className="flex flex-col items-center gap-2 p-4 min-w-0 text-center">
+              <p className="text-2xl font-semibold tabular-nums text-foreground break-words max-w-full">
                 {minPriceRivalData ? fmtBRL(minPriceRivalData.median) : "—"}
               </p>
               <p className="text-xs text-muted-foreground">Menor Preço Rival (mediana)</p>
               {minPriceRivalData ? (
                 <p className="text-[11px] text-muted-foreground text-center">
-                  Seu preço mínimo precisa ser ≤ {fmtBRL(minPriceRivalData.median)} para liderar nessa categoria
+                  Referência registrada na planilha; não comprova liderança na categoria.
                 </p>
               ) : (
                 <span className="status-badge text-[11px] bg-muted/40 text-muted-foreground border-border/40">Sem rival identificado</span>
               )}
             </div>
             {/* Coverage */}
-            <div className="flex flex-col items-center gap-2 p-4 rounded-xl bg-muted/20">
-              <p className="text-3xl font-bold font-mono text-foreground">
-                {bpcData.count}/{bpcData.total}
+            <div className="flex flex-col items-center gap-2 p-4 min-w-0 text-center">
+              <p className="text-3xl font-semibold tabular-nums text-foreground">
+                {fmtNum(priceCoverage.comComparacao, 0)} de {fmtNum(priceCoverage.total, 0)}
               </p>
-              <p className="text-xs text-muted-foreground">Sellers com comparação ativa</p>
+              <p className="text-xs text-muted-foreground">Registros da planilha com comparação</p>
               <p className="text-[11px] text-muted-foreground">
-                Cobertura de comparação: {Math.round((bpcData.count / bpcData.total) * 100)}%
+                Cobertura dos registros: {priceCoverage.percentual === null ? "—" : `${fmtNum(priceCoverage.percentual, 0)}%`}
               </p>
+              <p className="text-xs text-muted-foreground">Não representa quantidade de rivais ou cobertura do mercado.</p>
             </div>
           </div>
         </div>
