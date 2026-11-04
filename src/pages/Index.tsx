@@ -484,6 +484,11 @@ const Index = () => {
 
         {!isLoading && sellers.length > 0 &&
           <>
+            {selectedSeller && (
+              <div className="flex justify-end px-4 pt-2">
+                <button type="button" onClick={() => handleSellerChange("")} className="text-sm font-medium text-primary hover:underline">← Voltar ao resumo da carteira</button>
+              </div>
+            )}
             <DashboardHeader
               sellers={sellers}
               selectedSeller={selectedSeller}
