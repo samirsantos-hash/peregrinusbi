@@ -39,3 +39,15 @@ O resumo bruto é gravado fora do repositório. O alvo é fixo e somente de leit
 ## Regra obrigatória (04/11/2026)
 Toda tela nova ou ajuste roda este teste antes da entrega: 100 usuários por padrão, 1.000 quando mexer na página inicial. Bloqueia se falhas >1% ou p95 >1s. Registrar o resultado abaixo.
 - 04/11/2026: 100 usuários, 40s, 997 iterações, 1.197 requisições, 0 falhas, p95 158 ms (cache + resumo da carteira + alerta 1s).
+
+## Painel logado — 04/11/2026
+
+Script: `scripts/k6-painel-logado.js` (conta de teste só leitura com 3 lojas, login único no setup; consultas do resumo e da lista de lojas; subida 50 → 200 → 500 → 1000 com parada automática).
+
+Resultado no site publicado: **o teste parou sozinho com cerca de 24 usuários simultâneos**. Resumo em ~8,7 s (p95 8,9 s) e 15% das consultas falharam; a lista de lojas não chegou a ser medida. Com 1 usuário, o resumo abriu em ~20 s no navegador.
+
+Causas encontradas:
+- A consulta da data mais recente dos indicadores mensais leva ~3,9 s mesmo sozinha: a regra de acesso por loja é avaliada linha a linha antes do `limit 1`.
+- Ao abrir o painel, papel e acesso do usuário são consultados 27 vezes cada (deveria ser 1).
+
+Conclusão: o painel logado ainda não suporta 1000 usuários; corrigir esses dois pontos antes de repetir o teste.
