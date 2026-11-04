@@ -12,7 +12,6 @@ export const options = {
     { duration: '60s', target: 1000 },
     { duration: '30s', target: 0 },
   ],
-  gracefulStop: '10s',
   maxRedirects: 0,
   thresholds: {
     http_req_failed: [

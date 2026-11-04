@@ -8,7 +8,7 @@
 - Páginas: média 82,31 ms; mediana 69,69 ms; p95 **158,04 ms**; p99 292,62 ms; máximo **6.585,35 ms**. O máximo evidencia uma resposta lenta apesar do p95 baixo.
 - 55.376 verificações aprovadas e duas reprovadas (a mesma resposta pode reprovar mais de uma verificação); taxa de aprovação 99,9964%. Todos os limites configurados passaram, sem interrupção automática.
 - Tráfego recebido: aproximadamente **3,81 GB**; enviado: 25,06 MB. A hospedagem pode cobrar por esse tráfego; o teste não aciona IA, ML ou consultas autenticadas.
-- k6 avisou que `gracefulRampDown` não é aceito como opção global; essa opção foi ignorada na execução e removida do script. Não compromete o pico ou as métricas medidas; aplica-se o padrão de conclusão de iterações do executor. A configuração corrigida foi validada sem repetir a carga em produção.
+- k6 avisou que `gracefulRampDown` não é aceito como opção global; a inspeção final também sinalizou `gracefulStop`. Ambas foram removidas do script. Não compromete o pico ou as métricas medidas; aplica-se o padrão de conclusão de iterações do executor. A configuração corrigida foi validada sem repetir a carga em produção.
 
 **Conclusão:** boa entrega pública nesta janela, com uma falha e uma resposta de 6,59 segundos. Não comprova 1.000 pessoas usando o painel logado, gráficos, banco ou integrações. Mantido o mesmo escopo restrito do teste anterior.
 
