@@ -1,6 +1,6 @@
 # Architecture Rules
 
-- k6 public load tests target only same-origin documents/assets with bounded ramps and failure aborts; they never execute app JavaScript or call auth, AI, database or ML, so delivery results are not authenticated-panel capacity claims.
+- k6 public tests hit only same-origin documents/assets with bounded ramps; no app JS, auth, AI, DB or ML, so results are not logged-in capacity claims.
 
 - Integration status lists use server-validated master visibility independent of the OAuth connector owner; non-master visibility remains owner-scoped to prevent accidental cross-store disclosure.
 
