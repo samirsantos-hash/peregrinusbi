@@ -19,7 +19,7 @@ import MonitoramentoPrecoPanel from "@/components/seller/MonitoramentoPrecoPanel
 import type { DadosMes } from "@/lib/queries/insightsPrecificacao";
 import { fmtBRL, fmtBRLCompact, fmtNum, fmtNumCompact, formatChartDate } from "@/utils/formatters";
 import { type ListingQuality } from "@/hooks/useListingsQuality";
-import { coberturaPreco, percentualPreco } from "@/lib/precoComparacao";
+import { calcularBpc, coberturaPreco, percentualPreco } from "@/lib/precoComparacao";
 
 const TOOLTIP_BPC =
   "BPC (Buy Price Competitive) compara o preço do seller com rivais quando o ML identifica produto equivalente. " +
@@ -139,14 +139,9 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
 
   /* ── BPC from monthly data ── */
   const bpcData = useMemo(() => {
-    const src = latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis;
-    const bpcValues = src.filter(k => k.bpc != null && k.bpc !== undefined).map(k => k.bpc as number);
-    if (bpcValues.length === 0) return null;
-    const sorted = [...bpcValues].sort((a, b) => a - b);
-    const median = sorted[Math.floor(sorted.length / 2)];
-    const avg = bpcValues.reduce((s, v) => s + v, 0) / bpcValues.length;
-    return { median, avg, count: bpcValues.length, total: src.length };
-  }, [latestMonthlyKpis, kpis]);
+    const indice = calcularBpc(monthlyTotals.totalCheaper, monthlyTotals.totalMatch, monthlyTotals.totalExpensive);
+    return indice === null ? null : { median: indice };
+  }, [monthlyTotals]);
 
   /* ── Histórico mensal para Insights de Precificação ── */
   const { historicoInsights, dadosAtualInsights } = useMemo(() => {
@@ -216,7 +211,6 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
     return null;
   }, [latestMonthlyKpis, kpis]);
 
-  const priceCoverage = coberturaPreco(latestMonthlyKpis.length > 0 ? latestMonthlyKpis : kpis);
 
   /* ── Totals from display kpis (for visits/GMV — these can use daily) ── */
   const totalVisits = kpis.reduce((s, k) => s + k.visits, 0);
@@ -486,15 +480,15 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         <div className="glass-card p-5">
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              Índice de Competitividade de Preço (BPC)
+              Índice de Competitividade de Preço (calculado)
             </h3>
-            <TooltipInfo text="Índice BPC importado da planilha, apresentado pela mediana dos registros disponíveis. Não é o percentual calculado pela composição de preços dos cartões acima." />
+            <TooltipInfo text="Índice calculado: (faixa mais barata + faixa igual) ÷ soma das três faixas importadas. A unidade desses valores não está confirmada como contagem de visitas." />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 divide-y lg:divide-y-0 lg:divide-x divide-border">
             {/* BPC Value */}
             <div className="flex flex-col items-center gap-2 p-4 min-w-0 text-center">
               <p className="text-xs text-muted-foreground">
-                Índice BPC da planilha (mediana)
+                Índice calculado das faixas de preço
               </p>
               <p className="text-3xl font-bold font-mono" style={{ color: bpcData.median >= 0.9 ? 'hsl(var(--emerald))' : bpcData.median >= 0.7 ? 'hsl(var(--ok))' : bpcData.median >= 0.6 ? 'hsl(var(--attention-text))' : 'hsl(var(--crit))' }}>
                 {fmtNum(bpcData.median, 3)}
@@ -528,16 +522,27 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
             </div>
             {/* Coverage */}
             <div className="flex flex-col items-center gap-2 p-4 min-w-0 text-center">
-              <p className="text-3xl font-semibold tabular-nums text-foreground">
-                {fmtNum(priceCoverage.comComparacao, 0)} de {fmtNum(priceCoverage.total, 0)}
-              </p>
-              <p className="text-xs text-muted-foreground">Registros da planilha com comparação</p>
-              <p className="text-[11px] text-muted-foreground">
-                Cobertura dos registros: {priceCoverage.percentual === null ? "—" : `${fmtNum(priceCoverage.percentual, 0)}%`}
-              </p>
-              <p className="text-xs text-muted-foreground">Não representa quantidade de rivais ou cobertura do mercado.</p>
+              <p className="text-sm font-semibold text-foreground">Base real do cálculo</p>
+              <dl className="w-full text-xs tabular-nums space-y-2">
+                {[
+                  ["Mais barato", monthlyTotals.totalCheaper],
+                  ["Preço igual", monthlyTotals.totalMatch],
+                  ["Mais caro", monthlyTotals.totalExpensive],
+                  ["Total das faixas", monthlyTotals.totalPriceBands],
+                ].map(([label, value]) => (
+                  <div key={label} className="flex justify-between gap-3 border-b border-border pb-2">
+                    <dt className="text-muted-foreground">{label}</dt>
+                    <dd className="text-foreground">{fmtNum(Number(value), 2)}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="text-xs text-muted-foreground">Valores da planilha; unidade não confirmada como visitas. Quantidade de rivais não informada.</p>
             </div>
           </div>
+          <p className="text-xs text-muted-foreground mt-4 border-t border-border pt-3">
+            ({fmtNum(monthlyTotals.totalCheaper, 2)} + {fmtNum(monthlyTotals.totalMatch, 2)}) ÷ {fmtNum(monthlyTotals.totalPriceBands, 2)} = {fmtNum(bpcData.median, 3)}.
+            {" "}Visitas reais da loja no mês: {fmtNum(monthlyTotals.totalVisitsMonthly, 0)}. As faixas não são distribuídas artificialmente sobre esse total.
+          </p>
         </div>
       )}
 

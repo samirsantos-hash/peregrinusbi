@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { coberturaPreco, percentualPreco } from '@/lib/precoComparacao';
+import { calcularBpc, coberturaPreco, percentualPreco } from '@/lib/precoComparacao';
 
 describe('comparação de preço', () => {
+  it('calcula o índice com as faixas reais de novembro da AUTOPECASLONDRINA', () => {
+    expect(calcularBpc(9253.2, 19998, 6618)).toBeCloseTo(0.815496303, 8);
+  });
+  it('não inventa índice quando todas as faixas estão ausentes', () => {
+    expect(calcularBpc(0, 0, 0)).toBeNull();
+  });
+  it('mantém índice zero medido quando toda a base está mais cara', () => {
+    expect(calcularBpc(0, 0, 100)).toBe(0);
+  });
   it('não produz percentuais sem comparação', () => {
     expect(percentualPreco(0, 0)).toBeNull();
   });

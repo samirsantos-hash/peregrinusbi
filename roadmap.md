@@ -1,5 +1,10 @@
 # Roadmap
 
+## BPC calculado sobre dados reais (04/11)
+- [x] Índice de composição calculado pela soma das faixas importadas, com valores de origem e fórmula; distinto do BPC oficial importado e sem converter unidade desconhecida em visitas.
+- [x] Doze testes e build OK; AUTOPECASLONDRINA autenticada em 1280/536px: (9.253,20 + 19.998,00)/35.869,20 = 0,815; 587 visitas separadas, capturas sem transbordamento ou erros.
+- [ ] Contagens reais de visitas por faixa: unidade da fonte não documentada; valores decimais e soma acima de visitas impedem tratá-los como contagens. Depende de dicionário/relatório de origem que confirme unidade e escala, sem reenvio obrigatório dos arquivos já armazenados.
+
 ## Plotagem de Preço (04/11)
 - [x] Decimal pt-BR do índice, índice importado separado da composição, cobertura por registros (não sellers/rivais), cartões sem títulos cortados e divisórias no diagnóstico; fonte planilha preservada. Percentual da tabela corrigido de faixas/visitas para faixas/comparações, sem alegar visitas perdidas ou rebaixamento automático.
 - [x] Nove testes passaram e build OK; AUTOPECASLONDRINA autenticada em 1280/536px: BPC 0,815, cobertura 1 de 1 registro e tabela 22,3% (antes 571,2% com denominador incompatível); capturas sem transbordamento ou erros de execução.
