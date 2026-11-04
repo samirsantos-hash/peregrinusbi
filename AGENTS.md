@@ -2,7 +2,7 @@
 
 - k6 public tests hit only same-origin documents/assets with bounded ramps; no app JS, auth, AI, DB or ML, so results are not logged-in capacity claims.
 
-- Integration status lists use server-validated master visibility independent of the OAuth connector owner; non-master visibility remains owner-scoped to prevent accidental cross-store disclosure.
+- Integration lists: server-validated masters see all; others stay owner-scoped.
 
 - Price summaries use `precoComparacao` for null/zero, record coverage and the derived price index (cheap + equal)/all bands; imported BPC stays distinct and unknown band units never become visit counts. Spreadsheet diagnostics require price evidence, unknown CDP stays null, and no score fallback may classify unmeasured listings.
 
