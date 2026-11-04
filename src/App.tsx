@@ -1,4 +1,5 @@
 import PersistenciaCache from "@/components/PersistenciaCache";
+import SaidaEmergencia from "@/components/SaidaEmergencia";
 import { Toaster } from "@/components/ui/toaster";
 import ConectarConvite from "./pages/ConectarConvite";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -146,6 +147,7 @@ const AppRoutes = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <PersistenciaCache />
+    <SaidaEmergencia />
     <TooltipProvider>
       <SoundProvider>
         <ThemeProvider>

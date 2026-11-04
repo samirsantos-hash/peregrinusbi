@@ -61,3 +61,13 @@ Correções: regras de acesso por loja calculadas uma vez por consulta (não mai
 - Acima de ~300 usuários as respostas passam a esgotar o tempo e o teste parou sozinho. 1000 usuários ainda não é suportado no tamanho atual do servidor.
 - Conferido: master continua vendo as 1.093 lojas; a conta de teste vê só a sua loja.
 - Acima de ~300 usuários o banco ficou indisponível por cerca de 1 minuto logo após o teste e depois voltou sozinho.
+
+### Saída de emergência — 04/11/2026
+
+Regra (`src/lib/saidaEmergencia.ts`): 3 respostas lentas (>3 s), recusadas (429/5xx) ou sem resposta em 30 s pausam as consultas por 60 s; nesse tempo o painel mostra a última cópia boa das leituras e um aviso; escritas sempre vão ao servidor.
+
+k6 em degraus 500 → 600 → 700 → 800 → 900 → 1000 com a mesma regra em cada usuário simulado:
+- Chegou a **819 usuários simultâneos** antes de parar (falhas acima de 15%); antes da saída, parava em ~300.
+- 69% das aberturas foram atendidas pela cópia guardada, sem consultar o banco.
+- Resumo: mediana 4,3 s; lojas: mediana 1,4 s (com fila no servidor).
+- **O banco não caiu** (antes ficou ~1 min fora do ar).

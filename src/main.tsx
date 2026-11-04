@@ -2,6 +2,10 @@ import { createRoot } from "react-dom/client";
 import { AppErrorBoundary } from "./components/AppErrorBoundary.tsx";
 import App from "./App.tsx";
 import "./index.css";
+import { instalarSaidaEmergencia } from "./lib/saidaEmergencia";
+
+// Instala antes do app para cobrir todas as consultas ao servidor.
+if (import.meta.env.VITE_SUPABASE_URL) instalarSaidaEmergencia(new URL(import.meta.env.VITE_SUPABASE_URL).origin);
 
 const rootElement = document.getElementById("root");
 

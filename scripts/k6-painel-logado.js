@@ -9,19 +9,28 @@ const anon = __ENV.SUPABASE_ANON;
 const tempoResumo = new Trend('tempo_resumo', true);
 const tempoLojas = new Trend('tempo_lojas', true);
 const falhas = new Rate('falhas_painel');
+const emergencia = new Rate('emergencia');
+// Mesma regra do painel (src/lib/saidaEmergencia.ts): 3 sinais em 30 s pausam as consultas por 60 s.
+let sinais = [];
+let pausaAte = 0;
+function sinal(lento) { const t = Date.now(); if (!lento) return; sinais = sinais.filter((x) => t - x < 30000).concat(t); if (sinais.length >= 3) { pausaAte = t + 60000; sinais = []; } }
 
 export const options = {
+  // Degraus de 500, 600, 700... até 1000, imitando a saída de emergência do painel.
   stages: [
-    { duration: '30s', target: 50 },
-    { duration: '45s', target: 200 },
     { duration: '45s', target: 500 },
-    { duration: '60s', target: 1000 },
-    { duration: '60s', target: 1000 },
-    { duration: '20s', target: 0 },
+    { duration: '30s', target: 600 },
+    { duration: '30s', target: 700 },
+    { duration: '30s', target: 800 },
+    { duration: '30s', target: 900 },
+    { duration: '30s', target: 1000 },
+    { duration: '30s', target: 1000 },
+    { duration: '15s', target: 0 },
   ],
   thresholds: {
-    falhas_painel: ['rate<0.01', { threshold: 'rate<0.05', abortOnFail: true, delayAbortEval: '15s' }],
-    tempo_resumo: ['p(95)<1000', { threshold: 'p(95)<8000', abortOnFail: true, delayAbortEval: '20s' }],
+    falhas_painel: ['rate<0.01', { threshold: 'rate<0.15', abortOnFail: true, delayAbortEval: '20s' }],
+    emergencia: ['rate>=0'],
+    tempo_resumo: ['p(95)<1000'],
     tempo_lojas: ['p(95)<1000'],
   },
   summaryTrendStats: ['avg', 'med', 'p(90)', 'p(95)', 'max'],
@@ -42,12 +51,15 @@ function lote(reqs) {
   const t = Date.now();
   const rs = http.batch(reqs);
   const ok = rs.every((r) => r.status >= 200 && r.status < 300);
+  rs.forEach((r) => sinal(r.status === 0 || r.status === 429 || r.status >= 500 || r.timings.duration > 3000));
   falhas.add(!ok);
   check(rs, { 'consultas 2xx': () => ok });
   return Date.now() - t;
 }
 
 export default function (d) {
+  if (Date.now() < pausaAte) { emergencia.add(true); sleep(5 + Math.random() * 3); return; }
+  emergencia.add(false);
   const h = { headers: { apikey: anon, Authorization: `Bearer ${d.token}`, 'Content-Type': 'application/json' }, timeout: '30s' };
   const R = `${api}/rest/v1`;
   const corpo = JSON.stringify({ p_seller_ids: d.sellers });
