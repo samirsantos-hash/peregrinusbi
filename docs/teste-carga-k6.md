@@ -51,3 +51,13 @@ Causas encontradas:
 - Ao abrir o painel, papel e acesso do usuário são consultados 27 vezes cada (deveria ser 1).
 
 Conclusão: o painel logado ainda não suporta 1000 usuários; corrigir esses dois pontos antes de repetir o teste.
+
+### Após correção — 04/11/2026
+
+Correções: regras de acesso por loja calculadas uma vez por consulta (não mais linha a linha) e leitura do perfil do usuário compartilhada entre as telas (era repetida 27 vezes).
+
+- 20 consultas simultâneas: de ~3,5 s para ~0,3 s cada (mediana).
+- k6: chegou a **~300 usuários simultâneos** (antes parava em 24). Até aí, resumo com mediana 0,4 s e p90 0,58 s; lojas com mediana 0,2 s e p90 0,48 s.
+- Acima de ~300 usuários as respostas passam a esgotar o tempo e o teste parou sozinho. 1000 usuários ainda não é suportado no tamanho atual do servidor.
+- Conferido: master continua vendo as 1.093 lojas; a conta de teste vê só a sua loja.
+- Acima de ~300 usuários o banco ficou indisponível por cerca de 1 minuto logo após o teste e depois voltou sozinho.

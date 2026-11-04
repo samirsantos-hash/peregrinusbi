@@ -4554,6 +4554,7 @@ export type Database = {
         }[]
       }
       checklist_escopo_loja: { Args: { p_cust: string }; Returns: boolean }
+      escopo_lojas_ids: { Args: never; Returns: string[] }
       get_allowed_cust_ids: { Args: never; Returns: string[] }
       get_data_coverage: {
         Args: never

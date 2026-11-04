@@ -169,6 +169,27 @@
       "when": 1793811345252,
       "tag": "0023_alerta_lentidao_1s",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793812722374,
+      "tag": "0024_rls_por_consulta",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793812878870,
+      "tag": "0025_rls_escopo_uma_vez",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793813309879,
+      "tag": "0026_escopo_lojas_rapido",
+      "breakpoints": true
     }
   ]
 }
