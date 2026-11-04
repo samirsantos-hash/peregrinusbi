@@ -12,7 +12,7 @@ export default function PersistenciaCache() {
   useEffect(() => {
     if (!user?.id) return;
     const [parar] = persistQueryClient({
-      queryClient: client, persister: criarPersister(user.id), maxAge: CACHE_VALIDADE_MS, buster: 'v1',
+      queryClient: client, persister: criarPersister(user.id), maxAge: CACHE_VALIDADE_MS, buster: 'v2',
       dehydrateOptions: { shouldDehydrateQuery: devePersistir },
     });
     return parar;

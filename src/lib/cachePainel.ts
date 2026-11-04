@@ -9,8 +9,15 @@ export const LIMITE_LENTIDAO_MS = 1000;
 const NAO_PERSISTIR = ['minhas-permissoes', 'developer-alerts', 'sou-desenvolvedor', 'auth', 'session'];
 
 export const respostaLenta = (ms: number) => Number.isFinite(ms) && ms > LIMITE_LENTIDAO_MS;
+// Map/Set/Date viram objetos simples no JSON e quebram a tela ao restaurar.
+export const serializavel = (v: unknown, prof = 0): boolean => {
+  if (v instanceof Map || v instanceof Set || v instanceof Date) return false;
+  if (!v || typeof v !== 'object' || prof > 4) return true;
+  const vals = Array.isArray(v) ? v.slice(0, 3) : Object.values(v);
+  return vals.every((x) => serializavel(x, prof + 1));
+};
 export const devePersistir = (q: Pick<Query, 'queryKey' | 'state'>) =>
-  q.state.status === 'success' && !NAO_PERSISTIR.includes(String(q.queryKey[0]));
+  q.state.status === 'success' && !NAO_PERSISTIR.includes(String(q.queryKey[0])) && serializavel(q.state.data);
 
 const armazenamento = {
   getItem: (k: string) => { try { return localStorage.getItem(k); } catch { return null; } },
