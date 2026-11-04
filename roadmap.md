@@ -1,5 +1,9 @@
 # Roadmap
 
+## Teste de carga com 1.000 pessoas (04/11)
+- [x] Executada uma única simulação pública: pico confirmado de 1.000 usuários, 60 segundos de platô, interrupção por falhas e sem login, IA, banco ou Mercado Livre.
+- [x] 28.189 requisições, uma falha (0,00355%), p95 de páginas 158,04 ms e máximo 6,59 s; limites aprovados, 3,81 GB recebidos. Resultados em docs/teste-carga-k6.md; não certifica painel autenticado. Teste de configuração passou; opção global ignorada pelo k6 removida e configuração inspecionada sem nova carga.
+
 ## Teste de carga com 100 pessoas (04/11)
 - [x] k6 executado com subida gradual, 100 usuários virtuais por um minuto e redução gradual; somente páginas e arquivos públicos, sem login, IA, banco ou Mercado Livre.
 - [x] 2.209 requisições, zero falhas, p95 de páginas 164,92 ms; limites aprovados e resultado em docs/teste-carga-k6.md. A simulação não certifica capacidade do painel autenticado.

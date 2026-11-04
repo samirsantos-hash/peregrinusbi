@@ -1,5 +1,17 @@
 # Teste de carga público — 04/11/2026
 
+## Ampliação para 1.000 usuários — 16:37 UTC
+
+- Uma execução k6 2.0.0 no mesmo alvo público: subida até 1.000 usuários em 60 segundos, platô de 60 segundos e descida de 30 segundos. Pico confirmado de 1.000 usuários virtuais; duração efetiva de 153,38 segundos.
+- 26.189 navegações e 28.189 requisições HTTP; média na execução inteira de 183,79 requisições/s.
+- Uma falha HTTP/documento: **0,00355% das requisições**. O resumo agregado não registra o status ou a causa dessa resposta; não é possível atribuí-la a sobrecarga.
+- Páginas: média 82,31 ms; mediana 69,69 ms; p95 **158,04 ms**; p99 292,62 ms; máximo **6.585,35 ms**. O máximo evidencia uma resposta lenta apesar do p95 baixo.
+- 55.376 verificações aprovadas e duas reprovadas (a mesma resposta pode reprovar mais de uma verificação); taxa de aprovação 99,9964%. Todos os limites configurados passaram, sem interrupção automática.
+- Tráfego recebido: aproximadamente **3,81 GB**; enviado: 25,06 MB. A hospedagem pode cobrar por esse tráfego; o teste não aciona IA, ML ou consultas autenticadas.
+- k6 avisou que `gracefulRampDown` não é aceito como opção global; essa opção foi ignorada na execução e removida do script. Não compromete o pico ou as métricas medidas; aplica-se o padrão de conclusão de iterações do executor. A configuração corrigida foi validada sem repetir a carga em produção.
+
+**Conclusão:** boa entrega pública nesta janela, com uma falha e uma resposta de 6,59 segundos. Não comprova 1.000 pessoas usando o painel logado, gráficos, banco ou integrações. Mantido o mesmo escopo restrito do teste anterior.
+
 ## Resultado medido
 
 - Alvo: https://ecomperegrinus.com.br, páginas `/` e `/index`.

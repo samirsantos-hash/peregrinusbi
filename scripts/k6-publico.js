@@ -8,11 +8,10 @@ const pageFailures = new Rate('page_failures');
 
 export const options = {
   stages: [
-    { duration: '20s', target: 100 },
-    { duration: '60s', target: 100 },
-    { duration: '20s', target: 0 },
+    { duration: '60s', target: 1000 },
+    { duration: '60s', target: 1000 },
+    { duration: '30s', target: 0 },
   ],
-  gracefulRampDown: '10s',
   gracefulStop: '10s',
   maxRedirects: 0,
   thresholds: {
