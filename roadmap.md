@@ -1,5 +1,9 @@
 # Roadmap
 
+## Teste de carga com 100 pessoas (04/11)
+- [x] k6 executado com subida gradual, 100 usuários virtuais por um minuto e redução gradual; somente páginas e arquivos públicos, sem login, IA, banco ou Mercado Livre.
+- [x] 2.209 requisições, zero falhas, p95 de páginas 164,92 ms; limites aprovados e resultado em docs/teste-carga-k6.md. A simulação não certifica capacidade do painel autenticado.
+
 ## Visibilidade das integrações master (04/11)
 - [x] Quatro masters confirmadas, incluindo Vitória; lista completa independente de quem conectou, não-masters permanecem restritos ao proprietário. Doze testes passaram; Samir autenticado exibiu 39 contas (inclui demo desativada), com MERCALANI e demais ausentes visíveis. As quatro categorias foram conferidas na base; navegador exercitado somente como Samir.
 

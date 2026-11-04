@@ -1,5 +1,7 @@
 # Architecture Rules
 
+- k6 public load tests target only same-origin documents/assets with bounded ramps and failure aborts; they never execute app JavaScript or call auth, AI, database or ML, so delivery results are not authenticated-panel capacity claims.
+
 - Integration status lists use server-validated master visibility independent of the OAuth connector owner; non-master visibility remains owner-scoped to prevent accidental cross-store disclosure.
 
 - Price summaries use `precoComparacao` for null/zero, record coverage and the derived price index (cheap + equal)/all bands; imported BPC stays distinct and unknown band units never become visit counts. Spreadsheet diagnostics require price evidence, unknown CDP stays null, and no score fallback may classify unmeasured listings.
