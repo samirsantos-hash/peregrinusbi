@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcularSinergiaPublicidade, pearsonPareado, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
+import { calcularSinergiaPublicidade, completarVisitasPiloto, pearsonPareado, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
 const pontos = (n = 7): PontoPublicidade[] => Array.from({ length: n }, (_, i) => ({ data: `2026-10-${i + 1}`, investimento: i + 1, faturamento: (i + 1) * 10, receitaAds: (i + 1) * 4 }));
 describe("sinergia de publicidade", () => {
   it("matriz exclui pares ausentes sem deslocar as séries", () => {
@@ -27,4 +27,18 @@ describe("sinergia de publicidade", () => {
     expect(r.atribuicaoIncompativel).toBe(true); expect(r.participacao).toBeNull();
   });
   it("denominador zero mantém indicador indisponível", () => expect(calcularSinergiaPublicidade([{ data: "2026-10-01", investimento: 0, faturamento: 0, receitaAds: 0 }]).tacos).toBeNull());
+  it("o piloto preenche só o dia vazio e desliga sem alterar a leitura", () => {
+    const base = [{ data: "2026-10-01", visitas: 8 }, { data: "2026-10-02", visitas: null }, { data: "2026-10-03", visitas: null }];
+    const serie = [{ data: "2026-10-02T00:00:00Z", visitas: 0 }, { data: "2026-10-03", visitas: 5 }];
+    const ligado = completarVisitasPiloto(base, serie, true);
+    expect(ligado.dias).toBe(2);
+    expect(ligado.pontos.map(p => p.visitas)).toEqual([8, 0, 5]);
+    expect(completarVisitasPiloto(base, serie, false).pontos.map(p => p.visitas)).toEqual([8, null, null]);
+  });
+  it("o piloto substitui a série inteira de zeros da planilha", () => {
+    const base = [{ data: "2026-10-01", visitas: 0 }, { data: "2026-10-02", visitas: 0 }];
+    const serie = [{ data: "2026-10-01", visitas: 12 }, { data: "2026-10-02", visitas: 4 }];
+    expect(completarVisitasPiloto(base, serie, true).pontos.map(p => p.visitas)).toEqual([12, 4]);
+    expect(completarVisitasPiloto([{ data: "2026-10-01", visitas: 3 }, { data: "2026-10-02", visitas: 0 }], serie, true).pontos.map(p => p.visitas)).toEqual([3, 0]);
+  });
 });

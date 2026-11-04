@@ -1,4 +1,24 @@
 export type PontoPublicidade = { data: string; investimento: number | null; faturamento: number | null; receitaAds: number | null; visitas?: number | null; cancelamentos?: number | null };
+
+/** Fills days the read left empty. A series of only zeros counts as unmeasured. A real visit above zero is kept, and a missing synced day stays empty. */
+export function completarVisitasPiloto<T extends { data: string; visitas?: number | null }>(pontos: T[], serie: { data?: unknown; visitas?: unknown }[] | null | undefined, ativo: boolean) {
+  if (!ativo) return { pontos, dias: 0 };
+  const map = new Map<string, number>();
+  for (const r of serie ?? []) {
+    const data = String(r.data ?? "").slice(0, 10);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(data) || typeof r.visitas !== "number" || !Number.isFinite(r.visitas) || r.visitas < 0) continue;
+    map.set(data, r.visitas);
+  }
+  const semMedicao = pontos.every(p => p.visitas == null || p.visitas === 0);
+  let dias = 0;
+  const out = pontos.map(p => {
+    const vazio = p.visitas == null || (semMedicao && p.visitas === 0);
+    if (!vazio || !map.has(p.data)) return p;
+    dias++;
+    return { ...p, visitas: map.get(p.data)! };
+  });
+  return { pontos: out, dias };
+}
 export type ResultadoSinergia = ReturnType<typeof calcularSinergiaPublicidade>;
 
 const valido = (v: number | null): v is number => v != null && Number.isFinite(v) && v >= 0;

@@ -4,7 +4,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
 import { requireEnv } from '../_shared/env.ts';
 import { tokenAtual } from '../_shared/mlTokenAtual.ts';
-import { janelaAnalise, projetarPedidos } from '../_shared/mlAnaliseLoja.ts';
+import { anexarVisitas, janelaAnalise, projetarPedidos } from '../_shared/mlAnaliseLoja.ts';
 import { lerQualidade } from '../_shared/mlMelhorias.ts';
 import { amostraCampanhas } from '../_shared/mlCampanhasDiagnostico.ts';
 import { janelaMensal, projetarCancelamentosMensais } from './cancelamentosMensais.ts';
@@ -131,13 +131,10 @@ Deno.serve(async req => {
       const anterior = projetarPedidos(orders, completo.inicio, anteriorFim);
       let visits: any = null;
       try { visits = await get(`/users/${cust_id}/items_visits/time_window?last=60&unit=day`); } catch { /* unknown stays null */ }
-      const map = new Map<string, number>();
-      for (const r of visits?.results ?? []) if (typeof r.total === 'number') map.set(String(r.date).slice(0, 10), r.total);
       const enrich = (p: ReturnType<typeof projetarPedidos>) => {
-        const covered = p.serie.every(r => map.has(r.data));
-        const visitas = covered ? p.serie.reduce((s, r) => s + (map.get(r.data) ?? 0), 0) : null;
+        const { serie, visitas } = anexarVisitas(p.serie, visits?.results);
         const { itens: _, ...clean } = p;
-        return { ...clean, visitas, conversao: visitas != null && visitas > 0 ? p.pedidos / visitas : null };
+        return { ...clean, serie, visitas, conversao: visitas != null && visitas > 0 ? p.pedidos / visitas : null };
       };
       return json({ periodo, anteriorPeriodo: { inicio: completo.inicio, fim: anteriorFim }, atual: enrich(atual), anterior: enrich(anterior), consultadoEm: new Date().toISOString() });
     }

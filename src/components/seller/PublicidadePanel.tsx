@@ -31,7 +31,7 @@ import {
 import { fmtBRL, fmtBRLCompact } from "@/utils/formatters";
 import AdsGranularidadePanel from "./AdsGranularidadePanel";
 import AcosTacosChart from "./AcosTacosChart";
-import { SinergiaIndicadores } from "@/components/ml/SinergiaPublicidade";
+import { SinergiaIndicadores, usePilotoVisitas } from "@/components/ml/SinergiaPublicidade";
 
 type Props = {
   sellerUuid: string;
@@ -51,6 +51,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
   const mobile = useIsMobile();
   const [grafico, setGrafico] = useState<"roas_acos" | "investimento">("roas_acos");
   const soEvolucao = variante === "evolucao";
+  const visitasPiloto = usePilotoVisitas(custId);
 
   const { data: m, isLoading } = useQuery({
     queryKey: ["publicidade", sellerUuid, custId, fromDate, toDate],
@@ -81,9 +82,12 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
   ];
   const algumScore = scores.some((s) => s.val !== null && s.val !== undefined);
 
+  const pontosHistorico = diario.filter(d => d.date.slice(0, 10) >= fromDate && d.date.slice(0, 10) <= toDate).map(d => ({ data: d.date.slice(0, 10), investimento: d.adsInvestment ?? null, faturamento: d.tgmv ?? null, receitaAds: d.tgmvPads ?? null, visitas: d.visits ?? null, cancelamentos: d.repCancellationsRate ?? null }));
+  const visitas = visitasPiloto.aplicar(pontosHistorico);
+
   return (
     <div className="space-y-5">
-      {!soEvolucao && <SinergiaIndicadores custId={custId} de={fromDate} ate={toDate} fonte={`Histórico importado · ${fromDate} a ${toDate}`} pontos={diario.filter(d => d.date.slice(0, 10) >= fromDate && d.date.slice(0, 10) <= toDate).map(d => ({ data: d.date.slice(0, 10), investimento: d.adsInvestment ?? null, faturamento: d.tgmv ?? null, receitaAds: d.tgmvPads ?? null, visitas: d.visits ?? null, cancelamentos: d.repCancellationsRate ?? null }))} />}
+      {visitas.carregando ? <p className="text-xs text-muted-foreground">Carregando visitas do piloto…</p> : <SinergiaIndicadores custId={custId} de={fromDate} ate={toDate} piloto={visitasPiloto.piloto} fonte={`Histórico importado · ${fromDate} a ${toDate}${visitas.nota}`} pontos={visitas.pontos} />}
       {/* Banner sem dados */}
       {semDados && !soEvolucao && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">

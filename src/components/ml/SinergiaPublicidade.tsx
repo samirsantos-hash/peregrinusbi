@@ -1,21 +1,27 @@
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAnaliseMl } from "@/hooks/useAnaliseMl";
 import { useContaMl } from "@/components/dashboard/RupturaApi";
 import { fetchAllRows } from "@/lib/fetchAllRows";
-import { calcularSinergiaPublicidade, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
+import { calcularSinergiaPublicidade, completarVisitasPiloto, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
 import { num, pctFracao } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import GraficoPublicidadeSerie from "@/components/dashboard/GraficoPublicidadeSerie";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import CancelamentosMensais from "@/components/ml/CancelamentosMensais";
 
-export function SinergiaIndicadores({ pontos, compacto = false, fonte, custId, de, ate }: { pontos: PontoPublicidade[]; compacto?: boolean; fonte: string; custId?: string; de?: string; ate?: string }) {
+export function SinergiaIndicadores({ pontos, compacto = false, fonte, custId, de, ate, piloto }: { pontos: PontoPublicidade[]; compacto?: boolean; fonte: string; custId?: string; de?: string; ate?: string; piloto?: { ativo: boolean; alternar: () => void } }) {
   const r = calcularSinergiaPublicidade(pontos);
   return <section aria-label="Sinergia e dependência de publicidade" className="space-y-3 border-t border-border/50 pt-4">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
     <GraficoPublicidadeSerie pontos={pontos} compacto={compacto} />
+    {piloto && <div className="flex justify-end">
+      <button type="button" onClick={piloto.alternar} className="text-xs text-muted-foreground underline-offset-2 hover:underline">
+        {piloto.ativo ? "Voltar à leitura publicada" : "Ver piloto de visitas"}
+      </button>
+    </div>}
     <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
     <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -34,6 +40,40 @@ export function SinergiaIndicadores({ pontos, compacto = false, fonte, custId, d
 
 type Resumo = { periodo: { inicio: string; fim: string }; atual: { serie: { data: string; faturamento: number; cancelados?: number; visitas?: number }[] } };
 type Linha = { dia: string; campaign_id: number; cost: number | null; total_amount: number | null };
+const PILOTO_VISITAS = "peregrinus-visitas-piloto";
+
+function useVisitasPiloto() {
+  const [ativo, setAtivo] = useState(true);
+  useEffect(() => { try { setAtivo(localStorage.getItem(PILOTO_VISITAS) !== "0"); } catch { /* private mode keeps the pilot on */ } }, []);
+  const alternar = () => setAtivo(atual => {
+    const proximo = !atual;
+    try { localStorage.setItem(PILOTO_VISITAS, proximo ? "1" : "0"); } catch { /* the choice lasts for this view */ }
+    return proximo;
+  });
+  return { ativo, alternar };
+}
+
+export function usePilotoVisitas(custId?: string) {
+  const piloto = useVisitasPiloto();
+  const visitasSync = useQuery({ queryKey: ["sinergia-visitas-piloto", custId], enabled: piloto.ativo && !!custId, staleTime: 300_000,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("ml_sync_tema").select("dados, atualizado_em").eq("cust_id", custId ?? "").eq("tema", "visitas").maybeSingle();
+      if (error) throw error;
+      const dados = data?.dados as { serie?: { data?: string; visitas?: number }[] } | null;
+      return { serie: dados?.serie ?? [], atualizadoEm: data?.atualizado_em ?? null };
+    } });
+  const aplicar = <T extends { data: string; visitas?: number | null }>(pontos: T[]) => {
+    const visitas = completarVisitasPiloto(pontos, visitasSync.data?.serie, piloto.ativo);
+    const quando = visitasSync.data?.atualizadoEm ? new Date(visitasSync.data.atualizadoEm).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : null;
+    const faltamVisitas = visitas.pontos.some(p => p.visitas == null);
+    const nota = !piloto.ativo || (!faltamVisitas && visitas.dias === 0) ? ""
+      : visitas.dias > 0 ? ` · piloto: visitas da sincronização${quando ? ` de ${quando}` : ""}, antes de publicar a função`
+      : visitasSync.isError ? " · piloto sem leitura da sincronização"
+      : " · piloto sem visitas sincronizadas nestas datas";
+    return { pontos: visitas.pontos, nota, carregando: piloto.ativo && !!custId && visitasSync.isLoading };
+  };
+  return { piloto, aplicar };
+}
 
 /** Reuses paid-order summary; reads only campaign metrics on those exact UTC dates. */
 export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, compacto = false }: { custId?: string; accountId?: string; compacto?: boolean }) {
@@ -46,6 +86,8 @@ export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, c
       return data?.cust_id ?? undefined;
     } });
   const resumo = useAnaliseMl<Resumo>(custId ?? vinculo.data, "resumo");
+  const loja = custId ?? vinculo.data;
+  const { piloto, aplicar } = usePilotoVisitas(loja);
   const periodo = resumo.data?.periodo;
   const diario = useQuery({ queryKey: ["sinergia-ads-diario", accountId, periodo?.inicio, periodo?.fim], enabled: !!accountId && !!periodo, staleTime: 300_000,
     queryFn: async () => {
@@ -55,13 +97,14 @@ export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, c
       if (error) throw error;
       return data;
     } });
-  if (resumo.isLoading || diario.isLoading || vinculo.isLoading) return <Skeleton className="h-28 w-full" />;
   const pontos = (resumo.data?.atual.serie ?? []).map(d => {
     const ls = (diario.data ?? []).filter(l => l.dia === d.data);
     const soma = (campo: "cost" | "total_amount") => ls.length && ls.every(l => l[campo] != null && Number.isFinite(Number(l[campo]))) ? ls.reduce((s, l) => s + Number(l[campo]), 0) : null;
     return { data: d.data, faturamento: d.faturamento, investimento: soma("cost"), receitaAds: soma("total_amount"), visitas: d.visitas ?? null, cancelamentos: d.cancelados ?? null };
   });
-  return <SinergiaIndicadores pontos={pontos} compacto={compacto} custId={custId ?? vinculo.data} de={periodo?.inicio} ate={periodo?.fim} fonte={periodo
-    ? `Mercado Livre · ${periodo.inicio.split("-").reverse().join("/")} a ${periodo.fim.split("-").reverse().join("/")} · dias completos UTC${resumo.error || diario.error ? " · leitura indisponível" : ""}`
+  const visitas = aplicar(pontos);
+  if (resumo.isLoading || diario.isLoading || vinculo.isLoading || visitas.carregando) return <Skeleton className="h-28 w-full" />;
+  return <SinergiaIndicadores pontos={visitas.pontos} compacto={compacto} piloto={piloto} custId={loja} de={periodo?.inicio} ate={periodo?.fim} fonte={periodo
+    ? `Mercado Livre · ${periodo.inicio.split("-").reverse().join("/")} a ${periodo.fim.split("-").reverse().join("/")} · dias completos UTC${resumo.error || diario.error ? " · leitura indisponível" : ""}${visitas.nota}`
     : "Mercado Livre · sem leitura de faturamento e publicidade no mesmo período"} />;
 }
