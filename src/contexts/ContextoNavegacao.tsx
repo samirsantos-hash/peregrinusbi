@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 export interface ContextoNavegacao {
   periodo: { inicio: string; fim: string };
@@ -33,6 +33,7 @@ function parsePeriodo(raw: string | null) {
 export function ContextoNavegacaoProvider({ children }: { children: React.ReactNode }) {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const periodo = useMemo(() => parsePeriodo(params.get("periodo")), [params]);
   const programaId = params.get("programa");
@@ -68,8 +69,23 @@ export function ContextoNavegacaoProvider({ children }: { children: React.ReactN
       }
       const qs = merged.toString();
       navigate(qs ? `${caminho}?${qs}` : caminho);
+      // Only explicit entry into a store/listing analysis; never emit IDs or URLs.
+      const analysisLevel = /^\/lojas\/[^/]+\/?$/.test(caminho)
+        ? "store"
+        : /^\/lojas\/[^/]+\/anuncios\/[^/]+\/?$/.test(caminho)
+          ? "listing"
+          : null;
+      if (analysisLevel && caminho.replace(/\/$/, "") !== pathname.replace(/\/$/, "")) {
+        window.__lovableEvents?.track?.("project.seller_analysis_opened", {
+          analysis_level: analysisLevel,
+          source: /^\/(carteira|grupos)(\/|$)/.test(pathname)
+            ? "portfolio"
+            : pathname.startsWith("/lojas/") ? "seller_analysis" : "dashboard",
+          seller_scope: "single_store",
+        });
+      }
     },
-    [navigate, params],
+    [navigate, params, pathname],
   );
 
   const api: Api = {

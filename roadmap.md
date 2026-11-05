@@ -1,5 +1,9 @@
 # Roadmap
 
+## Aberturas de análises (05/11)
+- [x] Registrado project.seller_analysis_opened nas navegações existentes de loja/anúncio e seleção de loja real no painel; nível, origem e escopo único, sem nomes/IDs/URLs. Filtros, retorno à carteira e renderizações não contam.
+- [x] Catálogo validado (1 evento); 7 testes aprovados. AUTOPECASLONDRINA aberta na sessão master, um evento conferido com coletor substituto local; não comprova ingestão publicada. Navegação de anúncios validada em teste de componente. Build OK. k6 prévio: 100 usuários, 2.202 requisições, zero falhas, p95 público 117,47 ms, sem painel autenticado.
+
 ## Produtos e busca de loja (05/11)
 - [x] Anúncios com largura ampliada, imagens e fontes maiores, divisórias e busca por nome/ID nas contas autorizadas; tabela de produtos com acabamento equivalente, sem alterar consultas ou permissões.
 - [x] Build OK; sessão master buscou AUTOPECASLONDRINA por nome (50 anúncios), MERCALANI por ID e trocou a loja; busca sem resultado conferida, computador/celular sem erros ou transbordamento. k6 prévio: 100 usuários, 2.231 requisições, zero falhas e p95 público 74,61 ms; não mede painel autenticado.

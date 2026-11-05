@@ -188,7 +188,14 @@ const Index = () => {
   const handleSellerChange = useCallback((id: string) => {
     setSelectedSeller(id);
     setDateRange(undefined); // Reset → will be re-anchored by effect below
-  }, []);
+    if (id && id !== selectedSeller && hasRealData && sellers.some((seller) => seller.id === id)) {
+      window.__lovableEvents?.track?.("project.seller_analysis_opened", {
+        analysis_level: "store",
+        source: "dashboard",
+        seller_scope: "single_store",
+      });
+    }
+  }, [selectedSeller, hasRealData, sellers]);
 
   // Persist selected seller globally so other pages (e.g. Projeção de Crescimento) can sync
   useEffect(() => {

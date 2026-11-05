@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "events": {
+    "project.seller_analysis_opened": {
+      "event_schema_version": 1,
+      "description": "A user explicitly opens a single-store or listing analysis from portfolio or dashboard navigation, including selecting a real store in the dashboard. No names, IDs or URLs are collected.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "analysis_level",
+          "source",
+          "seller_scope"
+        ],
+        "properties": {
+          "analysis_level": {
+            "type": "string",
+            "enum": [
+              "store",
+              "listing"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "portfolio",
+              "dashboard",
+              "seller_analysis"
+            ]
+          },
+          "seller_scope": {
+            "type": "string",
+            "enum": [
+              "single_store"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
