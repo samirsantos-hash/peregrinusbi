@@ -4,7 +4,7 @@
 - [x] Preservada Home aprovada, retirado “Acesso ao Painel” e refinados pesos DM Sans da marca; campos e reação do botão intactos.
 - [x] Ambiente verde contínuo com chuva diagonal local e fumaça; chuva adicional do HTML apenas no carregamento; vidro transmite o verde por transparência e degradê de tokens.
 - [x] Acesso e painel com sessão de Samir conferidos em desktop e celular, sem erros nem excesso horizontal; 2 testes passaram e build OK. k6 público prévio: 28.399 requisições, zero falhas (não mede painel autenticado). Não publicado.
-- [ ] Replicar E comercial: aguarda desenho que Samir informou que reenviará.
+- [x] Aplicado E comercial original enviado em image-148.png na marca da Home e no ícone da aba, preservando falcão e nome. Imagem sem fundo conferida em desktop/mobile, sem erros e build OK; teste público prévio passou. Sem publicar.
 
 ## Identidade do HTML nos detalhes (05/11)
 - [x] Incorporadas as orientações Extract HTML Design System v2: catálogo design-system.html já presente no ZIP; referência comparada visualmente. Reutilizados padrões de navegação (12px), busca (8px), linhas sutis e cartões internos; retirado brilho excessivo e blur por célula. Mantidos DM Sans, vidro e identidade Peregrinus; não substituir por textos de demonstração. Dez testes passaram, incluindo chuva apenas enquanto carrega.

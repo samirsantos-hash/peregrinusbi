@@ -1098,7 +1098,8 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   text-wrap: balance;
   -webkit-font-smoothing: antialiased;
 }
-.auth-title .auth-brand-prefix { font-weight: 500; }
+.auth-title .auth-brand-prefix { display: inline-flex; align-items: center; gap: 2px; font-weight: 500; }
+.auth-brand-e { width: 22px; height: 29px; object-fit: contain; }
 .auth-title .auth-brand-name { font-weight: 300; }
 .auth-subtitle {
   font-size: 13px;
