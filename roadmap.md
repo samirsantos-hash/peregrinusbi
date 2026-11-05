@@ -1,5 +1,9 @@
 # Roadmap
 
+## Busca de loja na Publicidade (05/11)
+- [x] Seletor da Publicidade reutiliza a busca existente por nome ou Cust ID, somente nas contas já autorizadas, preservando a troca de conta e as consultas.
+- [x] Sessão master: nome, Cust ID, troca para MERCALANI, ausência de resultado e celular 390px conferidos; zero erros de página. k6 público prévio: 100 usuários, 2.200 requisições, zero falhas, p95 127,18 ms; não mede painel autenticado.
+
 ## Recomendações abertas (05/11)
 - [x] Instrumentada a abertura dos diagnósticos por anúncio no controle existente, com categoria e contexto, sem IDs ou textos privados; fechamento e itens sem diagnóstico não contam.
 - [x] Seis controles existentes cobertos: desempenho/planos por anúncio, planos por segmento, pilares de qualidade, plano de ação e retenção da carteira. Riscos sem detalhe e links genéricos não contam; Full legado não é montado em tela e não foi alterado.

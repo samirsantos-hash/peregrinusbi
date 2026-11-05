@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader } from "@/components/ds";
 import { DialogoPrevia } from "@/components/ml/acoes/DialogoPrevia";
@@ -148,14 +148,7 @@ export default function Publicidade() {
           acoes={
             <div className="flex flex-wrap items-center gap-2">
               {(contas.data?.length ?? 0) > 1 && (
-                <Select value={contaId} onValueChange={(v) => mudar({ conta: v })}>
-                  <SelectTrigger className="w-56 h-9"><SelectValue placeholder="Conta" /></SelectTrigger>
-                  <SelectContent>
-                    {contas.data!.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.nickname ?? c.ml_user_id} · {c.site_id}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <BuscarLojaMl contas={contas.data ?? []} value={contaId} onChange={(v) => mudar({ conta: v })} />
               )}
               {contaId && (
                 <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
