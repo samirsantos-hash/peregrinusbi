@@ -1,5 +1,8 @@
 # Roadmap
 
+## Ajuste da leitura da carteira — 05/11 às 21:08
+- [x] Faixas de cinco cartões preenchem a largura no computador; valores indivisíveis em Geist, comparações com quebra segura e vidro verde translúcido na leitura, sem alterar dados ou Home. Sessão real conferida em 1143px, 1605px e 390px: valores completos, sem excesso horizontal nem erros; 8 testes passaram e build OK. k6 público prévio: 28.403 requisições, zero falhas, p95 74,23ms (não mede painel logado). Somente teste.
+
 ## Reprodução fiel do HTML — 05/11 às 20:56
 - [x] Aplicados fonte Geist local da referência, materiais Ledger, contornos, medidas e seleção neutra ao painel protegido; Home e dados preservados. Parâmetros centralizados nos tokens de src/index.css.
 - [x] AUTOPECASLONDRINA autenticada: resumo com valores e reputação em 1280px/536px, sem erro ou excesso horizontal; Home com estilos idênticos, 8 regressões passaram e build OK. Teste público prévio: 28.446 requisições, zero falhas, p95 77,83ms; não mede painel logado. Somente teste. Estrutura funcional, marca e animação ambiental local preservadas, não substituídas pela página demonstrativa do HTML.

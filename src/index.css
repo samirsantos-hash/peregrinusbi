@@ -2445,6 +2445,33 @@ html body .peregrinus-panel.peregrinus-panel :is(.ds-numero-focal,.ds-numero-sec
 html body:has(.peregrinus-panel) [data-ui-surface].listing-detail-sheet { border-radius: 0 !important; }
 html body:has(.peregrinus-panel) .listing-detail-sheet h2 { font-size: 24px; line-height: 32px; font-weight: 300; }
 html body .peregrinus-panel.peregrinus-panel :is(input,textarea,select,button[role="combobox"]) { border-radius: 8px; backdrop-filter: none; }
+/* Portfolio rows fill the available tracks; numeric values remain indivisible. */
+html body .peregrinus-panel .carteira-leitura {
+  --carteira-glass: linear-gradient(125deg, hsl(var(--panel-white) / .035), hsl(var(--panel-brand) / .045) 55%, hsl(var(--panel-white) / .015));
+  --carteira-edge: hsl(var(--panel-white) / .08);
+  background: var(--carteira-glass);
+  border-block: 1px solid var(--carteira-edge);
+  font-family: "Geist Reference", sans-serif;
+  min-width: 0;
+}
+html.light body .peregrinus-panel .carteira-leitura {
+  --carteira-glass: linear-gradient(125deg, hsl(var(--panel-white) / .6), hsl(var(--panel-brand) / .035));
+  --carteira-edge: hsl(var(--panel-black) / .08);
+}
+html body .peregrinus-panel.peregrinus-panel .carteira-kpi {
+  background: var(--carteira-glass) !important;
+  border-color: var(--carteira-edge) !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  container-type: inline-size;
+}
+html body .peregrinus-panel .carteira-kpi .carteira-kpi-valor {
+  font-size: clamp(16px, 14cqi, 22px);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  font-variant-numeric: tabular-nums;
+}
 @container (max-width: 200px) {
   html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor { font-size: 28px !important; line-height: 36px; }
 }

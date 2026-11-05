@@ -70,7 +70,7 @@ export default function CarteiraNaSecao({ secao }: { secao: SecaoCarteira }) {
   );
 
   return (
-    <section className="space-y-4 rounded-lg border border-border/50 bg-card/30 p-4">
+    <section className="carteira-leitura space-y-4 p-4">
       {titulo}
       {/* Visão geral unificada: volume (ex-Faturamento) + carteira (ex-Resumo) numa faixa */}
       {secao === "efficiency" && kpis({ volume: true, carteira: true, alavancasVisiveis: [] })}

@@ -21,10 +21,10 @@ interface Linha { rotulo: string; valor: string; delta: number | null; ano: stri
 
 function Card({ l }: { l: Linha }) {
   return (
-    <div className="rounded-lg border border-border/50 bg-card/60 p-3 min-w-0">
+    <div className="carteira-kpi rounded-lg border border-border/50 bg-card/60 p-3 min-w-0">
       <p className="text-[11px] text-muted-foreground">{l.rotulo}</p>
-      <p className="text-lg font-semibold tabular-nums leading-tight mt-0.5">{l.valor}</p>
-      <div className="flex items-center justify-between gap-2 text-[11px] mt-1">
+      <p className="carteira-kpi-valor text-lg font-semibold tabular-nums leading-tight mt-0.5">{l.valor}</p>
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[11px] mt-1">
         <Delta v={l.delta} />
         <span className="text-muted-foreground tabular-nums truncate">ano ant. {l.ano}</span>
       </div>
@@ -42,7 +42,7 @@ function Bloco({ titulo, linhas }: { titulo: string; linhas: Linha[] }) {
   return (
     <section>
       <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{titulo}</h2>
-      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
+      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {linhas.map((l) => <Card key={l.rotulo} l={l} />)}
       </div>
     </section>
