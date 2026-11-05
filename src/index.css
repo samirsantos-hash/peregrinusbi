@@ -2331,3 +2331,127 @@ html body .peregrinus-panel .sinergia-operacional td {
 body:has(.peregrinus-panel) .chuva-painel { background: transparent; opacity: .45; }
 body:has(.peregrinus-panel) .chuva-painel .cadence-rain-bg__fade { display: none; }
 @media (prefers-reduced-motion: reduce) { .painel-ambiente-fumaca { animation: none; } }
+
+/* Peregrinus_html_final.zip: canonical Ledger specimens. Panel only. */
+@font-face {
+  font-family: "Geist Reference";
+  src: url("./assets/fonts/geist-reference.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+html body:has(.peregrinus-panel) {
+  --panel-canvas: 0 0% 0%;
+  --panel-surface: 225 17% 5%; /* #0A0B0E */
+  --panel-raised: 228 12% 8%; /* #121317 */
+  --panel-text: 0 0% 100%;
+  --panel-text-secondary: 0 0% 64%;
+  --panel-brand: 160 84% 39%;
+  --panel-action: 161 94% 30%;
+  --panel-positive: 158 64% 52%;
+  --panel-line: 0 0% 20%;
+  --panel-card-radius: 16px;
+  --panel-control-radius: 8px;
+  --panel-radius: 16px;
+  --panel-fill: hsl(var(--panel-raised) / .9);
+  --panel-fill-hover: var(--panel-fill);
+  --panel-fill-nested: hsl(var(--panel-white) / .02);
+  --panel-stroke: hsl(var(--panel-white) / .05);
+  --panel-stroke-hover: hsl(var(--panel-white) / .1);
+  --panel-divider: hsl(var(--panel-white) / .05);
+  --panel-backdrop: blur(20px) saturate(110%);
+  --panel-nav-fill: hsl(var(--panel-surface) / .9);
+  --panel-shadow: 0 25px 50px -12px hsl(var(--panel-black) / .6);
+  --panel-hover-shadow: var(--panel-shadow);
+  --panel-active-fill: hsl(var(--panel-white) / .07);
+  --panel-active-edge: hsl(var(--panel-white) / .08);
+  --panel-tooltip: hsl(var(--panel-raised) / .98);
+  --panel-environment-fill: linear-gradient(125deg, hsl(var(--panel-black)) 8%, hsl(var(--panel-action) / .12) 45%, hsl(var(--panel-black)) 85%);
+  --panel-environment-mist: linear-gradient(118deg, transparent 20%, hsl(var(--panel-brand) / .1) 38%, transparent 58%);
+  --panel-rain-color: hsl(var(--panel-positive) / .25);
+  background: hsl(var(--panel-canvas));
+}
+html.light body:has(.peregrinus-panel) {
+  --panel-canvas: 0 0% 98%;
+  --panel-surface: 0 0% 100%;
+  --panel-raised: 0 0% 96%;
+  --panel-text: 0 0% 8%;
+  --panel-text-secondary: 0 0% 38%;
+  --panel-positive: 161 94% 30%;
+  --panel-fill: hsl(var(--panel-white) / .6);
+  --panel-nav-fill: hsl(var(--panel-white) / .85);
+  --panel-fill-nested: hsl(var(--panel-black) / .02);
+  --panel-stroke: hsl(var(--panel-black) / .08);
+  --panel-stroke-hover: hsl(var(--panel-black) / .15);
+  --panel-divider: hsl(var(--panel-black) / .06);
+  --panel-active-fill: hsl(var(--panel-black) / .05);
+  --panel-active-edge: hsl(var(--panel-black) / .08);
+  --panel-tooltip: hsl(var(--panel-white) / .98);
+  --panel-shadow: 0 25px 50px -12px hsl(var(--panel-black) / .08);
+  --panel-environment-fill: linear-gradient(125deg, hsl(var(--panel-canvas)), hsl(var(--panel-brand) / .06), hsl(var(--panel-canvas)));
+}
+html body .peregrinus-panel.peregrinus-panel,
+html body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"],[data-radix-popper-content-wrapper]) {
+  font-family: "Geist Reference", sans-serif;
+  --panel-type-page-title: 24px;
+  --panel-type-page-leading: 32px;
+  --panel-type-section-title: 20px;
+  --panel-type-section-leading: 28px;
+  --panel-type-body: 14px;
+  --panel-type-label: 12px;
+  --panel-type-nav: 14px;
+  --panel-type-number: 36px;
+  --panel-type-number-small: 30px;
+  --panel-type-summary-number: 36px;
+  --panel-type-summary-number-small: 30px;
+  --panel-type-summary-number-compact: 24px;
+}
+html body .peregrinus-panel.peregrinus-panel .panel-section-header {
+  font-family: inherit;
+  --panel-type-page-title: 24px;
+  --panel-type-page-leading: 32px;
+  --panel-type-body: 14px;
+  --panel-type-body-leading: 24px;
+  --panel-type-label: 12px;
+}
+html body .peregrinus-panel.peregrinus-panel :is(.panel-section-title,.ds-titulo-pagina) { font-weight: 600; }
+html body .peregrinus-panel.peregrinus-panel .panel-container { max-width: 1400px; padding: 16px 48px 32px; }
+html body .peregrinus-panel.peregrinus-panel .panel-topbar { border-radius: 9999px; padding: 16px 24px; }
+html body .peregrinus-panel.peregrinus-panel .panel-sidebar { width: 224px; border-radius: 24px; border-color: hsl(var(--panel-white) / .1); }
+html body .peregrinus-panel.peregrinus-panel .panel-sidebar.w-\[64px\] { width: 64px; }
+html body .peregrinus-panel.peregrinus-panel .panel-sidebar nav > div:first-child { padding: 20px 12px; }
+html body .peregrinus-panel.peregrinus-panel .panel-sidebar nav > div:first-child > div > p {
+  font-size: 11px; line-height: 1.4; font-weight: 600; text-transform: uppercase; margin-bottom: 10px;
+}
+html body .peregrinus-panel.peregrinus-panel .panel-nav-item { font-size: 14px; gap: 12px; border-radius: 12px; }
+html body .peregrinus-panel.peregrinus-panel .panel-sidebar button[aria-current="page"],
+html body .peregrinus-panel.peregrinus-panel .panel-nav-item[aria-expanded="true"],
+html body:has(.peregrinus-panel) .painel-navigation button[aria-current="page"] {
+  background: var(--panel-active-fill) !important; color: hsl(var(--panel-text)) !important;
+  border: 1px solid var(--panel-active-edge);
+}
+html body .peregrinus-panel.peregrinus-panel .panel-sidebar button:hover { background: hsl(var(--panel-white) / .05); color: hsl(var(--panel-text)); }
+html body .peregrinus-panel.peregrinus-panel .panel-content { padding: 8px 0 32px; }
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro.noite-vidro {
+  border-radius: 16px !important; align-items: flex-start; text-align: left; padding: 24px; gap: 12px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro > div { align-items: flex-start; }
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes { align-items: flex-start !important; }
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor {
+  font-size: var(--panel-type-summary-number) !important; font-weight: 600; line-height: 40px;
+}
+html body .peregrinus-panel.peregrinus-panel :is(.ds-numero-focal,.ds-numero-sec,.metric-value) { font-weight: 600; }
+html body:has(.peregrinus-panel) [data-ui-surface].listing-detail-sheet { border-radius: 0 !important; }
+html body:has(.peregrinus-panel) .listing-detail-sheet h2 { font-size: 24px; line-height: 32px; font-weight: 300; }
+html body .peregrinus-panel.peregrinus-panel :is(input,textarea,select,button[role="combobox"]) { border-radius: 8px; backdrop-filter: none; }
+@container (max-width: 200px) {
+  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor { font-size: 28px !important; line-height: 36px; }
+}
+@media (max-width: 1023px) {
+  html body .peregrinus-panel.peregrinus-panel .panel-container { padding-inline: 32px; }
+}
+@media (max-width: 639px) {
+  html body .peregrinus-panel.peregrinus-panel .panel-container { padding-inline: 16px; }
+  html body .peregrinus-panel.peregrinus-panel .panel-topbar { border-radius: 24px; padding: 16px; }
+}

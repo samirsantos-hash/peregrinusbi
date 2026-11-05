@@ -1,5 +1,9 @@
 # Roadmap
 
+## Reprodução fiel do HTML — 05/11 às 20:56
+- [x] Aplicados fonte Geist local da referência, materiais Ledger, contornos, medidas e seleção neutra ao painel protegido; Home e dados preservados. Parâmetros centralizados nos tokens de src/index.css.
+- [x] AUTOPECASLONDRINA autenticada: resumo com valores e reputação em 1280px/536px, sem erro ou excesso horizontal; Home com estilos idênticos, 8 regressões passaram e build OK. Teste público prévio: 28.446 requisições, zero falhas, p95 77,83ms; não mede painel logado. Somente teste. Estrutura funcional, marca e animação ambiental local preservadas, não substituídas pela página demonstrativa do HTML.
+
 ## Ambiente e marca — esclarecimento (05/11 às 19:55)
 - [x] Preservada Home aprovada, retirado “Acesso ao Painel” e refinados pesos DM Sans da marca; campos e reação do botão intactos.
 - [x] Ambiente verde contínuo com chuva diagonal local e fumaça; chuva adicional do HTML apenas no carregamento; vidro transmite o verde por transparência e degradê de tokens.
