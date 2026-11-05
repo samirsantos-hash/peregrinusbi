@@ -46,7 +46,7 @@ const Auth = () => {
           <div className="w-24 h-24 mx-auto flex items-center justify-center">
             <img alt="Ecom Peregrinus" className="w-full h-full object-contain brightness-0 dark:invert" src={logoAuth} fetchPriority="high" decoding="async" width={128} height={128} />
           </div>
-          <h1 className="auth-title">Ecom Peregrinus <span className="block">Acesso ao Painel</span></h1>
+          <h1 className="auth-title"><span className="auth-brand-prefix">Ecom</span> <span className="auth-brand-name">Peregrinus</span></h1>
           <p className="auth-subtitle text-muted-foreground">Entre com suas credenciais</p>
         </div>
 

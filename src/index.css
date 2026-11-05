@@ -1098,7 +1098,8 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   text-wrap: balance;
   -webkit-font-smoothing: antialiased;
 }
-.auth-title span { margin-top: 4px; }
+.auth-title .auth-brand-prefix { font-weight: 500; }
+.auth-title .auth-brand-name { font-weight: 300; }
 .auth-subtitle {
   font-size: 13px;
   font-weight: 400;
@@ -1985,7 +1986,7 @@ html body .peregrinus-panel .recharts-default-tooltip { background: var(--panel-
 html:not(.dark) .chuva-painel { display: none; }
 html.dark body .peregrinus-panel { background-color: transparent !important; }
 html.dark body:has(.chuva-painel) { background-color: #050505; }
-html.dark .peregrinus-panel > :not(.chuva-painel) { position: relative; z-index: 1; }
+html.dark .peregrinus-panel > :not(.chuva-painel):not(.painel-ambiente) { position: relative; z-index: 1; }
 
 /* Reference typography: clean strokes and stable, container-sized numbers. */
 .peregrinus-panel {
@@ -2127,19 +2128,28 @@ html body .peregrinus-panel .resumo-visual-ref > :is(section, div) > header h3 {
 /* Apple Design: panel-only materials and interaction hierarchy. Home is untouched. */
 body:has(.peregrinus-panel) {
   --panel-backdrop: blur(24px) saturate(150%);
-  --panel-fill: linear-gradient(165deg, hsl(var(--panel-white) / .035), hsl(var(--panel-white) / .015)), hsl(var(--panel-surface) / .4);
+  --panel-environment-deep: 157 52% 7%;
+  --panel-environment-mid: 156 55% 13%;
+  --panel-environment-glow: 156 62% 24%;
+  --panel-rain-color: hsl(var(--panel-positive) / .65);
+  --panel-environment-fill: linear-gradient(125deg, hsl(var(--panel-environment-deep)), hsl(var(--panel-environment-mid)) 48%, hsl(var(--panel-environment-deep)) 100%);
+  --panel-environment-mist: linear-gradient(118deg, transparent 5%, hsl(var(--panel-environment-glow) / .5) 32%, transparent 55%, hsl(var(--panel-brand) / .14) 76%, transparent 95%);
+  --panel-fill: linear-gradient(145deg, hsl(var(--panel-brand) / .12), hsl(var(--panel-white) / .035) 44%, hsl(var(--panel-environment-glow) / .1)), hsl(var(--panel-environment-deep) / .18);
   --panel-fill-hover: var(--panel-fill);
   --panel-stroke: hsl(var(--panel-white) / .08);
   --panel-stroke-hover: hsl(var(--panel-positive) / .22);
   --panel-shadow: inset 0 1px 0 hsl(var(--panel-white) / .08), 0 4px 24px hsl(var(--panel-black) / .2);
   --panel-hover-shadow: var(--panel-shadow);
-  --panel-nav-fill: linear-gradient(165deg, hsl(var(--panel-white) / .045), hsl(var(--panel-white) / .015)), hsl(var(--panel-surface) / .58);
+  --panel-nav-fill: linear-gradient(155deg, hsl(var(--panel-brand) / .1), hsl(var(--panel-white) / .03)), hsl(var(--panel-environment-deep) / .6);
   --panel-tooltip: hsl(var(--panel-surface) / .9);
   --panel-scrim: hsl(var(--panel-black) / .48);
   --panel-motion-press: 100ms;
   --panel-motion-surface: 240ms;
 }
 html.light body:has(.peregrinus-panel) {
+  --panel-environment-fill: linear-gradient(125deg, hsl(var(--panel-canvas)), hsl(var(--panel-brand) / .08), hsl(var(--panel-canvas)));
+  --panel-environment-mist: linear-gradient(118deg, transparent, hsl(var(--panel-white) / .55) 35%, transparent 65%, hsl(var(--panel-brand) / .06));
+  --panel-rain-color: hsl(var(--panel-action) / .3);
   --panel-fill: linear-gradient(155deg, hsl(var(--panel-white) / .6), hsl(var(--panel-white) / .24) 52%, hsl(var(--panel-white) / .38));
   --panel-fill-hover: var(--panel-fill);
   --panel-stroke: hsl(var(--panel-white) / .78);
@@ -2295,3 +2305,28 @@ html body .peregrinus-panel .sinergia-operacional td {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
+
+/* Camada original constante, separada do efeito adicional de carregamento. */
+.painel-ambiente {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--panel-environment-fill);
+}
+.painel-ambiente-fumaca {
+  position: absolute;
+  inset: -15%;
+  background: var(--panel-environment-mist);
+  filter: blur(48px);
+  animation: painel-fumaca 24s ease-in-out infinite alternate;
+}
+.painel-ambiente-chuva { position: absolute; inset: 0; width: 100%; height: 100%; }
+@keyframes painel-fumaca {
+  from { transform: translate(-3%, 2%); opacity: .65; }
+  to { transform: translate(3%, -2%); opacity: 1; }
+}
+body:has(.peregrinus-panel) .chuva-painel { background: transparent; opacity: .45; }
+body:has(.peregrinus-panel) .chuva-painel .cadence-rain-bg__fade { display: none; }
+@media (prefers-reduced-motion: reduce) { .painel-ambiente-fumaca { animation: none; } }

@@ -1,9 +1,15 @@
 # Roadmap
 
+## Ambiente e marca — esclarecimento (05/11 às 19:55)
+- [x] Preservada Home aprovada, retirado “Acesso ao Painel” e refinados pesos DM Sans da marca; campos e reação do botão intactos.
+- [x] Ambiente verde contínuo com chuva diagonal local e fumaça; chuva adicional do HTML apenas no carregamento; vidro transmite o verde por transparência e degradê de tokens.
+- [x] Acesso e painel com sessão de Samir conferidos em desktop e celular, sem erros nem excesso horizontal; 2 testes passaram e build OK. k6 público prévio: 28.399 requisições, zero falhas (não mede painel autenticado). Não publicado.
+- [ ] Replicar E comercial: aguarda desenho que Samir informou que reenviará.
+
 ## Identidade do HTML nos detalhes (05/11)
 - [x] Incorporadas as orientações Extract HTML Design System v2: catálogo design-system.html já presente no ZIP; referência comparada visualmente. Reutilizados padrões de navegação (12px), busca (8px), linhas sutis e cartões internos; retirado brilho excessivo e blur por célula. Mantidos DM Sans, vidro e identidade Peregrinus; não substituir por textos de demonstração. Dez testes passaram, incluindo chuva apenas enquanto carrega.
 - [x] Identidade Ledger do HTML (linhas finas, rótulos em caixa alta com traço, títulos leves, brilho verde) nas laterais de promoções e melhorias, mantendo DM Sans e verde da marca. Corrigidos: códigos crus do ML, percentuais com ponto, nível em espanhol, pendências repetidas e cor âmbar fora da paleta.
-- [x] Chuva verde só enquanto há dados carregando; some suavemente ao terminar.
+- [x] Chuva adicional do HTML só enquanto há dados carregando; esclarecimento posterior preserva ambiente original contínuo.
 
 ## Sinais de promoções na lista (05/11)
 - [x] Coluna Promoções: X vermelho sem participação; um check verde sem fundo por promoção ativa ou programada (convites não contam). AUTOPECASLONDRINA: 14 sem e 36 com promoções nos 50 primeiros.

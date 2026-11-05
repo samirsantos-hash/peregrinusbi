@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useIsFetching } from "@tanstack/react-query";
+import { AmbientePainel } from "./AmbientePainel";
 import "./cadence-rain.css";
 import "./rainShaders.js";
 import "./rain.js";
@@ -9,7 +10,7 @@ declare global {
   interface Window { AsimovRain?: { mount(el: HTMLElement): RainApi } }
 }
 
-/** Chuva de luz só enquanto o painel carrega dados; com tudo carregado o fundo fica sem chuva. */
+/** Ambiente permanente; apenas a chuva adicional do HTML depende das consultas. */
 export function ChuvaPainel() {
   const carregando = useIsFetching() > 0;
   const [visivel, setVisivel] = useState(carregando);
@@ -18,8 +19,7 @@ export function ChuvaPainel() {
     const t = setTimeout(() => setVisivel(false), 600);
     return () => clearTimeout(t);
   }, [carregando]);
-  if (!visivel) return null;
-  return <ChuvaAtiva saindo={!carregando} />;
+  return <><AmbientePainel />{visivel && <ChuvaAtiva saindo={!carregando} />}</>;
 }
 
 function ChuvaAtiva({ saindo }: { saindo: boolean }) {
