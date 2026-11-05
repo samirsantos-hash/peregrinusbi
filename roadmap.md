@@ -2,7 +2,7 @@
 
 ## Trocas de loja (05/11)
 - [x] Evento project.seller_selection_changed nos controles existentes: origem e escopo, sem identificadores privados; mesma loja e troca de anúncio na mesma loja não contam.
-- [ ] Validar catálogo, testes e troca de loja no painel autenticado.
+- [x] Catálogo validado (2 eventos), 9 testes e build OK. Sessão master abriu AUTOPECASLONDRINA e voltou à carteira: dois eventos com origem/escopo conferidos em coletor substituto local; não comprova ingestão publicada. Repetição no controle do painel não concluída no navegador; mesma seleção e anúncio da mesma loja cobertos nos testes de navegação.
 - [x] k6 público prévio: 1.000 usuários, 28.310 requisições, zero falhas, p95 110,51 ms; não mede painel autenticado.
 
 ## Aberturas de análises (05/11)
