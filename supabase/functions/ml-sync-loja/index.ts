@@ -1,5 +1,6 @@
 import { exigirPermissao, segredoRotina } from '../_shared/permissoes.ts';
 import { tokenAtual } from "../_shared/mlTokenAtual.ts";
+import { mixEnvios } from './envios.ts';
 // ml-sync-loja
 // Busca no Mercado Livre, com o token da própria loja conectada, os dados de cada
 // tema (reputação, anúncios, vendas, visitas, envios, perguntas, promoções, Ads)
@@ -83,12 +84,17 @@ Deno.serve(async (req) => {
   }
   const uid = String(conta.ml_user_id);
   const cust = uid;
+  const accessToken = tok.access_token;
+  const accountId = conta.id;
+  const soEnvios = body.tema === 'envios';
 
-  async function get(path: string, extra: Record<string, string> = {}) {
+  async function get(path: string, extra: Record<string, string> = {}, deadline = Infinity) {
     for (let t = 0; t < 3; t++) {
+      const restante = Math.min(20_000, deadline - Date.now());
+      if (restante <= 0) throw new Error('Prazo de consulta encerrado.');
       const r = await fetch(API + path, {
-        headers: { Authorization: `Bearer ${tok!.access_token}`, ...extra },
-        signal: AbortSignal.timeout(20_000),
+        headers: { Authorization: `Bearer ${accessToken}`, ...extra },
+        signal: AbortSignal.timeout(restante),
       });
       if (r.status === 429) { await espera(1500 * (t + 1)); continue; }
       const j = await r.json().catch(() => ({}));
@@ -98,9 +104,11 @@ Deno.serve(async (req) => {
     throw new Error("limite de consultas do ML; tente de novo");
   }
   async function salvar(tema: string, fn: () => Promise<unknown>) {
+    if (soEnvios && tema !== 'envios' && tema !== 'vendas') return { tema, ignorado: true };
     let dados: unknown = null, erro: string | null = null;
     try { dados = await fn(); } catch (e) { erro = String((e as Error).message ?? e).replace(/https?:\/\/\S+/g, "").replace(/APP_USR-\S+/g, "").slice(0, 200); }
-    await db.from("ml_sync_tema").upsert({ account_id: conta!.id, cust_id: cust, tema, dados, erro, atualizado_em: new Date().toISOString() });
+    if (soEnvios && tema === 'vendas') return { tema, ok: !erro, erro };
+    await db.from("ml_sync_tema").upsert({ account_id: accountId, cust_id: cust, tema, dados, erro, atualizado_em: new Date().toISOString() });
     return { tema, ok: !erro, erro };
   }
 
@@ -156,11 +164,20 @@ Deno.serve(async (req) => {
 
   // 3. Vendas (30 dias) + 4. Envios por modalidade
   let pedidos: any[] = [];
+  let pedidosCompletos = false;
   res.push(await salvar("vendas", async () => {
+    let totalEsperado: number | null = null;
+    const vistos = new Set<string>();
     for (let off = 0; off < 5000; off += 50) {
       const s = await get(`/orders/search?seller=${uid}&order.date_created.from=${desde.toISOString()}&sort=date_desc&limit=50&offset=${off}`);
-      pedidos.push(...(s.results ?? []));
-      if ((s.results ?? []).length < 50) break;
+      if (!Number.isInteger(s.paging?.total) || (totalEsperado !== null && totalEsperado !== s.paging.total)) throw new Error('Cobertura de pedidos não confirmada.');
+      totalEsperado = s.paging.total;
+      for (const p of s.results ?? []) {
+        if (!p.id || vistos.has(String(p.id))) throw new Error('Paginação de pedidos incompleta.');
+        vistos.add(String(p.id)); pedidos.push(p);
+      }
+      if (pedidos.length === totalEsperado) { pedidosCompletos = true; break; }
+      if (!(s.results ?? []).length) break;
     }
     const porDia: Record<string, { faturamento: number; pedidos: number; cancelados: number; valor_cancelado: number }> = {};
     for (let d = new Date(desde); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { faturamento: 0, pedidos: 0, cancelados: 0, valor_cancelado: 0 };
@@ -184,15 +201,9 @@ Deno.serve(async (req) => {
   }));
 
   res.push(await salvar("envios", async () => {
-    const mix: Record<string, { pedidos: number; faturamento: number }> = {};
-    for (const p of pedidos) {
-      if (p.status === "cancelled") continue;
-      const item = p.order_items?.[0]?.item?.id;
-      const tipo = anuncioPorId.get(item)?.envio ?? "sem_info";
-      mix[tipo] ??= { pedidos: 0, faturamento: 0 };
-      mix[tipo].pedidos++; mix[tipo].faturamento += Number(p.total_amount) || 0;
-    }
-    return { mix, base: "pedidos dos últimos 30 dias pela modalidade do anúncio" };
+    if (!pedidosCompletos) throw new Error('Leitura de pedidos incompleta; mix de envios indisponível.');
+    const prazo = Date.now() + 45_000;
+    return mixEnvios(pedidos, uid, (id) => get(`/shipments/${id}`, { 'x-format-new': 'true' }, prazo), prazo);
   }));
 
   // 5. Visitas (30 dias)
@@ -270,6 +281,6 @@ Deno.serve(async (req) => {
     };
   }));
 
-  await db.from("ml_accounts").update({ last_sync_daily_at: new Date().toISOString() }).eq("id", conta.id);
+  if (!soEnvios) await db.from("ml_accounts").update({ last_sync_daily_at: new Date().toISOString() }).eq("id", conta.id);
   return json({ loja: conta.nickname, temas: res });
 });

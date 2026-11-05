@@ -60,9 +60,13 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
 
   const atualizar = async () => {
     setAtualizando(true);
-    const { error } = await supabase.functions.invoke("ml-sync-loja", { body: { cust_id: custId } });
+    const { data: resultado, error } = await supabase.functions.invoke("ml-sync-loja", { body: { cust_id: custId, ...(secao === 'logistica' ? { tema: 'envios' } : {}) } });
     setAtualizando(false);
     if (error) return toast.error("Não foi possível atualizar agora.");
+    if (secao === 'logistica' && resultado?.temas?.some((t: any) => t.tema === 'envios' && !t.ok)) {
+      qc.invalidateQueries({ queryKey: ["ml-sync-tema", custId] });
+      return toast.error('Não foi possível confirmar os envios dos pedidos agora.');
+    }
     toast.success("Dados do Mercado Livre atualizados.");
     qc.invalidateQueries({ queryKey: ["ml-sync-tema", custId] });
   };
@@ -247,7 +251,8 @@ function Logistica({ e }: { e: any }) {
   const total = linhas.reduce((s, [, v]) => s + v.faturamento, 0);
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted-foreground">Vendas dos últimos 30 dias por modalidade de envio · meta Full ≥ 40%</p>
+      <p className="text-xs text-muted-foreground">Vendas pagas dos últimos 30 dias por envio do pedido · meta Full ≥ 40%</p>
+      {e.cobertura && <p className="text-xs text-muted-foreground">Modal identificado em {num(e.cobertura.identificados)} de {num(e.cobertura.pedidos)} pedidos{!e.cobertura.completa ? ' · cobertura parcial' : ''}</p>}
       {linhas.map(([k, v]) => {
         const p = total ? v.faturamento / total : 0;
         return (

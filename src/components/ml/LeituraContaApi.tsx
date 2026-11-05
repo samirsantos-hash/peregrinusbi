@@ -167,6 +167,7 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
 
         <Bloco icone={Truck} titulo="Logística e mix">
           {mix.length ? (<>
+            {env?.cobertura && <p className="text-xs text-muted-foreground">Modal identificado em {num(env.cobertura.identificados)} de {num(env.cobertura.pedidos)} pedidos{!env.cobertura.completa ? ' · cobertura parcial' : ''}</p>}
             <Linha r="Participação Full (meta ≥ 40%)" v={pctFracao(partFull)} ruim={partFull != null && partFull < META_FULL} />
             <div className="space-y-2">
               {mix.map(([k, v]) => {

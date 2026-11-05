@@ -1,5 +1,10 @@
 # Roadmap
 
+## Modal real dos pedidos (05/11)
+- [x] Mix usa envios reais da API própria com cobertura explícita, consultas deduplicadas e limite de 45s/500 envios; não usa anúncio como prova. Coleta e ponto de coleta distintos; postagem em agência não é prova de Correios.
+- [x] 12 testes passaram, build OK e leitura implantada. AUTOPECASLONDRINA: 1.133 pedidos pagos, 362 identificados (313 Full, 49 Coleta), 771 não identificados nesta execução limitada; cobertura parcial confirmada na tela autenticada. k6 público prévio: 1.000 usuários, 28.357 requisições, zero falhas, p95 108,96 ms; não mede painel autenticado.
+- [ ] Identificar transportadora Correios: resposta/campo oficial de transportadora ainda não confirmado; não inferir pelo tipo drop_off.
+
 ## Busca de loja na Publicidade (05/11)
 - [x] Seletor da Publicidade reutiliza a busca existente por nome ou Cust ID, somente nas contas já autorizadas, preservando a troca de conta e as consultas.
 - [x] Sessão master: nome, Cust ID, troca para MERCALANI, ausência de resultado e celular 390px conferidos; zero erros de página. k6 público prévio: 100 usuários, 2.200 requisições, zero falhas, p95 127,18 ms; não mede painel autenticado.

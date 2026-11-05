@@ -281,6 +281,8 @@ Todas com RLS ligada. Só as funções (service role) gravam; o usuário autenti
 
 ### Fonte externa usada pelas telas
 
+`ml-sync-loja` aceita `{cust_id, tema: "envios"}` para atualizar apenas logística, com as mesmas permissões. Lê pedidos paginados (até 5.000, exige total exato), depois `/shipments/{shipping.id}` com `x-format-new: true`, token próprio e vendedor confirmado. Só pedidos `paid` em BRL entram no mix; não usa modalidade atual do anúncio. Consultas sequenciais até 500 envios únicos e 45s; falhas/ausências/prazo ficam em `sem_info`. `dados` de envios contém `mix`, `fonte: "shipments"`, `base` e `cobertura: {pedidos, identificados, nao_identificados, consultas, completa}`. Não retorna pedidos, IDs de pacotes nem dados do comprador. `cross_docking` = Coleta, `xd_drop_off` = Ponto de coleta; `drop_off` = Postagem em agência, sem afirmar Correios (transportadora não comprovada). Paginação incompleta grava erro do tema, nunca mix parcial de pedidos.
+
 | Tabela | Conteúdo | Leitura |
 |---|---|---|
 | `ml_sync_tema` | Resumo por tema da `ml-sync-loja`; `tema = vendas` traz `dados.faturamento_30d`, usado no TACOS e na meta de investimento | carteira (`allowed_cust_ids`) |
