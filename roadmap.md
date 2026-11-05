@@ -1,5 +1,9 @@
 # Roadmap
 
+## Alterações confirmadas nos anúncios (05/11)
+- [x] Medida cada confirmação com itens aplicados (status feito) em preço, publicidade e promoções, com quantidade; testes e esquema válidos.
+- [ ] Atribuir alterações às melhorias de IA: as melhorias só sugerem texto e não geram ação; impacto fica como comparação semanal antes/depois, não causalidade.
+
 ## Medição e publicação da árvore (05/11)
 - [x] Medidas abertura explícita de Resumo e mudanças nas subanálises de Reputação, Preço e Publicidade; contexto não sensível, sem IDs, com acesso de consultoria positivo validado (inclui masters/admins/gerentes; falso também pode indicar verificação pendente).
 - [x] Cinco eventos catalogados e esquema válido; 12 testes passaram, build OK e sessão master confirmou quatro eventos com coletor local substituto, sem erros. Não comprova ingestão publicada; não há ranking histórico destes eventos novos. k6 público: 28.356 requisições, zero falhas, p95 94,25ms; não mede painel logado. Segurança básica sem achados; análise profunda não executada. Publicação solicitada após salvar; visitas não representam consultores únicos.

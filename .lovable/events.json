@@ -47,6 +47,37 @@
         }
       }
     },
+    "project.listing_changes_confirmed": {
+      "event_schema_version": 1,
+      "description": "After explicit confirmation, Mercado Livre reports at least one listing change applied (status feito). applied_count excludes already-done, refused, conflict and unsent items. No account, listing or user identifiers.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "change_area",
+          "applied_count"
+        ],
+        "properties": {
+          "change_area": {
+            "type": "string",
+            "enum": [
+              "price",
+              "advertising",
+              "promotions"
+            ]
+          },
+          "applied_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          }
+        }
+      }
+    },
     "project.seller_analysis_opened": {
       "event_schema_version": 1,
       "description": "A user explicitly opens a single-store or listing analysis from portfolio or dashboard navigation, including selecting a real store in the dashboard. No names, IDs or URLs are collected.",

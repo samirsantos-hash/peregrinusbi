@@ -68,7 +68,15 @@ export function useAcaoEmLote(funcao: string, accountId: string, aoConcluir?: ()
     setEstado({ fase: "enviando", chave, linhas });
     try {
       const r = await chamarFuncaoMl<{ resultados: ResultadoLinha[] }>(funcao, { account_id: accountId, etapa: "confirmar", idempotency_key: chave });
-      setEstado({ fase: "resultado", linhas, resultados: r.resultados ?? [] });
+      const resultados = r.resultados ?? [];
+      const aplicadas = resultados.filter(x => x.status === "feito").length;
+      if (aplicadas > 0) {
+        window.__lovableEvents?.track?.("project.listing_changes_confirmed", {
+          change_area: funcao === "ml-price-action" ? "price" : funcao === "ml-ads-action" ? "advertising" : "promotions",
+          applied_count: aplicadas,
+        });
+      }
+      setEstado({ fase: "resultado", linhas, resultados });
       aoConcluir?.();
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Não foi possível enviar ao Mercado Livre.");
