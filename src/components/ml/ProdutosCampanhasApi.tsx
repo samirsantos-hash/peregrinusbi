@@ -31,15 +31,15 @@ export default function ProdutosCampanhasApi({ accountId }: { accountId: string 
     }
     return resultado;
   }});
-  return <section className="glass-card p-5 space-y-4" aria-label="Tabela de produtos Mercado Livre">
+  return <section className="w-full min-w-0 space-y-4 border-t border-border py-5" aria-label="Tabela de produtos Mercado Livre">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <div><h3 className="text-sm font-semibold uppercase">Tabela de produtos</h3><p className="text-xs text-muted-foreground">Mercado Livre · produtos sincronizados · campanhas elegíveis consultadas ao vivo</p></div>
+      <div><h3 className="text-lg font-semibold">Tabela de produtos</h3><p className="text-sm text-muted-foreground">Mercado Livre · produtos sincronizados · campanhas elegíveis consultadas ao vivo</p></div>
       <Button variant="outline" size="sm" disabled={lista.isFetching || campanhas.isFetching} onClick={async () => { await client.invalidateQueries({ queryKey: ['ml-campanhas-elegiveis-item', accountId] }); void lista.refetch(); void campanhas.refetch(); }}><RefreshCw className="mr-2 h-4 w-4" />Atualizar campanhas</Button>
     </div>
     {lista.isLoading ? <Skeleton className="h-60 w-full" /> : lista.error ? <p role="alert" className="text-sm text-destructive">{lista.error.message}</p> : <>
       <p className="text-xs text-muted-foreground">{num(lista.data?.itens.length ?? 0)} de {num(lista.data?.total ?? 0)} produtos</p>
-      <div className="overflow-x-auto"><table className="w-full text-xs tabular-nums"><thead className="text-left text-muted-foreground"><tr>{['Produto', 'Preço atual', 'Estoque atual', 'Campanhas elegíveis'].map(h => <th className="p-2" key={h}>{h}</th>)}</tr></thead>
-        <tbody className="divide-y divide-border">{lista.data?.itens.map(i => <tr key={i.item_id}>
+      <div className="overflow-x-auto rounded-lg border border-border"><table className="w-full text-sm tabular-nums [&_td]:p-3 [&_td+td]:border-l [&_td+td]:border-border"><thead className="text-left text-muted-foreground bg-muted/30"><tr>{['Produto', 'Preço atual', 'Estoque atual', 'Campanhas elegíveis'].map(h => <th className="p-3" key={h}>{h}</th>)}</tr></thead>
+        <tbody className="divide-y divide-border">{lista.data?.itens.map(i => <tr className="even:bg-muted/15 hover:bg-muted/30" key={i.item_id}>
           <td className="p-2 min-w-48 max-w-72"><div className="flex items-start gap-2"><a className="text-primary hover:underline" href={i.link || `https://produto.mercadolivre.com.br/${i.item_id.replace('MLB', 'MLB-')}`} target="_blank" rel="noopener noreferrer">{i.titulo || i.item_id}<span className="block text-muted-foreground">{i.item_id}</span></a><CopiarAnuncio itemId={i.item_id} titulo={i.titulo ?? undefined} /></div></td>
           <td className="p-2 whitespace-nowrap">{i.preco == null ? 'Sem dado' : brl(i.preco, true)}</td><td className="p-2">{i.estoque == null ? 'Sem dado' : num(i.estoque)}</td>
           <td className="p-2 min-w-64">{campanhas.isFetching ? <Skeleton className="h-8 w-full" /> : campanhas.data?.[i.item_id]?.erro ? <span className="text-destructive">{campanhas.data[i.item_id].erro}</span> : campanhas.data?.[i.item_id]?.lista.length ? <div className="space-y-2">{campanhas.data[i.item_id].lista.map((p, idx) => <div key={`${p.promotion_id}:${p.tipo}:${idx}`}><p className="font-medium">{p.nome || p.nome_tipo}</p><p className="text-muted-foreground">{p.promotion_id || 'Desconto individual'}{p.sugerido != null ? ` · preço sugerido ${brl(p.sugerido, true)}` : ''}{p.vendedor_pct != null ? ` · loja ${num(p.vendedor_pct)}%` : ''}{p.meli_pct != null ? ` · ML ${num(p.meli_pct)}%` : ''}</p></div>)}</div> : <span className="text-muted-foreground">{campanhas.data ? 'Nenhuma campanha elegível retornada' : 'Aguardando consulta'}</span>}</td>

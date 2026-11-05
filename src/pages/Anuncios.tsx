@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader } from "@/components/ds";
@@ -137,7 +137,7 @@ export default function Anuncios() {
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto max-w-6xl px-4 py-8 space-y-4">
+      <div className="mx-auto w-full max-w-[1760px] px-3 sm:px-5 xl:px-6 py-6 space-y-5">
         <Button variant="ghost" size="sm" className="gap-1.5 px-2" onClick={() => navigate("/")}>
           <ArrowLeft className="h-4 w-4" /> Painel
         </Button>
@@ -146,16 +146,7 @@ export default function Anuncios() {
           periodo={fonte}
           acoes={
             <div className="flex flex-wrap items-center gap-2">
-              {(contas.data?.length ?? 0) > 1 && (
-                <Select value={contaId} onValueChange={setContaId}>
-                  <SelectTrigger className="w-56 h-9"><SelectValue placeholder="Conta" /></SelectTrigger>
-                  <SelectContent>
-                    {contas.data!.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.nickname ?? c.ml_user_id} · {c.site_id}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
+              {!!contas.data?.length && <BuscarLojaMl contas={contas.data} value={contaId} onChange={setContaId} />}
               <Button size="sm" variant="outline" onClick={atualizar} disabled={!contaId || atualizando}>
                 <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${atualizando ? "animate-spin" : ""}`} />
                 {atualizando ? "Atualizando…" : "Atualizar"}
@@ -216,9 +207,9 @@ export default function Anuncios() {
               )}
 
               {resultados.data && resultados.data.length > 0 && (
-                <div className="overflow-x-auto border border-border [border-width:0.5px]">
-                  <table className="w-full text-xs tabular-nums">
-                    <thead className="text-muted-foreground text-left">
+                <div className="overflow-x-auto rounded-lg border border-border bg-card/30">
+                  <table className="w-full text-sm tabular-nums [&_th]:px-3 [&_th]:py-3 [&_td]:px-3 [&_td]:py-3 [&_td+td]:border-l [&_td+td]:border-border/60">
+                    <thead className="text-muted-foreground text-left bg-muted/30">
                       <tr className="border-b border-border">
                         <th className="py-2 px-2 w-6" />
                         <th className="py-2 pr-1 w-6" />
@@ -240,17 +231,17 @@ export default function Anuncios() {
                         const expandido = aberto === a.item_id;
                         return (
                           <Fragment key={a.item_id}>
-                            <tr className="border-t border-border align-top">
+                            <tr className="border-t border-border align-top even:bg-muted/15 hover:bg-muted/30">
                               <td className="py-2 px-2">
                                 {temVariacoes && (
-                                  <button
+                                  <Button variant="ghost" size="icon"
                                     type="button"
                                     onClick={() => setAberto(expandido ? null : a.item_id)}
                                     aria-label={expandido ? "Ocultar variações" : "Ver variações"}
                                     className="text-muted-foreground hover:text-primary"
                                   >
                                     {expandido ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                                  </button>
+                                  </Button>
                                 )}
                               </td>
                               <td className="py-2 pr-1">
@@ -258,7 +249,7 @@ export default function Anuncios() {
                               </td>
                               <td className="py-2 pr-2 min-w-[260px]">
                                 <div className="flex items-start gap-2">
-                                  {a.thumbnail && <img src={a.thumbnail} alt="" className="h-10 w-10 object-contain border border-border" />}
+                                  {a.thumbnail && <img src={a.thumbnail} alt="" className="h-14 w-14 shrink-0 rounded border border-border object-contain" />}
                                   <div className="min-w-0">
                                     <div className="flex items-center gap-1.5">
                                       {a.link

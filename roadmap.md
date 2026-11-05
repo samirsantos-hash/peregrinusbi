@@ -1,5 +1,9 @@
 # Roadmap
 
+## Produtos e busca de loja (05/11)
+- [x] Anúncios com largura ampliada, imagens e fontes maiores, divisórias e busca por nome/ID nas contas autorizadas; tabela de produtos com acabamento equivalente, sem alterar consultas ou permissões.
+- [x] Build OK; sessão master buscou AUTOPECASLONDRINA por nome (50 anúncios), MERCALANI por ID e trocou a loja; busca sem resultado conferida, computador/celular sem erros ou transbordamento. k6 prévio: 100 usuários, 2.231 requisições, zero falhas e p95 público 74,61 ms; não mede painel autenticado.
+
 ## Qualidade e melhores Clips (05/11)
 - [x] Radar técnico separado de metas de Clips; ausência e pacote legado de qualidade totalmente zerado não recebem classificação crítica. Ranking de até 10 anúncios com visitas, pedidos, conversão e datas, sem distribuir totais da loja.
 - [x] Seis testes e build OK; AUTOPECASLONDRINA autenticada em computador/celular sem erros ou transbordamento: medição 01/11 com 1.009 visitas, 45 pedidos, 4,46% e R$4.863,22 via Clips. Ranking por anúncio indisponível nessa loja, explicitado sem inventar vencedores. k6 público prévio: 100 usuários, 2.223 requisições, zero falhas e p95 83,26 ms; não mede painel logado.
