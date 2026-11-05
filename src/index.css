@@ -2416,7 +2416,7 @@ html body .peregrinus-panel.peregrinus-panel .panel-section-header {
   --panel-type-label: 12px;
 }
 html body .peregrinus-panel.peregrinus-panel :is(.panel-section-title,.ds-titulo-pagina) { font-weight: 600; }
-html body .peregrinus-panel.peregrinus-panel .panel-container { max-width: 1400px; padding: 16px 48px 32px; }
+html body .peregrinus-panel.peregrinus-panel .panel-container { max-width: none; width: 100%; padding: 16px 20px 32px; }
 html body .peregrinus-panel.peregrinus-panel .panel-topbar { border-radius: 9999px; padding: 16px 24px; }
 html body .peregrinus-panel.peregrinus-panel .panel-sidebar { width: 224px; border-radius: 24px; border-color: hsl(var(--panel-white) / .1); }
 html body .peregrinus-panel.peregrinus-panel .panel-sidebar.w-\[64px\] { width: 64px; }
@@ -2458,11 +2458,12 @@ html.light body .peregrinus-panel .carteira-leitura {
   --carteira-glass: linear-gradient(125deg, hsl(var(--panel-white) / .6), hsl(var(--panel-brand) / .035));
   --carteira-edge: hsl(var(--panel-black) / .08);
 }
-html body .peregrinus-panel.peregrinus-panel .carteira-kpi {
+html body .peregrinus-panel.peregrinus-panel .carteira-leitura .carteira-kpi.carteira-kpi.carteira-kpi {
   background: var(--carteira-glass) !important;
   border-color: var(--carteira-edge) !important;
   box-shadow: none !important;
   backdrop-filter: blur(24px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
   container-type: inline-size;
 }
 html body .peregrinus-panel .carteira-kpi .carteira-kpi-valor {
@@ -2476,7 +2477,7 @@ html body .peregrinus-panel .carteira-kpi .carteira-kpi-valor {
   html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor { font-size: 28px !important; line-height: 36px; }
 }
 @media (max-width: 1023px) {
-  html body .peregrinus-panel.peregrinus-panel .panel-container { padding-inline: 32px; }
+  html body .peregrinus-panel.peregrinus-panel .panel-container { padding-inline: 20px; }
 }
 @media (max-width: 639px) {
   html body .peregrinus-panel.peregrinus-panel .panel-container { padding-inline: 16px; }

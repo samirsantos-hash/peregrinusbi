@@ -1,5 +1,8 @@
 # Roadmap
 
+## Correção das margens e vidro — 05/11 às 21:19
+- [x] Removidos limite central de 1400px e margens de 48px; margem externa agora 20px. Regra opaca corrigida: vidro confirmado com degradê branco 3,5%/verde 4,5% e blur 24px. Sessão real em 1143px, 1605px e 390px sem erros ou valores cortados; build OK. k6 público prévio: 28.459 requisições, zero falhas, p95 76,15ms (não mede painel logado). Somente teste.
+
 ## Ajuste da leitura da carteira — 05/11 às 21:08
 - [x] Faixas de cinco cartões preenchem a largura no computador; valores indivisíveis em Geist, comparações com quebra segura e vidro verde translúcido na leitura, sem alterar dados ou Home. Sessão real conferida em 1143px, 1605px e 390px: valores completos, sem excesso horizontal nem erros; 8 testes passaram e build OK. k6 público prévio: 28.403 requisições, zero falhas, p95 74,23ms (não mede painel logado). Somente teste.
 
