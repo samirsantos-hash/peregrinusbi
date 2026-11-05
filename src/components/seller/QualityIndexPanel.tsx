@@ -250,7 +250,15 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
             key={p.id}
             pilar={p}
             expanded={expanded === p.id}
-            onToggle={() => setExpanded(expanded === p.id ? null : p.id)}
+            onToggle={() => {
+              setExpanded(expanded === p.id ? null : p.id);
+              if (expanded !== p.id) {
+                const categories = { logistica: "logistics", cdp: "promotions", reputacao: "reputation", relevancia: "listing_quality" } as const;
+                window.__lovableEvents?.track?.("project.diagnostic_recommendation_opened", {
+                  recommendation_category: categories[p.id], dashboard_context: "seller_quality_index",
+                });
+              }
+            }}
           />
         ))}
       </div>

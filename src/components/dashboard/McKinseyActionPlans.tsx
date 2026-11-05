@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { Copy, Rocket, Search, AlertTriangle, ExternalLink } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -38,6 +38,7 @@ function buildMlbLink(itemId: string): string {
 }
 
 const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) => {
+  const openPlans = useRef<string[]>([]);
   const classifiedItems = useMemo(() => {
     return listingsQuality.map((item) => ({
       ...item,
@@ -82,7 +83,17 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
         </h3>
       </div>
 
-      <Accordion type="multiple" className="space-y-2">
+      <Accordion type="multiple" className="space-y-2" onValueChange={(values) => {
+        const categories: Record<string, string> = { invest: "growth", seo: "listing_quality", critical: "inventory" };
+        for (const value of values) {
+          if (!openPlans.current.includes(value) && categories[value]) {
+            window.__lovableEvents?.track?.("project.diagnostic_recommendation_opened", {
+              recommendation_category: categories[value], dashboard_context: "seller_segment_action_plan",
+            });
+          }
+        }
+        openPlans.current = values;
+      }}>
         {/* 🚀 Prioridade Máxima */}
         {investRows.length > 0 && (
           <AccordionItem value="invest" className="border border-emerald/20 rounded-lg bg-emerald/5 px-1">

@@ -130,7 +130,21 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
     <>
       <tr
         className={`border-b border-border/40 cursor-pointer hover:bg-muted/30 ${tone.bg}`}
-        onClick={() => setAberto((v) => !v)}
+        onClick={() => {
+          setAberto((v) => !v);
+          if (!aberto && anuncio.acoes.length > 0) {
+            const categories: Record<AcaoCategoria, string> = {
+              fotos: "listing_quality", video: "listing_quality", titulo: "listing_quality",
+              descricao: "listing_quality", ficha_tecnica: "listing_quality", frete_gratis: "logistics",
+              preco: "price", cdp_promocao: "promotions", experiencia_compra: "reputation",
+            };
+            const unique = [...new Set(anuncio.acoes.map((a) => categories[a.categoria]))];
+            window.__lovableEvents?.track?.("project.diagnostic_recommendation_opened", {
+              recommendation_category: unique.length === 1 ? unique[0] : "multiple_issues",
+              dashboard_context: "seller_listing_action_plan",
+            });
+          }
+        }}
       >
         <td className="py-2 px-3">
           <div className="flex items-start gap-2">

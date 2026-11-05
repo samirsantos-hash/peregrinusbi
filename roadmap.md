@@ -1,5 +1,11 @@
 # Roadmap
 
+## Recomendações abertas (05/11)
+- [x] Instrumentada a abertura dos diagnósticos por anúncio no controle existente, com categoria e contexto, sem IDs ou textos privados; fechamento e itens sem diagnóstico não contam.
+- [x] Seis controles existentes cobertos: desempenho/planos por anúncio, planos por segmento, pilares de qualidade, plano de ação e retenção da carteira. Riscos sem detalhe e links genéricos não contam; Full legado não é montado em tela e não foi alterado.
+- [x] Catálogo validado (3 eventos), 25 testes aprovados e build OK. Sessão master abriu o diagnóstico de promoções da AUTOPECASLONDRINA: categoria promotions/contexto seller_quality_index e conteúdo revelado confirmados com coletor substituto local. Fechamento validado em testes; navegador interrompido após abertura. Não comprova ingestão publicada.
+- [x] k6 prévio público: 100 usuários, 2.218 requisições, zero falhas, p95 124,22 ms; não mede painel autenticado.
+
 ## Trocas de loja (05/11)
 - [x] Evento project.seller_selection_changed nos controles existentes: origem e escopo, sem identificadores privados; mesma loja e troca de anúncio na mesma loja não contam.
 - [x] Catálogo validado (2 eventos), 9 testes e build OK. Sessão master abriu AUTOPECASLONDRINA e voltou à carteira: dois eventos com origem/escopo conferidos em coletor substituto local; não comprova ingestão publicada. Repetição no controle do painel não concluída no navegador; mesma seleção e anúncio da mesma loja cobertos nos testes de navegação.

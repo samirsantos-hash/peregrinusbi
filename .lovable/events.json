@@ -1,6 +1,52 @@
 {
   "schema_version": 1,
   "events": {
+    "project.diagnostic_recommendation_opened": {
+      "event_schema_version": 1,
+      "description": "A user opens diagnostic or corrective-action details in seller analysis, or follows an actionable portfolio risk/retention recommendation. Fires on opening only, not passive rendering, closing, filtering, healthy listing details, copying or generic seller links. No identifiers or recommendation text are collected.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "recommendation_category",
+          "dashboard_context"
+        ],
+        "properties": {
+          "recommendation_category": {
+            "type": "string",
+            "enum": [
+              "listing_quality",
+              "visibility",
+              "inventory",
+              "missing_quality_data",
+              "growth",
+              "logistics",
+              "price",
+              "promotions",
+              "reputation",
+              "multiple_issues",
+              "revenue_decline",
+              "advertising"
+            ]
+          },
+          "dashboard_context": {
+            "type": "string",
+            "enum": [
+              "seller_listing_performance",
+              "seller_segment_action_plan",
+              "seller_listing_action_plan",
+              "seller_quality_index",
+              "portfolio_action_plan",
+              "portfolio_retention"
+            ]
+          }
+        }
+      }
+    },
     "project.seller_analysis_opened": {
       "event_schema_version": 1,
       "description": "A user explicitly opens a single-store or listing analysis from portfolio or dashboard navigation, including selecting a real store in the dashboard. No names, IDs or URLs are collected.",

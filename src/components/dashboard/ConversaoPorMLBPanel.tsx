@@ -214,7 +214,21 @@ function ItemRow({ item }: { item: MLBPerformance }) {
     <>
       <tr
         className="border-b border-border/40 hover:bg-muted/30 cursor-pointer transition"
-        onClick={() => setAberto(!aberto)}
+        onClick={() => {
+          setAberto(!aberto);
+          if (!aberto && item.diagnostico !== "ok") {
+            const categories = {
+              qualidade: "listing_quality",
+              visibilidade: "visibility",
+              estoque_parado: "inventory",
+              sem_dados: "missing_quality_data",
+            } as const;
+            window.__lovableEvents?.track?.("project.diagnostic_recommendation_opened", {
+              recommendation_category: categories[item.diagnostico],
+              dashboard_context: "seller_listing_performance",
+            });
+          }
+        }}
       >
         <td className="py-2 px-2">
           <div className="flex items-center gap-2 min-w-0">
