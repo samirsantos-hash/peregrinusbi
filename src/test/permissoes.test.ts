@@ -4,6 +4,15 @@ const revisado = { master: false, legado: false, revisado: true, permissoes: [] 
 describe('liberação individual pela master', () => {
   it('bloqueia usuário novo sem liberação', () => expect(podeExecutar(revisado, 'resumo.visualizar')).toBe(false));
   it('preserva acessos de usuário antigo não revisado', () => expect(podeExecutar({ ...revisado, legado: true, revisado: false, permissoes: ['resumo.visualizar'] }, 'resumo.visualizar')).toBe(true));
+  it('legado com visualização de carteira mantém leitura sem ganhar alteração', () => {
+    const antigo = { ...revisado, legado: true, revisado: false, permissoes: ['carteiras.visualizar'] };
+    expect(podeExecutar(antigo, 'carteiras.visualizar')).toBe(true);
+    expect(podeExecutar(antigo, 'carteiras.alterar')).toBe(false);
+  });
+  it('carteira continua bloqueada após revogação ou para usuário novo', () => {
+    expect(podeExecutar(revisado, 'carteiras.visualizar')).toBe(false);
+    expect(podeExecutar({ ...revisado, revisado: false }, 'carteiras.visualizar')).toBe(false);
+  });
   it('legado não ganha administração nova', () => expect(podeExecutar({ ...revisado, legado: true }, 'usuarios.criar')).toBe(false));
   it('libera todas as funções para master', () => expect(podeExecutar({ ...revisado, master: true }, 'usuarios.criar')).toBe(true));
   it('visualização não autoriza alteração', () => expect(podeExecutar({ ...revisado, permissoes: ['preco.visualizar'] }, 'preco.alterar')).toBe(false));

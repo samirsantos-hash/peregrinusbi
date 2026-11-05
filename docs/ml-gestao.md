@@ -202,6 +202,7 @@ Contrato próprio (uma pergunta por vez), com a mesma idempotência das ações 
 - Erros: 400 sem `account_id` com JWT, 401, 403, 405.
 - Campanhas e anúncios a cada chamada; custos por campanha têm prioridade sobre histórico por anúncio. Retoma primeiro campanhas com datas/custos ausentes, depois as leituras mais antigas; falhas de paginação/gravação ou série incompleta impedem marcar a conta completa. Métrica por campanha até cada 20 h (lacunas ignoram a espera), por anúncio dia a dia via `ml_ads_dias_sync`. Janela de 90 dias; cron de hora em hora. `dias_pendentes` inclui campanhas interrompidas por tempo; ausência nunca vira zero.
 - Erros e leituras parciais também gravam avisos controlados em `developer_alerts`, sem corpos de resposta ou tokens. Só o perfil `desenvolvedor` lê os diagnósticos; demais usuários recebem apenas estado genérico de atualização incompleta.
+- GETs e paginação compartilham prazo absoluto de 80 s; operações de persistência têm timeout de até 5 s e reserva até 110 s. Páginas incompletas preservam linhas já lidas, mas não confirmam `ml_ads_dias_sync`; gravação de métricas e marcador precisam ter sucesso. Diagnósticos não iniciam após 100 s. Isso limita o trabalho, não garante disponibilidade da infraestrutura ou do ML.
 
 #### `ml-ads-action` (lote)
 

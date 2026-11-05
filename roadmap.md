@@ -1,5 +1,11 @@
 # Roadmap
 
+## Avisos de monitoramento (05/11)
+- [x] Restaurada visualização para 38 legados não revisados; 50/50 legados têm leitura, 8 revisados intocados. Escopo e edição inalterados; reparo idempotente em scripts/restaurar-carteira-legado.sql.
+- [x] GETs Ads com prazo de 80 s, paginação interrompível e marcador condicionado à gravação completa. Função implantada: AUTOPECASLONDRINA retornou HTTP 200 em 82,53 s, 96 campanhas, 962 anúncios, 165 pendências (não cobertura completa).
+- [x] Cópias invalidadas antes/depois de escritas e troca de identidade; análises e permissões não ativam emergência. Refetch após mutação não herda staleTime infinito.
+- [x] 105 regressões passaram, build OK; carteira master autenticada abriu sem bloqueio/erros. Fluxo pós-gravação em emergência verificado por teste de rede simulado, não por edição de dados reais de cliente. k6 prévio: 100 usuários, 2.222 requisições, zero falhas, p95 90,62 ms (somente entrega pública).
+
 ## Teste de carga com 1.000 pessoas (04/11)
 - [x] Executada uma única simulação pública: pico confirmado de 1.000 usuários, 60 segundos de platô, interrupção por falhas e sem login, IA, banco ou Mercado Livre.
 - [x] 28.189 requisições, uma falha (0,00355%), p95 de páginas 158,04 ms e máximo 6,59 s; limites aprovados, 3,81 GB recebidos. Resultados em docs/teste-carga-k6.md; não certifica painel autenticado. Teste de configuração passou; opção global ignorada pelo k6 removida e configuração inspecionada sem nova carga.

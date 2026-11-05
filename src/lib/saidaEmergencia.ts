@@ -5,7 +5,8 @@ export const SINAIS_PARA_ABRIR = 3;
 export const LENTO_MS = 3_000;
 export const PAUSA_MS = 60_000;
 
-const RPC_LEITURA = /^\/rest\/v1\/rpc\/(indicadores_|get_|ml_minhas_contas_status|ml_contas_|ml_ads_painel_grupos|ml_tendencias_)/;
+const RPC_LEITURA = /^\/rest\/v1\/rpc\/(indicadores_[a-z_]+|get_data_coverage|ml_minhas_contas_status|ml_contas_status|ml_contas_gerenciaveis|ml_ads_painel_grupos|ml_tendencias_cobertura|ml_tendencias_escopos)$/;
+const PRIVADO = /\/(usuario_permissoes|usuario_permissao_estado|user_roles|profiles|developer_alerts|notifications|permissao_catalogo)(?:$|\/)/;
 
 export type Estado = { sinais: number[]; abertoAte: number };
 export const novoEstado = (): Estado => ({ sinais: [], abertoAte: 0 });
@@ -28,19 +29,23 @@ export const emergenciaAtiva = (e: Estado, agora: number) => agora < e.abertoAte
 /** Só leituras podem ser servidas da cópia guardada; escritas sempre vão ao servidor. */
 export function chaveLeitura(metodo: string, url: URL, corpo: string): string | null {
   if (!url.pathname.startsWith('/rest/v1/')) return null;
+  if (PRIVADO.test(url.pathname)) return null;
   if (metodo === 'GET') return 'GET ' + url.pathname + url.search;
   if (metodo === 'POST' && RPC_LEITURA.test(url.pathname)) return 'POST ' + url.pathname + url.search + ' ' + corpo;
   return null;
 }
 
 const LIMITE_COPIAS = 300;
-const estado = novoEstado();
-const copias = new Map<string, { corpo: string; status: number; headers: [string, string][] }>();
 export const EVENTO = 'peregrinus-emergencia';
 
 export function instalarSaidaEmergencia(origemApi: string) {
   if (typeof window === 'undefined' || (window as any).__saidaEmergencia) return;
   (window as any).__saidaEmergencia = true;
+  const estado = novoEstado();
+  const copias = new Map<string, { corpo: string; status: number; headers: [string, string][] }>();
+  let identidade = '';
+  let versao = 0;
+  const limpar = () => { versao++; copias.clear(); };
   const original = window.fetch.bind(window);
   const avisar = () => window.dispatchEvent(new CustomEvent(EVENTO, { detail: { ativa: emergenciaAtiva(estado, Date.now()), ate: estado.abertoAte } }));
 
@@ -49,8 +54,14 @@ export function instalarSaidaEmergencia(origemApi: string) {
     const url = new URL(pedido ? pedido.url : String(input), window.location.href);
     if (url.origin !== origemApi) return original(input, init);
     const metodo = (init?.method || pedido?.method || 'GET').toUpperCase();
-    const corpo = typeof init?.body === 'string' ? init.body : '';
+    const corpo = typeof init?.body === 'string' ? init.body : pedido && metodo === 'POST' ? await pedido.clone().text() : '';
+    const headers = new Headers(init?.headers ?? pedido?.headers);
+    const atual = headers.get('Authorization') ?? '';
+    if (atual !== identidade || url.pathname.startsWith('/auth/')) { limpar(); identidade = atual; }
     const chave = chaveLeitura(metodo, url, corpo);
+    const escrita = !['GET', 'HEAD', 'OPTIONS'].includes(metodo) && !chave;
+    if (escrita) limpar();
+    const leituraVersao = versao;
 
     if (chave && emergenciaAtiva(estado, Date.now())) {
       const c = copias.get(chave);
@@ -59,18 +70,19 @@ export function instalarSaidaEmergencia(origemApi: string) {
     const t0 = performance.now();
     try {
       const r = await original(input, init);
-      const abriu = registrar(estado, Date.now(), r.status, performance.now() - t0);
+      if (escrita && r.ok) limpar();
+      const abriu = chave ? registrar(estado, Date.now(), r.status, performance.now() - t0) : false;
       if (abriu) avisar();
-      if (chave && r.ok) {
+      if (chave && r.ok && leituraVersao === versao) {
         const texto = await r.clone().text();
-        if (texto.length < 500_000) {
+        if (texto.length < 500_000 && leituraVersao === versao) {
           copias.delete(chave); copias.set(chave, { corpo: texto, status: r.status, headers: [...r.headers.entries()] });
           if (copias.size > LIMITE_COPIAS) copias.delete(copias.keys().next().value as string);
         }
       }
       return r;
     } catch (erro) {
-      if (registrar(estado, Date.now(), null, performance.now() - t0)) avisar();
+      if (chave && registrar(estado, Date.now(), null, performance.now() - t0)) avisar();
       const c = chave ? copias.get(chave) : undefined;
       if (c) return new Response(c.corpo, { status: c.status, headers: c.headers });
       throw erro;

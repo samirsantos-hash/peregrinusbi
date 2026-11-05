@@ -12,7 +12,7 @@ export default function SaidaEmergencia() {
       const on = Boolean((e as CustomEvent).detail?.ativa);
       setAtiva(on);
       client.setDefaultOptions(on
-        ? { ...normal, queries: { ...normal.queries, staleTime: Infinity, refetchOnMount: false, refetchOnWindowFocus: false, refetchInterval: false, retry: 0 } }
+        ? { ...normal, queries: { ...normal.queries, refetchOnWindowFocus: false, refetchInterval: false, retry: 0 } }
         : normal);
     };
     window.addEventListener(EVENTO, ouvir);
