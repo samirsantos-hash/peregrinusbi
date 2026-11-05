@@ -30,5 +30,5 @@ function ChuvaAtiva({ saindo }: { saindo: boolean }) {
     const api = window.AsimovRain.mount(el);
     return () => api.destroy();
   }, []);
-  return <div ref={ref} className="chuva-painel transition-opacity duration-500" style={{ opacity: saindo ? 0 : undefined }} aria-hidden="true" />;
+  return <div ref={ref} className={`chuva-painel transition-opacity duration-500 ${saindo ? "opacity-0" : "opacity-100"}`} aria-hidden="true" />;
 }

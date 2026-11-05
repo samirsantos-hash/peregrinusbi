@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Identidade do HTML nos detalhes (05/11)
+- [x] Incorporadas as orientações Extract HTML Design System v2: catálogo design-system.html já presente no ZIP; referência comparada visualmente. Reutilizados padrões de navegação (12px), busca (8px), linhas sutis e cartões internos; retirado brilho excessivo e blur por célula. Mantidos DM Sans, vidro e identidade Peregrinus; não substituir por textos de demonstração. Dez testes passaram, incluindo chuva apenas enquanto carrega.
 - [x] Identidade Ledger do HTML (linhas finas, rótulos em caixa alta com traço, títulos leves, brilho verde) nas laterais de promoções e melhorias, mantendo DM Sans e verde da marca. Corrigidos: códigos crus do ML, percentuais com ponto, nível em espanhol, pendências repetidas e cor âmbar fora da paleta.
 - [x] Chuva verde só enquanto há dados carregando; some suavemente ao terminar.
 
@@ -13,7 +14,8 @@
 
 ## Medição e publicação da árvore (05/11)
 - [x] Medidas abertura explícita de Resumo e mudanças nas subanálises de Reputação, Preço e Publicidade; contexto não sensível, sem IDs, com acesso de consultoria positivo validado (inclui masters/admins/gerentes; falso também pode indicar verificação pendente).
-- [x] Cinco eventos catalogados e esquema válido; 12 testes passaram, build OK e sessão master confirmou quatro eventos com coletor local substituto, sem erros. Não comprova ingestão publicada; não há ranking histórico destes eventos novos. k6 público: 28.356 requisições, zero falhas, p95 94,25ms; não mede painel logado. Segurança básica sem achados; análise profunda não executada. Publicação solicitada após salvar; visitas não representam consultores únicos.
+- [x] Seis eventos catalogados e esquema válido; 12 testes passaram, build OK e sessão master confirmou quatro eventos com coletor local substituto, sem erros. Não comprova ingestão publicada; não há ranking histórico destes eventos novos. k6 público: 28.356 requisições, zero falhas, p95 94,25ms; não mede painel logado. Segurança básica sem achados; análise profunda não executada.
+- [ ] Publicar alterações salvas: solicitações anteriores canceladas antes da execução por novas mensagens; visitas não representam consultores únicos.
 
 ## Árvore de acessos e detalhes laterais (05/11)
 - [x] Árvore por assunto e subanálise com subaba, links antigos e permissões preservados; páginas específicas para resumo, reputação, preço, publicidade, logística, qualidade, Clips, oportunidades e Full.

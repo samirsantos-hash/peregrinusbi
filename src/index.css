@@ -8,10 +8,10 @@ html body [data-ui-surface="sheet"].listing-detail-sheet {
 }
 
 /* Identidade Ledger (HTML de referência) nos detalhes laterais: linhas finas, títulos leves, rótulo em caixa alta e brilho verde. */
-.listing-detail-sheet h2 { font-weight: 300; letter-spacing: -0.01em; }
+.listing-detail-sheet h2 { font-weight: 300; letter-spacing: 0; }
 .listing-detail-sheet h3 {
   display: flex; align-items: center; gap: 8px;
-  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0;
   color: hsl(var(--primary));
 }
 .listing-detail-sheet h3::before { content: ""; width: 24px; height: 1px; background: hsl(var(--primary) / 0.6); }
@@ -19,17 +19,16 @@ html body [data-ui-surface="sheet"].listing-detail-sheet {
   border: 1px solid hsl(var(--foreground) / 0.08);
   border-radius: 12px;
   background: hsl(var(--foreground) / 0.02);
-  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 .listing-detail-sheet .detalhe-cartao:hover {
   border-color: hsl(var(--primary) / 0.35);
-  box-shadow: 0 0 18px -6px hsl(var(--primary) / 0.35);
+  box-shadow: none;
 }
 .listing-detail-sheet .detalhe-rotulo {
-  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0;
   color: hsl(var(--muted-foreground));
 }
-.listing-detail-sheet button.bg-primary { box-shadow: 0 0 15px -4px hsl(var(--primary) / 0.5); }
+.listing-detail-sheet button.bg-primary { box-shadow: none; }
 
 /* =====================================================================
    Aura Cloud Design System aplicado ao Peregrinus
@@ -2277,4 +2276,22 @@ body:has(.peregrinus-panel) [data-ui-surface="sheet"][data-side="right"] { borde
     --panel-stroke: hsl(var(--panel-text-secondary) / .5);
     --panel-backdrop: none;
   }
+}
+
+/* Padrões existentes no HTML: navegação rounded-xl, busca rounded-lg e uma
+   única superfície por tabela. Mantém vidro, tipografia e identidade Peregrinus. */
+html body .peregrinus-panel .panel-nav-item,
+body:has(.peregrinus-panel) .painel-navigation .panel-nav-item {
+  border-radius: 12px;
+}
+html body .peregrinus-panel input[type="search"],
+html body .peregrinus-panel input[placeholder="Título, SKU ou MLB"] {
+  border-radius: 8px;
+  font-size: 12px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html body .peregrinus-panel .sinergia-operacional td {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
