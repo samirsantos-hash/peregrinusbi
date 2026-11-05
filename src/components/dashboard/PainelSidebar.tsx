@@ -77,6 +77,8 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
 }
 
 interface Props {
+  consultantAccess?: boolean;
+  sellerScope?: "single_store" | "portfolio";
   ativa: string;
   subativa?: string;
   onSubChange?: (secao: string, id: string) => void;
@@ -87,6 +89,8 @@ interface Props {
 }
 
 function Conteudo({
+  consultantAccess = false,
+  sellerScope = "portfolio",
   ativa,
   subativa,
   onSubChange,
@@ -96,6 +100,8 @@ function Conteudo({
   onToggle,
   mostrarToggle,
 }: {
+  consultantAccess?: boolean;
+  sellerScope?: "single_store" | "portfolio";
   ativa: string;
   subativa?: string;
   onSubChange?: (secao: string, id: string) => void;
@@ -134,6 +140,13 @@ function Conteudo({
                   <li key={id}>
                     <Button variant="ghost" aria-label={tab.label} aria-expanded={SUBANALISES[id] ? ramos.includes(id) : undefined}
                       onClick={() => {
+                        if (id === "efficiency" && !ramos.includes(id)) {
+                          window.__lovableEvents?.track?.("project.summary_tree_opened", {
+                            consultant_access: consultantAccess,
+                            seller_scope: sellerScope,
+                            source_view: "dashboard_sidebar",
+                          });
+                        }
                         if (recolhida) onToggle();
                         if (SUBANALISES[id]) setRamos(atual => atual.includes(id) ? atual.filter(r => r !== id) : [...atual, id]);
                         else onChange(id);
@@ -144,7 +157,18 @@ function Conteudo({
                       {!recolhida && <><span className="truncate flex-1 text-left">{tab.label}</span>{SUBANALISES[id] && (ramos.includes(id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
                     </Button>
                     {!recolhida && ramos.includes(id) && SUBANALISES[id] && <ul className="ml-5 pl-2 border-l border-border space-y-1 py-1">
-                      {SUBANALISES[id].map(sub => <li key={sub.id}><Button variant="ghost" onClick={() => onSubChange?.(id, sub.id)}
+                      {SUBANALISES[id].map(sub => <li key={sub.id}><Button variant="ghost" onClick={() => {
+                        if ((id === "reputation" || id === "competitiveness" || id === "publicidade") && (ativa !== id || subativa !== sub.id)) {
+                          window.__lovableEvents?.track?.("project.seller_section_opened", {
+                            section: id === "competitiveness" ? "price" : id === "publicidade" ? "advertising" : "reputation",
+                            subsection: sub.id,
+                            consultant_access: consultantAccess,
+                            seller_scope: sellerScope,
+                            source_view: "dashboard_sidebar",
+                          });
+                        }
+                        onSubChange?.(id, sub.id);
+                      }}
                         aria-current={ativa === id && subativa === sub.id ? "page" : undefined}
                         className={cn("w-full min-h-9 h-auto py-2 px-2 justify-start text-left whitespace-normal text-xs leading-5", ativa === id && subativa === sub.id ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "text-muted-foreground")}>
                         {sub.label}
@@ -198,7 +222,7 @@ function Conteudo({
   );
 }
 
-export default function PainelSidebar({ ativa, subativa, onSubChange, onChange, alertas, mobileAberto, onMobileChange }: Props) {
+export default function PainelSidebar({ ativa, subativa, onSubChange, onChange, alertas, mobileAberto, onMobileChange, consultantAccess, sellerScope }: Props) {
   const [recolhida, setRecolhida] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     const salvo = window.localStorage.getItem(CHAVE);
@@ -225,6 +249,8 @@ export default function PainelSidebar({ ativa, subativa, onSubChange, onChange, 
         )}
       >
         <Conteudo
+          consultantAccess={consultantAccess}
+          sellerScope={sellerScope}
           ativa={ativa}
           subativa={subativa}
           onSubChange={onSubChange}
@@ -243,6 +269,8 @@ export default function PainelSidebar({ ativa, subativa, onSubChange, onChange, 
           <SheetDescription className="sr-only">Navegação entre as seções da loja selecionada.</SheetDescription>
           <div className="h-full pt-8">
             <Conteudo
+              consultantAccess={consultantAccess}
+              sellerScope={sellerScope}
               ativa={ativa}
               subativa={subativa}
               onSubChange={(secao, id) => { onSubChange?.(secao, id); onMobileChange(false); }}

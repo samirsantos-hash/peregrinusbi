@@ -528,6 +528,8 @@ const Index = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-start gap-0 lg:gap-4 isolate">
                 <PainelSidebar
+                  consultantAccess={souConsultor}
+                  sellerScope={selectedSeller ? "single_store" : "portfolio"}
                   ativa={activeTab}
                   subativa={pagina}
                   onSubChange={selecionarSubanalise}

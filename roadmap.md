@@ -1,5 +1,9 @@
 # Roadmap
 
+## Medição e publicação da árvore (05/11)
+- [x] Medidas abertura explícita de Resumo e mudanças nas subanálises de Reputação, Preço e Publicidade; contexto não sensível, sem IDs, com acesso de consultoria positivo validado (inclui masters/admins/gerentes; falso também pode indicar verificação pendente).
+- [x] Cinco eventos catalogados e esquema válido; 12 testes passaram, build OK e sessão master confirmou quatro eventos com coletor local substituto, sem erros. Não comprova ingestão publicada; não há ranking histórico destes eventos novos. k6 público: 28.356 requisições, zero falhas, p95 94,25ms; não mede painel logado. Segurança básica sem achados; análise profunda não executada. Publicação solicitada após salvar; visitas não representam consultores únicos.
+
 ## Árvore de acessos e detalhes laterais (05/11)
 - [x] Árvore por assunto e subanálise com subaba, links antigos e permissões preservados; páginas específicas para resumo, reputação, preço, publicidade, logística, qualidade, Clips, oportunidades e Full.
 - [x] Resumo com resultados essenciais; reputação com medalha da API, tier associado, perfil importado e tabela dos limites existentes sem classificar por receita ou proxy de cancelamentos. AUTOPECASLONDRINA: Gold/Tier 2 e Mature; ausência de dados explícita.

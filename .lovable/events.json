@@ -87,6 +87,70 @@
         }
       }
     },
+    "project.seller_section_opened": {
+      "event_schema_version": 1,
+      "description": "User selects a different Reputation, Price or Advertising subanalysis in the dashboard navigation tree. Excludes reselecting current destination, render and automatic navigation. Consulting capability includes masters/admins/managers; no user or seller identifiers.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "section",
+          "subsection",
+          "consultant_access",
+          "seller_scope",
+          "source_view"
+        ],
+        "properties": {
+          "section": {
+            "type": "string",
+            "enum": [
+              "reputation",
+              "price",
+              "advertising"
+            ]
+          },
+          "subsection": {
+            "type": "string",
+            "enum": [
+              "resumo",
+              "indicadores",
+              "analise",
+              "requisitos",
+              "resumo-preco",
+              "carteira",
+              "mckinsey",
+              "estrategica",
+              "evolucao",
+              "insights",
+              "concorrentes",
+              "sinergia",
+              "produtos",
+              "historico"
+            ]
+          },
+          "consultant_access": {
+            "type": "boolean"
+          },
+          "seller_scope": {
+            "type": "string",
+            "enum": [
+              "single_store",
+              "portfolio"
+            ]
+          },
+          "source_view": {
+            "type": "string",
+            "enum": [
+              "dashboard_sidebar"
+            ]
+          }
+        }
+      }
+    },
     "project.seller_selection_changed": {
       "event_schema_version": 1,
       "description": "The user changes the selected seller through dashboard or seller-analysis navigation controls, including returning to the dashboard portfolio. Same-seller reselections and listing-only changes do not count. Seller identifiers, names and URLs are excluded.",
@@ -115,6 +179,41 @@
             "enum": [
               "single_store",
               "portfolio"
+            ]
+          }
+        }
+      }
+    },
+    "project.summary_tree_opened": {
+      "event_schema_version": 1,
+      "description": "Explicitly expands the Summary navigation branch, excluding automatic expansion and closing. consultant_access is the existing server-confirmed ML consulting capability (includes masters/admins/managers), not a unique user identity.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "consultant_access",
+          "seller_scope",
+          "source_view"
+        ],
+        "properties": {
+          "consultant_access": {
+            "type": "boolean"
+          },
+          "seller_scope": {
+            "type": "string",
+            "enum": [
+              "single_store",
+              "portfolio"
+            ]
+          },
+          "source_view": {
+            "type": "string",
+            "enum": [
+              "dashboard_sidebar"
             ]
           }
         }
