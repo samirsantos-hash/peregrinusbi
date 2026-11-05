@@ -11,7 +11,7 @@ import GraficoPublicidadeSerie from "@/components/dashboard/GraficoPublicidadeSe
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import CancelamentosMensais from "@/components/ml/CancelamentosMensais";
 
-export function SinergiaIndicadores({ pontos, compacto = false, fonte, custId, de, ate, piloto }: { pontos: PontoPublicidade[]; compacto?: boolean; fonte: string; custId?: string; de?: string; ate?: string; piloto?: { ativo: boolean; alternar: () => void } }) {
+export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = true, fonte, custId, de, ate, piloto }: { pontos: PontoPublicidade[]; compacto?: boolean; exibirMatriz?: boolean; fonte: string; custId?: string; de?: string; ate?: string; piloto?: { ativo: boolean; alternar: () => void } }) {
   const r = calcularSinergiaPublicidade(pontos);
   return <section aria-label="Sinergia e dependência de publicidade" className="space-y-3 border-t border-border/50 pt-4">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
@@ -22,7 +22,7 @@ export function SinergiaIndicadores({ pontos, compacto = false, fonte, custId, d
         {piloto.ativo ? "Voltar à leitura publicada" : "Ver piloto de visitas"}
       </button>
     </div>}
-    <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />
+    {exibirMatriz && <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />}
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
     <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{r.participacao == null ? "Sem dado" : pctFracao(r.participacao, 1)}</dd></div>
