@@ -2401,9 +2401,9 @@ html body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"],[data-
   --panel-type-body: 14px;
   --panel-type-label: 12px;
   --panel-type-nav: 14px;
-  --panel-type-number: 36px;
+  --panel-type-number: 30px;
   --panel-type-number-small: 30px;
-  --panel-type-summary-number: 36px;
+  --panel-type-summary-number: 30px;
   --panel-type-summary-number-small: 30px;
   --panel-type-summary-number-compact: 24px;
 }
@@ -2439,7 +2439,7 @@ html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro.noite
 html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro > div { align-items: flex-start; }
 html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes { align-items: flex-start !important; }
 html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor {
-  font-size: var(--panel-type-summary-number) !important; font-weight: 600; line-height: 40px;
+  font-size: var(--panel-type-summary-number) !important; font-weight: 600; line-height: 36px;
 }
 html body .peregrinus-panel.peregrinus-panel :is(.ds-numero-focal,.ds-numero-sec,.metric-value) { font-weight: 600; }
 html body:has(.peregrinus-panel) [data-ui-surface].listing-detail-sheet { border-radius: 0 !important; }
@@ -2509,9 +2509,16 @@ html body .peregrinus-panel .resumo-sinergia-evolucao { padding-bottom: 16px; bo
   --reference-glass-corner: linear-gradient(135deg, hsl(var(--reference-glass-white) / .4), hsl(var(--reference-glass-white) / .1) 16%, transparent 36%, transparent 72%, hsl(var(--reference-glass-green) / .18));
 }
 html.light {
-  --reference-glass-fill: linear-gradient(135deg, hsl(var(--reference-glass-white) / .65), hsl(var(--reference-glass-white) / .24) 48%, hsl(var(--reference-glass-white) / .42)), linear-gradient(145deg, hsl(var(--reference-glass-green) / .045), transparent 65%);
+  --day-gray: 150 5% 88%;
+  --day-green: 151 27% 80%;
+  --day-yellow: 54 68% 86%;
+  --day-ink: 150 7% 10%;
+  --day-muted: 150 5% 34%;
+  --day-environment: linear-gradient(125deg, hsl(var(--day-gray)) 5%, hsl(var(--day-green)) 43%, hsl(var(--day-yellow)) 76%, hsl(var(--reference-glass-white)) 100%);
+  --reference-glass-fill: linear-gradient(135deg, hsl(var(--reference-glass-white) / .6), hsl(var(--reference-glass-white) / .2) 48%, hsl(var(--reference-glass-white) / .38)), linear-gradient(125deg, hsl(var(--day-green) / .12), transparent 48%, hsl(var(--day-yellow) / .16));
   --reference-glass-edge: hsl(var(--reference-glass-white) / .8);
   --reference-glass-shadow: inset 0 1px 0 hsl(var(--reference-glass-white) / .95), inset 1px 0 0 hsl(var(--reference-glass-white) / .5), 0 8px 24px hsl(var(--reference-glass-black) / .08);
+  --reference-glass-corner: linear-gradient(135deg, hsl(var(--reference-glass-white)), hsl(var(--reference-glass-white) / .35) 18%, transparent 42%, transparent 72%, hsl(var(--reference-glass-green) / .16));
 }
 html body .auth-glass.glass-card {
   background: var(--reference-glass-fill) !important;
@@ -2525,6 +2532,33 @@ html.light body:has(.peregrinus-panel) {
   --panel-fill: var(--reference-glass-fill);
   --panel-nav-fill: var(--reference-glass-fill);
   --panel-shadow: var(--reference-glass-shadow);
+  --panel-environment-fill: var(--day-environment);
+  --panel-environment-mist: linear-gradient(118deg, transparent 8%, hsl(var(--reference-glass-white) / .4) 35%, transparent 55%, hsl(var(--day-yellow) / .3) 78%, transparent 100%);
+  --panel-text: var(--day-ink);
+  --panel-text-secondary: var(--day-muted);
+  --panel-stroke: hsl(var(--reference-glass-black) / .1);
+  --panel-divider: hsl(var(--reference-glass-black) / .1);
+  --panel-backdrop: var(--reference-glass-backdrop);
+}
+html.light .auth-page { background: var(--day-environment); }
+html.light .auth-page .aura-canvas { opacity: .55; }
+html.light body .auth-glass.glass-card { border-color: hsl(var(--reference-glass-black) / .1) !important; }
+html.light body .peregrinus-panel.peregrinus-panel .panel-sidebar { border-color: var(--panel-stroke); }
+/* Dashboard specimen: 30px semibold KPI, 14px primary labels, 12px notes.
+   Preserve zero tracking and financial alignment rather than marketing sizes. */
+html body .peregrinus-panel :is(.kpi-vidro-valor,.ds-numero-focal,.ds-numero-sec,.metric-value) {
+  font-family: "Geist Reference", sans-serif;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+html body .peregrinus-panel .recharts-cartesian-axis-tick-value,
+html body .peregrinus-panel .recharts-text { font-family: "Geist Reference", sans-serif; font-size: 12px; }
+html body .peregrinus-panel :is(.kpi-vidro > p:first-child,.ds-kpi dt) { font-size: 14px; line-height: 20px; font-weight: 500; }
+html body .peregrinus-panel .carteira-kpi-valor { font-size: 22px; line-height: 28px; }
+html body .peregrinus-panel .carteira-kpi > p:first-child { font-size: 14px; line-height: 20px; }
+@container (max-width: 160px) {
+  html body .peregrinus-panel .carteira-kpi-valor { font-size: 18px; line-height: 24px; }
 }
 /* Border-only reflection never overlays text, charts, inputs or controls. */
 html body .auth-glass.glass-card::before,

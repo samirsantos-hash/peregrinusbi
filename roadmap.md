@@ -1,5 +1,10 @@
 # Roadmap
 
+## Modo claro e proporções — 05/11 às 22:45
+- [x] Home e painel claros com ambiente cinza/verde/amarelo suave, vidro branco translúcido, reflexo de canto e contornos escuros sutis; cores de métricas preservadas.
+- [x] Comparada hierarquia dos KPIs reais do HTML: valores padrão 30px/600 (não 36px globais), etiquetas principais 14px, notas/eixos 12px; eixos usam Geist como painel, Home mantém DM Sans. Carteira mantém 22px com redução por espaço para números inteiros. Sessão real conferida em 1280px e 390px, troca claro/escuro, campos editáveis e nenhum erro ou excesso horizontal. Dez testes e build OK; não auditadas individualmente todas as telas. Sem publicar.
+- [x] k6 público prévio: 1.000 usuários, 28.492 requisições, zero falhas, p95 63,81ms; somente entrega pública, não mede painel autenticado.
+
 ## Vidro da Home e painel — 05/11 às 22:32
 - [x] Material compartilhado com transparência real, degradê verde, blur 24px/saturação 150%, cantos e reflexo restrito à borda; Home mantém marca, campos, botão e ambiente. Removido fundo 90% opaco do painel; interiores não acumulam blur.
 - [x] Home e carteira autenticada conferidas em 1280px e 390px, campos editáveis, mesmos parâmetros de vidro e nenhum erro ou excesso horizontal. Dez testes passaram; build OK. k6 público prévio: 1.000 usuários, 28.482 requisições, zero falhas, p95 58,91ms; não mede painel autenticado. Somente teste, sem publicar.
