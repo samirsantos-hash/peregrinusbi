@@ -56,6 +56,7 @@ function Bloco({
 }
 
 type Props = {
+  pagina?: string;
   diario: SellerKPI[];
   de?: string;
   ate?: string;
@@ -76,6 +77,7 @@ type Props = {
  * Sem repetir big numbers de GMV/Ads/ROAS fora do bloco 1–2.
  */
 export default function VisaoGeralSecao({
+  pagina = "analise",
   diario,
   de,
   ate,
@@ -89,6 +91,10 @@ export default function VisaoGeralSecao({
   dataGranularity = "daily",
   custId,
 }: Props) {
+  if (pagina === "geral" || pagina === "indicadores") return <div className="space-y-5">
+    <ResumoExecutivo diario={diario as any} de={de} ate={ate} custId={custId} />
+    {pagina === "geral" ? <OperacaoResumo diario={diario as any} /> : <><DailyPerformanceChart kpis={diario as any} granularity="daily" /><FunilVendas kpis={diario as any} periodo={periodo} indice={5} ocultarTitulo /></>}
+  </div>;
   return (
     <div className="painel-noite space-y-5">
       {/* Cabeçalho enxuto: o <h1> da página já é o SecaoHeader; aqui só rótulo + chips */}

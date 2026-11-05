@@ -71,7 +71,7 @@ export default function Anuncios() {
     if (!contaId && contas.data?.length) setContaId(contas.data[0].id);
   }, [contas.data, contaId]);
 
-  useEffect(() => { setMarcados(new Map()); }, [contaId]);
+  useEffect(() => { setMarcados(new Map()); setPromocoesDe(null); setMelhoriasDe(null); }, [contaId]);
 
   const alternar = (a: Anuncio) => setMarcados((m) => {
     const n = new Map(m);
@@ -281,8 +281,8 @@ export default function Anuncios() {
                               <td className="pr-2 py-2 text-right">{a.saude == null ? "Sem dado" : num(a.saude * 100)}</td>
                               <td className="pr-2 py-1.5 whitespace-nowrap text-right">
                                 <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setPrecoPara([a])}>Preço</Button>
-                                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setPromocoesDe(a)}>Promoções</Button>
-                                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setMelhoriasDe(a)}>Melhorias</Button>
+                                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => { setMelhoriasDe(null); setPromocoesDe(a); }}>Promoções</Button>
+                                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => { setPromocoesDe(null); setMelhoriasDe(a); }}>Melhorias</Button>
                                 <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => navigate(`/mercado?conta=${contaId}&item=${a.item_id}`)}>Estudar mercado</Button>
                               </td>
                             </tr>

@@ -32,6 +32,7 @@ interface KpiLike {
 interface ReputationPanelProps {
   kpis: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
+  pagina?: "resumo" | "indicadores" | "analise";
 }
 
 type Severity = "green" | "yellow" | "red";
@@ -99,7 +100,7 @@ function nivelLegivel(n?: string) {
   return [cor[base] ?? base, medalha ? `MercadoLíder ${medalha[0].toUpperCase()}${medalha.slice(1)}` : ""].filter(Boolean).join(" · ");
 }
 
-const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelProps) => {
+const ReputationPanel = ({ kpis, dataGranularity = "daily", pagina = "analise" }: ReputationPanelProps) => {
   const { lights, latest, trendData, overallSeverity, slopes } = useMemo(() => {
     if (kpis.length === 0) {
       return {
@@ -245,7 +246,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
       </div>
 
       {/* Traffic Lights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {pagina !== "analise" && <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {lights.map((light, idx) => {
           const cfg = SEVERITY_CONFIG[light.severity];
           const slope =
@@ -294,14 +295,14 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
             </motion.div>
           );
         })}
-      </div>
+      </div>}
 
       {/* Evolução única: uma linha suave por indicador, cada uma com cor própria */}
-      {trendData.length >= 1 && (() => {
+      {pagina === "analise" && trendData.length >= 1 && (() => {
         const CORES: Record<string, string> = {
           claims: "hsl(var(--brand-blue))",
-          delays: "hsl(var(--ec-laranja, 25 75% 44%))",
-          cancels: "hsl(var(--media))",
+          delays: "hsl(var(--chart-2))",
+          cancels: "hsl(var(--destructive))",
         };
         const statusCor = (v: number, a: number, c: number) =>
           v >= c ? "hsl(var(--crit))" : v >= a ? "hsl(var(--attention-text))" : "hsl(var(--ok))";

@@ -57,6 +57,7 @@ interface CompetitivenessPanelProps {
   sellerCustIdMap?: Record<string, string>;
   listingsQuality?: ListingQuality[];
   dataGranularity?: "consolidated" | "daily";
+  pagina?: string;
 }
 
 /* ── Shared Tooltip ── */
@@ -105,7 +106,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCustIdMap = {}, listingsQuality = [], dataGranularity = "daily" }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCustIdMap = {}, listingsQuality = [], dataGranularity = "daily", pagina = "todas" }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
@@ -390,6 +391,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         </div>
       )}
 
+      {(pagina === "todas" || pagina === "resumo-preco") && <>
       {/* Summary Cards — uses MONTHLY % */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {[
@@ -546,33 +548,33 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         </div>
       )}
 
-      {/* ── Insights Estratégicos ── */}
-      <CompetitivenessInsights kpis={(monthlyKpis.length > 0 ? monthlyKpis : kpis).filter(k => k.visitsExpensive + k.visitsMatch + k.visitsCheaper > 0)} />
+      </>}
+      {(pagina === "todas" || pagina === "estrategica") && <CompetitivenessInsights kpis={(monthlyKpis.length > 0 ? monthlyKpis : kpis).filter(k => k.visitsExpensive + k.visitsMatch + k.visitsCheaper > 0)} />}
 
       {/* ── Auditoria de Preço ── */}
-      <PriceAuditTable kpis={kpis} sellerCustIdMap={sellerCustIdMap} />
+      {(pagina === "todas" || pagina === "estrategica") && <PriceAuditTable kpis={kpis} sellerCustIdMap={sellerCustIdMap} />}
 
       {/* ── Evolução da Competitividade de Preço — área empilhada 100% ── */}
-      <PriceCompetitivenessChart
+      {(pagina === "todas" || pagina === "evolucao") && <PriceCompetitivenessChart
         kpis={monthlyKpis.length > 0 ? monthlyKpis : kpis}
         granularity={monthlyKpis.length > 0 ? "consolidated" : dataGranularity}
         tooltipBpc={`Faixas de preço em área empilhada 100% sobre as comparações BPC — não sobre visitas totais. ${TOOLTIP_BPC}`}
-      />
+      />}
 
       {/* ── Insights e Sugestões de Investigação ── */}
-      <InsightsPrecificacaoPanel
+      {(pagina === "todas" || pagina === "insights") && <InsightsPrecificacaoPanel
         historico={historicoInsights}
         dadosAtual={dadosAtualInsights}
-      />
+      />}
 
       {/* ── Planos de Ação por Segmento ── */}
-      <McKinseyActionPlans
+      {(pagina === "todas" || pagina === "mckinsey") && <McKinseyActionPlans
         listingsQuality={listingsQuality}
         sellerName={kpis[0]?.productName}
-      />
+      />}
 
       {/* ── Anúncios identificados com problema ── */}
-      <div className="flex items-center gap-3 pt-2">
+      {(pagina === "todas" || pagina === "insights") && <><div className="flex items-center gap-3 pt-2">
         <div className="h-px flex-1 bg-border/60" />
         <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           Anúncios identificados com problema
@@ -580,7 +582,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
         <div className="h-px flex-1 bg-border/60" />
       </div>
 
-      <MonitoramentoPrecoPanel sellerId={(kpis?.[0] as any)?.sellerId} />
+      <MonitoramentoPrecoPanel sellerId={(kpis?.[0] as any)?.sellerId} /></>}
 
     </motion.div>
   );

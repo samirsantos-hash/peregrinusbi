@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, AlertTriangle, Plug } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, AlertTriangle, Plug } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { SELLER_TABS, GRUPOS_SECOES, type SellerTab } from "@/config/sellerTabs";
+import { SELLER_TABS, GRUPOS_SECOES, SUBANALISES, type SellerTab } from "@/config/sellerTabs";
 import { NovidadeTip } from "@/components/novidades/novidades";
 import { Button } from "@/components/ui/button";
 import { usePermissoes } from '@/hooks/usePermissoes';
@@ -78,6 +78,8 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
 
 interface Props {
   ativa: string;
+  subativa?: string;
+  onSubChange?: (secao: string, id: string) => void;
   onChange: (id: string) => void;
   alertas?: number;
   mobileAberto: boolean;
@@ -86,6 +88,8 @@ interface Props {
 
 function Conteudo({
   ativa,
+  subativa,
+  onSubChange,
   onChange,
   alertas,
   recolhida,
@@ -93,6 +97,8 @@ function Conteudo({
   mostrarToggle,
 }: {
   ativa: string;
+  subativa?: string;
+  onSubChange?: (secao: string, id: string) => void;
   onChange: (id: string) => void;
   alertas?: number;
   recolhida: boolean;
@@ -102,6 +108,8 @@ function Conteudo({
   const tabAlertas = porId(ID_ALERTAS);
   const { pode } = usePermissoes();
   const navigate = useNavigate();
+  const [ramos, setRamos] = useState<string[]>([ativa]);
+  useEffect(() => { setRamos(atual => atual.includes(ativa) ? atual : [...atual, ativa]); }, [ativa]);
   const tabIntegracao = {
     id: "integracao", label: "Integração", icon: Plug, order: 11.5,
     descricao: "Conectar contas do Mercado Livre",
@@ -123,13 +131,26 @@ function Conteudo({
                 const tab = porId(id);
                 if (!tab || !pode(`${SECAO_PERMISSAO[id]}.visualizar`)) return null;
                 return (
-                  <ItemNav
-                    key={id}
-                    tab={tab}
-                    ativo={ativa === id}
-                    recolhida={recolhida}
-                    onSelect={onChange}
-                  />
+                  <li key={id}>
+                    <Button variant="ghost" aria-label={tab.label} aria-expanded={SUBANALISES[id] ? ramos.includes(id) : undefined}
+                      onClick={() => {
+                        if (recolhida) onToggle();
+                        if (SUBANALISES[id]) setRamos(atual => atual.includes(id) ? atual.filter(r => r !== id) : [...atual, id]);
+                        else onChange(id);
+                      }}
+                      className={cn("panel-nav-item w-full h-10 gap-2 px-3 justify-start text-[13px]", ativa === id ? "bg-muted text-primary" : "text-foreground/80", recolhida && "justify-center px-0")}
+                      title={recolhida ? tab.label : undefined}>
+                      <tab.icon className="h-4 w-4 shrink-0" />
+                      {!recolhida && <><span className="truncate flex-1 text-left">{tab.label}</span>{SUBANALISES[id] && (ramos.includes(id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
+                    </Button>
+                    {!recolhida && ramos.includes(id) && SUBANALISES[id] && <ul className="ml-5 pl-2 border-l border-border space-y-1 py-1">
+                      {SUBANALISES[id].map(sub => <li key={sub.id}><Button variant="ghost" onClick={() => onSubChange?.(id, sub.id)}
+                        aria-current={ativa === id && subativa === sub.id ? "page" : undefined}
+                        className={cn("w-full min-h-9 h-auto py-2 px-2 justify-start text-left whitespace-normal text-xs leading-5", ativa === id && subativa === sub.id ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "text-muted-foreground")}>
+                        {sub.label}
+                      </Button></li>)}
+                    </ul>}
+                  </li>
                 );
               })}
               {g.ids.includes("correlacoes") && pode('integracoes.visualizar') && (
@@ -177,12 +198,12 @@ function Conteudo({
   );
 }
 
-export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, onMobileChange }: Props) {
+export default function PainelSidebar({ ativa, subativa, onSubChange, onChange, alertas, mobileAberto, onMobileChange }: Props) {
   const [recolhida, setRecolhida] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     const salvo = window.localStorage.getItem(CHAVE);
     if (salvo !== null) return salvo === "true";
-    return window.innerWidth < 1280;
+    return false;
   });
 
   useEffect(() => {
@@ -200,11 +221,13 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
       <aside
         className={cn(
           "painel-navigation panel-sidebar hidden lg:block shrink-0 sticky self-start top-4 z-30 overflow-hidden",
-          recolhida ? "w-[64px]" : "w-[224px]",
+          recolhida ? "w-[64px]" : "w-[248px]",
         )}
       >
         <Conteudo
           ativa={ativa}
+          subativa={subativa}
+          onSubChange={onSubChange}
           onChange={onChange}
           alertas={alertas}
           recolhida={recolhida}
@@ -221,6 +244,8 @@ export default function PainelSidebar({ ativa, onChange, alertas, mobileAberto, 
           <div className="h-full pt-8">
             <Conteudo
               ativa={ativa}
+              subativa={subativa}
+              onSubChange={(secao, id) => { onSubChange?.(secao, id); onMobileChange(false); }}
               onChange={selecionar}
               alertas={alertas}
               recolhida={false}

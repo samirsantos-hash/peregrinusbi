@@ -9,6 +9,8 @@
    ===================================================================== */
 @layer base {
   :root {
+    --medal-gold: 44 62% 52%;
+    --medal-silver: 215 14% 66%;
     /* Paleta do Aura */
     --aura-black: 0 0% 0%;
     --aura-white: 0 0% 100%;

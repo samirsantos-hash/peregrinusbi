@@ -24,10 +24,11 @@ export type SellerTab = {
   descricao: string;
   juniorTip: string;
   order: number;
+  children?: { id: string; label: string }[];
 };
 
 export const SELLER_TABS: SellerTab[] = [
-  { id: "efficiency", label: "Visão geral", icon: DollarSign, order: 1,
+  { id: "efficiency", label: "Resumo", icon: DollarSign, order: 1,
     descricao: "Resultado, causas, ritmo e conversão — Resumo e Faturamento numa só leitura",
     juniorTip: "Comece aqui. Cadeia científica: efeito → tráfego → tendência → funil." },
   { id: "pock", label: "Full", icon: Gauge, order: 1.5,
@@ -85,3 +86,20 @@ export const GRUPOS_SECOES = [
 
 /** Aba legada "Faturamento" redireciona para a Visão geral unificada. */
 export const ABA_ALIAS: Record<string, string> = { executive: "efficiency" };
+
+export const SUBANALISES: Record<string, { id: string; label: string }[]> = {
+  efficiency: [{ id: "geral", label: "Resumo geral da conta" }, { id: "indicadores", label: "Indicadores e faturamento" }, { id: "analise", label: "Análise geral" }],
+  reputation: [{ id: "resumo", label: "Resumo da reputação" }, { id: "indicadores", label: "Indicadores" }, { id: "analise", label: "Análise geral" }, { id: "requisitos", label: "Perfil, tier e requisitos" }],
+  competitiveness: [{ id: "resumo-preco", label: "Índice de competitividade" }, { id: "carteira", label: "Leitura da carteira" }, { id: "mckinsey", label: "Análise McKinsey" }, { id: "estrategica", label: "Leitura estratégica" }, { id: "evolucao", label: "Evolução de competitividade" }, { id: "insights", label: "Insights" }, { id: "concorrentes", label: "Concorrentes" }],
+  publicidade: [{ id: "resumo", label: "Resumo da publicidade" }, { id: "sinergia", label: "Sinergia e dependência" }, { id: "produtos", label: "Produtos mais vendidos" }, { id: "historico", label: "Evolução e eficiência" }],
+  logistics: [{ id: "resumo-logistica", label: "Resumo de logística" }, { id: "envios", label: "Envios dos pedidos" }, { id: "full", label: "Full e estoque" }, { id: "flex", label: "Flex por loja" }],
+  quality: [{ id: "resumo", label: "Resumo da qualidade" }, { id: "indicadores", label: "Indicadores" }, { id: "analise", label: "Evolução e diagnóstico" }, { id: "anuncios", label: "Ações por anúncio" }],
+  clips: [{ id: "resumo", label: "Desempenho e ranking" }, { id: "qualidade", label: "Qualidade dos Clips" }],
+  opportunities: [{ id: "resumo", label: "Resumo de oportunidades" }, { id: "campanhas", label: "Campanhas e participação" }, { id: "cofinanciadas", label: "Campanhas cofinanciadas" }],
+  pock: [{ id: "resumo", label: "Potencial da loja" }, { id: "carteira", label: "Comparação da carteira" }, { id: "produtos", label: "Produtos para Full" }],
+};
+
+export function getSubanalise(secao: string, id?: string | null) {
+  const opcoes = SUBANALISES[secao] ?? [];
+  return opcoes.find(opcao => opcao.id === id) ?? opcoes[0];
+}

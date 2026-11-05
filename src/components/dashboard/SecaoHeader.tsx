@@ -4,6 +4,7 @@ import { getSecao } from "@/config/sellerTabs";
 interface Props {
   /** id da aba ativa */
   ativa: string;
+  subTitulo?: string;
   /** nome da loja selecionada, se houver */
   loja?: string | null;
   /** linha de contexto (ex.: período) */
@@ -13,7 +14,7 @@ interface Props {
 }
 
 /** Título da seção — único <h1> da página, com foco e anúncio em troca de seção. */
-export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
+export default function SecaoHeader({ ativa, subTitulo, loja, contexto, resumo }: Props) {
   const { label, descricao: fixa } = getSecao(ativa);
   const descricao = resumo || fixa;
   const h1Ref = useRef<HTMLHeadingElement>(null);
@@ -30,7 +31,7 @@ export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
     }
     h1Ref.current?.focus();
     window.scrollTo({ top: 0, behavior: "auto" });
-  }, [ativa]);
+  }, [ativa, subTitulo]);
 
   return (
     <header className="panel-section-header mb-5 min-w-0 font-sans" data-secao={ativa}>
@@ -58,6 +59,7 @@ export default function SecaoHeader({ ativa, loja, contexto, resumo }: Props) {
           </p>
         )}
       </div>
+      {subTitulo && <p className="mt-2 text-sm font-medium text-primary">{subTitulo}</p>}
       {descricao && (
         <p className="panel-section-briefing mt-3 font-normal tabular-nums break-words">
           {resumo && <strong className="panel-section-summary-label">Resumo: </strong>}

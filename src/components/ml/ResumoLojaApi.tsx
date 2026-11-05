@@ -39,8 +39,9 @@ const Rotulo = ({ children }: { children: React.ReactNode }) => (
  * vidro escuro. Nível superior: Resumo executivo (8 col) + Saúde da conta (4 col),
  * alturas alinhadas. Nível inferior: evolução diária (8 col) + Visitas/Conversão (4 col).
  */
-export default function ResumoLojaApi({ custId, historico }: { custId?: string; historico: React.ReactNode }) {
+export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: { custId?: string; historico: React.ReactNode; pagina?: string }) {
   const q = useAnaliseMl<Resposta>(custId, 'resumo');
+  if (pagina === "analise") return <>{historico}</>;
   if (!custId || (!q.verificandoConexao && !q.conectada && !q.erroConexao)) return <>{historico}</>;
   if (q.verificandoConexao || q.isLoading) return (
     <div className="space-y-5" role="status" aria-label="Carregando resumo da loja">
@@ -187,7 +188,7 @@ export default function ResumoLojaApi({ custId, historico }: { custId?: string; 
       </div>
 
       </div>
-      <LeituraContaApi custId={custId} faturamento30d={a.faturamento} ticketDelta={delta(a.ticket, p.ticket)} />
+      {pagina !== "indicadores" && <LeituraContaApi custId={custId} faturamento30d={a.faturamento} ticketDelta={delta(a.ticket, p.ticket)} />}
 
       <details className="border-t border-border pt-3">
         <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground">
