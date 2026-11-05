@@ -44,7 +44,8 @@ export const FRENTE: Record<string, string> = {
   fotos: "Fotos",
   geral: "Geral",
 };
-const COR: Record<Gravidade, string> = { alta: "text-destructive", media: "text-ec-ambar", baixa: "text-muted-foreground" };
+const COR: Record<Gravidade, string> = { alta: "text-destructive", media: "text-foreground", baixa: "text-muted-foreground" };
+const NIVEL: Record<string, string> = { profesional: "Profissional", professional: "Profissional", basico: "Básico", "básico": "Básico", basic: "Básico", satisfactorio: "Satisfatório", satisfactory: "Satisfatório" };
 const ROTULO: Record<Gravidade, string> = { alta: "Alta", media: "Média", baixa: "Baixa" };
 
 const copiar = async (texto: string) => {
@@ -146,14 +147,14 @@ export function MelhoriasDoAnuncio({ accountId, item, aoFechar }: {
                   <p>{m.ia.resumo}</p>
                 </section>
               ) : (
-                <p className="text-ec-ambar">A IA não respondeu{m.erro_ia ? `: ${m.erro_ia}` : "."} Os achados das regras estão abaixo; use Gerar de novo mais tarde.</p>
+                <p className="text-muted-foreground">A IA não respondeu{m.erro_ia ? `: ${m.erro_ia}` : "."} Os achados das regras estão abaixo; use Gerar de novo mais tarde.</p>
               )}
 
               {m.ia && m.ia.recomendacoes.length > 0 && (
                 <section className="space-y-2">
                   <h3 className="font-medium">Recomendações</h3>
                   {m.ia.recomendacoes.map((r, i) => (
-                    <div key={i} className="border-t border-border pt-2">
+                    <div key={i} className="detalhe-cartao p-3">
                       <p className="text-xs text-muted-foreground">
                         <span className={COR[r.prioridade]}>{ROTULO[r.prioridade]}</span> · {FRENTE[r.frente] ?? r.frente} · {r.origem === "regra" ? "Regra do painel" : "Análise da IA"}
                       </p>
@@ -169,11 +170,11 @@ export function MelhoriasDoAnuncio({ accountId, item, aoFechar }: {
                 {d.qualidade ? (
                   <>
                     <p className="tabular-nums">
-                      Nota {d.qualidade.score == null ? "sem dado" : num(d.qualidade.score)} de 100{d.qualidade.nivel ? ` · ${d.qualidade.nivel}` : ""}
+                      Nota {d.qualidade.score == null ? "sem dado" : num(d.qualidade.score)} de 100{d.qualidade.nivel ? ` · ${NIVEL[d.qualidade.nivel.toLowerCase()] ?? d.qualidade.nivel}` : ""}
                       {d.qualidade.calculado_em ? <span className="text-muted-foreground"> · calculada em {dataHoraBr(d.qualidade.calculado_em)}</span> : null}
                     </p>
                     {d.qualidade.pendencias.length === 0 && <p className="text-muted-foreground">Sem pendências apontadas pelo Mercado Livre.</p>}
-                    {d.qualidade.pendencias.map((p, i) => (
+                    {d.qualidade.pendencias.filter((p, i, t) => t.findIndex(o => o.titulo === p.titulo) === i).map((p, i) => (
                       <div key={i} className="flex items-start justify-between gap-2 border-t border-border pt-2">
                         <div>
                           <p>{p.titulo}</p>
@@ -195,7 +196,7 @@ export function MelhoriasDoAnuncio({ accountId, item, aoFechar }: {
               <section className="space-y-1">
                 <h3 className="font-medium">Ficha técnica</h3>
                 <Lista rotulo="Obrigatórios vazios" itens={d.ficha.obrigatorios} cor="text-destructive" />
-                <Lista rotulo="Podem ser obrigatórios (conferir)" itens={d.ficha.condicionais} cor="text-ec-ambar" />
+                <Lista rotulo="Podem ser obrigatórios (conferir)" itens={d.ficha.condicionais} cor="text-foreground" />
                 <Lista rotulo="Opcionais vazios" itens={d.ficha.opcionais_vazios} cor="text-muted-foreground" />
                 {!d.ficha.obrigatorios.length && !d.ficha.condicionais.length && !d.ficha.opcionais_vazios.length && (
                   <p className="text-muted-foreground">Todos os atributos da categoria estão preenchidos.</p>

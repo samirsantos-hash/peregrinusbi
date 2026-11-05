@@ -1,7 +1,8 @@
 # Roadmap
 
 ## Identidade do HTML nos detalhes (05/11)
-- [ ] Aplicar identidade do HTML de referência em cada detalhe e corrigir campos fora dos parâmetros — aguardando definição da tela e do HTML.
+- [x] Identidade Ledger do HTML (linhas finas, rótulos em caixa alta com traço, títulos leves, brilho verde) nas laterais de promoções e melhorias, mantendo DM Sans e verde da marca. Corrigidos: códigos crus do ML, percentuais com ponto, nível em espanhol, pendências repetidas e cor âmbar fora da paleta.
+- [x] Chuva verde só enquanto há dados carregando; some suavemente ao terminar.
 
 ## Sinais de promoções na lista (05/11)
 - [x] Coluna Promoções: X vermelho sem participação; um check verde sem fundo por promoção ativa ou programada (convites não contam). AUTOPECASLONDRINA: 14 sem e 36 com promoções nos 50 primeiros.

@@ -43,6 +43,9 @@ type Resposta = { item: { item_id: string; titulo: string | null; preco: number 
 const hoje = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
 const somarDias = (d: string, n: number) => new Date(Date.parse(`${d}T12:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 const dataBr = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) : "—");
+const pct = (v: number | null) => `${(v ?? 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
+/** Códigos internos do ML (ex.: SMART_LIGHTNING) nunca aparecem crus na tela. */
+const legivel = (t: string) => /^[A-Z0-9_]+$/.test(t) ? t.toLowerCase().split("_").map((w, i) => i ? w : w[0].toUpperCase() + w.slice(1)).join(" ") : t;
 
 /** Promoções de um anúncio lidas ao vivo do ML, com entrar, alterar oferta e sair. */
 export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
@@ -91,10 +94,11 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
               const chave = chaveDe(p);
               const ed = editando?.chave === chave ? editando : null;
               return (
-                <div key={chave} className="border border-border [border-width:0.5px] p-3 space-y-2 text-sm">
+                <div key={chave} className="detalhe-cartao p-3 space-y-2 text-sm">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-medium">{p.nome_tipo}{p.nome ? ` · ${p.nome}` : ""}</p>
+                      <p className="detalhe-rotulo">{legivel(p.nome_tipo)}</p>
+                      {p.nome && <p className="font-medium">{legivel(p.nome)}</p>}
                       <p className="text-xs text-muted-foreground">
                         {STATUS_PROMO_ITEM[p.status] ?? p.status}
                         {p.inicio || p.fim ? ` · ${dataBr(p.inicio)} a ${dataBr(p.fim)}` : ""}
@@ -111,9 +115,9 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
                     </p>
                   )}
                   {(p.meli_pct != null || p.vendedor_pct != null) && (
-                    <p className="text-xs text-muted-foreground">Desconto: Mercado Livre {p.meli_pct ?? 0}% · vendedor {p.vendedor_pct ?? 0}%</p>
+                    <p className="text-xs text-muted-foreground tabular-nums">Desconto: Mercado Livre {pct(p.meli_pct)} · vendedor {pct(p.vendedor_pct)}</p>
                   )}
-                  {p.motivo_sair && !p.pode.sair && <p className="text-xs text-ec-ambar">{p.motivo_sair}</p>}
+                  {p.motivo_sair && !p.pode.sair && <p className="text-xs text-muted-foreground">{p.motivo_sair}</p>}
 
                   {ed ? (
                     <FormOferta
