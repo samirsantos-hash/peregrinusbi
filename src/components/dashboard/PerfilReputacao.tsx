@@ -25,7 +25,7 @@ export default function PerfilReputacao({ seller, repLevel, requisitos = false }
   const nomeMedalha = tier === 1 ? "MercadoLíder Platinum" : tier === 2 ? "MercadoLíder Gold" : tier === 3 ? "MercadoLíder Silver" : r ? "Sem medalha informada" : "Medalha não confirmada";
   const nivel = r?.nivel ?? repLevel?.replace(/_(platinum|gold|silver)$/i, "");
   const nivelNome: Record<string, string> = { "5_green": "Verde", green: "Verde", "4_light_green": "Verde-claro", light_green: "Verde-claro", "3_yellow": "Amarela", yellow: "Amarela", "2_orange": "Laranja", orange: "Laranja", "1_red": "Vermelha", red: "Vermelha" };
-  const perfil = perfilLegivel(seller.cluster);
+  const perfil = perfilLegivel(seller.cluster || seller.subCluster);
   return <section className="space-y-6 border-b border-border pb-6" aria-label="Identidade e reputação da loja">
     <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-5 items-center">
       <div className={cn("w-20 h-24 rounded-lg border border-border bg-muted/40 flex items-center justify-center", tier === 2 ? "text-medal-gold" : "text-medal-silver")}><Award className="w-14 h-14" strokeWidth={1.3} aria-hidden /></div>

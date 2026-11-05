@@ -569,7 +569,7 @@ const Index = () => {
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
                     <NovidadesPrompt />
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
-                    {pagina === "geral" && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} />}
+                    {pagina === "geral" && selectedSeller && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} />}
                     <ResumoLojaApi pagina={pagina} custId={sellerCustIdMap[selectedSeller]} historico={
                       <>
                         {isConsolidado && <CarteiraNaSecao secao="efficiency" />}

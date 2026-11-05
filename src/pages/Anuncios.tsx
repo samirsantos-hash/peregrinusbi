@@ -137,7 +137,7 @@ export default function Anuncios() {
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto w-full max-w-[1760px] px-3 sm:px-5 xl:px-6 py-6 space-y-5">
+      <div className={`mx-auto w-full max-w-[1760px] px-3 sm:px-5 xl:px-6 py-6 space-y-5 ${promocoesDe || melhoriasDe ? "lg:!pr-[440px]" : ""}`}>
         <Button variant="ghost" size="sm" className="gap-1.5 px-2" onClick={() => navigate("/")}>
           <ArrowLeft className="h-4 w-4" /> Painel
         </Button>

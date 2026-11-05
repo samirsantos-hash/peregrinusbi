@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+html body [data-ui-surface="sheet"].listing-detail-sheet {
+  width: min(88vw, 420px);
+  max-width: min(88vw, 420px);
+}
+
 /* =====================================================================
    Aura Cloud Design System aplicado ao Peregrinus
    Tokens em HSL sem alfa: o código usa hsl(var(--x) / a) e bg-x/NN.

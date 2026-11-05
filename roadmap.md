@@ -1,10 +1,10 @@
 # Roadmap
 
 ## Árvore de acessos e detalhes laterais (05/11)
-- [ ] Organizar os acessos do painel por assunto e subanálise, mantendo permissões e links existentes.
-- [ ] Resumo geral com resultados essenciais e reputação com medalha, perfil, tier e requisitos existentes, sem inventar classificação oficial.
-- [ ] Promoções e melhorias de anúncios em lateral direita compacta, preservando a lista.
-- [ ] Verificar navegação autenticada, computador/celular, testes e entrega pública.
+- [x] Árvore por assunto e subanálise com subaba, links antigos e permissões preservados; páginas específicas para resumo, reputação, preço, publicidade, logística, qualidade, Clips, oportunidades e Full.
+- [x] Resumo com resultados essenciais; reputação com medalha da API, tier associado, perfil importado e tabela dos limites existentes sem classificar por receita ou proxy de cancelamentos. AUTOPECASLONDRINA: Gold/Tier 2 e Mature; ausência de dados explícita.
+- [x] Promoções e melhorias em lateral direita não modal de 420px no computador e 88vw no celular, sem escurecer/bloquear lista; troca direta conferida e somente uma lateral aberta, confirmações comerciais preservadas.
+- [x] 47 testes passaram e build OK; sessão master navegou requisitos, evolução de preço e dez produtos reais; celular 390px com árvore e promoções conferidos, sem erros de execução. Última repetição mobile interrompida ao voltar ao painel; fluxo mobile já conferido anteriormente. k6 prévio 1.000 usuários: 28.388 requisições, zero falhas, p95 público 87,39ms; não mede painel autenticado.
 
 ## Modal real dos pedidos (05/11)
 - [x] Mix usa envios reais da API própria com cobertura explícita, consultas deduplicadas e limite de 45s/500 envios; não usa anúncio como prova. Coleta e ponto de coleta distintos; postagem em agência não é prova de Correios.

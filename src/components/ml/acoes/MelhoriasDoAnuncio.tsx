@@ -108,7 +108,7 @@ export function MelhoriasDoAnuncio({ accountId, item, aoFechar }: {
 
   return (
     <Sheet modal={false} open={!!item} onOpenChange={(v) => !v && aoFechar()}>
-      <SheetContent side="right" className="w-[88vw] max-w-[420px] sm:max-w-[420px] overflow-y-auto p-4 break-words" onInteractOutside={e => e.preventDefault()}>
+      <SheetContent side="right" className="listing-detail-sheet w-[88vw] max-w-[420px] sm:max-w-[420px] overflow-y-auto p-4 break-words" onInteractOutside={e => e.preventDefault()}>
         <SheetHeader>
           <SheetTitle>Melhorias do anúncio</SheetTitle>
           <SheetDescription>{item?.titulo ?? item?.item_id} · {item?.item_id}</SheetDescription>
