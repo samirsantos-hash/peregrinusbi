@@ -668,10 +668,11 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                 </p>
               )}
             </div>
-            <ClipsRanking itens={listingsQuality ?? []} nomes={dedupedEligibility} />
           </div>
         </div>
       )}
+
+      <ClipsRanking itens={listingsQuality ?? []} nomes={dedupedEligibility} />
 
       {/* ── Row 1: Metric cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">

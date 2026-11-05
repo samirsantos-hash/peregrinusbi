@@ -37,6 +37,7 @@ K6_SUMMARY_PATH=/tmp/k6-publico-summary.json k6 run scripts/k6-publico.js
 
 O resumo bruto é gravado fora do repositório. O alvo é fixo e somente de leitura. Evitar execuções repetidas desnecessárias em produção. Um teste futuro autenticado precisa de cenário próprio com contas autorizadas e leituras limitadas; não deve chamar ML ou IA para simular simples navegação.
 ## Regra obrigatória (04/11/2026)
+ - 05/11/2026: revisão de qualidade e ranking de Clips, k6 prévio com 100 usuários, 2.223 requisições, zero falhas, p95 público 83,26 ms (também abaixo de 1s). Apenas entrega pública, sem painel autenticado, IA ou ML.
  - 05/11/2026: antes das três correções de monitoramento, 100 usuários (20s subida, 60s platô, 20s descida), 2.222 requisições, zero falhas, p95 público 90,62 ms. Não mede painel autenticado, sincronizações ou capacidade do banco.
  - 05/11/2026: remoção de matriz repetida em Publicidade; teste prévio com 100 usuários (20s subida, 60s platô, 20s descida), 2.238 requisições, zero falhas, p95 público 70,80 ms. Não mede painel autenticado.
 Toda tela nova ou ajuste roda este teste antes da entrega: 100 usuários por padrão, 1.000 quando mexer na página inicial. Bloqueia se falhas >1% ou p95 >1s. Registrar o resultado abaixo.

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { SellerKPI } from "./useSellerData";
+import { evidenciaQualidadeClips } from "@/lib/qualidadeClips";
 
 function transformDailyKpi(row: any, sellerNickname: string): SellerKPI {
   const gmv = Number(row.gmv_lc) || 0;
@@ -26,6 +27,7 @@ function transformDailyKpi(row: any, sellerNickname: string): SellerKPI {
   const pctPostagem = Math.max(0, 100 - pctFull - pctFlex);
 
   return {
+    evidenciaQualidadeClips: evidenciaQualidadeClips(row),
     id: row.id,
     sellerId: row.seller_id,
     date: row.data,

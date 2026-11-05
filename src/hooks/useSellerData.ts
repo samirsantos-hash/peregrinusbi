@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/fetchAllRows";
+import { evidenciaQualidadeClips, type EvidenciaQualidadeClips } from "@/lib/qualidadeClips";
 
 export interface Seller {
   id: string;
@@ -12,6 +13,7 @@ export interface Seller {
 }
 
 export interface SellerKPI {
+  evidenciaQualidadeClips?: EvidenciaQualidadeClips;
   id: string;
   sellerId: string;
   date: string;
@@ -107,6 +109,7 @@ export function transformKpi(row: any, sellerNickname: string): SellerKPI {
   const pctPostagem = Math.max(0, 100 - pctFull - pctFlex);
 
   return {
+    evidenciaQualidadeClips: evidenciaQualidadeClips(row),
     id: row.id,
     sellerId: row.seller_id,
     date: row.data,

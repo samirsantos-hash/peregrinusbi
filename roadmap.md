@@ -1,5 +1,9 @@
 # Roadmap
 
+## Qualidade e melhores Clips (05/11)
+- [x] Radar técnico separado de metas de Clips; ausência e pacote legado de qualidade totalmente zerado não recebem classificação crítica. Ranking de até 10 anúncios com visitas, pedidos, conversão e datas, sem distribuir totais da loja.
+- [x] Seis testes e build OK; AUTOPECASLONDRINA autenticada em computador/celular sem erros ou transbordamento: medição 01/11 com 1.009 visitas, 45 pedidos, 4,46% e R$4.863,22 via Clips. Ranking por anúncio indisponível nessa loja, explicitado sem inventar vencedores. k6 público prévio: 100 usuários, 2.223 requisições, zero falhas e p95 83,26 ms; não mede painel logado.
+
 ## Avisos de monitoramento (05/11)
 - [x] Restaurada visualização para 38 legados não revisados; 50/50 legados têm leitura, 8 revisados intocados. Escopo e edição inalterados; reparo idempotente em scripts/restaurar-carteira-legado.sql.
 - [x] GETs Ads com prazo de 80 s, paginação interrompível e marcador condicionado à gravação completa. Função implantada: AUTOPECASLONDRINA retornou HTTP 200 em 82,53 s, 96 campanhas, 962 anúncios, 165 pendências (não cobertura completa).
