@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Check, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader } from "@/components/ds";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
@@ -109,6 +110,20 @@ export default function Anuncios() {
       const { data, error } = await (supabase as any).rpc("ml_buscar_anuncios", { p_account_id: contaId, p_termo: busca, p_limite: 100 });
       if (error) throw error;
       return (data ?? []) as Anuncio[];
+    },
+  });
+
+  const idsVisiveis = (resultados.data ?? []).map(a => a.item_id);
+  const participacoes = useQuery({
+    queryKey: ["ml-promo-participacoes", contaId, idsVisiveis.join(",")],
+    enabled: !!contaId && idsVisiveis.length > 0,
+    queryFn: async () => {
+      const { data, error } = await (supabase as any).from("ml_promotion_items").select("item_id, promotion_id")
+        .eq("account_id", contaId).in("item_id", idsVisiveis).in("status", ["started", "pending", "programmed", "active"]);
+      if (error) throw error;
+      const porItem = new Map<string, Set<string>>();
+      for (const r of data ?? []) { const s = porItem.get(r.item_id) ?? new Set(); s.add(r.promotion_id); porItem.set(r.item_id, s); }
+      return new Map([...porItem].map(([k, s]) => [k, s.size]));
     },
   });
 
@@ -222,6 +237,7 @@ export default function Anuncios() {
                         <th className="pr-2">Tipo</th>
                         <th className="pr-2">Envio</th>
                         <th className="pr-2 text-right">Saúde</th>
+                        <th className="pr-2 text-center">Promoções</th>
                         <th className="pr-2" />
                       </tr>
                     </thead>
@@ -279,6 +295,14 @@ export default function Anuncios() {
                                 {a.frete_gratis && <span className="block text-muted-foreground">Frete grátis</span>}
                               </td>
                               <td className="pr-2 py-2 text-right">{a.saude == null ? "Sem dado" : num(a.saude * 100)}</td>
+                              <td className="pr-2 py-2 text-center">
+                                {participacoes.isError || !participacoes.data ? <span className="text-muted-foreground">—</span>
+                                  : (participacoes.data.get(a.item_id) ?? 0) === 0
+                                    ? <X className="mx-auto h-4 w-4 text-destructive" aria-label="Sem promoções ativas" />
+                                    : <span className="inline-flex items-center gap-0.5" aria-label={`${participacoes.data.get(a.item_id)} promoções ativas`} title={`${participacoes.data.get(a.item_id)} promoções ativas`}>
+                                        {Array.from({ length: participacoes.data.get(a.item_id)! }, (_, i) => <Check key={i} className="h-4 w-4 text-primary" strokeWidth={3} />)}
+                                      </span>}
+                              </td>
                               <td className="pr-2 py-1.5 whitespace-nowrap text-right">
                                 <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setPrecoPara([a])}>Preço</Button>
                                 <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => { setMelhoriasDe(null); setPromocoesDe(a); }}>Promoções</Button>
@@ -295,7 +319,7 @@ export default function Anuncios() {
                                 <td className="pr-2 text-right">{brl(v.preco, true)}</td>
                                 <td className="pr-2 text-right">{num(v.estoque)}</td>
                                 <td className="pr-2 text-right">{num(v.vendidos)}</td>
-                                <td colSpan={5} />
+                                <td colSpan={6} />
                               </tr>
                             ))}
                           </Fragment>

@@ -1,5 +1,8 @@
 # Roadmap
 
+## Sinais de promoções na lista (05/11)
+- [x] Coluna Promoções: X vermelho sem participação; um check verde sem fundo por promoção ativa ou programada (convites não contam). AUTOPECASLONDRINA: 14 sem e 36 com promoções nos 50 primeiros.
+
 ## Alterações confirmadas nos anúncios (05/11)
 - [x] Medida cada confirmação com itens aplicados (status feito) em preço, publicidade e promoções, com quantidade; testes e esquema válidos.
 - [ ] Atribuir alterações às melhorias de IA: as melhorias só sugerem texto e não geram ação; impacto fica como comparação semanal antes/depois, não causalidade.
