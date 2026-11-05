@@ -5,11 +5,12 @@ import { useAnaliseMl } from '@/hooks/useAnaliseMl';
 import KpiVidro from '@/components/dashboard/visaoGeral/KpiVidro';
 import SaudeConta from '@/components/dashboard/visaoGeral/SaudeConta';
 import { RefreshCw } from 'lucide-react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import LeituraContaApi from './LeituraContaApi';
 import InvestimentoAdsResumo from './InvestimentoAdsResumo';
+import SinteseIndicadores from './SinteseIndicadores';
 
-type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number }[] };
+type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number; pedidos?: number; cancelados?: number }[] };
 type Resposta = { atual: Total; anterior: Total; periodo: { inicio: string; fim: string }; anteriorPeriodo: { inicio: string; fim: string }; consultadoEm: string };
 
 const br = (s: string) => s.split('-').reverse().join('/');
@@ -19,13 +20,12 @@ const PERIODO_DELTA = 'vs 30 dias anteriores';
 const delta = (atual: number | null, ant: number | null, pontos = false) =>
   atual == null || ant == null || (!pontos && ant === 0) ? null : pontos ? (atual - ant) * 100 : (atual / ant - 1) * 100;
 
-function TooltipVidro({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
+function TooltipVidro({ active, payload, label }: { active?: boolean; payload?: { value: number; dataKey?: string; name?: string }[]; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
     <div className="panel-glass-tooltip p-3 text-xs">
       <p className="text-muted-foreground tabular-nums">{label ? br(label) : ''}</p>
-      <p className="mt-0.5 font-semibold tabular-nums">{brl(payload[0].value, true)}</p>
-      <p className="text-muted-foreground">Faturamento pago</p>
+      {payload.map(p => <p key={p.dataKey} className={`mt-1 tabular-nums ${p.dataKey === 'cancelados' ? 'text-destructive' : 'text-foreground'}`}>{p.name}: {p.dataKey === 'faturamento' ? brl(p.value, true) : num(p.value)}</p>)}
     </div>
   );
 }
@@ -114,7 +114,8 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
           </div>
         </div>
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-4">
-          <SaudeConta custId={custId} />
+          <SaudeConta custId={custId} compact />
+          <SinteseIndicadores custId={custId} atual={a} anterior={p} periodo={periodo} anteriorPeriodo={q.data.anteriorPeriodo} />
         </div>
       </div>
       </div>
@@ -127,7 +128,7 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
           </div>
           <div className="mt-4 h-[250px] min-w-0">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={a.serie} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <BarChart data={a.serie} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
                 <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
                 <XAxis
                   dataKey="data"
@@ -146,18 +147,31 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
                   tickLine={false}
                 />
                 <Tooltip content={<TooltipVidro />} cursor={{ stroke: 'hsl(var(--border))', strokeDasharray: '3 3' }} />
-                <Line
-                  type="linear"
+                <Bar
                   dataKey="faturamento"
-                  stroke="hsl(var(--chart-1))"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, fill: 'hsl(var(--chart-1))', stroke: 'hsl(var(--card))', strokeWidth: 2 }}
-                  connectNulls={false}
+                  name="Faturamento pago"
+                  fill="hsl(var(--chart-1))"
+                  maxBarSize={18}
+                  isAnimationActive={false}
                 />
-              </LineChart>
+              </BarChart>
             </ResponsiveContainer>
           </div>
+          <h4 className="mt-4 text-sm font-semibold text-foreground">Pedidos por dia</h4>
+          <div className="mt-2 flex flex-wrap gap-4 text-xs"><span className="text-primary">Pedidos pagos</span><span className="text-destructive">Pedidos cancelados</span></div>
+          <div className="mt-3 h-[170px] min-w-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={a.serie} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="data" tickFormatter={(d: string) => br(d).slice(0, 5)} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={28} />
+                <YAxis allowDecimals={false} width={40} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                <Tooltip content={<TooltipVidro />} cursor={{ fill: 'hsl(var(--muted) / .3)' }} />
+                <Bar dataKey="pedidos" name="Pedidos pagos" fill="hsl(var(--chart-1))" maxBarSize={12} isAnimationActive={false} />
+                <Bar dataKey="cancelados" name="Pedidos cancelados" fill="hsl(var(--destructive))" maxBarSize={12} isAnimationActive={false} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">Status atual por data de criação do pedido; a API deste resumo não identifica quem cancelou.</p>
           <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
             <span className="tabular-nums">
               Cancelados: <span className="font-medium text-foreground">{num(a.cancelados)}</span> pedidos

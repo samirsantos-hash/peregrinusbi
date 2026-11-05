@@ -11,7 +11,7 @@ type Periodo = { inicio: string; fim: string };
 type Linha = { dia: string; campaign_id: number; cost: number | null };
 type Props = { custId: string; periodo: Periodo; anteriorPeriodo: Periodo; faturamento: number; faturamentoAnterior: number };
 
-export default function InvestimentoAdsResumo({ custId, periodo, anteriorPeriodo, faturamento, faturamentoAnterior }: Props) {
+export function useInvestimentoAdsResumo({ custId, periodo, anteriorPeriodo, faturamento, faturamentoAnterior }: Props) {
   const conta = useContaMl(custId);
   const accountId = conta.data;
   const q = useQuery({
@@ -27,14 +27,20 @@ export default function InvestimentoAdsResumo({ custId, periodo, anteriorPeriodo
       return data;
     },
   });
-  if (conta.isLoading || q.isLoading) return <>{[0, 1].map(i => <Skeleton key={i} className="h-[180px] w-full" />)}</>;
   const rows = !q.error && accountId ? q.data ?? [] : [];
   const atual = metaInvestimentoAds(rows, periodo.inicio, periodo.fim, faturamento);
   const anterior = metaInvestimentoAds(rows, anteriorPeriodo.inicio, anteriorPeriodo.fim, faturamentoAnterior);
+  return { atual, anterior, isLoading: conta.isLoading || q.isLoading, error: q.error };
+}
+
+export default function InvestimentoAdsResumo(props: Props) {
+  const { faturamento } = props;
+  const { atual, anterior, isLoading, error } = useInvestimentoAdsResumo(props);
+  if (isLoading) return <>{[0, 1].map(i => <Skeleton key={i} className="h-[180px] w-full" />)}</>;
   const faixa = atual?.faixa;
   const delta = atual && anterior ? atual.share - anterior.share : null;
   const metaDelta = atual && anterior ? atual.atingimento - anterior.atingimento : null;
-  const cobertura = q.error ? 'Leitura de Ads indisponível.' : 'Aguardando cobertura diária completa de Ads.';
+  const cobertura = error ? 'Leitura de Ads indisponível.' : 'Aguardando cobertura diária completa de Ads.';
   return <>
     <KpiVidro rotulo="Investimento em Ads" valor={atual ? `${num(atual.share, 2)}%` : 'Sem dado'}
       delta={delta} deltaPontos melhorQuando="neutro" periodo="vs 30 dias anteriores"

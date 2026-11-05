@@ -103,7 +103,7 @@ function MiniColuna({ rotulo, valor, meta, cor }: { rotulo: string; valor: strin
  * cancelamentos) em mini-colunas com divisores translúcidos.
  * Fonte: `ml_sync_tema.reputacao` (conta conectada). Altura preenche a coluna.
  */
-export default function SaudeConta({ custId, className }: { custId?: string; className?: string }) {
+export default function SaudeConta({ custId, className, compact = false }: { custId?: string; className?: string; compact?: boolean }) {
   const q = useReputacaoMl(custId);
   const r = q.data?.dados ?? null;
   const idx = indiceNivel(r?.nivel);
@@ -117,7 +117,8 @@ export default function SaudeConta({ custId, className }: { custId?: string; cla
     <section
       aria-label="Saúde da conta"
       className={cn(
-        "noite-vidro flex h-full min-w-0 flex-col rounded-2xl border border-white/[0.08] bg-white/[0.04] p-5",
+        "noite-vidro flex min-w-0 flex-col rounded-2xl border border-border bg-card p-5",
+        compact ? "h-auto" : "h-full",
         "shadow-[inset_0_1px_1px_rgba(255,255,255,0.06),0_8px_24px_rgba(0,0,0,0.3)] backdrop-blur-xl",
         "transition-transform duration-200",
         className,
@@ -169,7 +170,7 @@ export default function SaudeConta({ custId, className }: { custId?: string; cla
             />
           </div>
 
-          <footer className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/5 pt-3 text-xs text-slate-400">
+          <footer className={cn("flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border pt-3 text-xs text-muted-foreground", compact ? "mt-4" : "mt-auto")}>
             <span className="tabular-nums">Janela oficial · 60 dias</span>
             {r.vendas_concluidas_60d != null ? <span className="tabular-nums">{num(r.vendas_concluidas_60d)} vendas concluídas</span> : null}
             {atualizado ? <span className="tabular-nums">Atualizado {atualizado}</span> : null}

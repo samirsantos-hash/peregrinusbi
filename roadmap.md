@@ -1,5 +1,9 @@
 # Roadmap
 
+## Evolução diária e síntese da conta — 05/11 às 21:29
+- [x] Faturamento em barras e faixa conjunta de pedidos pagos/cancelados dia a dia, cancelados em vermelho; série existente da API, sem rateio mensal. Cancelamentos rotulados por status atual e data de criação: não há evidência de quem cancelou.
+- [x] Saúde da conta compacta (282px no desktop) e cartão de síntese: receita −0,4%, pedidos −3,5%, ticket +3,2%, unidades −3,6%, custo Ads −26,4%, meta 67,5% na AUTOPECASLONDRINA. Mesma consulta/cache de Ads reutilizada, sem IA. Quatro testes passaram, sessão real desktop/390px sem erros ou excesso horizontal, três séries de barras e build OK. k6 público prévio: resultado abaixo; não mede painel logado. Somente teste.
+
 ## Correção das margens e vidro — 05/11 às 21:19
 - [x] Removidos limite central de 1400px e margens de 48px; margem externa agora 20px. Regra opaca corrigida: vidro confirmado com degradê branco 3,5%/verde 4,5% e blur 24px. Sessão real em 1143px, 1605px e 390px sem erros ou valores cortados; build OK. k6 público prévio: 28.459 requisições, zero falhas, p95 76,15ms (não mede painel logado). Somente teste.
 
