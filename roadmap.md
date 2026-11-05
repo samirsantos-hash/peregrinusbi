@@ -1,5 +1,8 @@
 # Roadmap
 
+## Identidade do HTML nos detalhes (05/11)
+- [ ] Aplicar identidade do HTML de referência em cada detalhe e corrigir campos fora dos parâmetros — aguardando definição da tela e do HTML.
+
 ## Sinais de promoções na lista (05/11)
 - [x] Coluna Promoções: X vermelho sem participação; um check verde sem fundo por promoção ativa ou programada (convites não contam). AUTOPECASLONDRINA: 14 sem e 36 com promoções nos 50 primeiros.
 
