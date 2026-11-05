@@ -40,7 +40,7 @@ const Auth = () => {
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 bg-background">
       <AuraBackground />
-      <div className="relative z-10 glass-card p-8 w-full max-w-sm space-y-6 animate-fade-in">
+      <div className="relative z-10 glass-card auth-glass p-8 w-full max-w-sm space-y-6 animate-fade-in">
 
 
         <div className="text-center space-y-3">

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Vidro da Home e painel — 05/11 às 22:32
+- [x] Material compartilhado com transparência real, degradê verde, blur 24px/saturação 150%, cantos e reflexo restrito à borda; Home mantém marca, campos, botão e ambiente. Removido fundo 90% opaco do painel; interiores não acumulam blur.
+- [x] Home e carteira autenticada conferidas em 1280px e 390px, campos editáveis, mesmos parâmetros de vidro e nenhum erro ou excesso horizontal. Dez testes passaram; build OK. k6 público prévio: 1.000 usuários, 28.482 requisições, zero falhas, p95 58,91ms; não mede painel autenticado. Somente teste, sem publicar.
+
 ## Leitura da conta e sinergia — 05/11 às 22:14
 - [x] Sexto cartão com média oficial ML de 93,2/100 em 9 de 188 anúncios ativos da AUTOPECASLONDRINA; 179 sem avaliação explícitos, sem IA nem substituição pelo índice da carteira.
 - [x] Sinergia e cancelamentos mensais reorganizados; 28 testes passaram, sessão real em 1280px e 390px sem erros ou excesso horizontal, build OK. k6 público prévio: 28.409 requisições, zero falhas, p95 69,80ms; não mede painel autenticado. Somente teste, sem publicar.
