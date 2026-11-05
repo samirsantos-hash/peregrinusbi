@@ -2483,3 +2483,15 @@ html body .peregrinus-panel .carteira-kpi .carteira-kpi-valor {
   html body .peregrinus-panel.peregrinus-panel .panel-container { padding-inline: 16px; }
   html body .peregrinus-panel.peregrinus-panel .panel-topbar { border-radius: 24px; padding: 16px; }
 }
+
+/* Account summary: readable financial values and balanced operational columns. */
+html body .peregrinus-panel .resumo-sinergia { font-size: 14px; line-height: 1.5; }
+html body .peregrinus-panel .resumo-sinergia h4 { font-size: 14px; line-height: 20px; font-weight: 600; }
+html body .peregrinus-panel .resumo-sinergia p { overflow-wrap: break-word; }
+html body .peregrinus-panel .resumo-sinergia dl > div { min-width: 0; }
+html body .peregrinus-panel .resumo-sinergia dt { font-size: 12px; line-height: 20px; margin-bottom: 8px; }
+html body .peregrinus-panel .resumo-sinergia dd { font-size: 24px; line-height: 32px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0; overflow-wrap: normal; }
+html body .peregrinus-panel .resumo-cancelamentos dd { font-size: 20px; line-height: 28px; }
+html body .peregrinus-panel .resumo-cancelamentos dl > div:last-child { grid-column: 1 / -1; }
+html body .peregrinus-panel .resumo-cancelamentos dl > div:last-child dd { font-size: 24px; }
+html body .peregrinus-panel .resumo-sinergia-evolucao { padding-bottom: 16px; border-bottom: 1px solid var(--panel-divider); }

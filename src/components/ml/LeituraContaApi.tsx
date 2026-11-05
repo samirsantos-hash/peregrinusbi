@@ -2,7 +2,7 @@
 // logística (mix) e ruptura de estoque — tudo da API do Mercado Livre.
 // Métrica ausente aparece como "Sem dado"; nada é estimado.
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Megaphone, PackageX, ShieldCheck, Tag, Truck } from "lucide-react";
+import { AlertTriangle, Megaphone, PackageX, ShieldCheck, Tag, Truck, BadgeCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { brl, num, pctFracao } from "@/lib/format";
@@ -11,6 +11,7 @@ import { avaliarRuptura } from "@/lib/rupturaApi";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useContaMl } from "@/components/dashboard/RupturaApi";
 import SinergiaPublicidadeApi from "@/components/ml/SinergiaPublicidade";
+import { resumirQualidadeMl } from "@/lib/qualidadeResumoMl";
 
 const NIVEL: Record<string, string> = { "5_green": "Verde", "4_light_green": "Verde-clara", "3_yellow": "Amarela", "2_orange": "Laranja", "1_red": "Vermelha" };
 const soDigitos = (s: string) => String(s).replace(/\D/g, "");
@@ -23,15 +24,15 @@ function Bloco({ icone: I, titulo, children }: { icone: typeof Tag; titulo: stri
     <div className="glass-card flex min-w-0 flex-col gap-3 p-4">
       <div className="flex items-center gap-2">
         <I className="h-4 w-4 text-primary" aria-hidden />
-        <h4 className="truncate text-xs font-semibold uppercase tracking-wider text-muted-foreground">{titulo}</h4>
+        <h4 className="text-sm font-semibold text-foreground">{titulo}</h4>
       </div>
       {children}
     </div>
   );
 }
 const Linha = ({ r, v, ruim }: { r: string; v: string; ruim?: boolean }) => (
-  <div className="flex items-baseline justify-between gap-3 text-sm">
-    <span className="truncate text-muted-foreground">{r}</span>
+  <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 text-sm">
+    <span className="min-w-0 text-muted-foreground">{r}</span>
     <span className={`shrink-0 font-medium tabular-nums ${ruim ? "text-destructive" : "text-foreground"}`}>{v}</span>
   </div>
 );
@@ -63,6 +64,16 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
     },
   });
 
+  const qualidade = useQuery({
+    queryKey: ["resumo-qualidade-oficial", accountId], enabled: !!accountId, staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await fetchAllRows<{ item_id: string; qualidade_score: number | null }>((de, ate) => (supabase as any).from("ml_listing_improvements")
+        .select("item_id, qualidade_score").eq("account_id", accountId).order("item_id").range(de, ate));
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   // Mesma chave do quadro de ruptura: reaproveita a leitura de vendas 7d.
   const vendas = useQuery({
     queryKey: ["ruptura-vendas7d", custId],
@@ -81,6 +92,7 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
 
   // Preço: desconto ativo (preço atual abaixo do original) e ticket.
   const lista = anuncios.data ?? [];
+  const qi = resumirQualidadeMl(lista.map(a => a.item_id), qualidade.data ?? []);
   const comDesconto = lista.filter((a) => a.preco_original != null && a.preco != null && Number(a.preco) < Number(a.preco_original));
   const descMedio = comDesconto.length
     ? comDesconto.reduce((s, a) => s + (1 - Number(a.preco) / Number(a.preco_original)), 0) / comDesconto.length : null;
@@ -203,6 +215,15 @@ export default function LeituraContaApi({ custId, faturamento30d, ticketDelta }:
               </div>
             ))}
           </>)}
+        </Bloco>
+        <Bloco icone={BadgeCheck} titulo="Quality Index · anúncios ML">
+          {qualidade.isLoading || anuncios.isLoading ? <Skeleton className="h-20 w-full" /> : qualidade.isError || anuncios.isError ? <p className="text-sm text-muted-foreground">Qualidade indisponível nesta consulta.</p> : <>
+            <p className="flex items-baseline gap-2"><span className="text-3xl font-semibold tabular-nums text-foreground">{qi.media == null ? "Sem avaliação" : num(qi.media, 1)}</span>{qi.media != null && <span className="text-sm text-muted-foreground">/ 100</span>}</p>
+            <Linha r="Anúncios ativos avaliados" v={`${num(qi.avaliados)} de ${num(qi.ativos)}`} />
+            <Linha r="Sem avaliação oficial" v={num(qi.semAvaliacao)} />
+            <p className="text-xs leading-5 text-muted-foreground">Média das notas oficiais do Mercado Livre disponíveis para os anúncios ativos. Não é o índice composto da carteira.</p>
+            <p className="text-xs text-muted-foreground">Comparação anterior indisponível.</p>
+          </>}
         </Bloco>
       </div>
       <SinergiaPublicidadeApi custId={custId} compacto />

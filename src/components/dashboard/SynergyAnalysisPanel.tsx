@@ -13,7 +13,7 @@ const tom = (r: number | null) => r == null || Math.abs(r) < .4 ? "bg-muted/30 t
 export default function SynergyAnalysisPanel({ kpis, compacto = false }: { kpis: Record<string, unknown>[]; compacto?: boolean }) {
   const coef = (a: string, b: string) => pearsonPareado(kpis.map(k => [numero(k[a]), numero(k[b])]));
   const pares = METRICAS.slice(1).filter(m => m.key !== "repCancellationsRate").map(m => ({ label: m.label, r: coef(m.key, "gmv") }));
-  return <section className="sinergia-operacional space-y-4" aria-label="Análise de sinergia operacional">
+  return <section className="sinergia-operacional min-w-0 space-y-4" aria-label="Análise de sinergia operacional">
     <div className="flex items-center gap-2"><h4 className="text-sm font-semibold">Análise de sinergia operacional</h4>
       <TooltipInfo text="Pearson: r = Σ[(x − média x)(y − média y)] ÷ √[Σ(x − média x)² × Σ(y − média y)²]. Mínimo de 7 observações pareadas; série constante ou incompleta não vira zero." />
     </div>
@@ -27,9 +27,9 @@ export default function SynergyAnalysisPanel({ kpis, compacto = false }: { kpis:
         })}</tr>)}</tbody>
       </table>
     </div>}
-    {compacto && <div className="grid gap-3 sm:grid-cols-2">{pares.map(p => <div key={p.label} className={`rounded-lg border border-border p-3 ${tom(p.r)}`}>
+    {compacto && <div className="grid gap-4">{pares.map(p => <div key={p.label} className={`rounded-lg border border-border p-4 ${tom(p.r)}`}>
       <p className="text-xs">{p.label} × faturamento</p><p className="mt-1 text-xl font-semibold tabular-nums">{p.r == null ? "Sem dado" : num(p.r, 2)}</p>
-      {!compacto && <p className="mt-2 text-xs leading-5">{p.r == null ? "Sem observações suficientes ou sem variação na série." : `${intensidade(p.r)} associação ${p.r >= 0 ? "direta" : "inversa"} no período. Compare mix e sazonalidade antes de decidir.`}</p>}
+      <p className="mt-2 text-xs leading-5">{p.r == null ? "Sem observações suficientes ou sem variação na série." : `${intensidade(p.r)} associação ${p.r >= 0 ? "direta" : "inversa"} no período.`}</p>
     </div>)}</div>}
     <p className="text-xs text-muted-foreground">Associação não é causalidade nem promessa de retorno. Cancelamentos usam taxa no histórico e quantidade na API, identificadas pela fonte.</p>
     {!compacto && <details className="text-xs text-muted-foreground"><summary className="cursor-pointer">Fórmula e critérios</summary><p className="mt-2">r = Σ[(x − média x)(y − média y)] ÷ √[Σ(x − média x)² × Σ(y − média y)²]. Pares da mesma data, mínimo 7; séries constantes e dados ausentes: Sem dado.</p></details>}

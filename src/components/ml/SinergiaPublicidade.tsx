@@ -10,21 +10,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 import GraficoPublicidadeSerie from "@/components/dashboard/GraficoPublicidadeSerie";
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import CancelamentosMensais from "@/components/ml/CancelamentosMensais";
+import { Button } from "@/components/ui/button";
 
 export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = true, fonte, custId, de, ate, piloto }: { pontos: PontoPublicidade[]; compacto?: boolean; exibirMatriz?: boolean; fonte: string; custId?: string; de?: string; ate?: string; piloto?: { ativo: boolean; alternar: () => void } }) {
   const r = calcularSinergiaPublicidade(pontos);
-  return <section aria-label="Sinergia e dependência de publicidade" className="space-y-3 border-t border-border/50 pt-4">
+  return <section aria-label="Sinergia e dependência de publicidade" className="resumo-sinergia space-y-5 border-t border-border/50 pt-5">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
-    <GraficoPublicidadeSerie pontos={pontos} compacto={compacto} />
+    <div className="resumo-sinergia-evolucao"><GraficoPublicidadeSerie pontos={pontos} compacto={compacto} /></div>
     {piloto && <div className="flex justify-end">
-      <button type="button" onClick={piloto.alternar} className="text-xs text-muted-foreground underline-offset-2 hover:underline">
+      <Button variant="ghost" size="sm" onClick={piloto.alternar} className="text-xs text-muted-foreground">
         {piloto.ativo ? "Voltar à leitura publicada" : "Ver piloto de visitas"}
-      </button>
+      </Button>
     </div>}
+    <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
     {exibirMatriz && <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />}
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
-    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    </div>
+    <dl className="grid grid-cols-1 gap-5 border-t border-border/50 pt-4 sm:grid-cols-2">
       <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{r.participacao == null ? "Sem dado" : pctFracao(r.participacao, 1)}</dd></div>
       <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{r.tacos == null ? "Sem dado" : pctFracao(r.tacos, 2)}</dd></div>
     </dl>

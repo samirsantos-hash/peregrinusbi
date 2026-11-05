@@ -27,7 +27,7 @@ export default function CancelamentosMensais({ custId, de, ate }: { custId?: str
   const comparacao = r && anterior.data ? compararCancelamentos(r, anterior.data) : null;
   const rotuloMes = (m: string) => `${m.slice(5, 7)}/${m.slice(0, 4)}`;
   const erro = atual.error ?? conexao.error;
-  return <section aria-label="Cancelamentos reais por mês" className="space-y-3 border-t border-border/50 pt-4">
+  return <section aria-label="Cancelamentos reais por mês" className="resumo-cancelamentos min-w-0 space-y-4">
     <div className="flex flex-wrap items-center justify-between gap-3">
       <h4 className="text-sm font-semibold">Pedidos cancelados · valor mensal</h4>
       <div className="flex items-center gap-2">
@@ -42,7 +42,7 @@ export default function CancelamentosMensais({ custId, de, ate }: { custId?: str
       : !mes ? <p className="text-sm text-muted-foreground">Período sem dias completos disponíveis.</p>
       : r ? <>
         <p className="text-xs text-muted-foreground">Mercado Livre · {r.periodo.inicio.split('-').reverse().join('/')} a {r.periodo.fim.split('-').reverse().join('/')} · {r.periodo.parcial ? 'mês parcial, até ontem' : 'mês completo'} · por criação do pedido e situação atual</p>
-        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div><dt className="text-xs text-muted-foreground">Valor dos pedidos cancelados</dt><dd className="text-xl font-semibold tabular-nums">{r.valorCancelado != null ? brl(r.valorCancelado, true) : 'Valor não informado'}</dd><p className="text-xs text-muted-foreground">{num(r.cancelados)} {r.cancelados === 1 ? 'pedido cancelado' : 'pedidos cancelados'}</p></div>
           <div><dt className="text-xs text-muted-foreground">Faturamento dos pedidos pagos</dt><dd className="text-xl font-semibold tabular-nums">{r.faturamento != null ? brl(r.faturamento, true) : 'Valor não informado'}</dd><p className="text-xs text-muted-foreground">{num(r.pedidosPagos)} {r.pedidosPagos === 1 ? 'pedido pago' : 'pedidos pagos'}</p></div>
           <div><dt className="text-xs text-muted-foreground">Valor cancelado ÷ faturamento pago</dt><dd className="text-xl font-semibold tabular-nums">{r.proporcao != null ? pctFracao(r.proporcao, 2) : r.faturamento === 0 ? 'Sem faturamento para comparação' : 'Valores incompletos'}</dd></div>

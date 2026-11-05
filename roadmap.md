@@ -1,5 +1,10 @@
 # Roadmap
 
+## Leitura da conta e sinergia — 05/11 às 22:14
+- [x] Sexto cartão com média oficial ML de 93,2/100 em 9 de 188 anúncios ativos da AUTOPECASLONDRINA; 179 sem avaliação explícitos, sem IA nem substituição pelo índice da carteira.
+- [x] Sinergia e cancelamentos mensais reorganizados; 28 testes passaram, sessão real em 1280px e 390px sem erros ou excesso horizontal, build OK. k6 público prévio: 28.409 requisições, zero falhas, p95 69,80ms; não mede painel autenticado. Somente teste, sem publicar.
+- [ ] Renomear ausência para DX bloqueado: API não confirmou modalidade de 771 pedidos (67,4%); manter ausência explícita até existir evidência de envio, sem inventar classificação.
+
 ## Evolução diária e síntese da conta — 05/11 às 21:29
 - [x] Faturamento em barras e faixa conjunta de pedidos pagos/cancelados dia a dia, cancelados em vermelho; série existente da API, sem rateio mensal. Cancelamentos rotulados por status atual e data de criação: não há evidência de quem cancelou.
 - [x] Saúde da conta compacta (282px no desktop) e cartão de síntese: receita −0,4%, pedidos −3,5%, ticket +3,2%, unidades −3,6%, custo Ads −26,4%, meta 67,5% na AUTOPECASLONDRINA. Mesma consulta/cache de Ads reutilizada, sem IA. Quatro testes passaram, sessão real desktop/390px sem erros ou excesso horizontal, três séries de barras e build OK. k6 público prévio: resultado abaixo; não mede painel logado. Somente teste.
