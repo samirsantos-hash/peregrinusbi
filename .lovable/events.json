@@ -40,6 +40,39 @@
           }
         }
       }
+    },
+    "project.seller_selection_changed": {
+      "event_schema_version": 1,
+      "description": "The user changes the selected seller through dashboard or seller-analysis navigation controls, including returning to the dashboard portfolio. Same-seller reselections and listing-only changes do not count. Seller identifiers, names and URLs are excluded.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_view",
+          "seller_scope"
+        ],
+        "properties": {
+          "source_view": {
+            "type": "string",
+            "enum": [
+              "dashboard",
+              "seller_analysis",
+              "portfolio"
+            ]
+          },
+          "seller_scope": {
+            "type": "string",
+            "enum": [
+              "single_store",
+              "portfolio"
+            ]
+          }
+        }
+      }
     }
   }
 }

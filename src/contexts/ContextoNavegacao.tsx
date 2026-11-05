@@ -69,6 +69,17 @@ export function ContextoNavegacaoProvider({ children }: { children: React.ReactN
       }
       const qs = merged.toString();
       navigate(qs ? `${caminho}?${qs}` : caminho);
+      const destinationSeller = /^\/lojas\/([^/]+)(?:\/|$)/.exec(caminho)?.[1];
+      const currentSeller = /^\/lojas\/([^/]+)(?:\/|$)/.exec(pathname)?.[1];
+      // Selecting another seller counts; moving between analyses of the same seller does not.
+      if (destinationSeller && destinationSeller !== currentSeller) {
+        window.__lovableEvents?.track?.("project.seller_selection_changed", {
+          source_view: /^\/(carteira|grupos)(\/|$)/.test(pathname)
+            ? "portfolio"
+            : currentSeller ? "seller_analysis" : "dashboard",
+          seller_scope: "single_store",
+        });
+      }
       // Only explicit entry into a store/listing analysis; never emit IDs or URLs.
       const analysisLevel = /^\/lojas\/[^/]+\/?$/.test(caminho)
         ? "store"

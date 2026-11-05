@@ -188,6 +188,12 @@ const Index = () => {
   const handleSellerChange = useCallback((id: string) => {
     setSelectedSeller(id);
     setDateRange(undefined); // Reset → will be re-anchored by effect below
+    if (id !== selectedSeller && hasRealData && (!id || sellers.some((seller) => seller.id === id))) {
+      window.__lovableEvents?.track?.("project.seller_selection_changed", {
+        source_view: "dashboard",
+        seller_scope: id ? "single_store" : "portfolio",
+      });
+    }
     if (id && id !== selectedSeller && hasRealData && sellers.some((seller) => seller.id === id)) {
       window.__lovableEvents?.track?.("project.seller_analysis_opened", {
         analysis_level: "store",

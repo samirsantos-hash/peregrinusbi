@@ -7,7 +7,7 @@ import type { ItemFilho } from "@/lib/navegacao/tipos";
 
 vi.mock("@/components/programas/base/Sparkline", () => ({ default: () => null }));
 
-const track = vi.fn(() => null);
+const track = vi.fn<(event: string, properties?: Record<string, unknown>) => string | null>(() => null);
 function Location() {
   const location = useLocation();
   return <output data-testid="location">{location.pathname}{location.search}</output>;
@@ -29,7 +29,8 @@ describe("seller analysis navigation events", () => {
     openRow("/carteira?periodo=2026-01:2026-11", "/lojas/private-id");
     expect(track).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button"));
-    expect(track).toHaveBeenCalledExactlyOnceWith("project.seller_analysis_opened", {
+    expect(track.mock.calls.filter(([name]) => name === "project.seller_analysis_opened")).toHaveLength(1);
+    expect(track).toHaveBeenCalledWith("project.seller_analysis_opened", {
       analysis_level: "store", source: "portfolio", seller_scope: "single_store",
     });
     expect(screen.getByTestId("location").textContent).toBe("/lojas/private-id?periodo=2026-01%3A2026-11");
@@ -61,5 +62,29 @@ describe("seller analysis navigation events", () => {
     openRow("/carteira", "/lojas/private-id");
     fireEvent.click(screen.getByRole("button"));
     expect(screen.getByTestId("location").textContent).toBe("/lojas/private-id");
+  });
+});
+
+describe("seller selection navigation events", () => {
+  it("counts a seller selected from portfolio without private identifiers", () => {
+    openRow("/carteira", "/lojas/private-id");
+    expect(track).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button"));
+    expect(track.mock.calls.filter(([name]) => name === "project.seller_selection_changed")).toEqual([
+      ["project.seller_selection_changed", { source_view: "portfolio", seller_scope: "single_store" }],
+    ]);
+  });
+  it("counts switching sellers from seller analysis controls once", () => {
+    openRow("/lojas/previous-private-id/anuncios/item", "/lojas/private-id");
+    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole("button"));
+    expect(track.mock.calls.filter(([name]) => name === "project.seller_selection_changed")).toEqual([
+      ["project.seller_selection_changed", { source_view: "seller_analysis", seller_scope: "single_store" }],
+    ]);
+  });
+  it("does not count a listing change within the same seller", () => {
+    openRow("/lojas/private-id/anuncios/old", "/lojas/private-id/anuncios/new");
+    fireEvent.click(screen.getByRole("button"));
+    expect(track.mock.calls.filter(([name]) => name === "project.seller_selection_changed")).toHaveLength(0);
   });
 });

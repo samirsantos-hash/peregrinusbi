@@ -1,5 +1,10 @@
 # Roadmap
 
+## Trocas de loja (05/11)
+- [x] Evento project.seller_selection_changed nos controles existentes: origem e escopo, sem identificadores privados; mesma loja e troca de anúncio na mesma loja não contam.
+- [ ] Validar catálogo, testes e troca de loja no painel autenticado.
+- [x] k6 público prévio: 1.000 usuários, 28.310 requisições, zero falhas, p95 110,51 ms; não mede painel autenticado.
+
 ## Aberturas de análises (05/11)
 - [x] Registrado project.seller_analysis_opened nas navegações existentes de loja/anúncio e seleção de loja real no painel; nível, origem e escopo único, sem nomes/IDs/URLs. Filtros, retorno à carteira e renderizações não contam.
 - [x] Catálogo validado (1 evento); 7 testes aprovados. AUTOPECASLONDRINA aberta na sessão master, um evento conferido com coletor substituto local; não comprova ingestão publicada. Navegação de anúncios validada em teste de componente. Build OK. k6 prévio: 100 usuários, 2.202 requisições, zero falhas, p95 público 117,47 ms, sem painel autenticado.
