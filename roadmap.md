@@ -1,5 +1,9 @@
 # Roadmap
 
+## Reflexos e resposta de cartões — 06/11
+- [ ] Restaurar reflexo localizado inspirado no HTML e resposta ao pressionar cartões já clicáveis; manter cartões informativos, navegação e Home sem inclinação.
+- [ ] Conferir clique real, reflexo, teclado e celular, sem alterar métricas/permissões nem publicar.
+
 ## Entrada suave e círculo de carregamento — 06/11
 - [x] Substituir letras caindo por entrada de títulos/conteúdo inspirada no HTML; círculo pequeno durante consultas, sem bloquear página nem mudar Home.
 - [x] Três testes e build OK; sessão real desktop/390px confirmou entrada dos títulos, círculo durante consultas, remoção ao terminar, ausência de letras caindo, movimento reduzido sem giro e nenhum erro/excesso horizontal. k6 público: 28.430 requisições, zero falhas, p95 79,62ms; não mede painel autenticado. Sem publicar. Movimento reproduzido sem blur animado para preservar desempenho/acessibilidade.

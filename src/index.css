@@ -2637,3 +2637,55 @@ html body .peregrinus-panel.peregrinus-panel :is(.glass-card,.ds-glass-surface,.
     backdrop-filter: none !important;
   }
 }
+
+/* Local flashlight from the HTML pricing specimen; stationary material and
+   independent press feedback only for existing actionable card roots. */
+:root {
+  --card-light-border: radial-gradient(600px circle at var(--card-light-x,50%) var(--card-light-y,50%), hsl(var(--reference-glass-green) / .4), transparent 40%);
+  --card-light-fill: radial-gradient(800px circle at var(--card-light-x,50%) var(--card-light-y,50%), hsl(var(--reference-glass-white) / .03), transparent 40%);
+  --card-press-opacity: .86;
+}
+html.light {
+  --card-light-fill: radial-gradient(800px circle at var(--card-light-x,50%) var(--card-light-y,50%), hsl(var(--reference-glass-white) / .18), transparent 40%);
+}
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha,.multilojas-chart,.carteira-kpi,[data-card-surface]) { position: relative; }
+html body .peregrinus-panel.peregrinus-panel :is(.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha,.multilojas-chart,.carteira-kpi,[data-card-surface])::after {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--card-light-fill) !important;
+  opacity: 0;
+  transition: opacity 300ms var(--curva-rapida);
+}
+html body .peregrinus-panel.peregrinus-panel :is(.carteira-kpi,[data-card-surface])::before {
+  content: ""; display: block; position: absolute; inset: 0; padding: 1px;
+  border-radius: inherit; pointer-events: none; background: var(--reference-glass-corner);
+  mask: linear-gradient(hsl(var(--reference-glass-white)) 0 0) content-box, linear-gradient(hsl(var(--reference-glass-white)) 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html body .peregrinus-panel.peregrinus-panel [data-card-reflection]::before { background: var(--card-light-border), var(--reference-glass-corner) !important; }
+  html body .peregrinus-panel.peregrinus-panel [data-card-reflection]::after { opacity: 1; }
+}
+html body .peregrinus-panel.peregrinus-panel :is(button,a,[role="button"]):is(.ds-kpi,.glass-card,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha) {
+  touch-action: manipulation;
+  transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida);
+}
+html body .peregrinus-panel.peregrinus-panel :is(button,a,[role="button"]):is(.ds-kpi,.glass-card,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha):active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(.98) !important;
+  opacity: var(--card-press-opacity);
+}
+html body .peregrinus-panel.peregrinus-panel :is(button,a,[role="button"]):is(.ds-kpi,.glass-card,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha):focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
+html body .peregrinus-panel.peregrinus-panel [data-card-interactive] { touch-action: manipulation; transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida); }
+html body .peregrinus-panel.peregrinus-panel [data-card-interactive]:active:not(:disabled):not([aria-disabled="true"]) { transform: scale(.98) !important; opacity: var(--card-press-opacity); }
+html body .peregrinus-panel.peregrinus-panel [data-card-interactive]:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  html body .peregrinus-panel.peregrinus-panel [data-card-interactive]:active { transform: none !important; }
+  html body .peregrinus-panel.peregrinus-panel :is(button,a,[role="button"]):is(.ds-kpi,.glass-card,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha):active { transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce), (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  html body .peregrinus-panel.peregrinus-panel [data-card-reflection]::after { display: none !important; }
+}
