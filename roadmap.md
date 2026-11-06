@@ -1,5 +1,9 @@
 # Roadmap
 
+## Letras durante carregamento — 06/11
+- [x] Chuva de letras sobre o painel somente enquanto consultas carregam; preservados ambiente, cliques e movimento reduzido, sem ler ou alterar textos reais.
+- [x] Dois testes e build OK; sessão real desktop/mobile confirmou camada sem bloquear cliques, remoção ao concluir consultas, movimento reduzido sem efeito e nenhum erro/excesso horizontal. k6 público: 28.437 requisições, zero falhas, p95 82,48ms; não mede painel autenticado. Sem publicar. HTML disponível não contém letras caindo; efeito adaptado.
+
 ## Comparação SWOT de anúncios — 06/11
 - [x] Comparação existente com quatro gráficos (visitas, pedidos, conversão e receita por visita), foco por anúncio e matriz SWOT; referência pela mediana dos outros selecionados, ameaças externas não verificadas e tabela detalhada preservada.
 - [x] Oito testes e build OK; dois anúncios reais da AUTOPECASLONDRINA conferidos, oito barras, troca de foco e celular 390px sem excesso horizontal ou erros. k6 público prévio: 28.470 requisições, zero falhas, p95 HTTP 79,25ms; somente entrega pública, não mede painel autenticado/ML. Sem publicar.
