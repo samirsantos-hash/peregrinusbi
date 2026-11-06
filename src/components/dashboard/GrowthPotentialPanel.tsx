@@ -13,7 +13,6 @@ import { fmtBRLCompact, formatChartDate } from "@/utils/formatters";
 import type { SellerCampaign } from "@/hooks/useMeliCampaigns";
 import type { VerticalBenchmark } from "@/hooks/useVerticalBenchmark";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
-import { useCategoryMix } from "@/hooks/useCategoryMix";
 import {
   statusPorDelta,
   corPorDelta,
@@ -78,7 +77,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 
 const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPotentialPanelProps) => {
-  const { data: mix } = useCategoryMix(sellerId);
   const [modoCurva, setModoCurva] = useState<"acumulado" | "indexado">("acumulado");
   // Categoria do seller: produtos que vende / base de clientes; campanhas só como último recurso.
   const { data: verticalProdutos } = useQuery({
@@ -604,55 +602,6 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
         </ResponsiveContainer>
         )}
       </div>
-
-      {/* ── Percentual por categoria ─────────────────────────────────────── */}
-      {!!mix?.categorias?.length && (
-        <div className="glass-card p-5">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
-              Percentual por categoria
-            </h3>
-            <TooltipInfo text="Distribuição dos anúncios por classificação registrada na última atualização. Os percentuais representam quantidade de anúncios, não vendas nem previsão de demanda." />
-            <Badge variant="outline" className="text-[10px] font-normal ml-auto">
-              {mix.totalItens.toLocaleString("pt-BR")} itens ativos
-              {mix.data ? ` · ${mix.data.slice(8, 10)}/${mix.data.slice(5, 7)}/${mix.data.slice(0, 4)}` : ""}
-            </Badge>
-          </div>
-
-          {mix.categorias.some(c => c.categoria.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase() === 'NAO VERAO') && (
-            <p className="mt-2 text-xs leading-5 text-muted-foreground">
-              “NÃO VERÃO” é uma classificação registrada dos anúncios, não uma previsão de vendas ou demanda no verão. O critério e a origem dessa classificação não estão confirmados. O percentual indica a quantidade de anúncios nesse grupo, não a participação nas vendas.
-            </p>
-          )}
-
-          <div className="mt-4 space-y-2.5">
-            {mix.categorias.slice(0, 12).map((c) => (
-              <div key={c.categoria}>
-                <div className="flex items-baseline justify-between gap-3 mb-1">
-                  <span className="text-xs text-foreground truncate">{c.categoria}</span>
-                  <span className="text-[11px] font-mono tabular-nums text-muted-foreground shrink-0">
-                    {c.itens.toLocaleString("pt-BR")} itens ·{" "}
-                    <span className="font-bold text-foreground">{c.pct.toFixed(1).replace(".", ",")}%</span>
-                  </span>
-                </div>
-                <div className="relative w-full h-2 bg-muted/40 rounded-full overflow-hidden">
-                  <motion.div
-                    className="absolute inset-y-0 left-0 rounded-full bg-primary"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(c.pct, 100)}%` }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-            ))}
-            {mix.categorias.length > 12 && (
-              <p className="text-[10px] text-muted-foreground pt-1">
-                + {mix.categorias.length - 12} categorias com participação menor.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
 
     </motion.div>
   );
