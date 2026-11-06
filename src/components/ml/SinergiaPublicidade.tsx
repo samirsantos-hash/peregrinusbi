@@ -28,7 +28,7 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
         {piloto.ativo ? "Voltar à leitura publicada" : "Ver piloto de visitas"}
       </Button>
     </div>}
-    <div className="grid min-w-0 items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+    <div className="grid min-w-0 items-start gap-6">
     {exibirMatriz && <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />}
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
     </div>
