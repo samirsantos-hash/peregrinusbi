@@ -246,9 +246,9 @@ export default function Anuncios() {
               )}
 
               {resultados.data && resultados.data.length > 0 && (
-                <div className="overflow-x-auto rounded-lg border border-border bg-card/30">
-                  <table className="w-full text-sm tabular-nums [&_th]:px-3 [&_th]:py-3 [&_td]:px-3 [&_td]:py-3 [&_td+td]:border-l [&_td+td]:border-border/60">
-                    <thead className="text-muted-foreground text-left bg-muted/30">
+                <div role="region" aria-label="Lista de anúncios" tabIndex={0} className="relative isolate w-full max-w-full max-h-[72vh] overflow-auto overscroll-contain rounded-lg border border-border bg-card/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <table className="w-full min-w-[1080px] text-sm tabular-nums [&_th]:px-3 [&_th]:py-3 [&_td]:px-3 [&_td]:py-3 [&_td+td]:border-l [&_td+td]:border-border/60">
+                    <thead className="sticky top-0 z-10 text-muted-foreground text-left bg-card">
                       <tr className="border-b border-border">
                         <th className="py-2 px-2 w-6" />
                         <th className="py-2 pr-1 w-6" />
@@ -262,7 +262,6 @@ export default function Anuncios() {
                         <th className="pr-2">Envio</th>
                         <th className="pr-2 text-right">Saúde</th>
                         <th className="pr-2 text-center">Promoções</th>
-                        <th className="pr-2" />
                       </tr>
                     </thead>
                     <tbody>
@@ -287,10 +286,10 @@ export default function Anuncios() {
                               <td className="py-2 pr-1">
                                 <Checkbox checked={marcados.has(a.item_id)} onCheckedChange={() => alternar(a)} aria-label={`Selecionar ${a.item_id}`} />
                               </td>
-                              <td className="py-2 pr-2 min-w-[260px]">
+                              <td className="py-2 pr-2 min-w-[320px] w-[360px]">
                                 <div className="flex items-start gap-2">
                                   {a.thumbnail && <img src={a.thumbnail} alt="" className="h-14 w-14 shrink-0 rounded border border-border object-contain" />}
-                                  <div className="min-w-0">
+                                  <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-1.5">
                                       {a.link
                                         ? <a href={a.link} target="_blank" rel="noreferrer" className="text-primary hover:underline line-clamp-2">{a.titulo ?? a.item_id}</a>
@@ -300,11 +299,17 @@ export default function Anuncios() {
                                     <p className="text-muted-foreground">
                                       {a.item_id}{a.catalogo ? " · Catálogo" : ""}{temVariacoes ? ` · ${a.variacoes.length} variações` : ""}
                                     </p>
+                                    <div className="mt-2 flex flex-wrap items-center gap-1">
+                                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setPrecoPara([a])}>Preço</Button>
+                                      {pode("promocoes.visualizar") && <ResumoPromocoesAnuncio accountId={contaId} itemId={a.item_id} aoGerenciar={() => { setMelhoriasDe(null); setPromocoesDe(a); }} />}
+                                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => { setPromocoesDe(null); setMelhoriasDe(a); }}>Melhorias</Button>
+                                      <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => navigate(`/mercado?conta=${contaId}&item=${a.item_id}`)}>Estudar mercado</Button>
+                                    </div>
                                   </div>
                                 </div>
                               </td>
-                              <td className="pr-2 py-2">{a.sku ?? "—"}</td>
-                              <td className="pr-2 py-2 text-right">
+                              <td className="pr-2 py-2 max-w-[160px] break-words">{a.sku ?? "—"}</td>
+                              <td className="pr-2 py-2 text-right whitespace-nowrap">
                                 {brl(a.preco, true)}
                                 {a.preco_original && a.preco_original > (a.preco ?? 0) && (
                                   <span className="block text-muted-foreground line-through">{brl(a.preco_original, true)}</span>
@@ -323,15 +328,9 @@ export default function Anuncios() {
                                 {participacoes.isError || !participacoes.data ? <span className="text-muted-foreground">—</span>
                                   : (participacoes.data.get(a.item_id) ?? 0) === 0
                                     ? <X className="mx-auto h-4 w-4 text-destructive" aria-label="Sem promoções ativas" />
-                                    : <span className="inline-flex items-center gap-0.5" aria-label={`${participacoes.data.get(a.item_id)} promoções ativas`} title={`${participacoes.data.get(a.item_id)} promoções ativas`}>
+                                    : <span className="inline-flex max-w-24 flex-wrap justify-center items-center gap-0.5" aria-label={`${participacoes.data.get(a.item_id)} promoções ativas`} title={`${participacoes.data.get(a.item_id)} promoções ativas`}>
                                         {Array.from({ length: participacoes.data.get(a.item_id) ?? 0 }, (_, i) => <Check key={i} className="h-4 w-4 text-primary" strokeWidth={3} />)}
                                       </span>}
-                              </td>
-                              <td className="pr-2 py-1.5 whitespace-nowrap text-right">
-                                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setPrecoPara([a])}>Preço</Button>
-                                {pode("promocoes.visualizar") && <ResumoPromocoesAnuncio accountId={contaId} itemId={a.item_id} aoGerenciar={() => { setMelhoriasDe(null); setPromocoesDe(a); }} />}
-                                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => { setPromocoesDe(null); setMelhoriasDe(a); }}>Melhorias</Button>
-                                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => navigate(`/mercado?conta=${contaId}&item=${a.item_id}`)}>Estudar mercado</Button>
                               </td>
                             </tr>
                             {expandido && a.variacoes.map((v, i) => (
@@ -343,7 +342,7 @@ export default function Anuncios() {
                                 <td className="pr-2 text-right">{brl(v.preco, true)}</td>
                                 <td className="pr-2 text-right">{num(v.estoque)}</td>
                                 <td className="pr-2 text-right">{num(v.vendidos)}</td>
-                                <td colSpan={6} />
+                                <td colSpan={5} />
                               </tr>
                             ))}
                           </Fragment>
