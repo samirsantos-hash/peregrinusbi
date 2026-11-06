@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/hooks/useTheme";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlassPointer } from "@/components/ds/GlassPointer";
 import { ChuvaPainel } from "@/components/chuva/ChuvaPainel";
+import { IndicadorCarregamento } from "@/components/chuva/IndicadorCarregamento";
 import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -87,7 +88,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   return (
     <div className="peregrinus-panel min-w-0">
       <ChuvaPainel />
-      {permissao ? <GuardaPermissao permissao={permissao}>{children}</GuardaPermissao> : children}
+      <div className="entrada-pagina">{permissao ? <GuardaPermissao permissao={permissao}>{children}</GuardaPermissao> : children}</div>
       <RodapeInstitucional />
     </div>
   );
@@ -109,6 +110,7 @@ const AppRoutes = () => {
       {/* Fundo Glass Verde vem do CSS (ambiente fixo) */}
       <AuraReveal />
       <GlassPointer />
+      <IndicadorCarregamento />
       <div className="relative z-10">
       <Routes>
       <Route path="/auth" element={user ? <Navigate to={oauthReturnPath(new URLSearchParams(window.location.search).get("next"))} replace /> : <Auth />} />

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Entrada suave e círculo de carregamento — 06/11
+- [x] Substituir letras caindo por entrada de títulos/conteúdo inspirada no HTML; círculo pequeno durante consultas, sem bloquear página nem mudar Home.
+- [x] Três testes e build OK; sessão real desktop/390px confirmou entrada dos títulos, círculo durante consultas, remoção ao terminar, ausência de letras caindo, movimento reduzido sem giro e nenhum erro/excesso horizontal. k6 público: 28.430 requisições, zero falhas, p95 79,62ms; não mede painel autenticado. Sem publicar. Movimento reproduzido sem blur animado para preservar desempenho/acessibilidade.
+
 ## Letras durante carregamento — 06/11
 - [x] Chuva de letras sobre o painel somente enquanto consultas carregam; preservados ambiente, cliques e movimento reduzido, sem ler ou alterar textos reais.
 - [x] Dois testes e build OK; sessão real desktop/mobile confirmou camada sem bloquear cliques, remoção ao concluir consultas, movimento reduzido sem efeito e nenhum erro/excesso horizontal. k6 público: 28.437 requisições, zero falhas, p95 82,48ms; não mede painel autenticado. Sem publicar. HTML disponível não contém letras caindo; efeito adaptado.

@@ -1,0 +1,30 @@
+.entrada-pagina { display: contents; }
+.entrada-pagina h1,
+.entrada-pagina h2 {
+  animation: entrada-titulo 800ms ease-out 300ms backwards;
+}
+.entrada-pagina main > section,
+.entrada-pagina main > article {
+  animation: entrada-conteudo 800ms ease-out 400ms backwards;
+}
+@keyframes entrada-titulo {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes entrada-conteudo {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.indicador-carregamento {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .entrada-pagina h1, .entrada-pagina h2,
+  .entrada-pagina main > section, .entrada-pagina main > article { animation: none; }
+  .indicador-carregamento svg { animation: none; }
+}

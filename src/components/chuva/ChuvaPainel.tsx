@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useIsFetching } from "@tanstack/react-query";
 import { AmbientePainel } from "./AmbientePainel";
-import { LetrasCarregamento } from "./LetrasCarregamento";
 import "./cadence-rain.css";
 import "./rainShaders.js";
 import "./rain.js";
@@ -20,7 +19,7 @@ export function ChuvaPainel() {
     const t = setTimeout(() => setVisivel(false), 600);
     return () => clearTimeout(t);
   }, [carregando]);
-  return <><AmbientePainel />{visivel && <><ChuvaAtiva saindo={!carregando} /><LetrasCarregamento saindo={!carregando} /></>}</>;
+  return <><AmbientePainel />{visivel && <ChuvaAtiva saindo={!carregando} />}</>;
 }
 
 function ChuvaAtiva({ saindo }: { saindo: boolean }) {

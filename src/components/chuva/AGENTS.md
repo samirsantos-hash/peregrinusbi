@@ -1,3 +1,3 @@
 # Loading visuals
 
-- Falling glyphs are decorative canvas overlays driven by the existing query-loading lifecycle; never read or mutate page text, block pointer events, or animate with reduced motion, to preserve accessibility and React ownership.
+- Page entrances use CSS-only title/content transitions without remounting route state, mutating text or transforming fixed-overlay ancestors; the small global query-loading indicator never blocks clicks and respects reduced motion.
