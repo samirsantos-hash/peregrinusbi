@@ -1,5 +1,7 @@
 # Teste de carga público — 04/11/2026
 
+- 06/11: cobertura dos cartões de investimento/meta Ads, teste público prévio com 1.000 usuários, 28.501 requisições, zero falhas, p95 HTTP 80,10ms; apenas entrega pública, não mede cálculos ou painel autenticado.
+
 - 06/11: encaixe da Typography, teste público prévio com 1.000 usuários, 28.447 requisições, zero falhas, p95 HTTP 77,97ms; somente entrega pública, não mede layout ou painel autenticado.
 
 - 06/11: Typography do HTML, teste público prévio com 1.000 usuários, 28.454 requisições, zero falhas, p95 HTTP 77,21ms; somente entrega pública, não mede tipografia ou painel autenticado.

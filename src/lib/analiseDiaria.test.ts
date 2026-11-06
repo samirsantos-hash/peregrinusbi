@@ -1,5 +1,24 @@
 import { describe, it, expect } from "vitest";
-import { analiseDiaria, faixaInvestimento, investimento30d, metaInvestimentoAds } from "./analiseDiaria";
+import { analiseDiaria, faixaInvestimento, investimento30d, metaInvestimentoAds, metaInvestimentoAdsCoberta } from "./analiseDiaria";
+
+describe('meta Ads em datas medidas conjuntamente', () => {
+  const serie = [{ data: '2026-11-01', faturamento: 1000 }, { data: '2026-11-02', faturamento: 9000 }, { data: '2026-11-03', faturamento: 1000 }];
+  it('usa meta de 3% apenas da receita dos dias com custo, sem atribuir tier ao período parcial', () => {
+    const r = metaInvestimentoAdsCoberta([{ dia: '2026-11-01', cost: 20 }, { dia: '2026-11-01', cost: 10 }, { dia: '2026-11-03', cost: 30 }], serie, '2026-11-01', '2026-11-03');
+    expect(r).toMatchObject({ investimento: 60, faturamento: 2000, meta: 60, share: 3, atingimento: 100, dias: 2, totalDias: 3, parcial: true, faixa: null });
+  });
+  it('custo nulo em uma campanha exclui toda essa data', () => {
+    const r = metaInvestimentoAdsCoberta([{ dia: '2026-11-01', cost: 10 }, { dia: '2026-11-01', cost: null }, { dia: '2026-11-03', cost: 15 }], serie, '2026-11-01', '2026-11-03');
+    expect(r).toMatchObject({ investimento: 15, faturamento: 1000, dias: 1, inicio: '2026-11-03', share: 1.5 });
+  });
+  it('ausência de receita coincidente não usa o total de outras datas', () => {
+    expect(metaInvestimentoAdsCoberta([{ dia: '2026-11-02', cost: 10 }], [serie[0]], '2026-11-01', '2026-11-03')).toBeNull();
+  });
+  it('zero observado é válido e cobertura completa conserva os requisitos financeiros', () => {
+    const r = metaInvestimentoAdsCoberta([{ dia: '2026-11-01', cost: 0 }], [serie[0]], '2026-11-01', '2026-11-01');
+    expect(r).toMatchObject({ investimento: 0, share: 0, atingimento: 0, dias: 1, parcial: false, faixa: { alerta: true } });
+  });
+});
 
 describe("melhorias aprovadas CND27", () => {
   it('meta interna é 3% do faturamento, ponderada pelo total', () => {

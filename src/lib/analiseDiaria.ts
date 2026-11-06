@@ -89,6 +89,39 @@ export function metaInvestimentoAds(rows: { dia: string; cost: number | null }[]
   return { investimento, share, meta, falta: Math.max(0, meta - investimento), atingimento: investimento / meta * 100, faixa: faixaInvestimento(share) };
 }
 
+/** Separate covered-date result; never divides partial costs by full-period revenue. */
+export function metaInvestimentoAdsCoberta(rows: { dia: string; cost: number | null }[], serie: { data: string; faturamento: number }[], inicio: string, fim: string) {
+  const de = timestamp(inicio), ate = timestamp(fim);
+  if (de === null || ate === null || ate < de || ate - de > 366 * DIA) return null;
+  const custos = new Map<string, number | null>();
+  for (const row of rows) {
+    if (timestamp(row.dia) === null || row.dia < inicio || row.dia > fim) continue;
+    const anterior = custos.get(row.dia);
+    const valido = row.cost != null && Number.isFinite(row.cost) && row.cost >= 0;
+    custos.set(row.dia, !valido || anterior === null ? null : (anterior ?? 0) + Number(row.cost));
+  }
+  const receitas = new Map<string, number | null>();
+  for (const d of serie) {
+    if (timestamp(d.data) === null || d.data < inicio || d.data > fim) continue;
+    // Duplicate daily totals are ambiguous, not additional revenue.
+    receitas.set(d.data, receitas.has(d.data) || !Number.isFinite(d.faturamento) || d.faturamento < 0 ? null : d.faturamento);
+  }
+  const datas: string[] = [];
+  let investimento = 0, faturamento = 0;
+  for (let t = de; t <= ate; t += DIA) {
+    const data = new Date(t).toISOString().slice(0, 10);
+    const custo = custos.get(data), receita = receitas.get(data);
+    if (custo == null || receita == null) continue;
+    datas.push(data); investimento += custo; faturamento += receita;
+  }
+  if (!datas.length || faturamento <= 0) return null;
+  const totalDias = Math.round((ate - de) / DIA) + 1;
+  const share = investimento / faturamento * 100, meta = faturamento * 0.03;
+  const parcial = datas.length < totalDias;
+  return { investimento, faturamento, share, meta, falta: Math.max(0, meta - investimento), atingimento: investimento / meta * 100,
+    faixa: parcial ? null : faixaInvestimento(share), parcial, dias: datas.length, totalDias, inicio: datas[0], fim: datas[datas.length - 1] };
+}
+
 export function investimento30d(rows: DiaAnalise[]) {
   const datas = rows.filter((r) => timestamp(r.date) !== null).map((r) => r.date.slice(0, 10)).sort();
   const fim = timestamp(datas[datas.length - 1] ?? "");

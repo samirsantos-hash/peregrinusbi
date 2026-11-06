@@ -1,5 +1,9 @@
 # Roadmap
 
+## Cobertura dos cartões de Ads — 06/11
+- [x] Mostrar investimento e meta nas datas medidas conjuntamente, com cobertura parcial explícita; não comparar períodos incompletos nem atribuir requisito de tier ao mês inteiro.
+- [x] AUTOPECASLONDRINA: 29/30 dias, R$2.566 investidos, 2,01% e meta 66,9% nas mesmas datas (07/10–04/11); resumo e síntese lidos na sessão real, sem erros. 33 testes e build OK. k6 público: 28.501 requisições, zero falhas, p95 80,10ms; não mede painel autenticado. Sem publicar. Cobertura completa das demais lojas não verificada; ausência histórica não foi preenchida.
+
 ## Encaixe da Typography — 06/11
 - [x] Rótulos dos KPIs completos com quebra de linha, legendas limitadas à largura do gráfico e fundo decorativo contido sem ocultar conteúdo ou tooltips; nenhum dado ou estilo da Home alterado.
 - [x] AUTOPECASLONDRINA: resumo em 320/390/1143/1280px sem rolagem horizontal ou rótulos cortados; oito subanálises em 390/1143px sem conteúdo fora da tela, temas claro/escuro e cartões/legendas conferidos. Zero erros, 15 regressões e build OK. k6 público: 28.447 requisições, zero falhas, p95 77,97ms; não mede painel autenticado. Sem publicar.

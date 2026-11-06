@@ -113,7 +113,7 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
             <KpiVidro rotulo="Pedidos pagos" valor={num(a.pedidos)} delta={delta(a.pedidos, p.pedidos)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Ticket por pedido" valor={a.ticket == null ? 'Sem dado' : brl(a.ticket)} delta={delta(a.ticket, p.ticket)} periodo={PERIODO_DELTA} />
             <KpiVidro rotulo="Unidades vendidas" valor={num(a.unidades)} delta={delta(a.unidades, p.unidades)} periodo={PERIODO_DELTA} />
-            <InvestimentoAdsResumo custId={custId} periodo={periodo} anteriorPeriodo={q.data.anteriorPeriodo} faturamento={a.faturamento} faturamentoAnterior={p.faturamento} />
+            <InvestimentoAdsResumo custId={custId} periodo={periodo} anteriorPeriodo={q.data.anteriorPeriodo} faturamento={a.faturamento} faturamentoAnterior={p.faturamento} serie={a.serie} serieAnterior={p.serie} />
           </div>
         </div>
         <div className="flex min-w-0 flex-col gap-3 lg:col-span-4">
