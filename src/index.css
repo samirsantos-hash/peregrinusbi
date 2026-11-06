@@ -2023,6 +2023,7 @@ html body .peregrinus-panel .recharts-default-tooltip { background: var(--panel-
 @media (max-width: 639px) {
   html body .peregrinus-panel [role="tablist"] { max-width: 100%; height: auto; flex-wrap: wrap; justify-content: flex-start; }
   html body .peregrinus-panel .recharts-wrapper { overflow: visible; }
+  html body .peregrinus-panel .recharts-legend-wrapper { max-width: 100%; }
   html body .peregrinus-panel .recharts-default-legend {
     display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 12px;
   }
@@ -2386,7 +2387,7 @@ html body .peregrinus-panel .sinergia-operacional td {
   from { transform: translate(-3%, 2%); opacity: .65; }
   to { transform: translate(3%, -2%); opacity: 1; }
 }
-body:has(.peregrinus-panel) .chuva-painel { background: transparent; opacity: .45; }
+body:has(.peregrinus-panel) .chuva-painel { background: transparent; opacity: .45; overflow: clip; contain: paint; }
 body:has(.peregrinus-panel) .chuva-painel .cadence-rain-bg__fade { display: none; }
 @media (prefers-reduced-motion: reduce) { .painel-ambiente-fumaca { animation: none; } }
 
@@ -2901,6 +2902,14 @@ html body .peregrinus-panel.peregrinus-panel .ds-rotulo {
   line-height: var(--panel-type-interface-leading);
   font-weight: 500;
   text-transform: none;
+}
+/* KPI labels remain complete in narrow cards instead of ellipsis; numbers
+   retain their independent container sizing and financial formatting. */
+html body .peregrinus-panel.peregrinus-panel .ds-kpi .ds-rotulo {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: anywhere;
 }
 html body .peregrinus-panel.peregrinus-panel .ds-nota {
   font-size: var(--panel-type-caption);

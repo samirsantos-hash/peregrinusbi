@@ -1,5 +1,9 @@
 # Roadmap
 
+## Encaixe da Typography — 06/11
+- [x] Rótulos dos KPIs completos com quebra de linha, legendas limitadas à largura do gráfico e fundo decorativo contido sem ocultar conteúdo ou tooltips; nenhum dado ou estilo da Home alterado.
+- [x] AUTOPECASLONDRINA: resumo em 320/390/1143/1280px sem rolagem horizontal ou rótulos cortados; oito subanálises em 390/1143px sem conteúdo fora da tela, temas claro/escuro e cartões/legendas conferidos. Zero erros, 15 regressões e build OK. k6 público: 28.447 requisições, zero falhas, p95 77,97ms; não mede painel autenticado. Sem publicar.
+
 ## Typography do HTML — 06/11
 - [x] Consolidada Geist original da referência, corpo 14/24, títulos de bloco 20/28/600, notas 12/18, labels 14/20 e títulos de portais marcados; cartões estreitos 24px/20px, números tabulares e espaçamento zero. Preservados marca, Home e dados.
 - [x] AUTOPECASLONDRINA com dados reais: fonte e acentos carregados, títulos 24/32/600 e lateral 20/28/600 confirmados; temas e 390px conferidos sem erros, 15 regressões e build OK. Excesso horizontal preexistente em conteúdo analítico abaixo, fora deste ajuste. k6 público: 28.454 requisições, zero falhas, p95 77,21ms; não mede painel autenticado. Somente teste.
