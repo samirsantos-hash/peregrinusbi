@@ -8,6 +8,7 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireEnv } from "../_shared/env.ts";
 import { aggregateItemOrders, itemConversion, parseItemVisits } from "../_shared/mlItemStats.ts";
 import { z } from "npm:zod@3";
+import { lerQualidade } from "../_shared/mlMelhorias.ts";
 
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -71,7 +72,7 @@ Deno.serve(async (req) => {
       cancelados: completo ? totals.cancelados : null,
       conversao: itemConversion(completo ? totals.pedidos : null, visitas),
       promocao: list ? list.some((p: any) => p.status === "started") : null, completo,
-    }, periodo: { inicio: from.slice(0, 10), fim: to.slice(0, 10) } });
+    }, detalhe: { status: item.status ?? null, estoque: typeof item.available_quantity === "number" ? item.available_quantity : null, saude: typeof item.health === "number" ? item.health : null, qualidade: lerQualidade(await get(`/item/${itemId}/performance`)) }, periodo: { inicio: from.slice(0, 10), fim: to.slice(0, 10) } });
   }
 
   const ids = new Set<string>();

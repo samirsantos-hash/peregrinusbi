@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { ArrowDownRight, ArrowRight, ArrowUpRight, Loader2, OctagonX, RefreshCw, Sparkles } from 'lucide-react';
+import DetalheAnuncioAbc from '@/components/ml/DetalheAnuncioAbc';
+import { tendenciaVendas, type Tendencia } from '@/lib/anuncio/tendenciaAbc';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,11 +23,20 @@ export default function CurvaAbc({ custId }: { custId: string }) {
   const [corteA, setCorteA] = useState('80'), [corteB, setCorteB] = useState('95');
   const [expandido, setExpandido] = useState(false);
   const [grupo, setGrupo] = useState<Grupo | null>(null);
+  const [mlbAberto, setMlbAberto] = useState<string | null>(null);
   const query = useQuery({
     queryKey: ['ml-curva-abc', custId, dias], enabled: !!custId, retry: false,
     queryFn: async () => {
       const d = await chamarFuncaoMl<Dados>('ml-analise-loja', { cust_id: custId, modo: 'curvaABC', dias });
       if (!d.coberturaCompleta || !d.catalogoCompleto) throw new Error('Cobertura incompleta; classificação suspensa.');
+      return d;
+    },
+  });
+  const anterior = useQuery({
+    queryKey: ['ml-curva-abc-anterior', custId, dias], enabled: !!custId && !!query.data, retry: false,
+    queryFn: async () => {
+      const d = await chamarFuncaoMl<Dados>('ml-analise-loja', { cust_id: custId, modo: 'curvaABC', dias, anterior: true });
+      if (!d.coberturaCompleta) throw new Error('Período anterior incompleto.');
       return d;
     },
   });
@@ -43,6 +54,8 @@ export default function CurvaAbc({ custId }: { custId: string }) {
   const dinheiro = base === 'faturamento';
   const lista = r?.itens.slice(0, expandido ? undefined : 10) ?? [];
   const semVendas = query.data?.itens.filter(i => i.unidades === 0) ?? [];
+  const prevMap = new Map((anterior.data?.itens ?? []).map(i => [i.mlb, i]));
+  const tend = (mlb: string, atual: number) => { if (!anterior.data) return null; const p = prevMap.get(mlb); return tendenciaVendas(atual, p ? (dinheiro ? p.faturamentoCents : p.unidades) : 0); };
   const valor = (v: number) => dinheiro ? brl(v / 100) : num(v);
 
   return <section className="space-y-5 min-w-0">
@@ -80,14 +93,24 @@ export default function CurvaAbc({ custId }: { custId: string }) {
       </div> : <EmptyState falta={`Nenhum anúncio com ${dinheiro ? 'faturamento' : 'unidades'} positivo no período.`} />}
       <h3 className="font-semibold">Cruzamento de faturamento e unidades</h3>
       <div className="grid grid-cols-3 gap-2 text-xs">{(['A', 'B', 'C'] as const).flatMap(cf => (['A', 'B', 'C'] as const).map(cu => <button type="button" key={cf + cu} onClick={() => setGrupo({ faturamento: cf, unidades: cu })} className="glass-card p-3 text-left cursor-pointer" aria-label={`Abrir lista Receita ${cf} · Unidades ${cu}`}><p className="text-muted-foreground">Receita {cf} · Unidades {cu}</p><p className="font-semibold mt-1">{num(calculo?.cruzado.filter(i => i.classeFaturamento === cf && i.classeUnidades === cu).length ?? 0)} anúncios</p></button>))}</div>
-      <div className="overflow-x-auto"><table className="w-full text-xs"><thead><tr className="border-b border-border text-muted-foreground">{['Posição / anúncio', 'Classe', 'Valor', 'Participação', 'Acumulado', 'Receita / unidades', 'Perfil'].map(t => <th key={t} className="text-left p-3 whitespace-nowrap">{t}</th>)}</tr></thead>
-        <tbody>{lista.map(i => <tr key={i.mlb} className="border-b border-border/50"><td className="p-3 min-w-48 max-w-xs"><p className="font-medium break-words">{i.posicao}. {i.titulo}</p><p className="text-muted-foreground">{i.mlb} · {i.status ? STATUS_ANUNCIO[i.status] ?? i.status : 'Estado atual não confirmado'}</p></td><td className="p-3 font-semibold">{i.classe}</td><td className="p-3 whitespace-nowrap tabular-nums">{valor(i.valorBase)}</td><td className="p-3">{pct(i.participacao * 100)}</td><td className="p-3">{pct(i.acumulado * 100)}</td><td className="p-3">{cruzados.get(i.mlb)?.classeFaturamento ?? '—'} / {cruzados.get(i.mlb)?.classeUnidades ?? '—'}</td><td className="p-3 whitespace-nowrap">{cruzados.get(i.mlb)?.perfil}</td></tr>)}</tbody></table></div>
+      <div className="overflow-x-auto"><table className="w-full text-xs"><thead><tr className="border-b border-border text-muted-foreground">{['Posição / anúncio', 'Classe', 'Valor', 'Participação', 'Acumulado', 'Receita / unidades', 'Perfil', 'Tendência'].map(t => <th key={t} className="text-left p-3 whitespace-nowrap">{t}</th>)}</tr></thead>
+        <tbody>{lista.map(i => <tr key={i.mlb} className="border-b border-border/50"><td className="p-3 min-w-48 max-w-xs"><button type="button" onClick={() => setMlbAberto(i.mlb)} className="text-left hover:underline"><p className="font-medium break-words">{i.posicao}. {i.titulo}</p></button><p className="text-muted-foreground"><button type="button" onClick={() => setMlbAberto(i.mlb)} className="hover:underline">{i.mlb}</button> · {i.status ? STATUS_ANUNCIO[i.status] ?? i.status : 'Estado atual não confirmado'}</p></td><td className="p-3 font-semibold">{i.classe}</td><td className="p-3 whitespace-nowrap tabular-nums">{valor(i.valorBase)}</td><td className="p-3">{pct(i.participacao * 100)}</td><td className="p-3">{pct(i.acumulado * 100)}</td><td className="p-3">{cruzados.get(i.mlb)?.classeFaturamento ?? '—'} / {cruzados.get(i.mlb)?.classeUnidades ?? '—'}</td><td className="p-3 whitespace-nowrap">{cruzados.get(i.mlb)?.perfil}</td><td className="p-3 whitespace-nowrap"><SetaTendencia t={tend(i.mlb, i.valorBase)} carregando={anterior.isPending} erro={anterior.isError} /></td></tr>)}</tbody></table></div>
       {r.itens.length > 10 && <Button variant="outline" size="sm" onClick={() => setExpandido(v => !v)}>{expandido ? 'Mostrar dez anúncios' : `Mostrar todos (${num(r.itens.length)})`}</Button>}
       <div className="space-y-2"><h3 className="font-semibold">Sem vendas pagas no período · {num(semVendas.length)}</h3><p className="text-xs text-muted-foreground">Catálogo atual de ativos e pausados conferido. Ausência de venda nesta janela não determina há quanto tempo o anúncio está parado.</p>
         <details><summary className="cursor-pointer text-sm">Anúncios sem vendas na janela</summary><ul className="text-xs space-y-2 mt-3">{semVendas.map(i => <li key={i.mlb}>{i.titulo} · {i.mlb}</li>)}</ul></details>
         {r.semMovimento.some(i => i.unidades > 0) && <p className="text-xs text-muted-foreground">{num(r.semMovimento.filter(i => i.unidades > 0).length)} anúncios tiveram unidades vendidas sem faturamento positivo; estão fora desta base.</p>}
       </div>
     </>}
+    {anterior.data && <p className="text-xs text-muted-foreground">Tendência compara com {dataBr(anterior.data.periodo.inicio)} – {dataBr(anterior.data.periodo.fim)} ({dinheiro ? 'faturamento' : 'unidades'}): subindo ≥ +10%, estável entre −10% e +10%, caindo até −70%, parando com queda de 70% ou mais.</p>}
+    <DetalheAnuncioAbc custId={custId} mlb={mlbAberto} onClose={() => setMlbAberto(null)} />
     <ListaCruzamentoAbc grupo={grupo} itens={calculo?.cruzado ?? []} periodo={query.data ? `${dataBr(query.data.periodo.inicio)} – ${dataBr(query.data.periodo.fim)}` : ''} onClose={() => setGrupo(null)} />
   </section>;
+}
+const ROTULO: Record<Tendencia, string> = { subindo: 'Subindo', estavel: 'Estável', caindo: 'Caindo', parando: 'Parando', novo: 'Novo no período' };
+function SetaTendencia({ t, carregando, erro }: { t: ReturnType<typeof tendenciaVendas>; carregando: boolean; erro: boolean }) {
+  if (carregando) return <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" aria-label="Carregando tendência" />;
+  if (erro || !t) return <span className="text-muted-foreground">Sem dado</span>;
+  const Icone = { subindo: ArrowUpRight, estavel: ArrowRight, caindo: ArrowDownRight, parando: OctagonX, novo: Sparkles }[t.tendencia];
+  const cor = t.tendencia === 'subindo' || t.tendencia === 'novo' ? 'text-primary' : t.tendencia === 'estavel' ? 'text-muted-foreground' : 'text-destructive';
+  return <span className={`inline-flex items-center gap-1 ${cor}`}><Icone className="h-4 w-4" aria-hidden />{ROTULO[t.tendencia]}{t.variacao != null && <span className="tabular-nums">{t.variacao > 0 ? '+' : ''}{pct(t.variacao * 100)}</span>}</span>;
 }
