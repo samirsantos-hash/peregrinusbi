@@ -1,5 +1,9 @@
 # Roadmap
 
+## Boas-vindas Laser beam — 06/11
+- [x] Usar a cena original local do HTML na entrada autenticada do dashboard, com boas-vindas breves e botão para continuar; não repetir na navegação e respeitar movimento reduzido.
+- [ ] Conferir cena em desktop e celular, remoção após entrada e ausência de consultas externas; somente em teste.
+
 ## Funil em camadas curvas — 06/11
 - [x] Aplicar o desenho da referência às etapas existentes do funil de conversão: topo elíptico, laterais afuniladas, volume e cores do tema, sem alterar cálculos.
 - [x] Quatro testes passaram; funil com dados reais conferido nos dois temas e em 390px, números completos e sem erros/excesso horizontal. k6 público prévio: 28.527 requisições, zero falhas, p95 78,97ms; não mede painel autenticado. Somente em teste. Aplicado ao desenho de etapas existente; gráficos diários preservados.

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+.boas-vindas-laser { --welcome-ink: var(--aura-white); --welcome-backdrop: var(--aura-black); background: hsl(var(--welcome-backdrop)); color: hsl(var(--welcome-ink)); }
+.boas-vindas-laser-texto { text-shadow: 0 2px 16px hsl(var(--welcome-backdrop) / .8); }
+.boas-vindas-laser button { color: hsl(var(--welcome-ink)); background: hsl(var(--welcome-backdrop) / .5); border-color: hsl(var(--welcome-ink) / .3); }
+
 /* Camadas curvas do funil: materiais derivados dos tokens do tema. */
 .funil-suave {
   --funil-face: hsl(var(--primary) / .48);

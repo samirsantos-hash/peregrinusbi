@@ -11,6 +11,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlassPointer } from "@/components/ds/GlassPointer";
 import { ChuvaPainel } from "@/components/chuva/ChuvaPainel";
 import { IndicadorCarregamento } from "@/components/chuva/IndicadorCarregamento";
+import BoasVindasLaser from "@/components/chuva/BoasVindasLaser";
 import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -111,6 +112,7 @@ const AppRoutes = () => {
       <AuraReveal />
       <GlassPointer />
       <IndicadorCarregamento />
+      <BoasVindasLaser />
       <div className="relative z-10">
       <Routes>
       <Route path="/auth" element={user ? <Navigate to={oauthReturnPath(new URLSearchParams(window.location.search).get("next"))} replace /> : <Auth />} />
