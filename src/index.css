@@ -2720,3 +2720,76 @@ html body .peregrinus-panel.peregrinus-panel [data-card-interactive]:focus-visib
 @media (prefers-reduced-motion: reduce), (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
   html body .peregrinus-panel.peregrinus-panel [data-card-reflection]::after { display: none !important; }
 }
+
+/* Motion from the HTML reference, scoped to the panel and its portals.
+   Intro keeps the original 800ms rhythm; live charts never loop or disappear. */
+body:has(.peregrinus-panel) {
+  --panel-motion-intro: 800ms;
+  --panel-motion-micro: 160ms;
+  --panel-motion-menu: 220ms;
+}
+@keyframes panel-reference-reveal {
+  from { opacity: 0; translate: 0 30px; }
+  to { opacity: 1; translate: 0 0; }
+}
+@keyframes panel-content-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+/* Existing outer glass entrances are replaced, not stacked. */
+html body .peregrinus-panel .glass-card { animation: none; }
+html body .peregrinus-panel [data-motion-reveal] {
+  animation: panel-reference-reveal var(--panel-motion-intro) ease-out var(--aura-delay, 0ms) backwards;
+}
+html body .peregrinus-panel [data-motion-reveal]:not([data-revealed]) { animation-play-state: paused; }
+html body .peregrinus-panel [data-ui-motion="tab-content"][data-state="active"] {
+  animation: panel-content-in var(--panel-motion-surface) var(--curva-rapida);
+}
+html body .peregrinus-panel [data-ui-motion="accordion"] {
+  animation: none;
+  transition: none;
+}
+html body .peregrinus-panel [data-ui-motion="accordion"][data-state="open"] > div {
+  animation: panel-content-in var(--panel-motion-surface) var(--curva-rapida);
+}
+html body .peregrinus-panel :is(button,a[href],[role="button"],[role="tab"],[role="option"],[role="menuitem"],summary),
+body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper]) :is(button,[role="option"],[role="menuitem"],summary) {
+  transition: transform var(--panel-motion-micro) var(--curva-rapida), opacity var(--panel-motion-micro) var(--curva-rapida);
+}
+html body .peregrinus-panel :is(button,[role="button"],[role="tab"],summary):active:not(:disabled):not([aria-disabled="true"]) {
+  opacity: .85;
+}
+@media (hover: hover) and (pointer: fine) {
+  html body .peregrinus-panel :is(button,[role="button"],summary):hover:not(:disabled):not([aria-disabled="true"]) > svg.lucide {
+    translate: 0 -1px;
+  }
+  html body .peregrinus-panel :is(button,[role="button"],summary) > svg.lucide {
+    transition: translate var(--panel-motion-micro) var(--curva-rapida);
+  }
+}
+/* Keep Radix's existing centering and sheet direction; normalize its animation variables. */
+body:has(.peregrinus-panel) :is([data-ui-surface="popover"],[data-ui-surface="menu"]) {
+  animation-duration: var(--panel-motion-menu) !important;
+  animation-timing-function: var(--curva-rapida) !important;
+  --tw-enter-scale: .98;
+  --tw-exit-scale: .98;
+  --tw-enter-translate-x: 0;
+  --tw-enter-translate-y: 4px;
+  --tw-exit-translate-x: 0;
+  --tw-exit-translate-y: 4px;
+}
+body:has(.peregrinus-panel) :is([data-ui-surface="dialog"],[data-ui-surface="sheet"]) {
+  animation-duration: var(--panel-motion-surface) !important;
+  animation-timing-function: var(--curva-rapida) !important;
+}
+body:has(.peregrinus-panel) [data-ui-surface][data-state="closed"] { animation-duration: var(--panel-motion-micro) !important; }
+@media (prefers-reduced-motion: reduce) {
+  html body .peregrinus-panel *, html body .peregrinus-panel *::before, html body .peregrinus-panel *::after,
+  body:has(.peregrinus-panel) :is([data-ui-surface],[data-ui-overlay],[data-radix-popper-content-wrapper]) * {
+    animation: none !important;
+    transition: none !important;
+  }
+  body:has(.peregrinus-panel) :is([data-ui-surface],[data-ui-overlay],[data-radix-popper-content-wrapper]) { animation: none !important; transition: none !important; }
+  html body .peregrinus-panel [data-motion-reveal] { translate: none !important; }
+  html body .peregrinus-panel :is(button,[role="button"],summary) > svg.lucide { translate: none !important; }
+}

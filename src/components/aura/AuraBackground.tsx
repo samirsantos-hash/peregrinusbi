@@ -296,7 +296,8 @@ export function AuraBackground() {
  */
 export function AuraReveal() {
   useEffect(() => {
-    const SELECTOR = ".glass-card, .aura-reveal";
+    const SELECTOR = ".glass-card, .aura-reveal, .peregrinus-panel :is(.ds-kpi,.cartao-branco,.noite-vidro,.cart-card,.carteira-kpi,.multilojas-chart,[data-card-surface])";
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     if (typeof IntersectionObserver === "undefined") {
       document
         .querySelectorAll<HTMLElement>(SELECTOR)
@@ -318,7 +319,7 @@ export function AuraReveal() {
           order++;
         }
       },
-      { threshold: 0, rootMargin: "0px 0px -8% 0px" },
+      { threshold: 0.2, rootMargin: "0px 0px -10% 0px" },
     );
     // Rede de segurança: o que já está na tela e por algum recorte não disparou o observer entra mesmo assim
     let fallback = 0;
@@ -336,7 +337,20 @@ export function AuraReveal() {
     const scan = () => {
       document
         .querySelectorAll<HTMLElement>(`:is(${SELECTOR}):not([data-revealed])`)
-        .forEach((el) => io.observe(el));
+        .forEach((el) => {
+          const panel = el.closest(".peregrinus-panel");
+          if (panel) {
+            // Do not animate fixed-overlay ancestors, nested surfaces or Framer-owned entrances twice.
+            const ownsTransform = el.style.transform && el.style.transform !== "none";
+            const nested = el.parentElement?.closest(".glass-card,.ds-kpi,.cartao-branco,.noite-vidro,.cart-card,[data-motion-reveal]");
+            if (reduced.matches || ownsTransform || nested || el.querySelector("[role='dialog'],[data-ui-surface]") || el.closest(".panel-sidebar,.panel-topbar,.painel-navigation,[role='dialog']")) {
+              el.dataset.revealed = "true";
+              return;
+            }
+            el.dataset.motionReveal = "true";
+          }
+          io.observe(el);
+        });
       window.clearTimeout(fallback);
       fallback = window.setTimeout(revealVisible, 1200);
     };

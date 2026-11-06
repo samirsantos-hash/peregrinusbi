@@ -1,5 +1,9 @@
 # Roadmap
 
+## Motion do HTML — 06/11
+- [ ] Ampliar entrada progressiva de cartões, títulos, gráficos e listas; uniformizar resposta de controles e abertura de menus/janelas sem duplicar movimentos ou alterar Home/dados.
+- [ ] Conferir sessão real, celular e movimento reduzido; registrar teste público e manter em teste.
+
 ## Ícones Lucide — 06/11
 - [x] Padronizar Lucide na navegação e árvore, tendências, reputação, preço, campanhas, Clips, diagnósticos e importações; preservar marca, dados e permissões.
 - [x] Loja real e reputação conferidas em desktop/390px sem excesso horizontal; 18 regressões passaram. k6 público prévio: 28.483 requisições, zero falhas, p95 62,89ms; não mede painel autenticado. Sem publicar.
