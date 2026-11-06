@@ -12,7 +12,7 @@ export default function FunilDiarioResumo({ atual, anterior, visitas, conversao,
   const serie = funilDiarioResumo(atual, anterior);
   return <>{([{ titulo:'Visitas', chave:'visitas', variacao:'deltaVisitas', valor:visitas, delta:deltaVisitas, pontos:false }, { titulo:'Conversão por pedido', chave:'conversao', variacao:'deltaConversao', valor:conversao, delta:deltaConversao, pontos:true }] as const).map(c => {
     const cobertura = serie.filter(d => d[c.chave] != null).length;
-    return <section key={c.chave} className="noite-vidro min-w-0 p-4" aria-label={`Evolução diária · ${c.titulo}`}>
+    return <section key={c.chave} className="noite-vidro min-w-0 rounded-2xl p-4" aria-label={`Evolução diária · ${c.titulo}`}>
       <h4 className="text-sm font-medium text-muted-foreground">{c.titulo}</h4>
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1"><p className="text-2xl font-semibold tabular-nums text-foreground">{c.valor}</p><DeltaCapsula delta={c.delta} pontos={c.pontos} /></div>
       <p className="mt-1 text-xs text-muted-foreground">Total vs 30 dias anteriores · {cobertura}/{serie.length} dias medidos</p>
@@ -22,8 +22,8 @@ export default function FunilDiarioResumo({ atual, anterior, visitas, conversao,
         <YAxis yAxisId="valor" width={42} tickFormatter={v => `${num(v,c.pontos ? 1 : 0)}${c.pontos ? '%' : ''}`} tick={{fontSize:11,fill:'hsl(var(--muted-foreground))'}} axisLine={false} tickLine={false} />
         <YAxis yAxisId="delta" hide />
         <Tooltip content={<Detalhe pontos={c.pontos} />} />
-        <Line yAxisId="valor" dataKey={c.chave} name={c.titulo} stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} activeDot={{r:3}} connectNulls={false} isAnimationActive={false} />
-        <Line yAxisId="delta" dataKey={c.variacao} name="Variação diária vs 30 dias antes" stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls={false} isAnimationActive={false} />
+        <Line type="monotone" yAxisId="valor" dataKey={c.chave} name={c.titulo} stroke="hsl(var(--chart-1))" strokeWidth={2} dot={false} activeDot={{r:3}} connectNulls={false} isAnimationActive={false} />
+        <Line type="monotone" yAxisId="delta" dataKey={c.variacao} name="Variação diária vs 30 dias antes" stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls={false} isAnimationActive={false} />
       </LineChart></ResponsiveContainer></div> : <p className="py-5 text-sm text-muted-foreground">Série diária indisponível.</p>}
       <p className="mt-1 text-xs text-muted-foreground">Linha verde: {c.pontos ? 'conversão diária' : 'visitas diárias'} · tracejada: variação {c.pontos ? '(p.p.)' : '(%)'}, escala independente</p>
     </section>;

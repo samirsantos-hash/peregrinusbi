@@ -1,5 +1,9 @@
 # Roadmap
 
+## Funil suave, impressões e carrinhos — 06/11
+- [x] Funil histórico sem polígonos rígidos e cores âmbar; cartões e curvas diárias suavizados. Impressões reais Product Ads separadas: AUTOPECASLONDRINA 2.059.882 em 29/30 dias, comparação anterior indisponível com lacunas.
+- [x] API pública documentada não confirmou leitura de carrinhos abertos/abandonados; packs agrupam compras, não carrinhos abandonados. Sete testes e build OK; sessão real 1280px/390px sem erros ou excesso horizontal. k6 público prévio 28.528 requisições, zero falhas, p95 60,74ms; não mede painel autenticado. Sem publicar.
+
 ## Indicadores sem dado em Publicidade — 06/11
 - [x] AUTOPECASLONDRINA: falta 05/11 na publicidade diária; indicadores agora mostram somente datas cobertas, com período parcial explícito e sem alterar totais do período inteiro. Participação 10,8%, TACOS 2,01%, 29/30 datas (07/10–04/11).
 - [x] 14 testes e build OK; sessão real e celular 390px sem erros/excesso horizontal. k6 público prévio: 28.410 requisições, zero falhas, p95 65,07ms; não mede painel autenticado. Sem publicar.

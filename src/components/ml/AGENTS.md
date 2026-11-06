@@ -1,5 +1,7 @@
 # Account summary
 
+- Funnel impressions use paginated campaign-level Product Ads prints with explicit scope/coverage; never infer whole-store impressions or abandoned carts from visits, sales or order packs.
+
 - Ads participation and TACOS may show explicitly labelled covered-date results independently; use each metric's matching revenue dates and expose coverage, never substitute partial values for full-period totals.
 
 - Promotion results read paginated account-scoped opt-ins separately from historical performance; current participation never produces ROAS or ROI because sale attribution and realized costs are unconfirmed.

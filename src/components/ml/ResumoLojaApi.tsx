@@ -11,6 +11,7 @@ import InvestimentoAdsResumo from './InvestimentoAdsResumo';
 import SinteseIndicadores from './SinteseIndicadores';
 import FunilDiarioResumo from './FunilDiarioResumo';
 import { receitaPorVisita } from '@/lib/funilDiarioResumo';
+import ImpressoesFunil from './ImpressoesFunil';
 
 type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number; pedidos?: number; cancelados?: number; visitas?: number | null }[] };
 type Resposta = { atual: Total; anterior: Total; periodo: { inicio: string; fim: string }; anteriorPeriodo: { inicio: string; fim: string }; consultadoEm: string };
@@ -187,6 +188,7 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
           </p>
         </div>
         <div className="resumo-funil grid min-w-0 grid-cols-1 items-start gap-3 self-start lg:col-span-4">
+          <ImpressoesFunil custId={custId} atual={a.serie.map(d => d.data)} anterior={p.serie.map(d => d.data)} />
           <FunilDiarioResumo atual={a.serie} anterior={p.serie} visitas={a.visitas == null ? 'Sem dado' : num(a.visitas)} conversao={pctFracao(a.conversao, 2)} deltaVisitas={delta(a.visitas,p.visitas)} deltaConversao={delta(a.conversao,p.conversao,true)} />
           <KpiVidro rotulo="Receita por visita" valor={receitaPorVisita(a.faturamento,a.visitas) == null ? 'Sem dado' : brl(receitaPorVisita(a.faturamento,a.visitas), true)} delta={delta(receitaPorVisita(a.faturamento,a.visitas),receitaPorVisita(p.faturamento,p.visitas))} periodo={PERIODO_DELTA} nota="Faturamento pago ÷ visitas no mesmo período; não representa lucro." />
         </div>
