@@ -2737,11 +2737,11 @@ body:has(.peregrinus-panel) {
   to { opacity: 1; }
 }
 /* Existing outer glass entrances are replaced, not stacked. */
-html body .peregrinus-panel .glass-card { animation: none; }
-html body .peregrinus-panel [data-motion-reveal] {
-  animation: panel-reference-reveal var(--panel-motion-intro) ease-out var(--aura-delay, 0ms) backwards;
+html body .peregrinus-panel.peregrinus-panel :is(.glass-card,.ds-kpi,.cartao-branco,.noite-vidro,.cart-card,.carteira-kpi,.multilojas-chart) { animation: none !important; }
+html body .peregrinus-panel.peregrinus-panel [data-motion-reveal][data-motion-reveal] {
+  animation: panel-reference-reveal var(--panel-motion-intro) ease-out var(--aura-delay, 0ms) backwards !important;
 }
-html body .peregrinus-panel [data-motion-reveal]:not([data-revealed]) { animation-play-state: paused; }
+html body .peregrinus-panel.peregrinus-panel [data-motion-reveal]:not([data-revealed]) { animation-play-state: paused !important; }
 html body .peregrinus-panel [data-ui-motion="tab-content"][data-state="active"] {
   animation: panel-content-in var(--panel-motion-surface) var(--curva-rapida);
 }
@@ -2790,6 +2790,6 @@ body:has(.peregrinus-panel) [data-ui-surface][data-state="closed"] { animation-d
     transition: none !important;
   }
   body:has(.peregrinus-panel) :is([data-ui-surface],[data-ui-overlay],[data-radix-popper-content-wrapper]) { animation: none !important; transition: none !important; }
-  html body .peregrinus-panel [data-motion-reveal] { translate: none !important; }
+  html body .peregrinus-panel.peregrinus-panel [data-motion-reveal][data-motion-reveal] { animation: none !important; translate: none !important; }
   html body .peregrinus-panel :is(button,[role="button"],summary) > svg.lucide { translate: none !important; }
 }
