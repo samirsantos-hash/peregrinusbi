@@ -28,7 +28,7 @@ export default function BoasVindasLaser() {
   useEffect(() => {
     if (!visible) return;
     const close = () => setVisible(false);
-    const timer = window.setTimeout(close, ready ? 12000 : 30000);
+    const timer = window.setTimeout(close, ready ? 8000 : 30000);
     const receive = (event: MessageEvent) => {
       if (event.origin !== window.location.origin || event.source !== frame.current?.contentWindow) return;
       if (event.data === 'peregrinus-laser-ready') setReady(true);

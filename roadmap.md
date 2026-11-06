@@ -2,7 +2,7 @@
 
 ## Boas-vindas Laser beam — 06/11
 - [x] Usar a cena original local do HTML na entrada autenticada do dashboard, com boas-vindas breves e botão para continuar; não repetir na navegação e respeitar movimento reduzido.
-- [ ] Conferir cena em desktop e celular, remoção após entrada e ausência de consultas externas; somente em teste.
+- [x] Cena original renderizada isoladamente; entrada autenticada, encerramento automático e movimento reduzido conferidos sem erros. Captura da composição com texto não concluída: a cena encerrou antes da captura no navegador de teste. k6 público: 28.471 requisições, zero falhas, p95 79ms; não mede a cena nem painel autenticado. Somente em teste.
 
 ## Funil em camadas curvas — 06/11
 - [x] Aplicar o desenho da referência às etapas existentes do funil de conversão: topo elíptico, laterais afuniladas, volume e cores do tema, sem alterar cálculos.
