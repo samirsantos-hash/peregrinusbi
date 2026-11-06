@@ -1,5 +1,9 @@
 # Roadmap
 
+## Typography do HTML — 06/11
+- [x] Consolidada Geist original da referência, corpo 14/24, títulos de bloco 20/28/600, notas 12/18, labels 14/20 e títulos de portais marcados; cartões estreitos 24px/20px, números tabulares e espaçamento zero. Preservados marca, Home e dados.
+- [x] AUTOPECASLONDRINA com dados reais: fonte e acentos carregados, títulos 24/32/600 e lateral 20/28/600 confirmados; temas e 390px conferidos sem erros, 15 regressões e build OK. Excesso horizontal preexistente em conteúdo analítico abaixo, fora deste ajuste. k6 público: 28.454 requisições, zero falhas, p95 77,21ms; não mede painel autenticado. Somente teste.
+
 ## Actions do HTML — 06/11
 - [x] Aplicada hierarquia de ações compactas, ícones, hover, foco e seleção aos controles existentes, incluindo portais; preservados Home, permissões e confirmações. Acabamento estático e realce por opacidade, sem borda giratória promocional.
 - [x] AUTOPECASLONDRINA: modo didático/avançado e Todo período conferidos com leitura real, dois temas e 390px com movimento reduzido, sem erros; 15 regressões e build OK. Controles cabem na tela; existe excesso horizontal em conteúdo analítico abaixo, não alterado. k6 público: 28.458 requisições, zero falhas, p95 77,90ms; não mede painel autenticado. Somente em teste.

@@ -2450,20 +2450,26 @@ html.light body:has(.peregrinus-panel) {
   --panel-environment-fill: linear-gradient(125deg, hsl(var(--panel-canvas)), hsl(var(--panel-brand) / .06), hsl(var(--panel-canvas)));
 }
 html body .peregrinus-panel.peregrinus-panel,
-html body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"],[data-radix-popper-content-wrapper]) {
-  font-family: "Geist Reference", sans-serif;
+html body:has(.peregrinus-panel) :is([role="dialog"],[role="alertdialog"],[data-radix-popper-content-wrapper],[data-ui-surface],[role="tooltip"]) {
+  font-family: var(--panel-font-sans);
+  font-size: var(--panel-type-body);
+  line-height: var(--panel-type-body-leading);
+  font-weight: 400;
+  font-synthesis: none;
+  letter-spacing: 0;
   --panel-type-page-title: 24px;
   --panel-type-page-leading: 32px;
   --panel-type-section-title: 20px;
   --panel-type-section-leading: 28px;
   --panel-type-body: 14px;
+  --panel-type-body-leading: 24px;
   --panel-type-label: 12px;
   --panel-type-nav: 14px;
   --panel-type-number: 30px;
-  --panel-type-number-small: 30px;
+  --panel-type-number-small: 24px;
   --panel-type-summary-number: 30px;
-  --panel-type-summary-number-small: 30px;
-  --panel-type-summary-number-compact: 24px;
+  --panel-type-summary-number-small: 24px;
+  --panel-type-summary-number-compact: 20px;
 }
 html body .peregrinus-panel.peregrinus-panel .panel-section-header {
   font-family: inherit;
@@ -2546,7 +2552,10 @@ html body .peregrinus-panel .carteira-kpi .carteira-kpi-valor {
   font-variant-numeric: tabular-nums;
 }
 @container (max-width: 200px) {
-  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor { font-size: 28px !important; line-height: 36px; }
+  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor { font-size: var(--panel-type-summary-number-small) !important; line-height: 32px; }
+}
+@container (max-width: 160px) {
+  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor { font-size: var(--panel-type-summary-number-compact) !important; line-height: 28px; }
 }
 @media (max-width: 1023px) {
   html body .peregrinus-panel.peregrinus-panel .panel-container { padding-inline: 20px; }
@@ -2859,4 +2868,65 @@ html body :is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surfac
 }
 @media (prefers-reduced-motion: reduce) {
   html body :is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button]::after { transition: none !important; }
+}
+
+/* Typography from the operational specimens: no marketing display sizes,
+   compressed tracking or changes to the original wordmark/access screen. */
+body:has(.peregrinus-panel) {
+  --panel-font-sans: "Geist Reference", ui-sans-serif, system-ui, sans-serif;
+  --panel-type-caption: 12px;
+  --panel-type-caption-leading: 18px;
+  --panel-type-interface: 14px;
+  --panel-type-interface-leading: 20px;
+  --panel-type-group: 11px;
+}
+html body .peregrinus-panel.peregrinus-panel :is(.font-sans,.font-display,.font-mono,.ds-corpo,.ds-rotulo,.ds-nota),
+html body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper],[role="tooltip"]) :is(.font-sans,.font-display,.font-mono,[data-ui-typography]) {
+  font-family: var(--panel-font-sans);
+  letter-spacing: 0;
+}
+html body .peregrinus-panel.peregrinus-panel :is(.ds-titulo-bloco,.painel-noite-titulo) {
+  font-size: var(--panel-type-section-title);
+  line-height: var(--panel-type-section-leading);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+html body .peregrinus-panel.peregrinus-panel .ds-corpo {
+  font-size: var(--panel-type-body);
+  line-height: var(--panel-type-body-leading);
+  font-weight: 400;
+}
+html body .peregrinus-panel.peregrinus-panel .ds-rotulo {
+  font-size: var(--panel-type-interface);
+  line-height: var(--panel-type-interface-leading);
+  font-weight: 500;
+  text-transform: none;
+}
+html body .peregrinus-panel.peregrinus-panel .ds-nota {
+  font-size: var(--panel-type-caption);
+  line-height: var(--panel-type-caption-leading);
+  font-weight: 400;
+}
+html body .peregrinus-panel.peregrinus-panel :is(.tnum,.tabular-nums,.font-mono,td,th,[data-num]) {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+}
+html body:has(.peregrinus-panel) [data-ui-surface] [data-ui-typography="title"] {
+  font-family: var(--panel-font-sans);
+  font-size: var(--panel-type-section-title);
+  line-height: var(--panel-type-section-leading);
+  font-weight: 600;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+html body:has(.peregrinus-panel) [data-ui-surface].listing-detail-sheet [data-ui-typography="title"] {
+  font-size: var(--panel-type-page-title);
+  line-height: var(--panel-type-page-leading);
+  font-weight: 300;
+}
+html body:has(.peregrinus-panel) [data-ui-surface] [data-ui-typography="description"] {
+  font-size: var(--panel-type-body);
+  line-height: var(--panel-type-body-leading);
+  font-weight: 400;
+  overflow-wrap: anywhere;
 }
