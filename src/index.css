@@ -2,6 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Camadas curvas do funil: materiais derivados dos tokens do tema. */
+.funil-suave {
+  --funil-face: hsl(var(--primary) / .48);
+  --funil-lateral: hsl(var(--primary) / .82);
+  --funil-topo: hsl(var(--primary) / .65);
+  --funil-reflexo: hsl(var(--foreground) / .15);
+  --funil-contorno: hsl(var(--primary) / .5);
+  --funil-sombra: 0 10px 16px -10px hsl(var(--foreground) / .25);
+}
+.funil-volume {
+  position: relative;
+  isolation: isolate;
+  min-height: 160px;
+  padding: 48px 16% 28px;
+  filter: drop-shadow(var(--funil-sombra));
+}
+.funil-volume svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; overflow: visible; }
+.funil-volume .funil-corpo { stroke: var(--funil-contorno); stroke-width: 1; }
+.funil-volume .funil-topo { fill: var(--funil-topo); stroke: var(--funil-reflexo); stroke-width: 1; }
+.funil-volume:last-child { --funil-face: hsl(var(--muted) / .9); --funil-lateral: hsl(var(--primary) / .4); --funil-topo: hsl(var(--primary) / .32); }
+.funil-volume p { overflow-wrap: anywhere; color: hsl(var(--foreground)); }
+@media (max-width: 640px) {
+  .funil-volume { min-height: 148px; padding: 44px 12% 24px; }
+}
+
 html body [data-ui-surface="sheet"].listing-detail-sheet {
   width: min(88vw, 420px);
   max-width: min(88vw, 420px);

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Funil em camadas curvas — 06/11
+- [x] Aplicar o desenho da referência às etapas existentes do funil de conversão: topo elíptico, laterais afuniladas, volume e cores do tema, sem alterar cálculos.
+- [x] Quatro testes passaram; funil com dados reais conferido nos dois temas e em 390px, números completos e sem erros/excesso horizontal. k6 público prévio: 28.527 requisições, zero falhas, p95 78,97ms; não mede painel autenticado. Somente em teste. Aplicado ao desenho de etapas existente; gráficos diários preservados.
+
 ## Sigilo da origem dos dados — 06/11
 - [x] Registrar a restrição de não citar planilha/API nos textos aos usuários e neutralizar essas referências nas quatro subcategorias do estudo de reputação, preservando períodos, cobertura e limitações.
 - [x] Sete regressões passaram; estudo nas quatro subcategorias e perfil/medalha com textos neutros, preservando datas e limitações. k6 público: 28.468 requisições, zero falhas, p95 80,91ms; somente entrega pública. Sem publicar.

@@ -1,5 +1,5 @@
 import NumeroAnimado from "@/components/ds/NumeroAnimado";
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { brl, num, pct } from "@/lib/format";
 import TooltipInfo from "./TooltipInfo";
@@ -26,6 +26,7 @@ export default function FunilVendas({
   ocultarTitulo?: boolean;
 }) {
   const reduzirMovimento = useReducedMotion();
+  const materialId = useId().replace(/:/g, '');
   const d = useMemo(() => {
     const s = (f: (k: KpiFunil) => number) => kpis.reduce((a, k) => a + (Number(f(k)) || 0), 0);
     const visitas = s((k) => k.visits);
@@ -53,7 +54,7 @@ export default function FunilVendas({
   const ticket = d.unidades > 0 ? d.fat / d.unidades : 0;
   const receitaVisita = d.fat / d.visitas;
   const topo = Math.max(1, etapas[0].valor);
-  const larg = (i: number) => Math.max(42, Math.sqrt(Math.min(1, etapas[i].valor / topo)) * 100);
+  const larg = (i: number) => Math.max(66, Math.sqrt(Math.min(1, etapas[i].valor / topo)) * 100);
 
   return (
     <section aria-label="Funil de conversão" className="funil-suave space-y-4 py-3">
@@ -70,7 +71,7 @@ export default function FunilVendas({
       )}
 
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2 flex flex-col items-center gap-1.5" role="img" aria-label="Funil de etapas reais">
+        <div className="lg:col-span-2 flex flex-col items-center gap-0" role="img" aria-label="Funil de etapas reais">
           {etapas.map((e, i) => {
             const w = larg(i);
             const daAnterior = i > 0 && etapas[i - 1].valor > 0 ? e.valor / etapas[i - 1].valor : 1;
@@ -87,18 +88,23 @@ export default function FunilVendas({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08, duration: 0.28 }}
                 title={`${e.nome}: ${num(e.valor)}${e.fonte === "estimativa" ? " (estimativa)" : ""}`}
-                className="noite-vidro group relative flex min-h-[96px] flex-col items-center justify-center gap-1 rounded-3xl px-4 py-4 text-center"
+                className="funil-volume flex flex-col items-center justify-center gap-1 text-center"
                 style={{ width: `${w}%` }}
               >
+                <svg viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true">
+                  <defs><linearGradient id={`${materialId}-${i}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="var(--funil-lateral)" /><stop offset=".5" stopColor="var(--funil-face)" /><stop offset="1" stopColor="var(--funil-lateral)" /></linearGradient></defs>
+                  <path className="funil-corpo" style={{ fill: `url(#${materialId}-${i})` }} d="M2 32 L48 128 C66 164 334 164 352 128 L398 32 Z" />
+                  <ellipse className="funil-topo" cx="200" cy="32" rx="198" ry="30" />
+                </svg>
                 <div className="relative flex max-w-full items-center gap-1.5">
-                  <p className="text-xs font-medium tracking-normal text-muted-foreground">{e.nome}</p>
+                  <p className="text-xs font-medium tracking-normal text-foreground">{e.nome}</p>
                   {e.fonte === "estimativa" && (
                     <span className="shrink-0 rounded bg-muted px-1.5 py-px text-[9px] font-medium uppercase tracking-wide text-muted-foreground">
                       estimativa
                     </span>
                   )}
                 </div>
-                <p className="relative max-w-full text-xl font-semibold tabular-nums leading-tight text-foreground">
+                <p className="relative max-w-full whitespace-nowrap text-xl font-semibold tabular-nums leading-tight text-foreground">
                   <NumeroAnimado valor={num(e.valor)} />
                 </p>
                 {e.nota && <p className="relative max-w-full text-xs text-muted-foreground">{e.nota}</p>}
