@@ -1,5 +1,9 @@
 # Roadmap
 
+## Actions do HTML — 06/11
+- [x] Aplicada hierarquia de ações compactas, ícones, hover, foco e seleção aos controles existentes, incluindo portais; preservados Home, permissões e confirmações. Acabamento estático e realce por opacidade, sem borda giratória promocional.
+- [x] AUTOPECASLONDRINA: modo didático/avançado e Todo período conferidos com leitura real, dois temas e 390px com movimento reduzido, sem erros; 15 regressões e build OK. Controles cabem na tela; existe excesso horizontal em conteúdo analítico abaixo, não alterado. k6 público: 28.458 requisições, zero falhas, p95 77,90ms; não mede painel autenticado. Somente em teste.
+
 ## Motion do HTML — 06/11
 - [x] Entrada progressiva de cartões ao aparecerem (800ms, 30px, sequência de 80ms), títulos e conteúdo; controles, abas e detalhes com resposta discreta; menus 220ms e laterais 240ms. Preservados Home, gráficos reais, reflexos e dados; sem blur animado ou barras em loop.
 - [x] Loja real e cartões de reputação visíveis após entrada; menus, abertura/fechamento lateral, celular 390px e movimento reduzido conferidos sem erros. 19 regressões passaram e build OK. k6 público: 28.484 requisições, zero falhas, p95 55,39ms; não mede painel autenticado. Sem publicar.

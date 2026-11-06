@@ -1693,7 +1693,7 @@ html body .peregrinus-panel button.aura-cta {
   background: hsl(var(--panel-action));
   color: hsl(var(--panel-white));
   border: 1px solid hsl(var(--panel-brand));
-  border-radius: 999px;
+  border-radius: var(--panel-control-radius);
 }
 html body .peregrinus-panel button.aura-cta::before,
 html body .peregrinus-panel button.aura-cta::after { content: none; }
@@ -2792,4 +2792,71 @@ body:has(.peregrinus-panel) [data-ui-surface][data-state="closed"] { animation-d
   body:has(.peregrinus-panel) :is([data-ui-surface],[data-ui-overlay],[data-radix-popper-content-wrapper]) { animation: none !important; transition: none !important; }
   html body .peregrinus-panel.peregrinus-panel [data-motion-reveal][data-motion-reveal] { animation: none !important; translate: none !important; }
   html body .peregrinus-panel :is(button,[role="button"],summary) > svg.lucide { translate: none !important; }
+}
+
+/* Actions: compact dashboard controls, not the promotional hero/carousel.
+   Static materials and opacity-only highlight preserve the motion budget. */
+body:has(.peregrinus-panel) {
+  --panel-action-fill: linear-gradient(135deg, hsl(var(--panel-brand)), hsl(var(--panel-action)));
+  --panel-action-shadow: inset 0 1px 0 hsl(var(--panel-white) / .16), 0 4px 14px hsl(var(--panel-brand) / .16);
+  --panel-action-highlight: hsl(var(--panel-white) / .1);
+  --panel-quiet-fill: hsl(var(--panel-white) / .05);
+  --panel-quiet-hover: hsl(var(--panel-white) / .1);
+  --panel-action-edge: hsl(var(--panel-white) / .1);
+}
+html.light body:has(.peregrinus-panel) {
+  --panel-action-fill: linear-gradient(135deg, hsl(var(--panel-action)), hsl(var(--panel-action)));
+  --panel-quiet-fill: hsl(var(--panel-white) / .3);
+  --panel-quiet-hover: hsl(var(--panel-white) / .6);
+  --panel-action-edge: hsl(var(--panel-black) / .12);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button] {
+  position: relative;
+  isolation: isolate;
+  border-radius: var(--panel-control-radius);
+  letter-spacing: 0;
+}
+html body :is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button="default"] {
+  background: var(--panel-action-fill);
+  color: hsl(var(--panel-white));
+  border: 1px solid hsl(var(--panel-brand) / .45);
+  box-shadow: var(--panel-action-shadow);
+}
+html body :is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button="default"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--panel-action-highlight);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--panel-motion-micro) var(--curva-rapida);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button]:is([data-ui-button="outline"],[data-ui-button="secondary"],[data-ui-button="ghost"]) {
+  background: var(--panel-quiet-fill);
+  border: 1px solid var(--panel-action-edge);
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button]:is([aria-pressed="true"],[aria-expanded="true"],[data-state="on"]) {
+  background: var(--panel-active-fill);
+  border-color: var(--panel-active-edge);
+  color: hsl(var(--panel-positive));
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button]:focus-visible {
+  outline: 2px solid hsl(var(--panel-brand));
+  outline-offset: 3px;
+}
+:is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button]:is(:disabled,[aria-disabled="true"]) {
+  opacity: .5;
+  pointer-events: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  html body :is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button="default"]:hover:not(:disabled):not([aria-disabled="true"]) { box-shadow: var(--panel-action-shadow); }
+  html body :is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button="default"]:hover:not(:disabled):not([aria-disabled="true"])::after { opacity: 1; }
+  :is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button]:is([data-ui-button="outline"],[data-ui-button="secondary"],[data-ui-button="ghost"]):hover:not(:disabled):not([aria-disabled="true"]):not([aria-pressed="true"]):not([aria-expanded="true"]):not([data-state="on"]) {
+    background: var(--panel-quiet-hover);
+    color: hsl(var(--panel-text));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body :is(.peregrinus-panel, body:has(.peregrinus-panel) :is([data-ui-surface],[data-radix-popper-content-wrapper])) [data-ui-button]::after { transition: none !important; }
 }

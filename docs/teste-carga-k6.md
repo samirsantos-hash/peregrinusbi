@@ -1,5 +1,7 @@
 # Teste de carga público — 04/11/2026
 
+- 06/11: Actions do HTML, teste público prévio com 1.000 usuários, 28.458 requisições, zero falhas, p95 HTTP 77,90ms; somente entrega pública, não mede controles nem painel autenticado.
+
 - 06/11: Motion do HTML, teste público prévio com 1.000 usuários, 28.484 requisições, zero falhas, p95 55,39ms; somente entrega pública, não mede animações ou painel autenticado.
 
 - 06/11: padronização Lucide, teste público prévio com 1.000 usuários, 28.483 requisições, zero falhas, p95 62,89ms; somente entrega pública, não mede o painel autenticado ou os ícones.

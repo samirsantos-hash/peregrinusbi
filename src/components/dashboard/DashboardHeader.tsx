@@ -371,15 +371,22 @@ const DashboardHeader = ({
               <PopoverContent className="w-auto p-0 bg-card border-glass-border" align="start">
                 <div className="flex flex-wrap items-center gap-1 border-b border-border/50 p-2">
                   {presets.map((p) => (
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
                       key={p.label}
                       onClick={() => aplicarPreset(p)}
-                      className="px-2 py-1 text-[11px] rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-transform duration-[120ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]"
+                      className="h-9 px-2 text-[11px]"
                     >
                       {p.label}
-                    </button>
+                    </Button>
                   ))}
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-pressed={activePeriod === "all"}
                     onClick={() => {
                       playClick();
                       setActivePeriod("all");
@@ -388,14 +395,14 @@ const DashboardHeader = ({
                       setCalOpen(false);
                     }}
                     className={cn(
-                      "px-2 py-1 text-[11px] rounded-md transition-transform duration-[120ms] ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98]",
+                      "h-9 px-2 text-[11px]",
                       activePeriod === "all"
                         ? "bg-primary/15 text-primary"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                     )}
                   >
                     Todo período
-                  </button>
+                  </Button>
                 </div>
 
                 <Calendar
@@ -445,13 +452,14 @@ const DashboardHeader = ({
             </Button>
             {onRefresh && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className="panel-control border-border bg-card h-10 w-10"
-                title="Atualizar dados"
-                aria-label="Atualizar dados"
+                aria-busy={isRefreshing}
+                className="panel-control h-10 w-10"
+                title={isRefreshing ? "Atualizando dados" : "Atualizar dados"}
+                aria-label={isRefreshing ? "Atualizando dados" : "Atualizar dados"}
               >
                 <RefreshCw className={cn("h-4 w-4 text-neon-blue", isRefreshing && "animate-spin")} />
               </Button>
