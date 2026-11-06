@@ -1,5 +1,10 @@
 # Roadmap
 
+## Participação e vendas reais por anúncio — 06/11
+- [x] Gerenciar promoções reúne Por anúncio e Por campanha; busca, participações, convites e adesão na lateral existente com prévia/confirmação.
+- [x] Contagem exclusiva corrigida e 12 regressões aprovadas; AUTOPECASLONDRINA: 34 pedidos/R$3.152,66 sem duplicação, e outro anúncio com 22 lidos/1 ausente. Prévia real de R$60,93 conferida sem confirmar. k6 28.435 requisições, zero falhas, p95 93,73ms; build OK. Interface não publicada; leitura compartilhada atualizada.
+- [ ] Vínculo nominal das vendas históricas depende de identidade de promoção comprovada na venda; IDs de ofertas/fornecedores e participação atual não fornecem essa prova nas amostras consultadas. Não há atribuição manual presumida.
+
 ## Carregamento e avisos centralizados — 06/11
 - [x] Centralizar indicador com percentual de consultas finalizadas e tempo decorrido real; reduzir aviso de inatividade sem alterar permissões.
 - [x] Seis testes passaram, build OK; sessão autorizada confirmou progresso 6/7 (85%) e centro exato. Aviso conferido com exemplo local em 384×171px, sem alterar usuários. k6: 28.422 requisições, uma falha, limites aprovados; não mede capacidade autenticada. Sem publicar.

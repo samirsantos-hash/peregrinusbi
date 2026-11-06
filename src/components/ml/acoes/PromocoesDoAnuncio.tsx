@@ -12,6 +12,7 @@ import { useAcaoEmLote } from "@/lib/mlAcoes";
 import { PROMO_PRECO_FIEL, STATUS_PROMO_ITEM } from "@/lib/mlRotulos";
 import { DialogoPrevia } from "./DialogoPrevia";
 import { ErroAcao, lerNumero } from "./AlterarPreco";
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 type PromoAoVivo = {
   promotion_id: string | null;
@@ -54,10 +55,11 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
   aoFechar: () => void;
   aoConcluir: () => void;
 }) {
+  const { pode } = usePermissoes();
   const consulta = useQuery({
     queryKey: ["ml-promocoes-item", accountId, item?.item_id],
     enabled: !!item,
-    queryFn: () => chamarFuncaoMl<Resposta>("ml-promotions-item", { account_id: accountId, item_id: item!.item_id }),
+    queryFn: () => { if (!item) throw new Error('Selecione um anúncio.'); return chamarFuncaoMl<Resposta>("ml-promotions-item", { account_id: accountId, item_id: item.item_id }); },
   });
   const acao = useAcaoEmLote("ml-promotions-action", accountId, () => { consulta.refetch(); aoConcluir(); });
   const [editando, setEditando] = useState<{ chave: string; modo: "aderir" | "alterar" } | null>(null);
@@ -126,19 +128,19 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
                       aoCancelar={() => setEditando(null)}
                       aoRevisar={(entrada) => {
                         setEditando(null);
-                        acao.previa({ acao: ed.modo, itens: [{ item_id: item!.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id, ...entrada }] });
+                        if (item) acao.previa({ acao: ed.modo, itens: [{ item_id: item.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id, ...entrada }] });
                       }}
                     />
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {p.pode.aderir && (
+                      {p.pode.aderir && pode('promocoes.aplicar') && (
                         p.preco_por === "vendedor"
                           ? <Button size="sm" onClick={() => setEditando({ chave, modo: "aderir" })}>Entrar</Button>
-                          : <Button size="sm" onClick={() => acao.previa({ acao: "aderir", itens: [{ item_id: item!.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id }] })}>Entrar</Button>
+                          : <Button size="sm" onClick={() => { if (item) acao.previa({ acao: "aderir", itens: [{ item_id: item.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id }] }); }}>Entrar</Button>
                       )}
-                      {p.pode.alterar && <Button size="sm" variant="outline" onClick={() => setEditando({ chave, modo: "alterar" })}>Alterar oferta</Button>}
-                      {p.pode.sair && (
-                        <Button size="sm" variant="outline" onClick={() => acao.previa({ acao: "sair", itens: [{ item_id: item!.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id }] })}>
+                      {p.pode.alterar && pode('promocoes.aplicar') && <Button size="sm" variant="outline" onClick={() => setEditando({ chave, modo: "alterar" })}>Alterar oferta</Button>}
+                      {p.pode.sair && pode('promocoes.remover') && (
+                        <Button size="sm" variant="outline" onClick={() => { if (item) acao.previa({ acao: "sair", itens: [{ item_id: item.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id }] }); }}>
                           Sair
                         </Button>
                       )}

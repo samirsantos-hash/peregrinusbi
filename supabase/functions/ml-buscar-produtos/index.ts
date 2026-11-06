@@ -17,7 +17,7 @@ const API = "https://api.mercadolibre.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  const checklistNegado = await exigirPermissao(req, ['qualidade.visualizar', 'anuncios.visualizar', 'publicidade.visualizar'], false); if (checklistNegado) return checklistNegado;
+  const checklistNegado = await exigirPermissao(req, ['qualidade.visualizar', 'anuncios.visualizar', 'publicidade.visualizar', 'promocoes.visualizar'], false); if (checklistNegado) return checklistNegado;
   const URL_ = requireEnv("SUPABASE_URL");
   const db = createClient(URL_, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
   const sbUser = createClient(URL_, requireEnv("SUPABASE_ANON_KEY"), {
@@ -29,6 +29,7 @@ Deno.serve(async (req) => {
   const parsed = z.object({ cust_id: z.string().regex(/^\d+$/), termo: z.string().trim().min(2).max(120).optional(), item_id: z.string().regex(/^MLB\d+$/).optional(), vendas_promocao: z.boolean().optional() }).safeParse(await req.json().catch(() => ({})));
   if (!parsed.success || (!parsed.data.termo && !parsed.data.item_id)) return json({ error: "Informe uma loja e uma busca válida." }, 400);
   const { cust_id: cust, termo = "", item_id: itemId } = parsed.data;
+  if (parsed.data.vendas_promocao) { const negado = await exigirPermissao(req, 'promocoes.visualizar', false); if (negado) return negado; }
 
   // Permissão: a pessoa precisa enxergar esta loja.
   const { data: vis } = await sbUser.from("ml_sync_tema").select("cust_id").eq("cust_id", cust).limit(1);
@@ -91,7 +92,7 @@ Deno.serve(async (req) => {
       unidades: completo ? totals.unidades : null, faturamento: completo ? totals.faturamento : null,
       cancelados: completo ? totals.cancelados : null,
       conversao: itemConversion(completo ? totals.pedidos : null, visitas),
-      promocao: list ? list.some((p: any) => p.status === "started") : null, completo,
+      promocao: list ? list.some((p: any) => ['started', 'active'].includes(p.status)) : null, completo,
     }, detalhe: { status: item.status ?? null, estoque: typeof item.available_quantity === "number" ? item.available_quantity : null, saude: typeof item.health === "number" ? item.health : null, qualidade: lerQualidade(await get(`/item/${itemId}/performance`)) }, vendasPromocao, periodo: { inicio: from.slice(0, 10), fim: to.slice(0, 10) } });
   }
 

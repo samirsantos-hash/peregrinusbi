@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
 import CorrelacoesAnuncios from "@/components/ml/CorrelacoesAnuncios";
 import ParticipacaoAnuncios from "@/components/ml/ParticipacaoAnuncios";
+import ParticipacaoVendasAnuncio from "@/components/ml/ParticipacaoVendasAnuncio";
 import ResumoPromocoesAnuncio from "@/components/ml/ResumoPromocoesAnuncio";
 import GuardaPermissao from "@/components/GuardaPermissao";
 import CurvaAbc from "@/components/ml/CurvaAbc";
@@ -20,7 +21,6 @@ import { EmptyState, PageHeader } from "@/components/ds";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { AlterarPreco, MAX_LOTE } from "@/components/ml/acoes/AlterarPreco";
 import { PromocoesDoAnuncio } from "@/components/ml/acoes/PromocoesDoAnuncio";
-import { AbaPromocoes } from "@/components/ml/acoes/AbaPromocoes";
 import { AbaMelhorias } from "@/components/ml/acoes/AbaMelhorias";
 import { MelhoriasDoAnuncio } from "@/components/ml/acoes/MelhoriasDoAnuncio";
 import { brl, num } from "@/lib/format";
@@ -97,6 +97,9 @@ export default function Anuncios() {
 
   const recarregarLista = () => {
     qc.invalidateQueries({ queryKey: ["ml-listings-busca", contaId] });
+    qc.invalidateQueries({ queryKey: ['inv-promos-item', contaId] });
+    qc.invalidateQueries({ queryKey: ['ml-resumo-promocoes-item', contaId] });
+    qc.invalidateQueries({ queryKey: ['ml-participacao-completa'] });
   };
 
   const estado = useQuery({
@@ -203,7 +206,7 @@ export default function Anuncios() {
               {pode("correlacoes.visualizar") && <TabsTrigger value="abc">Curva ABC</TabsTrigger>}
             </TabsList>
             <TabsContent value="promocoes" className="mt-4">
-              <GuardaPermissao permissao="promocoes.visualizar"><AbaPromocoes accountId={contaId} /></GuardaPermissao>
+              <GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoVendasAnuncio key={contaId} accountId={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? '')} aoGerenciar={item => { setMelhoriasDe(null); setPromocoesDe(item as Anuncio); }} /></GuardaPermissao>
             </TabsContent>
             <TabsContent value="participacao" className="mt-4"><GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoAnuncios key={contaId + aba} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? "")} filtro={aba} /></GuardaPermissao></TabsContent>
             <TabsContent value="melhorias" className="mt-4">

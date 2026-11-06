@@ -13,19 +13,20 @@ const faixa = (a: string | null, b: string | null) => a || b ? ` · ${dt(a)} –
 
 export default function PromocoesInvestigacaoAnuncio({ custId, accountId, itemId }: { custId: string; accountId: string; itemId: string }) {
   const promos = useQuery({ queryKey: ['inv-promos-item', accountId, itemId], retry: false, queryFn: () => chamarFuncaoMl<{ promocoes: Promo[] }>('ml-promotions-item', { account_id: accountId, item_id: itemId }) });
-  const vendas = useQuery({ queryKey: ['inv-vendas-promo', custId, itemId], retry: false, queryFn: () => chamarFuncaoMl<{ vendasPromocao: Vendas | null; periodo: { inicio: string; fim: string } }>('ml-buscar-produtos', { cust_id: custId, item_id: itemId, vendas_promocao: true }) });
+  const vendas = useQuery({ queryKey: ['inv-vendas-promo-v2', custId, itemId], retry: false, queryFn: () => chamarFuncaoMl<{ vendasPromocao: Vendas | null; periodo: { inicio: string; fim: string } }>('ml-buscar-produtos', { cust_id: custId, item_id: itemId, vendas_promocao: true }) });
   const lista = promos.data?.promocoes ?? [];
   const participa = lista.filter(p => PARTICIPA.includes(p.status));
   const disponiveis = lista.filter(p => p.pode?.aderir && !PARTICIPA.includes(p.status));
-  const achar = (id: string) => lista.find(x => x.offer_id === id || x.promotion_id === id);
-  const OUTRAS = 'Promoções encerradas ou não identificadas';
+  const achar = (id: string, tipo: string | null) => lista.find(x => x.promotion_id === id && x.tipo === tipo);
+  const OUTRAS = 'Promoção identificada na venda · nome indisponível';
   const v = vendas.data?.vendasPromocao;
   const linhasPromo = (() => {
     const m = new Map<string, { nome: string; pedidos: number; unidades: number; faturamento: number }>();
     for (const g of v?.porPromocao ?? []) {
-      const p = achar(g.id), nome = p ? (p.nome ?? p.nome_tipo) : g.id.startsWith('OFFER-') ? 'Desconto individual' : OUTRAS;
-      const r = m.get(nome) ?? { nome, pedidos: 0, unidades: 0, faturamento: 0 };
-      r.pedidos += g.pedidos; r.unidades += g.unidades; r.faturamento += g.faturamento; m.set(nome, r);
+      const p = achar(g.id, g.tipo), nome = p ? `${p.nome ?? p.nome_tipo} · ${ESTADO[p.status] ?? 'Situação atual não confirmada'}` : OUTRAS;
+      const chave = `${g.tipo}:${g.id}`;
+      const r = m.get(chave) ?? { nome, pedidos: 0, unidades: 0, faturamento: 0 };
+      r.pedidos += g.pedidos; r.unidades += g.unidades; r.faturamento += g.faturamento; m.set(chave, r);
     }
     return [...m.values()].sort((a, b) => (a.nome === OUTRAS ? 1 : 0) - (b.nome === OUTRAS ? 1 : 0) || b.faturamento - a.faturamento);
   })();
@@ -45,12 +46,14 @@ export default function PromocoesInvestigacaoAnuncio({ custId, accountId, itemId
     </div>
 
     <div><p className="font-semibold mb-1">Vendido por promoção{vendas.data && ` · ${dt(vendas.data.periodo.inicio + 'T12:00')} – ${dt(vendas.data.periodo.fim + 'T12:00')}`}</p>
+      <p className="text-muted-foreground mb-2">Participação atual não identifica promoções de vendas antigas. Cada pedido conta uma vez; cupons e cashback não somam vendas extras.</p>
       {vendas.isPending && <Loader2 className="h-3 w-3 animate-spin" />}
       {vendas.isError && <p className="text-muted-foreground">{vendas.error.message}</p>}
       {vendas.isSuccess && !v && <p className="text-muted-foreground">Sem dado: os pedidos do período não puderam ser lidos por completo.</p>}
+      {v && !v.completo && <p className="text-muted-foreground mb-2">Leitura parcial: valores abaixo não representam todo o período.</p>}
       {v && <table className="w-full"><thead><tr className="text-muted-foreground"><th className="text-left py-1">Promoção</th><th className="text-right">Pedidos</th><th className="text-right">Unidades</th><th className="text-right">Faturamento</th></tr></thead>
         <tbody className="tabular-nums">
-          {linhasPromo.map(g => <tr key={g.nome}><td className="py-1">{g.nome}</td><td className="text-right">{num(g.pedidos)}</td><td className="text-right">{num(g.unidades)}</td><td className="text-right">{brl(g.faturamento)}</td></tr>)}
+          {linhasPromo.map((g, i) => <tr key={i}><td className="py-1">{g.nome}</td><td className="text-right">{num(g.pedidos)}</td><td className="text-right">{num(g.unidades)}</td><td className="text-right">{brl(g.faturamento)}</td></tr>)}
           {v.descontoSemPromocao.pedidos > 0 && <tr><td className="py-1">Desconto sem promoção identificada</td><td className="text-right">{num(v.descontoSemPromocao.pedidos)}</td><td className="text-right">{num(v.descontoSemPromocao.unidades)}</td><td className="text-right">{brl(v.descontoSemPromocao.faturamento)}</td></tr>}
           <tr className="text-muted-foreground"><td className="py-1">Sem desconto</td><td className="text-right">{num(v.semDesconto.pedidos)}</td><td className="text-right">{num(v.semDesconto.unidades)}</td><td className="text-right">{brl(v.semDesconto.faturamento)}</td></tr>
         </tbody></table>}
