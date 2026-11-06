@@ -22,9 +22,14 @@ type Row = EligibilityItem & {
   severidade: "critical" | "warn" | "ok";
 };
 
+/** Unidade do consumo desta base não confirmada (média diária e contagem semanal divergem). */
+export const CONSUMO_SEM_UNIDADE_CONFIRMADA = true;
+
 function classify(item: EligibilityItem): Row {
-  const vendas7d = item.pedidos7d || 0;
-  const vendaDiaria = vendas7d / 7;
+  // Consumo = média diária de unidades vendidas em 7 dias (unidade confirmada).
+  // pedidos_7d tem unidade ambígua e não é usado para cobertura nem envio.
+  const vendaDiaria = item.mediaTsiDiario7d > 0 ? item.mediaTsiDiario7d : 0;
+  const vendas7d = vendaDiaria * 7;
   const estoque = item.estoqueMedio7d || 0;
   const cobertura = vendaDiaria > 0 ? estoque / vendaDiaria : Infinity;
   // Recomendação: cobrir 4 semanas (28 dias) de venda, descontando o estoque atual.
@@ -35,7 +40,7 @@ function classify(item: EligibilityItem): Row {
   else if (vendas7d > 0 && cobertura < 14) sev = "warn";
   return {
     ...item,
-    vendas7d,
+    vendas7d: Math.round(vendas7d * 10) / 10,
     vendaDiaria: Math.round(vendaDiaria * 100) / 100,
     coberturaDias: Number.isFinite(cobertura) ? Math.round(cobertura * 10) / 10 : 999,
     reposicao4semanas: reposicao,
@@ -125,6 +130,19 @@ const StockoutRiskPanel = ({ sellerId, custId }: Props) => {
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card p-6 text-center">
         <Package className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
         <p className="text-sm text-muted-foreground">Sem base de elegibilidade por MLB para este seller.</p>
+      </motion.div>
+    );
+  }
+
+  if (CONSUMO_SEM_UNIDADE_CONFIRMADA) {
+    return (
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card p-6 text-center">
+        <Package className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+        <p className="text-sm text-foreground font-medium">Recomendação de reposição suspensa para esta loja</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Os dados disponíveis não confirmam se o consumo semanal é contado em unidades vendidas. Sem essa confirmação,
+          cobertura em dias e quantidade a enviar poderiam sair muito distorcidas. Conecte a conta da loja para ver a reposição com vendas reais.
+        </p>
       </motion.div>
     );
   }

@@ -53,7 +53,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
   const soEvolucao = variante === "evolucao";
   const visitasPiloto = usePilotoVisitas(custId);
 
-  const { data: m, isLoading } = useQuery({
+  const { data: m, isLoading, isError } = useQuery({
     queryKey: ["publicidade", sellerUuid, custId, fromDate, toDate],
     queryFn: () =>
       getPublicidadeMetricas(supabase, { sellerUuid, custId, fromDate, toDate }),
@@ -64,6 +64,14 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
     () => !!m && m.inv_pads === 0 && m.gmv_pads === 0,
     [m],
   );
+
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-6 text-sm text-destructive">
+        Não foi possível carregar as métricas de Ads agora. Tente novamente em instantes.
+      </div>
+    );
+  }
 
   if (isLoading || !m) {
     return (
@@ -101,7 +109,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           titulo="ROAS"
-          valor={`${m.roas.toFixed(2).replace(".", ",")}x`}
+          valor={m.roas == null ? "Sem dado" : `${m.roas.toFixed(2).replace(".", ",")}x`}
           cor={corRoas(m.roas)}
           badge={classRoas(m.roas)}
           descricao="Retorno sobre investimento em Ads"
@@ -112,7 +120,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
         />
         <KpiCard
           titulo="ACOS"
-          valor={`${m.acos.toFixed(1).replace(".", ",")}%`}
+          valor={m.acos == null ? "Sem dado" : `${m.acos.toFixed(1).replace(".", ",")}%`}
           cor={corAcos(m.acos)}
           badge={classAcos(m.acos)}
           descricao="Custo de Ads sobre GMV de Ads"
@@ -123,7 +131,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
         />
         <KpiCard
           titulo="TACOS"
-          valor={`${m.tacos.toFixed(1).replace(".", ",")}%`}
+          valor={m.tacos == null ? "Sem dado" : `${m.tacos.toFixed(1).replace(".", ",")}%`}
           cor={corTacos(m.tacos)}
           badge={classTacos(m.tacos)}
           descricao="Custo de Ads sobre GMV total da loja"
@@ -141,9 +149,9 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
             <Row label="GMV gerado pelos Ads" value={fmtBRL(m.gmv_pads)} />
             <Row
               label="Pedidos via Ads · Ticket médio"
-              value={`${m.tsi_pads.toLocaleString("pt-BR")} ped. · ${fmtBRL(m.ticket_medio)}`}
+              value={`${m.tsi_pads.toLocaleString("pt-BR")} ped. · ${m.ticket_medio == null ? "Sem dado" : fmtBRL(m.ticket_medio)}`}
             />
-            <Row label="% GMV via Ads" value={`${m.pct_gmv_ads.toFixed(1).replace(".", ",")}%`} />
+            <Row label="% GMV via Ads" value={m.pct_gmv_ads == null ? "Sem dado" : `${m.pct_gmv_ads.toFixed(1).replace(".", ",")}%`} />
           </div>
         </div>
       </div>
@@ -272,6 +280,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
       )}
 
       {/* ── Impacto do TACOS na margem ───────────────────────────────── */}
+      {m.tacos != null && (
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">
         <div className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {soEvolucao ? "5 · Impacto do TACOS na margem" : "Impacto do TACOS na margem"}
@@ -282,7 +291,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
             { margem: 20, label: "Margem média (20%)" },
             { margem: 30, label: "Margem alta (30%)" },
           ].map(({ margem, label }) => {
-            const margemLiquida = margem - m.tacos;
+            const margemLiquida = margem - (m.tacos ?? 0);
             const ok = margemLiquida > 5;
             return (
               <div
@@ -306,10 +315,11 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
           })}
         </div>
         <div className="mt-3 text-xs text-muted-foreground">
-          TACOS (base PADS do calendário): <span className="font-mono tabular-nums">{m.tacos.toFixed(1).replace(".", ",")}%</span> do GMV total consumido por Ads.
+          TACOS (base PADS do calendário): <span className="font-mono tabular-nums">{m.tacos == null ? "Sem dado" : `${m.tacos.toFixed(1).replace(".", ",")}%`}</span> do GMV total consumido por Ads.
           Margem líquida = margem bruta estimada − TACOS.
         </div>
       </div>
+      )}
 
       {/* ── Granularidade (último nível) ─────────────────────────────── */}
       <AdsGranularidadePanel sellerUuid={sellerUuid} fromDate={fromDate} toDate={toDate} />

@@ -233,6 +233,10 @@ Deno.serve(async (req) => {
     const desde90 = new Date(hoje.getTime() - 90 * 864e5);
     const porDia: Record<string, { recebidas: number; respondidas: number; sem_resposta: number }> = {};
     for (let d = new Date(desde90); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { recebidas: 0, respondidas: 0, sem_resposta: 0 };
+    // Se o limite de leitura foi atingido, dias anteriores à pergunta mais antiga lida não têm cobertura.
+    const truncado = total != null && hist.length < total;
+    const maisAntiga = hist.reduce((m: string | null, q: any) => (q.date_created && (!m || q.date_created < m) ? q.date_created : m), null);
+    const cobertoDesde = truncado && maisAntiga ? dia(maisAntiga) : null;
     for (const q of hist) {
       const k = dia(q.date_created ?? "");
       if (!porDia[k]) continue;
@@ -244,9 +248,10 @@ Deno.serve(async (req) => {
       total,
       importadas: hist.length,
       respondidas: resp.length,
-      mediana_horas_resposta: resp.length ? resp[Math.floor(resp.length / 2)] : null,
+      mediana_horas_resposta: resp.length ? (resp.length % 2 ? resp[(resp.length - 1) / 2] : (resp[resp.length / 2 - 1] + resp[resp.length / 2]) / 2) : null,
       ate_1h: resp.length ? resp.filter((h) => h <= 1).length / resp.length : null,
-      serie: Object.entries(porDia).map(([data, v]) => ({ data, ...v })),
+      serie: Object.entries(porDia).map(([data, v]) => (cobertoDesde && data < cobertoDesde ? { data, recebidas: null, respondidas: null, sem_resposta: null } : { data, ...v })),
+      coberto_desde: cobertoDesde,
       pendentes: (pend.questions ?? []).slice(0, 50).map((q: any) => ({ item: q.item_id, texto: String(q.text ?? "").slice(0, 500), data: q.date_created })),
       historico: hist.slice(0, 500).map((q: any) => ({
         id: q.id, item: q.item_id, status: q.status, data: q.date_created,

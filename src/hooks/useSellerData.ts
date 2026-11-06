@@ -58,6 +58,8 @@ export interface SellerKPI {
   // Competitiveness
   minPriceRival: number;
   visits: number;
+  /** false quando a data não trouxe visitas (zero exibido não é medição). */
+  visitsMedidas?: boolean;
   visitsExpensive: number;
   visitsMatch: number;
   visitsCheaper: number;

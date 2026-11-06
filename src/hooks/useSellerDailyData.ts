@@ -66,6 +66,7 @@ function transformDailyKpi(row: any, sellerNickname: string): SellerKPI {
     tgmvLcClips: Number(row.tgmv_lc_clips) || 0,
     minPriceRival: Number(row.min_price_rival) || 0,
     visits: Number(row.visits) || 0,
+    visitsMedidas: row.visits != null && row.visits !== "" && Number.isFinite(Number(row.visits)),
     visitsExpensive: Number(row.visits_expensive) || 0,
     visitsMatch: Number(row.visits_match) || 0,
     visitsCheaper: Number(row.visits_cheaper) || 0,
