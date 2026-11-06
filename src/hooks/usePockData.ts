@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { calcularFavorabilidade, calcularTaxaVenda, crescimento } from "@/lib/pockIndicadores";
@@ -60,9 +61,10 @@ export interface PockData {
 export interface PockMecanismo {
   chave: string;
   rotulo: string;
-  valor: number;
+  /** null = mecanismo sem medição no período. */
+  valor: number | null;
   /** últimos 12 meses, para sparkline */
-  historico: { mes: string; valor: number }[];
+  historico: { mes: string; valor: number | null }[];
 }
 
 export interface PockFullMes {
@@ -124,6 +126,9 @@ export function usePockData(sellerId: string | undefined) {
           .eq("seller_id", sellerId)
           .order("tim_month_id", { ascending: true }),
       ]);
+      // Falha em qualquer leitura é mostrada como erro, nunca como base vazia.
+      const erroLeitura = kpiRes.error ?? llRes.error ?? cdpRes.error;
+      if (erroLeitura) throw erroLeitura;
 
       if (kpiRes.error) throw kpiRes.error;
 
@@ -172,37 +177,18 @@ export function usePockData(sellerId: string | undefined) {
         const t = String(id ?? "");
         return t.length === 6 ? `${t.slice(0, 4)}-${t.slice(4, 6)}-01` : t;
       };
-      // Sem base de descontos: usa os últimos 30 dias do diário (CDP e faturamento sem CDP).
-      if (!ultimos12.length) {
-        const { data: ult } = await supabase
-          .from("sellers_kpi_daily").select("data").eq("seller_id", sellerId)
-          .order("data", { ascending: false }).limit(1);
-        const fim = ult?.[0]?.data as string | undefined;
-        if (fim) {
-          const ini = new Date(new Date(fim + "T12:00:00").getTime() - 29 * 864e5).toISOString().slice(0, 10);
-          const { data: dias } = await supabase
-            .from("sellers_kpi_daily").select("tgmv_lc, cdp_tgmv_lc")
-            .eq("seller_id", sellerId).gte("data", ini).lte("data", fim);
-          const tg = (dias ?? []).reduce((s, r: any) => s + (Number(r.tgmv_lc) || 0), 0);
-          const cdp = (dias ?? []).reduce((s, r: any) => s + (Number(r.cdp_tgmv_lc) || 0), 0);
-          if (tg > 0 || cdp > 0) {
-            ultimos12 = [{
-              tim_month_id: `${fim.slice(0, 7)}-01`,
-              f_tgmv_lc: tg,
-              f_tgmv_lc_cdp: cdp,
-              f_tgmv_lc_regular: Math.max(0, tg - cdp),
-            }];
-          }
-        }
-      }
+      // Sem base de descontos medida, os mecanismos ficam vazios (nenhum zero ou "regular" fabricado).
       const mecanismosBase = ultimos12.reduce((s, r) => s + (Number(r.f_tgmv_lc) || 0), 0);
       const mecanismos: PockMecanismo[] = MECANISMOS_DESCONTO.map((m) => ({
         chave: m.chave,
         rotulo: m.rotulo,
-        valor: ultimos12.reduce((s, r) => s + (Number(r[m.coluna]) || 0), 0),
+        // Mecanismo sem valor medido fica null; só os medidos são somados.
+        valor: ultimos12.some((r) => r[m.coluna] != null && r[m.coluna] !== "")
+          ? ultimos12.reduce((s, r) => s + (Number(r[m.coluna]) || 0), 0)
+          : null,
         historico: ultimos12.map((r) => ({
           mes: mesDe(r.tim_month_id),
-          valor: Number(r[m.coluna]) || 0,
+          valor: r[m.coluna] == null || r[m.coluna] === "" ? null : Number(r[m.coluna]) || 0,
         })),
       }));
 
@@ -249,15 +235,25 @@ export function usePockData(sellerId: string | undefined) {
       let taxaVenda = { valor: null as number | null, seller: null as number | null, mercado: null as number | null, mesRef: null as string | null, pares: 0 };
       if (a && b) {
         const { data: sel } = await supabase.from("sellers").select("sub_cluster_seller").eq("id", sellerId).maybeSingle();
-        let q = supabase.from("sellers_kpi").select("seller_id, data, tgmv_lc").in("data", [a.data, b.data]);
+        // Referência só com pares do mesmo subcluster (sem a própria loja), em leitura completa.
+        const pares: any[] = [];
         if (sel?.sub_cluster_seller) {
-          const { data: ids } = await supabase.from("sellers").select("id").eq("sub_cluster_seller", sel.sub_cluster_seller).range(0, 4999);
-          const lista = (ids ?? []).map((x: any) => x.id);
-          if (lista.length >= 5) q = q.in("seller_id", lista.slice(0, 900));
+          const ids = await fetchAllRows((de, ate) => supabase.from("sellers").select("id")
+            .eq("sub_cluster_seller", sel.sub_cluster_seller).order("id").range(de, ate));
+          if (ids.error) throw ids.error;
+          const lista = ids.data.map((x: any) => x.id).filter((id: string) => id !== sellerId);
+          if (lista.length >= 5) {
+            for (let k = 0; k < lista.length; k += 200) {
+              const lote = lista.slice(k, k + 200);
+              const r = await fetchAllRows((de, ate) => supabase.from("sellers_kpi").select("seller_id, data, tgmv_lc")
+                .in("data", [a.data, b.data]).in("seller_id", lote).order("seller_id").order("data").range(de, ate));
+              if (r.error) throw r.error;
+              pares.push(...r.data);
+            }
+          }
         }
-        const { data: pares } = await q.range(0, 9999);
         const por = new Map<string, { a?: number; b?: number }>();
-        for (const r of (pares ?? []) as any[]) {
+        for (const r of pares) {
           const e = por.get(r.seller_id) ?? {};
           if (r.data === a.data) e.a = Number(r.tgmv_lc) || 0; else e.b = Number(r.tgmv_lc) || 0;
           por.set(r.seller_id, e);
@@ -266,7 +262,8 @@ export function usePockData(sellerId: string | undefined) {
           .filter(([id]) => id !== sellerId)
           .map(([, e]) => crescimento(e.a ?? null, e.b ?? null))
           .filter((v): v is number => v !== null && Number.isFinite(v) && Math.abs(v) < 500);
-        const t = calcularTaxaVenda(crescimento(num(a.tgmv_lc), num(b.tgmv_lc)), cres);
+        // Abaixo do mínimo de pares, a referência fica indisponível.
+        const t = cres.length < 5 ? { ...calcularTaxaVenda(crescimento(num(a.tgmv_lc), num(b.tgmv_lc)), []), mercado: null } : calcularTaxaVenda(crescimento(num(a.tgmv_lc), num(b.tgmv_lc)), cres);
         taxaVenda = { ...t, mesRef: String(a.data).slice(0, 7), pares: cres.length };
       }
 

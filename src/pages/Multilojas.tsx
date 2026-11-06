@@ -63,6 +63,13 @@ const Empty = ({ msg = "Sem dados para o filtro selecionado." }) => (
 );
 
 /* ───────── agregações ───────── */
+/** Cancelados ÷ pedidos distintos (pagos ∪ cancelados), contando cada pedido uma vez, mesmo com várias linhas. */
+export function taxaCancelamentoPedidos(ps: { id: string | number }[], cancelados: { id: string | number }[]): number {
+  const canc = new Set(cancelados.map((p) => String(p.id)));
+  const todos = new Set([...ps.map((p) => String(p.id)), ...canc]);
+  return todos.size ? canc.size / todos.size : 0;
+}
+
 type Agg = ReturnType<typeof agregar>;
 function agregar(ps: PedidoML[], cancelados: PedidoML[] = []) {
   const gmv = sum(ps.map((p) => p.gmv));
@@ -84,7 +91,7 @@ function agregar(ps: PedidoML[], cancelados: PedidoML[] = []) {
     margem: gmv ? liq / gmv : 0,
     ticket: pedidos ? gmv / pedidos : 0,
     devolRate: pedidos ? devolucoes / pedidos : 0,
-    cancRate: pedidos + cancelados.length ? cancelados.length / (pedidos + cancelados.length) : 0,
+    cancRate: taxaCancelamentoPedidos(ps, cancelados),
     adsShare: gmv ? sum(ps.filter((p) => p.ads).map((p) => p.gmv)) / gmv : 0,
     nfeRate: ps.length ? ps.filter((p) => p.nfeOk).length / ps.length : 0,
     freteShare: gmv ? frete / gmv : 0,

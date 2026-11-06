@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -59,11 +60,14 @@ export function useListingsQuality(sellerId: string | undefined) {
     queryFn: async (): Promise<ListingQuality[]> => {
       if (!sellerId) return [];
 
-      const { data, error } = await supabase
+      // Leitura completa e paginada (ordem estável); a primeira linha de cada anúncio é a mais recente.
+      const { data, error } = await fetchAllRows((de, ate) => supabase
         .from("seller_listings_quality")
         .select("*")
         .eq("seller_id", sellerId)
-        .order("data", { ascending: false });
+        .order("data", { ascending: false })
+        .order("id", { ascending: true })
+        .range(de, ate));
 
       if (error) throw error;
       if (!data) return [];

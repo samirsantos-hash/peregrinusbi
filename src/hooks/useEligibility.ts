@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -32,11 +33,14 @@ export function useEligibility(sellerId: string | undefined) {
     queryFn: async (): Promise<EligibilityItem[]> => {
       if (!sellerId) return [];
 
-      const { data, error } = await supabase
+      // Leitura completa e paginada (ordem estável); falha parcial é rejeitada.
+      const { data, error } = await fetchAllRows((de, ate) => supabase
         .from("seller_eligibility" as any)
         .select("*")
         .eq("seller_id", sellerId)
-        .order("pedidos_7d", { ascending: false });
+        .order("pedidos_7d", { ascending: false })
+        .order("id", { ascending: true })
+        .range(de, ate));
 
       if (error) throw error;
       if (!data) return [];

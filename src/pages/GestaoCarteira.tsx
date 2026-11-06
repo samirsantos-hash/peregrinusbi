@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { podeExportar } from '@/lib/permissaoExportar';
 import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { linhaCsvSegura } from "@/lib/csvSafe";
@@ -109,11 +110,12 @@ function useCppMensal() {
   return useQuery({
     queryKey: ["cpp_mensal_gm"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("cpp_mensal")
         .select("*")
-        .order("tim_month_id", { ascending: false })
-        .limit(5000);
+        .order("tim_month_id", { ascending: false }).order("cus_cust_id_sel")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as CppMensalRow[];
     },
@@ -125,11 +127,12 @@ function useSellersPm() {
   return useQuery({
     queryKey: ["sellers_pm_gm"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("sellers_pm")
         .select("*")
-        .order("snapshot_date", { ascending: false })
-        .limit(5000);
+        .order("snapshot_date", { ascending: false }).order("cust_id")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as SellersPmRow[];
     },
@@ -141,10 +144,12 @@ function useCdpMensal() {
   return useQuery({
     queryKey: ["cdp_mensal_gm"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("cdp_mensal")
         .select("*")
-        .limit(5000);
+        .order("tim_month_id", { ascending: false }).order("cus_cust_id_sel")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as Record<string, unknown>[];
     },
@@ -156,10 +161,12 @@ function useGmElegibilidade() {
   return useQuery({
     queryKey: ["gm_elegibilidade"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("gm_elegibilidade")
         .select("*")
-        .limit(5000);
+        .order("id")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as Record<string, unknown>[];
     },
@@ -171,10 +178,12 @@ function useGmLiveListings() {
   return useQuery({
     queryKey: ["gm_live_listings"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("gm_live_listings")
         .select("*")
-        .limit(5000);
+        .order("id")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as Record<string, unknown>[];
     },
@@ -222,7 +231,9 @@ export default function GestaoCarteira() {
   // Enrich sellers
   const enrichedSellers = useMemo<EnrichedSeller[]>(() => {
     const currentMonth = cppData.filter((r) => r.tim_month_id === activeMonth);
-    const pmMap = new Map(pmData.map((r) => [r.cust_id, r]));
+    // pmData vem do mais recente para o mais antigo: mantém a primeira (mais recente) por loja.
+    const pmMap = new Map<typeof pmData[number]["cust_id"], typeof pmData[number]>();
+    for (const r of pmData) if (!pmMap.has(r.cust_id)) pmMap.set(r.cust_id, r);
 
     return currentMonth.map((cpp) => {
       const pm = pmMap.get(cpp.cus_cust_id_sel);

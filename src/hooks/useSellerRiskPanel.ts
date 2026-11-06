@@ -58,7 +58,7 @@ export function useSellerRiskPanel() {
         sellerId: string;
         custId: string;
         nickname: string;
-        currentTgmv: number;
+        currentTgmv: number | null;
         closedTgmv: number;
         priorTgmv: number;
         closedBpc: number | null;
@@ -74,7 +74,7 @@ export function useSellerRiskPanel() {
           sellerId: sid,
           custId,
           nickname,
-          currentTgmv: 0,
+          currentTgmv: null,
           closedTgmv: 0,
           priorTgmv: 0,
           closedBpc: null,
@@ -83,12 +83,12 @@ export function useSellerRiskPanel() {
         });
         const tgmv = Number(row.tgmv_lc) || 0;
         const dataStr = String(row.data);
-        if (dataStr === current) s.currentTgmv = tgmv;
+        if (dataStr === current) s.currentTgmv = row.tgmv_lc == null || row.tgmv_lc === "" ? null : tgmv;
         else if (dataStr === closed) {
           s.closedTgmv = tgmv;
           s.closedBpc = row.bpc == null ? null : Number(row.bpc);
-          s.closedClaims = Number(row.rep_claims_rate) || 0;
-          s.closedDelayed = Number(row.rep_delayed_ht_rate) || 0;
+          s.closedClaims = row.rep_claims_rate == null ? null : Number(row.rep_claims_rate);
+          s.closedDelayed = row.rep_delayed_ht_rate == null ? null : Number(row.rep_delayed_ht_rate);
         } else if (dataStr === prior) s.priorTgmv = tgmv;
       }
 
