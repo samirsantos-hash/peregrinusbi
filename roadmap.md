@@ -1,5 +1,9 @@
 # Roadmap
 
+## Caixa de preço e margem — 06/11
+- [x] Janela compacta centralizada; modos preço de venda e margem desejada, custos/taxas explícitos por anúncio, sem persistência dos custos ou mudança na autorização/prévia.
+- [x] Cinco testes passaram; janela centralizada (480px desktop, 358px mobile) na sessão real. Custos fictícios de teste 60+10, taxas 10%, margem 20% resultaram em R$100; prévia ML confirmou antes R$130,73/depois R$100 e alerta de queda, sem clicar Confirmar. Build OK; k6 público 28.454 requisições, zero falhas, p95 63,17ms (não mede painel logado). Sem publicar.
+
 ## Linhas do funil e receita por visita — 06/11
 - [x] Dois gráficos diários com variação vs a data 30 dias antes; lacunas mantidas. Card receita por visita com comparação por totais cobertos do período, sem lucro estimado.
 - [x] Quatro testes passaram; AUTOPECASLONDRINA com 30/30 dias, duas linhas por gráfico e receita por visita R$6,02 (+10,5%); conferida nos dois temas a 1280px e celular 390px, sem excesso horizontal ou erros. Build OK; k6 público 28.444 requisições, zero falhas, p95 62,96ms (não mede painel logado). Sem publicar.

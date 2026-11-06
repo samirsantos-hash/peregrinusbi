@@ -1083,6 +1083,16 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
 }
 
 /* Shared white-ice glass: protected sections only, never the login canvas. */
+html body [data-ui-surface="dialog"].price-edit-dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: min(480px, calc(100vw - 32px));
+  max-width: min(480px, calc(100vw - 32px));
+  max-height: calc(100dvh - 48px);
+  transform: translate(-50%, -50%);
+  overflow-y: auto;
+}
 .auth-title {
   margin-inline: auto;
   max-width: 100%;
