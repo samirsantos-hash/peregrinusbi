@@ -53,7 +53,7 @@ import GuardaPermissao from '@/components/GuardaPermissao';
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
-import ReputationPanel from "@/components/dashboard/ReputationPanel";
+import EstudoReputacao from "@/components/dashboard/EstudoReputacao";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { qualidadeDerivada } from "@/lib/qualidadeDerivada";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
@@ -687,9 +687,7 @@ const Index = () => {
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0 space-y-5">
                     {(pagina === "resumo" || pagina === "requisitos") && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} requisitos={pagina === "requisitos"} />}
-                    {pagina === "resumo" && <MlAoVivo secao="reputacao" custId={sellerCustIdMap[selectedSeller]} />}
-                    {pagina === "resumo" && <details className="border-t border-border pt-3"><summary className="cursor-pointer text-sm text-muted-foreground">Histórico importado · fonte separada</summary><ReputationPanel pagina="resumo" kpis={displayKpis} dataGranularity={granularity} /></details>}
-                    {(pagina === "indicadores" || pagina === "analise") && <ReputationPanel pagina={pagina} kpis={displayKpis} dataGranularity={granularity} />}
+                    <EstudoReputacao sellerId={selectedSeller || undefined} custId={sellerCustIdMap[selectedSeller]} pagina={pagina} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.to ? formatDateString(dateRange.to) : undefined} />
                   </TabsContent>
                   <TabsContent value="perguntas" className="mt-0 space-y-5">
                     <MlAoVivo secao="perguntas" custId={sellerCustIdMap[selectedSeller]} />

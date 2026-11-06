@@ -1,5 +1,10 @@
 # Roadmap
 
+## Estudo de reputação — 05/11 às 23:54
+- [x] Distribuídos estado observado e avaliações no Resumo; taxas API/mensais nos Indicadores; gráfico/tabela de meses fechados na Análise; confiabilidade e referências provisórias em Perfil/tier/requisitos. Leitura crua preserva ausência e frações, sem reputação diária ou risco automático sem denominador.
+- [x] 19 testes passaram e build OK; AUTOPECASLONDRINA nas quatro subcategorias, 1280px e Resumo a 390px sem excesso horizontal. k6 público prévio: 28.440 requisições, zero falhas, p95 71,32ms; não mede painel autenticado. Somente teste.
+- [ ] Percentil da vertical, ocorrências/distância em pedidos, piso de volume e histórico de medalhas: aguardam pares/janelas/denominadores confirmados, limites oficiais e fotografias datadas; não inferidos.
+
 ## Modo claro e proporções — 05/11 às 22:45
 - [x] Home e painel claros com ambiente cinza/verde/amarelo suave, vidro branco translúcido, reflexo de canto e contornos escuros sutis; cores de métricas preservadas.
 - [x] Comparada hierarquia dos KPIs reais do HTML: valores padrão 30px/600 (não 36px globais), etiquetas principais 14px, notas/eixos 12px; eixos usam Geist como painel, Home mantém DM Sans. Carteira mantém 22px com redução por espaço para números inteiros. Sessão real conferida em 1280px e 390px, troca claro/escuro, campos editáveis e nenhum erro ou excesso horizontal. Dez testes e build OK; não auditadas individualmente todas as telas. Sem publicar.
