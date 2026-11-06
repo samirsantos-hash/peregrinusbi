@@ -10,6 +10,7 @@ import { chamarFuncaoMl, dataHoraBr } from '@/lib/mlFuncoes';
 import { brl, num, pct } from '@/lib/format';
 import { classificarAbc, cruzarAbc, type BaseAbc, type ItemVendas } from '@/lib/anuncio/curvaAbc';
 import { STATUS_ANUNCIO } from '@/lib/mlRotulos';
+import ListaCruzamentoAbc, { type Grupo } from '@/components/ml/ListaCruzamentoAbc';
 
 type Dados = { periodo: { inicio: string; fim: string }; itens: ItemVendas[]; coberturaCompleta: boolean; catalogoCompleto: boolean; consultadoEm: string };
 const dataBr = (s: string) => s.split('-').reverse().join('/');
@@ -19,6 +20,7 @@ export default function CurvaAbc({ custId }: { custId: string }) {
   const [base, setBase] = useState<BaseAbc>('faturamento');
   const [corteA, setCorteA] = useState('80'), [corteB, setCorteB] = useState('95');
   const [expandido, setExpandido] = useState(false);
+  const [grupo, setGrupo] = useState<Grupo | null>(null);
   const query = useQuery({
     queryKey: ['ml-curva-abc', custId, dias], enabled: !!custId, retry: false,
     queryFn: async () => {
@@ -77,7 +79,7 @@ export default function CurvaAbc({ custId }: { custId: string }) {
         </LineChart></ResponsiveContainer>
       </div> : <EmptyState falta={`Nenhum anúncio com ${dinheiro ? 'faturamento' : 'unidades'} positivo no período.`} />}
       <h3 className="font-semibold">Cruzamento de faturamento e unidades</h3>
-      <div className="grid grid-cols-3 gap-2 text-xs">{(['A', 'B', 'C'] as const).flatMap(cf => (['A', 'B', 'C'] as const).map(cu => <div key={cf + cu} className="glass-card p-3"><p className="text-muted-foreground">Receita {cf} · Unidades {cu}</p><p className="font-semibold mt-1">{num(calculo?.cruzado.filter(i => i.classeFaturamento === cf && i.classeUnidades === cu).length ?? 0)} anúncios</p></div>))}</div>
+      <div className="grid grid-cols-3 gap-2 text-xs">{(['A', 'B', 'C'] as const).flatMap(cf => (['A', 'B', 'C'] as const).map(cu => <button type="button" key={cf + cu} onClick={() => setGrupo({ faturamento: cf, unidades: cu })} className="glass-card p-3 text-left cursor-pointer" aria-label={`Abrir lista Receita ${cf} · Unidades ${cu}`}><p className="text-muted-foreground">Receita {cf} · Unidades {cu}</p><p className="font-semibold mt-1">{num(calculo?.cruzado.filter(i => i.classeFaturamento === cf && i.classeUnidades === cu).length ?? 0)} anúncios</p></button>))}</div>
       <div className="overflow-x-auto"><table className="w-full text-xs"><thead><tr className="border-b border-border text-muted-foreground">{['Posição / anúncio', 'Classe', 'Valor', 'Participação', 'Acumulado', 'Receita / unidades', 'Perfil'].map(t => <th key={t} className="text-left p-3 whitespace-nowrap">{t}</th>)}</tr></thead>
         <tbody>{lista.map(i => <tr key={i.mlb} className="border-b border-border/50"><td className="p-3 min-w-48 max-w-xs"><p className="font-medium break-words">{i.posicao}. {i.titulo}</p><p className="text-muted-foreground">{i.mlb} · {i.status ? STATUS_ANUNCIO[i.status] ?? i.status : 'Estado atual não confirmado'}</p></td><td className="p-3 font-semibold">{i.classe}</td><td className="p-3 whitespace-nowrap tabular-nums">{valor(i.valorBase)}</td><td className="p-3">{pct(i.participacao * 100)}</td><td className="p-3">{pct(i.acumulado * 100)}</td><td className="p-3">{cruzados.get(i.mlb)?.classeFaturamento ?? '—'} / {cruzados.get(i.mlb)?.classeUnidades ?? '—'}</td><td className="p-3 whitespace-nowrap">{cruzados.get(i.mlb)?.perfil}</td></tr>)}</tbody></table></div>
       {r.itens.length > 10 && <Button variant="outline" size="sm" onClick={() => setExpandido(v => !v)}>{expandido ? 'Mostrar dez anúncios' : `Mostrar todos (${num(r.itens.length)})`}</Button>}
@@ -86,5 +88,6 @@ export default function CurvaAbc({ custId }: { custId: string }) {
         {r.semMovimento.some(i => i.unidades > 0) && <p className="text-xs text-muted-foreground">{num(r.semMovimento.filter(i => i.unidades > 0).length)} anúncios tiveram unidades vendidas sem faturamento positivo; estão fora desta base.</p>}
       </div>
     </>}
+    <ListaCruzamentoAbc grupo={grupo} itens={calculo?.cruzado ?? []} periodo={query.data ? `${dataBr(query.data.periodo.inicio)} – ${dataBr(query.data.periodo.fim)}` : ''} onClose={() => setGrupo(null)} />
   </section>;
 }
