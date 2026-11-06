@@ -1,5 +1,9 @@
 # Roadmap
 
+## Analisador de título v2 — 06/11
+- [x] Analisador local em Anúncios → Correlações, com repetição/pontuação e sugestões revisáveis; limite público da categoria separado da nota, ausência não vira 60.
+- [x] 19 testes e build OK; título real MLB5381969652 com 60 caracteres e limite da categoria confirmado no navegador em 200. Preservados códigos/medidas e termos não comprovados como ruído; corte de 45 é estimativa fora da nota. Revisão/cópia/restauração conferidas em sessão real a 1280px/390px, sem erros ou excesso horizontal. k6 prévio 28.444 requisições, zero falhas, p95 HTTP 81,39ms (público somente). Sem IA, escrita ML ou publicação.
+
 ## Análises por anúncio organizadas por assunto — 06/11
 - [x] Criar Anúncios → Correlações com desempenho, conteúdo, promoções, Full/estoque e limites do estudo; reutilizar leituras existentes, sem ranking inventado.
 - [x] Dar acesso pelo ramo Correlações do painel, mantendo preço e reputação nas seções próprias e preservando permissões e loja nos atalhos.

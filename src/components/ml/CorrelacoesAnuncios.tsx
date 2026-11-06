@@ -9,12 +9,14 @@ import { AbaMelhorias } from "./acoes/AbaMelhorias";
 import { AbaPromocoes } from "./acoes/AbaPromocoes";
 import { brl, num } from "@/lib/format";
 import { LOGISTICA } from "@/lib/mlRotulos";
+import AnalisadorTitulo from "./AnalisadorTitulo";
 
-type Item = { item_id: string; titulo: string | null; sku: string | null; link: string | null; preco: number | null; estoque: number | null; vendidos: number | null; logistica: string | null; tipo_anuncio: string | null };
+type Item = { item_id: string; titulo: string | null; categoria_id?: string | null; sku: string | null; link: string | null; preco: number | null; estoque: number | null; vendidos: number | null; logistica: string | null; tipo_anuncio: string | null };
 
 const TOPICOS = [
   { id: "desempenho", label: "Desempenho e comparação", permissao: "qualidade.visualizar" },
   { id: "conteudo", label: "Título, descrição e qualidade", permissao: "qualidade.visualizar" },
+  { id: "titulo", label: "Analisador de título", permissao: "qualidade.visualizar" },
   { id: "oferta", label: "Full, estoque e oferta", permissao: "anuncios.visualizar" },
   { id: "promocoes", label: "Promoções e descontos", permissao: "promocoes.visualizar" },
   { id: "metodologia", label: "Fontes e limites do estudo", permissao: "correlacoes.visualizar" },
@@ -39,6 +41,7 @@ export default function CorrelacoesAnuncios({ accountId, custId, itens, carregan
       <CompararAnuncios key={accountId} custId={custId} itens={itens.filter(i => i.preco !== null && i.titulo !== null && i.link !== null).map(i => ({ id: i.item_id, titulo: i.titulo ?? i.item_id, link: i.link ?? "", preco: i.preco ?? 0, sku: i.sku, tipo: i.tipo_anuncio, vendidos: i.vendidos ?? undefined }))} />
     </>}
     {atual.id === "conteudo" && <AbaMelhorias key={accountId} accountId={accountId} />}
+    {atual.id === "titulo" && <AnalisadorTitulo key={accountId} itens={itens} carregando={carregando} erro={erro} />}
     {atual.id === "promocoes" && <><p className="text-sm text-muted-foreground">Adesões e descontos atuais. Retorno por promoção depende de vendas atribuídas e custos confirmados.</p><AbaPromocoes key={accountId} accountId={accountId} /></>}
     {atual.id === "oferta" && <>
       <p className="text-sm text-muted-foreground">Última leitura dos anúncios. Full não confirma entrega amanhã; estoque não determina posição na busca.</p>

@@ -1,5 +1,7 @@
 # Account summary
 
+- Title v2 is a local editorial heuristic: fetch category limits via credential-free fixed public category URLs, keep unknown limits null, exclude length/estimated visual cut from scores, and never auto-write titles or activate AI.
+
 - Listing-study topics compose existing account-scoped reads and capability guards; preserve store context across topic links, and never turn study weights into official ranking scores or position gains.
 
 - Funnel impressions use paginated campaign-level Product Ads prints with explicit scope/coverage; never infer whole-store impressions or abandoned carts from visits, sales or order packs.

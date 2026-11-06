@@ -28,6 +28,7 @@ type Variacao = { id: number | null; sku: string | null; combinacao: string; pre
 type Anuncio = {
   item_id: string;
   titulo: string | null;
+  categoria_id?: string | null;
   sku: string | null;
   preco: number | null;
   preco_original: number | null;
