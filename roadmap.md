@@ -1,5 +1,9 @@
 # Roadmap
 
+## Indicadores sem dado em Publicidade — 06/11
+- [x] AUTOPECASLONDRINA: falta 05/11 na publicidade diária; indicadores agora mostram somente datas cobertas, com período parcial explícito e sem alterar totais do período inteiro. Participação 10,8%, TACOS 2,01%, 29/30 datas (07/10–04/11).
+- [x] 14 testes e build OK; sessão real e celular 390px sem erros/excesso horizontal. k6 público prévio: 28.410 requisições, zero falhas, p95 65,07ms; não mede painel autenticado. Sem publicar.
+
 ## Promoções em Oportunidades — 06/11
 - [x] Consulta ao vivo em AUTOPECASLONDRINA: API respondeu 200, 20/20 pedidos pagos com descontos disponíveis, 4 com identificador de campanha, zero correspondências nas promoções/ofertas locais verificadas; janela 07/10–05/11. Amostra e ausência de vínculo não autorizam totais nem ROAS/ROI; sem mudanças na API ou publicação.
 - [x] Incluída subanálise Promoções com adesões confirmadas e cobertura; estado atual separado de resultados históricos.

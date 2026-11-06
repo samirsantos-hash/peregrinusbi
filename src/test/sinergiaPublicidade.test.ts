@@ -1,7 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { calcularSinergiaPublicidade, completarVisitasPiloto, pearsonPareado, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
+import { calcularSinergiaPublicidade, indicadoresPublicidadeCoberta, completarVisitasPiloto, pearsonPareado, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
 const pontos = (n = 7): PontoPublicidade[] => Array.from({ length: n }, (_, i) => ({ data: `2026-10-${i + 1}`, investimento: i + 1, faturamento: (i + 1) * 10, receitaAds: (i + 1) * 4 }));
 describe("sinergia de publicidade", () => {
+  it('calcula cobertura parcial com faturamento das mesmas datas, sem incluir dia ausente', () => {
+    const r = indicadoresPublicidadeCoberta([
+      { data: '2026-11-04', investimento: 10, receitaAds: 40, faturamento: 100 },
+      { data: '2026-11-05', investimento: null, receitaAds: null, faturamento: 900 },
+    ]);
+    expect(r.tacos.valor).toBeCloseTo(0.1);
+    expect(r.participacao.valor).toBeCloseTo(0.4);
+    expect(r.tacos.dias).toBe(1); expect(r.total).toBe(2);
+  });
+  it('coberturas de custo e receita são independentes', () => {
+    const r = indicadoresPublicidadeCoberta([{ data: '2026-11-04', investimento: 10, receitaAds: null, faturamento: 100 }]);
+    expect(r.tacos.valor).toBeCloseTo(0.1); expect(r.participacao.valor).toBeNull();
+    expect(r.participacao.dias).toBe(0);
+  });
   it("matriz exclui pares ausentes sem deslocar as séries", () => {
     expect(pearsonPareado([[1, 2], [2, 4], [null, 99], [3, 6], [4, 8], [5, 10], [6, 12], [7, 14]])).toBeCloseTo(1);
   });

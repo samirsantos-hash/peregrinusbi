@@ -21,6 +21,18 @@ export function completarVisitasPiloto<T extends { data: string; visitas?: numbe
 }
 export type ResultadoSinergia = ReturnType<typeof calcularSinergiaPublicidade>;
 
+/** An explicitly labelled partial period uses the same covered dates for each ratio. */
+export function indicadoresPublicidadeCoberta(pontos: PontoPublicidade[]) {
+  const custo = pontos.filter(p => valido(p.investimento) && valido(p.faturamento));
+  const receita = pontos.filter(p => valido(p.receitaAds) && valido(p.faturamento));
+  const datas = (ps: PontoPublicidade[]) => ({ dias: ps.length, inicio: ps[0]?.data, fim: ps[ps.length - 1]?.data });
+  return {
+    total: pontos.length,
+    tacos: { valor: calcularSinergiaPublicidade(custo).tacos, ...datas(custo) },
+    participacao: { valor: calcularSinergiaPublicidade(receita).participacao, ...datas(receita), incompativel: calcularSinergiaPublicidade(receita).atribuicaoIncompativel },
+  };
+}
+
 const valido = (v: number | null): v is number => v != null && Number.isFinite(v) && v >= 0;
 const razao = (a: number | null, b: number | null) => valido(a) && valido(b) && b > 0 ? a / b : null;
 

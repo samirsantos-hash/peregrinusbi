@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAnaliseMl } from "@/hooks/useAnaliseMl";
 import { useContaMl } from "@/components/dashboard/RupturaApi";
 import { fetchAllRows } from "@/lib/fetchAllRows";
-import { calcularSinergiaPublicidade, completarVisitasPiloto, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
+import { calcularSinergiaPublicidade, indicadoresPublicidadeCoberta, completarVisitasPiloto, type PontoPublicidade } from "@/lib/sinergiaPublicidade";
 import { num, pctFracao } from "@/lib/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import GraficoPublicidadeSerie from "@/components/dashboard/GraficoPublicidadeSerie";
@@ -14,6 +14,11 @@ import { Button } from "@/components/ui/button";
 
 export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = true, fonte, custId, de, ate, piloto }: { pontos: PontoPublicidade[]; compacto?: boolean; exibirMatriz?: boolean; fonte: string; custId?: string; de?: string; ate?: string; piloto?: { ativo: boolean; alternar: () => void } }) {
   const r = calcularSinergiaPublicidade(pontos);
+  const cobertura = indicadoresPublicidadeCoberta(pontos);
+  const notaCobertura = (m: { dias: number; inicio?: string; fim?: string }) => {
+    const data = (s?: string) => s?.split('-').reverse().join('/') ?? '—';
+    return `${num(m.dias)} de ${num(cobertura.total)} datas medidas${m.inicio ? ` · ${data(m.inicio)} a ${data(m.fim)}` : ''}${m.dias < cobertura.total ? ' · período parcial' : ''}`;
+  };
   return <section aria-label="Sinergia e dependência de publicidade" className="resumo-sinergia space-y-5 border-t border-border/50 pt-5">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
@@ -28,11 +33,11 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
     </div>
     <dl className="grid grid-cols-1 gap-5 border-t border-border/50 pt-4 sm:grid-cols-2">
-      <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{r.participacao == null ? "Sem dado" : pctFracao(r.participacao, 1)}</dd></div>
-      <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{r.tacos == null ? "Sem dado" : pctFracao(r.tacos, 2)}</dd></div>
+      <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{cobertura.participacao.valor == null ? "Sem dado" : pctFracao(cobertura.participacao.valor, 1)}</dd><p className="mt-2 text-xs text-muted-foreground">{notaCobertura(cobertura.participacao)}</p></div>
+      <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{cobertura.tacos.valor == null ? "Sem dado" : pctFracao(cobertura.tacos.valor, 2)}</dd><p className="mt-2 text-xs text-muted-foreground">{notaCobertura(cobertura.tacos)}</p></div>
     </dl>
-    {r.atribuicaoIncompativel && <p className="text-xs text-muted-foreground">A receita atribuída supera o faturamento pago; participação indisponível por diferença de atribuição.</p>}
-    {(r.investimento == null || r.receitaAds == null) && <p className="text-xs text-muted-foreground">Faltam métricas de publicidade em parte das datas. Participação e TACOS aguardam cobertura completa; dias ausentes não representam gasto zero.</p>}
+    {cobertura.participacao.incompativel && <p className="text-xs text-muted-foreground">A receita atribuída supera o faturamento pago; participação indisponível por diferença de atribuição.</p>}
+    {(r.investimento == null || r.receitaAds == null) && <p className="text-xs text-muted-foreground">Cobertura incompleta: cada indicador considera apenas as datas com sua métrica de Ads e faturamento medidos juntos. Não representa o período inteiro; dias ausentes não representam gasto zero.</p>}
     {!compacto && <div className="space-y-1 text-xs text-muted-foreground">
       <p>Participação = receita atribuída ÷ faturamento; TACOS = investimento ÷ faturamento. Razões dos totais das mesmas datas, sem média de percentuais.</p>
       <p>ROAS = soma das vendas atribuídas a Ads ÷ soma do investimento. Faturamento total ÷ Ads não é ROAS.</p>

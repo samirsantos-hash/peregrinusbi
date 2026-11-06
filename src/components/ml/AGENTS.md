@@ -1,5 +1,7 @@
 # Account summary
 
+- Ads participation and TACOS may show explicitly labelled covered-date results independently; use each metric's matching revenue dates and expose coverage, never substitute partial values for full-period totals.
+
 - Promotion results read paginated account-scoped opt-ins separately from historical performance; current participation never produces ROAS or ROI because sale attribution and realized costs are unconfirmed.
 
 - Margin-based pricing is a client calculator using explicit per-item costs and charges, not markup; send resulting prices through the unchanged server preview/confirmation flow and never persist private cost inputs.
