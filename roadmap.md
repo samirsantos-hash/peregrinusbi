@@ -1,5 +1,9 @@
 # Roadmap
 
+## Sigilo da origem dos dados — 06/11
+- [x] Registrar a restrição de não citar planilha/API nos textos aos usuários e neutralizar essas referências nas quatro subcategorias do estudo de reputação, preservando períodos, cobertura e limitações.
+- [x] Sete regressões passaram; estudo nas quatro subcategorias e perfil/medalha com textos neutros, preservando datas e limitações. k6 público: 28.468 requisições, zero falhas, p95 80,91ms; somente entrega pública. Sem publicar.
+
 ## Reflexos e resposta de cartões — 06/11
 - [x] Reflexo localizado de borda verde e superfície suave inspirado no HTML; compressão somente em cartões com ação existente, sem inclinação em cartões informativos, navegação ou Home.
 - [x] Quatro regressões e build OK; cartão real de faturamento conferido com reflexo seguindo ponteiro, pressão 0,98, seleção e teclado; cartão cabe em 390px e nenhum erro. Gestão de Carteira já apresenta excesso horizontal em outros gráficos/tabelas, não alterados neste pedido. k6 público: 28.486 requisições, zero falhas, p95 81,67ms; não mede painel autenticado. Sem publicar.

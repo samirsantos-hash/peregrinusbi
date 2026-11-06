@@ -37,7 +37,7 @@ export default function PerfilReputacao({ seller, repLevel, requisitos = false }
           <div><dt className="text-xs text-muted-foreground">Tier associado à medalha</dt><dd className="font-semibold">{tier ? `Tier ${tier}` : "Não confirmado"}</dd></div>
           <div><dt className="text-xs text-muted-foreground flex items-center gap-1"><UserRound className="w-3 h-3" />Perfil da conta</dt><dd className="font-semibold">{perfil}</dd></div>
         </dl>
-        <p className="text-xs text-muted-foreground">{r ? `Medalha e reputação da API · ${consulta.data?.atualizado_em ? new Date(consulta.data.atualizado_em).toLocaleDateString("pt-BR") : ""}` : consulta.isError ? "Leitura da reputação indisponível." : "Reputação do histórico importado; não é confirmação atual da API."} · Perfil do cadastro importado.</p>
+        <p className="text-xs text-muted-foreground">{r ? `Medalha e reputação na última atualização · ${consulta.data?.atualizado_em ? new Date(consulta.data.atualizado_em).toLocaleDateString("pt-BR") : ""}` : consulta.isError ? "Leitura da reputação indisponível." : "Reputação do histórico; não confirma o estado atual."} · Perfil conforme o cadastro disponível.</p>
       </div>
     </div>
     {requisitos && <>
