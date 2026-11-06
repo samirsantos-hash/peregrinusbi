@@ -168,3 +168,13 @@ Os caminhos abaixo são referências para executar a lista, não textos a exibir
 - Consolidações: `src/pages/Multilojas.tsx:72–87,205–216`; `GestaoCarteira.tsx:108–180,231–235`; `Carteira.tsx:181–186,247–254,454–465`; `useCarteiraData.ts:141`.
 
 **Critério de fechamento futuro:** cada correção deve reproduzir o caso numérico que falhava, preservar permissões e passar por leitura autenticada do resultado; “sem dado” não deve ser removido quando a medição continua ausente.
+## Situação das correções (06/11/2026)
+
+Corrigidos, com caso numérico em `src/lib/auditoria2026-11-06.test.ts` quando é cálculo puro: 01, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13 (alerta "sem venda"), 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35.
+
+- 02: cancelamentos esperados (AbortError, disputa de bloqueio) deixam de virar rejeição não tratada. A causa da disputa ainda não foi reproduzida.
+- 05: o Score CDP passou a usar a escala fixa 0–36 e ficou nulo quando não há medição. A referência por vertical e período continua pendente.
+- 13: as demais somas (CTR, CVR) ainda tratam unidade desconhecida como zero na função compartilhada de gestão.
+- 25: a recomendação de reposição foi suspensa no caminho alternativo, porque a unidade do consumo semanal não é confirmada (`pedidos_7d` e `media_tsi_diario_7d` divergem). Contas conectadas seguem com a reposição por vendas reais.
+- 06: no McKinsey, a cobertura mínima é de 3 de 4 dimensões. A base converte ausência em 0, por isso zero medido e ausente ainda não se distinguem nessa leitura.
+- 12: o alerta de orçamento mensal agora compara com o faturamento das datas medidas, que pode ser menor que 30 dias.
