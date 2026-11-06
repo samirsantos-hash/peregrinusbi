@@ -1,5 +1,10 @@
 # Roadmap
 
+## Análises por anúncio organizadas por assunto — 06/11
+- [x] Criar Anúncios → Correlações com desempenho, conteúdo, promoções, Full/estoque e limites do estudo; reutilizar leituras existentes, sem ranking inventado.
+- [x] Dar acesso pelo ramo Correlações do painel, mantendo preço e reputação nas seções próprias e preservando permissões e loja nos atalhos.
+- [x] 14 testes e build OK; comparação real do MLB5476651802: 386 visitas, 23 pedidos, R$1.530,89 e conversão 5,96%, sem confirmar alterações. Lista de qualidade, oferta com 10 linhas, celular 390px e atalhos ida/volta mantendo AUTOPECASLONDRINA conferidos. k6 prévio 28.444 requisições, zero falhas, p95 HTTP 82,57ms (público, não mede painel autenticado). Somente teste, sem publicar.
+
 ## Funil suave, impressões e carrinhos — 06/11
 - [x] Funil histórico sem polígonos rígidos e cores âmbar; cartões e curvas diárias suavizados. Impressões reais Product Ads separadas: AUTOPECASLONDRINA 2.059.882 em 29/30 dias, comparação anterior indisponível com lacunas.
 - [x] API pública documentada não confirmou leitura de carrinhos abertos/abandonados; packs agrupam compras, não carrinhos abandonados. Sete testes e build OK; sessão real 1280px/390px sem erros ou excesso horizontal. k6 público prévio 28.528 requisições, zero falhas, p95 60,74ms; não mede painel autenticado. Sem publicar.

@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ChevronDown, ChevronRight, Loader2, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
+import CorrelacoesAnuncios from "@/components/ml/CorrelacoesAnuncios";
+import { usePermissoes } from "@/hooks/usePermissoes";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -55,13 +57,15 @@ function useAdiado(valor: string, ms = 300) {
 
 export default function Anuncios() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const qc = useQueryClient();
   const contas = useContasMl();
+  const { pode } = usePermissoes();
   const [contaId, setContaId] = useState("");
   const [termo, setTermo] = useState("");
   const [aberto, setAberto] = useState<string | null>(null);
   const [atualizando, setAtualizando] = useState(false);
-  const [aba, setAba] = useState("anuncios");
+  const [aba, setAba] = useState(params.get("aba") === "correlacoes" ? "correlacoes" : "anuncios");
   const [marcados, setMarcados] = useState<Map<string, Anuncio>>(new Map());
   const [precoPara, setPrecoPara] = useState<Anuncio[]>([]);
   const [promocoesDe, setPromocoesDe] = useState<Anuncio | null>(null);
@@ -69,8 +73,11 @@ export default function Anuncios() {
   const busca = useAdiado(termo.trim());
 
   useEffect(() => {
-    if (!contaId && contas.data?.length) setContaId(contas.data[0].id);
-  }, [contas.data, contaId]);
+    if (!contaId && contas.data?.length) {
+      const solicitada = contas.data.find(c => String(c.ml_user_id) === params.get("loja"));
+      setContaId(solicitada?.id ?? contas.data[0].id);
+    }
+  }, [contas.data, contaId, params]);
 
   useEffect(() => { setMarcados(new Map()); setPromocoesDe(null); setMelhoriasDe(null); }, [contaId]);
 
@@ -185,6 +192,7 @@ export default function Anuncios() {
               <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
               <TabsTrigger value="promocoes">Promoções</TabsTrigger>
               <TabsTrigger value="melhorias">Melhorias</TabsTrigger>
+              {pode("correlacoes.visualizar") && <TabsTrigger value="correlacoes">Correlações</TabsTrigger>}
             </TabsList>
             <TabsContent value="promocoes" className="mt-4">
               <AbaPromocoes accountId={contaId} />
@@ -192,6 +200,9 @@ export default function Anuncios() {
             <TabsContent value="melhorias" className="mt-4">
               <AbaMelhorias accountId={contaId} />
             </TabsContent>
+            {pode("correlacoes.visualizar") && <TabsContent value="correlacoes" className="mt-4">
+              <CorrelacoesAnuncios key={contaId} accountId={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? "")} itens={resultados.data ?? []} carregando={resultados.isLoading} erro={resultados.isError} />
+            </TabsContent>}
             <TabsContent value="anuncios" className="mt-4 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative max-w-xl flex-1 min-w-[240px]">

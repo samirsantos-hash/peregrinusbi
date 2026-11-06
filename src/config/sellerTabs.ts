@@ -80,14 +80,16 @@ export function getSecao(id: string) {
 export const GRUPOS_SECOES = [
   { titulo: "Visão geral", ids: ["efficiency", "reputation"] },
   { titulo: "Desempenho comercial", ids: ["competitiveness", "publicidade", "opportunities", "clips"] },
-  { titulo: "Operação e anúncios", ids: ["logistics", "quality", "perguntas"] },
-  { titulo: "Planejamento", ids: ["pock", "metas", "correlacoes"] },
+  { titulo: "Operação", ids: ["logistics", "perguntas"] },
+  { titulo: "Anúncios", ids: ["quality", "correlacoes"] },
+  { titulo: "Planejamento", ids: ["pock", "metas"] },
 ];
 
 /** Aba legada "Faturamento" redireciona para a Visão geral unificada. */
 export const ABA_ALIAS: Record<string, string> = { executive: "efficiency" };
 
 export const SUBANALISES: Record<string, { id: string; label: string }[]> = {
+  correlacoes: [{ id: "geral", label: "Sinergia dos indicadores" }, { id: "anuncios", label: "Desempenho por anúncio" }, { id: "conteudo", label: "Conteúdo e oferta" }],
   efficiency: [{ id: "analise", label: "Análise geral" }, { id: "geral", label: "Resumo geral da conta" }, { id: "indicadores", label: "Indicadores e faturamento" }],
   reputation: [{ id: "resumo", label: "Resumo da reputação" }, { id: "indicadores", label: "Indicadores" }, { id: "analise", label: "Análise geral" }, { id: "requisitos", label: "Perfil, tier e requisitos" }],
   competitiveness: [{ id: "resumo-preco", label: "Índice de competitividade" }, { id: "carteira", label: "Leitura da carteira" }, { id: "mckinsey", label: "Análise McKinsey" }, { id: "estrategica", label: "Leitura estratégica" }, { id: "evolucao", label: "Evolução de competitividade" }, { id: "insights", label: "Insights" }, { id: "concorrentes", label: "Concorrentes" }],

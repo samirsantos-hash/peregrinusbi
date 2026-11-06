@@ -1,5 +1,7 @@
 # Account summary
 
+- Listing-study topics compose existing account-scoped reads and capability guards; preserve store context across topic links, and never turn study weights into official ranking scores or position gains.
+
 - Funnel impressions use paginated campaign-level Product Ads prints with explicit scope/coverage; never infer whole-store impressions or abandoned carts from visits, sales or order packs.
 
 - Ads participation and TACOS may show explicitly labelled covered-date results independently; use each metric's matching revenue dates and expose coverage, never substitute partial values for full-period totals.

@@ -214,6 +214,17 @@ const Index = () => {
     }
   }, [selectedSeller, hasRealData, sellers]);
 
+  // Links vindos de Anúncios só selecionam lojas ainda autorizadas.
+  useEffect(() => {
+    const cust = searchParams.get("loja");
+    if (!cust || !hasRealData) return;
+    const seller = sellers.find(s => String(s.custId) === cust);
+    if (seller && seller.id !== selectedSeller) handleSellerChange(seller.id);
+    const next = new URLSearchParams(searchParams);
+    next.delete("loja");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, hasRealData, sellers, selectedSeller, handleSellerChange]);
+
   // Persist selected seller globally so other pages (e.g. Projeção de Crescimento) can sync
   useEffect(() => {
     if (!selectedSeller) return;
@@ -699,8 +710,18 @@ const Index = () => {
                     <MetasPanel sellerId={selectedSeller} kpis={allKpisMonthly} />
                   </TabsContent>
                   <TabsContent value="correlacoes" className="mt-0 space-y-5">
-                    <ResumoSinergiaCorrelacoes custId={sellerCustIdMap[selectedSeller]} />
-                    <CorrelacaoPanel kpis={displayKpis} />
+                    {pagina === "geral" && <><ResumoSinergiaCorrelacoes custId={sellerCustIdMap[selectedSeller]} /><CorrelacaoPanel kpis={displayKpis} /></>}
+                    {pagina === "anuncios" && (selectedSeller ? <GuardaPermissao permissao="qualidade.visualizar"><MlAoVivo key={selectedSeller} secao="qualidade" custId={sellerCustIdMap[selectedSeller]} /></GuardaPermissao> : <p className="text-sm text-muted-foreground">Selecione uma loja para comparar seus anúncios.</p>)}
+                    {pagina === "conteudo" && <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">Qualidade, promoções, Full e estoque são sinais observados, não pesos oficiais do ranking.</p>
+                      <div className="flex flex-wrap gap-2">
+                        {pode("anuncios.visualizar") && <Button variant="outline" onClick={() => navigate(`/anuncios?aba=correlacoes${sellerCustIdMap[selectedSeller] ? `&loja=${encodeURIComponent(sellerCustIdMap[selectedSeller])}` : ""}`)}>Anúncios · Correlações</Button>}
+                        {pode("preco.visualizar") && <Button variant="outline" onClick={() => selecionarSubanalise("competitiveness", "concorrentes")}>Preço e concorrentes</Button>}
+                        {pode("promocoes.visualizar") && <Button variant="outline" onClick={() => selecionarSubanalise("opportunities", "promocoes")}>Promoções</Button>}
+                        {pode("reputacao.visualizar") && <Button variant="outline" onClick={() => selecionarSubanalise("reputation", "requisitos")}>Reputação e autoridade</Button>}
+                        {pode("logistica.visualizar") && <Button variant="outline" onClick={() => selecionarSubanalise("logistics", "full")}>Full e estoque</Button>}
+                      </div>
+                    </div>}
                   </TabsContent>
                   <TabsContent value="alertas-riscos" className="mt-0">
                     {isConsolidado && <CarteiraNaSecao secao="alertas-riscos" />}
