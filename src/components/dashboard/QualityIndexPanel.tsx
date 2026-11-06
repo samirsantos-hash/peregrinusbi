@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle, Camera, Type, Zap, Tag, TrendingUp, ShieldAlert } from "lucide-react";
 import GaugeChart from "./GaugeChart";
@@ -136,7 +135,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
         >
           <ShieldAlert className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold text-destructive">🚨 RISCO DE PENALIZAÇÃO</p>
+            <p className="text-sm font-bold text-destructive">RISCO DE PENALIZAÇÃO</p>
             <p className="text-xs text-destructive/80 mt-1">
               Tráfego alto sem conversão detectado. O algoritmo irá derrubar seu ranking orgânico se os anúncios não forem otimizados agora.
             </p>
@@ -285,7 +284,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
                     transition={{ delay: i * 0.08 }}
                     className={`flex items-center gap-3 p-3 rounded-lg border ${severityStyle}`}
                   >
-                    <IconeIndicador simbolo={a.icon} className={iconColor} />
+                    <span className={iconColor}>{a.icon}</span>
                     <span className="text-xs font-medium">{a.label}</span>
                   </motion.div>
                 );

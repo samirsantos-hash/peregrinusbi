@@ -2,7 +2,7 @@
 
 ## Ícones Lucide — 06/11
 - [x] Padronizar Lucide na navegação e árvore, tendências, reputação, preço, campanhas, Clips, diagnósticos e importações; preservar marca, dados e permissões.
-- [x] Loja real e reputação conferidas em desktop/390px sem excesso horizontal; 16 regressões passaram e build OK. k6 público prévio: 28.483 requisições, zero falhas, p95 62,89ms; não mede painel autenticado. Sem publicar.
+- [x] Loja real e reputação conferidas em desktop/390px sem excesso horizontal; 18 regressões passaram. k6 público prévio: 28.483 requisições, zero falhas, p95 62,89ms; não mede painel autenticado. Sem publicar.
 
 ## Boas-vindas Laser beam — 06/11
 - [x] Usar a cena original local do HTML na entrada autenticada do dashboard, com boas-vindas breves e botão para continuar; não repetir na navegação e respeitar movimento reduzido.
