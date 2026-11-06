@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
 import CorrelacoesAnuncios from "@/components/ml/CorrelacoesAnuncios";
+import CurvaAbc from "@/components/ml/CurvaAbc";
 import { usePermissoes } from "@/hooks/usePermissoes";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Check, X } from "lucide-react";
@@ -66,7 +67,7 @@ export default function Anuncios() {
   const [termo, setTermo] = useState("");
   const [aberto, setAberto] = useState<string | null>(null);
   const [atualizando, setAtualizando] = useState(false);
-  const [aba, setAba] = useState(params.get("aba") === "correlacoes" ? "correlacoes" : "anuncios");
+  const [aba, setAba] = useState(['correlacoes', 'abc'].includes(params.get('aba') ?? '') ? params.get('aba') ?? 'anuncios' : 'anuncios');
   const [marcados, setMarcados] = useState<Map<string, Anuncio>>(new Map());
   const [precoPara, setPrecoPara] = useState<Anuncio[]>([]);
   const [promocoesDe, setPromocoesDe] = useState<Anuncio | null>(null);
@@ -189,11 +190,12 @@ export default function Anuncios() {
 
         {contaId && (
           <Tabs value={aba} onValueChange={setAba}>
-            <TabsList>
+            <TabsList className="max-w-full overflow-x-auto justify-start">
               <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
               <TabsTrigger value="promocoes">Promoções</TabsTrigger>
               <TabsTrigger value="melhorias">Melhorias</TabsTrigger>
               {pode("correlacoes.visualizar") && <TabsTrigger value="correlacoes">Correlações</TabsTrigger>}
+              {pode("correlacoes.visualizar") && <TabsTrigger value="abc">Curva ABC</TabsTrigger>}
             </TabsList>
             <TabsContent value="promocoes" className="mt-4">
               <AbaPromocoes accountId={contaId} />
@@ -204,6 +206,7 @@ export default function Anuncios() {
             {pode("correlacoes.visualizar") && <TabsContent value="correlacoes" className="mt-4">
               <CorrelacoesAnuncios key={contaId} accountId={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? "")} itens={resultados.data ?? []} carregando={resultados.isLoading} erro={resultados.isError} />
             </TabsContent>}
+            {pode('correlacoes.visualizar') && <TabsContent value="abc" className="mt-4"><CurvaAbc key={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? '')} /></TabsContent>}
             <TabsContent value="anuncios" className="mt-4 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative max-w-xl flex-1 min-w-[240px]">

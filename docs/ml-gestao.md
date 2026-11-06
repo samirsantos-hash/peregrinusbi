@@ -74,6 +74,8 @@ Confirmação (só a chave; o servidor usa o que gravou na prévia):
 
 ### Resumo limpo e Full — `ml-analise-loja`
 
+- `modo: "curvaABC", dias: 7 | 30` (padrão 30): exige `correlacoes.visualizar` e visibilidade existente da loja. Coleta pedidos uma vez na janela UTC completa; exige total exato após deduplicação, totais estáveis em todas as páginas, vendedor confirmado e limite de 10.000. Agrega apenas `paid` em BRL, quantidade inteira positiva × preço unitário em centavos; evidência ausente suspende a análise. Catálogo atual ativo/pausado por scan até página vazia, limite de 100 páginas por status e orçamento total da função; sem confirmação não há ABC definitiva. Vendidos hoje encerrados não são descartados. Detalhes atuais indisponíveis ficam null, com título do pedido ou MLB. Retorna `{ periodo, itens: [{mlb,titulo,sku,unidades,faturamentoCents,pedidos,ultimaVenda,status}], coberturaCompleta:true, catalogoCompleto:true, universoCatalogo, consultadoEm }`, sem compradores ou pedidos brutos e sem gravação. Ausência de última venda não é histórico de inatividade. Classificação pura em `src/lib/anuncio/curvaAbc.ts`: bases faturamento/unidades, cortes convencionais ajustáveis 80/95 pelo acumulado anterior; empates permanecem juntos, zeros fora da base. Faltas de cobertura retornam erro, nunca zero. Não calcula margem nem competitividade.
+
 - Entrada: POST autenticado `{ cust_id: "ID numérico", modo: "resumo" | "full" }`. Acesso pela visibilidade existente de `ml_sync_tema`, sem privilégio adicional do desenvolvedor.
 - Somente leitura do ML com token da própria conta e renovação compartilhada. Sem gravação de dados de negócio; retorna apenas agregados, nunca compradores ou pedidos brutos.
 - Período: 30 dias UTC completos. Resumo consulta também os 30 dias anteriores. Receita = soma de quantidade × preço em pedidos pagos, unidades separadas de pedidos; cancelamento = cancelados ÷ (pagos + cancelados). Outros status não entram.
@@ -83,7 +85,7 @@ Confirmação (só a chave; o servidor usa o que gravou na prévia):
 - A leitura personalizada em Oportunidades usa `src/lib/campanhasLeitura.ts`, nome da conta visível, período e contagens retornadas. Explica cobertura da amostra e correspondências sem chamá-las de atribuição; não calcula desempenho, custo por venda ou causalidade a partir dessa amostra. Não usa IA para inferir identificadores ausentes.
 - Full: `{ periodo, candidatos, universoVendido, limite: 20, consultadoEm, elegibilidadeFull: null }`. Até 20 anúncios vendidos fora de fulfillment, com MLB, título, SKU, estoque/status atuais, receita/unidades pagas, série diária completa, saúde, pendências ML e dimensões originais das fotos. Universo limitado explicitamente; pesos não são envio nem elegibilidade.
 - Frontend usa quadprog para minimizar risco de oscilação da receita diária combinado à média, com pesos long-only que somam 100% e limite de 40% por anúncio (50% com dois). Só calcula com ao menos dois anúncios ativos com estoque e 30 datas alinhadas; alertas não inventam resolução ou lucro.
-- Erros: 400 entrada inválida; 401 sem sessão; 403 sem loja visível; 404 desconectada; 409 autorização indisponível; 422 mais de 1.000 pedidos (suspende totais, não exibe parcial); 502 cobertura/API/tempo não confirmados.
+- Erros: 400 entrada inválida; 401 sem sessão; 403 sem loja visível; 404 desconectada; 409 autorização indisponível; 422 mais de 10.000 pedidos (suspende totais, não exibe parcial); 502 cobertura/API/tempo não confirmados.
 
 ### Notificações
 

@@ -3,6 +3,7 @@
 ## Planejamento ABC e análise de anúncios — 06/11
 - [x] Revisar documento e mapear recursos existentes, lacunas, dependências e cuidados de cálculo.
 - [x] Preparar plano em etapas, sem implementar ou publicar funcionalidades.
+- [x] Etapa 1: Curva ABC por faturamento/unidades, cortes e empates aprovados, catálogo ativo/pausado completo e cruzamento; AUTOPECASLONDRINA conferida em 7 e 30 dias, expansão 211/10 linhas e celular sem excesso horizontal. 17 regressões passaram, build OK. Sem publicar a interface; leitura da função compartilhada atualizada. Etapa 2 aguarda revisão do usuário.
 
 ## Auditoria de cálculos e erros — 06/11
 - [x] Mapear seções e subanálises, revisar caminhos ativos e registrar lista priorizada em docs/auditoria-calculos-2026-11-06.md; separar defeitos confirmados, condições de volume e hipóteses. Nenhuma correção de negócio ou publicação solicitada nesta etapa.

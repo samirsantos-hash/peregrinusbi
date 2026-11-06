@@ -8,6 +8,7 @@ import { anexarVisitas, janelaAnalise, projetarPedidos } from '../_shared/mlAnal
 import { lerQualidade } from '../_shared/mlMelhorias.ts';
 import { amostraCampanhas } from '../_shared/mlCampanhasDiagnostico.ts';
 import { janelaMensal, projetarCancelamentosMensais } from './cancelamentosMensais.ts';
+import { agregarPedidosAbc, lerCatalogoAbc } from './abcPedidos.ts';
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -15,7 +16,7 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais']), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais', 'curvaABC']), dias: z.union([z.literal(7), z.literal(30)]).optional(), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
   let mensal: ReturnType<typeof janelaMensal> | undefined;
@@ -23,7 +24,7 @@ Deno.serve(async req => {
     try { mensal = janelaMensal(body.data.mes ?? ''); }
     catch (e) { return json({ error: e instanceof Error ? e.message : 'Informe um mês válido.' }, 400); }
   }
-  const negado = await exigirPermissao(req, modo === 'full' ? 'full.visualizar' : modo === 'campanhasDiagnostico' ? 'promocoes.visualizar' : ['resumo.visualizar', 'reputacao.visualizar', 'publicidade.visualizar', 'correlacoes.visualizar']); if (negado) return negado;
+  const negado = await exigirPermissao(req, modo === 'curvaABC' ? 'correlacoes.visualizar' : modo === 'full' ? 'full.visualizar' : modo === 'campanhasDiagnostico' ? 'promocoes.visualizar' : ['resumo.visualizar', 'reputacao.visualizar', 'publicidade.visualizar', 'correlacoes.visualizar']); if (negado) return negado;
   // Reuse existing store visibility; developer status does not grant business access.
   const { data: vis, error: visError } = await user.from('ml_sync_tema').select('account_id').eq('cust_id', cust_id).limit(1);
   if (visError || !vis?.length) return json({ error: 'Loja sem conexão disponível na sua carteira.' }, 403);
@@ -34,13 +35,18 @@ Deno.serve(async req => {
   if (!token?.access_token) return json({ error: 'Autorização indisponível.' }, 409);
   const access = token.access_token, started = Date.now();
   async function get(path: string): Promise<any> {
-    if (Date.now() - started > 95_000) throw new Error('Consulta incompleta; tente novamente.');
-    const r = await fetch('https://api.mercadolibre.com' + path, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(8000) });
-    if (!r.ok) throw new Error('O Mercado Livre não disponibilizou todos os dados desta análise.');
-    return r.json();
+    for (let tentativa = 0; tentativa < 3; tentativa++) {
+      if (Date.now() - started > 95_000) throw new Error('Consulta incompleta; tente novamente.');
+      const r = await fetch('https://api.mercadolibre.com' + path, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(8000) });
+      if (r.ok) return r.json();
+      if (modo !== 'curvaABC' || tentativa === 2 || (r.status !== 429 && r.status < 500)) throw new Error('O Mercado Livre não disponibilizou todos os dados desta análise.');
+      await new Promise(resolve => setTimeout(resolve, 500 * (tentativa + 1)));
+    }
+    throw new Error('Leitura indisponível.');
   }
   try {
-    const periodo = mensal ?? janelaAnalise(new Date(), modo === 'vendas7d' ? 7 : 30), completo = mensal ?? janelaAnalise(new Date(), modo === 'resumo' ? 60 : modo === 'vendas7d' ? 7 : 30);
+    const dias = modo === 'curvaABC' ? body.data.dias ?? 30 : modo === 'vendas7d' ? 7 : 30;
+    const periodo = mensal ?? janelaAnalise(new Date(), dias), completo = mensal ?? janelaAnalise(new Date(), modo === 'resumo' ? 60 : dias);
     const orders: any[] = [];
     const MAX = 10000;
     // Read a one-day envelope for monthly timezone boundaries, then bound in UTC.
@@ -97,19 +103,56 @@ Deno.serve(async req => {
     }
     const total: number = first.paging.total;
     if (total > MAX) return json({ error: 'Há mais de 10.000 pedidos no período; análise suspensa para não apresentar totais parciais.' }, 422);
-    orders.push(...first.results);
+    if (modo === 'curvaABC' && total > 1000) {
+      // Orders search may reject deep offsets; bound each complete UTC day instead.
+      for (let t = Date.parse(completo.inicio); t <= Date.parse(completo.fim); t += 864e5) {
+        const dia = new Date(t).toISOString().slice(0, 10);
+        const diaUrl = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${dia}T00:00:00.000Z&order.date_created.to=${dia}T23:59:59.999Z&sort=date_asc&limit=50&offset=${off}`;
+        const p = await get(diaUrl(0));
+        if (!Array.isArray(p.results) || !Number.isSafeInteger(p.paging?.total) || p.paging.total < 0 || p.paging.total > 1000) throw new Error('Volume diário acima da janela disponível; escolha sete dias ou tente novamente.');
+        const linhas = [...p.results];
+        for (let off = 50; off < p.paging.total; off += 50) {
+          const pagina = await get(diaUrl(off));
+          if (!Array.isArray(pagina.results) || pagina.paging?.total !== p.paging.total) throw new Error('Cobertura diária não confirmada.');
+          linhas.push(...pagina.results);
+        }
+        if (new Set(linhas.map(o => o.id)).size !== p.paging.total) throw new Error('Cobertura diária incompleta.');
+        orders.push(...linhas);
+      }
+    } else orders.push(...first.results);
     const offsets: number[] = [];
-    for (let off = 50; off < total; off += 50) offsets.push(off);
-    for (let i = 0; i < offsets.length; i += 10) {
-      const pages = await Promise.all(offsets.slice(i, i + 10).map(o => get(url(o))));
+    if (!(modo === 'curvaABC' && total > 1000)) for (let off = 50; off < total; off += 50) offsets.push(off);
+    const concorrencia = modo === 'curvaABC' ? 3 : 10;
+    for (let i = 0; i < offsets.length; i += concorrencia) {
+      const pages = await Promise.all(offsets.slice(i, i + concorrencia).map(o => get(url(o))));
       for (const p of pages) {
-        if (!Array.isArray(p.results) || (mensal && p.paging?.total !== total)) throw new Error('Cobertura de pedidos não confirmada.');
+        if (!Array.isArray(p.results) || ((mensal || modo === 'curvaABC') && p.paging?.total !== total)) throw new Error('Cobertura de pedidos não confirmada.');
         orders.push(...p.results);
       }
     }
     const unicos = new Map(orders.map(o => [o.id, o]));
     orders.length = 0; orders.push(...unicos.values());
     if (orders.length < total) return json({ error: 'Não foi possível ler todos os pedidos do período; análise suspensa para não apresentar totais parciais.' }, 422);
+    if (modo === 'curvaABC') {
+      if (orders.length !== total) throw new Error('Cobertura de pedidos não confirmada.');
+      const vendidos = agregarPedidosAbc(orders, cust_id, periodo.inicio, periodo.fim);
+      const catalogo = await lerCatalogoAbc(get, cust_id);
+      const itens = new Map(vendidos.map(i => [i.mlb, i]));
+      for (const mlb of catalogo) if (!itens.has(mlb)) itens.set(mlb, { mlb, titulo: mlb, sku: null, unidades: 0, faturamentoCents: 0, pedidos: 0, ultimaVenda: null, status: null });
+      const ids = [...itens.keys()];
+      for (let off = 0; off < ids.length; off += 20) {
+        const lote = await get(`/items?ids=${ids.slice(off, off + 20).join(',')}&attributes=id,seller_id,title,seller_custom_field,status`);
+        if (!Array.isArray(lote)) throw new Error('Detalhes do catálogo não confirmados.');
+        for (const entry of lote) {
+          if (entry.code !== 200) continue; // sales remain even if current metadata is unavailable
+          const item = entry.body;
+          if (String(item?.seller_id) !== cust_id) throw new Error('Loja do anúncio não confirmada.');
+          const i = itens.get(item.id);
+          if (i) { i.titulo = item.title ?? i.titulo; i.sku = item.seller_custom_field ?? null; i.status = item.status ?? null; }
+        }
+      }
+      return json({ periodo, itens: [...itens.values()], coberturaCompleta: true, catalogoCompleto: true, universoCatalogo: catalogo.length, consultadoEm: new Date().toISOString() });
+    }
     if (mensal) {
       if (orders.length !== total || orders.some(o => String(o.seller?.id) !== cust_id)) return json({ error: 'Cobertura ou loja dos pedidos não confirmada.' }, 422);
       const limitados = orders.filter(o => {
