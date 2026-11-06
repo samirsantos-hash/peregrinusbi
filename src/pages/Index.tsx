@@ -6,7 +6,7 @@ import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu, MessageCircleQuestion, Search, Megaphone } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu, MessageCircleQuestion, Search, Megaphone } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import NewBadge from "@/components/ui/NewBadge";
 import {
@@ -518,7 +518,7 @@ const Index = () => {
           <>
             {selectedSeller && (
               <div className="flex justify-end px-4 pt-2">
-                <button type="button" onClick={() => handleSellerChange("")} className="text-sm font-medium text-primary hover:underline">← Voltar ao resumo da carteira</button>
+                <Button variant="link" type="button" onClick={() => handleSellerChange("")} className="h-auto py-1 text-sm"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Voltar ao resumo da carteira</Button>
               </div>
             )}
             <DashboardHeader

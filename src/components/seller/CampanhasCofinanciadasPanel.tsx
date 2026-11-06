@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Sparkles, AlertTriangle, RefreshCw, CheckCircle2, Tag } from "lucide-react";
@@ -189,7 +190,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                 color: active ? "hsl(var(--series-4))" : "hsl(var(--muted-foreground))",
               }}
             >
-              {label}
+              <TextoComIcones texto={label} />
               <span className="ml-1.5 text-[10px] text-muted-foreground font-mono tabular-nums">
                 ({countByFilter(f)})
               </span>
@@ -253,7 +254,7 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                       <span className="text-[10px] text-muted-foreground">{item.vertical}</span>
                       {item.pode_melhorar && (
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-ec-verde/15 text-ec-verde-txt border border-ec-verde/30">
-                          🔄 campanha melhor disponível
+                          <IconeIndicador simbolo="🔄" className="h-3 w-3 mr-1" /> campanha melhor disponível
                         </span>
                       )}
                     </div>
@@ -298,11 +299,11 @@ export function CampanhasCofinanciadasPanel({ items }: Props) {
                   <div className="text-center">
                     {item.optin ? (
                       <span className="text-[10px] px-2 py-0.5 rounded bg-ec-verde/15 text-ok border border-ec-verde/30">
-                        ✓ Ativo
+                        <IconeIndicador simbolo="✓" className="h-3 w-3 mr-1" /> Ativo
                       </span>
                     ) : (
                       <span className="text-[10px] px-2 py-0.5 rounded bg-ec-ambar/15 text-ec-ambar border border-ec-ambar/30">
-                        ⚠ Pendente
+                        <IconeIndicador simbolo="⚠" className="h-3 w-3 mr-1" /> Pendente
                       </span>
                     )}
                   </div>

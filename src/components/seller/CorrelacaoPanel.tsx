@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link2, ArrowRight } from "lucide-react";
@@ -66,17 +67,17 @@ export function CorrelacaoPanel({ kpis }: Props) {
             { l: "🛡 Reputação Verde", sub: "ESSENCIAL" },
           ].map((it) => (
             <div key={it.l} className="rounded-lg border border-neon-blue/20 bg-neon-blue/[0.04] p-3 text-center">
-              <p className="font-semibold text-foreground">{it.l}</p>
+              <p className="font-semibold text-foreground"><TextoComIcones texto={it.l} /></p>
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground mt-1">{it.sub}</p>
             </div>
           ))}
         </div>
 
-        <div className="flex items-center justify-center gap-2 my-4 text-xs text-muted-foreground">
-          <span>👆 CTR</span><ArrowRight className="w-3 h-3" />
-          <span>🛒 Conversão</span><ArrowRight className="w-3 h-3" />
-          <span>💹 GMV</span><ArrowRight className="w-3 h-3" />
-          <span>🔝 Posição Orgânica</span>
+        <div className="flex flex-wrap items-center justify-center gap-2 my-4 text-xs text-muted-foreground">
+          <span><IconeIndicador simbolo="👆" className="h-3 w-3" /> CTR</span><ArrowRight className="w-3 h-3" />
+          <span><IconeIndicador simbolo="🛒" className="h-3 w-3" /> Conversão</span><ArrowRight className="w-3 h-3" />
+          <span><IconeIndicador simbolo="💹" className="h-3 w-3" /> GMV</span><ArrowRight className="w-3 h-3" />
+          <span><IconeIndicador simbolo="🔝" className="h-3 w-3" /> Posição Orgânica</span>
           <ArrowRight className="w-3 h-3 rotate-180" />
           <span className="italic">(retroalimenta CTR)</span>
         </div>
@@ -106,7 +107,7 @@ export function CorrelacaoPanel({ kpis }: Props) {
                   <tr key={l.xKey + l.yKey} className="border-b border-border/40">
                     <td className="py-2 pr-3 text-foreground">{l.a}</td>
                     <td className="py-2 pr-3 text-foreground">
-                      {l.b} {l.sentido}
+                      {l.b} <IconeIndicador simbolo={l.sentido} className="h-3 w-3" />
                     </td>
                     <td className="py-2 pr-3 text-right font-mono tabular-nums">
                       {l.n < 3 ? "—" : l.r.toFixed(2)}

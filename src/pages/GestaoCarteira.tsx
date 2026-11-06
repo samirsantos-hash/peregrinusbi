@@ -9,7 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Briefcase, ExternalLink, AlertTriangle, TrendingUp, TrendingDown,
-  Upload, Settings, Download, Search, ChevronRight, FolderPlus,
+  Upload, Settings, Download, Search, ChevronRight, FolderPlus, ArrowLeft,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -510,7 +510,7 @@ export default function GestaoCarteira() {
       {/* Simple nav bar */}
       <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => window.location.href = "/"}>← Dashboard</Button>
+          <Button variant="ghost" size="sm" onClick={() => window.location.href = "/"}><ArrowLeft aria-hidden="true" className="h-4 w-4" />Dashboard</Button>
           <Button variant="ghost" size="sm" onClick={() => window.location.href = "/cpp"}>CPP</Button>
         </div>
       </div>

@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -627,7 +628,7 @@ const Admin = () => {
                               </TableCell>
                               <TableCell>
                                 <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusInfo.color}`} title={log.notes || undefined}>
-                                  {statusInfo.label}
+                                  <TextoComIcones texto={statusInfo.label} />
                                 </span>
                               </TableCell>
                               <TableCell className="text-right font-mono text-sm">
@@ -716,7 +717,7 @@ const Admin = () => {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    ⚠️ Anote esta senha agora. O usuário deverá alterá-la no primeiro acesso. A senha expira em 48 horas.
+                    <IconeIndicador simbolo="⚠️" className="h-4 w-4 mr-1" /> Anote esta senha agora. O usuário deverá alterá-la no primeiro acesso. A senha expira em 48 horas.
                   </p>
                 </div>
               </AlertDialogDescription>

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Ícones Lucide — 06/11
+- [x] Padronizar Lucide na navegação e árvore, tendências, reputação, preço, campanhas, Clips, diagnósticos e importações; preservar marca, dados e permissões.
+- [x] Loja real e reputação conferidas em desktop/390px sem excesso horizontal; 16 regressões passaram e build OK. k6 público prévio: 28.483 requisições, zero falhas, p95 62,89ms; não mede painel autenticado. Sem publicar.
+
 ## Boas-vindas Laser beam — 06/11
 - [x] Usar a cena original local do HTML na entrada autenticada do dashboard, com boas-vindas breves e botão para continuar; não repetir na navegação e respeitar movimento reduzido.
 - [x] Cena original renderizada isoladamente; entrada autenticada, encerramento automático e movimento reduzido conferidos sem erros. Captura da composição com texto não concluída: a cena encerrou antes da captura no navegador de teste. k6 público: 28.471 requisições, zero falhas, p95 79ms; não mede a cena nem painel autenticado. Somente em teste.

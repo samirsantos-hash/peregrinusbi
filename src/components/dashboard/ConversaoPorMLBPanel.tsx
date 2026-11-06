@@ -1,3 +1,4 @@
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -233,7 +234,7 @@ function ItemRow({ item }: { item: MLBPerformance }) {
         <td className="py-2 px-2">
           <div className="flex items-center gap-2 min-w-0">
             {aberto ? <ChevronDown className="w-3 h-3 shrink-0" /> : <ChevronRight className="w-3 h-3 shrink-0" />}
-            <span>{DIAG_EMOJI[item.diagnostico]}</span>
+            <IconeIndicador simbolo={DIAG_EMOJI[item.diagnostico]} />
             <div className="min-w-0">
               <a
                 href={item.mlbLink}
@@ -258,7 +259,7 @@ function ItemRow({ item }: { item: MLBPerformance }) {
             className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-semibold ${giro.cls}`}
             title={giro.title}
           >
-            {giro.emoji} {giro.label}
+            <IconeIndicador simbolo={giro.emoji} className="h-3 w-3 mr-1" /> {giro.label}
           </span>
         </td>
         <td className="py-2 px-2 text-right text-xs font-mono tabular-nums">
@@ -285,11 +286,11 @@ function ItemRow({ item }: { item: MLBPerformance }) {
         </td>
         <td className="py-2 px-2 text-center text-xs">
           {item.flagOptinCdp ? (
-            <span title="Opt-in CDP ativo">🎯</span>
+            <span title="Opt-in CDP ativo"><IconeIndicador simbolo="🎯" /></span>
           ) : (
-            <span className="text-muted-foreground" title="Sem opt-in">○</span>
+            <span className="text-muted-foreground" title="Sem opt-in"><IconeIndicador simbolo="○" /></span>
           )}
-          {item.flagBestPromo && <span title="Best promo" className="ml-1">⭐</span>}
+          {item.flagBestPromo && <span title="Best promo" className="ml-1"><IconeIndicador simbolo="⭐" /></span>}
         </td>
       </tr>
       {aberto && (
@@ -304,7 +305,7 @@ function ItemRow({ item }: { item: MLBPerformance }) {
                   </p>
                 ))
               ) : (
-                <p className="text-[11px] text-emerald">✅ Sem gaps identificados.</p>
+                <p className="text-[11px] text-emerald"><IconeIndicador simbolo="✅" /> Sem gaps identificados.</p>
               )}
               <p className="text-[10px] text-muted-foreground pt-1">
                 Estoque Full: <span className="font-mono tabular-nums">{item.estoqueFull.toFixed(0)} un</span> ({item.shareEstoqueFull.toFixed(0).replace(".", ",")}%)
@@ -436,11 +437,11 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
 
       {/* Legenda */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-        <span>🔴 Gap de qualidade</span>
-        <span>🟠 Sem visibilidade (CDP)</span>
-        <span>🟡 Estoque parado</span>
-        <span>⚪ Sem dados de qualidade</span>
-        <span>✅ Sem gap</span>
+        <span><IconeIndicador simbolo="🔴" className="h-3 w-3 mr-1" />Gap de qualidade</span>
+        <span><IconeIndicador simbolo="🟠" className="h-3 w-3 mr-1" />Sem visibilidade (CDP)</span>
+        <span><IconeIndicador simbolo="🟡" className="h-3 w-3 mr-1" />Estoque parado</span>
+        <span><IconeIndicador simbolo="⚪" className="h-3 w-3 mr-1" />Sem dados de qualidade</span>
+        <span><IconeIndicador simbolo="✅" className="h-3 w-3 mr-1" />Sem gap</span>
       </div>
 
       {/* Tabela ou estado vazio */}
@@ -451,7 +452,7 @@ export default function ConversaoPorMLBPanel({ sellerId }: Props) {
       ) : itens.length === 0 ? (
         <div className="text-center text-sm text-muted-foreground py-8">
           {filtro === "problemas"
-            ? "Nenhum gap identificado — todos os itens com estoque estão girando. 🎉"
+            ? "Nenhum gap identificado — todos os itens com estoque estão girando."
             : "Nenhum item de elegibilidade disponível para este seller."}
         </div>
       ) : (

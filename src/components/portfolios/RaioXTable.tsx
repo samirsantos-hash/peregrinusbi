@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { podeExportar } from '@/lib/permissaoExportar';
 import { useState, useMemo } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -476,7 +477,7 @@ export default function RaioXTable({ sellers, trends, portfolioName = "Carteira"
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={`text-xs border ${s.modalPrincipal.className}`}>
-                          {s.modalPrincipal.emoji} {s.modalPrincipal.label}
+                          <IconeIndicador simbolo={s.modalPrincipal.emoji} className="h-3 w-3" /> {s.modalPrincipal.label}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-mono text-sm">

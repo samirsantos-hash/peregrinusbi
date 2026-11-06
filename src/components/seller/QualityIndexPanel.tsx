@@ -19,10 +19,6 @@ function statusTone(s: StatusLevel) {
   return { text: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30", bar: "bg-destructive" };
 }
 
-function statusEmoji(s: StatusLevel) {
-  return s === "ok" ? "🟢" : s === "atencao" ? "🟡" : "🔴";
-}
-
 function limpar(t: string) { return t.replace(/^[^\p{L}\d]+/u, "").replace(/^\d+º\s*/, ""); }
 
 function ScoreBig({ score, nota }: { score: number; nota: string }) {

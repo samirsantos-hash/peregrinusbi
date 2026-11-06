@@ -1,3 +1,4 @@
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Activity, ShieldCheck } from "lucide-react";
@@ -86,7 +87,7 @@ function StatusPill({ sev }: { sev: Severity }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
       style={{ color: COR_SEV[sev], borderColor: COR_SEV[sev].replace(")", " / 0.4)"), background: COR_SEV[sev].replace(")", " / 0.1)") }}>
-      <span className="w-2 h-2 rounded-full" style={{ background: COR_SEV[sev], boxShadow: `0 0 8px ${COR_SEV[sev]}` }} />
+      <IconeIndicador simbolo={SEVERITY_CONFIG[sev].emoji} className="h-3 w-3" />
       {ROTULO_SEV[sev]}
     </span>
   );
@@ -330,7 +331,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily", pagina = "analise" }
                       <span className="text-xl font-bold tabular-nums" style={{ color: statusCor(m.valor, m.atencao, m.critico) }}>
                         {m.valor.toFixed(2).replace(".", ",")}%
                       </span>
-                      <span className="text-[10px] font-semibold" style={{ color: corTend }}>{tend}</span>
+                      <span className="text-[10px] font-semibold" style={{ color: corTend }}><IconeIndicador simbolo={tend.slice(0, 1)} className="h-3 w-3 mr-1" />{tend.slice(2)}</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
                       meta &lt; {m.atencao}% · crítico ≥ {m.critico}%

@@ -1,3 +1,4 @@
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -148,7 +149,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
       >
         <td className="py-2 px-3">
           <div className="flex items-start gap-2">
-            <span>{tone.emoji}</span>
+            <span className={tone.text} title={tone.label}><IconeIndicador simbolo={tone.emoji} /></span>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <a
@@ -202,7 +203,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
         <td className="py-2 px-3 text-center text-xs font-mono tabular-nums">
           {anuncio.flag_optin_cdp ? (
             <span className="text-emerald">
-              🎯 {(anuncio.desconto_atual / 100).toFixed(1).replace(".", ",")}%
+              <IconeIndicador simbolo="🎯" className="h-3 w-3" /> {(anuncio.desconto_atual / 100).toFixed(1).replace(".", ",")}%
             </span>
           ) : (
             <span className="text-muted-foreground">—</span>
@@ -216,7 +217,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
                 className="text-[10px] px-1.5 py-0.5 rounded bg-muted/50 border border-border"
                 title={a.titulo}
               >
-                {a.icone} {CATEGORIA_LABEL[a.categoria]}
+                <IconeIndicador simbolo={a.icone} className="h-3 w-3 mr-1" /> {CATEGORIA_LABEL[a.categoria]}
               </span>
             ))}
             {anuncio.acoes.length > 4 && (
@@ -238,7 +239,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
           <td colSpan={7} className="p-4 border-b border-border/40">
             {anuncio.acoes.length === 0 ? (
               <div className="text-xs text-emerald">
-                ✅ Nada a investigar — anúncio dentro dos padrões.
+                <IconeIndicador simbolo="✅" /> Nada a investigar — anúncio dentro dos padrões.
               </div>
             ) : (
               <div className="space-y-2">
@@ -262,7 +263,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
                     className="flex gap-3 p-3 rounded-md border border-border/60 bg-muted/20"
                   >
                     <div className="flex flex-col items-center shrink-0 w-10">
-                      <span className="text-xl">{acao.icone}</span>
+                      <IconeIndicador simbolo={acao.icone} className="h-5 w-5" />
                       <span className="text-[10px] text-muted-foreground font-mono">
                         #{idx + 1}
                       </span>
@@ -408,7 +409,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
 
       {semQualidade && !semElegibilidade && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 text-warning px-3 py-2 text-[11px]">
-          ⚠️ <strong>Dados parciais:</strong> a tabela{" "}
+          <IconeIndicador simbolo="⚠️" /> <strong>Dados parciais:</strong> a tabela{" "}
           qualidade por anúncio está vazia para este
           seller. Exibindo apenas dados de venda e CDP (elegibilidade). Scores de IPI,
           fotos, título e ficha técnica não estão disponíveis — carregue o arquivo de
@@ -433,7 +434,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
       {planos.length === 0 ? (
         <div className="text-sm text-center text-muted-foreground py-8">
           {filtro === "acoes"
-            ? "Nada a investigar — todos os anúncios com dados estão dentro dos padrões. 🎉"
+            ? "Nada a investigar — todos os anúncios com dados estão dentro dos padrões."
             : "Nenhum anúncio para exibir."}
         </div>
       ) : (

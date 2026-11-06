@@ -1,5 +1,7 @@
 # Teste de carga público — 04/11/2026
 
+- 06/11: padronização Lucide, teste público prévio com 1.000 usuários, 28.483 requisições, zero falhas, p95 62,89ms; somente entrega pública, não mede o painel autenticado ou os ícones.
+
 ## Ampliação para 1.000 usuários — 16:37 UTC
 
 - Uma execução k6 2.0.0 no mesmo alvo público: subida até 1.000 usuários em 60 segundos, platô de 60 segundos e descida de 30 segundos. Pico confirmado de 1.000 usuários virtuais; duração efetiva de 153,38 segundos.

@@ -300,8 +300,8 @@ html body [data-ui-surface="sheet"].listing-detail-sheet {
   }
   .font-mono { font-variant-numeric: tabular-nums; }
   code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-  /* Traço fino, como os ícones Solar (linear) do Aura */
-  svg.lucide { stroke-width: 1.5; }
+  /* Lucide: traço uniforme e dimensões estáveis em ambos os temas. */
+  html body svg.lucide { stroke-width: 1.75; flex-shrink: 0; }
 }
 
 @layer components {

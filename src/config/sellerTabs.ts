@@ -1,11 +1,11 @@
 // Navegação macro → micro: resultado, causas, produtos e planejamento.
 
 import {
-  DollarSign,
+  LayoutDashboard,
   Truck,
   Shield,
   Video,
-  Swords,
+  Tags,
   Gift,
   HeartPulse,
   Link2,
@@ -28,7 +28,7 @@ export type SellerTab = {
 };
 
 export const SELLER_TABS: SellerTab[] = [
-  { id: "efficiency", label: "Resumo", icon: DollarSign, order: 1,
+  { id: "efficiency", label: "Resumo", icon: LayoutDashboard, order: 1,
     descricao: "Resultado, causas, ritmo e conversão — Resumo e Faturamento numa só leitura",
     juniorTip: "Comece aqui. Cadeia científica: efeito → tráfego → tendência → funil." },
   { id: "pock", label: "Full", icon: Gauge, order: 1.5,
@@ -43,7 +43,7 @@ export const SELLER_TABS: SellerTab[] = [
   { id: "clips", label: "Clips", icon: Video, order: 5,
     descricao: "Vídeos publicados e desempenho",
     juniorTip: "Canal novo de tráfego orgânico — meta: 20 clips/mês, 8.000 visitas." },
-  { id: "competitiveness", label: "Preço", icon: Swords, order: 6,
+  { id: "competitiveness", label: "Preço", icon: Tags, order: 6,
     descricao: "Competitividade frente aos concorrentes",
     juniorTip: "% Não Competitivo > 30%? O algoritmo começa a esconder o anúncio." },
   { id: "publicidade", label: "Publicidade", icon: Megaphone, order: 7,

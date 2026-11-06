@@ -1,3 +1,4 @@
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { analiseDiaria, type DiaAnalise } from "@/lib/analiseDiaria";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { numCurto } from "@/lib/format";
@@ -368,7 +369,7 @@ const EfficiencyPanel = ({ kpis, dailyKpis = [], from, to, sellerCustIdMap, data
               }`}
             >
               <p className="text-sm">
-                <span className="mr-2">{alert.icon}</span>
+                <IconeIndicador simbolo={alert.icon} className="mr-2" />
                 {alert.text}
               </p>
             </motion.div>

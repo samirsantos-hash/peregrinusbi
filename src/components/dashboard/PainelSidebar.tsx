@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown, AlertTriangle, Plug } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown, AlertTriangle, Plug, ChartNoAxesCombined, ListFilter, BadgeCheck, History, Package, Tags, Search, LayoutDashboard, type LucideIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -15,6 +15,13 @@ const CHAVE = "peregrinus.sidebar.collapsed";
 const GRUPOS = GRUPOS_SECOES;
 
 const ID_ALERTAS = "alertas-riscos";
+
+const ICONES_SUBANALISE: Record<string, LucideIcon> = {
+  analise: ChartNoAxesCombined, geral: LayoutDashboard, resumo: LayoutDashboard,
+  indicadores: ListFilter, requisitos: BadgeCheck, historico: History, evolucao: History,
+  produtos: Package, anuncios: Package, promocoes: Tags, campanhas: Tags,
+  concorrentes: Search, insights: Search,
+};
 
 function porId(id: string): SellerTab | undefined {
   return SELLER_TABS.find((t) => t.id === id);
@@ -157,7 +164,7 @@ function Conteudo({
                       {!recolhida && <><span className="truncate flex-1 text-left">{tab.label}</span>{SUBANALISES[id] && (ramos.includes(id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
                     </Button>
                     {!recolhida && ramos.includes(id) && SUBANALISES[id] && <ul className="ml-5 pl-2 border-l border-border space-y-1 py-1">
-                      {SUBANALISES[id].map(sub => <li key={sub.id}><Button variant="ghost" onClick={() => {
+                      {SUBANALISES[id].map(sub => { const IconeSub = ICONES_SUBANALISE[sub.id] ?? ChartNoAxesCombined; return <li key={sub.id}><Button variant="ghost" onClick={() => {
                         if ((id === "reputation" || id === "competitiveness" || id === "publicidade") && (ativa !== id || subativa !== sub.id)) {
                           window.__lovableEvents?.track?.("project.seller_section_opened", {
                             section: id === "competitiveness" ? "price" : id === "publicidade" ? "advertising" : "reputation",
@@ -171,8 +178,8 @@ function Conteudo({
                       }}
                         aria-current={ativa === id && subativa === sub.id ? "page" : undefined}
                         className={cn("w-full min-h-9 h-auto py-2 px-2 justify-start text-left whitespace-normal text-xs leading-5", ativa === id && subativa === sub.id ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "text-muted-foreground")}>
-                        {sub.label}
-                      </Button></li>)}
+                        <IconeSub aria-hidden="true" className="h-3.5 w-3.5 shrink-0" /><span>{sub.label}</span>
+                      </Button></li>; })}
                     </ul>}
                   </li>
                 );

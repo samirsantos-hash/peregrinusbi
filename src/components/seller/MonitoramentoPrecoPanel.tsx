@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ExternalLink, ChevronDown, ChevronUp, TrendingDown, AlertTriangle } from "lucide-react";
@@ -292,7 +293,7 @@ function ItemRow({ a }: { a: AnuncioFlag }) {
           </div>
           <div className="rounded-md p-2.5 border" style={{ borderColor: cfg.borda, backgroundColor: "rgba(255,255,255,0.02)" }}>
             <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: cfg.cor }}>
-              💡 Ação recomendada
+              <IconeIndicador simbolo="💡" className="h-3 w-3 mr-1" /> Ação recomendada
             </p>
             <p className="text-xs text-foreground leading-relaxed">{a.acao}</p>
           </div>

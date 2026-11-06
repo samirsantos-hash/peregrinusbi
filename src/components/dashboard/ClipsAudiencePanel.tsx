@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -192,7 +193,7 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
               <div className="space-y-2">
                 <p className="text-xs font-medium text-warning flex items-center gap-1.5">
                   <FileVideo className="w-3.5 h-3.5" />
-                  🎬 Clip com baixa performance — Revisar visitas e conversão
+                  Clip com baixa performance — Revisar visitas e conversão
                 </p>
                 <p className="text-[11px] text-muted-foreground">
                   Sem métricas por anúncio disponíveis hoje. Se o clip existe, o problema é alcance
@@ -221,13 +222,13 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
             ) : videoStatus.status === "no-reach" ? (
               <p className="text-xs text-destructive flex items-center gap-1.5">
                 <Ban className="w-3.5 h-3.5" />
-                🚫 Vídeo sem Alcance (Verificar Indexação ou Qualidade)
+                Vídeo sem Alcance (Verificar Indexação ou Qualidade)
               </p>
             ) : (
               <div className="space-y-2">
                 {videoStatus.status === "low-conversion" && (
                   <p className="text-xs font-medium" style={{ color: "hsl(50 100% 50%)" }}>
-                    ⚠️ Refazer Roteiro/Edição (Baixa Conversão)
+                    <IconeIndicador simbolo="⚠️" className="h-3.5 w-3.5 mr-1" /> Refazer Roteiro/Edição (Baixa Conversão)
                   </p>
                 )}
                 {AUDIT_CHECKLIST.map((c, i) => (
@@ -522,9 +523,9 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     const clip = itemClipMap.get(itemId);
     const hc = clip ? clip.hasClip : false;
     if (hc) {
-      return <Badge className="text-[11px] bg-emerald/10 text-emerald border-emerald/20">✅ Ativo no Clips</Badge>;
+      return <Badge className="text-[11px] bg-emerald/10 text-emerald border-emerald/20"><IconeIndicador simbolo="✅" className="h-3 w-3 mr-1" /> Ativo no Clips</Badge>;
     }
-    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20">❌ Analisar</Badge>;
+    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20"><IconeIndicador simbolo="❌" className="h-3 w-3 mr-1" /> Analisar</Badge>;
   };
 
   /* ── Summary using performance-based detection ── */
@@ -910,7 +911,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           <div className="flex items-center gap-3">
             <Flame className="w-5 h-5 text-warning" />
             <h3 className="text-sm font-semibold uppercase tracking-wider text-warning">
-              🔥 Alerta de Conversão: Otimização de Vídeo e Script
+              Alerta de Conversão: Otimização de Vídeo e Script
             </h3>
             <TooltipInfo text="Itens com alto volume de vendas que precisam de otimização de vídeo. Expanda cada card para acessar o checklist de diagnóstico de produção." />
           </div>

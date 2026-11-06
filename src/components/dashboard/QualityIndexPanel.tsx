@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { motion } from "framer-motion";
 import { AlertTriangle, CheckCircle, Camera, Type, Zap, Tag, TrendingUp, ShieldAlert } from "lucide-react";
 import GaugeChart from "./GaugeChart";
@@ -284,7 +285,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
                     transition={{ delay: i * 0.08 }}
                     className={`flex items-center gap-3 p-3 rounded-lg border ${severityStyle}`}
                   >
-                    <span className={iconColor}>{a.icon}</span>
+                    <IconeIndicador simbolo={a.icon} className={iconColor} />
                     <span className="text-xs font-medium">{a.label}</span>
                   </motion.div>
                 );

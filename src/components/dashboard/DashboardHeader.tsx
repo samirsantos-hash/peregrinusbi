@@ -4,7 +4,7 @@ import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy, Calendar as CalendarIcon } from "lucide-react";
+import { TrendingUp, TrendingDown, GraduationCap, SlidersHorizontal, Store, Check, ChevronsUpDown, RefreshCw, Copy, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { ptBR } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
@@ -440,7 +440,7 @@ const DashboardHeader = ({
               className="panel-control border-border bg-card min-h-10 gap-2 text-xs"
               title={juniorMode ? "Ocultar orientações didáticas" : "Mostrar orientações didáticas"}
             >
-              <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
+              {juniorMode ? <GraduationCap className="h-4 w-4 text-primary" aria-hidden="true" /> : <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" />}
               {juniorMode ? "Modo Didático" : "Modo Avançado"}
             </Button>
             {onRefresh && (
@@ -451,6 +451,7 @@ const DashboardHeader = ({
                 disabled={isRefreshing}
                 className="panel-control border-border bg-card h-10 w-10"
                 title="Atualizar dados"
+                aria-label="Atualizar dados"
               >
                 <RefreshCw className={cn("h-4 w-4 text-neon-blue", isRefreshing && "animate-spin")} />
               </Button>
