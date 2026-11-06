@@ -15,7 +15,7 @@ import { AnunciosAds } from "@/components/ml/ads/AnunciosAds";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useAcaoEmLote } from "@/lib/mlAcoes";
 import { chamarFuncaoMl, dataHoraBr, useContasMl } from "@/lib/mlFuncoes";
-import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel } from "@/lib/adsAnalise";
+import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel, faturamentoAlinhado } from "@/lib/adsAnalise";
 import { useDesenvolvedor } from '@/hooks/useDesenvolvedor';
 import { registrarAviso } from '@/lib/avisosDesenvolvedor';
 import SinergiaPublicidadeApi from '@/components/ml/SinergiaPublicidade';
@@ -77,15 +77,18 @@ export default function Publicidade() {
       ]);
       const erro = campanhas.error ?? serie.error ?? grupos.error ?? settings.error;
       if (erro) throw erro;
-      const fat = (vendas.data?.dados as { faturamento_30d?: unknown } | null)?.faturamento_30d;
+      const hojeRef = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+      const vendasSerie = (vendas.data?.dados as { serie?: { data?: string; faturamento?: unknown }[] } | null)?.serie;
+      // TACOS só com faturamento das mesmas datas do investimento; sem alinhamento, fica indisponível.
+      const fat = faturamentoAlinhado(vendasSerie, serie.data, hojeRef, DIAS);
       return {
         painel: montarPainel({
           campanhas: campanhas.data,
           serie: serie.data,
           grupos: grupos.data,
           settings: settings.data,
-          faturamento: typeof fat === "number" && Number.isFinite(fat) ? fat : null,
-        }, new Date(Date.now() - 86_400_000).toISOString().slice(0, 10), DIAS),
+          faturamento: fat,
+        }, hojeRef, DIAS),
         faturamentoEm: (vendas.data?.atualizado_em ?? null) as string | null,
       };
     },

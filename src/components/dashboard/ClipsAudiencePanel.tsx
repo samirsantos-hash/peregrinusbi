@@ -472,7 +472,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
   const conversionRate = pct(totals.ordersClips, totals.visitasClips);
   const conversionGeneral = pct(totals.tsi, totals.visits);
   const clipsVsGeralDelta = conversionRate - conversionGeneral;
-  const clipsBeatsGeral = totals.visitasClips > 0 && totals.visits > 0 && conversionRate >= conversionGeneral;
+  // A loja só tem unidades vendidas por visita; Clips tem pedidos por visita. Bases diferentes não são comparadas.
+  const clipsBeatsGeral = false;
 
   /* ── Fallback flag: per-item clip data is missing but seller has clip activity ── */
   const hasSellerLevelClipsOnly = useMemo(() => {
@@ -665,7 +666,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               {effectiveCoverage.mode === "items" && clipCoverage.withoutClip > 0 && (
                 <p className="text-xs text-warning flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  {clipCoverage.withoutClip} anúncios sem Clip representam oportunidades perdidas de conversão
+                  {clipCoverage.withoutClip} anúncios sem desempenho de Clip registrado no período (a publicação de vídeo não está confirmada)
                 </p>
               )}
             </div>
@@ -687,10 +688,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         />
         <MetricCard
           icon={Activity}
-          label="Conversão Geral"
+          label="Unidades por visita (loja)"
           value={`${conversionGeneral.toFixed(2).replace(".", ",")}%`}
-          sub={`${fmt(totals.tsi)} pedidos / ${fmt(totals.visits)} visitas`}
-          tooltip="Taxa de conversão geral da loja: (TSI / Visitas) × 100. É o benchmark interno que a conversão via Clips precisa superar."
+          sub={`${fmt(totals.tsi)} unidades / ${fmt(totals.visits)} visitas`}
+          tooltip="Unidades vendidas da loja divididas pelas visitas. Usa unidades, não pedidos, por isso não é comparável à conversão via Clips."
           accentClass="text-foreground"
         />
         <MetricCard
@@ -717,22 +718,14 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={ShoppingCart}
           label="Conversão Clips"
           value={`${conversionRate.toFixed(2).replace(".", ",")}%`}
-          sub={
-            totals.visitasClips > 0 && totals.visits > 0
-              ? `${fmt(totals.ordersClips)} pedidos · ${clipsBeatsGeral ? "+" : ""}${clipsVsGeralDelta.toFixed(2).replace(".", ",")}pp vs Geral`
-              : `${fmt(totals.ordersClips)} pedidos via clips`
-          }
-          tooltip="Taxa de conversão: (Pedidos via Clips / Visitas via Clips) × 100. Comparada ao benchmark interno (Conversão Geral) — quando acima, o vídeo está pré-qualificando o comprador."
-          accentClass={
-            totals.visitasClips > 0 && totals.visits > 0
-              ? clipsBeatsGeral ? "text-emerald" : "text-warning"
-              : conversionRate > 1 ? "text-emerald" : "text-neon-blue"
-          }
+          sub={`${fmt(totals.ordersClips)} pedidos / ${fmt(totals.visitasClips)} visitas via Clips`}
+          tooltip="Pedidos via Clips divididos pelas visitas via Clips. Não é comparada às unidades por visita da loja, que usam outra base."
+          accentClass="text-neon-blue"
         />
       </div>
 
       {/* ── Banner comparativo: Conversão Clips vs Geral ── */}
-      {totals.visitasClips > 0 && totals.visits > 0 && (
+      {false && (
         <div
           className={`glass-card p-4 border flex items-start gap-3 ${
             clipsBeatsGeral
@@ -810,7 +803,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                 formatter={(v: any) => `${Number(v).toFixed(2).replace(".", ",")}%`}
               />
               <Legend wrapperStyle={{ fontSize: 11, color: "hsl(var(--ec-text-sec))" }} />
-              <Line type="monotone" dataKey="convGeral" name="Conversão Geral" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="convGeral" name="Unidades por visita (loja)" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
               <Line type="monotone" dataKey="convClips" name="Conversão Clips" stroke="hsl(var(--emerald))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
             </LineChart>
           </ResponsiveContainer>

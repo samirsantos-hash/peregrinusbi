@@ -2,7 +2,7 @@ import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link2, ArrowRight } from "lucide-react";
-import { pearson, strengthLabel } from "@/lib/correlacao";
+import { pearsonValido, strengthLabel } from "@/lib/correlacao";
 import { cn } from "@/lib/utils";
 
 type Kpi = Record<string, any>;
@@ -12,11 +12,9 @@ type Props = {
 };
 
 const PARES: Array<{ a: string; b: string; xKey: string; yKey: string; sentido: "↑" | "↓"; comentario: string }> = [
-  { a: "Full %",              b: "GMV",           xKey: "shareFullPct",   yKey: "gmv",           sentido: "↑", comentario: "Quanto mais Full, mais o algoritmo empurra o anúncio." },
+  { a: "Full %",              b: "GMV",           xKey: "pctFull",   yKey: "gmv",           sentido: "↑", comentario: "Quanto mais Full, mais o algoritmo empurra o anúncio." },
   { a: "CDP (TGMV via CDP)",  b: "GMV",           xKey: "cdpTgmv",        yKey: "gmv",           sentido: "↑", comentario: "Central de Promoção amplia o tráfego orgânico." },
   { a: "IPI",                 b: "ROAS",          xKey: "pontuacaoIpi",   yKey: "roas",          sentido: "↑", comentario: "Anúncios de qualidade convertem melhor o Ads." },
-  { a: "% Não Competitivo",   b: "Conversão",     xKey: "pctNaoCompetitivo", yKey: "convRate",   sentido: "↓", comentario: "Preço alto reduz conversão e penaliza ranking." },
-  { a: "Taxa de Atraso",      b: "Conversão",     xKey: "taxaAtrasos",    yKey: "convRate",      sentido: "↓", comentario: "Atrasos derrubam Shipping Score e a conversão." },
 ];
 
 export function CorrelacaoPanel({ kpis }: Props) {
@@ -31,13 +29,13 @@ export function CorrelacaoPanel({ kpis }: Props) {
           xs.push(x); ys.push(y);
         }
       }
-      const r = pearson(xs, ys);
+      const r = pearsonValido(xs, ys);
       return { ...p, r, n: xs.length };
     });
   }, [kpis]);
 
   const maisForte = useMemo(() => {
-    const ord = [...linhas].filter(l => l.n >= 3).sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
+    const ord = [...linhas].filter((l): l is typeof l & { r: number } => l.r != null).sort((a, b) => Math.abs(b.r) - Math.abs(a.r));
     return ord[0];
   }, [linhas]);
 
@@ -86,15 +84,15 @@ export function CorrelacaoPanel({ kpis }: Props) {
       <div className="glass-card p-5">
         <h3 className="text-sm font-semibold uppercase tracking-wider mb-1">Correlações observadas (Pearson)</h3>
         <p className="text-xs text-muted-foreground mb-4">
-          Calculadas sobre o período carregado deste seller. |r| &lt; 0.3 é considerado fraco.
+          Calculadas sobre o período carregado deste seller. Exige ao menos 7 períodos com variação; |r| &lt; 0.3 é considerado fraco. Associação não comprova efeito.
         </p>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead className="text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border">
               <tr>
-                <th className="text-left py-2 pr-3">Se este KPI sobe →</th>
-                <th className="text-left py-2 pr-3">Tende a:</th>
+                <th className="text-left py-2 pr-3">Quando este KPI sobe →</th>
+                <th className="text-left py-2 pr-3">Associação esperada com:</th>
                 <th className="text-right py-2 pr-3">Pearson</th>
                 <th className="text-left py-2 pr-3">Força</th>
                 <th className="text-left py-2">Leitura</th>
@@ -102,7 +100,7 @@ export function CorrelacaoPanel({ kpis }: Props) {
             </thead>
             <tbody>
               {linhas.map((l) => {
-                const s = strengthLabel(l.r);
+                const s = l.r == null ? null : strengthLabel(l.r);
                 return (
                   <tr key={l.xKey + l.yKey} className="border-b border-border/40">
                     <td className="py-2 pr-3 text-foreground">{l.a}</td>
@@ -110,11 +108,11 @@ export function CorrelacaoPanel({ kpis }: Props) {
                       {l.b} <IconeIndicador simbolo={l.sentido} className="h-3 w-3" />
                     </td>
                     <td className="py-2 pr-3 text-right font-mono tabular-nums">
-                      {l.n < 3 ? "—" : l.r.toFixed(2)}
+                      {l.r == null ? "—" : l.r.toFixed(2)}
                     </td>
                     <td className="py-2 pr-3">
-                      <span className={cn("inline-block text-[10px] font-semibold border rounded px-1.5 py-0.5", toneClass(s.tone))}>
-                        {l.n < 3 ? "Sem dados" : s.label}
+                      <span className={cn("inline-block text-[10px] font-semibold border rounded px-1.5 py-0.5", toneClass(s?.tone ?? "muted"))}>
+                        {s == null ? "Sem dados" : s.label}
                       </span>
                     </td>
                     <td className="py-2 text-muted-foreground">{l.comentario}</td>
@@ -128,8 +126,8 @@ export function CorrelacaoPanel({ kpis }: Props) {
         {maisForte && Math.abs(maisForte.r) >= 0.3 && (
           <div className="mt-4 p-3 rounded-md border border-neon-blue/30 bg-neon-blue/[0.06] text-xs">
             <span className="font-semibold text-neon-blue">Insight: </span>
-            Para este seller, o fator que mais se correlaciona com {maisForte.b.toLowerCase()} no período é{" "}
-            <span className="font-semibold">{maisForte.a}</span> (Pearson {maisForte.r.toFixed(2)}). Foco aqui para maior impacto.
+            Para este seller, o fator com associação mais forte com {maisForte.b.toLowerCase()} no período é{" "}
+            <span className="font-semibold">{maisForte.a}</span> (Pearson {maisForte.r.toFixed(2)}). Associação não prova causa: investigue antes de agir.
           </div>
         )}
       </div>

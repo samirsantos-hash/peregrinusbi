@@ -16,13 +16,13 @@ type Quadrant = "invest" | "seo" | "critical" | "maintain";
 
 function classifyItem(item: ListingQuality): Quadrant | null {
   // Força Competitiva = avg of offer scores (price, stock, shipping, promotions)
-  const offerScores = [item.llPriceScore, item.llStockAvailabilityScore, item.llFreeShippingScore, item.llPromotionsScore].filter(s => s > 0);
-  if (offerScores.length === 0) return null;
+  const offerScores = [item.llPriceScore, item.llStockAvailabilityScore, item.llFreeShippingScore, item.llPromotionsScore].filter((s): s is number => typeof s === "number" && Number.isFinite(s));
+  if (offerScores.length < 3) return null; // cobertura mínima: 3 de 4 dimensões medidas
   const forcaCompetitiva = offerScores.reduce((a, b) => a + b, 0) / offerScores.length;
 
   // Atratividade = avg of content scores (pictures, title, description, tech specs)
-  const contentScores = [item.llPicturesScore, item.llTitleScore, item.llDescriptionScore, item.llTechSpecsScore].filter(s => s > 0);
-  if (contentScores.length === 0) return null;
+  const contentScores = [item.llPicturesScore, item.llTitleScore, item.llDescriptionScore, item.llTechSpecsScore].filter((s): s is number => typeof s === "number" && Number.isFinite(s));
+  if (contentScores.length < 3) return null;
   const atratividade = contentScores.reduce((a, b) => a + b, 0) / contentScores.length;
 
   const threshold = 65;

@@ -34,7 +34,7 @@ const AJUDA =
   "Cada faixa é a participação da respectiva coluna sobre a soma das três, por período. A área empilhada é 100% por construção — ela mostra composição, não volume.\n" +
   "Ressalva de unidade: " + RESSALVA_UNIDADE + "\n\n" +
   "POR QUE IMPORTA\n" +
-  "O algoritmo cruza cliques e conversão. Anúncio que recebe visita e não converte por preço perde posição de forma progressiva e automática. Acima de 30% em preço alto, o efeito costuma ficar visível na exposição orgânica.\n\n" +
+  "Preço alto frente ao rival pode reduzir a conversão. A linha de 30% é um limiar interno de investigação, não uma regra oficial de penalização.\n\n" +
   "COMO LER E O QUE FAZER\n" +
   "Leia primeiro a faixa de volume abaixo do gráfico: mês com barra clara ou hachurada tem base pequena e não sustenta conclusão. Depois olhe a tendência da faixa laranja contra a linha de 30%. Se subir, priorize os itens da tabela abaixo, ordenados por visitas — é onde o preço custa mais tráfego. Onde a margem não permite baixar preço, avalie CDP com coparticipação.";
 

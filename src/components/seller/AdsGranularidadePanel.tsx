@@ -232,9 +232,9 @@ const AdsGranularidadePanel = ({ sellerUuid, fromDate, toDate }: Props) => {
       <div className="rounded-xl border border-border/40 bg-card/60 p-5">
         <div className="mb-1 flex items-center gap-2">
           <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Produtos mais vendidos no período
+            Anúncios com mais visitas (última leitura do período)
           </span>
-          <TooltipInfo text="Ranking por visitas dos últimos 7 dias (base de elegibilidade — essa coluna mede tráfego por anúncio, não pedidos). O feed do Mercado Livre não quebra o investimento em Ads por item — por isso a coluna de desconto e o status de campanha servem como leitura do esforço promocional por produto." />
+          <TooltipInfo text="Ranking por visitas dos últimos 7 dias na leitura mais recente de cada anúncio; mede tráfego, não vendas. O feed do Mercado Livre não quebra o investimento em Ads por item — por isso a coluna de desconto e o status de campanha servem como leitura do esforço promocional por produto." />
         </div>
         <p className="mb-4 text-[11px] text-muted-foreground">
           O investimento em Ads não é exportado por anúncio no feed diário; este ranking mostra os itens que puxam o volume e se estão em campanha.

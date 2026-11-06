@@ -45,11 +45,11 @@ export function gerarInsights(
       id: "nao_competitivo_critico",
       tipo: "alerta",
       urgencia: "alta",
-      titulo: "Preço não competitivo acima do limite algorítmico",
+      titulo: "Preço alto acima do limiar interno de investigação (30%)",
       metrica: `${atual.pctMaisCaro.toFixed(1)}%`,
-      identificado: `Em ${atual.pctMaisCaro.toFixed(1)}% das comparações de preço ativadas pelo ML, o seller estava mais caro que o concorrente direto. O limite que dispara penalização é 30%.`,
+      identificado: `Em ${atual.pctMaisCaro.toFixed(1)}% das comparações de preço ativadas pelo ML, o seller estava mais caro que o concorrente direto. 30% é um limiar interno de investigação, não uma regra oficial de penalização.`,
       porque:
-        "O algoritmo do ML cruza CTR com taxa de conversão em tempo real. Quando um anúncio recebe cliques mas não converte por causa do preço, ele é progressivamente rebaixado nos resultados de busca — sem necessidade de ação do ML, acontece automaticamente.",
+        "Preço acima do concorrente pode reduzir a conversão quando o comprador compara ofertas. Não há evidência no painel de rebaixamento automático; use o limiar para priorizar a investigação.",
       investigar:
         "Identificar quais categorias ou produtos específicos concentram essa desvantagem. Verificar se houve reajuste de preço recente ou se um concorrente reduziu o preço. Comparar o preço atual com os 3 primeiros resultados da busca no ML para os produtos de maior GMV.",
       sugestao:
@@ -60,11 +60,11 @@ export function gerarInsights(
       id: "nao_competitivo_atencao",
       tipo: "investigar",
       urgencia: "media",
-      titulo: "Preço em zona de atenção — 10pp do limite de penalização",
+      titulo: "Preço em zona de atenção — perto do limiar interno de 30%",
       metrica: `${atual.pctMaisCaro.toFixed(1)}%`,
-      identificado: `${atual.pctMaisCaro.toFixed(1)}% das comparações com preço mais caro. Ainda dentro do tolerável pelo algoritmo, mas com pouca margem antes de atingir os 30% de limite.`,
+      identificado: `${atual.pctMaisCaro.toFixed(1)}% das comparações com preço mais caro. Abaixo do limiar interno de 30%, mas próximo dele.`,
       porque:
-        "Entre 20% e 30%, o algoritmo ainda não penaliza diretamente, mas a conversão já começa a cair porque o comprador vê o rival mais barato na comparação de preço.",
+        "Entre 20% e 30% o comprador já encontra com frequência um rival mais barato na comparação; vale acompanhar a conversão dos itens afetados.",
       investigar:
         "Verificar tendência: está subindo ou descendo nos últimos 3 meses? Se subindo, identificar a causa (reajuste do seller ou concorrente mais barato entrando no mercado).",
       sugestao: "Monitorar mensalmente e agir preventivamente nos SKUs de maior volume antes de ultrapassar 30%.",

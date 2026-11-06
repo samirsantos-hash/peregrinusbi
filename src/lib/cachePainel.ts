@@ -57,3 +57,11 @@ export function monitorarLentidao(client: QueryClient) {
     }
   });
 }
+
+/** Houve troca real de identidade (A→B ou A→ninguém)? A primeira definição não conta. */
+export const trocouIdentidade = (anterior: string | null | undefined, atual: string | null) =>
+  anterior !== undefined && anterior !== atual;
+
+/** Cancelamentos esperados (troca de tela, sessão renovada) não são falhas. */
+export const eCancelamento = (e: unknown) =>
+  !!e && typeof e === 'object' && ((e as { name?: string }).name === 'AbortError' || /lock.*(released|stolen|acquire)|aborted/i.test(String((e as { message?: string }).message ?? '')));
