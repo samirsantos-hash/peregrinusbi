@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import logoAuth from "@/assets/logo-auth-transparent.png";
-import ecomLogo from "@/assets/ecom-e-logo.png.asset.json";
+import MarcaEcom from "@/components/MarcaEcom";
 import { AuraBackground } from "@/components/aura/AuraBackground";
 
 const Auth = () => {
@@ -47,7 +47,7 @@ const Auth = () => {
           <div className="w-24 h-24 mx-auto flex items-center justify-center">
             <img alt="Ecom Peregrinus" className="w-full h-full object-contain brightness-0 dark:invert" src={logoAuth} fetchPriority="high" decoding="async" width={128} height={128} />
           </div>
-          <h1 className="auth-title" aria-label="Ecom Peregrinus"><span className="auth-brand-prefix"><img src={new URL(ecomLogo.url, "https://ecomperegrinus.com.br").href} alt="" className="auth-brand-e brightness-0 dark:invert" width={22} height={29} />com</span> <span className="auth-brand-name">Peregrinus</span></h1>
+          <h1 className="auth-title"><MarcaEcom /></h1>
           <p className="auth-subtitle text-muted-foreground">Entre com suas credenciais</p>
         </div>
 

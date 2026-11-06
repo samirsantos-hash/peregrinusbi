@@ -1098,9 +1098,28 @@ button:not(:disabled), [role="button"], [role="tab"], a[href] { -webkit-tap-high
   text-wrap: balance;
   -webkit-font-smoothing: antialiased;
 }
-.auth-title .auth-brand-prefix { display: inline-flex; align-items: center; gap: 2px; font-weight: 500; }
-.auth-brand-e { width: 22px; height: 29px; object-fit: contain; }
-.auth-title .auth-brand-name { font-weight: 300; }
+.ecom-wordmark {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: 184px;
+  max-width: 100%;
+  vertical-align: middle;
+  color: hsl(var(--foreground));
+}
+.ecom-wordmark-image { display: block; width: 100%; height: auto; aspect-ratio: 301 / 135; object-fit: contain; }
+.ecom-wordmark .ecom-wordmark-signature {
+  display: block;
+  margin-top: 4px;
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.ecom-wordmark-compact { width: 112px; }
+.ecom-wordmark-compact .ecom-wordmark-signature { font-size: 10px; line-height: 12px; margin-top: 2px; }
 .auth-subtitle {
   font-size: 13px;
   font-weight: 400;

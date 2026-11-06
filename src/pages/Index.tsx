@@ -1,4 +1,5 @@
 import AguiaLogo from "@/components/aura/AguiaLogo";
+import MarcaEcom from "@/components/MarcaEcom";
 import CarteiraNaSecao from "@/components/carteira/deepdive/CarteiraNaSecao";
 import MlAoVivo from "@/components/ml/MlAoVivo";
 import { useState, useMemo, useEffect, useCallback } from "react";
@@ -425,10 +426,7 @@ const Index = () => {
             <AguiaLogo className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
             <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-primary shrink-0" />
             <div className="min-w-0">
-              <p className="text-sm sm:text-lg font-semibold tracking-normal truncate">
-                <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
-                <span className="sm:hidden">Peregrinus BI</span>
-              </p>
+              <MarcaEcom compact />
               {sellersFetched && !hasRealData && isAdmin && (
                 <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                   <span className="text-warning">● Dados de demonstração</span>

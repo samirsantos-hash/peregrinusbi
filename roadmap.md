@@ -1,5 +1,9 @@
 # Roadmap
 
+## Escrita da marca — 06/11
+- [x] Escrita original ecom solutions isolada da referência, com by Peregrinus na Home, recuperação e cabeçalho comum das análises; águia, campos, ambiente e fontes dos dados preservados.
+- [x] Marca carregada nos dois temas da Home e cabeçalho autenticado; celular 390px sem excesso horizontal ou erros. Build OK; k6 público 28.439 requisições, zero falhas, p95 65,43ms (não mede painel logado). Somente em teste, sem publicar.
+
 ## Estudo de reputação — 05/11 às 23:54
 - [x] Distribuídos estado observado e avaliações no Resumo; taxas API/mensais nos Indicadores; gráfico/tabela de meses fechados na Análise; confiabilidade e referências provisórias em Perfil/tier/requisitos. Leitura crua preserva ausência e frações, sem reputação diária ou risco automático sem denominador.
 - [x] 19 testes passaram e build OK; AUTOPECASLONDRINA nas quatro subcategorias, 1280px e Resumo a 390px sem excesso horizontal. k6 público prévio: 28.440 requisições, zero falhas, p95 71,32ms; não mede painel autenticado. Somente teste.

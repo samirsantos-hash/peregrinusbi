@@ -7,6 +7,7 @@ import { Loader2, Mail, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import MarcaEcom from "@/components/MarcaEcom";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -53,7 +54,8 @@ const ForgotPassword = () => {
       >
         <div className="text-center space-y-2">
           <Mail className="w-8 h-8 text-primary mx-auto" />
-          <h1 className="text-xl font-bold">Ecom Peregrinus — Recuperar Senha</h1>
+          <MarcaEcom />
+          <h1 className="text-xl font-bold">Recuperar Senha</h1>
           <p className="text-xs text-muted-foreground">
             {sent
               ? "Verifique sua caixa de entrada para o link de redefinição."
