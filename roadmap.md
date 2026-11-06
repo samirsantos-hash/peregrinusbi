@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Reflexos e resposta de cartões — 06/11
-- [ ] Restaurar reflexo localizado inspirado no HTML e resposta ao pressionar cartões já clicáveis; manter cartões informativos, navegação e Home sem inclinação.
-- [ ] Conferir clique real, reflexo, teclado e celular, sem alterar métricas/permissões nem publicar.
+- [x] Reflexo localizado de borda verde e superfície suave inspirado no HTML; compressão somente em cartões com ação existente, sem inclinação em cartões informativos, navegação ou Home.
+- [x] Quatro regressões e build OK; cartão real de faturamento conferido com reflexo seguindo ponteiro, pressão 0,98, seleção e teclado; cartão cabe em 390px e nenhum erro. Gestão de Carteira já apresenta excesso horizontal em outros gráficos/tabelas, não alterados neste pedido. k6 público: 28.486 requisições, zero falhas, p95 81,67ms; não mede painel autenticado. Sem publicar.
 
 ## Entrada suave e círculo de carregamento — 06/11
 - [x] Substituir letras caindo por entrada de títulos/conteúdo inspirada no HTML; círculo pequeno durante consultas, sem bloquear página nem mudar Home.

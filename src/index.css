@@ -2680,10 +2680,12 @@ html body .peregrinus-panel.peregrinus-panel :is(button,a,[role="button"]):is(.d
 }
 html body .peregrinus-panel.peregrinus-panel :is(button,a,[role="button"]):is(.ds-kpi,.glass-card,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha):focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
 html body .peregrinus-panel.peregrinus-panel [data-card-interactive] { touch-action: manipulation; transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida); }
-html body .peregrinus-panel.peregrinus-panel [data-card-interactive]:active:not(:disabled):not([aria-disabled="true"]) { transform: scale(.98) !important; opacity: var(--card-press-opacity); }
+html body .peregrinus-panel.peregrinus-panel [data-card-interactive][data-card-interactive]:active:not(:disabled):not([aria-disabled="true"]) { transform: scale(.98) !important; opacity: var(--card-press-opacity, .86) !important; }
+html body .peregrinus-panel.peregrinus-panel [data-card-interactive][data-card-pressed] { scale: .98 !important; transform: none !important; opacity: var(--card-press-opacity) !important; }
 html body .peregrinus-panel.peregrinus-panel [data-card-interactive]:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
-  html body .peregrinus-panel.peregrinus-panel [data-card-interactive]:active { transform: none !important; }
+  html body .peregrinus-panel.peregrinus-panel [data-card-interactive][data-card-interactive]:active { transform: none !important; }
+  html body .peregrinus-panel.peregrinus-panel [data-card-pressed] { transform: none !important; scale: none !important; }
   html body .peregrinus-panel.peregrinus-panel :is(button,a,[role="button"]):is(.ds-kpi,.glass-card,.cartao-branco,.noite-vidro,.cart-card,.cart-ficha):active { transform: none !important; }
 }
 @media (prefers-reduced-motion: reduce), (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
