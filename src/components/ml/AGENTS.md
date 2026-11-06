@@ -1,5 +1,7 @@
 # Account summary
 
+- Promotion results read paginated account-scoped opt-ins separately from historical performance; current participation never produces ROAS or ROI because sale attribution and realized costs are unconfirmed.
+
 - Margin-based pricing is a client calculator using explicit per-item costs and charges, not markup; send resulting prices through the unchanged server preview/confirmation flow and never persist private cost inputs.
 
 - The summary Quality Index averages saved official ML performance scores only for active scoped listings; show coverage and no prior comparison instead of invoking AI or substituting legacy health scores.

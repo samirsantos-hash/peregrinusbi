@@ -86,6 +86,7 @@ import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
 import ResumoLojaApi from "@/components/ml/ResumoLojaApi";
 import CampanhasAtribuicaoApi from "@/components/ml/CampanhasAtribuicaoApi";
+import PromocoesResultados from "@/components/ml/PromocoesResultados";
 import ResumoSinergiaCorrelacoes from "@/components/ml/SinergiaPublicidade";
 import FullProdutosApi from "@/components/pock/FullProdutosApi";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
@@ -682,6 +683,7 @@ const Index = () => {
                     {pagina === "campanhas" && <><CampanhasAtribuicaoApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
                     <CampanhasDesempenho items={eligibilityItems || []} /></>}
                     {pagina === "cofinanciadas" && <CampanhasCofinanciadasPanel items={eligibilityItems || []} />}
+                    {pagina === "promocoes" && <PromocoesResultados key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />}
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0 space-y-5">
                     {(pagina === "resumo" || pagina === "requisitos") && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} requisitos={pagina === "requisitos"} />}

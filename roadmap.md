@@ -1,5 +1,10 @@
 # Roadmap
 
+## Promoções em Oportunidades — 06/11
+- [x] Incluída subanálise Promoções com adesões confirmadas e cobertura; estado atual separado de resultados históricos.
+- [x] ROAS/ROI explicitamente indisponíveis sem atribuição/custos; AUTOPECASLONDRINA com 6 promoções, atualização conferida, sem erros ou excesso horizontal em 390px. Dez testes e build OK; k6 público 28.419 requisições, zero falhas, p95 61,04ms (não mede painel logado). Sem publicar.
+- [ ] Resultados financeiros por promoção: dependem de atribuição histórica por venda e custos realizados confirmados, ausentes no contrato atual.
+
 ## Caixa de preço e margem — 06/11
 - [x] Janela compacta centralizada; modos preço de venda e margem desejada, custos/taxas explícitos por anúncio, sem persistência dos custos ou mudança na autorização/prévia.
 - [x] Cinco testes passaram; janela centralizada (480px desktop, 358px mobile) na sessão real. Custos fictícios de teste 60+10, taxas 10%, margem 20% resultaram em R$100; prévia ML confirmou antes R$130,73/depois R$100 e alerta de queda, sem clicar Confirmar. Build OK; k6 público 28.454 requisições, zero falhas, p95 63,17ms (não mede painel logado). Sem publicar.
