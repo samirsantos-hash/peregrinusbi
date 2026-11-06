@@ -1,5 +1,9 @@
 # Roadmap
 
+## Planejamento ABC e análise de anúncios — 06/11
+- [x] Revisar documento e mapear recursos existentes, lacunas, dependências e cuidados de cálculo.
+- [x] Preparar plano em etapas, sem implementar ou publicar funcionalidades.
+
 ## Auditoria de cálculos e erros — 06/11
 - [x] Mapear seções e subanálises, revisar caminhos ativos e registrar lista priorizada em docs/auditoria-calculos-2026-11-06.md; separar defeitos confirmados, condições de volume e hipóteses. Nenhuma correção de negócio ou publicação solicitada nesta etapa.
 - [x] Conferir abertura das 12 seções principais em sessão autorizada, sem mensagem de falha ou erro de execução; evidência visual de CDP fixo, comparação Clips e tabela geral de correlações. Suíte existente: 518 aprovados e 1 ignorado. Consultar erros registrados: 200 AbortError não tratados, causa ainda a validar. Teste público obrigatório executado; não mede capacidade autenticada.
