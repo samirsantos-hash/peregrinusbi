@@ -1,5 +1,9 @@
 # Roadmap
 
+## Explicação visual da sinergia — 06/11
+- [x] Inserir após a análise gráfico das associações com faturamento e diagrama de interpretação, com valores e cobertura reais; sem causalidade, projeções ou mistura de cancelamentos mensais.
+- [x] AUTOPECASLONDRINA: resumo conectado (r Ads 0,47, visitas 0,77, cancelamentos 0,32) e histórico separados, conferidos em 1280/536/390px; gráfico, texto e diagrama sem excesso horizontal ou erros. 14 regressões e build OK. k6 público: 28.484 requisições, zero falhas, p95 80,72ms; não mede painel autenticado. Sem publicar.
+
 ## Clareza da classificação NÃO VERÃO — 06/11
 - [x] Explicação visível no cartão: rótulo registrado, não previsão de vendas/demanda; origem e critério não confirmados, percentual por quantidade de anúncios. Dados preservados.
 - [x] AUTOPECASLONDRINA com 70 itens reais: texto e cartão conferidos em 1280/536/390px, sem corte ou erros; build OK. k6 público 28.468 requisições, zero falhas, p95 84,75ms; não mede painel autenticado. Sem publicar.
