@@ -15,7 +15,7 @@ type Resposta = {
 const br = (s: string) => s.split('-').reverse().join('/');
 const v = (x: number | null | undefined, f: (n: number) => string = num) => x == null ? 'Sem dado' : f(x);
 
-export default function DetalheAnuncioAbc({ custId, mlb, onClose }: { custId: string; mlb: string | null; onClose: () => void }) {
+export default function DetalheAnuncioAbc({ custId, mlb, onClose, extra }: { custId: string; mlb: string | null; onClose: () => void; extra?: import('react').ReactNode }) {
   const q = useQuery({
     queryKey: ['ml-detalhe-anuncio', custId, mlb], enabled: !!mlb, retry: false,
     queryFn: () => chamarFuncaoMl<Resposta>('ml-buscar-produtos', { cust_id: custId, item_id: mlb }),
@@ -35,6 +35,7 @@ export default function DetalheAnuncioAbc({ custId, mlb, onClose }: { custId: st
     <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
       <SheetHeader><SheetTitle className="break-words">{e?.titulo ?? mlb}</SheetTitle>
         <SheetDescription>{mlb}{q.data && ` · ${br(q.data.periodo.inicio)} – ${br(q.data.periodo.fim)}`}</SheetDescription></SheetHeader>
+      {extra && <div className="mt-4">{extra}</div>}
       {q.isPending && <div role="status" className="flex gap-2 items-center py-8 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Consultando anúncio…</div>}
       {q.isError && <EmptyState falta={q.error.message} />}
       {e && <div className="space-y-5 mt-4 text-sm">

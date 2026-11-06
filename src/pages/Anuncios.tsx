@@ -12,6 +12,7 @@ import ParticipacaoAnuncios from "@/components/ml/ParticipacaoAnuncios";
 import ParticipacaoVendasAnuncio from "@/components/ml/ParticipacaoVendasAnuncio";
 import ResumoPromocoesAnuncio from "@/components/ml/ResumoPromocoesAnuncio";
 import GuardaPermissao from "@/components/GuardaPermissao";
+import DiagnosticoDoisEixos from '@/components/ml/DiagnosticoDoisEixos';
 import CurvaAbc from "@/components/ml/CurvaAbc";
 import { usePermissoes } from "@/hooks/usePermissoes";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -70,8 +71,8 @@ export default function Anuncios() {
   const [termo, setTermo] = useState("");
   const [aberto, setAberto] = useState<string | null>(null);
   const [atualizando, setAtualizando] = useState(false);
-  const [aba, setAba] = useState(['anuncios', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'participacao', 'fora', 'multiplas'].includes(params.get('aba') ?? '') ? params.get('aba') ?? 'anuncios' : 'anuncios');
-  useEffect(() => { const proxima = params.get('aba') ?? 'anuncios'; if (['anuncios', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'participacao', 'fora', 'multiplas'].includes(proxima)) setAba(proxima); }, [params]);
+  const [aba, setAba] = useState(['anuncios', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'diagnostico', 'participacao', 'fora', 'multiplas'].includes(params.get('aba') ?? '') ? params.get('aba') ?? 'anuncios' : 'anuncios');
+  useEffect(() => { const proxima = params.get('aba') ?? 'anuncios'; if (['anuncios', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'diagnostico', 'participacao', 'fora', 'multiplas'].includes(proxima)) setAba(proxima); }, [params]);
   const [marcados, setMarcados] = useState<Map<string, Anuncio>>(new Map());
   const [precoPara, setPrecoPara] = useState<Anuncio[]>([]);
   const [promocoesDe, setPromocoesDe] = useState<Anuncio | null>(null);
@@ -204,6 +205,7 @@ export default function Anuncios() {
               <TabsTrigger value="melhorias">Melhorias</TabsTrigger>
               {pode("correlacoes.visualizar") && <TabsTrigger value="correlacoes">Desempenho de anúncios</TabsTrigger>}
               {pode("correlacoes.visualizar") && <TabsTrigger value="abc">Curva ABC</TabsTrigger>}
+              {pode("correlacoes.visualizar") && <TabsTrigger value="diagnostico">Diagnóstico</TabsTrigger>}
             </TabsList>
             <TabsContent value="promocoes" className="mt-4">
               <GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoVendasAnuncio key={contaId} accountId={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? '')} aoGerenciar={item => { setMelhoriasDe(null); setPromocoesDe(item as Anuncio); }} /></GuardaPermissao>
@@ -215,6 +217,7 @@ export default function Anuncios() {
             {pode("correlacoes.visualizar") && <TabsContent value="correlacoes" className="mt-4">
               <CorrelacoesAnuncios key={contaId} accountId={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? "")} itens={resultados.data ?? []} carregando={resultados.isLoading} erro={resultados.isError} />
             </TabsContent>}
+            {pode('correlacoes.visualizar') && <TabsContent value="diagnostico" className="mt-4"><DiagnosticoDoisEixos key={contaId} contaId={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? '')} /></TabsContent>}
             {pode('correlacoes.visualizar') && <TabsContent value="abc" className="mt-4"><CurvaAbc key={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? '')} /></TabsContent>}
             <TabsContent value="anuncios" className="mt-4 space-y-4">
               <div className="flex flex-wrap items-center gap-2">
