@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ABA_ALIAS, getSubanalise, SUBANALISES } from "@/config/sellerTabs";
 describe("navegação por subanálise", () => {
-  it("preserva a entrada antiga do resumo", () => { expect(ABA_ALIAS.executive).toBe("efficiency"); expect(getSubanalise("efficiency")?.id).toBe("geral"); });
+  it("abre Análise geral primeiro no ramo Resumo e preserva links existentes", () => { expect(ABA_ALIAS.executive).toBe("efficiency"); expect(SUBANALISES.efficiency[0].id).toBe("analise"); expect(getSubanalise("efficiency")?.id).toBe("analise"); expect(getSubanalise("efficiency", "geral")?.id).toBe("geral"); });
   it("usa uma opção válida para links com subanálise desconhecida", () => { expect(getSubanalise("reputation", "inexistente")?.id).toBe("resumo"); });
   it("separa o índice de preço de McKinsey e evolução", () => { expect(getSubanalise("competitiveness", "mckinsey")?.id).toBe("mckinsey"); expect(getSubanalise("competitiveness", "evolucao")?.id).toBe("evolucao"); });
   it("mantém sinergia e produtos como destinos distintos", () => { expect(getSubanalise("publicidade", "sinergia")?.id).toBe("sinergia"); expect(getSubanalise("publicidade", "produtos")?.id).toBe("produtos"); });

@@ -88,7 +88,7 @@ export const GRUPOS_SECOES = [
 export const ABA_ALIAS: Record<string, string> = { executive: "efficiency" };
 
 export const SUBANALISES: Record<string, { id: string; label: string }[]> = {
-  efficiency: [{ id: "geral", label: "Resumo geral da conta" }, { id: "indicadores", label: "Indicadores e faturamento" }, { id: "analise", label: "Análise geral" }],
+  efficiency: [{ id: "analise", label: "Análise geral" }, { id: "geral", label: "Resumo geral da conta" }, { id: "indicadores", label: "Indicadores e faturamento" }],
   reputation: [{ id: "resumo", label: "Resumo da reputação" }, { id: "indicadores", label: "Indicadores" }, { id: "analise", label: "Análise geral" }, { id: "requisitos", label: "Perfil, tier e requisitos" }],
   competitiveness: [{ id: "resumo-preco", label: "Índice de competitividade" }, { id: "carteira", label: "Leitura da carteira" }, { id: "mckinsey", label: "Análise McKinsey" }, { id: "estrategica", label: "Leitura estratégica" }, { id: "evolucao", label: "Evolução de competitividade" }, { id: "insights", label: "Insights" }, { id: "concorrentes", label: "Concorrentes" }],
   publicidade: [{ id: "resumo", label: "Resumo da publicidade" }, { id: "sinergia", label: "Sinergia e dependência" }, { id: "produtos", label: "Produtos mais vendidos" }, { id: "historico", label: "Evolução e eficiência" }],
