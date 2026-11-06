@@ -1,5 +1,10 @@
 # Roadmap
 
+## Organização unificada dos acessos — 06/11
+- [x] Analisar conteúdo, rotas, escopos e permissões dos acessos do cabeçalho e da árvore esquerda; teste público prévio executado com sucesso.
+- [ ] Definir com o usuário se esta etapa inclui relatórios completos de anúncios fora de promoções e em múltiplas promoções ou somente organização dos acessos existentes.
+- [ ] Unificar os acessos na árvore por assunto, distinguindo análise e gestão, preservando contexto de loja, permissões, URLs existentes e visual; conferir sessão real, desktop e celular. Sem publicar.
+
 ## Planejamento ABC e análise de anúncios — 06/11
 - [x] Revisar documento e mapear recursos existentes, lacunas, dependências e cuidados de cálculo.
 - [x] Preparar plano em etapas, sem implementar ou publicar funcionalidades.
