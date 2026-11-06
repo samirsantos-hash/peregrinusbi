@@ -1,5 +1,9 @@
 # Roadmap
 
+## Carregamento e avisos centralizados — 06/11
+- [x] Centralizar indicador com percentual de consultas finalizadas e tempo decorrido real; reduzir aviso de inatividade sem alterar permissões.
+- [x] Seis testes passaram, build OK; sessão autorizada confirmou progresso 6/7 (85%) e centro exato. Aviso conferido com exemplo local em 384×171px, sem alterar usuários. k6: 28.422 requisições, uma falha, limites aprovados; não mede capacidade autenticada. Sem publicar.
+
 ## Simplificação de promoções — 06/11
 - [x] Centralizar listas em filtros, manter um check verde por promoção e abrir resumo em balão; preservar cobertura, permissões e links antigos.
 - [x] Cinco regressões passaram e página sem erros. AUTOPECASLONDRINA: balão real com três promoções (nomes, estados e datas), filtro múltiplas e celular conferidos. Catálogo grande ainda em leitura, não declarado completo. Teste público com uma falha em 28.281 requisições e limites aprovados; não mede capacidade autenticada. Sem publicação.
