@@ -4,8 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
+import { consumirPrimeiraEntrada } from './primeiraEntrada';
 
-/** One short local scene per authenticated entry, never during normal navigation. */
+/** One short local scene on the account's first entry in this browser. */
 export default function BoasVindasLaser() {
   const { user, loading, mustChangePassword } = useAuth();
   const { pathname } = useLocation();
@@ -20,6 +21,7 @@ export default function BoasVindasLaser() {
     if (!user) { shownFor.current = null; setVisible(false); return; }
     if (pathname !== '/' || mustChangePassword || shownFor.current === user.id) return;
     shownFor.current = user.id;
+    if (!consumirPrimeiraEntrada(user.id)) return;
     if (reduceMotion) return;
     setReady(false);
     setVisible(true);

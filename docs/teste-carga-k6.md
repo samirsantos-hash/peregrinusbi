@@ -1,5 +1,7 @@
 # Teste de carga público — 04/11/2026
 
+- 06/11: boas-vindas uma única vez, teste público prévio com 1.000 usuários, 28.418 requisições, zero falhas, p95 HTTP 86,50ms; somente entrega pública, não mede login nem cena.
+
 - 06/11: gráfico e diagrama explicativos da sinergia, teste público prévio com 1.000 usuários, 28.484 requisições, zero falhas, p95 HTTP 80,72ms; somente entrega pública, não mede gráficos nem painel autenticado.
 
 - 06/11: esclarecimento de NÃO VERÃO, teste público prévio com 1.000 usuários, 28.468 requisições, zero falhas, p95 HTTP 84,75ms; somente entrega pública, não mede painel autenticado.

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Boas-vindas uma única vez — 06/11
+- [x] Registrar a primeira entrada por usuário neste navegador, independente de login e cache; preservar cena e movimento reduzido.
+- [x] Primeira entrada autenticada, fechamento por Escape e recarregamento sem repetição conferidos, zero erros; três regressões e build OK. Sem publicar. Preferência local: limpar dados do navegador ou usar outro navegador permite nova entrada.
+
 ## Explicação visual da sinergia — 06/11
 - [x] Inserir após a análise gráfico das associações com faturamento e diagrama de interpretação, com valores e cobertura reais; sem causalidade, projeções ou mistura de cancelamentos mensais.
 - [x] AUTOPECASLONDRINA: resumo conectado (r Ads 0,47, visitas 0,77, cancelamentos 0,32) e histórico separados, conferidos em 1280/536/390px; gráfico, texto e diagrama sem excesso horizontal ou erros. 14 regressões e build OK. k6 público: 28.484 requisições, zero falhas, p95 80,72ms; não mede painel autenticado. Sem publicar.
