@@ -20,6 +20,7 @@ import { useLocation } from 'react-router-dom';
 import { Loader2 } from "lucide-react";
 import { useSessionTracker } from "@/hooks/useSessionTracker";
 import Index from "./pages/Index";
+import ArvorePaginas from '@/components/dashboard/ArvorePaginas';
 import Auth from "./pages/Auth";
 import OAuthConsent from "./pages/OAuthConsent";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
@@ -89,7 +90,7 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
   return (
     <div className="peregrinus-panel min-w-0">
       <ChuvaPainel />
-      <div className="entrada-pagina">{permissao ? <GuardaPermissao permissao={permissao}>{children}</GuardaPermissao> : children}</div>
+      <div className="entrada-pagina">{permissao ? <GuardaPermissao permissao={permissao}>{['/anuncios', '/multilojas', '/perguntas', '/mercado', '/publicidade'].includes(pathname) ? <ArvorePaginas>{children}</ArvorePaginas> : children}</GuardaPermissao> : children}</div>
       <RodapeInstitucional />
     </div>
   );

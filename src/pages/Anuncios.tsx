@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
 import CorrelacoesAnuncios from "@/components/ml/CorrelacoesAnuncios";
+import ParticipacaoAnuncios from "@/components/ml/ParticipacaoAnuncios";
+import GuardaPermissao from "@/components/GuardaPermissao";
 import CurvaAbc from "@/components/ml/CurvaAbc";
 import { usePermissoes } from "@/hooks/usePermissoes";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -67,7 +69,8 @@ export default function Anuncios() {
   const [termo, setTermo] = useState("");
   const [aberto, setAberto] = useState<string | null>(null);
   const [atualizando, setAtualizando] = useState(false);
-  const [aba, setAba] = useState(['correlacoes', 'abc'].includes(params.get('aba') ?? '') ? params.get('aba') ?? 'anuncios' : 'anuncios');
+  const [aba, setAba] = useState(['anuncios', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'participacao', 'fora', 'multiplas'].includes(params.get('aba') ?? '') ? params.get('aba') ?? 'anuncios' : 'anuncios');
+  useEffect(() => { const proxima = params.get('aba') ?? 'anuncios'; if (['anuncios', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'participacao', 'fora', 'multiplas'].includes(proxima)) setAba(proxima); }, [params]);
   const [marcados, setMarcados] = useState<Map<string, Anuncio>>(new Map());
   const [precoPara, setPrecoPara] = useState<Anuncio[]>([]);
   const [promocoesDe, setPromocoesDe] = useState<Anuncio | null>(null);
@@ -192,14 +195,18 @@ export default function Anuncios() {
           <Tabs value={aba} onValueChange={setAba}>
             <TabsList className="max-w-full overflow-x-auto justify-start">
               <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
-              <TabsTrigger value="promocoes">Promoções</TabsTrigger>
+              {pode("promocoes.visualizar") && <TabsTrigger value="promocoes">Gerenciar promoções</TabsTrigger>}
+              {pode("promocoes.visualizar") && <TabsTrigger value="participacao">Participação</TabsTrigger>}
+              {pode("promocoes.visualizar") && <TabsTrigger value="fora">Fora de promoções</TabsTrigger>}
+              {pode("promocoes.visualizar") && <TabsTrigger value="multiplas">Duas ou mais</TabsTrigger>}
               <TabsTrigger value="melhorias">Melhorias</TabsTrigger>
-              {pode("correlacoes.visualizar") && <TabsTrigger value="correlacoes">Correlações</TabsTrigger>}
+              {pode("correlacoes.visualizar") && <TabsTrigger value="correlacoes">Desempenho de anúncios</TabsTrigger>}
               {pode("correlacoes.visualizar") && <TabsTrigger value="abc">Curva ABC</TabsTrigger>}
             </TabsList>
             <TabsContent value="promocoes" className="mt-4">
-              <AbaPromocoes accountId={contaId} />
+              <GuardaPermissao permissao="promocoes.visualizar"><AbaPromocoes accountId={contaId} /></GuardaPermissao>
             </TabsContent>
+            {["participacao", "fora", "multiplas"].map(f => <TabsContent key={f} value={f} className="mt-4"><GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoAnuncios key={contaId + f} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? "")} filtro={f} /></GuardaPermissao></TabsContent>)}
             <TabsContent value="melhorias" className="mt-4">
               <AbaMelhorias accountId={contaId} />
             </TabsContent>

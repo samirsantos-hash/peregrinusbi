@@ -12,6 +12,7 @@
 - Summary investment goals use metaInvestimentoAdsCoberta with same-date daily revenue; partial results must show coverage and suppress full-period comparisons and tier conclusions, preserving the strict full-period helper.
 
 - Promotion results read paginated account-scoped opt-ins separately from historical performance; current participation never produces ROAS or ROI because sale attribution and realized costs are unconfirmed.
+- Promotion participation lists use live per-item reads over the scanned active/paused catalog; incomplete coverage suspends outside-promotions classification, while distinct current opt-ins never imply stacked discounts or sale attribution.
 
 - Margin-based pricing is a client calculator using explicit per-item costs and charges, not markup; send resulting prices through the unchanged server preview/confirmation flow and never persist private cost inputs.
 

@@ -60,7 +60,7 @@ import { qualidadeDerivada } from "@/lib/qualidadeDerivada";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
 import { useAuth } from "@/hooks/useAuth";
-import { useSouConsultor } from "@/lib/mlFuncoes";
+import { useContasMl, useSouConsultor } from "@/lib/mlFuncoes";
 import { useMyAccess } from "@/hooks/useMyAccess";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -109,6 +109,7 @@ const Index = () => {
   const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
   const { pode, data: permissoes } = usePermissoes();
   const souConsultor = useSouConsultor(user?.id);
+  const contasMl = useContasMl();
   const { allowedSellers } = useMyAccess();
   // Piloto: consultores com acesso ao cliente MEGAJU também enxergam a rede consolidada.
   const temRedePiloto = allowedSellers.some((s) => /megaju/i.test(s.nickname));
@@ -447,37 +448,6 @@ const Index = () => {
             </div>
           </div>
           <div className="flex flex-1 items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
-            {(isAdmin || isGerente || isGestorLoja || temRedePiloto) &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
-                <Store className="w-4 h-4" />
-                <span className="hidden sm:inline">Multilojas</span>
-                <NewBadge featureKey="multilojas_v1" tooltip="Novo: consolidação de rede a partir do relatório de Vendas do Mercado Livre" />
-              </Button>
-            }
-            {souConsultor &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/anuncios")} className="gap-2 px-2 sm:px-3">
-                <Search className="w-4 h-4" />
-                <span className="hidden sm:inline">Anúncios</span>
-              </Button>
-            }
-            {souConsultor &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/perguntas")} className="gap-2 px-2 sm:px-3">
-                <MessageCircleQuestion className="w-4 h-4" />
-                <span className="hidden sm:inline">Perguntas</span>
-              </Button>
-            }
-            {souConsultor &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/mercado")} className="gap-2 px-2 sm:px-3">
-                <TrendingUp className="w-4 h-4" />
-                <span className="hidden sm:inline">Mercado</span>
-              </Button>
-            }
-            {souConsultor &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/publicidade")} className="gap-2 px-2 sm:px-3">
-                <Megaphone className="w-4 h-4" />
-                <span className="hidden sm:inline">Publicidade</span>
-              </Button>
-            }
             {(isAdmin || isGerente) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2 px-2 sm:px-3">
                 <Settings className="w-4 h-4" />
@@ -539,6 +509,9 @@ const Index = () => {
               <div className="flex items-start gap-0 lg:gap-4 isolate">
                 <PainelSidebar
                   consultantAccess={souConsultor}
+                  redeAccess={isAdmin || isGerente || isGestorLoja || temRedePiloto}
+                  custId={sellerCustIdMap[selectedSeller]}
+                  contaId={contasMl.data?.find(c => String(c.ml_user_id) === sellerCustIdMap[selectedSeller])?.id}
                   sellerScope={selectedSeller ? "single_store" : "portfolio"}
                   ativa={activeTab}
                   subativa={pagina}

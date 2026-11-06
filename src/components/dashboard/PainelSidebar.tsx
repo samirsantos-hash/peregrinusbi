@@ -4,7 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { SELLER_TABS, GRUPOS_SECOES, SUBANALISES, type SellerTab } from "@/config/sellerTabs";
+import { SELLER_TABS, type SellerTab } from "@/config/sellerTabs";
+import { RAMOS_ACESSOS, GRUPOS_ACESSOS, destinoAcesso, type AcessoArvore } from "@/config/arvoreAcessos";
 import { NovidadeTip } from "@/components/novidades/novidades";
 import { Button } from "@/components/ui/button";
 import { usePermissoes } from '@/hooks/usePermissoes';
@@ -12,7 +13,7 @@ import { SECAO_PERMISSAO } from '@/lib/permissoes';
 
 const CHAVE = "peregrinus.sidebar.collapsed";
 
-const GRUPOS = GRUPOS_SECOES;
+const GRUPOS = GRUPOS_ACESSOS;
 
 const ID_ALERTAS = "alertas-riscos";
 
@@ -85,6 +86,9 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
 
 interface Props {
   consultantAccess?: boolean;
+  redeAccess?: boolean;
+  custId?: string;
+  contaId?: string;
   sellerScope?: "single_store" | "portfolio";
   ativa: string;
   subativa?: string;
@@ -97,6 +101,7 @@ interface Props {
 
 function Conteudo({
   consultantAccess = false,
+  redeAccess = false, custId, contaId,
   sellerScope = "portfolio",
   ativa,
   subativa,
@@ -108,6 +113,9 @@ function Conteudo({
   mostrarToggle,
 }: {
   consultantAccess?: boolean;
+  redeAccess?: boolean;
+  custId?: string;
+  contaId?: string;
   sellerScope?: "single_store" | "portfolio";
   ativa: string;
   subativa?: string;
@@ -121,6 +129,8 @@ function Conteudo({
   const tabAlertas = porId(ID_ALERTAS);
   const { pode } = usePermissoes();
   const navigate = useNavigate();
+  const visivel = (a: AcessoArvore) => pode(a.permissao) && (!a.consultor || consultantAccess) && (!a.rede || redeAccess) && (a.caminho !== "/anuncios" || pode("anuncios.visualizar"));
+  const filhos = (id: string) => RAMOS_ACESSOS.find(t => t.id === id)?.acessos.filter(visivel) ?? [];
   const [ramos, setRamos] = useState<string[]>([ativa]);
   useEffect(() => { setRamos(atual => atual.includes(ativa) ? atual : [...atual, ativa]); }, [ativa]);
   const tabIntegracao = {
@@ -131,7 +141,7 @@ function Conteudo({
   return (
     <nav aria-label="Seções do painel" className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        {GRUPOS.filter(g => g.ids.some(id => pode(`${SECAO_PERMISSAO[id]}.visualizar`))).map((g) => (
+        {GRUPOS.filter(g => g.ids.some(id => filhos(id).length || (SECAO_PERMISSAO[id] && pode(`${SECAO_PERMISSAO[id]}.visualizar`)))).map((g) => (
           <div key={g.titulo} className="mt-5 first:mt-2">
             {!recolhida && (
               <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-normal text-muted-foreground">
@@ -141,11 +151,12 @@ function Conteudo({
             )}
             <ul className="space-y-0.5">
               {g.ids.map((id) => {
-                const tab = porId(id);
-                if (!tab || !pode(`${SECAO_PERMISSAO[id]}.visualizar`)) return null;
+                const tab = RAMOS_ACESSOS.find(t => t.id === id);
+                const subs = filhos(id);
+                if (!tab || (!subs.length && !(SECAO_PERMISSAO[id] && pode(`${SECAO_PERMISSAO[id]}.visualizar`)))) return null;
                 return (
                   <li key={id}>
-                    <Button variant="ghost" aria-label={tab.label} aria-expanded={SUBANALISES[id] ? ramos.includes(id) : undefined}
+                    <Button variant="ghost" aria-label={tab.label} aria-expanded={subs.length ? ramos.includes(id) : undefined}
                       onClick={() => {
                         if (id === "efficiency" && !ramos.includes(id)) {
                           window.__lovableEvents?.track?.("project.summary_tree_opened", {
@@ -155,16 +166,16 @@ function Conteudo({
                           });
                         }
                         if (recolhida) onToggle();
-                        if (SUBANALISES[id]) setRamos(atual => atual.includes(id) ? atual.filter(r => r !== id) : [...atual, id]);
+                        if (subs.length) setRamos(atual => atual.includes(id) ? atual.filter(r => r !== id) : [...atual, id]);
                         else onChange(id);
                       }}
-                      className={cn("panel-nav-item w-full h-10 gap-2 px-3 justify-start text-[13px]", ativa === id ? "bg-muted text-primary" : "text-foreground/80", recolhida && "justify-center px-0")}
+                      className={cn("panel-nav-item w-full min-h-10 h-auto py-2 gap-2 px-3 justify-start text-[13px]", ativa === id ? "bg-muted text-primary" : "text-foreground/80", recolhida && "justify-center px-0")}
                       title={recolhida ? tab.label : undefined}>
                       <tab.icon className="h-4 w-4 shrink-0" />
-                      {!recolhida && <><span className="truncate flex-1 text-left">{tab.label}</span>{SUBANALISES[id] && (ramos.includes(id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
+                      {!recolhida && <><span className="whitespace-normal flex-1 text-left">{tab.label}</span>{subs.length > 0 && (ramos.includes(id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
                     </Button>
-                    {!recolhida && ramos.includes(id) && SUBANALISES[id] && <ul className="ml-5 pl-2 border-l border-border space-y-1 py-1">
-                      {SUBANALISES[id].map(sub => { const IconeSub = ICONES_SUBANALISE[sub.id] ?? ChartNoAxesCombined; return <li key={sub.id}><Button variant="ghost" onClick={() => {
+                    {!recolhida && ramos.includes(id) && subs.length > 0 && <ul className="ml-5 pl-2 border-l border-border space-y-1 py-1">
+                      {subs.map(sub => { const IconeSub = ICONES_SUBANALISE[sub.id] ?? ChartNoAxesCombined; return <li key={sub.id}><Button variant="ghost" onClick={() => {
                         if ((id === "reputation" || id === "competitiveness" || id === "publicidade") && (ativa !== id || subativa !== sub.id)) {
                           window.__lovableEvents?.track?.("project.seller_section_opened", {
                             section: id === "competitiveness" ? "price" : id === "publicidade" ? "advertising" : "reputation",
@@ -174,7 +185,8 @@ function Conteudo({
                             source_view: "dashboard_sidebar",
                           });
                         }
-                        onSubChange?.(id, sub.id);
+                        if (sub.caminho) navigate(destinoAcesso(sub, custId, contaId));
+                        else onSubChange?.(sub.secao ?? id, sub.subaba ?? sub.id);
                       }}
                         aria-current={ativa === id && subativa === sub.id ? "page" : undefined}
                         className={cn("w-full min-h-9 h-auto py-2 px-2 justify-start text-left whitespace-normal text-xs leading-5", ativa === id && subativa === sub.id ? "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "text-muted-foreground")}>
@@ -229,7 +241,7 @@ function Conteudo({
   );
 }
 
-export default function PainelSidebar({ ativa, subativa, onSubChange, onChange, alertas, mobileAberto, onMobileChange, consultantAccess, sellerScope }: Props) {
+export default function PainelSidebar({ redeAccess, custId, contaId, ativa, subativa, onSubChange, onChange, alertas, mobileAberto, onMobileChange, consultantAccess, sellerScope }: Props) {
   const [recolhida, setRecolhida] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     const salvo = window.localStorage.getItem(CHAVE);
@@ -256,6 +268,7 @@ export default function PainelSidebar({ ativa, subativa, onSubChange, onChange, 
         )}
       >
         <Conteudo
+          redeAccess={redeAccess} custId={custId} contaId={contaId}
           consultantAccess={consultantAccess}
           sellerScope={sellerScope}
           ativa={ativa}
@@ -276,7 +289,8 @@ export default function PainelSidebar({ ativa, subativa, onSubChange, onChange, 
           <SheetDescription className="sr-only">Navegação entre as seções da loja selecionada.</SheetDescription>
           <div className="h-full pt-8">
             <Conteudo
-              consultantAccess={consultantAccess}
+              redeAccess={redeAccess} custId={custId} contaId={contaId}
+          consultantAccess={consultantAccess}
               sellerScope={sellerScope}
               ativa={ativa}
               subativa={subativa}

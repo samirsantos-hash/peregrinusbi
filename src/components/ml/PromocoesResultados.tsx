@@ -42,7 +42,7 @@ export default function PromocoesResultados({ custId }: { custId?: string }) {
         <p className="text-sm text-muted-foreground">Adesões atuais · resultados por promoção</p></div>
       <Button variant="outline" size="sm" disabled={q.isFetching} onClick={() => void q.refetch()}><RefreshCw className="mr-2 h-4 w-4" />Atualizar leitura</Button>
     </div>
-    {q.isLoading ? <Skeleton className="h-48 w-full" /> : q.error ? <p role="alert" className="text-sm text-destructive">Não foi possível consultar as promoções. Tente atualizar a leitura.</p> : !q.data ? <p className="text-sm text-muted-foreground">Esta loja não possui uma conta integrada acessível. Não há resultados de promoções pela API.</p> : <>
+    {q.isLoading ? <Skeleton className="h-48 w-full" /> : q.error ? <p role="alert" className="text-sm text-destructive">Não foi possível consultar as promoções. Tente atualizar a leitura.</p> : !q.data ? <p className="text-sm text-muted-foreground">Esta loja não possui uma conta integrada acessível. Não há resultados de promoções disponíveis.</p> : <>
       <div className="space-y-3">
         <h3 className="text-base font-medium">Promoções aderidas</h3>
         {q.data.parcial && <p className="text-xs text-muted-foreground">Leitura de anúncios incompleta em algumas promoções. Quantidades parciais não representam o total.</p>}
