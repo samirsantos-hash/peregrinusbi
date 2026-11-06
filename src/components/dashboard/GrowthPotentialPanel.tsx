@@ -612,12 +612,18 @@ const GrowthPotentialPanel = ({ kpis, campaign, benchmark, sellerId }: GrowthPot
             <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
               Percentual por categoria
             </h3>
-            <TooltipInfo text="Participação de cada categoria no total de anúncios ativos do seller, no snapshot mais recente de anúncios." />
+            <TooltipInfo text="Distribuição dos anúncios por classificação registrada na última atualização. Os percentuais representam quantidade de anúncios, não vendas nem previsão de demanda." />
             <Badge variant="outline" className="text-[10px] font-normal ml-auto">
               {mix.totalItens.toLocaleString("pt-BR")} itens ativos
               {mix.data ? ` · ${mix.data.slice(8, 10)}/${mix.data.slice(5, 7)}/${mix.data.slice(0, 4)}` : ""}
             </Badge>
           </div>
+
+          {mix.categorias.some(c => c.categoria.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toUpperCase() === 'NAO VERAO') && (
+            <p className="mt-2 text-xs leading-5 text-muted-foreground">
+              “NÃO VERÃO” é uma classificação registrada dos anúncios, não uma previsão de vendas ou demanda no verão. O critério e a origem dessa classificação não estão confirmados. O percentual indica a quantidade de anúncios nesse grupo, não a participação nas vendas.
+            </p>
+          )}
 
           <div className="mt-4 space-y-2.5">
             {mix.categorias.slice(0, 12).map((c) => (
