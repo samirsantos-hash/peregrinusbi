@@ -17,7 +17,7 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais', 'curvaABC', 'participacaoPromocoes']), dias: z.union([z.literal(7), z.literal(30)]).optional(), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), offset: z.number().int().min(0).max(20000).optional(), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais', 'curvaABC', 'participacaoPromocoes']), dias: z.union([z.literal(7), z.literal(30)]).optional(), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
   let mensal: ReturnType<typeof janelaMensal> | undefined;
@@ -46,7 +46,7 @@ Deno.serve(async req => {
     throw new Error('Leitura indisponível.');
   }
   try {
-    if (modo === 'participacaoPromocoes') return json(await lerParticipacaoPromocoes(get, cust_id));
+    if (modo === 'participacaoPromocoes') return json(await lerParticipacaoPromocoes(get, cust_id, body.data.offset ?? 0));
     const dias = modo === 'curvaABC' ? body.data.dias ?? 30 : modo === 'vendas7d' ? 7 : 30;
     const periodo = mensal ?? janelaAnalise(new Date(), dias), completo = mensal ?? janelaAnalise(new Date(), modo === 'resumo' ? 60 : dias);
     const orders: any[] = [];

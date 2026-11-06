@@ -3,7 +3,7 @@
 ## Organização unificada dos acessos — 06/11
 - [x] Analisar conteúdo, rotas, escopos e permissões dos acessos do cabeçalho e da árvore esquerda; teste público prévio executado com sucesso.
 - [x] Usuário escolheu organizar e incluir as listas; leitura atual por anúncio com cobertura explícita, sem atribuir vendas à participação atual.
-- [ ] Unificar os acessos na árvore por assunto, distinguindo análise e gestão, preservando contexto de loja, permissões, URLs existentes e visual; conferir sessão real, desktop e celular. Sem publicar.
+- [x] Acessos reunidos na árvore, mantida nas páginas de gestão, com contexto de loja e liberações preservados. Curva ABC e listas acessíveis; 18 regressões e build OK. ECOMCONSULT: 18/18 anúncios conferidos, todos fora de promoções e nenhum em duas ou mais; desktop/celular sem erros. AUTOPECASLONDRINA esgotou tempo com lotes de 60; reduzidos para 20, catálogo grande ainda não conferido integralmente. Participação incompleta nunca vira zero. Interface não publicada; leitura compartilhada atualizada.
 
 ## Planejamento ABC e análise de anúncios — 06/11
 - [x] Revisar documento e mapear recursos existentes, lacunas, dependências e cuidados de cálculo.

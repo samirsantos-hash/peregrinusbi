@@ -6,11 +6,21 @@ import { filtrarParticipacao, type AnuncioParticipacao } from '@/lib/participaca
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { num } from '@/lib/format';
-type Resultado = { itens: AnuncioParticipacao[]; universo: number; medidos: number; indisponiveis: number; coberturaCompleta: boolean; consultadoEm: string };
+type Resultado = { catalogo: string[]; proximo: number | null; itens: AnuncioParticipacao[]; universo: number; medidos: number; indisponiveis: number; coberturaCompleta: boolean; consultadoEm: string };
 export default function ParticipacaoAnuncios({ custId, filtro = 'participacao' }: { custId: string; filtro?: string }) {
   const [busca, setBusca] = useState(''); const [limite, setLimite] = useState(10);
   const q = useQuery({ queryKey: ['ml-participacao-completa', custId], enabled: !!custId, retry: false, staleTime: 300_000,
-    queryFn: () => chamarFuncaoMl<Resultado>('ml-analise-loja', { cust_id: custId, modo: 'participacaoPromocoes' }) });
+    queryFn: async () => {
+      let offset = 0; let catalogo: string[] | null = null; const itens: AnuncioParticipacao[] = []; let indisponiveis = 0; let ultima: Resultado | null = null;
+      do {
+        const r = await chamarFuncaoMl<Resultado>('ml-analise-loja', { cust_id: custId, modo: 'participacaoPromocoes', offset });
+        if (catalogo && JSON.stringify(catalogo) !== JSON.stringify(r.catalogo)) throw new Error('Catálogo mudou durante a leitura.');
+        catalogo = r.catalogo; itens.push(...r.itens); indisponiveis += r.indisponiveis; ultima = r;
+        if (r.proximo == null) break; if (r.proximo <= offset) throw new Error('Paginação inválida.'); offset = r.proximo;
+      } while (offset <= 20000);
+      if (!ultima) throw new Error('Leitura indisponível.');
+      return { ...ultima, itens, medidos: itens.length, indisponiveis, coberturaCompleta: indisponiveis === 0 && itens.length === ultima.universo };
+    } });
   const titulo = filtro === 'fora' ? 'Anúncios fora de promoções' : filtro === 'multiplas' ? 'Duas ou mais promoções' : 'Participação dos anúncios';
   const lista = filtrarParticipacao(q.data?.itens ?? [], filtro, q.data?.coberturaCompleta ?? false).filter(i => `${i.titulo} ${i.item_id}`.toLocaleLowerCase().includes(busca.toLocaleLowerCase()));
   return <section className="min-w-0 space-y-4" aria-label={titulo}>
