@@ -38,15 +38,15 @@ export default function ListaCruzamentoAbc({ grupo, itens, periodo, onClose }: {
   }
 
   return <Sheet open={!!grupo} onOpenChange={o => { if (!o) onClose(); }}>
-    <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-      <SheetHeader><SheetTitle>{titulo}</SheetTitle><SheetDescription>{num(lista.length)} anúncios · {periodo}</SheetDescription></SheetHeader>
-      <div className="flex gap-2 my-4">
+    <SheetContent side="right" className="!left-auto !right-0 !w-[min(88vw,480px)] !max-w-[min(88vw,480px)] flex flex-col overflow-hidden">
+      <SheetHeader className="shrink-0 pr-6 text-left"><SheetTitle>{titulo}</SheetTitle><SheetDescription>{num(lista.length)} anúncios · {periodo}</SheetDescription></SheetHeader>
+      <div className="flex shrink-0 gap-2 my-4">
         <Button variant="outline" size="sm" disabled={!lista.length} onClick={() => void excel()}><FileSpreadsheet className="h-4 w-4 mr-1" />Excel</Button>
         <Button variant="outline" size="sm" disabled={!lista.length} onClick={() => void txt()}><FileText className="h-4 w-4 mr-1" />TXT</Button>
       </div>
-      {lista.length ? <ul className="space-y-3 text-xs">{lista.map(i => <li key={i.mlb} className="border-b border-border/50 pb-3">
+      {lista.length ? <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain space-y-3 pr-2 text-xs">{lista.map(i => <li key={i.mlb} className="border-b border-border/50 pb-3">
         <p className="font-medium break-words">{i.titulo}</p>
-        <p className="text-muted-foreground tabular-nums">{i.mlb} · {brl(i.faturamentoCents / 100)} · {num(i.unidades)} unidades · {num(i.pedidos)} pedidos · {i.perfil}</p>
+        <p className="break-words text-muted-foreground tabular-nums">{i.mlb} · {brl(i.faturamentoCents / 100)} · {num(i.unidades)} unidades · {num(i.pedidos)} pedidos · {i.perfil}</p>
       </li>)}</ul> : <p className="text-sm text-muted-foreground">Nenhum anúncio nesta combinação no período.</p>}
     </SheetContent>
   </Sheet>;
