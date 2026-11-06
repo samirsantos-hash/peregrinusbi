@@ -40,6 +40,7 @@ Deno.serve(async req => {
       if (Date.now() - started > 95_000) throw new Error('Consulta incompleta; tente novamente.');
       const r = await fetch('https://api.mercadolibre.com' + path, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(8000) });
       if (r.ok) return r.json();
+      if (tentativa === 0 || tentativa === 2) console.warn('ml-analise-loja leitura', modo, r.status, path.split('?')[0].replace(/\d{6,}/g, ':id'));
       if (!['curvaABC', 'participacaoPromocoes'].includes(modo) || tentativa === 2 || (r.status !== 429 && r.status < 500)) throw new Error('O Mercado Livre não disponibilizou todos os dados desta análise.');
       await new Promise(resolve => setTimeout(resolve, 500 * (tentativa + 1)));
     }
@@ -143,8 +144,13 @@ Deno.serve(async req => {
       for (const mlb of catalogo) if (!itens.has(mlb)) itens.set(mlb, { mlb, titulo: mlb, sku: null, unidades: 0, faturamentoCents: 0, pedidos: 0, ultimaVenda: null, status: null });
       const ids = [...itens.keys()];
       for (let off = 0; off < ids.length; off += 20) {
-        const lote = await get(`/items?ids=${ids.slice(off, off + 20).join(',')}&attributes=id,seller_id,title,seller_custom_field,status`);
-        if (!Array.isArray(lote)) throw new Error('Detalhes do catálogo não confirmados.');
+        // Current metadata is optional: a forbidden item (e.g. moderated or closed) must not suspend paid-sales totals.
+        const parte = ids.slice(off, off + 20), attrs = '&attributes=id,seller_id,title,seller_custom_field,status';
+        let lote: any = await get(`/items?ids=${parte.join(',')}${attrs}`).catch(() => null);
+        if (!Array.isArray(lote)) {
+          lote = [];
+          for (const id of parte) { const r = await get(`/items?ids=${id}${attrs}`).catch(() => null); if (Array.isArray(r)) lote.push(...r); }
+        }
         for (const entry of lote) {
           if (entry.code !== 200) continue; // sales remain even if current metadata is unavailable
           const item = entry.body;
