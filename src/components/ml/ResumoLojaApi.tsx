@@ -120,7 +120,7 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
       </div>
       </div>
 
-      {/* Nível inferior: Evolução (8) × Funil (4) — colunas fecham na mesma linha */}
+      {/* Funil compacto: cartões não esticam até a altura dos dois gráficos. */}
       <div className="grid grid-cols-1 items-stretch gap-5 lg:grid-cols-12">
         <div className="noite-vidro flex min-h-[320px] min-w-0 flex-col rounded-xl border border-border bg-card p-5 transition-transform duration-150 lg:col-span-8">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -184,7 +184,7 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
             )}
           </p>
         </div>
-        <div className="grid min-w-0 grid-rows-2 gap-5 lg:col-span-4">
+        <div className="resumo-funil grid min-w-0 grid-cols-2 items-start gap-3 self-start lg:col-span-4 lg:grid-cols-1">
           <KpiVidro
             rotulo="Visitas"
             valor={a.visitas == null ? 'Sem dado' : num(a.visitas)}

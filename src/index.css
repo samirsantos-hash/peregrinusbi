@@ -2456,6 +2456,20 @@ html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro.noite
   border-radius: 16px !important; align-items: flex-start; text-align: left; padding: 24px; gap: 12px;
 }
 html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro > div { align-items: flex-start; }
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-funil .kpi-vidro.noite-vidro {
+  height: auto;
+  min-height: 164px;
+  justify-content: flex-start;
+  padding: 20px;
+  gap: 12px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-funil .kpi-vidro-detalhes {
+  gap: 4px;
+  justify-content: flex-start;
+}
+@media (max-width: 639px) {
+  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-funil .kpi-vidro.noite-vidro { padding: 16px; }
+}
 html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-detalhes { align-items: flex-start !important; }
 html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .kpi-vidro .kpi-vidro-valor.kpi-vidro-valor {
   font-size: var(--panel-type-summary-number) !important; font-weight: 600; line-height: 36px;

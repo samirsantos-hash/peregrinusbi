@@ -1,5 +1,9 @@
 # Roadmap
 
+## Enquadramento do funil — 06/11
+- [x] Visitas e conversão com altura de conteúdo em vez de metade dos dois gráficos; alinhados no topo e duas colunas no celular, mantendo vidro, dados e comparações.
+- [x] AUTOPECASLONDRINA conferida nos dois temas a 1280px e no celular a 390px: cartões com 164px de altura, números completos, sem excesso horizontal ou erros. Build OK; k6 público prévio 28.431 requisições, zero falhas, p95 68,27ms (não mede painel logado). Sem publicar.
+
 ## Escrita da marca — 06/11
 - [x] Escrita original ecom solutions isolada da referência, com by Peregrinus na Home, recuperação e cabeçalho comum das análises; águia, campos, ambiente e fontes dos dados preservados.
 - [x] Marca carregada nos dois temas da Home e cabeçalho autenticado; celular 390px sem excesso horizontal ou erros. Build OK; k6 público 28.439 requisições, zero falhas, p95 65,43ms (não mede painel logado). Somente em teste, sem publicar.
