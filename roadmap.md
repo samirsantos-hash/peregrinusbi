@@ -1,5 +1,9 @@
 # Roadmap
 
+## Linhas do funil e receita por visita — 06/11
+- [x] Dois gráficos diários com variação vs a data 30 dias antes; lacunas mantidas. Card receita por visita com comparação por totais cobertos do período, sem lucro estimado.
+- [x] Quatro testes passaram; AUTOPECASLONDRINA com 30/30 dias, duas linhas por gráfico e receita por visita R$6,02 (+10,5%); conferida nos dois temas a 1280px e celular 390px, sem excesso horizontal ou erros. Build OK; k6 público 28.444 requisições, zero falhas, p95 62,96ms (não mede painel logado). Sem publicar.
+
 ## Enquadramento do funil — 06/11
 - [x] Visitas e conversão com altura de conteúdo em vez de metade dos dois gráficos; alinhados no topo e duas colunas no celular, mantendo vidro, dados e comparações.
 - [x] AUTOPECASLONDRINA conferida nos dois temas a 1280px e no celular a 390px: cartões com 164px de altura, números completos, sem excesso horizontal ou erros. Build OK; k6 público prévio 28.431 requisições, zero falhas, p95 68,27ms (não mede painel logado). Sem publicar.

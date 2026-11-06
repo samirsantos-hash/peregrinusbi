@@ -9,8 +9,10 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import LeituraContaApi from './LeituraContaApi';
 import InvestimentoAdsResumo from './InvestimentoAdsResumo';
 import SinteseIndicadores from './SinteseIndicadores';
+import FunilDiarioResumo from './FunilDiarioResumo';
+import { receitaPorVisita } from '@/lib/funilDiarioResumo';
 
-type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number; pedidos?: number; cancelados?: number }[] };
+type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number; pedidos?: number; cancelados?: number; visitas?: number | null }[] };
 type Resposta = { atual: Total; anterior: Total; periodo: { inicio: string; fim: string }; anteriorPeriodo: { inicio: string; fim: string }; consultadoEm: string };
 
 const br = (s: string) => s.split('-').reverse().join('/');
@@ -184,20 +186,9 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
             )}
           </p>
         </div>
-        <div className="resumo-funil grid min-w-0 grid-cols-2 items-start gap-3 self-start lg:col-span-4 lg:grid-cols-1">
-          <KpiVidro
-            rotulo="Visitas"
-            valor={a.visitas == null ? 'Sem dado' : num(a.visitas)}
-            delta={delta(a.visitas, p.visitas)}
-            periodo={PERIODO_DELTA}
-          />
-          <KpiVidro
-            rotulo="Conversão por pedido"
-            valor={pctFracao(a.conversao, 2)}
-            delta={delta(a.conversao, p.conversao, true)}
-            deltaPontos
-            periodo={PERIODO_DELTA}
-          />
+        <div className="resumo-funil grid min-w-0 grid-cols-1 items-start gap-3 self-start lg:col-span-4">
+          <FunilDiarioResumo atual={a.serie} anterior={p.serie} visitas={a.visitas == null ? 'Sem dado' : num(a.visitas)} conversao={pctFracao(a.conversao, 2)} deltaVisitas={delta(a.visitas,p.visitas)} deltaConversao={delta(a.conversao,p.conversao,true)} />
+          <KpiVidro rotulo="Receita por visita" valor={receitaPorVisita(a.faturamento,a.visitas) == null ? 'Sem dado' : brl(receitaPorVisita(a.faturamento,a.visitas), true)} delta={delta(receitaPorVisita(a.faturamento,a.visitas),receitaPorVisita(p.faturamento,p.visitas))} periodo={PERIODO_DELTA} nota="Faturamento pago ÷ visitas no mesmo período; não representa lucro." />
         </div>
       </div>
 
