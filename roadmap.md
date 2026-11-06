@@ -1,5 +1,9 @@
 # Roadmap
 
+## Comparação SWOT de anúncios — 06/11
+- [x] Comparação existente com quatro gráficos (visitas, pedidos, conversão e receita por visita), foco por anúncio e matriz SWOT; referência pela mediana dos outros selecionados, ameaças externas não verificadas e tabela detalhada preservada.
+- [x] Oito testes e build OK; dois anúncios reais da AUTOPECASLONDRINA conferidos, oito barras, troca de foco e celular 390px sem excesso horizontal ou erros. k6 público prévio: 28.470 requisições, zero falhas, p95 HTTP 79,25ms; somente entrega pública, não mede painel autenticado/ML. Sem publicar.
+
 ## Analisador de título v2 — 06/11
 - [x] Analisador local em Anúncios → Correlações, com repetição/pontuação e sugestões revisáveis; limite público da categoria separado da nota, ausência não vira 60.
 - [x] 19 testes e build OK; título real MLB5381969652 com 60 caracteres e limite da categoria confirmado no navegador em 200. Preservados códigos/medidas e termos não comprovados como ruído; corte de 45 é estimativa fora da nota. Revisão/cópia/restauração conferidas em sessão real a 1280px/390px, sem erros ou excesso horizontal. k6 prévio 28.444 requisições, zero falhas, p95 HTTP 81,39ms (público somente). Sem IA, escrita ML ou publicação.
