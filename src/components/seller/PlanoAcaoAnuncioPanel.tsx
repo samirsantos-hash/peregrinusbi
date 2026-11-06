@@ -6,6 +6,7 @@ import { ChevronDown, ChevronUp, ExternalLink } from "lucide-react";
 
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
+import PromocoesInvestigacaoAnuncio from "@/components/seller/PromocoesInvestigacaoAnuncio";
 import {
   montarPlanos,
   ordenarPlanos,
@@ -123,7 +124,7 @@ function ScoreBar({
   );
 }
 
-function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
+function AnuncioRow({ anuncio, conta }: { anuncio: AnuncioPlano; conta: { custId: string; accountId: string } | null }) {
   const [aberto, setAberto] = useState(false);
   const tone = URGENCIA_TONE[anuncio.urgencia];
 
@@ -206,7 +207,7 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
               <IconeIndicador simbolo="🎯" className="h-3 w-3" /> {(anuncio.desconto_atual / 100).toFixed(1).replace(".", ",")}%
             </span>
           ) : (
-            <span className="text-muted-foreground">—</span>
+            <span className="font-semibold text-destructive" title="Sem promoção registrada">0</span>
           )}
         </td>
         <td className="py-2 px-3">
@@ -237,6 +238,10 @@ function AnuncioRow({ anuncio }: { anuncio: AnuncioPlano }) {
       {aberto && (
         <tr className="bg-card/60">
           <td colSpan={7} className="p-4 border-b border-border/40">
+            <div className="mb-4 p-3 rounded-md border border-border/60 bg-muted/20">
+              {conta ? <PromocoesInvestigacaoAnuncio custId={conta.custId} accountId={conta.accountId} itemId={`MLB${String(anuncio.item_id).replace(/^MLB/, "")}`} />
+                : <p className="text-xs text-muted-foreground">Promoções do anúncio disponíveis só para lojas conectadas da sua carteira.</p>}
+            </div>
             {anuncio.acoes.length === 0 ? (
               <div className="text-xs text-emerald">
                 <IconeIndicador simbolo="✅" /> Nada a investigar — anúncio dentro dos padrões.
@@ -309,6 +314,17 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
   );
 
   const { data: qualities = [], isLoading: loadingQ } = useListingsQuality(sellerId);
+  // Conta conectada da loja (somente contas que a pessoa pode gerir).
+  const { data: conta } = useQuery({
+    queryKey: ["plano-acao-conta-ml", sellerId], enabled: !!sellerId,
+    queryFn: async () => {
+      const { data: s } = await supabase.from("sellers").select("cust_id").eq("id", sellerId!).maybeSingle();
+      if (!s?.cust_id) return null;
+      const { data: contas } = await supabase.rpc("ml_contas_gerenciaveis");
+      const c = (contas ?? []).find((x: { ml_user_id: number }) => String(x.ml_user_id) === String(s.cust_id));
+      return c ? { custId: String(s.cust_id), accountId: c.id as string } : null;
+    },
+  });
   const { data: eligibilities = [], isLoading: loadingE } = useEligibility(sellerId);
 
   // Taxa de conversão real do seller (Σ tsi / Σ visits) — única ponte possível
@@ -460,7 +476,7 @@ export default function PlanoAcaoAnuncioPanel({ sellerId }: Props) {
             </thead>
             <tbody>
               {planos.map((p) => (
-                <AnuncioRow key={p.item_id} anuncio={p} />
+                <AnuncioRow key={p.item_id} anuncio={p} conta={conta ?? null} />
               ))}
             </tbody>
           </table>

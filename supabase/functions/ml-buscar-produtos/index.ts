@@ -9,6 +9,7 @@ import { requireEnv } from "../_shared/env.ts";
 import { aggregateItemOrders, itemConversion, parseItemVisits } from "../_shared/mlItemStats.ts";
 import { z } from "npm:zod@3";
 import { lerQualidade } from "../_shared/mlMelhorias.ts";
+import { agruparVendasPromocao } from "../_shared/mlVendasPromocao.ts";
 
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
   const { data: u } = await sbUser.auth.getUser();
   if (!u?.user) return json({ error: "Faça login." }, 401);
 
-  const parsed = z.object({ cust_id: z.string().regex(/^\d+$/), termo: z.string().trim().min(2).max(120).optional(), item_id: z.string().regex(/^MLB\d+$/).optional() }).safeParse(await req.json().catch(() => ({})));
+  const parsed = z.object({ cust_id: z.string().regex(/^\d+$/), termo: z.string().trim().min(2).max(120).optional(), item_id: z.string().regex(/^MLB\d+$/).optional(), vendas_promocao: z.boolean().optional() }).safeParse(await req.json().catch(() => ({})));
   if (!parsed.success || (!parsed.data.termo && !parsed.data.item_id)) return json({ error: "Informe uma loja e uma busca válida." }, 400);
   const { cust_id: cust, termo = "", item_id: itemId } = parsed.data;
 
@@ -63,6 +64,25 @@ Deno.serve(async (req) => {
       if (offset === 950) completo = false;
     }
     const totals = aggregateItemOrders(orders, itemId);
+    let vendasPromocao: ReturnType<typeof agruparVendasPromocao> & { completo: boolean } | null = null;
+    if (parsed.data.vendas_promocao && completo) {
+      const vistos = new Set<string>(), pagos: { id: string; unidades: number; faturamento: number; desconto: any }[] = [];
+      for (const o of orders) {
+        if (o.status !== "paid" || vistos.has(String(o.id))) continue; vistos.add(String(o.id));
+        const linhas = (o.order_items ?? []).filter((l: any) => l.item?.id === itemId);
+        if (!linhas.length) continue;
+        pagos.push({ id: String(o.id), unidades: linhas.reduce((a: number, l: any) => a + (Number(l.quantity) || 0), 0), faturamento: linhas.reduce((a: number, l: any) => a + (Number(l.quantity) || 0) * (Number(l.unit_price) || 0), 0), desconto: undefined });
+      }
+      const inicio = Date.now(), alvo = pagos.slice(0, 300);
+      for (let i = 0; i < alvo.length && Date.now() - inicio < 45_000; i += 5) {
+        await Promise.all(alvo.slice(i, i + 5).map(async (p) => {
+          try { const r = await fetch(`${API}/orders/${encodeURIComponent(p.id)}/discounts`, { headers: { Authorization: `Bearer ${tok.access_token}` }, signal: AbortSignal.timeout(6000) });
+            p.desconto = r.ok ? await r.json() : undefined; } catch { p.desconto = undefined; }
+        }));
+      }
+      const g = agruparVendasPromocao(itemId, pagos);
+      vendasPromocao = { ...g, completo: g.naoLidos === 0 };
+    }
     const promotions = await get(`/seller-promotions/items/${itemId}?app_version=v2`);
     const list = Array.isArray(promotions) ? promotions : Array.isArray(promotions?.results) ? promotions.results : null;
     return json({ estatisticas: {
@@ -72,7 +92,7 @@ Deno.serve(async (req) => {
       cancelados: completo ? totals.cancelados : null,
       conversao: itemConversion(completo ? totals.pedidos : null, visitas),
       promocao: list ? list.some((p: any) => p.status === "started") : null, completo,
-    }, detalhe: { status: item.status ?? null, estoque: typeof item.available_quantity === "number" ? item.available_quantity : null, saude: typeof item.health === "number" ? item.health : null, qualidade: lerQualidade(await get(`/item/${itemId}/performance`)) }, periodo: { inicio: from.slice(0, 10), fim: to.slice(0, 10) } });
+    }, detalhe: { status: item.status ?? null, estoque: typeof item.available_quantity === "number" ? item.available_quantity : null, saude: typeof item.health === "number" ? item.health : null, qualidade: lerQualidade(await get(`/item/${itemId}/performance`)) }, vendasPromocao, periodo: { inicio: from.slice(0, 10), fim: to.slice(0, 10) } });
   }
 
   const ids = new Set<string>();

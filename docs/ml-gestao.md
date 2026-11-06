@@ -319,3 +319,4 @@ Todas com RLS ligada. Só as funções (service role) gravam; o usuário autenti
 Roteiro e script: `scripts/ml-e2e.sh` (ver o cabeçalho do script). Cobre ler Ads, criar campanha pausada, editar, incluir, pausar e remover um anúncio, entrar e sair de uma promoção em um anúncio, receber uma pergunta pelo webhook e respondê-la.
 
 - `ml-buscar-produtos` com `item_id`: além de `estatisticas` e `periodo` (30 dias UTC completos), retorna `detalhe: { status, estoque, saude, qualidade: { score, nivel, calculado_em, pendencias[] } | null }` lido de `/items/{id}` e `/item/{id}/performance`; ausência fica null.
+- `ml-buscar-produtos` com `item_id` e `vendas_promocao: true`: lê `/orders/{id}/discounts` dos pedidos pagos do anúncio (até 300, 45 s) e retorna `vendasPromocao: { porPromocao:[{id,tipo,pedidos,unidades,faturamento}], semDesconto, descontoSemPromocao, naoLidos, completo }`; pedido sem leitura fica em `naoLidos`, nunca zero. Regras em `_shared/mlVendasPromocao.ts`.
