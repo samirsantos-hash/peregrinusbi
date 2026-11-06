@@ -1,5 +1,9 @@
 # Roadmap
 
+## Simplificação de promoções — 06/11
+- [x] Centralizar listas em filtros, manter um check verde por promoção e abrir resumo em balão; preservar cobertura, permissões e links antigos.
+- [x] Cinco regressões passaram e página sem erros. AUTOPECASLONDRINA: balão real com três promoções (nomes, estados e datas), filtro múltiplas e celular conferidos. Catálogo grande ainda em leitura, não declarado completo. Teste público com uma falha em 28.281 requisições e limites aprovados; não mede capacidade autenticada. Sem publicação.
+
 ## Organização unificada dos acessos — 06/11
 - [x] Analisar conteúdo, rotas, escopos e permissões dos acessos do cabeçalho e da árvore esquerda; teste público prévio executado com sucesso.
 - [x] Usuário escolheu organizar e incluir as listas; leitura atual por anúncio com cobertura explícita, sem atribuir vendas à participação atual.

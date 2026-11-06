@@ -3,6 +3,6 @@ export function filtrarParticipacao(itens: AnuncioParticipacao[], filtro: string
   if (!completa && filtro === 'fora') return [];
   return itens.filter(i => ['active', 'paused'].includes(i.status)).filter(i => {
     const n = new Set(i.promocoes.map(p => p.id)).size;
-    return filtro === 'fora' ? n === 0 : filtro === 'multiplas' ? n >= 2 : true;
+    return filtro === 'fora' ? n === 0 : filtro === 'multiplas' ? n >= 2 : filtro === 'com' ? n >= 1 : true;
   });
 }

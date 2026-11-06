@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
 import CorrelacoesAnuncios from "@/components/ml/CorrelacoesAnuncios";
 import ParticipacaoAnuncios from "@/components/ml/ParticipacaoAnuncios";
+import ResumoPromocoesAnuncio from "@/components/ml/ResumoPromocoesAnuncio";
 import GuardaPermissao from "@/components/GuardaPermissao";
 import CurvaAbc from "@/components/ml/CurvaAbc";
 import { usePermissoes } from "@/hooks/usePermissoes";
@@ -192,13 +193,11 @@ export default function Anuncios() {
         )}
 
         {contaId && (
-          <Tabs value={aba} onValueChange={setAba}>
+          <Tabs value={['fora', 'multiplas'].includes(aba) ? 'participacao' : aba} onValueChange={setAba}>
             <TabsList className="max-w-full overflow-x-auto justify-start">
               <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
               {pode("promocoes.visualizar") && <TabsTrigger value="promocoes">Gerenciar promoções</TabsTrigger>}
-              {pode("promocoes.visualizar") && <TabsTrigger value="participacao">Participação</TabsTrigger>}
-              {pode("promocoes.visualizar") && <TabsTrigger value="fora">Fora de promoções</TabsTrigger>}
-              {pode("promocoes.visualizar") && <TabsTrigger value="multiplas">Duas ou mais</TabsTrigger>}
+              {pode("promocoes.visualizar") && <TabsTrigger value="participacao">Anúncios em promoções</TabsTrigger>}
               <TabsTrigger value="melhorias">Melhorias</TabsTrigger>
               {pode("correlacoes.visualizar") && <TabsTrigger value="correlacoes">Desempenho de anúncios</TabsTrigger>}
               {pode("correlacoes.visualizar") && <TabsTrigger value="abc">Curva ABC</TabsTrigger>}
@@ -206,7 +205,7 @@ export default function Anuncios() {
             <TabsContent value="promocoes" className="mt-4">
               <GuardaPermissao permissao="promocoes.visualizar"><AbaPromocoes accountId={contaId} /></GuardaPermissao>
             </TabsContent>
-            {["participacao", "fora", "multiplas"].map(f => <TabsContent key={f} value={f} className="mt-4"><GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoAnuncios key={contaId + f} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? "")} filtro={f} /></GuardaPermissao></TabsContent>)}
+            <TabsContent value="participacao" className="mt-4"><GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoAnuncios key={contaId + aba} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? "")} filtro={aba} /></GuardaPermissao></TabsContent>
             <TabsContent value="melhorias" className="mt-4">
               <AbaMelhorias accountId={contaId} />
             </TabsContent>
@@ -322,12 +321,12 @@ export default function Anuncios() {
                                   : (participacoes.data.get(a.item_id) ?? 0) === 0
                                     ? <X className="mx-auto h-4 w-4 text-destructive" aria-label="Sem promoções ativas" />
                                     : <span className="inline-flex items-center gap-0.5" aria-label={`${participacoes.data.get(a.item_id)} promoções ativas`} title={`${participacoes.data.get(a.item_id)} promoções ativas`}>
-                                        {Array.from({ length: participacoes.data.get(a.item_id)! }, (_, i) => <Check key={i} className="h-4 w-4 text-primary" strokeWidth={3} />)}
+                                        {Array.from({ length: participacoes.data.get(a.item_id) ?? 0 }, (_, i) => <Check key={i} className="h-4 w-4 text-primary" strokeWidth={3} />)}
                                       </span>}
                               </td>
                               <td className="pr-2 py-1.5 whitespace-nowrap text-right">
                                 <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setPrecoPara([a])}>Preço</Button>
-                                <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => { setMelhoriasDe(null); setPromocoesDe(a); }}>Promoções</Button>
+                                {pode("promocoes.visualizar") && <ResumoPromocoesAnuncio accountId={contaId} itemId={a.item_id} aoGerenciar={() => { setMelhoriasDe(null); setPromocoesDe(a); }} />}
                                 <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => { setPromocoesDe(null); setMelhoriasDe(a); }}>Melhorias</Button>
                                 <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => navigate(`/mercado?conta=${contaId}&item=${a.item_id}`)}>Estudar mercado</Button>
                               </td>
