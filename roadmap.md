@@ -1,5 +1,8 @@
 # Roadmap
 
+## Apresentação após 100% — 07/11
+- [x] Contadores sincronizados após 100%; Curva ABC desenha a linha e revela contornos, demais gráficos têm entrada suave. Conferido com loja real em 536px e 1280px e movimento reduzido; testes e entrega pública aprovados. Sem publicação.
+
 ## Participação e vendas reais por anúncio — 06/11
 - [x] Gerenciar promoções reúne Por anúncio e Por campanha; busca, participações, convites e adesão na lateral existente com prévia/confirmação.
 - [x] Contagem exclusiva corrigida e 12 regressões aprovadas; AUTOPECASLONDRINA: 34 pedidos/R$3.152,66 sem duplicação, e outro anúncio com 22 lidos/1 ausente. Prévia real de R$60,93 conferida sem confirmar. k6 28.435 requisições, zero falhas, p95 93,73ms; build OK. Interface não publicada; leitura compartilhada atualizada.

@@ -4,3 +4,4 @@
 
 - Page entrances use CSS-only title/content transitions without remounting route state or mutating text; the query-loading portal keeps the mounted root hidden and inert until the observed batch finishes and its completion hold ends, so dependent queries can still run without exposing partial content.
 - Loading progress counts finalized queries in the observed batch, with elapsed time but no fabricated ETA; percentages can decrease when new dependent queries start.
+- A shared presentation store signals loading/release to React-owned number counters; chart reveals use transform/opacity without remounting data or delaying controls, and reduced motion renders final values immediately.

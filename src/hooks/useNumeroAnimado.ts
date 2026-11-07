@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useEstadoApresentacao } from '@/components/chuva/estadoApresentacao';
 
 export function extrairNumero(texto: string) {
   const match = texto.match(/-?\d+(?:\.\d{3})*(?:,\d+)?/);
@@ -22,8 +23,13 @@ export function duracaoNumero(de: number, para: number) {
 export function useNumeroAnimado(valor: string, duracao?: number) {
   const [texto, setTexto] = useState(valor);
   const atual = useRef(0);
+  const { carregando, ciclo } = useEstadoApresentacao();
   useEffect(() => {
     const numero = extrairNumero(valor);
+    if (carregando) {
+      atual.current = 0;
+      return;
+    }
     if (!numero || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
       atual.current = numero?.valor ?? 0;
       setTexto(valor);
@@ -44,6 +50,6 @@ export function useNumeroAnimado(valor: string, duracao?: number) {
     };
     raf = requestAnimationFrame(passo);
     return () => cancelAnimationFrame(raf);
-  }, [valor, duracao]);
+  }, [valor, duracao, carregando, ciclo]);
   return texto;
 }

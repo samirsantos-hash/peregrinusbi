@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
+import { useEstadoApresentacao } from '@/components/chuva/estadoApresentacao';
 import { useQuery } from '@tanstack/react-query';
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Loader2, OctagonX, RefreshCw, Sparkles } from 'lucide-react';
@@ -8,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState } from '@/components/ds';
+import NumeroAnimado from '@/components/ds/NumeroAnimado';
 import { chamarFuncaoMl, dataHoraBr } from '@/lib/mlFuncoes';
 import { brl, num, pct } from '@/lib/format';
 import { classificarAbc, cruzarAbc, type BaseAbc, type ItemVendas } from '@/lib/anuncio/curvaAbc';
@@ -18,6 +21,8 @@ type Dados = { periodo: { inicio: string; fim: string }; itens: ItemVendas[]; co
 const dataBr = (s: string) => s.split('-').reverse().join('/');
 
 export default function CurvaAbc({ custId }: { custId: string }) {
+  const { carregando, ciclo } = useEstadoApresentacao();
+  const reduzirMovimento = useReducedMotion();
   const [dias, setDias] = useState(30);
   const [base, setBase] = useState<BaseAbc>('faturamento');
   const [corteA, setCorteA] = useState('80'), [corteB, setCorteB] = useState('95');
@@ -78,9 +83,9 @@ export default function CurvaAbc({ custId }: { custId: string }) {
     {calculo?.erro && <p role="alert" className="text-sm text-destructive">{calculo.erro}</p>}
     {r && <>
       <p className="text-xs text-muted-foreground">Cortes convencionais, não oficiais. O item que cruza o corte e os empatados permanecem na mesma classe; a participação pode ultrapassar o limite.</p>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">{r.resumo.map(g => <div key={g.classe} className="glass-card p-4 space-y-2">
-        <h3 className="font-semibold">Classe {g.classe}</h3><p className="text-xl font-semibold tabular-nums">{valor(g.valor)}</p>
-        <p className="text-xs text-muted-foreground">{num(g.itens)} anúncios · {pct(g.participacaoValor * 100)} da base</p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">{r.resumo.map(g => <div key={g.classe} className="glass-card resultado-contorno p-4 space-y-2">
+        <h3 className="font-semibold">Classe {g.classe}</h3><p className="text-xl font-semibold tabular-nums"><NumeroAnimado valor={valor(g.valor)} /></p>
+        <p className="text-xs text-muted-foreground"><NumeroAnimado valor={num(g.itens)} /> anúncios · <NumeroAnimado valor={pct(g.participacaoValor * 100)} /> da base</p>
       </div>)}</div>
       {r.totalBase > 0 ? <div className="min-w-0">
         <h3 className="font-semibold mb-3">Contribuição acumulada · {valor(r.totalBase)}</h3>
@@ -88,7 +93,7 @@ export default function CurvaAbc({ custId }: { custId: string }) {
           <CartesianGrid stroke="hsl(var(--grid))" vertical={false} /><XAxis dataKey="posicao" type="number" domain={[0, r.itens.length]} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} /><YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} width={45} />
           <Tooltip formatter={(v: number) => [pct(v), 'Acumulado']} labelFormatter={v => `Posição ${v}`} contentStyle={{ background: 'hsl(var(--card))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} />
           <ReferenceLine y={Number(corteA)} stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" /><ReferenceLine y={Number(corteB)} stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" />
-          <Line type="monotone" dataKey="acumulado" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} isAnimationActive={false} />
+          <Line key={ciclo} type="monotone" dataKey="acumulado" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} isAnimationActive={!carregando && !reduzirMovimento} animationDuration={1100} animationBegin={100} animationEasing="ease-out" />
         </LineChart></ResponsiveContainer>
       </div> : <EmptyState falta={`Nenhum anúncio com ${dinheiro ? 'faturamento' : 'unidades'} positivo no período.`} />}
       <h3 className="font-semibold">Cruzamento de faturamento e unidades</h3>

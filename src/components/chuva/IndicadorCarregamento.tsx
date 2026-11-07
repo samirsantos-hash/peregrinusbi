@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { progressoConsultas } from "./progressoConsultas";
+import { definirCarregamentoApresentacao } from "./estadoApresentacao";
 import "./entrada-pagina.css";
 
 export function IndicadorCarregamento() {
@@ -44,11 +45,15 @@ export function IndicadorCarregamento() {
     const root = document.getElementById('root');
     if (!root || !bloqueado) return;
     const inertAnterior = root.inert;
+    definirCarregamentoApresentacao(true);
+    root.classList.remove('pagina-resultados-prontos');
     root.inert = true;
     root.classList.add('pagina-aguardando-consultas');
     return () => {
       root.inert = inertAnterior;
       root.classList.remove('pagina-aguardando-consultas');
+      root.classList.add('pagina-resultados-prontos');
+      definirCarregamentoApresentacao(false);
     };
   }, [bloqueado]);
   if (estado.total === 0) return null;

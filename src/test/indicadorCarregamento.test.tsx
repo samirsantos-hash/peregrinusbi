@@ -33,5 +33,5 @@ it('libera a página somente depois de 100% e da exibição da conclusão', asyn
   expect(root.inert).toBe(false);
   expect(root.classList.contains('pagina-aguardando-consultas')).toBe(false);
   expect(screen.queryByRole('status')).toBeNull();
-  client.clear();
+  act(() => { client.clear(); });
 });
