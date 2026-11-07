@@ -1,7 +1,8 @@
 # Roadmap
 
 ## Proporções do resumo executivo — 07/11
-- [ ] Compactar cartões financeiros, separar altura das notas de Ads e conferir resumo real em larguras de computador e celular, sem alterar cálculos ou publicar.
+- [x] Compactar cartões financeiros e separar altura das notas de Ads sem alterar cálculos; quatro métricas em uma linha quando houver largura útil de 720px, duas abaixo disso; notas em largura inteira em espaços estreitos. Build OK; k6 público: 28.478 requisições, zero falhas, p95 83,16ms. Sem publicação.
+- [ ] Conferência visual autenticada bloqueada: navegador de teste não conseguiu ler a página após restaurar a sessão; proporções finais ainda não verificadas visualmente.
 
 ## Diagnóstico — etapa 5 — 07/11
 - [x] Exportar todos os lotes e lote lateral em Excel com notas exatas, cobertura, pesos, evidências e critérios; ausências em branco e zeros medidos preservados.
