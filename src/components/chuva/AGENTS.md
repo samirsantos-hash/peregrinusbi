@@ -2,5 +2,5 @@
 
 - Authenticated dashboard entry uses a short, dismissible local iframe for the original laser scene; no user data enters the frame, reduced motion skips it and teardown releases WebGL without affecting dashboard state.
 
-- Page entrances use CSS-only title/content transitions without remounting route state, mutating text or transforming fixed-overlay ancestors; the viewport-centered query-loading portal never blocks clicks and respects reduced motion.
+- Page entrances use CSS-only title/content transitions without remounting route state or mutating text; the query-loading portal keeps the mounted root hidden and inert until the observed batch finishes and its completion hold ends, so dependent queries can still run without exposing partial content.
 - Loading progress counts finalized queries in the observed batch, with elapsed time but no fabricated ETA; percentages can decrease when new dependent queries start.
