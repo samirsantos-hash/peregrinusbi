@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Diagnóstico — etapa 4 — 07/11
-- [ ] Consultar experiência dos anúncios da curva A com token da própria loja; reclamações, atrasos e cancelamentos exigem vínculo e cobertura na mesma janela, sem zeros presumidos.
-- [ ] Integrar evidências na Resposta e detalhe, testar regras e conferir numa loja real; manter interface sem publicação.
+- [x] Consultar experiência sequencial dos 83 anúncios da curva A de faturamento da AUTOPECASLONDRINA; contagem de cancelamentos reutiliza pedidos completos nas mesmas datas, sem nova varredura ou dados pessoais.
+- [x] Evidências no detalhe e cobertura explícita; MLB5381969652: 129 pedidos pagos e 9 cancelados, 08/10–06/11, experiência sem nota pois reclamações e atrasos não foram confirmados. Diagnóstico real abriu com 1.381 anúncios; 38 testes aprovados e build OK. k6: 28.267 requisições, uma falha, p95 132,88ms; limites passaram, não capacidade autenticada. Interface não publicada.
+- [ ] Reclamações e atrasos por anúncio bloqueados: consulta individual não disponibilizou contagens verificáveis nesta loja; estado/nível e reputação da conta não comprovam ocorrências na mesma janela. Nota e confiança não aumentadas artificialmente.
 
 ## Diagnóstico — etapa 3 — 07/11
 - [x] Visitas confirmadas em 1.381/1.381 anúncios da AUTOPECASLONDRINA, 08/10–06/11/2026, nas mesmas datas dos pedidos pagos completos; sem novas varreduras de pedidos, lotes sequenciais de 20 e ausências null.

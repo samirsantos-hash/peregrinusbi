@@ -47,7 +47,7 @@ Deno.serve(async req => {
   async function get(path: string): Promise<any> {
     for (let tentativa = 0; tentativa < 3; tentativa++) {
       if (Date.now() - started > 95_000) throw new Error('Consulta incompleta; tente novamente.');
-      const r = await fetch('https://api.mercadolibre.com' + path, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(8000) });
+      const r = await fetch('https://api.mercadolibre.com' + path, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(8000), ...(modo === 'diagnosticoExperiencia' ? { redirect: 'error' as const } : {}) });
       if (r.ok) return r.json();
       if (tentativa === 0 || tentativa === 2) console.warn('ml-analise-loja leitura', modo, r.status, path.split('?')[0].replace(/\d{6,}/g, ':id'));
       if (!['curvaABC', 'participacaoPromocoes', 'diagnosticoConstrucao', 'diagnosticoResposta', 'diagnosticoExperiencia'].includes(modo) || tentativa === 2 || (r.status !== 429 && r.status < 500)) throw new Error('O Mercado Livre não disponibilizou todos os dados desta análise.');
