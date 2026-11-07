@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { notaTipoAnuncio, SEM_PROMOCAO, diagnosticar, perfilarCatalogo, montarDimensoes, notaGiro, mediana, type NotaDimensao } from './diagnostico';
+import { SEM_PROMOCAO, diagnosticar, perfilarCatalogo, montarDimensoes, notaGiro, mediana, type NotaDimensao } from './diagnostico';
 
 const dim = (dimensao: any, peso: number, nota: number | null): NotaDimensao => ({ dimensao, peso, nota, evidencia: '', acao: nota !== null && nota < 0.5 ? 'corrigir' : null });
 const dims = (c: (number | null)[], r: (number | null)[]) => [dim('promocoes', 95, c[0]), dim('preco', 65, c[1]), dim('fotos', 40, c[2]), dim('titulo', 40, c[3]), dim('experiencia', 85, r[0]), dim('conversao', 70, r[1])];
@@ -30,7 +30,7 @@ describe('notas não medidas', () => {
   it('nota 0 ou ausente fica fora, não vira zero', () => {
     const d = diagnosticar('7', montarDimensoes({ fotos: 80, promocoes: 0 }, 1));
     expect(d.construcao.indice).toBe(80);
-    expect(d.construcao.cobertura).toBeCloseTo(40 / 295);
+    expect(d.construcao.cobertura).toBeCloseTo(40 / 415);
     expect(d.confianca).toBe('baixa');
   });
   it('giro usa mediana dos itens com venda e exige base', () => {
@@ -51,10 +51,9 @@ describe('perfil do catálogo', () => {
 });
 
 describe('construção a partir do anúncio', () => {
-  it('tipo Premium vale 1 e Clássico 0,6', () => { expect(notaTipoAnuncio('gold_pro')).toBe(1); expect(notaTipoAnuncio('gold_special')).toBe(0.6); expect(notaTipoAnuncio(null)).toBeNull(); });
   it('sem promoção atual é medido como zero e vira gargalo', () => {
-    const d = diagnosticar('8', montarDimensoes({ promocoes: SEM_PROMOCAO, tipoAnuncio: 1 }, 1));
-    expect(d.construcao.indice).toBeCloseTo(25 / 120 * 100);
+    const d = diagnosticar('8', montarDimensoes({ promocoes: SEM_PROMOCAO, envio: { envio: { free_shipping: true, logistic_type: "fulfillment" }, tipo: "gold_pro", precoCents: 5000 } }, 1));
+    expect(d.construcao.indice).toBeCloseTo(100 / 195 * 100);
     expect(d.construcao.gargalo?.dimensao).toBe('promocoes');
   });
 });

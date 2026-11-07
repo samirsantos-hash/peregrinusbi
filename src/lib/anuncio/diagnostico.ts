@@ -1,12 +1,14 @@
 // Diagnóstico em dois eixos (Construção × Resposta). Funções puras; nota nula = não medida, nunca zero.
-export type Dimensao = 'promocoes' | 'preco' | 'fotos' | 'titulo' | 'descricao' | 'tipoAnuncio' | 'experiencia' | 'conversao' | 'visitasRelativas' | 'giro';
+import { notarExposicaoComercial, type ShippingItem } from './dimensoes';
+export type Dimensao = 'exposicaoComercial' | 'promocoes' | 'preco' | 'fichaTecnica' | 'fotos' | 'titulo' | 'descricao' | 'experiencia' | 'conversao' | 'visitasRelativas' | 'giro';
 export type Eixo = 'construcao' | 'resposta';
 export interface NotaDimensao { dimensao: Dimensao; peso: number; nota: number | null; evidencia: string; acao: string | null }
 export type Quadrante = 'saudavel' | 'potencial_reprimido' | 'produto_ou_demanda' | 'falha_dupla';
 
-export const PESOS: Record<Dimensao, number> = { promocoes: 95, preco: 65, fotos: 40, titulo: 40, descricao: 30, tipoAnuncio: 25, experiencia: 85, conversao: 70, visitasRelativas: 50, giro: 40 };
-export const EIXO_DA_DIMENSAO: Record<Dimensao, Eixo> = { promocoes: 'construcao', preco: 'construcao', fotos: 'construcao', titulo: 'construcao', descricao: 'construcao', tipoAnuncio: 'construcao', experiencia: 'resposta', conversao: 'resposta', visitasRelativas: 'resposta', giro: 'resposta' };
-export const ROTULO_DIMENSAO: Record<Dimensao, string> = { promocoes: 'Promoções', preco: 'Preço', fotos: 'Fotos', titulo: 'Título', descricao: 'Descrição', tipoAnuncio: 'Tipo de anúncio', experiencia: 'Experiência de compra', conversao: 'Conversão', visitasRelativas: 'Visitas relativas', giro: 'Giro' };
+/** Pesos v2: construção 415, resposta 245. */
+export const PESOS: Record<Dimensao, number> = { exposicaoComercial: 100, promocoes: 95, preco: 65, fichaTecnica: 45, fotos: 40, titulo: 40, descricao: 30, experiencia: 85, conversao: 70, visitasRelativas: 50, giro: 40 };
+export const EIXO_DA_DIMENSAO: Record<Dimensao, Eixo> = { exposicaoComercial: 'construcao', fichaTecnica: 'construcao', promocoes: 'construcao', preco: 'construcao', fotos: 'construcao', titulo: 'construcao', descricao: 'construcao', experiencia: 'resposta', conversao: 'resposta', visitasRelativas: 'resposta', giro: 'resposta' };
+export const ROTULO_DIMENSAO: Record<Dimensao, string> = { exposicaoComercial: 'Exposição comercial', fichaTecnica: 'Ficha técnica', promocoes: 'Promoções', preco: 'Preço', fotos: 'Fotos', titulo: 'Título', descricao: 'Descrição', experiencia: 'Experiência de compra', conversao: 'Conversão', visitasRelativas: 'Visitas relativas', giro: 'Giro' };
 export const ROTULO_QUADRANTE: Record<Quadrante, string> = { saudavel: 'Saudável', potencial_reprimido: 'Potencial reprimido', produto_ou_demanda: 'Produto ou demanda', falha_dupla: 'Falha dupla' };
 
 export interface NotaEixo { eixo: Eixo; indice: number | null; cobertura: number; dimensoes: NotaDimensao[]; gargalo: NotaDimensao | null }
@@ -108,7 +110,7 @@ export function lotesDeCorrecao(fila: ReturnType<typeof filaDeAcao>) {
 }
 
 /** Notas de 0–100 registradas para o anúncio; 0 ou ausente = não medida. */
-export interface InsumosConstrucao { tipoAnuncio?: number | null; promocoes?: number | null; preco?: number | null; fotos?: number | null; titulo?: number | null; descricao?: number | null }
+export interface InsumosConstrucao { envio?: { envio: ShippingItem | null; tipo: string | null; precoCents: number } | null; promocoes?: number | null; preco?: number | null; fotos?: number | null; titulo?: number | null; descricao?: number | null }
 const ACOES: Partial<Record<Dimensao, string>> = { promocoes: 'Aderir a uma promoção disponível', preco: 'Revisar a posição de preço', fotos: 'Melhorar as fotos', titulo: 'Ajustar o título', descricao: 'Completar a descrição', giro: 'Investigar o giro do item' };
 const nota = (d: Dimensao, v: number | null | undefined, evidencia: string): NotaDimensao => {
   if (d === 'promocoes' && v === 0.0001) return { dimensao: d, peso: PESOS[d], nota: 0, evidencia: 'sem promoção atual', acao: ACOES.promocoes! };
@@ -133,8 +135,9 @@ export function montarDimensoes(c: InsumosConstrucao, giro: number | null): Nota
   return [
     nota('promocoes', c.promocoes, 'nota registrada'), nota('preco', c.preco, 'nota registrada'), nota('fotos', c.fotos, 'nota registrada'),
     nota('titulo', c.titulo, 'nota registrada'), nota('descricao', c.descricao, 'nota registrada'),
-    c.tipoAnuncio == null ? { dimensao: 'tipoAnuncio', peso: PESOS.tipoAnuncio, nota: null, evidencia: 'não medido', acao: null }
-      : { dimensao: 'tipoAnuncio', peso: PESOS.tipoAnuncio, nota: c.tipoAnuncio, evidencia: 'tipo atual', acao: c.tipoAnuncio < 1 ? 'Avaliar o tipo Premium' : null },
+    c.envio ? { dimensao: 'exposicaoComercial', peso: PESOS.exposicaoComercial, ...notarExposicaoComercial(c.envio.envio, c.envio.tipo, c.envio.precoCents) }
+      : { dimensao: 'exposicaoComercial', peso: PESOS.exposicaoComercial, nota: null, evidencia: 'não medido', acao: null },
+    { dimensao: 'fichaTecnica', peso: PESOS.fichaTecnica, nota: null, evidencia: 'não medido', acao: null },
     { dimensao: 'experiencia', peso: PESOS.experiencia, nota: null, evidencia: 'não medido', acao: null },
     { dimensao: 'conversao', peso: PESOS.conversao, nota: null, evidencia: 'não medido', acao: null },
     { dimensao: 'visitasRelativas', peso: PESOS.visitasRelativas, nota: null, evidencia: 'não medido', acao: null },
@@ -142,10 +145,5 @@ export function montarDimensoes(c: InsumosConstrucao, giro: number | null): Nota
   ];
 }
 
-/** Nota provisória pelo tipo atual: Premium 1, Clássico 0,6, outros 0,3; desconhecido null. */
-export function notaTipoAnuncio(tipo: string | null | undefined): number | null {
-  if (!tipo) return null;
-  return tipo === 'gold_pro' ? 1 : tipo === 'gold_special' ? 0.6 : 0.3;
-}
 /** Participação atual em promoções (catálogo lido por completo): participa = 100; não participa = medido como zero. */
 export const SEM_PROMOCAO = 0.0001;

@@ -12,7 +12,7 @@ import { brl, num, pct } from '@/lib/format';
 import type { ItemVendas } from '@/lib/anuncio/curvaAbc';
 import {
   CORTES_PADRAO, QUADRANTES, ROTULO_DIMENSAO, ROTULO_QUADRANTE, diagnosticar, filaDeAcao, lotesDeCorrecao,
-  mediana, montarDimensoes, notaGiro, notaTipoAnuncio, SEM_PROMOCAO, perfilarCatalogo, type Dimensao, type Diagnostico, type Quadrante,
+  mediana, montarDimensoes, notaGiro, SEM_PROMOCAO, perfilarCatalogo, type Dimensao, type Diagnostico, type Quadrante,
 } from '@/lib/anuncio/diagnostico';
 
 type Dados = { periodo: { inicio: string; fim: string }; itens: ItemVendas[]; coberturaCompleta: boolean; catalogoCompleto: boolean };
@@ -28,12 +28,12 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
       const sb = supabase as any;
       const est = await sb.from('ml_listings_estado').select('pendentes, completo_em').eq('account_id', contaId).maybeSingle();
       if (est.error) throw est.error;
-      const tipos = await fetchAllRows((de: number, ate: number) => sb.from('ml_listings').select('item_id, tipo_anuncio').eq('account_id', contaId).order('item_id').range(de, ate));
+      const tipos = await fetchAllRows((de: number, ate: number) => sb.from('ml_listings').select('item_id, tipo_anuncio, logistica, frete_gratis, preco').eq('account_id', contaId).order('item_id').range(de, ate));
       if (tipos.error) throw tipos.error;
       const promo = await fetchAllRows((de: number, ate: number) => sb.from('ml_promotion_items').select('item_id').eq('account_id', contaId).in('status', ['started', 'pending', 'programmed', 'active']).order('item_id').range(de, ate));
       if (promo.error) throw promo.error;
       const completo = !!est.data?.completo_em && (est.data?.pendentes ?? 1) === 0;
-      return { completo, tipos: new Map<string, string | null>(((tipos.data ?? []) as any[]).map(r => [r.item_id, r.tipo_anuncio])), promo: new Set<string>(((promo.data ?? []) as any[]).map(r => r.item_id)) };
+      return { completo, tipos: new Map<string, any>(((tipos.data ?? []) as any[]).map(r => [r.item_id, r])), promo: new Set<string>(((promo.data ?? []) as any[]).map(r => r.item_id)) };
     },
   });
   const [lote, setLote] = useState<ReturnType<typeof lotesDeCorrecao>[number] | null>(null);
@@ -64,7 +64,7 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
       const cat = catalogo.data;
       const promoAtual = cat?.completo ? (cat.promo.has(i.mlb) ? 100 : SEM_PROMOCAO) : null;
       return diagnosticar(i.mlb, montarDimensoes({
-        tipoAnuncio: notaTipoAnuncio(cat?.tipos.get(i.mlb)),
+        envio: (() => { const r = cat?.tipos.get(i.mlb); return r ? { envio: r.logistica ? { free_shipping: !!r.frete_gratis, logistic_type: r.logistica } : null, tipo: r.tipo_anuncio ?? null, precoCents: Math.round(Number(r.preco ?? 0) * 100) } : null; })(),
         promocoes: promoAtual ?? q?.llPromotionsScore, preco: q?.llPriceScore, fotos: q?.llPicturesScore, titulo: q?.llTitleScore, descricao: q?.llDescriptionScore,
       }, notaGiro(i.unidades, med)));
     });
