@@ -1,5 +1,11 @@
 # Roadmap
 
+## Cache no navegador e antecipação — 07/11
+- [x] IndexedDB por usuário com agregados autorizados por chave de loja/período, inspeção recursiva, máximo 2.000 entradas por lista/5 MiB por cópia; purga e geração impedem gravações tardias. Restauração antes das páginas; listas de acesso não persistidas.
+- [x] Revalidação não bloqueia cópias da mesma chave; somente consultas observadas sem dados exibem espera até 100%. Permissões e contas seguem leitura atual, sem restauração nem novas concessões.
+- [x] Antecipação por intenção na Curva ABC reutiliza consultas conhecidas, só se não houver trabalho em andamento e a leitura estiver velha. AUTOPECASLONDRINA: 54,16s primeira leitura → 8,88s reabertura na mesma sessão, não garantia de alvo de 300ms; desktop/536px sem erro. 42 testes aprovados; k6 prévio zero falhas. Sem publicar.
+- [x] Avaliar carimbo e previsão: documento usa colunas inexistentes em ingest_log; run_at não cobre atualizações ML. Mantidos revalidação ao montar e invalidadores existentes em vez de carimbo global fictício. Previsão por histórico não ativada nesta entrega: sem mapa compartilhado completo de consultas leves; não antecipar leituras comerciais pesadas. Alvos de 300/100ms e acerto >60% ainda não comprovados.
+
 ## Vendas por promoção e anúncio — 07/11
 - [x] Novo acesso em Promoções e oportunidades → Vendas por promoção e anúncio; filtros ativas/com vendas comprovadas/todas, vendas sem vínculo e cobertura por anúncio.
 - [x] Leitura de ROAS publicitário por MLB exato e campanha, datas alinhadas e soma receita/custo. Ausência mantém indisponível; não distribui receita de famílias nem campanhas da loja ao anúncio.

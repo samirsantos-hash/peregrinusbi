@@ -12,7 +12,7 @@ declare global {
 
 /** Ambiente permanente; apenas a chuva adicional do HTML depende das consultas. */
 export function ChuvaPainel() {
-  const carregando = useIsFetching() > 0;
+  const carregando = useIsFetching({ predicate: q => q.getObserversCount() > 0 && q.state.data === undefined }) > 0;
   const [visivel, setVisivel] = useState(carregando);
   useEffect(() => {
     if (carregando) { setVisivel(true); return; }

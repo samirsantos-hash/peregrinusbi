@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, ChevronDown, AlertTriangle, Plug, ChartNoAxesCombined, ListFilter, BadgeCheck, History, Package, Tags, Search, LayoutDashboard, type LucideIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from '@tanstack/react-query';
+import { anteciparConsulta } from '@/lib/cacheAntecipacao';
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -129,6 +131,11 @@ function Conteudo({
   const tabAlertas = porId(ID_ALERTAS);
   const { pode } = usePermissoes();
   const navigate = useNavigate();
+  const client = useQueryClient();
+  const antecipar = (sub: AcessoArvore) => {
+    if (!custId || !visivel(sub) || sub.caminho !== '/anuncios' || sub.aba !== 'abc') return;
+    void anteciparConsulta(client, ['ml-curva-abc', custId, 30]);
+  };
   const visivel = (a: AcessoArvore) => pode(a.permissao) && (!a.consultor || consultantAccess) && (!a.rede || redeAccess) && (a.caminho !== "/anuncios" || pode("anuncios.visualizar"));
   const filhos = (id: string) => RAMOS_ACESSOS.find(t => t.id === id)?.acessos.filter(visivel) ?? [];
   const [ramos, setRamos] = useState<string[]>([ativa]);
@@ -175,7 +182,7 @@ function Conteudo({
                       {!recolhida && <><span className="whitespace-normal flex-1 text-left">{tab.label}</span>{subs.length > 0 && (ramos.includes(id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
                     </Button>
                     {!recolhida && ramos.includes(id) && subs.length > 0 && <ul className="ml-5 pl-2 border-l border-border space-y-1 py-1">
-                      {subs.map(sub => { const IconeSub = ICONES_SUBANALISE[sub.id] ?? ChartNoAxesCombined; return <li key={sub.id}><Button variant="ghost" onClick={() => {
+                      {subs.map(sub => { const IconeSub = ICONES_SUBANALISE[sub.id] ?? ChartNoAxesCombined; return <li key={sub.id}><Button variant="ghost" onMouseEnter={() => antecipar(sub)} onFocus={() => antecipar(sub)} onTouchStart={() => antecipar(sub)} onClick={() => {
                         if ((id === "reputation" || id === "competitiveness" || id === "publicidade") && (ativa !== id || subativa !== sub.id)) {
                           window.__lovableEvents?.track?.("project.seller_section_opened", {
                             section: id === "competitiveness" ? "price" : id === "publicidade" ? "advertising" : "reputation",

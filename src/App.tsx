@@ -63,7 +63,9 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60_000,
-      refetchOnWindowFocus: true,
+      gcTime: 24 * 60 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
       refetchOnMount: "always",
     },
   },
@@ -151,7 +153,7 @@ const AppRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <PersistenciaCache />
+    <PersistenciaCache>
     <SaidaEmergencia />
     <TooltipProvider>
       <SoundProvider>
@@ -172,6 +174,7 @@ const App = () => (
         </ThemeProvider>
       </SoundProvider>
     </TooltipProvider>
+    </PersistenciaCache>
   </QueryClientProvider>
 );
 

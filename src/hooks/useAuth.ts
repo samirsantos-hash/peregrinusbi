@@ -168,7 +168,7 @@ export function useAuth() {
   };
 
   const signOut = async () => {
-    limparCachePainel();
+    await limparCachePainel();
     limparPerfilCompartilhado();
     await supabase.auth.signOut();
   };

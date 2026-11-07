@@ -51,5 +51,5 @@
 - Ads charts use sinergiaPublicidade: same-date totals, nullable Pearson ≥7, no causality, API/imports separate. Overview goal uses metaInvestimentoAds: paginated campaign costs on summary dates, gaps=null, financial tiers≠internal goal.
 - Monthly cancellation summaries use the own-store `ml-analise-loja` monthly mode with complete pagination and BRL order totals for both paid and cancelled orders; zero needs confirmed coverage, partial-month comparisons match elapsed days, and reputation rates never imply cancelled monetary values or refunds.
 - Panel rain; login ropes. Clips pair metrics. Campaign TACOS: same-date store revenue, gaps=null; no API/import blends. Flex uses scoped monthly rows, confirmed city, nullable coverage and same-store comparisons.
-- Query cache: per-user 24h via `src/lib/cachePainel.ts`, never permissions/alerts, cleared on sign-out/permission change; queries >1s report `resposta_lenta`.
+- Query cache: user-scoped IndexedDB aggregates, 24h, purged on logout/access change; restore before routes, no blocking revalidation; >1s reports `resposta_lenta`.
 - Every change runs `scripts/k6-publico.js` first (rules in docs/teste-carga-k6.md).

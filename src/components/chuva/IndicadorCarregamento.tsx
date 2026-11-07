@@ -9,14 +9,16 @@ import "./entrada-pagina.css";
 export function IndicadorCarregamento() {
   const client = useQueryClient();
   const [estado, setEstado] = useState({ total: 0, concluidas: 0, percentual: 0, segundos: 0 });
+  const [atualizando, setAtualizando] = useState(0);
   useEffect(() => {
     const consultas = new Map<string, boolean>();
     let inicio = 0;
     let fechar: ReturnType<typeof setTimeout> | undefined;
     const atualizar = () => {
       const cache = client.getQueryCache().getAll();
+      setAtualizando(cache.filter(q => q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && q.state.data !== undefined).length);
       for (const q of cache) {
-        if (q.state.fetchStatus === 'fetching') {
+        if (q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && q.state.data === undefined) {
           if (consultas.size === 0) inicio = Date.now();
           consultas.set(q.queryHash, false);
         } else if (consultas.has(q.queryHash)) {
@@ -56,7 +58,7 @@ export function IndicadorCarregamento() {
       definirCarregamentoApresentacao(false);
     };
   }, [bloqueado]);
-  if (estado.total === 0) return null;
+  if (estado.total === 0) return atualizando > 0 ? createPortal(<div role="status" aria-label="Atualização dos dados" className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-lg border border-border bg-background/90 px-3 py-2 text-xs text-muted-foreground shadow-sm"><Loader2 aria-hidden="true" className="h-3.5 w-3.5 animate-spin text-primary" />Atualizando dados…</div>, document.body) : null;
   const terminou = estado.concluidas === estado.total;
   return createPortal(<div className="tela-carregamento" aria-busy={!terminou}><div role="status" aria-label="Progresso do carregamento" className="indicador-carregamento w-72 max-w-[calc(100vw-32px)] px-5 py-4 text-foreground">
     <div className="flex items-center justify-between gap-4">
