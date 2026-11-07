@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader } from "@/components/ds";
 import { DialogoPrevia } from "@/components/ml/acoes/DialogoPrevia";
@@ -15,9 +15,10 @@ import { AnunciosAds } from "@/components/ml/ads/AnunciosAds";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useAcaoEmLote } from "@/lib/mlAcoes";
 import { chamarFuncaoMl, dataHoraBr, useContasMl } from "@/lib/mlFuncoes";
-import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel } from "@/lib/adsAnalise";
+import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel, faturamentoAlinhado } from "@/lib/adsAnalise";
 import { useDesenvolvedor } from '@/hooks/useDesenvolvedor';
 import { registrarAviso } from '@/lib/avisosDesenvolvedor';
+import SinergiaPublicidadeApi from '@/components/ml/SinergiaPublicidade';
 
 /** Janela de comparação: 30 dias contra os 30 anteriores (a API guarda 90). */
 const DIAS = 30;
@@ -76,15 +77,18 @@ export default function Publicidade() {
       ]);
       const erro = campanhas.error ?? serie.error ?? grupos.error ?? settings.error;
       if (erro) throw erro;
-      const fat = (vendas.data?.dados as { faturamento_30d?: unknown } | null)?.faturamento_30d;
+      const hojeRef = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+      const vendasSerie = (vendas.data?.dados as { serie?: { data?: string; faturamento?: unknown }[] } | null)?.serie;
+      // TACOS só com faturamento das mesmas datas do investimento; sem alinhamento, fica indisponível.
+      const fat = faturamentoAlinhado(vendasSerie, serie.data, hojeRef, DIAS);
       return {
         painel: montarPainel({
           campanhas: campanhas.data,
           serie: serie.data,
           grupos: grupos.data,
           settings: settings.data,
-          faturamento: typeof fat === "number" && Number.isFinite(fat) ? fat : null,
-        }, undefined, DIAS),
+          faturamento: fat,
+        }, hojeRef, DIAS),
         faturamentoEm: (vendas.data?.atualizado_em ?? null) as string | null,
       };
     },
@@ -147,14 +151,7 @@ export default function Publicidade() {
           acoes={
             <div className="flex flex-wrap items-center gap-2">
               {(contas.data?.length ?? 0) > 1 && (
-                <Select value={contaId} onValueChange={(v) => mudar({ conta: v })}>
-                  <SelectTrigger className="w-56 h-9"><SelectValue placeholder="Conta" /></SelectTrigger>
-                  <SelectContent>
-                    {contas.data!.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.nickname ?? c.ml_user_id} · {c.site_id}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <BuscarLojaMl contas={contas.data ?? []} value={contaId} onChange={(v) => mudar({ conta: v })} />
               )}
               {contaId && (
                 <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
@@ -189,6 +186,7 @@ export default function Publicidade() {
 
         {estado.data?.status === "ativo" && (
           <>
+            <SinergiaPublicidadeApi accountId={contaId} />
             {dados.isLoading && <Carregando texto="Montando o painel de publicidade…" />}
             {dados.isError && <EmptyState falta="Não foi possível carregar os dados de publicidade." acao="Recarregue a página ou clique em Atualizar." />}
             {painel && (
@@ -202,7 +200,7 @@ export default function Publicidade() {
                   <VisaoGeralAds painel={painel} faturamentoEm={dados.data?.faturamentoEm ?? null} aoVerAnuncios={(filtro) => mudar({ aba: "anuncios", filtro })} />
                 </TabsContent>
                 <TabsContent value="campanhas" className="mt-4">
-                  <CampanhasAds painel={painel} acao={acao} />
+                  <CampanhasAds painel={painel} acao={acao} custId={String(contas.data?.find((c) => c.id === contaId)?.ml_user_id ?? "")} contaId={contaId} />
                 </TabsContent>
                 <TabsContent value="anuncios" className="mt-4">
                   <AnunciosAds

@@ -1,10 +1,15 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
 import { requireEnv } from '../_shared/env.ts';
 import { tokenAtual } from '../_shared/mlTokenAtual.ts';
-import { janelaAnalise, projetarPedidos } from '../_shared/mlAnaliseLoja.ts';
+import { anexarVisitas, janelaAnalise, projetarPedidos } from '../_shared/mlAnaliseLoja.ts';
 import { lerQualidade } from '../_shared/mlMelhorias.ts';
+import { amostraCampanhas } from '../_shared/mlCampanhasDiagnostico.ts';
+import { janelaMensal, projetarCancelamentosMensais } from './cancelamentosMensais.ts';
+import { agregarPedidosAbc, lerCatalogoAbc } from './abcPedidos.ts';
+import { lerParticipacaoPromocoes } from './participacaoPromocoes.ts';
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -12,9 +17,15 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), modo: z.enum(['resumo', 'full']) }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), offset: z.number().int().min(0).max(20000).optional(), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais', 'curvaABC', 'participacaoPromocoes']), dias: z.union([z.literal(7), z.literal(30)]).optional(), anterior: z.boolean().optional(), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
+  let mensal: ReturnType<typeof janelaMensal> | undefined;
+  if (modo === 'cancelamentosMensais') {
+    try { mensal = janelaMensal(body.data.mes ?? ''); }
+    catch (e) { return json({ error: e instanceof Error ? e.message : 'Informe um mês válido.' }, 400); }
+  }
+  const negado = await exigirPermissao(req, modo === 'curvaABC' ? 'correlacoes.visualizar' : modo === 'full' ? 'full.visualizar' : ['campanhasDiagnostico', 'participacaoPromocoes'].includes(modo) ? 'promocoes.visualizar' : ['resumo.visualizar', 'reputacao.visualizar', 'publicidade.visualizar', 'correlacoes.visualizar']); if (negado) return negado;
   // Reuse existing store visibility; developer status does not grant business access.
   const { data: vis, error: visError } = await user.from('ml_sync_tema').select('account_id').eq('cust_id', cust_id).limit(1);
   if (visError || !vis?.length) return json({ error: 'Loja sem conexão disponível na sua carteira.' }, 403);
@@ -25,46 +36,158 @@ Deno.serve(async req => {
   if (!token?.access_token) return json({ error: 'Autorização indisponível.' }, 409);
   const access = token.access_token, started = Date.now();
   async function get(path: string): Promise<any> {
-    if (Date.now() - started > 95_000) throw new Error('Consulta incompleta; tente novamente.');
-    const r = await fetch('https://api.mercadolibre.com' + path, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(8000) });
-    if (!r.ok) throw new Error('O Mercado Livre não disponibilizou todos os dados desta análise.');
-    return r.json();
+    for (let tentativa = 0; tentativa < 3; tentativa++) {
+      if (Date.now() - started > 95_000) throw new Error('Consulta incompleta; tente novamente.');
+      const r = await fetch('https://api.mercadolibre.com' + path, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(8000) });
+      if (r.ok) return r.json();
+      if (tentativa === 0 || tentativa === 2) console.warn('ml-analise-loja leitura', modo, r.status, path.split('?')[0].replace(/\d{6,}/g, ':id'));
+      if (!['curvaABC', 'participacaoPromocoes'].includes(modo) || tentativa === 2 || (r.status !== 429 && r.status < 500)) throw new Error('O Mercado Livre não disponibilizou todos os dados desta análise.');
+      await new Promise(resolve => setTimeout(resolve, 500 * (tentativa + 1)));
+    }
+    throw new Error('Leitura indisponível.');
   }
   try {
-    const periodo = janelaAnalise(), completo = janelaAnalise(new Date(), modo === 'resumo' ? 60 : 30);
+    if (modo === 'participacaoPromocoes') return json(await lerParticipacaoPromocoes(get, cust_id, body.data.offset ?? 0));
+    const dias = modo === 'curvaABC' ? body.data.dias ?? 30 : modo === 'vendas7d' ? 7 : 30;
+    // curvaABC anterior: same-length window immediately before the current one.
+    const base = modo === 'curvaABC' && body.data.anterior ? new Date(Date.now() - dias * 864e5) : new Date();
+    const periodo = mensal ?? janelaAnalise(base, dias), completo = mensal ?? janelaAnalise(base, modo === 'resumo' ? 60 : dias);
     const orders: any[] = [];
     const MAX = 10000;
-    const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(completo.inicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(completo.fim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
+    // Read a one-day envelope for monthly timezone boundaries, then bound in UTC.
+    const consultaInicio = mensal ? new Date(Date.parse(completo.inicio) - 864e5).toISOString().slice(0, 10) : completo.inicio;
+    const consultaFim = mensal ? new Date(Date.parse(completo.fim) + 864e5).toISOString().slice(0, 10) : completo.fim;
+    const url = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${encodeURIComponent(consultaInicio + 'T00:00:00.000Z')}&order.date_created.to=${encodeURIComponent(consultaFim + 'T23:59:59.999Z')}&sort=date_asc&limit=50&offset=${off}`;
     const first = await get(url(0));
-    if (!Array.isArray(first.results) || !Number.isFinite(first.paging?.total)) throw new Error('Cobertura de pedidos não confirmada.');
+    if (!Array.isArray(first.results) || !Number.isSafeInteger(first.paging?.total) || first.paging.total < 0) throw new Error('Cobertura de pedidos não confirmada.');
+    if (modo === 'campanhasDiagnostico') {
+      // Bounded capability check, never a performance series or raw-order response.
+      const amostra = amostraCampanhas(first.results);
+      const { data: promos } = await db.from('ml_promotions').select('promotion_id').eq('account_id', conta.id);
+      const { data: ofertas } = await db.from('ml_promotion_items').select('offer_id, promotion_id, item_id').eq('account_id', conta.id).limit(1000);
+      const ids = new Set((promos ?? []).map(p => String(p.promotion_id)));
+      const diagnostico = { consultados: 0, disponiveis: 0, indisponiveis: 0, comDetalhes: 0, comCampanha: 0, comOferta: 0, comItem: 0, comQuantidade: 0, campanhaReconhecida: 0, ofertaReconhecida: 0, campanhasNumericas: 0, status: {} as Record<string, number>, campos: [] as string[] };
+      const campos = new Set<string>();
+      const permitidos = ['details', 'type', 'items', 'id', 'quantity', 'amounts', 'total', 'seller', 'supplier', 'campaign_id', 'offer_id', 'promotion_id', 'funding_mode'];
+      for (const o of amostra) {
+        if (Date.now() - started > 75_000) break;
+        diagnostico.consultados++;
+        try {
+          const res = await fetch(`https://api.mercadolibre.com/orders/${encodeURIComponent(String(o.id))}/discounts`, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(5000) });
+          diagnostico.status[String(res.status)] = (diagnostico.status[String(res.status)] ?? 0) + 1;
+          if (!res.ok) { diagnostico.indisponiveis++; continue; }
+          const d = await res.json();
+          diagnostico.disponiveis++;
+          const details = Array.isArray(d.details) ? d.details : [];
+          if (details.length) diagnostico.comDetalhes++;
+          let campanha = false, oferta = false, item = false, quantidade = false;
+          for (const detail of details) {
+            for (const key of Object.keys(detail ?? {})) if (permitidos.includes(key)) campos.add(key);
+            const cid = detail.supplier?.campaign_id ?? detail.campaign_id ?? detail.promotion_id;
+            campanha ||= (typeof cid === 'string' || typeof cid === 'number') && String(cid).length > 0;
+            if (typeof cid === 'number') diagnostico.campanhasNumericas++;
+            if (cid != null && ids.has(String(cid))) diagnostico.campanhaReconhecida++;
+            const oid = detail.supplier?.offer_id ?? detail.offer_id;
+            if (oid != null && (ofertas ?? []).some(f => String(f.offer_id) === String(oid) && (detail.items ?? []).some((i: any) => i.id === f.item_id))) diagnostico.ofertaReconhecida++;
+            oferta ||= typeof detail.supplier?.offer_id === 'string' || typeof detail.offer_id === 'string';
+            for (const key of Object.keys(detail.supplier ?? {})) if (permitidos.includes(key)) campos.add('supplier.' + key);
+            for (const i of Array.isArray(detail.items) ? detail.items : []) {
+              item ||= typeof i.id === 'string';
+              quantidade ||= typeof i.quantity === 'number';
+              for (const key of Object.keys(i ?? {})) if (permitidos.includes(key)) campos.add('items.' + key);
+            }
+          }
+          if (campanha) diagnostico.comCampanha++;
+          if (oferta) diagnostico.comOferta++;
+          if (item) diagnostico.comItem++;
+          if (quantidade) diagnostico.comQuantidade++;
+        } catch { diagnostico.indisponiveis++; }
+      }
+      diagnostico.campos = [...campos].sort();
+      return json({ periodo, diagnostico, amostra: true, atribuicaoConfirmada: false, consultadoEm: new Date().toISOString() });
+    }
     const total: number = first.paging.total;
     if (total > MAX) return json({ error: 'Há mais de 10.000 pedidos no período; análise suspensa para não apresentar totais parciais.' }, 422);
-    orders.push(...first.results);
+    if (modo === 'curvaABC' && total > 1000) {
+      // Orders search may reject deep offsets; bound each complete UTC day instead.
+      for (let t = Date.parse(completo.inicio); t <= Date.parse(completo.fim); t += 864e5) {
+        const dia = new Date(t).toISOString().slice(0, 10);
+        const diaUrl = (off: number) => `/orders/search?seller=${cust_id}&order.date_created.from=${dia}T00:00:00.000Z&order.date_created.to=${dia}T23:59:59.999Z&sort=date_asc&limit=50&offset=${off}`;
+        const p = await get(diaUrl(0));
+        if (!Array.isArray(p.results) || !Number.isSafeInteger(p.paging?.total) || p.paging.total < 0 || p.paging.total > 1000) throw new Error('Volume diário acima da janela disponível; escolha sete dias ou tente novamente.');
+        const linhas = [...p.results];
+        for (let off = 50; off < p.paging.total; off += 50) {
+          const pagina = await get(diaUrl(off));
+          if (!Array.isArray(pagina.results) || pagina.paging?.total !== p.paging.total) throw new Error('Cobertura diária não confirmada.');
+          linhas.push(...pagina.results);
+        }
+        if (new Set(linhas.map(o => o.id)).size !== p.paging.total) throw new Error('Cobertura diária incompleta.');
+        orders.push(...linhas);
+      }
+    } else orders.push(...first.results);
     const offsets: number[] = [];
-    for (let off = 50; off < total; off += 50) offsets.push(off);
-    for (let i = 0; i < offsets.length; i += 10) {
-      const pages = await Promise.all(offsets.slice(i, i + 10).map(o => get(url(o))));
+    if (!(modo === 'curvaABC' && total > 1000)) for (let off = 50; off < total; off += 50) offsets.push(off);
+    const concorrencia = modo === 'curvaABC' ? 3 : 10;
+    for (let i = 0; i < offsets.length; i += concorrencia) {
+      const pages = await Promise.all(offsets.slice(i, i + concorrencia).map(o => get(url(o))));
       for (const p of pages) {
-        if (!Array.isArray(p.results)) throw new Error('Cobertura de pedidos não confirmada.');
+        if (!Array.isArray(p.results) || ((mensal || modo === 'curvaABC') && p.paging?.total !== total)) throw new Error('Cobertura de pedidos não confirmada.');
         orders.push(...p.results);
       }
     }
     const unicos = new Map(orders.map(o => [o.id, o]));
     orders.length = 0; orders.push(...unicos.values());
     if (orders.length < total) return json({ error: 'Não foi possível ler todos os pedidos do período; análise suspensa para não apresentar totais parciais.' }, 422);
+    if (modo === 'curvaABC') {
+      if (orders.length !== total) throw new Error('Cobertura de pedidos não confirmada.');
+      const vendidos = agregarPedidosAbc(orders, cust_id, periodo.inicio, periodo.fim);
+      const catalogo = await lerCatalogoAbc(get, cust_id);
+      const itens = new Map(vendidos.map(i => [i.mlb, i]));
+      for (const mlb of catalogo) if (!itens.has(mlb)) itens.set(mlb, { mlb, titulo: mlb, sku: null, unidades: 0, faturamentoCents: 0, pedidos: 0, ultimaVenda: null, status: null });
+      const ids = [...itens.keys()];
+      for (let off = 0; off < ids.length; off += 20) {
+        // Current metadata is optional: a forbidden item (e.g. moderated or closed) must not suspend paid-sales totals.
+        const parte = ids.slice(off, off + 20), attrs = '&attributes=id,seller_id,title,seller_custom_field,status';
+        let lote: any = await get(`/items?ids=${parte.join(',')}${attrs}`).catch(() => null);
+        if (!Array.isArray(lote)) {
+          lote = [];
+          for (const id of parte) { const r = await get(`/items?ids=${id}${attrs}`).catch(() => null); if (Array.isArray(r)) lote.push(...r); }
+        }
+        for (const entry of lote) {
+          if (entry.code !== 200) continue; // sales remain even if current metadata is unavailable
+          const item = entry.body;
+          if (String(item?.seller_id) !== cust_id) throw new Error('Loja do anúncio não confirmada.');
+          const i = itens.get(item.id);
+          if (i) { i.titulo = item.title ?? i.titulo; i.sku = item.seller_custom_field ?? null; i.status = item.status ?? null; }
+        }
+      }
+      return json({ periodo, itens: [...itens.values()], coberturaCompleta: true, catalogoCompleto: true, universoCatalogo: catalogo.length, consultadoEm: new Date().toISOString() });
+    }
+    if (mensal) {
+      if (orders.length !== total || orders.some(o => String(o.seller?.id) !== cust_id)) return json({ error: 'Cobertura ou loja dos pedidos não confirmada.' }, 422);
+      const limitados = orders.filter(o => {
+        const timestamp = Date.parse(o.date_created);
+        if (!Number.isFinite(timestamp)) throw new Error('Data do pedido não confirmada.');
+        const dia = new Date(timestamp).toISOString().slice(0, 10);
+        return dia >= mensal.inicio && dia <= mensal.fim;
+      });
+      const resultado = projetarCancelamentosMensais(limitados, mensal.inicio, mensal.fim);
+      return json({ periodo: mensal, ...resultado, coberturaCompleta: true, fonte: 'api', consultadoEm: new Date().toISOString() });
+    }
     const atual = projetarPedidos(orders, periodo.inicio, periodo.fim);
+    if (modo === 'vendas7d' || modo === 'vendas30d') {
+      // Paid units and revenue per listing over complete UTC days; no buyer data.
+      return json({ periodo, itens: atual.itens.map(i => ({ id: i.id, unidades: i.unidades, faturamento: Math.round(i.faturamento * 100) / 100 })), consultadoEm: new Date().toISOString() });
+    }
     if (modo === 'resumo') {
       const anteriorFim = new Date(Date.parse(periodo.inicio) - 864e5).toISOString().slice(0, 10);
       const anterior = projetarPedidos(orders, completo.inicio, anteriorFim);
       let visits: any = null;
       try { visits = await get(`/users/${cust_id}/items_visits/time_window?last=60&unit=day`); } catch { /* unknown stays null */ }
-      const map = new Map<string, number>();
-      for (const r of visits?.results ?? []) if (typeof r.total === 'number') map.set(String(r.date).slice(0, 10), r.total);
       const enrich = (p: ReturnType<typeof projetarPedidos>) => {
-        const covered = p.serie.every(r => map.has(r.data));
-        const visitas = covered ? p.serie.reduce((s, r) => s + (map.get(r.data) ?? 0), 0) : null;
+        const { serie, visitas } = anexarVisitas(p.serie, visits?.results);
         const { itens: _, ...clean } = p;
-        return { ...clean, visitas, conversao: visitas != null && visitas > 0 ? p.pedidos / visitas : null };
+        return { ...clean, serie, visitas, conversao: visitas != null && visitas > 0 ? p.pedidos / visitas : null };
       };
       return json({ periodo, anteriorPeriodo: { inicio: completo.inicio, fim: anteriorFim }, atual: enrich(atual), anterior: enrich(anterior), consultadoEm: new Date().toISOString() });
     }

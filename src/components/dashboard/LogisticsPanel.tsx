@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Tooltip, ResponsiveContainer, Legend, AreaChart, Area, XAxis, YAxis, CartesianGrid, LineChart, Line } from "recharts";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Package, Truck, Mail, TrendingUp, AlertTriangle, CheckCircle2 } from "lucide-react";
 import TooltipInfo from "./TooltipInfo";
 import { AlgoTooltip } from "@/components/ui/AlgoTooltip";
@@ -48,17 +49,25 @@ interface LogisticsPanelProps {
   eligibilityItems?: EligibilityItem[];
 }
 
+/** Volume que mudaria para Full ao migrar `pp` pontos percentuais do total, limitado ao residual em outros modais. */
+export function cenarioMigracaoFull(total: number, residual: number, pp: number): number {
+  if (!(total > 0) || !(residual > 0)) return 0;
+  return Math.min(total * (pp / 100), residual);
+}
+
 const COLORS = ["hsl(var(--ec-verde))", "hsl(var(--ok))", "hsl(var(--series-3))", "hsl(var(--ec-ambar))"];
 
 const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = [] }: LogisticsPanelProps) => {
+  const mobile = useIsMobile();
   const latestByProduct = kpis.reduce<Record<string, KpiLike>>((acc, k) => {
     if (!acc[k.productId] || k.date > acc[k.productId].date) acc[k.productId] = k;
     return acc;
   }, {});
 
-  const products = Object.values(latestByProduct);
+  void latestByProduct;
+  // Participação somada em todo o período selecionado (mesma base do gráfico), não só a última medição.
+  const products = kpis;
 
-  // GMV-based share calculation (correct source: CPP_MENSAL fields)
   const totalTgmvFull = products.reduce((s, p) => s + (p.tgmvFull || 0), 0);
   const totalTgmvFlex = products.reduce((s, p) => s + (p.tgmvFlex || 0), 0);
   const totalTgmv = products.reduce((s, p) => s + (p.tgmv || 0), 0);
@@ -83,9 +92,8 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
   const statusLabel = (s: "ok" | "warn" | "crit") =>
     s === "ok" ? "Saudável" : s === "warn" ? "Atenção" : "Crítico";
 
-  // Estimativa de impacto financeiro: migrar 10pp de Agência para Full
-  // Premissa do algoritmo MELI: Full aumenta conversão em ~30% vs Agência
-  const migrationPotentialGmv = totalTgmvAgencia * 0.10 * 0.30;
+  // Cenário hipotético: 10 p.p. do total mudam de modal para Full (limitado ao residual). Não é ganho de GMV.
+  const migrationPotentialGmv = cenarioMigracaoFull(totalTgmv, totalTgmvAgencia, 10);
   const showMigrationInsight = shareFullGmv < 60 && shareAgenciaGmv > 20;
 
   // Time series for evolution chart
@@ -210,16 +218,16 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                     <span className="font-mono font-bold text-foreground">
                       {fmtBRLCompact(totalTgmvAgencia)}
                     </span>{" "}
-                    rodando em Outros modais (inclui Agência, Correios e Places, entre outros — não separáveis no CSV diário) — conjunto despriorizado pelo algoritmo MELI vs Full.
+                    rodando em Outros modais (inclui Agência, Correios e Places, entre outros — não separáveis nos dados diários) — conjunto despriorizado pelo algoritmo MELI vs Full.
                   </p>
                   <div className="flex items-center gap-2 mt-2 bg-muted/30 rounded p-2">
                     <TrendingUp className="w-4 h-4 text-emerald shrink-0" />
                     <p className="text-xs">
-                      <span className="text-muted-foreground">Migrar 10pp para Full pode gerar </span>
-                      <span className="font-mono font-bold text-emerald">
-                        +{fmtBRLCompact(migrationPotentialGmv)}
+                      <span className="text-muted-foreground">Cenário hipotético: migrar 10 p.p. do GMV para Full move </span>
+                      <span className="font-mono font-bold text-foreground">
+                        {fmtBRLCompact(migrationPotentialGmv)}
                       </span>
-                      <span className="text-muted-foreground"> de GMV adicional (premissa: +30% conversão em Full).</span>
+                      <span className="text-muted-foreground"> de outros modais. É volume que muda de modal, não ganho garantido de vendas.</span>
                     </p>
                   </div>
                   <p className="text-xs text-muted-foreground italic mt-2">
@@ -248,7 +256,7 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
         <p className="text-[11px] text-muted-foreground text-center mb-3 leading-relaxed">
           ℹ️ <span className="font-medium text-foreground">Full</span> = <code className="text-[10px]">TGMV_LC_FULL</code> (FBM) ·{" "}
           <span className="font-medium text-foreground">Flex</span> = <code className="text-[10px]">TGMV_LC_FLEX</code> ·{" "}
-          <span className="font-medium text-foreground">Outros modais</span> = restante (inclui Agência, Correios e Places, entre outros — não separáveis no CSV diário).
+          <span className="font-medium text-foreground">Outros modais</span> = restante (inclui Agência, Correios e Places, entre outros — não separáveis nos dados diários).
         </p>
         <div className="flex flex-wrap justify-center gap-4 mb-2 text-xs">
           {donutData.map((d, i) => (
@@ -291,8 +299,8 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
             </h3>
             <TooltipInfo text="Evolução temporal do share de GMV por canal logístico. Acompanhe a migração para Full ao longo do tempo." />
           </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <AreaChart data={evolutionData}>
+          <ResponsiveContainer width="100%" height={mobile ? 320 : 280}>
+            <AreaChart data={evolutionData} margin={{ top: 12, right: 16, bottom: 12, left: 8 }}>
               <defs>
                 <linearGradient id="gradFullLog" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="hsl(var(--ec-verde))" stopOpacity={0.3} />
@@ -313,15 +321,19 @@ const LogisticsPanel = ({ kpis, dataGranularity = "daily", eligibilityItems = []
                 tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 interval="preserveStartEnd"
-                angle={evolutionData.length > 8 ? -45 : 0}
-                textAnchor={evolutionData.length > 8 ? "end" : "middle"}
-                height={evolutionData.length > 8 ? 50 : 30}
+                minTickGap={40}
+                padding={{ left: 12, right: 12 }}
+                angle={!mobile && evolutionData.length > 8 ? -45 : 0}
+                textAnchor={!mobile && evolutionData.length > 8 ? "end" : "middle"}
+                height={!mobile && evolutionData.length > 8 ? 50 : 36}
               />
               <YAxis
                 tick={{ fill: "hsl(var(--ec-text-sec))", fontSize: 11 }}
                 axisLine={false}
                 tickFormatter={(v) => `${v}%`}
                 domain={[0, 100]}
+                width={48}
+                tickCount={mobile ? 4 : 5}
               />
               <Tooltip content={<EvolutionTooltip />} />
               <Area type="monotone" dataKey="% Full" stroke="hsl(var(--ec-verde))" fill="url(#gradFullLog)" strokeWidth={2} />

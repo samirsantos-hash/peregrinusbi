@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Loader2, UserPlus, Upload, Users, ArrowLeft, Trash2, FileText, Search, RotateCcw, Copy, CheckCircle, CalendarDays, Package, BarChart3, Gift, Store, Folder, KeyRound, PauseCircle, PlayCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissoes, rpcPermissoes } from '@/hooks/usePermissoes';
+import PermissoesUsuario from '@/components/admin/PermissoesUsuario';
+import { ShieldCheck } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useToast } from "@/hooks/use-toast";
@@ -49,6 +53,8 @@ interface ManagedUser {
   created_at: string;
   role: AppRole;
   desenvolvedor: boolean;
+  master: boolean;
+  revisado: boolean;
 }
 
 interface UploadLog {
@@ -78,6 +84,11 @@ const STATUS_BADGE: Record<string, { label: string; color: string }> = {
 
 const Admin = () => {
   const { user, isAdmin, isGerente, signOut } = useAuth();
+  const { master, pode } = usePermissoes();
+  const [permissoesUser, setPermissoesUser] = useState<ManagedUser | null>(null);
+  const [buscaUsuario, setBuscaUsuario] = useState('');
+  const [filtroCategoria, setFiltroCategoria] = useState('todos');
+  const [filtroRevisao, setFiltroRevisao] = useState('todos');
   const { autorizado: isDesenvolvedor } = useDesenvolvedor();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -103,18 +114,20 @@ const Admin = () => {
 
   const loadData = async () => {
     setLoading(true);
-    const [sellersRes, usersRes, logsRes, rolesRes] = await Promise.all([
+    const [sellersRes, usersRes, logsRes, rolesRes, estados] = await Promise.all([
       fetchAllRows<any>((from, to) =>
         supabase.from("sellers").select("id, nickname, cust_id").order("nickname").order("id").range(from, to)
       ),
       supabase.from("user_access_control").select("*").order("created_at", { ascending: false }),
       supabase.from("upload_logs").select("*").order("uploaded_at", { ascending: false }).limit(50),
       supabase.from("user_roles").select("user_id, role"),
+      rpcPermissoes<{ user_id: string; revisado: boolean }[]>('usuarios_revisao').catch(() => []),
     ]);
 
     const rolesMap: Record<string, AppRole> = {};
     if (rolesRes.data) {
       for (const r of rolesRes.data) {
+        if (!['admin', 'gerente', 'user'].includes(r.role)) continue;
         const role = r.role as AppRole;
         if (!rolesMap[r.user_id] || role === "admin") {
           rolesMap[r.user_id] = role;
@@ -138,6 +151,8 @@ const Admin = () => {
           created_at: u.created_at,
           role: rolesMap[u.user_id] || "user",
           desenvolvedor: rolesRes.data?.some(r => r.user_id === u.user_id && r.role === 'desenvolvedor') ?? false,
+          master: rolesRes.data?.some(r => r.user_id === u.user_id && r.role === 'super_admin') ?? false,
+          revisado: estados.some(e => e.user_id === u.user_id && e.revisado),
         }))
       );
     }
@@ -319,38 +334,38 @@ const Admin = () => {
           <Button variant="outline" size="sm" onClick={signOut}>Sair</Button>
         </motion.div>
 
-        <Tabs defaultValue={isAdmin ? "users" : "portfolios"} className="w-full">
+        <Tabs defaultValue={pode('usuarios.visualizar') ? 'users' : pode('carteiras.visualizar') ? 'portfolios' : pode('dados.visualizar') ? 'upload' : 'integracoes'} className="w-full">
           <TabsList className="glass-card w-full flex-wrap justify-start gap-1 p-1 bg-card/60 h-auto">
             {isDesenvolvedor && <TabsTrigger value="avisos" className="flex items-center gap-2 px-4 py-2.5 text-sm"><Bell className="h-4 w-4" /> Avisos do desenvolvedor</TabsTrigger>}
-            {isAdmin && (
+            {(master || pode('usuarios.visualizar')) && (
               <TabsTrigger value="users" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Users className="w-4 h-4" />
                 Gestão de Usuários
               </TabsTrigger>
             )}
-            {(isAdmin || isGerente) && (
+            {pode('dados.visualizar') && (
               <TabsTrigger value="upload" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Upload className="w-4 h-4" />
                 Upload de Dados
               </TabsTrigger>
             )}
-            <TabsTrigger value="portfolios" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+            {pode('carteiras.visualizar') && <TabsTrigger value="portfolios" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
               <Folder className="w-4 h-4" />
               Gestão de Carteiras
-            </TabsTrigger>
-            {isAdmin && (
+            </TabsTrigger>}
+            {pode('integracoes.visualizar') && (
               <TabsTrigger value="tokens" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <KeyRound className="w-4 h-4" />
                 Tokens de Acesso
               </TabsTrigger>
             )}
-            {isAdmin && (
+            {pode('dados.visualizar') && (
               <TabsTrigger value="revisao-ia" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Sparkles className="w-4 h-4" />
                 Revisão IA
               </TabsTrigger>
             )}
-            {isAdmin && (
+            {pode('integracoes.visualizar') && (
               <TabsTrigger value="integracoes" className="flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
                 <Link2 className="w-4 h-4" />
                 Integrações
@@ -361,7 +376,7 @@ const Admin = () => {
           {isDesenvolvedor && <TabsContent value="avisos" className="mt-5"><PainelAvisos /></TabsContent>}
           <TabsContent value="users" className="mt-5 space-y-6">
             {/* Create User Form */}
-            <Card className="glass-card border-glass-border">
+            {pode('usuarios.criar') && <Card className="glass-card border-glass-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <UserPlus className="w-5 h-5 text-neon-blue" />
@@ -463,7 +478,7 @@ const Admin = () => {
 
                   {newRole === "admin" && (
                     <p className="text-xs text-muted-foreground bg-muted/30 border border-border rounded-lg p-3">
-                      ℹ️ O perfil <strong>Admin</strong> terá acesso total a todas as lojas e ao Painel Administrativo. Não é necessário vincular lojas manualmente.
+                      Administrador não é conta master. Novos usuários dependem de aprovação das funções e de vínculos de lojas.
                     </p>
                   )}
 
@@ -474,7 +489,7 @@ const Admin = () => {
                   </Button>
                 </form>
               </CardContent>
-            </Card>
+            </Card>}
 
             {/* Users List */}
             <Card className="glass-card border-glass-border">
@@ -482,12 +497,17 @@ const Admin = () => {
                 <CardTitle className="text-lg">Usuários Cadastrados</CardTitle>
               </CardHeader>
               <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                  <Input aria-label="Buscar usuários" placeholder="Buscar por e-mail…" value={buscaUsuario} onChange={e => setBuscaUsuario(e.target.value)} />
+                  <Select value={filtroCategoria} onValueChange={setFiltroCategoria}><SelectTrigger aria-label="Categoria do usuário"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todas as categorias</SelectItem><SelectItem value="master">Master</SelectItem><SelectItem value="admin">Administrador</SelectItem><SelectItem value="gerente">Gerente</SelectItem><SelectItem value="user">Consultor</SelectItem></SelectContent></Select>
+                  <Select value={filtroRevisao} onValueChange={setFiltroRevisao}><SelectTrigger aria-label="Situação da revisão"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="todos">Todas as revisões</SelectItem><SelectItem value="pendente">Aguardando revisão</SelectItem><SelectItem value="revisado">Revisado</SelectItem></SelectContent></Select>
+                </div>
                 {managedUsers.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Nenhum usuário cadastrado.</p>
                 ) : (
                   <div className="space-y-3">
-                    {managedUsers.map((u) => (
-                      <div key={u.id} className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/20">
+                    {managedUsers.filter(u => u.email.toLowerCase().includes(buscaUsuario.toLowerCase()) && (filtroCategoria === 'todos' || (filtroCategoria === 'master' ? u.master : !u.master && u.role === filtroCategoria)) && (filtroRevisao === 'todos' || (filtroRevisao === 'revisado' ? u.revisado && !u.master : !u.revisado && !u.master))).map((u) => (
+                      <div key={u.id} className="flex flex-wrap gap-3 items-center justify-between p-3 border-b border-border even:bg-muted/20">
                         <div className="space-y-1 flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{u.email}</p>
@@ -504,9 +524,10 @@ const Admin = () => {
                                 ? "bg-primary/15 text-primary border border-primary/30"
                                 : "bg-muted/50 text-muted-foreground border border-border"
                             )}>
-                              {u.role === "admin" ? "Admin" : u.role === "gerente" ? "Gerente" : "Consultor"}
+                              {u.master ? "Master" : u.role === "admin" ? "Administrador" : u.role === "gerente" ? "Gerente" : "Consultor"}
                             </span>
                             {u.desenvolvedor && <span className="text-xs font-medium text-foreground">Desenvolvedor</span>}
+                            {!u.master && <span className="text-xs text-muted-foreground">{u.revisado ? 'Revisado' : 'Aguardando revisão'}</span>}
                           </div>
                           <p className="text-xs text-muted-foreground">
                             CNPJ: {u.cnpj || "—"} · Lojas: {u.allowed_cust_ids.length}
@@ -514,10 +535,11 @@ const Admin = () => {
                           </p>
                         </div>
                         <div className="flex items-center gap-1">
+                          {master && <Button variant="outline" size="sm" onClick={() => setPermissoesUser(u)}><ShieldCheck className="h-4 w-4 mr-2" />Permissões</Button>}
                           <Select
                             value={u.role}
                             onValueChange={(v) => handleChangeRole(u.userId, u.email, v as AppRole)}
-                            disabled={changingRole === u.userId}
+                            disabled={!master || u.master || changingRole === u.userId}
                           >
                             <SelectTrigger className="h-8 w-[130px] text-xs" title="Alterar perfil de acesso">
                               <SelectValue />
@@ -528,24 +550,24 @@ const Admin = () => {
                               <SelectItem value="admin">Admin</SelectItem>
                             </SelectContent>
                           </Select>
-                          <Button variant="ghost" size="icon" title="Editar carteira de lojas" onClick={() => setWalletUser(u)}>
+                          <Button disabled={!pode('carteiras.alterar') || u.master} variant="ghost" size="icon" title="Editar carteira de lojas" onClick={() => setWalletUser(u)}>
                             <Store className="w-4 h-4 text-emerald" />
                           </Button>
-                          <Button variant="ghost" size="icon" title="Resetar senha" onClick={() => handleResetPassword(u.userId, u.email)}>
+                          <Button disabled={!pode('usuarios.senhas') || u.master} variant="ghost" size="icon" title="Resetar senha" onClick={() => handleResetPassword(u.userId, u.email)}>
                             <RotateCcw className="w-4 h-4 text-neon-blue" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             title={pausedIds.has(u.userId) ? "Reativar acesso" : "Pausar acesso"}
-                            disabled={pausing === u.userId || u.userId === user?.id}
+                            disabled={!pode('usuarios.pausar') || u.master || pausing === u.userId || u.userId === user?.id}
                             onClick={() => handleTogglePause(u.userId, u.email, !pausedIds.has(u.userId))}
                           >
                             {pausedIds.has(u.userId)
                               ? <PlayCircle className="w-4 h-4 text-emerald" />
                               : <PauseCircle className="w-4 h-4 text-warning" />}
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeleteUser(u.userId, u.email)}>
+                          <Button disabled={!pode('usuarios.pausar') || u.master} variant="ghost" size="icon" title="Remover usuário" onClick={() => handleDeleteUser(u.userId, u.email)}>
                             <Trash2 className="w-4 h-4 text-destructive" />
                           </Button>
                         </div>
@@ -606,7 +628,7 @@ const Admin = () => {
                               </TableCell>
                               <TableCell>
                                 <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${statusInfo.color}`} title={log.notes || undefined}>
-                                  {statusInfo.label}
+                                  <TextoComIcones texto={statusInfo.label} />
                                 </span>
                               </TableCell>
                               <TableCell className="text-right font-mono text-sm">
@@ -627,19 +649,19 @@ const Admin = () => {
             <PortfolioManager />
           </TabsContent>
 
-          {isAdmin && (
+          {pode('integracoes.visualizar') && (
             <TabsContent value="tokens" className="mt-5">
               <TokensDeAcessoTab />
             </TabsContent>
           )}
 
-          {isAdmin && (
+          {pode('dados.visualizar') && (
             <TabsContent value="revisao-ia" className="mt-5 space-y-4">
               <RevisaoPlanilhaIA />
             </TabsContent>
           )}
 
-          {isAdmin && (
+          {pode('integracoes.visualizar') && (
             <TabsContent value="integracoes" className="mt-5 space-y-4">
               <Card className="bg-card/60 border-border/50">
                 <CardHeader className="pb-2">
@@ -695,7 +717,7 @@ const Admin = () => {
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    ⚠️ Anote esta senha agora. O usuário deverá alterá-la no primeiro acesso. A senha expira em 48 horas.
+                    <IconeIndicador simbolo="⚠️" className="h-4 w-4 mr-1" /> Anote esta senha agora. O usuário deverá alterá-la no primeiro acesso. A senha expira em 48 horas.
                   </p>
                 </div>
               </AlertDialogDescription>
@@ -707,6 +729,7 @@ const Admin = () => {
         </AlertDialog>
 
         {/* Wallet Sheet */}
+        {permissoesUser && <PermissoesUsuario userId={permissoesUser.userId} email={permissoesUser.email} onClose={() => setPermissoesUser(null)} onSaved={() => void loadData()} />}
         {walletUser && (
           <UserWalletSheet
             open={!!walletUser}

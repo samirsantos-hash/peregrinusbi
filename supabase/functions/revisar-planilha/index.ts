@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireEnv } from "../_shared/env.ts";
@@ -31,6 +32,7 @@ const SCHEMA = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const checklistNegado = await exigirPermissao(req, 'dados.visualizar', false); if (checklistNegado) return checklistNegado;
   try {
     const admin = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
     const token = (req.headers.get("authorization") ?? "").replace("Bearer ", "");

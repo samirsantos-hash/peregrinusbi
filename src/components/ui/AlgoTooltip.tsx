@@ -1,3 +1,4 @@
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { HelpCircle, TrendingUp, TrendingDown } from "lucide-react";
@@ -65,7 +66,7 @@ export function AlgoTooltip(props: Props) {
 
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-neon-blue mb-0.5">
-            🤖 Como o algoritmo ML usa
+            <IconeIndicador simbolo="🤖" className="h-3 w-3 mr-1" /> Como o algoritmo ML usa
           </p>
           <p className="text-foreground/90">{content.algoritmo}</p>
         </div>
@@ -90,7 +91,7 @@ export function AlgoTooltip(props: Props) {
         {content.correlacao && (
           <div className="pt-1 border-t border-border/40">
             <p className="text-[10px] font-semibold uppercase tracking-wider text-warning mb-0.5">
-              🔗 Correlação
+              <IconeIndicador simbolo="🔗" className="h-3 w-3 mr-1" /> Correlação
             </p>
             <p className="text-foreground/85">{content.correlacao}</p>
           </div>
@@ -98,7 +99,7 @@ export function AlgoTooltip(props: Props) {
 
         {content.benchmark && (
           <div className="pt-1 border-t border-border/40">
-            <p className="text-foreground/80">📊 {content.benchmark}</p>
+            <p className="text-foreground/80"><IconeIndicador simbolo="📊" className="h-3 w-3 mr-1" /> {content.benchmark}</p>
           </div>
         )}
       </TooltipContent>

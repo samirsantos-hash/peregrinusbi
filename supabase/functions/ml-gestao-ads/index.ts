@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
@@ -11,6 +12,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const checklistNegado = await exigirPermissao(req, 'publicidade.visualizar', false); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
   const url = requireEnv("SUPABASE_URL");
   const userClient = createClient(url, requireEnv("SUPABASE_ANON_KEY"), {

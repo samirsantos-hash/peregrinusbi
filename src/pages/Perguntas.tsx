@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
@@ -68,6 +68,7 @@ const STATUS: Record<string, string> = {
 
 export default function Perguntas() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
   const qc = useQueryClient();
   const contas = useContasMl();
   const [contaId, setContaId] = useState<string>("");
@@ -79,7 +80,7 @@ export default function Perguntas() {
   const [atualizando, setAtualizando] = useState(false);
 
   useEffect(() => {
-    if (!contaId && contas.data?.length) setContaId(contas.data[0].id);
+    if (!contaId && contas.data?.length) setContaId(contas.data.find(c => c.id === params.get("conta"))?.id ?? contas.data[0].id);
   }, [contas.data, contaId]);
 
   const perguntas = useQuery({

@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Area,
   CartesianGrid,
@@ -55,6 +56,7 @@ function percentil(vals: number[], p: number): number {
 }
 
 export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
+  const mobile = useIsMobile();
   const dados = useMemo(
     () =>
       pontos.map((p) => {
@@ -140,7 +142,8 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
         {itens.map((i, k) => (
           <text
             key={k}
-            x={Math.min(x + 8, (offset?.left ?? 0) + (offset?.width ?? 0) + 34)}
+            x={mobile ? x - 8 : Math.min(x + 8, (offset?.left ?? 0) + (offset?.width ?? 0) + 34)}
+            textAnchor={mobile ? "end" : "start"}
             y={yA.scale(i.v as number) + 4}
             fontSize={11}
             fontWeight={600}
@@ -233,11 +236,13 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
-        <ComposedChart data={plot} margin={{ top: 12, right: 78, bottom: 0, left: 8 }}>
+        <ComposedChart data={plot} margin={{ top: 16, right: mobile ? 16 : 78, bottom: 8, left: 8 }}>
           <CartesianGrid vertical={false} stroke="hsl(var(--grid))" />
-          <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
+          <XAxis dataKey="label" interval="preserveStartEnd" minTickGap={40} height={36} padding={{ left: 12, right: 12 }} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} />
           <YAxis
             domain={[0, teto]}
+            width={48}
+            tickCount={mobile ? 4 : 5}
             allowDataOverflow
             tickFormatter={(v) => `${Number(v).toFixed(0).replace(".", ",")}%`}
             tick={{ fontSize: 11, fill: "hsl(var(--axis))" }}
@@ -262,7 +267,7 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
             stroke={TACOS_COLOR}
             strokeDasharray="5 4"
             label={{
-              value: `meta de investimento em Ads: ${META_TACOS}% do faturamento`,
+              value: mobile ? `Meta TACOS ${META_TACOS}%` : `meta de investimento em Ads: ${META_TACOS}% do faturamento`,
               position: "insideBottomLeft",
               fontSize: 9,
               fill: "hsl(var(--axis))",

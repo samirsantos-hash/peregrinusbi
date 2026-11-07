@@ -1,5 +1,16 @@
 # Architecture Rules
 
+- k6 public tests hit only same-origin documents/assets with bounded ramps; no app JS, auth, AI, DB or ML, so results are not logged-in capacity claims.
+
+- Integration lists: server-validated masters see all; others stay owner-scoped.
+
+- Price summaries use `precoComparacao` for null/zero, record coverage and the derived price index (cheap + equal)/all bands; imported BPC stays distinct and unknown band units never become visit counts. Spreadsheet diagnostics require price evidence, unknown CDP stays null, and no score fallback may classify unmeasured listings.
+
+- Feature capabilities use the central catalog and master-only audited approval RPCs; legacy capabilities are snapshotted independently of store scope, and UI, RLS and server checks compose without granting new roles or stores. Download handlers use the fresh permission export guard because revocations must apply before generating files.
+
+- Market access validation uses a fixed developer/master-only account-scoped diagnostic with sanitized field-presence results; capability evidence must precede monitoring and never authorizes inferred competitor revenue.
+- Price competitor presentation reuses the read-only catalog search service and compares only one catalog product at a time; unverified third-party visits and conversion remain null, never derived from cumulative sold quantities.
+
 - Dashboard macro-to-micro navigation groups live in `src/config/sellerTabs.ts`; preserve tab IDs for existing links and keep API summaries separate from imported historical analytics to prevent mixed definitions and periods.
 - Full product allocation uses `src/lib/fullBalanceamento.ts` with constrained quadprog mean-variance on complete daily paid revenue by MLB; it never treats seller series as product series or presents demand weights as financial returns, eligibility or shipment quantities.
 - Read-only `ml-analise-loja` projects paid orders into bounded aggregates with no buyer data, reuses store visibility, and rejects incomplete pagination; photo alerts require original dimensions, not thumbnail sizes.
@@ -23,12 +34,22 @@
 - Listas completas de lojas no frontend usam `fetchAllRows` (src/lib/fetchAllRows.ts) com ordem estável; o servidor corta em 1000 linhas e lojas além disso sumiam das buscas.
 - A revisão de planilhas com IA (Admin → Revisão IA) detecta inconsistências com regras determinísticas no navegador (src/lib/revisaoPlanilha.ts) e envia só os alertas à função `revisar-planilha` (só admin) para o modelo resumir; o modelo nunca inventa achados nem grava dados.
 - A leitura de carteira (modelo Deep Dive) não tem tela própria: `CarteiraNaSecao` entra nas seções existentes do painel quando nenhuma loja está selecionada; cálculo em funções puras em src/lib/carteiraDeepDive/calculo.ts (mesma janela de dias) e limites só em src/config/limiaresCarteira.ts.
-- index.html declara `lang="pt-BR"` e bloqueia tradução automática (`translate="no"`, meta google notranslate): o tradutor do navegador altera o DOM e derruba o React com erro de insertBefore.
+- index.html: `lang="pt-BR"`, `translate="no"` e meta notranslate; o tradutor altera o DOM e derruba o React (insertBefore).
 - Sistema de Design Peregrinus: tokens só em src/index.css (`:root` = tema claro padrão, `.dark` opcional; cores legadas são aliases da paleta `--ec-*`), formatação numérica só em src/lib/format.ts (utils/formatters.ts delega) e componentes base em src/components/ds (KpiCard, BandBar, TargetBar, Alert, EmptyState, PageHeader); medidores circulares renderizam BandBar.
 - Indicadores Pock derivados (Taxa de Venda vs mediana do mesmo subcluster, Favorabilidade ponderada pelas metas de src/config/limiaresCarteira.ts) ficam em src/lib/pockIndicadores.ts; a função `recomendar-seller` só redige texto a partir das métricas enviadas, sem ler nem gravar dados.
 - A "Referência da vertical" do GrowthPotentialPanel é a mediana (faixa P25–P75) dos índices mensais dos pares da mesma vertical, sem o próprio seller, calculada em src/lib/referenciaVertical.ts; com menos de 5 pares não há curva, para evitar comparação circular.
-- Gestão do Mercado Livre (Anúncios, Perguntas e ações no ML) é de consultor, definido só em `ml_e_consultor` (super_admin, admin, gerente ou carteira atribuída, como em `usePerfilNavegacao`) e sempre limitado às contas de `allowed_cust_ids`; o cabeçalho consulta `ml_sou_consultor` para não divergir do servidor.
+- Gestão do Mercado Livre (Anúncios, Perguntas e ações no ML) é de consultor, definido só em `ml_e_consultor` (super_admin, admin, gerente ou carteira atribuída, como em `usePerfilNavegacao`) e limitado às contas de `allowed_cust_ids` (super_admin, conta master, gerencia todas); o cabeçalho consulta `ml_sou_consultor` para não divergir do servidor.
 - Publicidade (`/publicidade`) gerencia Product Ads por `ml-ads-action` no fluxo de prévia e confirmação de `_shared/mlAcaoLote.ts`: criar e editar campanha (meta é `roas_target` 1–35, que substituiu o ACOS alvo), incluir, mover, ativar, pausar e remover anúncios (Ad Groups) um a um, no máximo 50. A prévia só avisa (orçamento mensal projetado contra `meta_investimento_ads` sobre `faturamento_30d` de `ml_sync_tema`, limites de 30 dias da `ml_settings`, anúncio sem estoque ou pausado). Escrita tenta `/advertising/...` e só em 404 `/marketplace/advertising/...`. Regras em `_shared/mlAdsGestao.ts` (sem imports, usado também pela tela); alertas cruzados com qualidade, fotos, ficha e frete e associações por mediana (mínimo 5 por lado, rotuladas como associação) só em src/lib/adsAnalise.ts, lendo `ml_ads_painel_grupos`.
 - Contratos das funções de gestão do ML e das tabelas e RPCs que as telas leem ficam em `docs/ml-gestao.md`; mudou entrada, saída, erro ou tabela, atualize lá. O teste de ponta a ponta contra o projeto publicado é `scripts/ml-e2e.sh` (confirma cada escrita, campanha de teste sempre pausada).
 - Integrações de agentes (MCP) ficam em src/lib/mcp (uma ferramenta por arquivo, só leitura, cliente com o token OAuth do usuário para respeitar as permissões); a função mcp é gerada pelo plugin e só vai ao ar ao publicar.
 - Subdiretórios têm o próprio AGENTS.md (ex.: supabase/functions/AGENTS.md com as regras das funções do ML); leia antes de alterar arquivos lá.
+- Operational summary surfaces and typography are scoped by `.operacao-resumo` using global CSS tokens and shared KpiCard, so presentation changes never alter reputation thresholds or logistics calculations.
+- Panel/portal materials, motion and accessibility use scoped tokens to preserve Home. Surface data attributes distinguish sheets/dialogs; useNumeroAnimado owns KPI counts to avoid DOM mutation.
+- HTML references use panel tokens; `.resumo-visual-ref` scopes overview finishes without changing data; navigation and filters never tilt.
+- Indicator summaries use security-invoker RPCs; portfolio batches always filter seller IDs and reject partial reads to preserve RLS and totals.
+- Promotion rebate rules use `src/lib/promocoesAnalise.ts`. Product opportunities use scoped listings/live item promotions for active ML accounts, otherwise spreadsheets; API errors never trigger fallback.
+- Ads charts use sinergiaPublicidade: same-date totals, nullable Pearson ≥7, no causality, API/imports separate. Overview goal uses metaInvestimentoAds: paginated campaign costs on summary dates, gaps=null, financial tiers≠internal goal.
+- Monthly cancellation summaries use the own-store `ml-analise-loja` monthly mode with complete pagination and BRL order totals for both paid and cancelled orders; zero needs confirmed coverage, partial-month comparisons match elapsed days, and reputation rates never imply cancelled monetary values or refunds.
+- Panel rain; login ropes. Clips pair metrics. Campaign TACOS: same-date store revenue, gaps=null; no API/import blends. Flex uses scoped monthly rows, confirmed city, nullable coverage and same-store comparisons.
+- Query cache: per-user 24h via `src/lib/cachePainel.ts`, never permissions/alerts, cleared on sign-out/permission change; queries >1s report `resposta_lenta`.
+- Every change runs `scripts/k6-publico.js` first (rules in docs/teste-carga-k6.md).

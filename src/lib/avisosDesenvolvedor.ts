@@ -10,7 +10,7 @@ export const PERFIS_SISTEMA = [
   { nome: 'Dono de grupo / Gestor de loja', escopo: 'Grupos e lojas vinculados', nivel: 4 },
 ];
 export const temPerfilDesenvolvedor = (roles: readonly string[]) => roles.includes('desenvolvedor');
-export const consultaLenta = (ms: number) => Number.isFinite(ms) && ms >= 8000;
+export const consultaLenta = (ms: number) => Number.isFinite(ms) && ms > 1000;
 
 export function origemAviso(): string {
   const pagina = window.location.pathname.split('/')[1];

@@ -35,3 +35,16 @@ export function projetarPedidos(orders: any[], inicio: string, fim: string) {
   const total = linhas.reduce((s, r) => ({ faturamento: s.faturamento + r.faturamento, pedidos: s.pedidos + r.pedidos, unidades: s.unidades + r.unidades, cancelados: s.cancelados + r.cancelados }), { faturamento: 0, pedidos: 0, unidades: 0, cancelados: 0 });
   return { ...total, taxaCancelamento: total.pedidos + total.cancelados > 0 ? total.cancelados / (total.pedidos + total.cancelados) : null, ticket: total.pedidos > 0 ? total.faturamento / total.pedidos : null, serie: linhas, itens: [...itens.values()] };
 }
+
+/** Daily visits stay on each date. A missing day is null, never zero. The period total exists only when every day was returned. */
+export function anexarVisitas<T extends { data: string }>(serie: T[], resultados: { date?: unknown; total?: unknown }[] | null | undefined) {
+  const map = new Map<string, number>();
+  for (const r of resultados ?? []) {
+    if (typeof r.total !== 'number' || !Number.isFinite(r.total) || r.total < 0) continue;
+    const data = String(r.date ?? '').slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(data)) map.set(data, r.total);
+  }
+  const dias = serie.map(r => ({ ...r, visitas: map.has(r.data) ? map.get(r.data)! : null }));
+  const coberto = dias.length > 0 && dias.every(r => r.visitas != null);
+  return { serie: dias, visitas: coberto ? dias.reduce((s, r) => s + (r.visitas ?? 0), 0) : null };
+}

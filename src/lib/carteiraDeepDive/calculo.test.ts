@@ -5,7 +5,7 @@ import {
 } from "./calculo";
 
 const loja = (id: string, extra: Partial<Loja> = {}): Loja => ({ id, custId: id, nickname: id, vertical: null, fechaIn: null, fechaOut: null, ...extra });
-const tot = (p: Partial<Totais>): Totais => ({ ...vazio(), linhas: 1, ...p });
+const tot = (p: Partial<Totais>): Totais => ({ ...vazio(), linhas: 1, mGmv: 1, mFull: 1, mFlex: 1, mAds: 1, mPromo: 1, mClips: 1, mComp: 1, ...p });
 
 describe("carteira deep dive", () => {
   it("compara a mesma janela de dias do mês anterior", () => {

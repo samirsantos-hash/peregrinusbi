@@ -8,6 +8,7 @@ import {
   type RiskSellerResult,
 } from "@/lib/risk/riskAggregator";
 import { fetchDominantVerticals } from "@/lib/risk/verticalOf";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 export interface RiskPanelData {
   results: RiskSellerResult[];
@@ -43,21 +44,21 @@ export function useSellerRiskPanel() {
       const prior = toIso(shift(currentDate, -2));
       const distinct = [current, closed, prior];
 
-      const { data: kpis, error: kErr } = await supabase
+      const { data: kpis, error: kErr } = await fetchAllRows((from, to) => supabase
         .from("sellers_kpi")
         .select(
           "seller_id, data, tgmv_lc, bpc, rep_claims_rate, rep_delayed_ht_rate, sellers!inner(id, nickname, cust_id)",
         )
-        .in("data", [current, closed, prior]);
+        .in("data", [current, closed, prior]).order("seller_id").order("data").order("id").range(from, to));
       if (kErr) throw kErr;
 
-      const verticalOf = await fetchDominantVerticals();
+      const verticalOf = await fetchDominantVerticals([...new Set(kpis.map((r: any) => String(r.seller_id)))]);
 
       type Snap = {
         sellerId: string;
         custId: string;
         nickname: string;
-        currentTgmv: number;
+        currentTgmv: number | null;
         closedTgmv: number;
         priorTgmv: number;
         closedBpc: number | null;
@@ -73,7 +74,7 @@ export function useSellerRiskPanel() {
           sellerId: sid,
           custId,
           nickname,
-          currentTgmv: 0,
+          currentTgmv: null,
           closedTgmv: 0,
           priorTgmv: 0,
           closedBpc: null,
@@ -82,12 +83,12 @@ export function useSellerRiskPanel() {
         });
         const tgmv = Number(row.tgmv_lc) || 0;
         const dataStr = String(row.data);
-        if (dataStr === current) s.currentTgmv = tgmv;
+        if (dataStr === current) s.currentTgmv = row.tgmv_lc == null || row.tgmv_lc === "" ? null : tgmv;
         else if (dataStr === closed) {
           s.closedTgmv = tgmv;
           s.closedBpc = row.bpc == null ? null : Number(row.bpc);
-          s.closedClaims = Number(row.rep_claims_rate) || 0;
-          s.closedDelayed = Number(row.rep_delayed_ht_rate) || 0;
+          s.closedClaims = row.rep_claims_rate == null ? null : Number(row.rep_claims_rate);
+          s.closedDelayed = row.rep_delayed_ht_rate == null ? null : Number(row.rep_delayed_ht_rate);
         } else if (dataStr === prior) s.priorTgmv = tgmv;
       }
 

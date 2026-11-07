@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import { brlCurto, numCurto } from "@/lib/format";
 import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { toast } from "sonner";
@@ -223,7 +224,8 @@ export default function CppDashboard() {
     });
   };
 
-  const exportCsv = () => {
+  const exportCsv = async () => {
+    if (!(await podeExportar())) return;
     if (!filtered.length) return;
     const cols = TABLE_COLS.map(c => c.key);
     const header = linhaCsvSegura(TABLE_COLS.map(c => c.label));

@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo } from "react";
@@ -14,9 +15,15 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TooltipInfo from "./TooltipInfo";
 import { type EligibilityItem } from "@/hooks/useEligibility";
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { Skeleton } from '@/components/ui/skeleton';
+import ProdutosCampanhasApi from '@/components/ml/ProdutosCampanhasApi';
+import { fonteProdutos, produtosVisiveis, PRODUTOS_INICIAIS } from '@/lib/produtosCampanhas';
 
 interface OpportunitiesPanelProps {
   items: EligibilityItem[];
+  custId?: string;
 }
 
 // Campaign type abbreviation map
@@ -43,10 +50,7 @@ interface ScoredItem extends EligibilityItem {
 }
 
 function computeScoredItems(items: EligibilityItem[]): ScoredItem[] {
-  // Deduplica por MLB (itemId): cada anúncio aparece UMA vez.
-  // Para cada MLB, mantém o registro mais recente (por data) como base
-  // e consolida métricas numéricas escolhendo o pico observado no período,
-  // evitando inflar valores ao somar snapshots já agregados (7d).
+  // Deduplica por MLB (itemId): cada anúncio aparece UMA vez, na posição mais recente.
   const byMlb = new Map<string, EligibilityItem>();
   for (const it of items) {
     const key = String(it.itemId);
@@ -58,29 +62,9 @@ function computeScoredItems(items: EligibilityItem[]): ScoredItem[] {
     const prevDate = prev.data ? new Date(prev.data).getTime() : 0;
     const curDate = it.data ? new Date(it.data).getTime() : 0;
     // Base = registro mais recente (descritivos: nome, categoria, ação, campanha)
+    // Última posição integral do anúncio: métricas, estoque, descontos e participação da mesma data.
+    // Máximos de datas diferentes criariam uma posição que nunca existiu.
     const base = curDate >= prevDate ? { ...it } : { ...prev };
-    const other = curDate >= prevDate ? prev : it;
-    // Consolida métricas pegando o maior valor observado entre as ocorrências
-    base.pedidos7d = Math.max(prev.pedidos7d || 0, it.pedidos7d || 0);
-    base.mediaTsiDiario7d = Math.max(prev.mediaTsiDiario7d || 0, it.mediaTsiDiario7d || 0);
-    base.estoqueMedio7d = Math.max(prev.estoqueMedio7d || 0, it.estoqueMedio7d || 0);
-    base.estoqueMedioFull7d = Math.max(prev.estoqueMedioFull7d || 0, it.estoqueMedioFull7d || 0);
-    base.discountTotal = Math.max(prev.discountTotal || 0, it.discountTotal || 0);
-    base.discountBest = Math.max(prev.discountBest || 0, it.discountBest || 0);
-    base.discountSellerPercentage = Math.max(
-      prev.discountSellerPercentage || 0,
-      it.discountSellerPercentage || 0,
-    );
-    base.flagBestPromo = prev.flagBestPromo || it.flagBestPromo;
-    // Optin: considera ativo se QUALQUER ocorrência estiver opted-in
-    // (flagItemSOptin = true significa "SEM optin" pelo nome do campo)
-    base.flagItemSOptin = prev.flagItemSOptin && it.flagItemSOptin;
-    // Mantém referências secundárias quando faltarem na base
-    if (!base.itemName && other.itemName) base.itemName = other.itemName;
-    if (!base.domDomainAgg1 && other.domDomainAgg1) base.domDomainAgg1 = other.domDomainAgg1;
-    if (!base.campaignIdBest && other.campaignIdBest) base.campaignIdBest = other.campaignIdBest;
-    if (!base.campaignType && other.campaignType) base.campaignType = other.campaignType;
-    if (!base.acaoRecomendada && other.acaoRecomendada) base.acaoRecomendada = other.acaoRecomendada;
     byMlb.set(key, base);
   }
   const unique = Array.from(byMlb.values());
@@ -153,7 +137,7 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
     return result;
   }, [scored, catFilter, actionFilter, searchQuery, sortBy]);
 
-  const displayed = showAll ? filtered : filtered.slice(0, 20);
+  const displayed = produtosVisiveis(filtered, showAll);
 
   // BLOCO 3: Profile cards
   const profileCards = useMemo(() => {
@@ -190,7 +174,8 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
     else setSelectedIds(new Set(displayed.map(i => i.id)));
   };
 
-  const exportSelected = () => {
+  const exportSelected = async () => {
+    if (!(await podeExportar())) return;
     const sel = displayed.filter(i => selectedIds.has(i.id));
     const csvLines = ["CAMPAIGN_ID_BEST;ITEM_ID"];
     sel.forEach(i => csvLines.push(linhaCsvSegura([i.campaignIdBest, i.itemId])));
@@ -446,11 +431,11 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
             </tbody>
           </table>
         </div>
-        {!showAll && filtered.length > 20 && (
+        {filtered.length > PRODUTOS_INICIAIS && (
           <div className="flex justify-center mt-4">
-            <Button variant="outline" size="sm" onClick={() => setShowAll(true)} className="gap-1.5 text-xs">
+            <Button variant="outline" size="sm" onClick={() => setShowAll(v => !v)} className="gap-1.5 text-xs">
               <ChevronDown className="w-3.5 h-3.5" />
-              Ver mais ({filtered.length - 20} restantes)
+              {showAll ? 'Recolher' : `Expandir (${filtered.length - PRODUTOS_INICIAIS} restantes)`}
             </Button>
           </div>
         )}
@@ -459,4 +444,14 @@ const OpportunitiesPanel = ({ items }: OpportunitiesPanelProps) => {
   );
 };
 
-export default OpportunitiesPanel;
+export default function ProdutosOportunidades(props: OpportunitiesPanelProps) {
+  const conexao = useQuery({ queryKey: ['ml-conta-produtos', props.custId], enabled: !!props.custId, retry: false, queryFn: async () => {
+    const { data, error } = await supabase.from('ml_accounts').select('id,status').eq('ml_user_id', Number(props.custId)).maybeSingle();
+    if (error) throw error;
+    return data;
+  }});
+  if (props.custId && conexao.isLoading) return <Skeleton className="h-60 w-full" />;
+  if (conexao.error) return <p role="alert" className="text-sm text-destructive">Não foi possível verificar a conexão da loja. Tente novamente.</p>;
+  if (conexao.data && fonteProdutos(conexao.data) === 'api') return <ProdutosCampanhasApi key={conexao.data.id} accountId={conexao.data.id} />;
+  return <><p className="text-xs text-muted-foreground">Fonte: planilhas de elegibilidade</p><OpportunitiesPanel key={props.custId ?? 'carteira'} items={props.items} /></>;
+}

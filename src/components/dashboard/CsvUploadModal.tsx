@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
@@ -73,7 +74,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
   const inputRef = useRef<HTMLInputElement>(null);
 
   const functionName = FUNCTION_MAP[uploadType];
-  const displayLabel = label || `📤 ${LABEL_MAP[uploadType]}`;
+  const displayLabel = label || LABEL_MAP[uploadType];
 
   const validateFile = (file: File): { valid: boolean; safra: string; error?: string } => {
     const name = file.name;
@@ -208,7 +209,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="glass-card border-glass-border bg-card/60 gap-2 w-full justify-start">
           <Upload className="w-4 h-4" />
-          {displayLabel}
+          <TextoComIcones texto={displayLabel} />
         </Button>
       </DialogTrigger>
       <DialogContent
@@ -217,7 +218,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
       >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            📤 Importar {LABEL_MAP[uploadType]} (SFTP)
+            <IconeIndicador simbolo="📤" /> Importar {LABEL_MAP[uploadType]} (SFTP)
           </DialogTitle>
         </DialogHeader>
 
@@ -253,14 +254,14 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold truncate">{stagedFile.name}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      📊 <strong>{stagedLineCount.toLocaleString("pt-BR")}</strong> linhas detectadas
+                      <IconeIndicador simbolo="📊" className="h-3 w-3" /> <strong>{stagedLineCount.toLocaleString("pt-BR")}</strong> linhas detectadas
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      📦 Tamanho: <strong>{(stagedFile.size / 1024).toFixed(1)} KB</strong>
+                      <IconeIndicador simbolo="📦" className="h-3 w-3" /> Tamanho: <strong>{(stagedFile.size / 1024).toFixed(1)} KB</strong>
                     </p>
                     {safraLabel && (
                       <p className="text-xs text-muted-foreground">
-                        📅 Safra: <strong>{safraLabel}</strong>
+                        <IconeIndicador simbolo="📅" className="h-3 w-3" /> Safra: <strong>{safraLabel}</strong>
                       </p>
                     )}
                   </div>
@@ -293,7 +294,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
               </div>
 
               <Progress value={progress} className="h-2" />
-              <p className="text-xs text-center text-muted-foreground">{progress}% · {message}</p>
+              <p className="text-xs text-center text-muted-foreground">{progress}% · <TextoComIcones texto={message} /></p>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
                 {STRATEGIC_GROUPS.map((g, i) => (
@@ -312,7 +313,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
                         : "bg-muted/30 border-border text-muted-foreground"
                     }`}
                   >
-                    {g.icon} {g.name}
+                    <IconeIndicador simbolo={g.icon} className="h-3 w-3 mr-1" /> {g.name}
                   </motion.div>
                 ))}
               </div>
@@ -324,7 +325,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 py-6">
               <Loader2 className="w-8 h-8 animate-spin text-neon-blue" />
               <Progress value={progress} className="h-2 w-full" />
-              <p className="text-sm text-muted-foreground">{message}</p>
+              <p className="text-sm text-muted-foreground"><TextoComIcones texto={message} /></p>
             </motion.div>
           )}
 
@@ -332,7 +333,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
           {status === "success" && (
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center gap-3 py-6">
               <CheckCircle className="w-10 h-10 text-emerald" />
-              <p className="text-sm font-medium text-center text-emerald">{message}</p>
+              <p className="text-sm font-medium text-center text-emerald"><TextoComIcones texto={message} /></p>
               {stats && (
                 <div className="text-xs text-muted-foreground text-center space-y-0.5">
                   {stats.sellers != null && <p>{stats.sellers} sellers · {stats.kpis} registros de KPI</p>}
@@ -350,7 +351,7 @@ const CsvUploadModal = ({ onSuccess, uploadType = "cpp_mensal", label }: CsvUplo
           {status === "error" && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3 py-6">
               <FileWarning className="w-10 h-10 text-destructive" />
-              <p className="text-sm font-semibold text-destructive text-center">{message}</p>
+              <p className="text-sm font-semibold text-destructive text-center"><TextoComIcones texto={message} /></p>
               {errorDetail && (
                 <p className="text-xs text-muted-foreground text-center max-w-sm">{errorDetail}</p>
               )}

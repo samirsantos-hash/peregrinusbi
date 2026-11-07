@@ -1,9 +1,10 @@
 export const LOGISTICA: Record<string, string> = {
   fulfillment: "Full",
   self_service: "Flex",
-  xd_drop_off: "Agência",
+  xd_drop_off: "Ponto de coleta",
   cross_docking: "Coleta",
-  drop_off: "Correios",
+  drop_off: "Postagem em agência",
+  xd_same_day: "Envio no mesmo dia",
   sem_info: "Sem informação",
 };
 

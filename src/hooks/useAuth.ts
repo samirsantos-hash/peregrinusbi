@@ -1,3 +1,4 @@
+import { limparCachePainel } from "@/lib/cachePainel";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
@@ -15,6 +16,22 @@ async function withTimeout<T>(request: PromiseLike<T>): Promise<T> {
       window.setTimeout(() => reject(new Error("Tempo limite ao carregar o perfil de acesso")), AUTH_PROFILE_TIMEOUT_MS);
     }),
   ]);
+}
+
+// Vários componentes usam useAuth ao mesmo tempo: compartilha uma única leitura do perfil
+// por usuário (30 s) em vez de repetir as mesmas consultas a cada componente.
+const PERFIL_TTL_MS = 30_000;
+let perfilCompartilhado: { userId: string; em: number; promessa: Promise<[any, any]> } | null = null;
+export function limparPerfilCompartilhado() { perfilCompartilhado = null; }
+function carregarPerfil(userId: string) {
+  if (perfilCompartilhado && perfilCompartilhado.userId === userId && Date.now() - perfilCompartilhado.em < PERFIL_TTL_MS) return perfilCompartilhado.promessa;
+  const promessa = withTimeout(Promise.all([
+    supabase.from("user_roles").select("role").eq("user_id", userId),
+    supabase.from("user_access_control").select("must_change_password, temp_password_expires_at").eq("user_id", userId).maybeSingle(),
+  ])) as Promise<[any, any]>;
+  perfilCompartilhado = { userId, em: Date.now(), promessa };
+  promessa.catch(() => { if (perfilCompartilhado?.promessa === promessa) perfilCompartilhado = null; });
+  return promessa;
 }
 
 export function useAuth() {
@@ -47,21 +64,11 @@ export function useAuth() {
       }
 
       try {
-        const [rolesResult, accessResult] = await withTimeout(Promise.all([
-          supabase
-            .from("user_roles")
-            .select("role")
-            .eq("user_id", currentSession.user.id),
-          supabase
-            .from("user_access_control")
-            .select("must_change_password, temp_password_expires_at")
-            .eq("user_id", currentSession.user.id)
-            .maybeSingle(),
-        ]));
+        const [rolesResult, accessResult] = await carregarPerfil(currentSession.user.id);
 
         if (!mounted) return;
 
-        setIsAdmin(rolesResult.data?.some((r) => r.role === "admin") ?? false);
+        setIsAdmin(rolesResult.data?.some((r) => r.role === "admin" || r.role === 'super_admin') ?? false);
         setIsGerente(rolesResult.data?.some((r) => r.role === "gerente") ?? false);
         setIsGestorLoja(rolesResult.data?.some((r) => r.role === "gestor_loja") ?? false);
 
@@ -161,6 +168,8 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    limparCachePainel();
+    limparPerfilCompartilhado();
     await supabase.auth.signOut();
   };
 
@@ -182,6 +191,7 @@ export function useAuth() {
         return { error: new Error(data?.error || markError?.message || "Falha ao finalizar troca de senha") };
       }
 
+      limparPerfilCompartilhado();
       setMustChangePassword(false);
     }
 

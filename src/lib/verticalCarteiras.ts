@@ -1,5 +1,6 @@
 /** Comparação de lojas por vertical contra a mediana da própria vertical. Funções puras. */
-export interface LojaMes { sellerId: string; vertical: string | null; atual: number; anterior: number }
+/** atual/anterior null = mês sem medição (nunca tratado como faturamento zero). */
+export interface LojaMes { sellerId: string; vertical: string | null; atual: number | null; anterior: number | null }
 export interface LojaComparada extends LojaMes { crescimento: number | null; vsMediana: number | null }
 export interface ResumoVertical {
   vertical: string;
@@ -27,7 +28,8 @@ export function compararLojas(lojas: LojaMes[]): { lojas: LojaComparada[]; verti
   const out: LojaComparada[] = [];
   const verticais: ResumoVertical[] = [];
   for (const [vertical, ls] of grupos) {
-    const cresc = ls.map((l) => (l.anterior > 0 ? l.atual / l.anterior - 1 : null));
+    // Crescimento exige as duas medições.
+    const cresc = ls.map((l) => (l.atual != null && l.anterior != null && l.anterior > 0 ? l.atual / l.anterior - 1 : null));
     const med = mediana(cresc.filter((c): c is number => c !== null));
     let acima = 0, comCresc = 0;
     ls.forEach((l, i) => {
@@ -36,7 +38,7 @@ export function compararLojas(lojas: LojaMes[]): { lojas: LojaComparada[]; verti
       if (vs !== null) { comCresc++; if (vs > 0) acima++; }
       out.push({ ...l, crescimento: c, vsMediana: vs });
     });
-    verticais.push({ vertical, lojas: ls.length, medianaFat: mediana(ls.map((l) => l.atual)) ?? 0, medianaCresc: med, acima: comCresc ? acima / comCresc : 0 });
+    verticais.push({ vertical, lojas: ls.length, medianaFat: mediana(ls.map((l) => l.atual).filter((v): v is number => v != null)) ?? 0, medianaCresc: med, acima: comCresc ? acima / comCresc : 0 });
   }
   verticais.sort((a, b) => b.lojas - a.lojas);
   return { lojas: out, verticais };

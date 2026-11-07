@@ -11,6 +11,7 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "./env.ts";
 import { type Conta, contaComToken, cors, exigirGestor, resposta } from "./mlConta.ts";
+import { exigirPermissao, permissaoAcao } from './permissoes.ts';
 
 const ORCAMENTO_MS = 110_000;
 
@@ -83,9 +84,15 @@ export function servirAcaoEmLote(opcoes: Opcoes) {
     const ctx: Contexto = { admin, conta: alvo.conta, token: alvo.token, userId, accountId };
 
     const { data: existente } = await admin.from("ml_action_requests")
-      .select("id, acao, status, antes, resposta_ml")
+      .select("id, acao, status, antes, resposta_ml, payload")
       .eq("account_id", accountId).eq("usuario_id", userId).eq("idempotency_key", chave).maybeSingle();
     if (existente && existente.acao !== opcoes.acao) return resposta({ error: "Esta chave de envio já foi usada em outra ação." }, 409);
+    const dadosPermissao = etapa === 'previa' ? body : (existente?.payload as Record<string, unknown> | null)?.permissao_dados as Record<string, unknown> | undefined;
+    const permissao = permissaoAcao(opcoes.acao, dadosPermissao ?? {});
+    // Old previews have no capability metadata: require a new preview instead of guessing.
+    if (!permissao) return resposta({ error: 'Gere uma nova prévia com a função autorizada.' }, 403);
+    const negado = await exigirPermissao(req, permissao);
+    if (negado) return negado;
     if (existente?.status === "committed") {
       const resultados = (existente.resposta_ml as { resultados?: Resultado[] } | null)?.resultados ?? [];
       return resposta({ etapa: "confirmar", status: "ja_feito", resultados });
@@ -105,7 +112,7 @@ export function servirAcaoEmLote(opcoes: Opcoes) {
         status: "preview",
         antes: { linhas: p.linhas },
         depois: { linhas: p.linhas.map((l) => ({ chave: l.chave, depois: l.depois })) },
-        payload: { itens: p.linhas.map((l) => l.chave) },
+        payload: { itens: p.linhas.map((l) => l.chave), permissao_dados: { tipo: body.tipo, acao: body.acao } },
         estado_ml_hash: null,
       });
       if (error) return resposta({ error: "Não foi possível registrar a prévia." }, 500);

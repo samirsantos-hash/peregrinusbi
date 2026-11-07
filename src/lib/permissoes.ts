@@ -1,0 +1,40 @@
+export type FuncaoPermissao = { id: string; nome: string; grupo: string; acoes: { id: string; nome: string }[] };
+const funcao = (id: string, nome: string, grupo: string, acoes: [string, string][] = []): FuncaoPermissao => ({ id, nome, grupo, acoes: acoes.map(([id, nome]) => ({ id, nome })) });
+export const FUNCOES_PERMISSAO = [
+  funcao('resumo', 'Visão geral', 'Resultados'),
+  funcao('reputacao', 'Reputação', 'Resultados'),
+  funcao('preco', 'Preço e concorrentes', 'Resultados', [['preco.alterar', 'Alterar preços']]),
+  funcao('publicidade', 'Publicidade', 'Resultados', [['publicidade.campanhas', 'Criar e editar campanhas'], ['publicidade.anuncios', 'Incluir, mover, ativar, pausar e remover anúncios Ads']]),
+  funcao('promocoes', 'Oportunidades e promoções', 'Resultados', [['promocoes.aplicar', 'Aplicar promoções e cupons'], ['promocoes.remover', 'Remover promoções e cupons']]),
+  funcao('clips', 'Clips', 'Resultados'),
+  funcao('logistica', 'Logística e Flex', 'Operação'),
+  funcao('qualidade', 'Qualidade', 'Operação'),
+  funcao('anuncios', 'Anúncios', 'Operação'),
+  funcao('perguntas', 'Perguntas', 'Operação', [['perguntas.responder', 'Responder perguntas']]),
+  funcao('full', 'Full', 'Planejamento'),
+  funcao('metas', 'Metas', 'Planejamento', [['metas.alterar', 'Editar metas']]),
+  funcao('correlacoes', 'Correlações', 'Planejamento'),
+  funcao('alertas', 'Alertas e riscos', 'Planejamento'),
+  funcao('mercado', 'Estudos de mercado e tendências', 'Planejamento'),
+  funcao('integracoes', 'Integrações', 'Gestão', [['integracoes.conectar', 'Conectar lojas e gerar convites'], ['integracoes.atualizar', 'Atualizar dados das lojas'], ['integracoes.configurar', 'Editar configurações da integração']]),
+  funcao('carteiras', 'Carteiras', 'Gestão', [['carteiras.alterar', 'Alterar carteiras e vínculos de lojas']]),
+  funcao('multilojas', 'Multilojas', 'Gestão'),
+  funcao('usuarios', 'Usuários', 'Gestão', [['usuarios.criar', 'Criar usuários'], ['usuarios.pausar', 'Pausar ou remover usuários'], ['usuarios.senhas', 'Redefinir senhas']]),
+  funcao('dados', 'Importação e revisão de dados', 'Gestão', [['dados.importar', 'Importar dados']]),
+  funcao('relatorios', 'Relatórios', 'Gestão', [['relatorios.exportar', 'Exportar relatórios']]),
+] satisfies FuncaoPermissao[];
+export const PERMISSOES_VALIDAS = FUNCOES_PERMISSAO.flatMap(f => [`${f.id}.visualizar`, ...f.acoes.map(a => a.id)]);
+export const PERMISSAO_PAI = Object.fromEntries(FUNCOES_PERMISSAO.flatMap(f => f.acoes.map(a => [a.id, `${f.id}.visualizar`])));
+export const SECAO_PERMISSAO: Record<string, string> = { efficiency: 'resumo', reputation: 'reputacao', competitiveness: 'preco', publicidade: 'publicidade', opportunities: 'promocoes', clips: 'clips', logistics: 'logistica', quality: 'qualidade', perguntas: 'perguntas', pock: 'full', metas: 'metas', correlacoes: 'correlacoes', 'alertas-riscos': 'alertas' };
+export function alterarChecklist(atuais: string[], permissao: string, marcada: boolean): string[] {
+  if (!PERMISSOES_VALIDAS.includes(permissao)) return atuais;
+  const novo = new Set(atuais);
+  if (marcada) { novo.add(permissao); const pai = PERMISSAO_PAI[permissao]; if (pai) novo.add(pai); }
+  else { novo.delete(permissao); for (const [filha, pai] of Object.entries(PERMISSAO_PAI)) if (pai === permissao) novo.delete(filha); }
+  return [...novo].sort();
+}
+export type EstadoPermissoes = { master: boolean; legado: boolean; revisado: boolean; permissoes: string[] };
+export function podeExecutar(estado: EstadoPermissoes | undefined, permissao: string) {
+  if (!estado || !PERMISSOES_VALIDAS.includes(permissao)) return false;
+  return estado.master || (estado.permissoes.includes(permissao) && (!PERMISSAO_PAI[permissao] || estado.permissoes.includes(PERMISSAO_PAI[permissao])));
+}

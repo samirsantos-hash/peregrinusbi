@@ -1,3 +1,5 @@
+import { fetchAllRows } from "@/lib/fetchAllRows";
+import { podeExportar } from '@/lib/permissaoExportar';
 import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
@@ -8,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   Briefcase, ExternalLink, AlertTriangle, TrendingUp, TrendingDown,
-  Upload, Settings, Download, Search, ChevronRight, FolderPlus,
+  Upload, Settings, Download, Search, ChevronRight, FolderPlus, ArrowLeft,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -108,11 +110,12 @@ function useCppMensal() {
   return useQuery({
     queryKey: ["cpp_mensal_gm"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("cpp_mensal")
         .select("*")
-        .order("tim_month_id", { ascending: false })
-        .limit(5000);
+        .order("tim_month_id", { ascending: false }).order("cus_cust_id_sel")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as CppMensalRow[];
     },
@@ -124,11 +127,12 @@ function useSellersPm() {
   return useQuery({
     queryKey: ["sellers_pm_gm"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("sellers_pm")
         .select("*")
-        .order("snapshot_date", { ascending: false })
-        .limit(5000);
+        .order("snapshot_date", { ascending: false }).order("cust_id")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as SellersPmRow[];
     },
@@ -140,10 +144,12 @@ function useCdpMensal() {
   return useQuery({
     queryKey: ["cdp_mensal_gm"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("cdp_mensal")
         .select("*")
-        .limit(5000);
+        .order("tim_month_id", { ascending: false }).order("cus_cust_id_sel")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as Record<string, unknown>[];
     },
@@ -155,10 +161,12 @@ function useGmElegibilidade() {
   return useQuery({
     queryKey: ["gm_elegibilidade"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("gm_elegibilidade")
         .select("*")
-        .limit(5000);
+        .order("id")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as Record<string, unknown>[];
     },
@@ -170,10 +178,12 @@ function useGmLiveListings() {
   return useQuery({
     queryKey: ["gm_live_listings"],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      // Leitura completa paginada; falha parcial é rejeitada para não apresentar universo incompleto.
+      const { data, error } = await fetchAllRows((de, ate) => (supabase as any)
         .from("gm_live_listings")
         .select("*")
-        .limit(5000);
+        .order("id")
+        .range(de, ate));
       if (error) throw error;
       return (data || []) as Record<string, unknown>[];
     },
@@ -221,7 +231,9 @@ export default function GestaoCarteira() {
   // Enrich sellers
   const enrichedSellers = useMemo<EnrichedSeller[]>(() => {
     const currentMonth = cppData.filter((r) => r.tim_month_id === activeMonth);
-    const pmMap = new Map(pmData.map((r) => [r.cust_id, r]));
+    // pmData vem do mais recente para o mais antigo: mantém a primeira (mais recente) por loja.
+    const pmMap = new Map<typeof pmData[number]["cust_id"], typeof pmData[number]>();
+    for (const r of pmData) if (!pmMap.has(r.cust_id)) pmMap.set(r.cust_id, r);
 
     return currentMonth.map((cpp) => {
       const pm = pmMap.get(cpp.cus_cust_id_sel);
@@ -469,7 +481,8 @@ export default function GestaoCarteira() {
   };
 
   // Export CSV
-  const handleExport = () => {
+  const handleExport = async () => {
+    if (!(await podeExportar())) return;
     const headers = ["Status", "Nickname", "CustID", "Cluster", "Nível", "H/L", "UF", "TGMV", "Δ MoM%", "Score", "Dias Exp."];
     const csvRows = sortedSellers.map((s) => [
       s.worstAlert?.tipo ?? "OK",
@@ -508,7 +521,7 @@ export default function GestaoCarteira() {
       {/* Simple nav bar */}
       <div className="border-b border-border/50 bg-card/30 backdrop-blur-sm px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => window.location.href = "/"}>← Dashboard</Button>
+          <Button variant="ghost" size="sm" onClick={() => window.location.href = "/"}><ArrowLeft aria-hidden="true" className="h-4 w-4" />Dashboard</Button>
           <Button variant="ghost" size="sm" onClick={() => window.location.href = "/cpp"}>CPP</Button>
         </div>
       </div>

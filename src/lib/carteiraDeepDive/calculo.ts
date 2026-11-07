@@ -40,6 +40,8 @@ export interface Totais {
   visMatch: number;
   visCheaper: number;
   visExpensive: number;
+  /** Linhas com cada métrica medida (cobertura); proporções só com cobertura completa. */
+  mGmv: number; mFull: number; mFlex: number; mAds: number; mPromo: number; mClips: number; mComp: number;
 }
 
 export interface Janela { ini: string; fim: string; dias: number }
@@ -91,11 +93,19 @@ export const dentro = (data: string, j: Janela) => data >= j.ini && data <= j.fi
 /* ───────── agregação ───────── */
 
 export function vazio(): Totais {
-  return { linhas: 0, gmv: 0, itens: 0, visitas: 0, full: 0, flex: 0, ads: 0, promo: 0, clips: 0, visMatch: 0, visCheaper: 0, visExpensive: 0 };
+  return { linhas: 0, gmv: 0, itens: 0, visitas: 0, full: 0, flex: 0, ads: 0, promo: 0, clips: 0, visMatch: 0, visCheaper: 0, visExpensive: 0, mGmv: 0, mFull: 0, mFlex: 0, mAds: 0, mPromo: 0, mClips: 0, mComp: 0 };
 }
 
 export function somar(t: Totais, r: LinhaDiaria) {
   t.linhas++;
+  const tem = (v: unknown) => v !== null && v !== undefined && (v as unknown) !== "";
+  if (tem(r.tgmv_lc)) t.mGmv++;
+  if (tem(r.tgmv_lc_full)) t.mFull++;
+  if (tem(r.tgmv_lc_flex)) t.mFlex++;
+  if (tem(r.tgmv_lc_pads)) t.mAds++;
+  if (tem(r.cdp_tgmv_lc)) t.mPromo++;
+  if (tem(r.tgmv_lc_clips)) t.mClips++;
+  if (tem(r.visits_match) && tem(r.visits_cheaper) && tem(r.visits_expensive)) t.mComp++;
   t.gmv += n(r.tgmv_lc);
   t.itens += n(r.tsi);
   t.visitas += n(r.visits);
@@ -140,13 +150,15 @@ export interface Alavancas {
 
 /** Todas as taxas são razão dos totais (soma ÷ soma). */
 export function alavancas(t: Totais): Alavancas {
+  // Ausência não vira zero: sem cobertura completa da métrica e do faturamento, a proporção fica indisponível.
+  const ok = (m: number) => t.linhas > 0 && m === t.linhas && t.mGmv === t.linhas;
   return {
-    full: razao(t.full, t.gmv),
-    flex: razao(t.flex, t.gmv),
-    ads: razao(t.ads, t.gmv),
-    promocao: razao(t.promo, t.gmv),
-    competitividade: razao(t.visMatch + t.visCheaper, t.visMatch + t.visCheaper + t.visExpensive),
-    clips: razao(t.clips, t.gmv),
+    full: ok(t.mFull) ? razao(t.full, t.gmv) : null,
+    flex: ok(t.mFlex) ? razao(t.flex, t.gmv) : null,
+    ads: ok(t.mAds) ? razao(t.ads, t.gmv) : null,
+    promocao: ok(t.mPromo) ? razao(t.promo, t.gmv) : null,
+    competitividade: t.linhas > 0 && t.mComp === t.linhas ? razao(t.visMatch + t.visCheaper, t.visMatch + t.visCheaper + t.visExpensive) : null,
+    clips: ok(t.mClips) ? razao(t.clips, t.gmv) : null,
   };
 }
 
@@ -174,8 +186,9 @@ export interface DiagnosticoLoja {
 }
 
 export function diagnosticar(loja: Loja, atual?: Totais, anterior?: Totais): DiagnosticoLoja {
-  const gmv = atual ? atual.gmv : null;
-  const gmvAnterior = anterior ? anterior.gmv : null;
+  // Faturamento só conta com todas as linhas da janela medidas.
+  const gmv = atual && atual.mGmv > 0 && atual.mGmv === atual.linhas ? atual.gmv : null;
+  const gmvAnterior = anterior && anterior.mGmv > 0 && anterior.mGmv === anterior.linhas ? anterior.gmv : null;
   const queda = variacao(gmv, gmvAnterior);
   const alav = atual ? alavancas(atual) : null;
   const alertas: AlertaLoja[] = [];

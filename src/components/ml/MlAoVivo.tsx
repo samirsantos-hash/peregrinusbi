@@ -1,5 +1,7 @@
+import { usePermissoes } from '@/hooks/usePermissoes';
 // Bloco "Direto do Mercado Livre": mostra, em cada aba, o tema importado pela
 // conexão da própria loja (ml_sync_tema). Só aparece quando a loja está conectada.
+import PromocoesApi from "@/components/ml/PromocoesApi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshCw } from "lucide-react";
@@ -19,7 +21,7 @@ export type SecaoMl = "resumo" | "reputacao" | "qualidade" | "logistica" | "opor
 
 const TEMAS: Record<SecaoMl, string[]> = {
   resumo: ["vendas", "visitas"],
-  reputacao: ["reputacao", "perguntas"],
+  reputacao: ["reputacao", "perguntas", "vendas"],
   qualidade: ["anuncios"],
   logistica: ["envios"],
   oportunidades: ["promocoes"],
@@ -36,7 +38,7 @@ const MEDALHA: Record<string, string> = { platinum: "Platinum", gold: "Gold", si
 const dataBr = (iso?: string | null) => (iso ? new Date(iso).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "");
 
 export default function MlAoVivo({ custId, secao }: { custId?: string; secao: SecaoMl }) {
-  const { isAdmin, isGerente } = useAuth();
+  const { pode } = usePermissoes();
   const qc = useQueryClient();
   const [atualizando, setAtualizando] = useState(false);
   const temas = TEMAS[secao];
@@ -52,19 +54,33 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
       return Object.fromEntries((data ?? []).map((r) => [r.tema, r])) as Record<string, { dados: any; erro: string | null; atualizado_em: string }>;
     },
   });
-  if (!custId || !data || !temas.some((t) => data[t])) return null;
+  // Publicidade consulta a API de Product Ads direto — não depende de ml_sync_tema.ads.
+  if (!custId) return null;
+  if (secao !== "publicidade" && (!data || !temas.some((t) => data[t]))) return null;
 
   const atualizar = async () => {
     setAtualizando(true);
-    const { error } = await supabase.functions.invoke("ml-sync-loja", { body: { cust_id: custId } });
+    const { data: resultado, error } = await supabase.functions.invoke("ml-sync-loja", { body: { cust_id: custId, ...(secao === 'logistica' ? { tema: 'envios' } : {}) } });
     setAtualizando(false);
     if (error) return toast.error("Não foi possível atualizar agora.");
+    if (secao === 'logistica' && resultado?.temas?.some((t: any) => t.tema === 'envios' && !t.ok)) {
+      qc.invalidateQueries({ queryKey: ["ml-sync-tema", custId] });
+      return toast.error('Não foi possível confirmar os envios dos pedidos agora.');
+    }
     toast.success("Dados do Mercado Livre atualizados.");
     qc.invalidateQueries({ queryKey: ["ml-sync-tema", custId] });
   };
 
-  const d = (t: string) => data[t]?.dados ?? null;
-  const ultima = temas.map((t) => data[t]?.atualizado_em).filter(Boolean).sort().pop();
+  const d = (t: string) => data?.[t]?.dados ?? null;
+  const ultima = temas.map((t) => data?.[t]?.atualizado_em).filter(Boolean).sort().pop();
+
+  if (secao === "publicidade") {
+    return (
+      <section className="rounded-lg border border-border bg-card p-4 space-y-4 [border-width:0.5px]">
+        <GestaoAds key={custId} custId={custId} />
+      </section>
+    );
+  }
 
   return (
     <section className="rounded-lg border border-border bg-card p-4 space-y-4 [border-width:0.5px]">
@@ -73,23 +89,22 @@ export default function MlAoVivo({ custId, secao }: { custId?: string; secao: Se
           <RotuloSecao>Direto do Mercado Livre</RotuloSecao>
           <p className="text-xs text-muted-foreground">Conta conectada · atualizado em {dataBr(ultima)}</p>
         </div>
-        {isAdmin && (
+        {pode('integracoes.atualizar') && (
           <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
             <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${atualizando ? "animate-spin" : ""}`} />
             {atualizando ? "Atualizando…" : "Atualizar"}
           </Button>
         )}
       </div>
-      {temas.map((t) => data[t]?.erro && !data[t]?.dados ? (
+      {temas.map((t) => data?.[t]?.erro && !data?.[t]?.dados ? (
         <p key={t} className="text-xs text-muted-foreground">Este dado não veio do Mercado Livre na última atualização.</p>
       ) : null)}
       {secao === "resumo" && <Resumo vendas={d("vendas")} visitas={d("visitas")} />}
-      {secao === "reputacao" && <Reputacao r={d("reputacao")} p={d("perguntas")} />}
+      {secao === "reputacao" && <Reputacao r={d("reputacao")} p={d("perguntas")} vendas={d("vendas")} />}
       {secao === "qualidade" && <><Qualidade a={d("anuncios")} /><CompararAnuncios key={custId} custId={custId} itens={d("anuncios")?.itens ?? []} /></>}
       {secao === "logistica" && <Logistica e={d("envios")} />}
-      {secao === "oportunidades" && <Promocoes p={d("promocoes")} />}
-      {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={isAdmin || isGerente} />}
-      {secao === "publicidade" && <><Ads a={d("ads")} fat={d("vendas")?.faturamento_30d} /><GestaoAds key={custId} custId={custId} /></>}
+      {secao === "oportunidades" && <PromocoesApi custId={custId} resumo={d("promocoes")} />}
+      {secao === "perguntas" && <Perguntas p={d("perguntas")} custId={custId} podeResponder={pode('perguntas.responder')} />}
     </section>
   );
 }
@@ -134,6 +149,21 @@ function Resumo({ vendas, visitas }: { vendas: any; visitas: any }) {
           </ResponsiveContainer>
         </div>
       )}
+      <GraficoCancelamentos serie={serie} />
+    </>
+  );
+}
+
+function serieCancelamentos(vendas: any) {
+  return (vendas?.serie ?? []).map((x: any) => {
+    const tot = (x.pedidos ?? 0) + (x.cancelados ?? 0);
+    return { ...x, taxa: tot ? ((x.cancelados ?? 0) / tot) * 100 : null, label: x.data.slice(8, 10) + "/" + x.data.slice(5, 7) };
+  });
+}
+
+function GraficoCancelamentos({ serie }: { serie: any[] }) {
+  return (
+    <>
       {serie.length > 0 && (
         <div className="h-56">
           <p className="mb-1 text-xs text-muted-foreground">Pedidos, cancelamentos e taxa de cancelamento por dia</p>
@@ -156,8 +186,8 @@ function Resumo({ vendas, visitas }: { vendas: any; visitas: any }) {
   );
 }
 
-function Reputacao({ r, p }: { r: any; p: any }) {
-  if (!r && !p) return null;
+function Reputacao({ r, p, vendas }: { r: any; p: any; vendas: any }) {
+  if (!r && !p && !vendas) return null;
   return (
     <>
       <Grade>
@@ -172,6 +202,7 @@ function Reputacao({ r, p }: { r: any; p: any }) {
           <KpiCard rotulo="Tempo de resposta" valor={p.mediana_horas_resposta == null ? "Sem dado" : p.mediana_horas_resposta < 1 ? `${num(p.mediana_horas_resposta * 60)} min` : `${num(p.mediana_horas_resposta, 1)} h`} referencia="mediana das últimas 50" />
         </Grade>
       )}
+      <GraficoCancelamentos serie={serieCancelamentos(vendas)} />
     </>
   );
 }
@@ -220,7 +251,8 @@ function Logistica({ e }: { e: any }) {
   const total = linhas.reduce((s, [, v]) => s + v.faturamento, 0);
   return (
     <div className="space-y-2">
-      <p className="text-xs text-muted-foreground">Vendas dos últimos 30 dias por modalidade de envio · meta Full ≥ 40%</p>
+      <p className="text-xs text-muted-foreground">Vendas pagas dos últimos 30 dias por envio do pedido · meta Full ≥ 40%</p>
+      {e.cobertura && <p className="text-xs text-muted-foreground">Modal identificado em {num(e.cobertura.identificados)} de {num(e.cobertura.pedidos)} pedidos{!e.cobertura.completa ? ' · cobertura parcial' : ''}</p>}
       {linhas.map(([k, v]) => {
         const p = total ? v.faturamento / total : 0;
         return (
@@ -231,53 +263,6 @@ function Logistica({ e }: { e: any }) {
         );
       })}
     </div>
-  );
-}
-
-function Promocoes({ p }: { p: any }) {
-  if (!p) return null;
-  return (
-    <>
-      <Grade>
-        <KpiCard focal rotulo="Promoções ativas" valor={num(p.ativas)} referencia={`${num(p.total)} disponíveis para a loja`} />
-      </Grade>
-      <ul className="text-xs divide-y divide-border">
-        {(p.lista ?? []).slice(0, 12).map((x: any) => (
-          <li key={x.id} className="py-1.5 flex justify-between gap-2">
-            <span>{x.nome ?? x.tipo}</span>
-            <span className="text-muted-foreground">{x.status === "started" ? "Ativa" : x.status === "pending" ? "Programada" : "Disponível"}{x.fim ? ` · até ${new Date(x.fim).toLocaleDateString("pt-BR")}` : ""}</span>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
-}
-
-function Ads({ a, fat }: { a: any; fat?: number }) {
-  if (!a) return null;
-  if (!a.usa_ads) return <p className="text-sm text-muted-foreground">A loja não usa Product Ads.</p>;
-  const acos = a.vendas_ads ? a.investimento / a.vendas_ads : null;
-  const roas = a.investimento ? a.vendas_ads / a.investimento : null;
-  const share = fat ? a.investimento / fat : null;
-  return (
-    <>
-      <Grade>
-        <KpiCard focal rotulo="Investimento 30 dias" valor={brl(a.investimento, true)} referencia={`${pctFracao(share, 2)} do faturamento · Meta Peregrinus 3%`} />
-        <KpiCard rotulo="Vendas por Ads" valor={brl(a.vendas_ads)} referencia={`${num(a.unidades)} unidades`} />
-        <KpiCard rotulo="ROAS" valor={roas == null ? "Sem dado" : `${num(roas, 1)}x`} referencia={`ACOS ${pctFracao(acos)}`} />
-        <KpiCard rotulo="Cliques" valor={num(a.cliques)} referencia={`${num(a.impressoes)} impressões`} />
-      </Grade>
-      {(a.campanhas ?? []).length > 0 && (
-        <ul className="text-xs divide-y divide-border tabular-nums">
-          {a.campanhas.map((c: any, i: number) => (
-            <li key={i} className="py-1.5 flex justify-between gap-2">
-              <span>{c.nome} <span className="text-muted-foreground">({c.status === "active" ? "ativa" : "pausada"})</span></span>
-              <span>{brl(c.investimento, true)} → {brl(c.vendas)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </>
   );
 }
 

@@ -180,8 +180,9 @@ export const ACOES_REPUTACAO: ActionItem[] = [
 ];
 
 export const ACOES_POR_ABA: Record<string, ActionItem[]> = {
-  efficiency: ACOES_RESUMO,
-  executive: ACOES_FATURAMENTO,
+  // Visão geral = Resumo + Faturamento (sem repetir abas)
+  efficiency: [...ACOES_RESUMO, ...ACOES_FATURAMENTO],
+  executive: [...ACOES_RESUMO, ...ACOES_FATURAMENTO],
   logistics: ACOES_LOGISTICA,
   quality: ACOES_QUALIDADE,
   competitiveness: ACOES_PRECO,

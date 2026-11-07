@@ -1,11 +1,12 @@
 import AguiaLogo from "@/components/aura/AguiaLogo";
+import MarcaEcom from "@/components/MarcaEcom";
 import CarteiraNaSecao from "@/components/carteira/deepdive/CarteiraNaSecao";
 import MlAoVivo from "@/components/ml/MlAoVivo";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu, MessageCircleQuestion, Search, Megaphone } from "lucide-react";
+import { ArrowLeft, LayoutDashboard, DollarSign, Swords, Truck, Loader2, Settings, LogOut, Shield, HeartPulse, Gift, Video, KeyRound, TrendingUp, Sun, Moon, Store, Menu, MessageCircleQuestion, Search, Megaphone } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import NewBadge from "@/components/ui/NewBadge";
 import {
@@ -28,38 +29,38 @@ import SecaoHeader from "@/components/dashboard/SecaoHeader";
 import AvisoSemOperacao from "@/components/dashboard/AvisoSemOperacao";
 
 import GranularityToggle, { type Granularity } from "@/components/dashboard/GranularityToggle";
-import ExecutivePanel from "@/components/dashboard/ExecutivePanel";
-import { Daily7DPanel } from "@/components/dashboard/Daily7DPanel";
-import GmvMesVsMes from "@/components/charts/GmvMesVsMes";
-import TrendAnalysisPanel from "@/components/dashboard/TrendAnalysisPanel";
-import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
-import EfficiencyPanel from "@/components/dashboard/EfficiencyPanel";
 import CompetitivenessPanel from "@/components/dashboard/CompetitivenessPanel";
-import GrowthPotentialPanel from "@/components/dashboard/GrowthPotentialPanel";
+import BuscaConcorrentes from "@/components/dashboard/BuscaConcorrentes";
 import LogisticsPanel from "@/components/dashboard/LogisticsPanel";
+import FlexDesempenho from "@/components/dashboard/FlexDesempenho";
 import UpliftFullPanel from "@/components/seller/UpliftFullPanel";
 import StockoutRiskPanel from "@/components/dashboard/StockoutRiskPanel";
 import QualityRadarPanel from "@/components/dashboard/QualityRadarPanel";
 import CriticalListingsTable from "@/components/dashboard/CriticalListingsTable";
 import OpportunitiesPanel from "@/components/dashboard/OpportunitiesPanel";
-import CdpEvolucao from "@/components/dashboard/CdpEvolucao";
+import CampanhasDesempenho from "@/components/dashboard/CampanhasDesempenho";
 import { CampanhasCofinanciadasPanel } from "@/components/seller/CampanhasCofinanciadasPanel";
 import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
+import VisaoGeralSecao from "@/components/dashboard/VisaoGeralSecao";
+import { formatarPeriodoBr } from "@/lib/periodoResumo";
+import { briefingPeriodo } from "@/lib/briefingPeriodo";
+import { ABA_ALIAS, getSubanalise } from "@/config/sellerTabs";
+import PerfilReputacao from "@/components/dashboard/PerfilReputacao";
+import ProdutosMaisVendidos from "@/components/dashboard/ProdutosMaisVendidos";
+import { SECAO_PERMISSAO } from '@/lib/permissoes';
+import { usePermissoes } from '@/hooks/usePermissoes';
+import GuardaPermissao from '@/components/GuardaPermissao';
 import { useListingsQuality } from "@/hooks/useListingsQuality";
 import { useEligibility } from "@/hooks/useEligibility";
 import { useLiveListingsCount } from "@/hooks/useLiveListingsCount";
-import ReputationPanel from "@/components/dashboard/ReputationPanel";
-import DiagnosticAlerts from "@/components/dashboard/DiagnosticAlerts";
-import FunilVendas from "@/components/dashboard/FunilVendas";
-import ResumoExecutivo from "@/components/dashboard/ResumoExecutivo";
-import ConversaoCarteiraSegmento from "@/components/dashboard/ConversaoCarteiraSegmento";
+import EstudoReputacao from "@/components/dashboard/EstudoReputacao";
 import CsvUploadModal from "@/components/dashboard/CsvUploadModal";
 import { qualidadeDerivada } from "@/lib/qualidadeDerivada";
 import QualityKpiCards from "@/components/dashboard/QualityKpiCards";
 import { useSellers, useSellerKpis } from "@/hooks/useSellerData";
 import { useAuth } from "@/hooks/useAuth";
-import { useSouConsultor } from "@/lib/mlFuncoes";
+import { useContasMl, useSouConsultor } from "@/lib/mlFuncoes";
 import { useMyAccess } from "@/hooks/useMyAccess";
 import { sellers as mockSellers, sellerKPIs as mockSellerKPIs } from "@/data/mockData";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -78,15 +79,16 @@ import PublicidadePanel from "@/components/seller/PublicidadePanel";
 import { useCarteiraConsolidado } from "@/hooks/useCarteiraConsolidado";
 import { SellerRiskPanel } from "@/components/dashboard/risk/SellerRiskPanel";
 import { useTheme } from "@/hooks/useTheme";
-import { useContagemNumeros } from "@/hooks/useContagemNumeros";
 import PockPanel from "@/components/pock/PockPanel";
 import VerticalCarteirasTabela from "@/components/pock/VerticalCarteirasTabela";
 import { NovidadesPrompt } from "@/components/novidades/novidades";
 import MetasPanel from "@/components/dashboard/MetasPanel";
 import PainelSidebar from "@/components/dashboard/PainelSidebar";
 import ResumoLojaApi from "@/components/ml/ResumoLojaApi";
+import CampanhasAtribuicaoApi from "@/components/ml/CampanhasAtribuicaoApi";
+import PromocoesResultados from "@/components/ml/PromocoesResultados";
+import ResumoSinergiaCorrelacoes from "@/components/ml/SinergiaPublicidade";
 import FullProdutosApi from "@/components/pock/FullProdutosApi";
-import HomeResumo from "@/components/dashboard/HomeResumo";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
@@ -105,7 +107,9 @@ function formatDateString(date: Date): string {
 
 const Index = () => {
   const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
+  const { pode, data: permissoes } = usePermissoes();
   const souConsultor = useSouConsultor(user?.id);
+  const contasMl = useContasMl();
   const { allowedSellers } = useMyAccess();
   // Piloto: consultores com acesso ao cliente MEGAJU também enxergam a rede consolidada.
   const temRedePiloto = allowedSellers.some((s) => /megaju/i.test(s.nickname));
@@ -114,17 +118,39 @@ const Index = () => {
   const [selectedSeller, setSelectedSeller] = useState<string>("");
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get("aba") || "efficiency";
+  const abaRaw = searchParams.get("aba") || "efficiency";
+  const activeTab = ABA_ALIAS[abaRaw] ?? abaRaw;
+  useEffect(() => {
+    if (!permissoes || pode(`${SECAO_PERMISSAO[activeTab] ?? 'resumo'}.visualizar`)) return;
+    const primeira = Object.entries(SECAO_PERMISSAO).find(([, p]) => pode(`${p}.visualizar`));
+    if (primeira) { const next = new URLSearchParams(searchParams); next.set('aba', primeira[0]); setSearchParams(next, { replace: true }); }
+  }, [activeTab, permissoes, searchParams, setSearchParams]);
   const [menuAberto, setMenuAberto] = useState(false);
-  useContagemNumeros(`${activeTab}|${selectedSeller}`, () => document.querySelector('[role="tabpanel"][data-state="active"]') as HTMLElement | null);
+  const subanalise = getSubanalise(activeTab, searchParams.get("subaba"));
+  const pagina = subanalise?.id;
+  const selecionarSubanalise = (secao: string, id: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("aba", secao);
+    next.set("subaba", id);
+    setSearchParams(next, { replace: true });
+  };
   const setActiveTab = useCallback(
     (tab: string) => {
       const next = new URLSearchParams(searchParams);
-      next.set("aba", tab);
+      next.set("aba", ABA_ALIAS[tab] ?? tab);
+      next.delete("subaba");
       setSearchParams(next, { replace: true });
     },
     [searchParams, setSearchParams],
   );
+  // Links antigos ?aba=executive → Visão geral unificada
+  useEffect(() => {
+    if (abaRaw in ABA_ALIAS && ABA_ALIAS[abaRaw] !== abaRaw) {
+      const next = new URLSearchParams(searchParams);
+      next.set("aba", ABA_ALIAS[abaRaw]);
+      setSearchParams(next, { replace: true });
+    }
+  }, [abaRaw, searchParams, setSearchParams]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [granularity, setGranularity] = useState<Granularity>("consolidated");
   const [activePeriod, setActivePeriod] = useState<string>("q1");
@@ -174,7 +200,31 @@ const Index = () => {
   const handleSellerChange = useCallback((id: string) => {
     setSelectedSeller(id);
     setDateRange(undefined); // Reset → will be re-anchored by effect below
-  }, []);
+    if (id !== selectedSeller && hasRealData && (!id || sellers.some((seller) => seller.id === id))) {
+      window.__lovableEvents?.track?.("project.seller_selection_changed", {
+        source_view: "dashboard",
+        seller_scope: id ? "single_store" : "portfolio",
+      });
+    }
+    if (id && id !== selectedSeller && hasRealData && sellers.some((seller) => seller.id === id)) {
+      window.__lovableEvents?.track?.("project.seller_analysis_opened", {
+        analysis_level: "store",
+        source: "dashboard",
+        seller_scope: "single_store",
+      });
+    }
+  }, [selectedSeller, hasRealData, sellers]);
+
+  // Links vindos de Anúncios só selecionam lojas ainda autorizadas.
+  useEffect(() => {
+    const cust = searchParams.get("loja");
+    if (!cust || !hasRealData) return;
+    const seller = sellers.find(s => String(s.custId) === cust);
+    if (seller && seller.id !== selectedSeller) handleSellerChange(seller.id);
+    const next = new URLSearchParams(searchParams);
+    next.delete("loja");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, hasRealData, sellers, selectedSeller, handleSellerChange]);
 
   // Persist selected seller globally so other pages (e.g. Projeção de Crescimento) can sync
   useEffect(() => {
@@ -312,12 +362,12 @@ const Index = () => {
     return filteredKpis;
   }, [filteredKpis, isDailyPeriod]);
 
-  // Dados diários ficam independentes da escolha de visão mensal/trimestral.
-  const filteredDailyKpis = useMemo(() => {
+  /** Resumo Growth: sempre grão diário no mesmo intervalo do calendário (evita S1 diário × S3/S4 mensal). */
+  const resumoDiario: any[] = useMemo(() => {
     if (!dateRange?.from) return allKpisDaily;
     const from = formatDateString(dateRange.from);
     const to = formatDateString(dateRange.to ?? dateRange.from);
-    return allKpisDaily.filter((k) => k.date >= from && k.date <= to);
+    return allKpisDaily.filter((k) => String(k.date).slice(0, 10) >= from && String(k.date).slice(0, 10) <= to);
   }, [allKpisDaily, dateRange]);
 
   const handleRefresh = useCallback(async () => {
@@ -378,21 +428,18 @@ const Index = () => {
     if (!dateRange?.from) return null;
     const fromStr = formatDateString(dateRange.from);
     const toStr = formatDateString(dateRange.to || dateRange.from);
-    return `Exibindo de ${fromStr} até ${toStr}`;
+    return formatarPeriodoBr(fromStr, toStr);
   }, [dateRange]);
 
   return (
-    <div className="min-h-screen">
-      <div className="relative z-10 max-w-[1760px] mx-auto px-3 sm:px-5 xl:px-6 py-4 sm:py-6 space-y-4">
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card !rounded-[32px] px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+    <div className="panel-workspace min-h-screen">
+      <div className="panel-container relative z-10 max-w-[1760px] mx-auto px-3 sm:px-5 xl:px-6 py-4 sm:py-6 space-y-4">
+        <motion.header initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="panel-topbar px-4 py-4 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <AguiaLogo className="h-9 w-9 sm:h-10 sm:w-10 shrink-0" />
             <div className="w-1.5 h-7 sm:w-2 sm:h-8 rounded-full bg-primary shrink-0" />
             <div className="min-w-0">
-              <p className="text-sm sm:text-xl font-bold tracking-tight truncate">
-                <span className="hidden sm:inline">Peregrinus BI — Performance no Mercado Livre</span>
-                <span className="sm:hidden">Peregrinus BI</span>
-              </p>
+              <MarcaEcom compact />
               {sellersFetched && !hasRealData && isAdmin && (
                 <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                   <span className="text-warning">● Dados de demonstração</span>
@@ -401,37 +448,6 @@ const Index = () => {
             </div>
           </div>
           <div className="flex flex-1 items-center gap-1.5 sm:gap-2 flex-wrap justify-end">
-            {(isAdmin || isGerente || isGestorLoja || temRedePiloto) &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/multilojas")} className="gap-2 relative px-2 sm:px-3">
-                <Store className="w-4 h-4" />
-                <span className="hidden sm:inline">Multilojas</span>
-                <NewBadge featureKey="multilojas_v1" tooltip="Novo: consolidação de rede a partir do relatório de Vendas do Mercado Livre" />
-              </Button>
-            }
-            {souConsultor &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/anuncios")} className="gap-2 px-2 sm:px-3">
-                <Search className="w-4 h-4" />
-                <span className="hidden sm:inline">Anúncios</span>
-              </Button>
-            }
-            {souConsultor &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/perguntas")} className="gap-2 px-2 sm:px-3">
-                <MessageCircleQuestion className="w-4 h-4" />
-                <span className="hidden sm:inline">Perguntas</span>
-              </Button>
-            }
-            {souConsultor &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/mercado")} className="gap-2 px-2 sm:px-3">
-                <TrendingUp className="w-4 h-4" />
-                <span className="hidden sm:inline">Mercado</span>
-              </Button>
-            }
-            {souConsultor &&
-              <Button variant="outline" size="sm" onClick={() => navigate("/publicidade")} className="gap-2 px-2 sm:px-3">
-                <Megaphone className="w-4 h-4" />
-                <span className="hidden sm:inline">Publicidade</span>
-              </Button>
-            }
             {(isAdmin || isGerente) &&
               <Button variant="outline" size="sm" onClick={() => navigate("/admin")} className="gap-2 px-2 sm:px-3">
                 <Settings className="w-4 h-4" />
@@ -459,7 +475,7 @@ const Index = () => {
               </AlertDialogContent>
             </AlertDialog>
           </div>
-        </motion.div>
+        </motion.header>
 
         {isLoading &&
           <div className="flex items-center justify-center py-12">
@@ -470,6 +486,11 @@ const Index = () => {
 
         {!isLoading && sellers.length > 0 &&
           <>
+            {selectedSeller && (
+              <div className="flex justify-end px-4 pt-2">
+                <Button variant="link" type="button" onClick={() => handleSellerChange("")} className="h-auto py-1 text-sm"><ArrowLeft aria-hidden="true" className="h-4 w-4" />Voltar ao resumo da carteira</Button>
+              </div>
+            )}
             <DashboardHeader
               sellers={sellers}
               selectedSeller={selectedSeller}
@@ -487,17 +508,28 @@ const Index = () => {
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-start gap-0 lg:gap-4 isolate">
                 <PainelSidebar
+                  consultantAccess={souConsultor}
+                  redeAccess={isAdmin || isGerente || isGestorLoja || temRedePiloto}
+                  custId={sellerCustIdMap[selectedSeller]}
+                  contaId={contasMl.data?.find(c => String(c.ml_user_id) === sellerCustIdMap[selectedSeller])?.id}
+                  sellerScope={selectedSeller ? "single_store" : "portfolio"}
                   ativa={activeTab}
+                  subativa={pagina}
+                  onSubChange={selecionarSubanalise}
                   onChange={setActiveTab}
                   alertas={alertasAtivos}
                   mobileAberto={menuAberto}
                   onMobileChange={setMenuAberto}
                 />
-                <div className="relative z-0 flex-1 min-w-0 space-y-4">
+                <div className="panel-content relative z-0 flex-1 min-w-0 space-y-4">
                   <SecaoHeader
                     ativa={activeTab}
+                    subTitulo={subanalise?.label}
                     loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
                     contexto={dateDebugLabel}
+                    resumo={activeTab === "efficiency" && !isConsolidado && dateRange?.from
+                      ? briefingPeriodo(allKpisDaily as any, formatDateString(dateRange.from), formatDateString(dateRange.to ?? dateRange.from))
+                      : null}
                   />
                   <AvisoSemOperacao
                     kpis={displayKpis}
@@ -511,84 +543,80 @@ const Index = () => {
                       <span>Seções</span>
                     </Button>
                   </div>
-              <AnimatePresence mode="wait">
+              <GuardaPermissao permissao={`${SECAO_PERMISSAO[activeTab] ?? 'resumo'}.visualizar`}><AnimatePresence mode="wait">
                 <motion.div
-                  key={`${activeTab}-${selectedSeller}-${granularity}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
+                  key={`${activeTab}-${pagina}-${selectedSeller}-${granularity}-${dateRange?.from?.getTime()}-${dateRange?.to?.getTime()}`}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                   className="mt-0">
-                  <TabsContent value="executive" className="mt-0 space-y-6">
-                    {isConsolidado && <CarteiraNaSecao secao="executive" />}
-                    <NovidadesPrompt />
-                    <JuniorActionBanner abaId="executive" dados={dadosJunior} />
-                    <Daily7DPanel
-                      dailyKpis={allKpisDaily}
-                      sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
-                    />
-                    <GmvMesVsMes
-                      pontos={(allKpisDaily.length ? allKpisDaily : allKpisMonthly).map((k: any) => ({
-                        date: String(k.date || "").slice(0, 10),
-                        gmv: Number(k.gmv ?? k.revenue ?? 0),
-                      }))}
-                      titulo="GMV mês vs mês (comparação anual)"
-                    />
-                    <ExecutivePanel kpis={displayKpis} allKpis={allKpisMonthly} dataGranularity={granularity} />
-                    <ConversaoCarteiraSegmento />
-                    <GrowthPotentialPanel kpis={displayKpis} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller || undefined} />
-                    <TrendAnalysisPanel
-                      kpis={displayKpis}
-                      dataGranularity={granularity}
-                      allKpisDaily={allKpisDaily}
-                    />
-                    <SynergyAnalysisPanel kpis={displayKpis} />
-                  </TabsContent>
                   <TabsContent value="efficiency" className="mt-0 space-y-5">
-                    <ResumoLojaApi custId={sellerCustIdMap[selectedSeller]} historico={<>
-                      <HomeResumo nome={(user?.user_metadata as any)?.full_name?.split(" ")[0] || user?.email?.split("@")[0]} loja={sellers.find(s => s.id === selectedSeller)?.nickname} todos={allKpis} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} />
-                      <DiagnosticAlerts kpis={displayKpis} fallbackKpis={allKpisMonthly} dailyKpis={allKpisDaily} sellerCustIdMap={sellerCustIdMap} seller={sellers.find(s => s.id === selectedSeller) || null} />
-                    {!isConsolidado && <ResumoExecutivo diario={allKpisDaily as any} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} />}
-                    {!isConsolidado && <FunilVendas kpis={displayKpis as any} />}
-                    {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
+                    <NovidadesPrompt />
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
-                    <EfficiencyPanel semDiario={isConsolidado} kpis={displayKpis} dailyKpis={filteredDailyKpis} from={dateRange?.from ? formatDateString(dateRange.from) : undefined} to={dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined} sellerCustIdMap={sellerCustIdMap} dataGranularity={granularity} campaign={currentCampaign} benchmark={verticalBenchmark} sellerId={selectedSeller} sellerCluster={(sellers.find(s => s.id === selectedSeller) as any)?.subCluster} />
-                    </>} />
+                    {pagina === "geral" && selectedSeller && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} />}
+                    <ResumoLojaApi pagina={pagina} custId={sellerCustIdMap[selectedSeller]} historico={
+                      <>
+                        {isConsolidado && <CarteiraNaSecao secao="efficiency" />}
+                        {!isConsolidado && (() => {
+                          const de = dateRange?.from ? formatDateString(dateRange.from) : undefined;
+                          const ate = dateRange?.from ? formatDateString(dateRange.to ?? dateRange.from) : undefined;
+                          const periodo = de && ate ? formatarPeriodoBr(de, ate) : undefined;
+                          const serieGmv = (allKpisDaily.length ? allKpisDaily : allKpisMonthly).map((k: any) => ({
+                            date: String(k.date || "").slice(0, 10),
+                            gmv: Number(k.gmv ?? k.revenue ?? 0),
+                          }));
+                          return (
+                            <VisaoGeralSecao
+                              pagina={pagina}
+                              diario={resumoDiario as any}
+                              de={de}
+                              ate={ate}
+                              periodo={periodo}
+                              listingsQuality={listingsQuality || []}
+                              eligibilityItems={eligibilityItems || []}
+                              serieGmv={serieGmv}
+                              campaign={currentCampaign}
+                              benchmark={verticalBenchmark}
+                              sellerId={selectedSeller || undefined}
+                              dataGranularity={granularity === "daily" ? "daily" : "consolidated"}
+                              custId={sellerCustIdMap[selectedSeller]}
+                            />
+                          );
+                        })()}
+                      </>
+                    } />
                   </TabsContent>
                   <TabsContent value="pock" className="mt-0 space-y-5">
-                    <PockPanel
+                    {pagina === "resumo" && <PockPanel
                       sellerId={selectedSeller || undefined}
                       nickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
                       custId={sellerCustIdMap[selectedSeller]}
                       segmento={(sellers.find((s) => s.id === selectedSeller) as any)?.subCluster}
                       programas={(sellers.find((s) => s.id === selectedSeller) as any)?.clusterSeller}
-                    />
-                    <VerticalCarteirasTabela sellerId={selectedSeller || undefined} />
-                    <FullProdutosApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
+                    />}
+                    {pagina === "carteira" && <VerticalCarteirasTabela sellerId={selectedSeller || undefined} />}
+                    {pagina === "produtos" && <FullProdutosApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />}
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0 space-y-5">
-                    {isConsolidado && <CarteiraNaSecao secao="competitiveness" />}
-                    <JuniorActionBanner abaId="competitiveness" dados={dadosJunior} />
-                    <CompetitivenessPanel kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map((s) => ({ id: s.id, cluster: (s as any).cluster }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />
+                    {pagina === "carteira" ? <CarteiraNaSecao secao="competitiveness" /> : pagina === "concorrentes" ? <BuscaConcorrentes /> : <CompetitivenessPanel pagina={pagina} kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map(s => ({ id: s.id }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />}
                   </TabsContent>
                   <TabsContent value="publicidade" className="mt-0 space-y-5">
-                    {isConsolidado && <CarteiraNaSecao secao="publicidade" />}
-                    <MlAoVivo secao="publicidade" custId={sellerCustIdMap[selectedSeller]} />
-                    <PublicidadePanel
-                      sellerUuid={selectedSeller}
-                      custId={sellerCustIdMap[selectedSeller]}
-                      fromDate={dateRange?.from ? formatDateString(dateRange.from) : minStr}
-                      toDate={dateRange?.to ? formatDateString(dateRange.to) : anchorStr}
-                      sellerNickname={sellers.find((s) => s.id === selectedSeller)?.nickname}
-                    />
+                    {isConsolidado ? <CarteiraNaSecao secao="publicidade" /> : <>
+                      {pagina === "resumo" && <MlAoVivo secao="publicidade" custId={sellerCustIdMap[selectedSeller]} />}
+                      {pagina === "sinergia" && <ResumoSinergiaCorrelacoes custId={sellerCustIdMap[selectedSeller]} />}
+                      {pagina === "produtos" && <ProdutosMaisVendidos custId={sellerCustIdMap[selectedSeller]} />}
+                      {pagina === "historico" && <PublicidadePanel variante="evolucao" diario={resumoDiario} sellerUuid={selectedSeller} custId={sellerCustIdMap[selectedSeller]} fromDate={dateRange?.from ? formatDateString(dateRange.from) : minStr} toDate={dateRange?.to ? formatDateString(dateRange.to) : anchorStr} sellerNickname={sellers.find(s => s.id === selectedSeller)?.nickname} />}
+                    </>}
                   </TabsContent>
                   <TabsContent value="logistics" className="mt-0 space-y-5">
-                    {isConsolidado && <CarteiraNaSecao secao="logistics" />}
-                    <JuniorActionBanner abaId="logistics" dados={dadosJunior} />
-                    <MlAoVivo secao="logistica" custId={sellerCustIdMap[selectedSeller]} />
-                    <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} eligibilityItems={eligibilityItems || []} />
-                    <UpliftFullPanel custId={sellerCustIdMap[selectedSeller]} />
-                    <StockoutRiskPanel sellerId={selectedSeller} />
+                    {pagina === "resumo-logistica" && <>
+                      {isConsolidado && <CarteiraNaSecao secao="logistics" />}
+                      <LogisticsPanel kpis={displayKpis} dataGranularity={granularity} eligibilityItems={eligibilityItems || []} />
+                    </>}
+                    {pagina === "envios" && <MlAoVivo secao="logistica" custId={sellerCustIdMap[selectedSeller]} />}
+                    {pagina === "full" && <><UpliftFullPanel custId={sellerCustIdMap[selectedSeller]} /><StockoutRiskPanel sellerId={selectedSeller} custId={sellerCustIdMap[selectedSeller]} /></>}
+                    {pagina === "flex" && <FlexDesempenho lojas={hasRealData ? sellers : []} />}
                   </TabsContent>
                   <TabsContent value="quality" className="mt-0 space-y-5">
                     <JuniorActionBanner abaId="quality" dados={dadosJunior} />
@@ -598,8 +626,8 @@ const Index = () => {
                       return (
                         <>
                           {/* 1. Índice e indicadores */}
-                          <QualityIndexPanelV2 custId={sellerCustIdMap[selectedSeller]} sellerUuid={selectedSeller} />
-                          <QualityKpiCards
+                          {pagina === "resumo" && <QualityIndexPanelV2 custId={sellerCustIdMap[selectedSeller]} sellerUuid={selectedSeller} />}
+                          {pagina === "indicadores" && <QualityKpiCards
                             scoreCaracteristica={qd.atributos?.valor ?? 0}
                             pontuacaoLlGtin={qd.gtin?.valor ?? 0}
                             scoreOfertaFinal={qd.oferta ?? 0}
@@ -611,37 +639,39 @@ const Index = () => {
                             totalLiveListings={liveListingsCount || 0}
                             diasRecentes={allKpisDaily as any[]}
                             pctFullPeriodo={Number(latest.pctFull) || 0}
-                          />
+                          />}
                           {/* 2. Evolução e diagnóstico */}
-                          <div className="grid grid-cols-1 gap-5 items-stretch">
+                          {pagina === "analise" && <div className="grid grid-cols-1 gap-5 items-stretch">
                             <QualityIndexPanel kpis={displayKpis} campaign={currentCampaign} allKpis={allKpis} />
-                            <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />
-                          </div>
+                          </div>}
                           {/* 3. Ação por anúncio */}
-                          <MlAoVivo secao="qualidade" custId={sellerCustIdMap[selectedSeller]} />
+                          {pagina === "anuncios" && <><MlAoVivo secao="qualidade" custId={sellerCustIdMap[selectedSeller]} />
                           <PlanoAcaoAnuncioPanel sellerId={selectedSeller} />
                           <ConversaoPorMLBPanel sellerId={selectedSeller} />
-                          <CriticalListingsTable listings={listingsQuality || []} />
+                          <CriticalListingsTable listings={listingsQuality || []} /></>}
                         </>
                       );
                     })()}
                   </TabsContent>
-                  <TabsContent value="clips" className="mt-0">
-                    {isConsolidado && <CarteiraNaSecao secao="clips" />}
+                  <TabsContent value="clips" className="mt-0 space-y-5">
+                    {pagina === "resumo" && <>{isConsolidado && <CarteiraNaSecao secao="clips" />}
                     <ClipsAudiencePanel kpis={displayKpis} eligibilityItems={eligibilityItems || []} listingsQuality={listingsQuality || []} sellerCustIdMap={sellerCustIdMap} selectedSeller={selectedSeller} dataGranularity={granularity} />
+                    </>}
+                    {pagina === "qualidade" && !isConsolidado && <QualityRadarPanel kpis={displayKpis} sellerCustIdMap={sellerCustIdMap} />}
                   </TabsContent>
                   <TabsContent value="opportunities" className="mt-0 space-y-5">
-                    {isConsolidado && <CarteiraNaSecao secao="opportunities" />}
+                    {pagina === "resumo" && <>{isConsolidado && <CarteiraNaSecao secao="opportunities" />}
                     <JuniorActionBanner abaId="opportunities" dados={dadosJunior} />
                     <MlAoVivo secao="oportunidades" custId={sellerCustIdMap[selectedSeller]} />
-                    <CdpEvolucao rows={allKpisDaily.map((r) => ({ date: r.date, tgmv: r.tgmv, cdpTgmv: r.cdpTgmv }))} />
-                    <CampanhasCofinanciadasPanel items={eligibilityItems || []} />
-                    <OpportunitiesPanel items={eligibilityItems || []} />
+                    <OpportunitiesPanel items={eligibilityItems || []} custId={sellerCustIdMap[selectedSeller]} /></>}
+                    {pagina === "campanhas" && <><CampanhasAtribuicaoApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />
+                    <CampanhasDesempenho items={eligibilityItems || []} /></>}
+                    {pagina === "cofinanciadas" && <CampanhasCofinanciadasPanel items={eligibilityItems || []} />}
+                    {pagina === "promocoes" && <PromocoesResultados key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />}
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0 space-y-5">
-                    <JuniorActionBanner abaId="reputation" dados={dadosJunior} />
-                    <MlAoVivo secao="reputacao" custId={sellerCustIdMap[selectedSeller]} />
-                    <ReputationPanel kpis={displayKpis} dataGranularity={granularity} />
+                    {(pagina === "resumo" || pagina === "requisitos") && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} requisitos={pagina === "requisitos"} />}
+                    <EstudoReputacao sellerId={selectedSeller || undefined} custId={sellerCustIdMap[selectedSeller]} pagina={pagina} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.to ? formatDateString(dateRange.to) : undefined} />
                   </TabsContent>
                   <TabsContent value="perguntas" className="mt-0 space-y-5">
                     <MlAoVivo secao="perguntas" custId={sellerCustIdMap[selectedSeller]} />
@@ -652,15 +682,26 @@ const Index = () => {
                   <TabsContent value="metas" className="mt-0">
                     <MetasPanel sellerId={selectedSeller} kpis={allKpisMonthly} />
                   </TabsContent>
-                  <TabsContent value="correlacoes" className="mt-0">
-                    <CorrelacaoPanel kpis={displayKpis} />
+                  <TabsContent value="correlacoes" className="mt-0 space-y-5">
+                    {pagina === "geral" && <><ResumoSinergiaCorrelacoes custId={sellerCustIdMap[selectedSeller]} /><CorrelacaoPanel kpis={displayKpis} /></>}
+                    {pagina === "anuncios" && (selectedSeller ? <GuardaPermissao permissao="qualidade.visualizar"><MlAoVivo key={selectedSeller} secao="qualidade" custId={sellerCustIdMap[selectedSeller]} /></GuardaPermissao> : <p className="text-sm text-muted-foreground">Selecione uma loja para comparar seus anúncios.</p>)}
+                    {pagina === "conteudo" && <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">Qualidade, promoções, Full e estoque são sinais observados, não pesos oficiais do ranking.</p>
+                      <div className="flex flex-wrap gap-2">
+                        {pode("anuncios.visualizar") && <Button variant="outline" onClick={() => navigate(`/anuncios?aba=correlacoes${sellerCustIdMap[selectedSeller] ? `&loja=${encodeURIComponent(sellerCustIdMap[selectedSeller])}` : ""}`)}>Anúncios · Correlações</Button>}
+                        {pode("preco.visualizar") && <Button variant="outline" onClick={() => selecionarSubanalise("competitiveness", "concorrentes")}>Preço e concorrentes</Button>}
+                        {pode("promocoes.visualizar") && <Button variant="outline" onClick={() => selecionarSubanalise("opportunities", "promocoes")}>Promoções</Button>}
+                        {pode("reputacao.visualizar") && <Button variant="outline" onClick={() => selecionarSubanalise("reputation", "requisitos")}>Reputação e autoridade</Button>}
+                        {pode("logistica.visualizar") && <Button variant="outline" onClick={() => selecionarSubanalise("logistics", "full")}>Full e estoque</Button>}
+                      </div>
+                    </div>}
                   </TabsContent>
                   <TabsContent value="alertas-riscos" className="mt-0">
                     {isConsolidado && <CarteiraNaSecao secao="alertas-riscos" />}
                     <SellerRiskPanel />
                   </TabsContent>
                 </motion.div>
-              </AnimatePresence>
+              </AnimatePresence></GuardaPermissao>
                 </div>
               </div>
             </Tabs>

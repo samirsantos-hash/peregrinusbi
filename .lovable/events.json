@@ -1,0 +1,254 @@
+{
+  "schema_version": 1,
+  "events": {
+    "project.diagnostic_recommendation_opened": {
+      "event_schema_version": 1,
+      "description": "A user opens diagnostic or corrective-action details in seller analysis, or follows an actionable portfolio risk/retention recommendation. Fires on opening only, not passive rendering, closing, filtering, healthy listing details, copying or generic seller links. No identifiers or recommendation text are collected.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "recommendation_category",
+          "dashboard_context"
+        ],
+        "properties": {
+          "recommendation_category": {
+            "type": "string",
+            "enum": [
+              "listing_quality",
+              "visibility",
+              "inventory",
+              "missing_quality_data",
+              "growth",
+              "logistics",
+              "price",
+              "promotions",
+              "reputation",
+              "multiple_issues",
+              "revenue_decline",
+              "advertising"
+            ]
+          },
+          "dashboard_context": {
+            "type": "string",
+            "enum": [
+              "seller_listing_performance",
+              "seller_segment_action_plan",
+              "seller_listing_action_plan",
+              "seller_quality_index",
+              "portfolio_action_plan",
+              "portfolio_retention"
+            ]
+          }
+        }
+      }
+    },
+    "project.listing_changes_confirmed": {
+      "event_schema_version": 1,
+      "description": "After explicit confirmation, Mercado Livre reports at least one listing change applied (status feito). applied_count excludes already-done, refused, conflict and unsent items. No account, listing or user identifiers.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "change_area",
+          "applied_count"
+        ],
+        "properties": {
+          "change_area": {
+            "type": "string",
+            "enum": [
+              "price",
+              "advertising",
+              "promotions"
+            ]
+          },
+          "applied_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          }
+        }
+      }
+    },
+    "project.seller_analysis_opened": {
+      "event_schema_version": 1,
+      "description": "A user explicitly opens a single-store or listing analysis from portfolio or dashboard navigation, including selecting a real store in the dashboard. No names, IDs or URLs are collected.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "analysis_level",
+          "source",
+          "seller_scope"
+        ],
+        "properties": {
+          "analysis_level": {
+            "type": "string",
+            "enum": [
+              "store",
+              "listing"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "portfolio",
+              "dashboard",
+              "seller_analysis"
+            ]
+          },
+          "seller_scope": {
+            "type": "string",
+            "enum": [
+              "single_store"
+            ]
+          }
+        }
+      }
+    },
+    "project.seller_section_opened": {
+      "event_schema_version": 1,
+      "description": "User selects a different Reputation, Price or Advertising subanalysis in the dashboard navigation tree. Excludes reselecting current destination, render and automatic navigation. Consulting capability includes masters/admins/managers; no user or seller identifiers.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "section",
+          "subsection",
+          "consultant_access",
+          "seller_scope",
+          "source_view"
+        ],
+        "properties": {
+          "section": {
+            "type": "string",
+            "enum": [
+              "reputation",
+              "price",
+              "advertising"
+            ]
+          },
+          "subsection": {
+            "type": "string",
+            "enum": [
+              "resumo",
+              "indicadores",
+              "analise",
+              "requisitos",
+              "resumo-preco",
+              "carteira",
+              "mckinsey",
+              "estrategica",
+              "evolucao",
+              "insights",
+              "concorrentes",
+              "sinergia",
+              "produtos",
+              "historico"
+            ]
+          },
+          "consultant_access": {
+            "type": "boolean"
+          },
+          "seller_scope": {
+            "type": "string",
+            "enum": [
+              "single_store",
+              "portfolio"
+            ]
+          },
+          "source_view": {
+            "type": "string",
+            "enum": [
+              "dashboard_sidebar"
+            ]
+          }
+        }
+      }
+    },
+    "project.seller_selection_changed": {
+      "event_schema_version": 1,
+      "description": "The user changes the selected seller through dashboard or seller-analysis navigation controls, including returning to the dashboard portfolio. Same-seller reselections and listing-only changes do not count. Seller identifiers, names and URLs are excluded.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "source_view",
+          "seller_scope"
+        ],
+        "properties": {
+          "source_view": {
+            "type": "string",
+            "enum": [
+              "dashboard",
+              "seller_analysis",
+              "portfolio"
+            ]
+          },
+          "seller_scope": {
+            "type": "string",
+            "enum": [
+              "single_store",
+              "portfolio"
+            ]
+          }
+        }
+      }
+    },
+    "project.summary_tree_opened": {
+      "event_schema_version": 1,
+      "description": "Explicitly expands the Summary navigation branch, excluding automatic expansion and closing. consultant_access is the existing server-confirmed ML consulting capability (includes masters/admins/managers), not a unique user identity.",
+      "privacy": {
+        "contains_pii": false,
+        "purpose": "product_analytics"
+      },
+      "properties_schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "consultant_access",
+          "seller_scope",
+          "source_view"
+        ],
+        "properties": {
+          "consultant_access": {
+            "type": "boolean"
+          },
+          "seller_scope": {
+            "type": "string",
+            "enum": [
+              "single_store",
+              "portfolio"
+            ]
+          },
+          "source_view": {
+            "type": "string",
+            "enum": [
+              "dashboard_sidebar"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
