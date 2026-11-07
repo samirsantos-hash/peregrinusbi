@@ -1,5 +1,9 @@
 # Roadmap
 
+## Diagnóstico — etapa 3 — 07/11
+- [ ] Ler visitas por MLB na mesma janela completa de 30 dias dos pedidos pagos já confirmados; preservar ausências e limites de amostra.
+- [ ] Integrar visitas e conversão em Resposta, mostrar evidências e cobertura; testar cálculos e conferir loja real, sem publicar a interface.
+
 ## Cache no navegador e antecipação — 07/11
 - [x] IndexedDB por usuário com agregados autorizados por chave de loja/período, inspeção recursiva, máximo 2.000 entradas por lista/5 MiB por cópia; purga e geração impedem gravações tardias. Restauração antes das páginas; listas de acesso não persistidas.
 - [x] Revalidação não bloqueia cópias da mesma chave; somente consultas observadas sem dados exibem espera até 100%. Permissões e contas seguem leitura atual, sem restauração nem novas concessões.

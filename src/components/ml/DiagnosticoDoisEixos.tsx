@@ -6,6 +6,8 @@ import { EmptyState } from '@/components/ds';
 import DetalheAnuncioAbc from '@/components/ml/DetalheAnuncioAbc';
 import { useListingsQuality } from '@/hooks/useListingsQuality';
 import { useConstrucaoAnuncios } from '@/hooks/useConstrucaoAnuncios';
+import { useRespostaAnuncios } from '@/hooks/useRespostaAnuncios';
+import { notasResposta, referenciasResposta } from '@/lib/anuncio/resposta';
 import { notasConstrucaoLida } from '@/lib/anuncio/construcao';
 import { chamarFuncaoMl } from '@/lib/mlFuncoes';
 import { supabase } from '@/integrations/supabase/client';
@@ -55,10 +57,12 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
   });
 
   const construcao = useConstrucaoAnuncios(custId, vendas.data?.itens.map(i => i.mlb) ?? []);
+  const resposta = useRespostaAnuncios(custId, vendas.data?.itens.map(i => i.mlb) ?? [], vendas.data?.periodo);
   const calc = useMemo(() => {
     if (!vendas.data) return null;
     const qMap = new Map((qualidade.data ?? []).map(q => [q.itemId.replace(/\D/g, ''), q]));
     const med = mediana(vendas.data.itens.map(i => i.unidades));
+    const refs = referenciasResposta(vendas.data.itens.map(i => ({ visitas: resposta.porMlb.get(i.mlb) ?? null, pedidos: i.pedidos })));
     const fat = new Map<string, number>();
     const titulos = new Map<string, string>();
     const ds: Diagnostico[] = vendas.data.itens.map(i => {
@@ -71,16 +75,16 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
         medidas: leitura ? notasConstrucaoLida(leitura) : { fotos: { nota: null, evidencia: 'fotos não lidas', acao: null }, fichaTecnica: { nota: null, evidencia: 'ficha técnica não lida', acao: null }, preco: { nota: null, evidencia: 'preço atual não lido; sem referência comparável confirmada', acao: null } },
         envio: leitura ? { envio: leitura.envio, tipo: leitura.tipo, precoCents: leitura.moeda === 'BRL' && leitura.preco !== null ? Math.round(leitura.preco * 100) : Number.NaN } : (() => { const r = cat?.tipos.get(i.mlb); return r ? { envio: r.logistica ? { free_shipping: !!r.frete_gratis, logistic_type: r.logistica } : null, tipo: r.tipo_anuncio ?? null, precoCents: Math.round(Number(r.preco ?? 0) * 100) } : null; })(),
         promocoes: promoAtual ?? q?.llPromotionsScore, preco: q?.llPriceScore, fotos: q?.llPicturesScore, titulo: q?.llTitleScore, descricao: q?.llDescriptionScore,
-      }, notaGiro(i.unidades, med)));
+      }, notaGiro(i.unidades, med), notasResposta(resposta.porMlb.get(i.mlb) ?? null, i.pedidos, refs)));
     });
     let perfil = null;
     try { perfil = perfilarCatalogo(ds, fat); } catch { perfil = null; }
     const fila = filaDeAcao(ds, fat);
     return { ds, perfil, fila, lotes: lotesDeCorrecao(fila), titulos, porMlb: new Map(ds.map(d => [d.mlb, d])) };
-  }, [vendas.data, qualidade.data, catalogo.data, construcao.porMlb]);
+  }, [vendas.data, qualidade.data, catalogo.data, construcao.porMlb, resposta.porMlb]);
 
   if (!custId) return <EmptyState falta="Selecione uma loja." acao="Escolha a loja no seletor acima." />;
-  if (vendas.isPending || catalogo.isPending || seller.isPending || (!!seller.data && qualidade.isPending) || construcao.carregando) return <div role="status" className="flex gap-2 items-center py-8 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Montando o diagnóstico… {num(construcao.lidos)} de {num(construcao.total)} anúncios lidos</div>;
+  if (vendas.isPending || catalogo.isPending || seller.isPending || (!!seller.data && qualidade.isPending) || construcao.carregando || resposta.carregando) return <div role="status" className="flex gap-2 items-center py-8 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Montando o diagnóstico… {num(construcao.lidos)} anúncios lidos · visitas confirmadas em {num(resposta.medidos)} de {num(resposta.total)}</div>;
   if (vendas.isError) return <EmptyState falta={vendas.error.message} acao="Tente atualizar em instantes." />;
   if (catalogo.isError || seller.isError || qualidade.isError) return <EmptyState falta="Não foi possível ler as notas de qualidade." acao="Tente atualizar em instantes." />;
   if (!calc || !vendas.data) return null;
@@ -92,6 +96,7 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
       <h2 className="text-xl font-semibold">Diagnóstico em dois eixos</h2>
       <p className="text-xs text-muted-foreground mt-1">{dataBr(vendas.data.periodo.inicio)} – {dataBr(vendas.data.periodo.fim)} · Construção (o que o anúncio é) × Resposta (como o mercado reage). Não é a pontuação oficial do Mercado Livre.</p>
       <p className="text-xs text-muted-foreground mt-2">Dados atuais lidos para {num(construcao.lidos)} de {num(construcao.total)} anúncios.{!construcao.completo && ' Leitura parcial: anúncios ou dimensões não confirmados permanecem sem medição.'} Preço atual consultado; comparação de preço permanece sem medição quando não há referência comparável confirmada.</p>
+      <p className="text-xs text-muted-foreground mt-2">Visitas confirmadas em {num(resposta.medidos)} de {num(resposta.total)} anúncios, nas mesmas datas das vendas. Conversão = pedidos pagos ÷ visitas; mínimo de 50 visitas para pontuar. Referência: mediana dos anúncios medidos desta loja, incluindo taxas zero.{!resposta.completo && ' Cobertura parcial: visitas ausentes não contam como zero.'}</p>
     </div>
 
     {!perfil ? <EmptyState falta="Nenhum anúncio pôde ser diagnosticado nos dois eixos." acao="As notas de construção ainda não estão disponíveis para estes anúncios." /> : <>
@@ -112,7 +117,7 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
         <div className="space-y-3 text-sm">
           <p><span className="font-semibold">{ROTULO_QUADRANTE[perfil.quadranteDominante]} domina.</span> {perfil.leitura}</p>
           {perfil.gargaloRecorrente && <p>Gargalo recorrente: <b>{ROTULO_DIMENSAO[perfil.gargaloRecorrente.dimensao]}</b> em {pct(perfil.gargaloRecorrente.participacao * 100)} dos anúncios diagnosticados.</p>}
-          <p className="text-xs text-muted-foreground">{num(perfil.diagnosticados)} de {num(perfil.anuncios)} anúncios diagnosticados; Construção considera fotos com dimensões originais, ficha técnica da categoria, exposição comercial e participação atual em promoções{!catalogo.data?.completo ? ' — participação suspensa: catálogo ainda não lido por inteiro' : ''}, além de título e descrição quando medidos. Resposta considera somente o giro na mesma janela; experiência, conversão e visitas ainda não entram. A confiança depende da cobertura de cada anúncio.</p>
+          <p className="text-xs text-muted-foreground">{num(perfil.diagnosticados)} de {num(perfil.anuncios)} anúncios diagnosticados; Construção considera fotos com dimensões originais, ficha técnica da categoria, exposição comercial e participação atual em promoções{!catalogo.data?.completo ? ' — participação suspensa: catálogo ainda não lido por inteiro' : ''}, além de título e descrição quando medidos. Resposta considera giro, visitas relativas e conversão quando confirmados na mesma janela. Experiência de compra ainda não medida; visitas e conversão não garantem confiança alta. A confiança depende da cobertura de cada anúncio.</p>
           <p className="text-xs text-muted-foreground">Cortes provisórios: Construção {CORTES_PADRAO.construcao}, Resposta {CORTES_PADRAO.resposta}.{perfil.corteSemSeparacao && ' Atenção: mais de 90% dos anúncios ficam do mesmo lado de um corte — ele ainda não separa bem este catálogo.'}</p>
         </div>
       </div>
@@ -159,7 +164,7 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
         <div className="h-2 rounded bg-muted"><div className="h-2 rounded bg-primary" style={{ width: `${e.indice ?? 0}%` }} /></div>
       </div>)}
       <p className="text-xs">{detalhe.leitura}</p>
-      <ul className="space-y-3 border-t border-border pt-3">{detalhe.construcao.dimensoes.map(d => <li key={d.dimensao} className="text-xs"><div className="flex justify-between gap-2 font-semibold"><span>{ROTULO_DIMENSAO[d.dimensao]}</span><span className="tabular-nums">{d.nota === null ? 'Sem medição' : num(Math.round(d.nota * 100))}</span></div><p className="mt-1 text-muted-foreground">{d.evidencia}</p>{d.acao && <p className="mt-1">{d.acao}</p>}</li>)}</ul>
+      <ul className="space-y-3 border-t border-border pt-3">{[...detalhe.construcao.dimensoes, ...detalhe.resposta.dimensoes].map(d => <li key={d.dimensao} className="text-xs"><div className="flex justify-between gap-2 font-semibold"><span>{ROTULO_DIMENSAO[d.dimensao]}</span><span className="tabular-nums">{d.nota === null ? 'Sem medição' : num(Math.round(d.nota * 100))}</span></div><p className="mt-1 text-muted-foreground">{d.evidencia}</p>{d.acao && <p className="mt-1">{d.acao}</p>}</li>)}</ul>
       {detalhe.acaoPrincipal && <p className="text-xs font-semibold">{detalhe.acaoPrincipal}</p>}
     </div> : null} />
   </section>;
