@@ -41,11 +41,12 @@ export function IndicadorCarregamento() {
   }, [client]);
   if (estado.total === 0) return null;
   const terminou = estado.concluidas === estado.total;
-  return createPortal(<div role="status" aria-label="Progresso do carregamento" className="indicador-carregamento w-64 max-w-[calc(100vw-32px)] rounded-lg border border-border bg-background/95 p-4 text-foreground shadow-lg backdrop-blur-xl">
+  return createPortal(<div role="status" aria-label="Progresso do carregamento" className="indicador-carregamento w-72 max-w-[calc(100vw-32px)] px-5 py-4 text-foreground">
     <div className="flex items-center justify-between gap-4">
-      <span className="flex items-center gap-2 text-sm font-medium">{!terminou && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-primary" />}{terminou ? 'Consultas finalizadas' : 'Carregando'}</span>
-      <span className="text-lg font-semibold tabular-nums text-primary">{estado.percentual}%</span>
+      <span className="flex items-center gap-2 text-sm font-medium leading-none">{!terminou && <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin text-primary" />}{terminou ? 'Consultas finalizadas' : 'Carregando'}</span>
+      <span className="text-xl font-semibold leading-none tabular-nums text-primary">{estado.percentual}%</span>
     </div>
-    <p className="mt-2 text-xs text-muted-foreground tabular-nums">{estado.concluidas} de {estado.total} consultas finalizadas · {estado.segundos}s</p>
+    <div className="barra-trilho mt-3" aria-hidden="true"><div className="barra-progresso" style={{ transform: `scaleX(${Math.max(0.02, estado.percentual / 100)})` }} /></div>
+    <p className="mt-2.5 text-xs text-muted-foreground tabular-nums">{estado.concluidas} de {estado.total} consultas finalizadas · {estado.segundos}s</p>
   </div>, document.body);
 }
