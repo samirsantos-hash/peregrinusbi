@@ -1,5 +1,7 @@
 # Teste de carga público — 04/11/2026
 
+- 07/11: tela de vendas por promoção e anúncio, teste público prévio: 28.452 requisições, zero falhas, p95 HTTP 96,16ms. Somente entrega pública, não mede análise autenticada nem vínculos financeiros.
+
 - 06/11: boas-vindas uma única vez, teste público prévio com 1.000 usuários, 28.418 requisições, zero falhas, p95 HTTP 86,50ms; somente entrega pública, não mede login nem cena.
 
 - 06/11: gráfico e diagrama explicativos da sinergia, teste público prévio com 1.000 usuários, 28.484 requisições, zero falhas, p95 HTTP 80,72ms; somente entrega pública, não mede gráficos nem painel autenticado.

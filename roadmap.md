@@ -1,5 +1,12 @@
 # Roadmap
 
+## Vendas por promoção e anúncio — 07/11
+- [x] Novo acesso em Promoções e oportunidades → Vendas por promoção e anúncio; filtros ativas/com vendas comprovadas/todas, vendas sem vínculo e cobertura por anúncio.
+- [x] Leitura de ROAS publicitário por MLB exato e campanha, datas alinhadas e soma receita/custo. Ausência mantém indisponível; não distribui receita de famílias nem campanhas da loja ao anúncio.
+- [x] 19 testes aprovados, build OK; AUTOPECASLONDRINA conferida desktop/536px: MLB4003091671 participa de 11.11 da Black, mas 33 pedidos/R$3.253,58 têm desconto sem identidade promocional. MLB5381969652 tem 43 pedidos/R$5.627,28 lidos e 86 ausentes. Nenhuma escrita ou publicação.
+- [x] Teste público prévio: 28.452 requisições, zero falhas, p95 96,16ms; não mede capacidade autenticada.
+- [ ] Valores reais de ROAS e vendas nominais por promoção bloqueados: nenhuma métrica diária por anúncio armazenada (somente campanhas) e identidade promocional ausente nas vendas reais consultadas. Não substituídos por totais da loja, descontos ou estimativas.
+
 ## Diagnóstico — etapa 2 — 07/11
 - [x] Leitura sequencial em lotes de 20: 1.381/1.381 anúncios do universo diagnosticado da AUTOPECASLONDRINA, fotos, categoria, ficha e preço disponíveis; nenhum anúncio alterado.
 - [x] Evidências integradas em Construção e detalhe lateral; preço sem referência segue não medido. Testes aprovados, celular/desktop sem erros, teste público sem falhas. Etapas 3–5 não iniciadas; interface sem publicação.

@@ -6,15 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import PromocoesInvestigacaoAnuncio from '@/components/seller/PromocoesInvestigacaoAnuncio';
 import ResumoPromocoesAnuncio from './ResumoPromocoesAnuncio';
+import VendasPromocaoAnuncio from './VendasPromocaoAnuncio';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { AbaPromocoes } from './acoes/AbaPromocoes';
 
 type Item = { item_id: string; titulo: string | null; thumbnail: string | null };
-type Props = { accountId: string; custId: string; aoGerenciar: (item: Item) => void };
+type Props = { accountId: string; custId: string; aoGerenciar: (item: Item) => void; analise?: boolean };
 export default function ParticipacaoVendasAnuncio(props: Props) {
+  if (props.analise) return <PorAnuncio {...props} />;
   return <Tabs defaultValue="anuncio"><TabsList><TabsTrigger value="anuncio">Por anúncio</TabsTrigger><TabsTrigger value="campanha">Por campanha</TabsTrigger></TabsList><TabsContent value="anuncio"><PorAnuncio {...props} /></TabsContent><TabsContent value="campanha"><AbaPromocoes accountId={props.accountId} /></TabsContent></Tabs>;
 }
-function PorAnuncio({ accountId, custId, aoGerenciar }: Props) {
+function PorAnuncio({ accountId, custId, aoGerenciar, analise }: Props) {
   const [busca, setBusca] = useState('');
   const [termo, setTermo] = useState('');
   const [selecionado, setSelecionado] = useState<Item | null>(null);
@@ -29,7 +31,7 @@ function PorAnuncio({ accountId, custId, aoGerenciar }: Props) {
     return (data ?? []) as Item[];
   }});
   return <section className="space-y-4 min-w-0" aria-label="Participação e vendas por anúncio">
-    <h2 className="text-lg font-semibold">Participação e vendas por anúncio</h2>
+    <h2 className="text-lg font-semibold">{analise ? 'Vendas por promoção e anúncio' : 'Participação e vendas por anúncio'}</h2>
     <form className="flex gap-2" onSubmit={e => { e.preventDefault(); setTermo(busca.trim()); setSelecionado(null); }}>
       <Input aria-label="Buscar anúncio para promoções" placeholder="Título, SKU ou MLB" value={busca} onChange={e => setBusca(e.target.value)} className="min-w-0" />
       <Button type="submit" variant="outline" disabled={!!busca.trim() && busca.trim().length < 2}><Search className="h-4 w-4 mr-2" />Buscar</Button>
@@ -49,7 +51,7 @@ function PorAnuncio({ accountId, custId, aoGerenciar }: Props) {
     {!termo && <p className="text-xs text-muted-foreground">10 anúncios iniciais · use a busca para localizar outros anúncios da loja.</p>}
     {selecionado && <div className="border-t border-border pt-4 space-y-3">
       <h3 className="font-semibold break-words">{selecionado.titulo ?? selecionado.item_id} · {selecionado.item_id}</h3>
-      <PromocoesInvestigacaoAnuncio key={selecionado.item_id} accountId={accountId} custId={custId} itemId={selecionado.item_id} />
+      {analise ? <VendasPromocaoAnuncio key={selecionado.item_id} accountId={accountId} custId={custId} itemId={selecionado.item_id} /> : <PromocoesInvestigacaoAnuncio key={selecionado.item_id} accountId={accountId} custId={custId} itemId={selecionado.item_id} />}
     </div>}
   </section>;
 }

@@ -14,6 +14,7 @@
 - Promotion results read paginated account-scoped opt-ins separately from historical performance; current participation never produces ROAS or ROI because sale attribution and realized costs are unconfirmed.
 - Promotion participation lists use live per-item reads over the scanned active/paused catalog; incomplete coverage suspends outside-promotions classification, while distinct current opt-ins never imply stacked discounts or sale attribution.
 - Per-listing promotion management reuses the existing preview/confirmation sheet; historical sales use exclusive paid-order buckets and never infer promotion identity from supplier offer IDs or current membership.
+- Promotion-sale verification uses exact sale promotion ID/type; item advertising ROAS reads only exact external MLB groups and aligned daily sums, never family totals or promotion returns.
 
 - Margin-based pricing is a client calculator using explicit per-item costs and charges, not markup; send resulting prices through the unchanged server preview/confirmation flow and never persist private cost inputs.
 

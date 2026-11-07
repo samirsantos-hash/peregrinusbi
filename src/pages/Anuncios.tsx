@@ -71,8 +71,8 @@ export default function Anuncios() {
   const [termo, setTermo] = useState("");
   const [aberto, setAberto] = useState<string | null>(null);
   const [atualizando, setAtualizando] = useState(false);
-  const [aba, setAba] = useState(['anuncios', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'diagnostico', 'participacao', 'fora', 'multiplas'].includes(params.get('aba') ?? '') ? params.get('aba') ?? 'anuncios' : 'anuncios');
-  useEffect(() => { const proxima = params.get('aba') ?? 'anuncios'; if (['anuncios', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'diagnostico', 'participacao', 'fora', 'multiplas'].includes(proxima)) setAba(proxima); }, [params]);
+  const [aba, setAba] = useState(['anuncios', 'vendas-promocoes', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'diagnostico', 'participacao', 'fora', 'multiplas'].includes(params.get('aba') ?? '') ? params.get('aba') ?? 'anuncios' : 'anuncios');
+  useEffect(() => { const proxima = params.get('aba') ?? 'anuncios'; if (['anuncios', 'vendas-promocoes', 'promocoes', 'melhorias', 'correlacoes', 'abc', 'diagnostico', 'participacao', 'fora', 'multiplas'].includes(proxima)) setAba(proxima); }, [params]);
   const [marcados, setMarcados] = useState<Map<string, Anuncio>>(new Map());
   const [precoPara, setPrecoPara] = useState<Anuncio[]>([]);
   const [promocoesDe, setPromocoesDe] = useState<Anuncio | null>(null);
@@ -201,6 +201,7 @@ export default function Anuncios() {
             <TabsList className="max-w-full overflow-x-auto justify-start">
               <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
               {pode("promocoes.visualizar") && <TabsTrigger value="promocoes">Gerenciar promoções</TabsTrigger>}
+              {pode("promocoes.visualizar") && <TabsTrigger value="vendas-promocoes">Vendas por promoção</TabsTrigger>}
               {pode("promocoes.visualizar") && <TabsTrigger value="participacao">Anúncios em promoções</TabsTrigger>}
               <TabsTrigger value="melhorias">Melhorias</TabsTrigger>
               {pode("correlacoes.visualizar") && <TabsTrigger value="correlacoes">Desempenho de anúncios</TabsTrigger>}
@@ -210,6 +211,7 @@ export default function Anuncios() {
             <TabsContent value="promocoes" className="mt-4">
               <GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoVendasAnuncio key={contaId} accountId={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? '')} aoGerenciar={item => { setMelhoriasDe(null); setPromocoesDe(item as Anuncio); }} /></GuardaPermissao>
             </TabsContent>
+            <TabsContent value="vendas-promocoes" className="mt-4"><GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoVendasAnuncio analise key={contaId} accountId={contaId} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? '')} aoGerenciar={item => { setMelhoriasDe(null); setPromocoesDe(item as Anuncio); }} /></GuardaPermissao></TabsContent>
             <TabsContent value="participacao" className="mt-4"><GuardaPermissao permissao="promocoes.visualizar"><ParticipacaoAnuncios key={contaId + aba} custId={String(contas.data?.find(c => c.id === contaId)?.ml_user_id ?? "")} filtro={aba} /></GuardaPermissao></TabsContent>
             <TabsContent value="melhorias" className="mt-4">
               <AbaMelhorias accountId={contaId} />
