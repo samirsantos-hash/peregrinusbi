@@ -1,5 +1,8 @@
 # Roadmap
 
+## Proporções do resumo executivo — 07/11
+- [ ] Compactar cartões financeiros, separar altura das notas de Ads e conferir resumo real em larguras de computador e celular, sem alterar cálculos ou publicar.
+
 ## Diagnóstico — etapa 5 — 07/11
 - [x] Exportar todos os lotes e lote lateral em Excel com notas exatas, cobertura, pesos, evidências e critérios; ausências em branco e zeros medidos preservados.
 - [x] Download geral conferido na AUTOPECASLONDRINA: 50 anúncios, 550 dimensões, 3 abas, 281.619 bytes; MLB5381969652 com Construção 54,5330 e Resposta 89,2459, mesmas notas da tela. 14 testes aprovados e build OK; k6 prévio: 28.456 requisições, zero falhas, p95 88,73ms (somente público). Botão individual implementado na lateral; download individual ainda não exercitado. Sem publicação.

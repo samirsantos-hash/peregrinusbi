@@ -2939,3 +2939,33 @@ html body:has(.peregrinus-panel) [data-ui-surface] [data-ui-typography="descript
   font-weight: 400;
   overflow-wrap: anywhere;
 }
+
+/* Executive summary sizes follow available column width, not the taller
+   account-health column. Financial tiles stay compact; Ads notes keep room. */
+.resumo-executivo { container-type: inline-size; }
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-executivo .kpi-vidro.noite-vidro {
+  height: auto;
+  min-height: 156px;
+  justify-content: flex-start;
+  padding: 20px;
+  gap: 12px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-executivo .kpi-vidro > div {
+  gap: 12px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-executivo .kpi-vidro-detalhes {
+  justify-content: flex-start;
+  gap: 4px;
+}
+@container (min-width: 720px) {
+  .resumo-executivo-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .resumo-executivo-grid > :nth-child(n + 5) { grid-column: span 2; }
+}
+@container (max-width: 479px) {
+  .resumo-executivo-grid > :nth-child(n + 5) { grid-column: 1 / -1; }
+  html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-executivo .kpi-vidro.noite-vidro {
+    padding: 16px;
+    min-height: 148px;
+    gap: 8px;
+  }
+}
