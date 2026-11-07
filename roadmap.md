@@ -1,5 +1,9 @@
 # Roadmap
 
+## Diagnóstico — etapa 5 — 07/11
+- [ ] Exportar todos os lotes e lote lateral em Excel com notas exatas, cobertura, pesos, evidências e critérios; ausências em branco e zeros medidos preservados.
+- [ ] Testar valores e download na loja real; manter interface sem publicação.
+
 ## Diagnóstico — etapa 4 — 07/11
 - [x] Consultar experiência sequencial dos 83 anúncios da curva A de faturamento da AUTOPECASLONDRINA; contagem de cancelamentos reutiliza pedidos completos nas mesmas datas, sem nova varredura ou dados pessoais.
 - [x] Evidências no detalhe e cobertura explícita; MLB5381969652: 129 pedidos pagos e 9 cancelados, 08/10–06/11, experiência sem nota pois reclamações e atrasos não foram confirmados. Diagnóstico real abriu com 1.381 anúncios; 38 testes aprovados e build OK. k6: 28.267 requisições, uma falha, p95 132,88ms; limites passaram, não capacidade autenticada. Interface não publicada.

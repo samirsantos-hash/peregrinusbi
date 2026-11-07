@@ -1,6 +1,10 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Loader2 } from 'lucide-react';
+import { FileSpreadsheet, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { podeExportar } from '@/lib/permissaoExportar';
+import { criarExcelDiagnostico } from '@/lib/anuncio/exportarDiagnostico';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { EmptyState } from '@/components/ds';
 import DetalheAnuncioAbc from '@/components/ml/DetalheAnuncioAbc';
@@ -44,6 +48,23 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
   });
   const [lote, setLote] = useState<ReturnType<typeof lotesDeCorrecao>[number] | null>(null);
   const [mlb, setMlb] = useState<string | null>(null);
+  const [exportando, setExportando] = useState(false);
+  async function exportarLotes(selecionado?: ReturnType<typeof lotesDeCorrecao>[number]) {
+    if (!calc || !vendas.data || exportando) return;
+    setExportando(true);
+    try {
+      if (!(await podeExportar())) return;
+      const arquivo = criarExcelDiagnostico({ custId, periodo: vendas.data.periodo, lotes: selecionado ? [selecionado] : calc.lotes, porMlb: calc.porMlb, titulos: calc.titulos });
+      const blob = new Blob([arquivo], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `diagnostico-lotes-${selecionado?.gargalo ?? 'todos'}-${vendas.data.periodo.inicio}-${vendas.data.periodo.fim}.xlsx`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+    } catch { toast.error('Não foi possível exportar os lotes. Tente novamente.'); }
+    finally { setExportando(false); }
+  }
   const seller = useQuery({
     queryKey: ['seller-por-cust', custId], enabled: !!custId,
     queryFn: async () => { const { data, error } = await supabase.from('sellers').select('id').eq('cust_id', custId as any).maybeSingle(); if (error) throw error; return data?.id ?? null; },
@@ -132,7 +153,10 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
       </div>
 
       {lotes.length > 0 && <div className="space-y-2">
-        <h3 className="font-semibold">Lotes de correção</h3>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-semibold">Lotes de correção</h3>
+          <Button variant="outline" size="sm" disabled={exportando} onClick={() => void exportarLotes()}><FileSpreadsheet className="h-4 w-4 mr-1" />{exportando ? 'Exportando…' : 'Exportar lotes em Excel'}</Button>
+        </div>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {lotes.map(l => <button key={l.gargalo} type="button" onClick={() => setLote(l)} className="text-left rounded-lg border bg-card p-3 hover:border-primary">
             <p className="font-semibold">{l.gargalo === 'indefinido' ? 'Sem gargalo definido' : ROTULO_DIMENSAO[l.gargalo as Dimensao]}</p>
@@ -159,9 +183,10 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
     </>}
 
     <Sheet open={!!lote} onOpenChange={o => !o && setLote(null)}>
-      <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent side="right" className="!left-auto !right-0 !w-[min(88vw,480px)] !max-w-[min(88vw,480px)] overflow-y-auto">
         <SheetHeader><SheetTitle>{lote && (lote.gargalo === 'indefinido' ? 'Sem gargalo definido' : ROTULO_DIMENSAO[lote.gargalo as Dimensao])}</SheetTitle><SheetDescription>{lote && `${num(lote.itens.length)} anúncios com o mesmo gargalo`}</SheetDescription></SheetHeader>
-        <ul className="mt-4 space-y-2 text-sm">{lote?.itens.map(i => <li key={i.mlb}><button type="button" className="text-left hover:underline" onClick={() => setMlb(i.mlb)}>{titulos.get(i.mlb)} <span className="text-xs text-muted-foreground">{i.mlb} · {brl(i.faturamentoCents / 100)}</span></button></li>)}</ul>
+        <Button className="mt-4" variant="outline" size="sm" disabled={exportando || !lote?.itens.length} onClick={() => lote && void exportarLotes(lote)}><FileSpreadsheet className="h-4 w-4 mr-1" />{exportando ? 'Exportando…' : 'Exportar este lote em Excel'}</Button>
+        <ul className="mt-4 space-y-3 text-sm">{lote?.itens.map(i => <li key={i.mlb} className="border-b border-border pb-3"><button type="button" className="text-left hover:underline break-words" onClick={() => setMlb(i.mlb)}>{titulos.get(i.mlb)} <span className="text-xs text-muted-foreground">{i.mlb} · {brl(i.faturamentoCents / 100)}</span></button><p className="mt-1 text-xs tabular-nums text-muted-foreground">Construção {ind(i.construcao)} · Resposta {ind(i.resposta)} · confiança {i.confianca === 'media' ? 'média' : i.confianca}</p></li>)}</ul>
       </SheetContent>
     </Sheet>
 
