@@ -131,7 +131,7 @@ export function mediana(vs: number[]): number | null {
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
-export function montarDimensoes(c: InsumosConstrucao, giro: number | null, resposta?: Partial<Record<'conversao' | 'visitasRelativas', NotaParcial>>): NotaDimensao[] {
+export function montarDimensoes(c: InsumosConstrucao, giro: number | null, resposta?: Partial<Record<'conversao' | 'visitasRelativas' | 'experiencia', NotaParcial>>): NotaDimensao[] {
   const medida = (d: 'fotos' | 'fichaTecnica' | 'preco', valor?: number | null) => c.medidas?.[d] ? { dimensao: d, peso: PESOS[d], ...c.medidas[d] } : nota(d, valor, 'nota registrada');
   return [
     nota('promocoes', c.promocoes, 'nota registrada'), medida('preco', c.preco), medida('fotos', c.fotos),
@@ -139,7 +139,7 @@ export function montarDimensoes(c: InsumosConstrucao, giro: number | null, respo
     c.envio ? { dimensao: 'exposicaoComercial', peso: PESOS.exposicaoComercial, ...notarExposicaoComercial(c.envio.envio, c.envio.tipo, c.envio.precoCents) }
       : { dimensao: 'exposicaoComercial', peso: PESOS.exposicaoComercial, nota: null, evidencia: 'não medido', acao: null },
     medida('fichaTecnica'),
-    { dimensao: 'experiencia', peso: PESOS.experiencia, nota: null, evidencia: 'não medido', acao: null },
+    { dimensao: 'experiencia', peso: PESOS.experiencia, nota: null, evidencia: 'não medido', acao: null, ...resposta?.experiencia },
     { dimensao: 'conversao', peso: PESOS.conversao, nota: null, evidencia: 'não medido', acao: null, ...resposta?.conversao },
     { dimensao: 'visitasRelativas', peso: PESOS.visitasRelativas, nota: null, evidencia: 'não medido', acao: null, ...resposta?.visitasRelativas },
     { dimensao: 'giro', peso: PESOS.giro, nota: giro, evidencia: 'unidades vs mediana da loja', acao: giro !== null && giro < 0.5 ? ACOES.giro! : null },

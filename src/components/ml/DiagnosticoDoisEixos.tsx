@@ -7,6 +7,8 @@ import DetalheAnuncioAbc from '@/components/ml/DetalheAnuncioAbc';
 import { useListingsQuality } from '@/hooks/useListingsQuality';
 import { useConstrucaoAnuncios } from '@/hooks/useConstrucaoAnuncios';
 import { useRespostaAnuncios } from '@/hooks/useRespostaAnuncios';
+import { useExperienciaAnuncios } from '@/hooks/useExperienciaAnuncios';
+import { anunciosExperienciaA, notaExperienciaLida, type ExperienciaLida } from '@/lib/anuncio/experiencia';
 import { notasResposta, referenciasResposta } from '@/lib/anuncio/resposta';
 import { notasConstrucaoLida } from '@/lib/anuncio/construcao';
 import { chamarFuncaoMl } from '@/lib/mlFuncoes';
@@ -19,7 +21,7 @@ import {
   mediana, montarDimensoes, notaGiro, SEM_PROMOCAO, perfilarCatalogo, type Dimensao, type Diagnostico, type Quadrante,
 } from '@/lib/anuncio/diagnostico';
 
-type Dados = { periodo: { inicio: string; fim: string }; itens: ItemVendas[]; coberturaCompleta: boolean; catalogoCompleto: boolean };
+type Dados = { periodo: { inicio: string; fim: string }; itens: ItemVendas[]; experienciaPedidos?: Omit<ExperienciaLida, 'disponivel'>[]; coberturaCompleta: boolean; catalogoCompleto: boolean };
 const dataBr = (s: string) => s.split('-').reverse().join('/');
 const ind = (v: number | null) => v == null ? '—' : num(Math.round(v));
 const POS: Record<Quadrante, string> = { falha_dupla: 'col-start-1 row-start-2', potencial_reprimido: 'col-start-2 row-start-2', produto_ou_demanda: 'col-start-1 row-start-1', saudavel: 'col-start-2 row-start-1' };
@@ -48,7 +50,7 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
   });
   const qualidade = useListingsQuality(seller.data ?? undefined);
   const vendas = useQuery({
-    queryKey: ['ml-curva-abc', custId, 30], enabled: !!custId, retry: false,
+    queryKey: ['ml-curva-abc-experiencia-v1', custId, 30], enabled: !!custId, retry: false,
     queryFn: async () => {
       const d = await chamarFuncaoMl<Dados>('ml-analise-loja', { cust_id: custId, modo: 'curvaABC', dias: 30 });
       if (!d.coberturaCompleta || !d.catalogoCompleto) throw new Error('Cobertura incompleta; classificação suspensa.');
@@ -58,6 +60,8 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
 
   const construcao = useConstrucaoAnuncios(custId, vendas.data?.itens.map(i => i.mlb) ?? []);
   const resposta = useRespostaAnuncios(custId, vendas.data?.itens.map(i => i.mlb) ?? [], vendas.data?.periodo);
+  const idsA = useMemo(() => vendas.data ? anunciosExperienciaA(vendas.data.itens) : [], [vendas.data]);
+  const experiencia = useExperienciaAnuncios(custId, idsA, vendas.data?.periodo, !construcao.carregando && !resposta.carregando);
   const calc = useMemo(() => {
     if (!vendas.data) return null;
     const qMap = new Map((qualidade.data ?? []).map(q => [q.itemId.replace(/\D/g, ''), q]));
@@ -75,16 +79,20 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
         medidas: leitura ? notasConstrucaoLida(leitura) : { fotos: { nota: null, evidencia: 'fotos não lidas', acao: null }, fichaTecnica: { nota: null, evidencia: 'ficha técnica não lida', acao: null }, preco: { nota: null, evidencia: 'preço atual não lido; sem referência comparável confirmada', acao: null } },
         envio: leitura ? { envio: leitura.envio, tipo: leitura.tipo, precoCents: leitura.moeda === 'BRL' && leitura.preco !== null ? Math.round(leitura.preco * 100) : Number.NaN } : (() => { const r = cat?.tipos.get(i.mlb); return r ? { envio: r.logistica ? { free_shipping: !!r.frete_gratis, logistic_type: r.logistica } : null, tipo: r.tipo_anuncio ?? null, precoCents: Math.round(Number(r.preco ?? 0) * 100) } : null; })(),
         promocoes: promoAtual ?? q?.llPromotionsScore, preco: q?.llPriceScore, fotos: q?.llPicturesScore, titulo: q?.llTitleScore, descricao: q?.llDescriptionScore,
-      }, notaGiro(i.unidades, med), notasResposta(resposta.porMlb.get(i.mlb) ?? null, i.pedidos, refs)));
+      }, notaGiro(i.unidades, med), { ...notasResposta(resposta.porMlb.get(i.mlb) ?? null, i.pedidos, refs), experiencia: (() => {
+        const cohort = vendas.data.experienciaPedidos?.find(e => e.item_id === i.mlb);
+        const lida = experiencia.porMlb.get(i.mlb);
+        return notaExperienciaLida(idsA.includes(i.mlb) && cohort && lida ? { ...cohort, ...lida } : undefined);
+      })() }));
     });
     let perfil = null;
     try { perfil = perfilarCatalogo(ds, fat); } catch { perfil = null; }
     const fila = filaDeAcao(ds, fat);
     return { ds, perfil, fila, lotes: lotesDeCorrecao(fila), titulos, porMlb: new Map(ds.map(d => [d.mlb, d])) };
-  }, [vendas.data, qualidade.data, catalogo.data, construcao.porMlb, resposta.porMlb]);
+  }, [vendas.data, qualidade.data, catalogo.data, construcao.porMlb, resposta.porMlb, experiencia.porMlb, idsA]);
 
   if (!custId) return <EmptyState falta="Selecione uma loja." acao="Escolha a loja no seletor acima." />;
-  if (vendas.isPending || catalogo.isPending || seller.isPending || (!!seller.data && qualidade.isPending) || construcao.carregando || resposta.carregando) return <div role="status" className="flex gap-2 items-center py-8 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Montando o diagnóstico… {num(construcao.lidos)} anúncios lidos · visitas confirmadas em {num(resposta.medidos)} de {num(resposta.total)}</div>;
+  if (vendas.isPending || catalogo.isPending || seller.isPending || (!!seller.data && qualidade.isPending) || construcao.carregando || resposta.carregando || experiencia.carregando) return <div role="status" className="flex gap-2 items-center py-8 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Montando o diagnóstico… {num(construcao.lidos)} anúncios lidos · visitas confirmadas em {num(resposta.medidos)} de {num(resposta.total)} · experiência consultada em {num(experiencia.consultados)} de {num(experiencia.total)} da curva A</div>;
   if (vendas.isError) return <EmptyState falta={vendas.error.message} acao="Tente atualizar em instantes." />;
   if (catalogo.isError || seller.isError || qualidade.isError) return <EmptyState falta="Não foi possível ler as notas de qualidade." acao="Tente atualizar em instantes." />;
   if (!calc || !vendas.data) return null;
@@ -97,6 +105,7 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
       <p className="text-xs text-muted-foreground mt-1">{dataBr(vendas.data.periodo.inicio)} – {dataBr(vendas.data.periodo.fim)} · Construção (o que o anúncio é) × Resposta (como o mercado reage). Não é a pontuação oficial do Mercado Livre.</p>
       <p className="text-xs text-muted-foreground mt-2">Dados atuais lidos para {num(construcao.lidos)} de {num(construcao.total)} anúncios.{!construcao.completo && ' Leitura parcial: anúncios ou dimensões não confirmados permanecem sem medição.'} Preço atual consultado; comparação de preço permanece sem medição quando não há referência comparável confirmada.</p>
       <p className="text-xs text-muted-foreground mt-2">Visitas confirmadas em {num(resposta.medidos)} de {num(resposta.total)} anúncios, nas mesmas datas das vendas. Conversão = pedidos pagos ÷ visitas; mínimo de 50 visitas para pontuar. Referência: mediana dos anúncios medidos desta loja, incluindo taxas zero.{!resposta.completo && ' Cobertura parcial: visitas ausentes não contam como zero.'}</p>
+      <p className="text-xs text-muted-foreground mt-2">Experiência consultada em {num(experiencia.consultados)} de {num(experiencia.total)} anúncios da curva A de faturamento. Cancelamentos são pedidos distintos desta janela; não significam culpa do vendedor ou reembolso. Reclamações e atrasos sem contagens confirmadas permanecem sem medição, sem aumentar a confiança. Nota exige todas as ocorrências e ao menos 20 pedidos pagos; referências provisórias: 2% de reclamações, 5% de atrasos e 3% de cancelamentos.</p>
     </div>
 
     {!perfil ? <EmptyState falta="Nenhum anúncio pôde ser diagnosticado nos dois eixos." acao="As notas de construção ainda não estão disponíveis para estes anúncios." /> : <>
@@ -117,7 +126,7 @@ export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: stri
         <div className="space-y-3 text-sm">
           <p><span className="font-semibold">{ROTULO_QUADRANTE[perfil.quadranteDominante]} domina.</span> {perfil.leitura}</p>
           {perfil.gargaloRecorrente && <p>Gargalo recorrente: <b>{ROTULO_DIMENSAO[perfil.gargaloRecorrente.dimensao]}</b> em {pct(perfil.gargaloRecorrente.participacao * 100)} dos anúncios diagnosticados.</p>}
-          <p className="text-xs text-muted-foreground">{num(perfil.diagnosticados)} de {num(perfil.anuncios)} anúncios diagnosticados; Construção considera fotos com dimensões originais, ficha técnica da categoria, exposição comercial e participação atual em promoções{!catalogo.data?.completo ? ' — participação suspensa: catálogo ainda não lido por inteiro' : ''}, além de título e descrição quando medidos. Resposta considera giro, visitas relativas e conversão quando confirmados na mesma janela. Experiência de compra ainda não medida; visitas e conversão não garantem confiança alta. A confiança depende da cobertura de cada anúncio.</p>
+          <p className="text-xs text-muted-foreground">{num(perfil.diagnosticados)} de {num(perfil.anuncios)} anúncios diagnosticados; Construção considera fotos com dimensões originais, ficha técnica da categoria, exposição comercial e participação atual em promoções{!catalogo.data?.completo ? ' — participação suspensa: catálogo ainda não lido por inteiro' : ''}, além de título e descrição quando medidos. Resposta considera giro, visitas relativas, conversão e experiência quando confirmados na mesma janela. Ausências não recebem nota nem garantem confiança alta. A confiança depende da cobertura de cada anúncio.</p>
           <p className="text-xs text-muted-foreground">Cortes provisórios: Construção {CORTES_PADRAO.construcao}, Resposta {CORTES_PADRAO.resposta}.{perfil.corteSemSeparacao && ' Atenção: mais de 90% dos anúncios ficam do mesmo lado de um corte — ele ainda não separa bem este catálogo.'}</p>
         </div>
       </div>

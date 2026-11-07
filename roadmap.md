@@ -1,5 +1,9 @@
 # Roadmap
 
+## Diagnóstico — etapa 4 — 07/11
+- [ ] Consultar experiência dos anúncios da curva A com token da própria loja; reclamações, atrasos e cancelamentos exigem vínculo e cobertura na mesma janela, sem zeros presumidos.
+- [ ] Integrar evidências na Resposta e detalhe, testar regras e conferir numa loja real; manter interface sem publicação.
+
 ## Diagnóstico — etapa 3 — 07/11
 - [x] Visitas confirmadas em 1.381/1.381 anúncios da AUTOPECASLONDRINA, 08/10–06/11/2026, nas mesmas datas dos pedidos pagos completos; sem novas varreduras de pedidos, lotes sequenciais de 20 e ausências null.
 - [x] Resposta integra giro, visitas relativas e conversão (mínimo 50 visitas, mediana da amostra medida incluindo zero). MLB5381969652: 1.890 visitas, conversão 6,83%, Resposta 89, cobertura 65,3%, confiança média; experiência ainda não medida. Desktop e 536px conferidos, sem erros; primeira montagem completa 366,89s, não melhoria de velocidade. 35 testes passaram, build OK; k6 público 28.221 requisições, zero falhas, p95 142,26ms (não capacidade autenticada). Leitura compartilhada atualizada, interface não publicada.
