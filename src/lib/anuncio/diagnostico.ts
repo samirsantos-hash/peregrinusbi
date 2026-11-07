@@ -1,5 +1,5 @@
 // Diagnóstico em dois eixos (Construção × Resposta). Funções puras; nota nula = não medida, nunca zero.
-import { notarExposicaoComercial, type ShippingItem } from './dimensoes';
+import { notarExposicaoComercial, type ShippingItem, type NotaParcial } from './dimensoes';
 export type Dimensao = 'exposicaoComercial' | 'promocoes' | 'preco' | 'fichaTecnica' | 'fotos' | 'titulo' | 'descricao' | 'experiencia' | 'conversao' | 'visitasRelativas' | 'giro';
 export type Eixo = 'construcao' | 'resposta';
 export interface NotaDimensao { dimensao: Dimensao; peso: number; nota: number | null; evidencia: string; acao: string | null }
@@ -110,7 +110,7 @@ export function lotesDeCorrecao(fila: ReturnType<typeof filaDeAcao>) {
 }
 
 /** Notas de 0–100 registradas para o anúncio; 0 ou ausente = não medida. */
-export interface InsumosConstrucao { envio?: { envio: ShippingItem | null; tipo: string | null; precoCents: number } | null; promocoes?: number | null; preco?: number | null; fotos?: number | null; titulo?: number | null; descricao?: number | null }
+export interface InsumosConstrucao { medidas?: Partial<Record<'fotos' | 'fichaTecnica' | 'preco', NotaParcial>>; envio?: { envio: ShippingItem | null; tipo: string | null; precoCents: number } | null; promocoes?: number | null; preco?: number | null; fotos?: number | null; titulo?: number | null; descricao?: number | null }
 const ACOES: Partial<Record<Dimensao, string>> = { promocoes: 'Aderir a uma promoção disponível', preco: 'Revisar a posição de preço', fotos: 'Melhorar as fotos', titulo: 'Ajustar o título', descricao: 'Completar a descrição', giro: 'Investigar o giro do item' };
 const nota = (d: Dimensao, v: number | null | undefined, evidencia: string): NotaDimensao => {
   if (d === 'promocoes' && v === 0.0001) return { dimensao: d, peso: PESOS[d], nota: 0, evidencia: 'sem promoção atual', acao: ACOES.promocoes! };
@@ -132,12 +132,13 @@ export function mediana(vs: number[]): number | null {
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
 export function montarDimensoes(c: InsumosConstrucao, giro: number | null): NotaDimensao[] {
+  const medida = (d: 'fotos' | 'fichaTecnica' | 'preco', valor?: number | null) => c.medidas?.[d] ? { dimensao: d, peso: PESOS[d], ...c.medidas[d] } : nota(d, valor, 'nota registrada');
   return [
-    nota('promocoes', c.promocoes, 'nota registrada'), nota('preco', c.preco, 'nota registrada'), nota('fotos', c.fotos, 'nota registrada'),
+    nota('promocoes', c.promocoes, 'nota registrada'), medida('preco', c.preco), medida('fotos', c.fotos),
     nota('titulo', c.titulo, 'nota registrada'), nota('descricao', c.descricao, 'nota registrada'),
     c.envio ? { dimensao: 'exposicaoComercial', peso: PESOS.exposicaoComercial, ...notarExposicaoComercial(c.envio.envio, c.envio.tipo, c.envio.precoCents) }
       : { dimensao: 'exposicaoComercial', peso: PESOS.exposicaoComercial, nota: null, evidencia: 'não medido', acao: null },
-    { dimensao: 'fichaTecnica', peso: PESOS.fichaTecnica, nota: null, evidencia: 'não medido', acao: null },
+    medida('fichaTecnica'),
     { dimensao: 'experiencia', peso: PESOS.experiencia, nota: null, evidencia: 'não medido', acao: null },
     { dimensao: 'conversao', peso: PESOS.conversao, nota: null, evidencia: 'não medido', acao: null },
     { dimensao: 'visitasRelativas', peso: PESOS.visitasRelativas, nota: null, evidencia: 'não medido', acao: null },

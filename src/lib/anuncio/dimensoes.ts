@@ -23,7 +23,7 @@ export function notarExposicaoComercial(s: ShippingItem | null, tipoAnuncio: str
   const acoes: string[] = [];
   if (tipoLog !== 'fulfillment') acoes.push(`Migrar para o Full ganha ${((1 - notaLog) * PESO_LOGISTICA * 100).toFixed(0)} pontos nesta dimensão — é o maior salto disponível no anúncio`);
   const tipoEsperado = precoCents > limiarTipoCents ? CLASSICO : PREMIUM;
-  if (tipoAnuncio && tipoAnuncio !== tipoEsperado) {
+  if (Number.isFinite(precoCents) && precoCents > 0 && tipoAnuncio && tipoAnuncio !== tipoEsperado) {
     acoes.push(`Preço de ${(precoCents / 100).toFixed(2).replace('.', ',')} pede ${tipoEsperado === CLASSICO ? 'clássico' : 'premium'} pela regra de margem — avaliar o efeito na rentabilidade antes de manter`);
   }
   if (!s.free_shipping && precoCents >= limiarTipoCents) acoes.push('Acima do limiar o comprador espera frete grátis — não oferecer reduz conversão');
@@ -49,6 +49,7 @@ export function notarFotos(fotos: FotoApi[] | null): NotaParcial {
   if (!fotos.length) return { nota: 0, evidencia: 'nenhuma foto publicada', acao: `Publicar ao menos ${MINIMO_FOTOS} fotos em 1200x1200 ou mais.` };
   const medidas = fotos.map(f => medirFoto(f.max_size)).filter((x): x is MedidaFoto => x !== null);
   if (!medidas.length) return { nota: null, evidencia: 'fotos sem dimensão informada', acao: null };
+  if (medidas.length !== fotos.length) return { nota: null, evidencia: `${medidas.length} de ${fotos.length} fotos com dimensão original confirmada; medição incompleta`, acao: null };
   const n = fotos.length;
   const emAlta = medidas.filter(m => m.altaResolucao).length;
   const quadradas = medidas.filter(m => m.quadrada).length;
@@ -74,7 +75,7 @@ export function notarFichaTecnica(doItem: AtributoItem[], daCategoria: AtributoC
   const mapa = new Map(doItem.map(a => [a.id, a]));
   const ok = obrig.filter(o => { const a = mapa.get(o.id); return !!a && preenchido(a); });
   const faltando = obrig.filter(o => !ok.includes(o));
-  const total = doItem.filter(preenchido).length;
+  const total = daCategoria.filter(a => { const item = mapa.get(a.id); return !!item && preenchido(item); }).length;
   const notaObrig = obrig.length ? ok.length / obrig.length : 1;
   const notaGeral = Math.min(1, total / daCategoria.length);
   return {

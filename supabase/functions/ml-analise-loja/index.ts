@@ -10,6 +10,7 @@ import { amostraCampanhas } from '../_shared/mlCampanhasDiagnostico.ts';
 import { janelaMensal, projetarCancelamentosMensais } from './cancelamentosMensais.ts';
 import { agregarPedidosAbc, lerCatalogoAbc } from './abcPedidos.ts';
 import { lerParticipacaoPromocoes } from './participacaoPromocoes.ts';
+import { lerConstrucaoAnuncios } from './construcaoAnuncios.ts';
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -17,15 +18,16 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), offset: z.number().int().min(0).max(20000).optional(), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais', 'curvaABC', 'participacaoPromocoes']), dias: z.union([z.literal(7), z.literal(30)]).optional(), anterior: z.boolean().optional(), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), item_ids: z.array(z.string().regex(/^MLB\d+$/)).min(1).max(20).optional(), offset: z.number().int().min(0).max(20000).optional(), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais', 'curvaABC', 'participacaoPromocoes', 'diagnosticoConstrucao']), dias: z.union([z.literal(7), z.literal(30)]).optional(), anterior: z.boolean().optional(), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
+  if (modo === 'diagnosticoConstrucao' && (!body.data.item_ids?.length || new Set(body.data.item_ids).size !== body.data.item_ids.length)) return json({ error: 'Informe de 1 a 20 anúncios distintos.' }, 400);
   let mensal: ReturnType<typeof janelaMensal> | undefined;
   if (modo === 'cancelamentosMensais') {
     try { mensal = janelaMensal(body.data.mes ?? ''); }
     catch (e) { return json({ error: e instanceof Error ? e.message : 'Informe um mês válido.' }, 400); }
   }
-  const negado = await exigirPermissao(req, modo === 'curvaABC' ? 'correlacoes.visualizar' : modo === 'full' ? 'full.visualizar' : ['campanhasDiagnostico', 'participacaoPromocoes'].includes(modo) ? 'promocoes.visualizar' : ['resumo.visualizar', 'reputacao.visualizar', 'publicidade.visualizar', 'correlacoes.visualizar']); if (negado) return negado;
+  const negado = await exigirPermissao(req, ['curvaABC', 'diagnosticoConstrucao'].includes(modo) ? 'correlacoes.visualizar' : modo === 'full' ? 'full.visualizar' : ['campanhasDiagnostico', 'participacaoPromocoes'].includes(modo) ? 'promocoes.visualizar' : ['resumo.visualizar', 'reputacao.visualizar', 'publicidade.visualizar', 'correlacoes.visualizar']); if (negado) return negado;
   // Reuse existing store visibility; developer status does not grant business access.
   const { data: vis, error: visError } = await user.from('ml_sync_tema').select('account_id').eq('cust_id', cust_id).limit(1);
   if (visError || !vis?.length) return json({ error: 'Loja sem conexão disponível na sua carteira.' }, 403);
@@ -41,12 +43,13 @@ Deno.serve(async req => {
       const r = await fetch('https://api.mercadolibre.com' + path, { headers: { Authorization: `Bearer ${access}` }, signal: AbortSignal.timeout(8000) });
       if (r.ok) return r.json();
       if (tentativa === 0 || tentativa === 2) console.warn('ml-analise-loja leitura', modo, r.status, path.split('?')[0].replace(/\d{6,}/g, ':id'));
-      if (!['curvaABC', 'participacaoPromocoes'].includes(modo) || tentativa === 2 || (r.status !== 429 && r.status < 500)) throw new Error('O Mercado Livre não disponibilizou todos os dados desta análise.');
+      if (!['curvaABC', 'participacaoPromocoes', 'diagnosticoConstrucao'].includes(modo) || tentativa === 2 || (r.status !== 429 && r.status < 500)) throw new Error('O Mercado Livre não disponibilizou todos os dados desta análise.');
       await new Promise(resolve => setTimeout(resolve, 500 * (tentativa + 1)));
     }
     throw new Error('Leitura indisponível.');
   }
   try {
+    if (modo === 'diagnosticoConstrucao') return json(await lerConstrucaoAnuncios(get, cust_id, body.data.item_ids ?? []));
     if (modo === 'participacaoPromocoes') return json(await lerParticipacaoPromocoes(get, cust_id, body.data.offset ?? 0));
     const dias = modo === 'curvaABC' ? body.data.dias ?? 30 : modo === 'vendas7d' ? 7 : 30;
     // curvaABC anterior: same-length window immediately before the current one.

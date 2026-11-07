@@ -1,5 +1,9 @@
 # Roadmap
 
+## Diagnóstico — etapa 2 — 07/11
+- [x] Leitura sequencial em lotes de 20: 1.381/1.381 anúncios do universo diagnosticado da AUTOPECASLONDRINA, fotos, categoria, ficha e preço disponíveis; nenhum anúncio alterado.
+- [x] Evidências integradas em Construção e detalhe lateral; preço sem referência segue não medido. Testes aprovados, celular/desktop sem erros, teste público sem falhas. Etapas 3–5 não iniciadas; interface sem publicação.
+
 ## Apresentação após 100% — 07/11
 - [x] Contadores sincronizados após 100%; Curva ABC desenha a linha e revela contornos, demais gráficos têm entrada suave. Conferido com loja real em 536px e 1280px e movimento reduzido; testes e entrega pública aprovados. Sem publicação.
 
