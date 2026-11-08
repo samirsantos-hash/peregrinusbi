@@ -22,3 +22,4 @@
 - Operational summary layout uses scoped `.resumo-sinergia` styles so presentation changes preserve same-date Ads calculations and monthly cancellation coverage rules.
 - Summary funnel charts reuse nullable daily visits and paid orders from the same live summary; compare exact dates 30 days apart and compute revenue per visit from covered period totals, never impute missing visits or blend imports.
 - Executive KPI sizing is scoped to `.resumo-executivo` with container-width tracks and natural row heights, so account-health content and Ads coverage notes cannot stretch every financial tile.
+- Summary listing cancellations reuse the existing ABC query only with matching dates and confirmed order coverage; exclude ambiguous counts and never reconstruct listings from store totals.

@@ -12,6 +12,7 @@ import SinteseIndicadores from './SinteseIndicadores';
 import FunilDiarioResumo from './FunilDiarioResumo';
 import { receitaPorVisita } from '@/lib/funilDiarioResumo';
 import ImpressoesFunil from './ImpressoesFunil';
+import AnunciosMaisCancelados from './AnunciosMaisCancelados';
 
 type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number; pedidos?: number; cancelados?: number; visitas?: number | null }[] };
 type Resposta = { atual: Total; anterior: Total; periodo: { inicio: string; fim: string }; anteriorPeriodo: { inicio: string; fim: string }; consultadoEm: string };
@@ -174,7 +175,7 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">Status atual por data de criação do pedido; a API deste resumo não identifica quem cancelou.</p>
+          <p className="mt-2 text-xs text-muted-foreground">Status atual por data de criação do pedido; os dados disponíveis não identificam quem cancelou.</p>
           <p className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-border pt-3 text-xs text-muted-foreground">
             <span className="tabular-nums">
               Cancelados: <span className="font-medium text-foreground">{num(a.cancelados)}</span> pedidos
@@ -186,6 +187,7 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
               <span className="tabular-nums">{num(delta(a.cancelados, p.cancelados), 1)}% {PERIODO_DELTA}</span>
             )}
           </p>
+          <AnunciosMaisCancelados custId={custId} periodo={periodo} />
         </div>
         <div className="resumo-funil grid min-w-0 grid-cols-1 items-start gap-3 self-start lg:col-span-4">
           <ImpressoesFunil custId={custId} atual={a.serie.map(d => d.data)} anterior={p.serie.map(d => d.data)} />

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Anúncios mais afetados por cancelamentos — 08/11
+- [x] Preencher o espaço abaixo dos cancelamentos com lista por anúncio, pedidos pagos, cancelados e taxa na mesma janela; preservar ausências e vínculo inequívoco, reutilizando a consulta ABC existente.
+- [x] AUTOPECASLONDRINA: 52 anúncios com cancelamentos confirmados, cinco iniciais e expansão completa; MLB5381969652: 128 pagos, 9 cancelados, 6,57%. Desktop/390px sem excesso horizontal ou erros. Dez testes passaram e build OK; k6 público prévio 28.471 requisições, zero falhas, p95 80,31ms (não mede painel autenticado). Sem publicar.
+
 ## Proporções do resumo executivo — 07/11
 - [x] Compactar cartões financeiros e separar altura das notas de Ads sem alterar cálculos; quatro métricas em uma linha quando houver largura útil de 720px, duas abaixo disso; notas em largura inteira em espaços estreitos. Build OK; k6 público: 28.478 requisições, zero falhas, p95 83,16ms. Sem publicação.
 - [ ] Conferência visual autenticada bloqueada: navegador de teste não conseguiu ler a página após restaurar a sessão; proporções finais ainda não verificadas visualmente.
