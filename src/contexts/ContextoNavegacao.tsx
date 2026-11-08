@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregamento';
 
 export interface ContextoNavegacao {
   periodo: { inicio: string; fim: string };
@@ -105,7 +106,7 @@ export function ContextoNavegacaoProvider({ children }: { children: React.ReactN
     filtros,
     aba,
     queryString,
-    setPeriodo: (p) => atualizar("periodo", `${p.inicio}:${p.fim}`),
+    setPeriodo: (p) => { if (p.inicio !== periodo.inicio || p.fim !== periodo.fim) sinalizarSelecaoCarregamento(); atualizar("periodo", `${p.inicio}:${p.fim}`); },
     setPrograma: (id) => atualizar("programa", id),
     setFiltro: (chave, valor) =>
       atualizar(chave, valor === null ? null : typeof valor === "boolean" ? String(valor) : valor),

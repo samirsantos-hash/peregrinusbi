@@ -46,6 +46,12 @@
   background: hsl(var(--background));
   pointer-events: auto;
 }
+.skeleton-painel { width: min(1280px, 100%); margin: 0 auto; padding: 24px; height: 100%; overflow: hidden; }
+.skeleton-painel-corpo { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; }
+.carregamento-atualizacao { position: fixed; inset: 0; z-index: 1000; pointer-events: none; }
+@media (max-width: 1023px) { .skeleton-painel-corpo { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 480px) { .skeleton-painel { padding: 16px; } }
+@media (prefers-reduced-motion: reduce) { .skeleton-painel .panel-skeleton { animation: none; } }
 .indicador-carregamento {
   position: fixed;
   top: 50%;

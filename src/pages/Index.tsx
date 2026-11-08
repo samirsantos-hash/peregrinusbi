@@ -90,6 +90,7 @@ import PromocoesResultados from "@/components/ml/PromocoesResultados";
 import ResumoSinergiaCorrelacoes from "@/components/ml/SinergiaPublicidade";
 import FullProdutosApi from "@/components/pock/FullProdutosApi";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
+import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregamento';
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -158,19 +159,21 @@ const Index = () => {
 
   // Handle period changes from DashboardHeader
   const handlePeriodChange = useCallback((period: string) => {
+    if (period !== activePeriod) sinalizarSelecaoCarregamento();
     setActivePeriod(period);
     const useConsolidated = period === "all" || period === "custom";
     setGranularity(useConsolidated ? "consolidated" : "daily");
     // Seleções vindas do calendário já trazem o intervalo — não limpar.
     if (!period.startsWith("custom")) setDateRange(undefined);
-  }, []);
+  }, [activePeriod]);
 
 
   // Clear date range and cache when granularity changes
   const handleGranularityChange = useCallback((val: Granularity) => {
+    if (val !== granularity) sinalizarSelecaoCarregamento();
     setGranularity(val);
     setDateRange(undefined);
-  }, []);
+  }, [granularity]);
 
   const { data: dbSellers, isLoading: loadingSellers, isFetched: sellersFetched } = useSellers();
 
@@ -198,6 +201,7 @@ const Index = () => {
 
   // When seller changes, reset date range so it re-anchors to the new dataset
   const handleSellerChange = useCallback((id: string) => {
+    if (id !== selectedSeller) sinalizarSelecaoCarregamento();
     setSelectedSeller(id);
     setDateRange(undefined); // Reset → will be re-anchored by effect below
     if (id !== selectedSeller && hasRealData && (!id || sellers.some((seller) => seller.id === id))) {
@@ -496,7 +500,7 @@ const Index = () => {
               selectedSeller={selectedSeller}
               onSellerChange={handleSellerChange}
               dateRange={dateRange}
-              onDateRangeChange={setDateRange}
+              onDateRangeChange={range => { if (range?.from?.getTime() !== dateRange?.from?.getTime() || range?.to?.getTime() !== dateRange?.to?.getTime()) sinalizarSelecaoCarregamento(); setDateRange(range); }}
               allKpis={allKpis}
               calendarKpis={calendarKpis}
               filteredKpis={filteredKpis}

@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
+import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregamento';
 import CorrelacoesAnuncios from "@/components/ml/CorrelacoesAnuncios";
 import ParticipacaoAnuncios from "@/components/ml/ParticipacaoAnuncios";
 import ParticipacaoVendasAnuncio from "@/components/ml/ParticipacaoVendasAnuncio";
@@ -178,7 +179,7 @@ export default function Anuncios() {
           periodo={fonte}
           acoes={
             <div className="flex flex-wrap items-center gap-2">
-              {!!contas.data?.length && <BuscarLojaMl contas={contas.data} value={contaId} onChange={setContaId} />}
+              {!!contas.data?.length && <BuscarLojaMl contas={contas.data} value={contaId} onChange={id => { if (id !== contaId) sinalizarSelecaoCarregamento(); setContaId(id); }} />}
               <Button size="sm" variant="outline" onClick={atualizar} disabled={!contaId || atualizando}>
                 <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${atualizando ? "animate-spin" : ""}`} />
                 {atualizando ? "Atualizando…" : "Atualizar"}

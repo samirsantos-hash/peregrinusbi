@@ -1,5 +1,7 @@
 # Teste de carga público — 04/11/2026
 
+- 08/11: skeleton inicial e progresso por seleção, teste prévio de 1.000 usuários: 28.473 requisições, zero falhas, p95 de documentos 69,72ms. Somente entrega pública, não mede consultas autenticadas ou tempo de análise.
+
 - 07/11: cache IndexedDB e revalidação sem bloqueio; teste público prévio existente (1.000 VUs): 28.231 requisições, zero falhas, p95 HTTP 162,77ms. Não mede sessão, cache do navegador nem desempenho das consultas autenticadas.
 
 - 07/11: tela de vendas por promoção e anúncio, teste público prévio: 28.452 requisições, zero falhas, p95 HTTP 96,16ms. Somente entrega pública, não mede análise autenticada nem vínculos financeiros.

@@ -1,5 +1,9 @@
 # Roadmap
 
+## Skeleton e progresso por seleção — 08/11
+- [x] Skeleton proporcional na abertura; barra com percentual real e tempo ao trocar loja/período, preservando cache e liberação em 100%.
+- [x] Nove testes aprovados e build OK. Abertura e troca real para AUTOPECASLONDRINA/MERCALANI conferidas em 1280px/390px; lista carregada após o progresso. k6 público: 28.473 requisições, zero falhas, p95 69,72ms (somente entrega pública). Sem publicar.
+
 ## Anúncios mais afetados por cancelamentos — 08/11
 - [x] Preencher o espaço abaixo dos cancelamentos com lista por anúncio, pedidos pagos, cancelados e taxa na mesma janela; preservar ausências e vínculo inequívoco, reutilizando a consulta ABC existente.
 - [x] AUTOPECASLONDRINA: 52 anúncios com cancelamentos confirmados, cinco iniciais e expansão completa; MLB5381969652: 128 pagos, 9 cancelados, 6,57%. Desktop/390px sem excesso horizontal ou erros. Dez testes passaram e build OK; k6 público prévio 28.471 requisições, zero falhas, p95 80,31ms (não mede painel autenticado). Sem publicar.

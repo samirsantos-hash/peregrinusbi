@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { useEstadoApresentacao } from '@/components/chuva/estadoApresentacao';
+import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregamento';
 import { useQuery } from '@tanstack/react-query';
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { ArrowDownRight, ArrowRight, ArrowUpRight, Loader2, OctagonX, RefreshCw, Sparkles } from 'lucide-react';
@@ -69,7 +70,7 @@ export default function CurvaAbc({ custId }: { custId: string }) {
         {query.data && <p className="text-xs text-muted-foreground mt-1">{dataBr(query.data.periodo.inicio)} – {dataBr(query.data.periodo.fim)} · pedidos pagos · atualizado em {dataHoraBr(query.data.consultadoEm)}</p>}
       </div>
       <div className="flex flex-wrap gap-2 items-center">
-        <Tabs value={String(dias)} onValueChange={v => { setDias(Number(v)); setExpandido(false); }}><TabsList><TabsTrigger value="7">7 dias</TabsTrigger><TabsTrigger value="30">30 dias</TabsTrigger></TabsList></Tabs>
+        <Tabs value={String(dias)} onValueChange={v => { if (Number(v) !== dias) sinalizarSelecaoCarregamento(); setDias(Number(v)); setExpandido(false); }}><TabsList><TabsTrigger value="7">7 dias</TabsTrigger><TabsTrigger value="30">30 dias</TabsTrigger></TabsList></Tabs>
         <Button variant="outline" size="icon" aria-label="Atualizar Curva ABC" title="Atualizar Curva ABC" disabled={query.isFetching} onClick={() => void query.refetch()}><RefreshCw className={`h-4 w-4 ${query.isFetching ? 'animate-spin' : ''}`} /></Button>
       </div>
     </div>
