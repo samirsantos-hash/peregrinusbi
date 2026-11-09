@@ -1,5 +1,11 @@
 # Roadmap
 
+## Comparação de campanhas promocionais — 09/11
+- [x] Plotar vendas comprovadas por campanha no anúncio, com seleção de faturamento/pedidos/unidades/ticket e ranking da métrica escolhida.
+- [x] Exibir cobertura e limitações; não transformar ausência em zero, atribuir vendas pela participação atual ou confundir publicidade com promoção.
+- [x] Onze testes passaram e build OK; AUTOPECASLONDRINA/MLB4003091671 conferido em 1280px e 390px, filtros funcionais sem excesso horizontal. Há 35 pedidos/R$3.449,74 com desconto sem identidade promocional: gráfico real permanece indisponível, sem atribuição presumida. k6 prévio: 28.516 requisições, uma falha, limites aprovados; somente entrega pública. Sem publicar.
+- [ ] Curvas e ranking com campanhas reais dependem de identidade promocional confirmada nas vendas; a amostra consultada ainda não fornece esse vínculo. ROAS/ROI promocionais dependem também de custos atribuídos.
+
 ## Skeleton e progresso por seleção — 08/11
 - [x] Skeleton proporcional na abertura; barra com percentual real e tempo ao trocar loja/período, preservando cache e liberação em 100%.
 - [x] Nove testes aprovados e build OK. Abertura e troca real para AUTOPECASLONDRINA/MERCALANI conferidas em 1280px/390px; lista carregada após o progresso. k6 público: 28.473 requisições, zero falhas, p95 69,72ms (somente entrega pública). Sem publicar.

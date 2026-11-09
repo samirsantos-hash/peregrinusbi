@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { usePermissoes } from '@/hooks/usePermissoes';
+import { ComparacaoCampanhasPromocao } from './ComparacaoCampanhasPromocao';
 
 type Leitura = { vendasPromocao: VendasPromocao | null; periodo: { inicio: string; fim: string } };
 const data = (iso: string) => new Date(`${iso.slice(0, 10)}T12:00:00Z`).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
@@ -63,6 +64,7 @@ export default function VendasPromocaoAnuncio({ accountId, custId, itemId }: { a
     {vendas.isSuccess && !v && <p className="text-sm text-muted-foreground">Vendas indisponíveis: leitura do período não confirmada.</p>}
     {v && !v.completo && <p className="text-sm text-muted-foreground">Leitura parcial · {num(v.naoLidos)} pedidos sem leitura de desconto. Não representam zero de vendas.</p>}
     {promos.isSuccess && vendas.isSuccess && <>
+      <ComparacaoCampanhasPromocao linhas={linhas} vendas={v} />
       <div className="overflow-x-auto rounded-lg border border-border bg-card/30">
         <table className="w-full text-sm [&_th]:p-3 [&_td]:p-3"><thead className="text-left text-muted-foreground"><tr><th>Promoção</th><th>Vínculo com a venda</th><th>Pedidos</th><th>Unidades</th><th>Faturamento</th><th>ROAS da promoção</th></tr></thead>
           <tbody className="divide-y divide-border">{linhas.map(r => <tr key={r.chave}>
