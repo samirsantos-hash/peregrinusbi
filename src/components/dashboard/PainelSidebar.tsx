@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { SELLER_TABS, type SellerTab } from "@/config/sellerTabs";
-import { RAMOS_ACESSOS, GRUPOS_ACESSOS, destinoAcesso, type AcessoArvore } from "@/config/arvoreAcessos";
+import { RAMOS_ACESSOS, GRUPOS_ACESSOS, RAMOS_DIDATICOS, GRUPOS_DIDATICOS, destinoAcesso, type AcessoArvore } from "@/config/arvoreAcessos";
 import { NovidadeTip } from "@/components/novidades/novidades";
 import { Button } from "@/components/ui/button";
 import { usePermissoes } from '@/hooks/usePermissoes';
@@ -87,6 +87,7 @@ function ItemNav({ tab, ativo, recolhida, onSelect, badge }: ItemProps) {
 }
 
 interface Props {
+  didatico?: boolean;
   consultantAccess?: boolean;
   redeAccess?: boolean;
   custId?: string;
@@ -102,6 +103,7 @@ interface Props {
 }
 
 function Conteudo({
+  didatico = false,
   consultantAccess = false,
   redeAccess = false, custId, contaId,
   sellerScope = "portfolio",
@@ -114,6 +116,7 @@ function Conteudo({
   onToggle,
   mostrarToggle,
 }: {
+  didatico?: boolean;
   consultantAccess?: boolean;
   redeAccess?: boolean;
   custId?: string;
@@ -132,12 +135,14 @@ function Conteudo({
   const { pode } = usePermissoes();
   const navigate = useNavigate();
   const client = useQueryClient();
+  const catalogo = didatico ? RAMOS_DIDATICOS : RAMOS_ACESSOS;
+  const grupos = didatico ? GRUPOS_DIDATICOS : GRUPOS;
   const antecipar = (sub: AcessoArvore) => {
     if (!custId || !visivel(sub) || sub.caminho !== '/anuncios' || sub.aba !== 'abc') return;
     void anteciparConsulta(client, ['ml-curva-abc', custId, 30]);
   };
   const visivel = (a: AcessoArvore) => pode(a.permissao) && (!a.consultor || consultantAccess) && (!a.rede || redeAccess) && (a.caminho !== "/anuncios" || pode("anuncios.visualizar"));
-  const filhos = (id: string) => RAMOS_ACESSOS.find(t => t.id === id)?.acessos.filter(visivel) ?? [];
+  const filhos = (id: string) => catalogo.find(t => t.id === id)?.acessos.filter(visivel) ?? [];
   const [ramos, setRamos] = useState<string[]>([ativa]);
   useEffect(() => { setRamos(atual => atual.includes(ativa) ? atual : [...atual, ativa]); }, [ativa]);
   const tabIntegracao = {
@@ -148,7 +153,7 @@ function Conteudo({
   return (
     <nav aria-label="Seções do painel" className="flex h-full flex-col">
       <div className="flex-1 overflow-y-auto px-3 pb-4">
-        {GRUPOS.filter(g => g.ids.some(id => filhos(id).length || (SECAO_PERMISSAO[id] && pode(`${SECAO_PERMISSAO[id]}.visualizar`)))).map((g) => (
+        {grupos.filter(g => g.ids.some(id => filhos(id).length || (SECAO_PERMISSAO[id] && pode(`${SECAO_PERMISSAO[id]}.visualizar`)))).map((g) => (
           <div key={g.titulo} className="mt-5 first:mt-2">
             {!recolhida && (
               <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-normal text-muted-foreground">
@@ -158,7 +163,7 @@ function Conteudo({
             )}
             <ul className="space-y-0.5">
               {g.ids.map((id) => {
-                const tab = RAMOS_ACESSOS.find(t => t.id === id);
+                const tab = catalogo.find(t => t.id === id);
                 const subs = filhos(id);
                 if (!tab || (!subs.length && !(SECAO_PERMISSAO[id] && pode(`${SECAO_PERMISSAO[id]}.visualizar`)))) return null;
                 return (
@@ -232,7 +237,7 @@ function Conteudo({
             {!recolhida && <span>Recolher</span>}
           </Button>
         )}
-        {tabAlertas && pode('alertas.visualizar') && (
+        {!didatico && tabAlertas && pode('alertas.visualizar') && (
           <ul>
             <ItemNav
               tab={tabAlertas}
@@ -248,7 +253,7 @@ function Conteudo({
   );
 }
 
-export default function PainelSidebar({ redeAccess, custId, contaId, ativa, subativa, onSubChange, onChange, alertas, mobileAberto, onMobileChange, consultantAccess, sellerScope }: Props) {
+export default function PainelSidebar({ didatico, redeAccess, custId, contaId, ativa, subativa, onSubChange, onChange, alertas, mobileAberto, onMobileChange, consultantAccess, sellerScope }: Props) {
   const [recolhida, setRecolhida] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     const salvo = window.localStorage.getItem(CHAVE);
@@ -275,6 +280,7 @@ export default function PainelSidebar({ redeAccess, custId, contaId, ativa, suba
         )}
       >
         <Conteudo
+          didatico={didatico}
           redeAccess={redeAccess} custId={custId} contaId={contaId}
           consultantAccess={consultantAccess}
           sellerScope={sellerScope}
@@ -296,6 +302,7 @@ export default function PainelSidebar({ redeAccess, custId, contaId, ativa, suba
           <SheetDescription className="sr-only">Navegação entre as seções da loja selecionada.</SheetDescription>
           <div className="h-full pt-8">
             <Conteudo
+              didatico={didatico}
               redeAccess={redeAccess} custId={custId} contaId={contaId}
           consultantAccess={consultantAccess}
               sellerScope={sellerScope}

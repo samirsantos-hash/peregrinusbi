@@ -1,5 +1,10 @@
 # Roadmap
 
+## Árvore esquerda no modo Didático — 09/11
+- [x] Reutilizar a navegação esquerda com Métricas de Negócio → Indicadores de negócio e Faturamento mensal, sem acessos avançados nem mudança de loja.
+- [x] Oito regressões aprovadas e build OK; k6 público prévio: 28.351 requisições, zero falhas, p95 documentos 113,42ms (não mede capacidade autenticada). Próximas etapas preservadas, sem publicar.
+- [ ] Conferência visual bloqueada: navegador com sessão autorizada não respondeu à leitura da raiz após 100s; navegação completa no computador/celular ainda não verificada.
+
 ## Loja herdada na gestão de campanhas — 09/11
 - [x] Transportar a loja em ambos os atalhos, remover seleção própria/automática em Publicidade e preservar a mesma loja no retorno; conta ausente ou incoerente não libera consultas de outra loja.
 - [x] 22 regressões e build OK; AUTOPECASLONDRINA herdada por Cust ID, navegação entre campanhas/anúncios mantém loja, contexto conflitante e ausência de seleção bloqueados sem fallback; desktop/483px conferidos, sem erros. k6 prévio: 28.114 requisições, zero falhas, p95 documentos 156,75ms; entrega pública somente. Sem publicar.

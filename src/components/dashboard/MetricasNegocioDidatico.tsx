@@ -37,16 +37,16 @@ function LinhasResumo({ resumo, custId }: { resumo: Resumo; custId: string }) {
   </>;
 }
 
-export default function MetricasNegocioDidatico({ custId, mensal, inicio, fim }: { custId?: string; mensal: { date: string; tgmv?: number; revenue?: number }[]; inicio?: string; fim?: string }) {
-  const q = useAnaliseMl<Resumo>(custId, 'resumo');
+export default function MetricasNegocioDidatico({ custId, mensal, inicio, fim, pagina = 'indicadores' }: { custId?: string; mensal: { date: string; tgmv?: number; revenue?: number }[]; inicio?: string; fim?: string; pagina?: 'indicadores' | 'historico' }) {
+  const q = useAnaliseMl<Resumo>(pagina === 'indicadores' ? custId : undefined, 'resumo');
   const meses = mensal.filter(k => (!inicio || k.date.slice(0, 7) >= inicio.slice(0, 7)) && (!fim || k.date.slice(0, 7) <= fim.slice(0, 7))).map(k => ({ mes: k.date.slice(0, 7), faturamento: k.tgmv ?? k.revenue ?? null }));
   const mesAtual = new Date().toISOString().slice(0, 7);
   return <section className="min-w-0 space-y-6" aria-label="Métricas de Negócio">
     <header><h2 className="text-lg font-semibold text-foreground">Métricas de Negócio</h2></header>
-    {q.isLoading || q.verificandoConexao ? <div role="status" aria-label="Carregando métricas">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="my-3 h-14 w-full" />)}</div>
+    {pagina === 'indicadores' && (q.isLoading || q.verificandoConexao ? <div role="status" aria-label="Carregando métricas">{Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="my-3 h-14 w-full" />)}</div>
       : q.data && custId ? <LinhasResumo resumo={q.data} custId={custId} />
-      : <><p className="text-sm text-muted-foreground">{custId ? 'Não foi possível confirmar os indicadores de 30 dias desta loja.' : 'Selecione uma loja para conferir os indicadores de negócio.'}</p><dl>{['Faturamento pago', 'Itens vendidos', 'Ticket por pedido', 'Visitas', 'Taxa de conversão', 'Investimento em publicidade'].map(nome => <Linha key={nome} nome={nome} valor="—" referencia="Medição não confirmada" />)}</dl>{(q.error || q.erroConexao) && <Button variant="outline" onClick={() => q.refetch()}>Tentar novamente</Button>}</>}
-    <div className="min-w-0 border-t border-border pt-6">
+      : <><p className="text-sm text-muted-foreground">{custId ? 'Não foi possível confirmar os indicadores de 30 dias desta loja.' : 'Selecione uma loja para conferir os indicadores de negócio.'}</p><dl>{['Faturamento pago', 'Itens vendidos', 'Ticket por pedido', 'Visitas', 'Taxa de conversão', 'Investimento em publicidade'].map(nome => <Linha key={nome} nome={nome} valor="—" referencia="Medição não confirmada" />)}</dl>{(q.error || q.erroConexao) && <Button variant="outline" onClick={() => q.refetch()}>Tentar novamente</Button>}</>)}
+    {pagina === 'historico' && <div className="min-w-0">
       <h3 className="text-sm font-semibold text-foreground">Faturamento mensal · histórico</h3>
       <p className="mt-1 text-xs leading-5 text-muted-foreground">Seleção do calendário por mês; histórico separado dos indicadores acima. Mês atual hachurado e parcial; cobertura dos demais meses não confirmada.</p>
       {meses.length ? <div className="mt-4 h-64 min-w-0"><ResponsiveContainer width="100%" height="100%"><BarChart data={meses} margin={{ left: 0, right: 12 }}>
@@ -56,6 +56,6 @@ export default function MetricasNegocioDidatico({ custId, mensal, inicio, fim }:
         <Tooltip formatter={v => brl(Number(v))} contentStyle={{ background: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', color: 'hsl(var(--foreground))' }} />
         <Bar dataKey="faturamento" name="Faturamento" maxBarSize={32} isAnimationActive={false}>{meses.map(m => <Cell key={m.mes} fill={m.mes === mesAtual ? 'url(#didatico-mes-parcial)' : 'hsl(var(--primary))'} />)}</Bar>
       </BarChart></ResponsiveContainer></div> : <p className="mt-4 text-sm text-muted-foreground">Sem faturamento mensal confirmado para a seleção.</p>}
-    </div>
+    </div>}
   </section>;
 }

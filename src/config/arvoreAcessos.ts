@@ -27,6 +27,20 @@ export const GRUPOS_ACESSOS = [
   { titulo: 'Planejamento', ids: ['pock', 'metas', 'correlacoes', 'multilojas'] },
 ];
 
+// Only implemented read-only views belong to the simplified tree.
+export const RAMOS_DIDATICOS: RamoArvore[] = RAMOS_ACESSOS.filter(r => r.id === 'efficiency').map(r => ({
+  ...r, label: 'Métricas de Negócio',
+  acessos: [
+    { id: 'indicadores', label: 'Indicadores de negócio', secao: 'efficiency', subaba: 'indicadores', permissao: 'resumo.visualizar' },
+    { id: 'historico', label: 'Faturamento mensal', secao: 'efficiency', subaba: 'historico', permissao: 'resumo.visualizar' },
+  ],
+}));
+export const GRUPOS_DIDATICOS = [{ titulo: 'Visão geral', ids: ['efficiency'] }];
+
+export function paginaDidatica(id: string | null): 'indicadores' | 'historico' {
+  return id === 'historico' ? 'historico' : 'indicadores';
+}
+
 export function destinoAcesso(a: AcessoArvore, custId?: string, contaId?: string) {
   const params = new URLSearchParams();
   if (!a.caminho) { params.set('aba', a.secao ?? 'efficiency'); if (a.subaba) params.set('subaba', a.subaba); }
