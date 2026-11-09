@@ -1,5 +1,10 @@
 # Roadmap
 
+## Filtros de promoções por anúncio — 09/11
+- [x] Filtros exatos de 1, 2, 3 ou sem promoção e vencimento em 3/7/15 dias combináveis, na participação e no diagnóstico; manter checks, balão e ausências explícitas.
+- [x] Quinze testes e build OK; ECOMCONSULT com 18/18 anúncios conferidos, filtros e abertura do diagnóstico testados no computador/celular sem excesso horizontal. k6 público: 28.493 requisições, zero falhas. Sem publicar.
+- [ ] AUTOPECASLONDRINA: leitura integral de participação falhou nesta conferência; catálogo grande permanece sem confirmação, não classificado como ausência de promoção.
+
 ## Diagnóstico de vendas promocionais por anúncio — 09/11
 - [x] Renomear a tela e o gráfico para Diagnóstico de promoções por anúncio, preservando os links e análises de anúncios independentes.
 - [x] Reunir campanha, unidades, pedidos, faturamento, ticket, ROAS e ROI; ausência de vínculo ou custos permanece explícita, sem estimar retorno.

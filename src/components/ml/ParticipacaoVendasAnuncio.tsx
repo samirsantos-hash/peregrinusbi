@@ -9,6 +9,7 @@ import ResumoPromocoesAnuncio from './ResumoPromocoesAnuncio';
 import VendasPromocaoAnuncio from './VendasPromocaoAnuncio';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { AbaPromocoes } from './acoes/AbaPromocoes';
+import ParticipacaoAnuncios from './ParticipacaoAnuncios';
 
 type Item = { item_id: string; titulo: string | null; thumbnail: string | null };
 type Props = { accountId: string; custId: string; aoGerenciar: (item: Item) => void; analise?: boolean };
@@ -20,7 +21,7 @@ function PorAnuncio({ accountId, custId, aoGerenciar, analise }: Props) {
   const [busca, setBusca] = useState('');
   const [termo, setTermo] = useState('');
   const [selecionado, setSelecionado] = useState<Item | null>(null);
-  const q = useQuery({ queryKey: ['promo-vendas-anuncios', accountId, termo], queryFn: async () => {
+  const q = useQuery({ queryKey: ['promo-vendas-anuncios', accountId, termo], enabled: !analise, queryFn: async () => {
     if (termo) {
       const { data, error } = await supabase.rpc('ml_buscar_anuncios', { p_account_id: accountId, p_termo: termo, p_limite: 50 });
       if (error) throw error;
@@ -32,6 +33,7 @@ function PorAnuncio({ accountId, custId, aoGerenciar, analise }: Props) {
   }});
   return <section className="space-y-4 min-w-0" aria-label="Participação e vendas por anúncio">
     <h2 className="text-lg font-semibold">{analise ? 'Diagnóstico de promoções por anúncio' : 'Participação e vendas por anúncio'}</h2>
+    {analise ? <ParticipacaoAnuncios key={custId} custId={custId} aoSelecionar={item => setSelecionado({ item_id: item.item_id, titulo: item.titulo, thumbnail: null })} /> : <>
     <form className="flex gap-2" onSubmit={e => { e.preventDefault(); setTermo(busca.trim()); setSelecionado(null); }}>
       <Input aria-label="Buscar anúncio para promoções" placeholder="Título, SKU ou MLB" value={busca} onChange={e => setBusca(e.target.value)} className="min-w-0" />
       <Button type="submit" variant="outline" disabled={!!busca.trim() && busca.trim().length < 2}><Search className="h-4 w-4 mr-2" />Buscar</Button>
@@ -49,6 +51,7 @@ function PorAnuncio({ accountId, custId, aoGerenciar, analise }: Props) {
       </div>)}
     </div>
     {!termo && <p className="text-xs text-muted-foreground">10 anúncios iniciais · use a busca para localizar outros anúncios da loja.</p>}
+    </>}
     {selecionado && <div className="border-t border-border pt-4 space-y-3">
       <h3 className="font-semibold break-words">{selecionado.titulo ?? selecionado.item_id} · {selecionado.item_id}</h3>
       {analise ? <VendasPromocaoAnuncio key={selecionado.item_id} accountId={accountId} custId={custId} itemId={selecionado.item_id} /> : <PromocoesInvestigacaoAnuncio key={selecionado.item_id} accountId={accountId} custId={custId} itemId={selecionado.item_id} />}
