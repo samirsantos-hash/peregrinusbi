@@ -91,6 +91,8 @@ import ResumoSinergiaCorrelacoes from "@/components/ml/SinergiaPublicidade";
 import FullProdutosApi from "@/components/pock/FullProdutosApi";
 import { useSellerRiskPanel } from "@/hooks/useSellerRiskPanel";
 import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregamento';
+import { useModoPainel } from '@/hooks/useModoPainel';
+import MetricasNegocioDidatico from '@/components/dashboard/MetricasNegocioDidatico';
 /* ------------------------------------------------------------------ */
 /*  Helpers — timezone-safe date parsing                               */
 /* ------------------------------------------------------------------ */
@@ -108,6 +110,7 @@ function formatDateString(date: Date): string {
 
 const Index = () => {
   const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
+  const { modo, alternar, didatico } = useModoPainel(user?.id);
   const { pode, data: permissoes } = usePermissoes();
   const souConsultor = useSouConsultor(user?.id);
   const contasMl = useContasMl();
@@ -263,19 +266,19 @@ const Index = () => {
   );
 
   const { data: listingsQuality } = useListingsQuality(
-    hasRealData ? selectedSeller : undefined
+    hasRealData && !didatico ? selectedSeller : undefined
   );
 
   const { data: eligibilityItems } = useEligibility(
-    hasRealData ? selectedSeller : undefined
+    hasRealData && !didatico ? selectedSeller : undefined
   );
 
   const { data: liveListingsCount } = useLiveListingsCount(
-    hasRealData ? selectedSeller : undefined
+    hasRealData && !didatico ? selectedSeller : undefined
   );
 
   // Fetch campaign data for selected seller
-  const sellerIdsForCampaign = useMemo(() => selectedSeller ? [selectedSeller] : [], [selectedSeller]);
+  const sellerIdsForCampaign = useMemo(() => selectedSeller && !didatico ? [selectedSeller] : [], [selectedSeller, didatico]);
   const { campaigns: sellerCampaigns } = useMeliCampaigns(sellerIdsForCampaign);
   const currentCampaign = sellerCampaigns[selectedSeller] || null;
 
@@ -424,7 +427,7 @@ const Index = () => {
   }, [displayKpis, eligibilityItems]);
 
   // Contagem de alertas de alta severidade para o badge da navegação lateral
-  const { data: riskPanel } = useSellerRiskPanel();
+  const { data: riskPanel } = useSellerRiskPanel(!didatico);
   const alertasAtivos = riskPanel?.totals?.alta ?? 0;
 
   // Active date range debug label
@@ -508,8 +511,10 @@ const Index = () => {
               isRefreshing={isRefreshing}
               onPeriodChange={handlePeriodChange}
               dailyDisponivel={!isConsolidado && hasRealData && allKpisDaily.length > 0}
+              modoPainel={modo}
+              onModoPainelChange={alternar}
             />
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            {didatico ? <GuardaPermissao permissao="resumo.visualizar"><MetricasNegocioDidatico custId={sellerCustIdMap[selectedSeller]} mensal={allKpisMonthly} inicio={dateRange?.from ? formatDateString(dateRange.from) : undefined} fim={dateRange?.to ? formatDateString(dateRange.to) : undefined} /></GuardaPermissao> : <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-start gap-0 lg:gap-4 isolate">
                 <PainelSidebar
                   consultantAccess={souConsultor}
@@ -708,7 +713,7 @@ const Index = () => {
               </AnimatePresence></GuardaPermissao>
                 </div>
               </div>
-            </Tabs>
+            </Tabs>}
           </>
         }
       </div>
