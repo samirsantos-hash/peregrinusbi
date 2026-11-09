@@ -117,6 +117,7 @@ export default function Anuncios() {
 
   const resultados = useQuery({
     queryKey: ["ml-listings-busca", contaId, busca],
+    meta: { carregamentoNaoBloqueante: busca.length > 0 },
     enabled: !!contaId && (busca.length === 0 || busca.length >= 2),
     queryFn: async () => {
       if (!busca) {
@@ -134,6 +135,7 @@ export default function Anuncios() {
   const idsVisiveis = (resultados.data ?? []).map(a => a.item_id);
   const participacoes = useQuery({
     queryKey: ["ml-promo-participacoes", contaId, idsVisiveis.join(",")],
+    meta: { carregamentoNaoBloqueante: busca.length > 0 },
     enabled: !!contaId && idsVisiveis.length > 0,
     queryFn: async () => {
       const { data, error } = await (supabase as any).from("ml_promotion_items").select("item_id, promotion_id")

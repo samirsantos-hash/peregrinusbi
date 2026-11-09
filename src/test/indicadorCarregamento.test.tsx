@@ -6,6 +6,46 @@ import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregam
 
 afterEach(() => { cleanup(); document.getElementById('root')?.remove(); vi.useRealTimers(); });
 
+for (const chave of ['ml-listings-busca', 'ml-listings-mercado', 'ml-promo-participacoes']) {
+  it(`${chave}: busca interativa mantém foco e aceita digitação durante leitura sem cópia`, async () => {
+    const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(<QueryClientProvider client={client}><input aria-label="Busca" /><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+    const campo = screen.getByRole('textbox') as HTMLInputElement;
+    campo.focus();
+    const queryKey = [chave, 'loja', 'MLB400'];
+    const meta = { carregamentoNaoBloqueante: true };
+    let parar = () => {};
+    act(() => { parar = new QueryObserver(client, { queryKey, meta, enabled: false }).subscribe(() => {}); });
+    let resolver: ((v: number) => void) | undefined;
+    let pedido: Promise<number> = Promise.resolve(0);
+    act(() => { pedido = client.fetchQuery({ queryKey, meta, queryFn: () => new Promise(r => { resolver = r; }) }); });
+    expect(root.inert).toBe(false);
+    expect(document.activeElement).toBe(campo);
+    expect(screen.getByRole('status', { name: 'Atualização dos dados' })).toBeTruthy();
+    expect(root.classList.contains('pagina-aguardando-consultas')).toBe(false);
+    await act(async () => { resolver?.(1); await pedido; });
+    expect(document.activeElement).toBe(campo);
+    act(() => { parar(); client.clear(); });
+  });
+}
+
+it('seleção explícita sem cópia continua bloqueando mesmo com consulta de busca', async () => {
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  const queryKey = ['ml-listings-busca', 'outra-loja', 'MLB400'];
+  const meta = { carregamentoNaoBloqueante: true };
+  let parar = () => {};
+  act(() => { parar = new QueryObserver(client, { queryKey, meta, enabled: false }).subscribe(() => {}); });
+  let resolver: ((v: number) => void) | undefined;
+  let pedido: Promise<number> = Promise.resolve(0);
+  act(() => { sinalizarSelecaoCarregamento(); pedido = client.fetchQuery({ queryKey, meta, queryFn: () => new Promise(r => { resolver = r; }) }); });
+  expect(root.inert).toBe(true);
+  await act(async () => { resolver?.(1); await pedido; });
+  act(() => { parar(); client.clear(); });
+});
+
 it('libera a página somente depois de 100% e da exibição da conclusão', async () => {
   vi.useFakeTimers();
   const root = document.createElement('div');

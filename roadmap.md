@@ -1,5 +1,10 @@
 # Roadmap
 
+## Foco na busca — 09/11
+- [x] Reproduzir em sessão autenticada: busca bloqueava a página e perdia foco e caracteres.
+- [x] Tornar buscas e participações dependentes não bloqueantes em Anúncios/Mercado, preservando abertura e seleção de loja/período.
+- [x] Dez testes passaram, build OK e buscas autenticadas em Anúncios/Mercado mantiveram foco e MLB completo durante a pausa e a consulta; k6 público prévio aprovado. Sem publicar.
+
 ## Filtros de promoções por anúncio — 09/11
 - [x] Filtros exatos de 1, 2, 3 ou sem promoção e vencimento em 3/7/15 dias combináveis, na participação e no diagnóstico; manter checks, balão e ausências explícitas.
 - [x] Quinze testes e build OK; ECOMCONSULT com 18/18 anúncios conferidos, filtros e abertura do diagnóstico testados no computador/celular sem excesso horizontal. k6 público: 28.493 requisições, zero falhas. Sem publicar.

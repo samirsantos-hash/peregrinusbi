@@ -20,10 +20,11 @@ export function IndicadorCarregamento() {
     let porSelecao = false;
     const atualizar = () => {
       const cache = client.getQueryCache().getAll();
+      const bloqueante = (q: (typeof cache)[number]) => porSelecao || q.meta?.carregamentoNaoBloqueante !== true;
       if (porSelecao && cache.some(q => q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && q.state.data === undefined)) setBloqueioSelecao(true);
-      setAtualizando(cache.filter(q => q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && q.state.data !== undefined).length);
+      setAtualizando(cache.filter(q => q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && (q.state.data !== undefined || !bloqueante(q))).length);
       for (const q of cache) {
-        if (q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && (q.state.data === undefined || porSelecao)) {
+        if (bloqueante(q) && q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && (q.state.data === undefined || porSelecao)) {
           if (consultas.size === 0 && !inicio) inicio = Date.now();
           consultas.set(q.queryHash, false);
         } else if (consultas.has(q.queryHash)) {
