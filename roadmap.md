@@ -1,5 +1,11 @@
 # Roadmap
 
+## Diagnóstico de vendas promocionais por anúncio — 09/11
+- [x] Renomear a tela e o gráfico para Diagnóstico de promoções por anúncio, preservando os links e análises de anúncios independentes.
+- [x] Reunir campanha, unidades, pedidos, faturamento, ticket, ROAS e ROI; ausência de vínculo ou custos permanece explícita, sem estimar retorno.
+- [x] Onze testes e build OK; conferido na AUTOPECASLONDRINA/MLB4003091671 em desktop e celular, nomes e filtros funcionando, sem excesso horizontal. k6 prévio: 28.491 requisições, zero falhas; somente entrega pública. Sem publicar.
+- [ ] Valores de ROI/ROAS promocionais e vendas por campanha ainda dependem de identidade e custos comprovados: os 35 pedidos com desconto do anúncio consultado não identificam a promoção.
+
 ## Comparação de campanhas promocionais — 09/11
 - [x] Plotar vendas comprovadas por campanha no anúncio, com seleção de faturamento/pedidos/unidades/ticket e ranking da métrica escolhida.
 - [x] Exibir cobertura e limitações; não transformar ausência em zero, atribuir vendas pela participação atual ou confundir publicidade com promoção.

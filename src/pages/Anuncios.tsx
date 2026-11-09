@@ -202,7 +202,7 @@ export default function Anuncios() {
             <TabsList className="max-w-full overflow-x-auto justify-start">
               <TabsTrigger value="anuncios">Anúncios</TabsTrigger>
               {pode("promocoes.visualizar") && <TabsTrigger value="promocoes">Gerenciar promoções</TabsTrigger>}
-              {pode("promocoes.visualizar") && <TabsTrigger value="vendas-promocoes">Vendas por promoção</TabsTrigger>}
+              {pode("promocoes.visualizar") && <TabsTrigger value="vendas-promocoes">Diagnóstico de promoções</TabsTrigger>}
               {pode("promocoes.visualizar") && <TabsTrigger value="participacao">Anúncios em promoções</TabsTrigger>}
               <TabsTrigger value="melhorias">Melhorias</TabsTrigger>
               {pode("correlacoes.visualizar") && <TabsTrigger value="correlacoes">Desempenho de anúncios</TabsTrigger>}

@@ -52,7 +52,7 @@ export default function VendasPromocaoAnuncio({ accountId, custId, itemId }: { a
   const totalDias = periodo ? Math.round((Date.parse(periodo.fim) - Date.parse(periodo.inicio)) / 86400000) + 1 : 30;
   return <section className="space-y-5 min-w-0" aria-label="Vínculo real entre promoção e venda">
     <div className="flex flex-wrap justify-between items-center gap-3">
-      <div><h3 className="font-semibold text-base flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" />Vendas e vínculo comprovado</h3>
+      <div><h3 className="font-semibold text-base flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" />Campanhas e resultados deste anúncio</h3>
         {periodo && <p className="text-xs text-muted-foreground">{data(periodo.inicio)} – {data(periodo.fim)} · dias completos</p>}</div>
       <Button size="sm" variant="outline" disabled={promos.isFetching || vendas.isFetching || ads.isFetching} onClick={() => { void promos.refetch(); void vendas.refetch(); if (pode('publicidade.visualizar') && periodo) void ads.refetch(); }}><RefreshCw className="h-4 w-4 mr-2" />Atualizar análise</Button>
     </div>
@@ -66,13 +66,17 @@ export default function VendasPromocaoAnuncio({ accountId, custId, itemId }: { a
     {promos.isSuccess && vendas.isSuccess && <>
       <ComparacaoCampanhasPromocao linhas={linhas} vendas={v} />
       <div className="overflow-x-auto rounded-lg border border-border bg-card/30">
-        <table className="w-full text-sm [&_th]:p-3 [&_td]:p-3"><thead className="text-left text-muted-foreground"><tr><th>Promoção</th><th>Vínculo com a venda</th><th>Pedidos</th><th>Unidades</th><th>Faturamento</th><th>ROAS da promoção</th></tr></thead>
+        <table className="w-full text-sm [&_th]:p-3 [&_td]:p-3"><thead className="text-left text-muted-foreground"><tr><th>Campanha de promoção</th><th>Diagnóstico do vínculo</th><th>Pedidos</th><th>Unidades</th><th>Faturamento</th><th>Ticket por pedido</th><th>ROAS da promoção</th><th>ROI da promoção</th></tr></thead>
           <tbody className="divide-y divide-border">{linhas.map(r => <tr key={r.chave}>
             <td className="min-w-48"><div className="flex gap-2 items-start">{r.ativa && <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />}<div><p className="font-medium">{r.promo?.nome ?? r.promo?.nome_tipo ?? 'Promoção identificada na venda · nome indisponível'}</p><p className="text-xs text-muted-foreground">{r.promo ? STATUS[r.promo.status] ?? 'Situação atual não confirmada' : 'Sem correspondência atual'}{r.promo?.inicio && r.promo.fim ? ` · ${data(r.promo.inicio)} – ${data(r.promo.fim)}` : ''}</p></div></div></td>
-            <td className={r.confirmada ? 'text-primary' : 'text-muted-foreground'}>{r.confirmada ? 'Identidade comprovada na venda' : r.zeroConfirmado ? 'Nenhuma venda vinculada' : 'Não confirmado'}</td>
-            <td className="tabular-nums">{r.grupo ? num(r.grupo.pedidos) : r.zeroConfirmado ? '0' : '—'}</td><td className="tabular-nums">{r.grupo ? num(r.grupo.unidades) : r.zeroConfirmado ? '0' : '—'}</td><td className="tabular-nums whitespace-nowrap">{r.grupo ? brl(r.grupo.faturamento, true) : r.zeroConfirmado ? brl(0) : '—'}</td><td className="text-muted-foreground">Indisponível</td>
+            <td className={r.confirmada ? 'text-primary' : 'text-muted-foreground'}>{r.grupo ? `${num(r.grupo.unidades)} unidades vendidas neste anúncio, faturando ${brl(r.grupo.faturamento, true)}${v?.completo ? '.' : ' nas vendas lidas.'}` : r.zeroConfirmado ? 'Nenhuma venda vinculada' : 'Vendas desta campanha ainda não confirmadas'}</td>
+            <td className="tabular-nums">{r.grupo ? num(r.grupo.pedidos) : r.zeroConfirmado ? '0' : '—'}</td><td className="tabular-nums">{r.grupo ? num(r.grupo.unidades) : r.zeroConfirmado ? '0' : '—'}</td><td className="tabular-nums whitespace-nowrap">{r.grupo ? brl(r.grupo.faturamento, true) : r.zeroConfirmado ? brl(0) : '—'}</td><td className="tabular-nums whitespace-nowrap">{r.grupo && r.grupo.pedidos > 0 ? brl(r.grupo.faturamento / r.grupo.pedidos, true) : '—'}</td><td className="text-muted-foreground">Indisponível</td><td className="text-muted-foreground">Indisponível</td>
           </tr>)}</tbody></table>
         {!linhas.length && <p className="p-4 text-sm text-muted-foreground">Nenhuma promoção confirmada neste filtro.</p>}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2 text-xs text-muted-foreground">
+        <p><span className="font-medium text-foreground">ROAS da promoção:</span> exige receita publicitária e investimento atribuídos à mesma promoção, anúncio e período. O ROAS publicitário abaixo não substitui esse vínculo.</p>
+        <p><span className="font-medium text-foreground">ROI da promoção:</span> exige resultado líquido e investimento comprovados, incluindo custos do produto, taxas, frete e desconto efetivamente suportado. Faturamento não é lucro.</p>
       </div>
       {v && <div className="grid sm:grid-cols-2 gap-4 border-y border-border py-4 text-sm">
         <div><p className="text-muted-foreground">Desconto sem promoção identificada</p><p className="font-semibold tabular-nums">{num(v.descontoSemPromocao.pedidos)} pedidos · {brl(v.descontoSemPromocao.faturamento, true)}</p></div>

@@ -15,7 +15,7 @@ export function ComparacaoCampanhasPromocao({ linhas, vendas }: { linhas: Return
   const primeira = ranking[0];
   return <section aria-label="Comparação das campanhas promocionais" className="min-w-0 space-y-4 border-y border-border py-5">
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h3 className="flex items-center gap-2 text-base font-semibold"><BarChart3 className="h-4 w-4 text-primary" />Desempenho por campanha de promoção</h3>
+      <h3 className="flex items-center gap-2 text-base font-semibold"><BarChart3 className="h-4 w-4 text-primary" />Diagnóstico das vendas por campanha</h3>
       <Select value={metrica} onValueChange={v => { if (v in METRICAS) setMetrica(v as MetricaPromocao); }}><SelectTrigger aria-label="Métrica das campanhas" className="w-full sm:w-52"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(METRICAS).map(([id, nome]) => <SelectItem key={id} value={id}>{nome}</SelectItem>)}</SelectContent></Select>
     </div>
     {primeira ? <>

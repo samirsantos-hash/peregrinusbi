@@ -31,7 +31,7 @@ function PorAnuncio({ accountId, custId, aoGerenciar, analise }: Props) {
     return (data ?? []) as Item[];
   }});
   return <section className="space-y-4 min-w-0" aria-label="Participação e vendas por anúncio">
-    <h2 className="text-lg font-semibold">{analise ? 'Vendas por promoção e anúncio' : 'Participação e vendas por anúncio'}</h2>
+    <h2 className="text-lg font-semibold">{analise ? 'Diagnóstico de promoções por anúncio' : 'Participação e vendas por anúncio'}</h2>
     <form className="flex gap-2" onSubmit={e => { e.preventDefault(); setTermo(busca.trim()); setSelecionado(null); }}>
       <Input aria-label="Buscar anúncio para promoções" placeholder="Título, SKU ou MLB" value={busca} onChange={e => setBusca(e.target.value)} className="min-w-0" />
       <Button type="submit" variant="outline" disabled={!!busca.trim() && busca.trim().length < 2}><Search className="h-4 w-4 mr-2" />Buscar</Button>

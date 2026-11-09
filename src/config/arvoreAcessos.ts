@@ -7,7 +7,7 @@ export type RamoArvore = SellerTab & { acessos: AcessoArvore[] };
 const externo = (id: string, label: string, caminho: string, permissao: string, aba?: string): AcessoArvore => ({ id, label, caminho, permissao, aba, consultor: caminho !== '/multilojas', rede: caminho === '/multilojas' });
 const extras: Record<string, AcessoArvore[]> = {
   publicidade: [externo('gestao-campanhas', 'Gerenciar campanhas', '/publicidade', 'publicidade.visualizar', 'campanhas'), externo('gestao-ads', 'Anúncios patrocinados', '/publicidade', 'publicidade.visualizar', 'anuncios')],
-  opportunities: [externo('vendas-promocoes', 'Vendas por promoção e anúncio', '/anuncios', 'promocoes.visualizar', 'vendas-promocoes'), externo('participacao', 'Anúncios em promoções', '/anuncios', 'promocoes.visualizar', 'participacao'), externo('gerenciar', 'Gerenciar promoções', '/anuncios', 'promocoes.visualizar', 'promocoes')],
+  opportunities: [externo('vendas-promocoes', 'Diagnóstico de promoções por anúncio', '/anuncios', 'promocoes.visualizar', 'vendas-promocoes'), externo('participacao', 'Anúncios em promoções', '/anuncios', 'promocoes.visualizar', 'participacao'), externo('gerenciar', 'Gerenciar promoções', '/anuncios', 'promocoes.visualizar', 'promocoes')],
   perguntas: [externo('responder', 'Consultar e responder', '/perguntas', 'perguntas.visualizar')],
 };
 export const RAMOS_ACESSOS: RamoArvore[] = SELLER_TABS.map(tab => ({ ...tab,
