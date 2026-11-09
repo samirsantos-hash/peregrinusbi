@@ -1,5 +1,7 @@
 # Account summary
 
+- Ads chart breaches use alertasGraficoAds with current store limits and measured values only; strict maximum/minimum comparisons drive red sphere/ring dots and tooltips, while monetary lines get only same-date ratio alerts, never invented currency targets.
+
 - Ads KPI limit editing reuses audited ml-settings PATCH and existing configuration/store authorization; sends only edited fields, never campaign budgets, and converts display percentages at the persistence boundary.
 
 - Listing SWOT compares nullable metrics against other selected own-store listings only; keep external opportunities/threats unverified and never infer promotion returns or market rankings.

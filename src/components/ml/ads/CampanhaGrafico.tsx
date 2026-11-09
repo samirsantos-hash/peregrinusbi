@@ -1,9 +1,12 @@
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
-import { Line, LineChart, Legend, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Line, LineChart, Legend, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, ReferenceLine } from "recharts";
 import { Button } from "@/components/ui/button";
 import { brl, brlCurto, num, pctFracao } from "@/lib/format";
 import { serieCampanha } from "@/lib/campanhaEvolucao";
+import { limiteGraficoAds, motivoAlertaAds } from '@/lib/alertasGraficoAds';
+import { PontoRupturaAds } from './PontoRupturaAds';
+import type { Limites } from '../../../../supabase/functions/_shared/mlAdsGestao';
 
 export type LinhaDiaCampanha = {
   campaign_id: number | string;
@@ -27,15 +30,18 @@ const METRICAS: { id: Metrica; rotulo: string; fmt: (v: number | null) => string
 ];
 
 /** Same-date campaign sales and spend, with nullable auxiliary indicators. */
-export default function CampanhaGrafico({ nome, linhas, faturamentoDia, aoFechar }: {
+export default function CampanhaGrafico({ nome, linhas, faturamentoDia, aoFechar, limites }: {
   nome: string;
   linhas: LinhaDiaCampanha[];
   faturamentoDia: { data: string; faturamento: number }[];
   aoFechar: () => void;
+  limites?: Limites;
 }) {
   const [m, setM] = useState<Metrica>("conjunto");
   const serie = useMemo(() => serieCampanha(linhas, faturamentoDia), [linhas, faturamentoDia]);
   const def = METRICAS.find((x) => x.id === m) ?? METRICAS[0];
+  const alvo = limiteGraficoAds(m, limites);
+  const motivos = (p: Record<string, unknown>) => (m === 'conjunto' ? ['acos', 'cpc', 'tacos'] : [m]).map(k => motivoAlertaAds(k, p[k], limites)).filter((s): s is string => s != null);
 
   return (
     <div className="min-w-0 space-y-3" aria-label="Evolução diária da campanha">
@@ -60,12 +66,21 @@ export default function CampanhaGrafico({ nome, linhas, faturamentoDia, aoFechar
               <CartesianGrid stroke="hsl(var(--grid))" strokeDasharray="3 3" vertical={false} />
               <XAxis dataKey="dia" tickFormatter={v => v.slice(5).split('-').reverse().join('/')} tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" minTickGap={40} interval="preserveStartEnd" height={36} padding={{ left: 12, right: 12 }} />
               <YAxis tick={{ fontSize: 12, fill: "hsl(var(--axis))" }} stroke="hsl(var(--axis))" width={76} tickCount={4} tickFormatter={(v) => m === "conjunto" ? brlCurto(v) : def.fmt(v)} />
-              <Tooltip labelFormatter={v => String(v).split('-').reverse().join('/')} formatter={(v: number, name: string) => [def.fmt(v), name]} />
+              <Tooltip content={({ active, payload, label }) => {
+                const p = payload?.[0]?.payload;
+                if (!active || !p) return null;
+                return <div className="panel-glass-tooltip space-y-2 p-3 text-xs tabular-nums">
+                  <p>{String(label).split('-').reverse().join('/')}</p>
+                  {payload?.map(l => <p key={String(l.dataKey)}>{l.name}: {def.fmt(typeof l.value === 'number' ? l.value : null)}</p>)}
+                  {motivos(p).map(t => <p key={t} className="text-destructive">{t}</p>)}
+                </div>;
+              }} />
               <Legend iconType="plainline" />
+              {alvo && <ReferenceLine y={alvo.valor} stroke="hsl(var(--destructive))" strokeDasharray="4 4" label={{ value: `${alvo.minimo ? 'Mín.' : 'Máx.'} ${def.fmt(alvo.valor)}`, position: 'insideTopRight', fill: 'hsl(var(--muted-foreground))', fontSize: 11 }} />}
               {m === "conjunto" ? <>
                 <Line name="Vendas atribuídas a Ads" type="monotone" dataKey="vendas" stroke="hsl(var(--panel-positive))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
-                <Line name="Investimento" type="monotone" dataKey="investimento" stroke="hsl(var(--panel-text-secondary))" strokeDasharray="5 3" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
-              </> : <Line name={def.rotulo} type="monotone" dataKey={m} stroke="hsl(var(--panel-positive))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />}
+                <Line name="Investimento" type="monotone" dataKey="investimento" stroke="hsl(var(--panel-text-secondary))" strokeDasharray="5 3" strokeWidth={2} dot={p => <PontoRupturaAds cx={p.cx} cy={p.cy} motivos={motivos(p.payload)} />} connectNulls={false} isAnimationActive={false} />
+              </> : <Line name={def.rotulo} type="monotone" dataKey={m} stroke="hsl(var(--panel-positive))" strokeWidth={2} dot={p => <PontoRupturaAds cx={p.cx} cy={p.cy} motivos={motivos(p.payload)} />} connectNulls={false} isAnimationActive={false} />}
             </LineChart>
           </ResponsiveContainer>
         </div>

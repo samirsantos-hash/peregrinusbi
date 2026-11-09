@@ -188,7 +188,7 @@ export default function Publicidade() {
         {estado.data?.status === "ativo" && (
           <>
             {painel && <ConfigurarLimitesAds key={contaId} contaId={contaId} limites={painel.limites} aoSalvar={recarregar} />}
-            <SinergiaPublicidadeApi accountId={contaId} />
+            <SinergiaPublicidadeApi accountId={contaId} limites={painel?.limites} />
             {dados.isLoading && <Carregando texto="Montando o painel de publicidade…" />}
             {dados.isError && <EmptyState falta="Não foi possível carregar os dados de publicidade." acao="Recarregue a página ou clique em Atualizar." />}
             {painel && (

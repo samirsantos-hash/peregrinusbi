@@ -4,8 +4,11 @@ import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveCo
 import { Button } from "@/components/ui/button";
 import { brl, brlCurto, num } from "@/lib/format";
 import type { PontoPublicidade } from "@/lib/sinergiaPublicidade";
+import type { Limites } from '../../../supabase/functions/_shared/mlAdsGestao';
+import { motivoAlertaAds } from '@/lib/alertasGraficoAds';
+import { PontoRupturaAds } from '@/components/ml/ads/PontoRupturaAds';
 
-export default function GraficoPublicidadeSerie({ pontos, compacto = false }: { pontos: PontoPublicidade[]; compacto?: boolean }) {
+export default function GraficoPublicidadeSerie({ pontos, compacto = false, limites }: { pontos: PontoPublicidade[]; compacto?: boolean; limites?: Limites }) {
   const mobile = useIsMobile();
   const [semanal, setSemanal] = useState(false);
   const grupos = new Map<string, PontoPublicidade[]>();
@@ -18,7 +21,10 @@ export default function GraficoPublicidadeSerie({ pontos, compacto = false }: { 
   const serie = [...grupos].sort(([a], [b]) => a.localeCompare(b)).map(([data, ps]) => {
     const soma = (campo: "faturamento" | "investimento" | "receitaAds") => ps.every(p => p[campo] != null && Number.isFinite(p[campo])) ? ps.reduce((s, p) => s + (p[campo] ?? 0), 0) : null;
     const investimento = soma("investimento"), receitaAds = soma("receitaAds");
-    return { data, faturamento: soma("faturamento"), investimento, receitaAds, roas: investimento != null && investimento > 0 && receitaAds != null ? receitaAds / investimento : null };
+    const faturamento = soma('faturamento');
+    return { data, faturamento, investimento, receitaAds, roas: investimento != null && investimento > 0 && receitaAds != null ? receitaAds / investimento : null,
+      acos: investimento != null && receitaAds != null && receitaAds > 0 ? investimento / receitaAds : null,
+      tacos: investimento != null && faturamento != null && faturamento > 0 ? investimento / faturamento : null };
   });
   return <div className="space-y-3" aria-label="Gráfico Faturamento Ads ROAS">
     <div className="flex flex-wrap items-center justify-between gap-3">
@@ -45,11 +51,12 @@ export default function GraficoPublicidadeSerie({ pontos, compacto = false }: { 
               <p>Investimento Ads: {p.investimento == null ? 'Sem dado' : brl(p.investimento)}</p>
               <p>Vendas por Ads: {p.receitaAds == null ? 'Sem dado' : brl(p.receitaAds)}</p>
               <p>ROAS: {p.roas == null ? 'Sem dado' : `${num(p.roas, 2)}x`}</p>
+              {['roas', 'acos', 'tacos'].map(m => motivoAlertaAds(m, p[m], limites)).filter((t): t is string => t != null).map(t => <p key={t} className="text-destructive">{t}</p>)}
             </div>;
           }} />
           <Line yAxisId="faturamento" dataKey="faturamento" stroke="hsl(var(--panel-positive))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
-          <Line yAxisId="ads" dataKey="investimento" stroke="hsl(var(--panel-text-secondary))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
-          <Line yAxisId="roas" dataKey="roas" stroke="hsl(var(--panel-text))" strokeDasharray="4 4" strokeWidth={1.5} dot={false} connectNulls={false} isAnimationActive={false} />
+          <Line yAxisId="ads" dataKey="investimento" stroke="hsl(var(--panel-text-secondary))" strokeWidth={2} dot={p => <PontoRupturaAds cx={p.cx} cy={p.cy} motivos={['acos', 'tacos'].map(m => motivoAlertaAds(m, p.payload[m], limites)).filter((s): s is string => s != null)} />} connectNulls={false} isAnimationActive={false} />
+          <Line yAxisId="roas" dataKey="roas" stroke="hsl(var(--panel-text))" strokeDasharray="4 4" strokeWidth={1.5} dot={p => <PontoRupturaAds cx={p.cx} cy={p.cy} motivos={[motivoAlertaAds('roas', p.payload.roas, limites)].filter((s): s is string => s != null)} />} connectNulls={false} isAnimationActive={false} />
         </ComposedChart>
       </ResponsiveContainer>
     </div>

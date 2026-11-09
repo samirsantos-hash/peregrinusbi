@@ -1,5 +1,10 @@
 # Roadmap
 
+## Alertas nos gráficos de Publicidade — 09/11
+- [x] Esferas vermelhas com anel e descrição de valor/limite nos desvios medidos; ROAS/CTR abaixo, ACOS/TACOS/CPC acima, igualdade/ausência sem alerta. Gráficos de campanha mostram linha do objetivo; gráfico conjunto marca razões junto ao investimento, nunca receita como meta monetária.
+- [x] 25 regressões passaram, build OK; AUTOPECASLONDRINA com 34 pontos de alerta na conta, campanha MLB5217639380 FULL com 14 ROAS, 5 ACOS, 2 CTR, zero TACOS/CPC. Computador/390px conferidos após fechar aviso de inatividade, sem erros. Configurações e campanhas não alteradas; sem publicar.
+- [x] k6 público prévio: 28.172 requisições, duas falhas (0,00710%), p95 documentos 144,84ms; não mede capacidade autenticada.
+
 ## Correções da gestão de publicidade — 09/11
 - [x] Primeira etapa: limites independentes de TACOS, ACOS, ROAS, CTR, CPC e meta de investimento por loja, com autorização existente, valores atuais e PATCH somente de campos editados; campanhas/orçamentos não alterados.
 - [x] 91 testes passaram e build OK; desktop/483px e salvamento/releitura reais na AUTOPECASLONDRINA conferidos, mantendo TACOS efetivo em 5%. Corrigido CORS PATCH de ml-settings e implantada somente essa função compartilhada; interface não publicada.

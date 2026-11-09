@@ -22,7 +22,7 @@ const ativa = (s: string | null) => (s ?? "").toLowerCase() === "active";
 type GrupoResumo = PainelAds["grupos"][number];
 
 /** Detalhe expandido: série diária da campanha e estatísticas do anúncio principal lidas ao vivo. */
-function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, tacos, carregando }: { c: CampanhaLinha; custId: string; item: GrupoResumo | null; i: any; somas?: { impressoes: number; cliques: number; unidades: number }; linhas: LinhaDiaCampanha[]; faturamentoDia: FaturamentoDia[]; tacos: number | null; carregando: boolean }) {
+function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, tacos, carregando, limites }: { c: CampanhaLinha; custId: string; item: GrupoResumo | null; i: any; somas?: { impressoes: number; cliques: number; unidades: number }; linhas: LinhaDiaCampanha[]; faturamentoDia: FaturamentoDia[]; tacos: number | null; carregando: boolean; limites: PainelAds['limites'] }) {
   const est = useQuery({
     queryKey: ["ads-camp-item", custId, item?.item_id],
     enabled: !!custId && !!item?.item_id,
@@ -61,7 +61,7 @@ function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, ta
         ))}
       </div>
       {carregando ? <p className="text-xs text-muted-foreground">Carregando gráfico…</p>
-        : <CampanhaGrafico nome={c.name ?? `Campanha ${c.campaign_id}`} linhas={linhas} faturamentoDia={faturamentoDia} aoFechar={() => {}} />}
+        : <CampanhaGrafico nome={c.name ?? `Campanha ${c.campaign_id}`} linhas={linhas} faturamentoDia={faturamentoDia} limites={limites} aoFechar={() => {}} />}
       <p className="text-[11px] text-muted-foreground">Visitas, conversão e pedidos são do anúncio principal nos últimos 30 dias, direto do Mercado Livre. As demais métricas são da campanha no período.</p>
     </div>
   );
@@ -239,7 +239,7 @@ export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { pain
                   </tr>
                   {exp && (
                     <tr className="border-t border-border bg-muted/10">
-                      <td colSpan={15}><DetalheCampanha c={c} custId={custId} item={g} i={i} somas={m?.somas} linhas={linhas} faturamentoDia={faturamentoDia} tacos={tacos} carregando={serie.isLoading} /></td>
+                      <td colSpan={15}><DetalheCampanha c={c} custId={custId} item={g} i={i} somas={m?.somas} linhas={linhas} faturamentoDia={faturamentoDia} tacos={tacos} carregando={serie.isLoading} limites={painel.limites} /></td>
                     </tr>
                   )}
                   </Fragment>

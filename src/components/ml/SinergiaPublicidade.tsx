@@ -11,8 +11,9 @@ import GraficoPublicidadeSerie from "@/components/dashboard/GraficoPublicidadeSe
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import CancelamentosMensais from "@/components/ml/CancelamentosMensais";
 import { Button } from "@/components/ui/button";
+import type { Limites } from '../../../supabase/functions/_shared/mlAdsGestao';
 
-export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = true, fonte, custId, de, ate, piloto }: { pontos: PontoPublicidade[]; compacto?: boolean; exibirMatriz?: boolean; fonte: string; custId?: string; de?: string; ate?: string; piloto?: { ativo: boolean; alternar: () => void } }) {
+export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = true, fonte, custId, de, ate, piloto, limites }: { pontos: PontoPublicidade[]; compacto?: boolean; exibirMatriz?: boolean; fonte: string; custId?: string; de?: string; ate?: string; limites?: Limites; piloto?: { ativo: boolean; alternar: () => void } }) {
   const r = calcularSinergiaPublicidade(pontos);
   const cobertura = indicadoresPublicidadeCoberta(pontos);
   const notaCobertura = (m: { dias: number; inicio?: string; fim?: string }) => {
@@ -22,7 +23,7 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
   return <section aria-label="Sinergia e dependência de publicidade" className="resumo-sinergia space-y-5 border-t border-border/50 pt-5">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
-    <div className="resumo-sinergia-evolucao"><GraficoPublicidadeSerie pontos={pontos} compacto={compacto} /></div>
+    <div className="resumo-sinergia-evolucao"><GraficoPublicidadeSerie pontos={pontos} compacto={compacto} limites={limites} /></div>
     {piloto && <div className="flex justify-end">
       <Button variant="ghost" size="sm" onClick={piloto.alternar} className="text-xs text-muted-foreground">
         {piloto.ativo ? "Voltar à leitura publicada" : "Ver piloto de visitas"}
@@ -84,7 +85,7 @@ export function usePilotoVisitas(custId?: string) {
 }
 
 /** Reuses paid-order summary; reads only campaign metrics on those exact UTC dates. */
-export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, compacto = false }: { custId?: string; accountId?: string; compacto?: boolean }) {
+export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, compacto = false, limites }: { custId?: string; accountId?: string; compacto?: boolean; limites?: Limites }) {
   const conta = useContaMl(custId);
   const accountId = fornecida ?? conta.data;
   const vinculo = useQuery({ queryKey: ["sinergia-conta-vinculo", accountId], enabled: !!accountId && !custId, staleTime: 300_000,
@@ -112,7 +113,7 @@ export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, c
   });
   const visitas = aplicar(pontos);
   if (resumo.isLoading || diario.isLoading || vinculo.isLoading || visitas.carregando) return <Skeleton className="h-28 w-full" />;
-  return <SinergiaIndicadores pontos={visitas.pontos} compacto={compacto} piloto={piloto} custId={loja} de={periodo?.inicio} ate={periodo?.fim} fonte={periodo
+  return <SinergiaIndicadores pontos={visitas.pontos} compacto={compacto} limites={limites} piloto={piloto} custId={loja} de={periodo?.inicio} ate={periodo?.fim} fonte={periodo
     ? `Mercado Livre · ${periodo.inicio.split("-").reverse().join("/")} a ${periodo.fim.split("-").reverse().join("/")} · dias completos UTC${resumo.error || diario.error ? " · leitura indisponível" : ""}${visitas.nota}`
     : "Mercado Livre · sem leitura de faturamento e publicidade no mesmo período"} />;
 }
