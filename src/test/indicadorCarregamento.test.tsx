@@ -6,6 +6,41 @@ import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregam
 
 afterEach(() => { cleanup(); document.getElementById('root')?.remove(); vi.useRealTimers(); });
 
+for (const remover of [false, true]) it(`libera consultas abandonadas ${remover ? 'removidas do cache' : 'sem observadores'} sem esperar a resposta`, async () => {
+  vi.useFakeTimers();
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  let parar = () => {};
+  const queryKey = ['diagnostico-abandonado'];
+  act(() => { parar = new QueryObserver(client, { queryKey, enabled: false }).subscribe(() => {}); });
+  let resolver: ((v: number) => void) | undefined;
+  let pedido: Promise<number> = Promise.resolve(0);
+  act(() => { pedido = client.fetchQuery({ queryKey, queryFn: () => new Promise<number>(r => { resolver = r; }) }).catch(() => 0); });
+  expect(root.inert).toBe(true);
+  act(() => { if (remover) client.removeQueries({ queryKey }); else parar(); vi.advanceTimersByTime(600); });
+  expect(root.inert).toBe(false);
+  expect(root.classList.contains('pagina-aguardando-consultas')).toBe(false);
+  await act(async () => { resolver?.(1); await pedido; });
+  act(() => { parar(); client.clear(); });
+});
+
+it('eventos de outras consultas não adiam a liberação após conclusão', async () => {
+  vi.useFakeTimers();
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient();
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  let parar = () => {};
+  act(() => { parar = new QueryObserver(client, { queryKey: ['diagnostico'], enabled: false }).subscribe(() => {}); });
+  let resolver: ((v: number) => void) | undefined;
+  let pedido: Promise<number> = Promise.resolve(0);
+  act(() => { pedido = client.fetchQuery({ queryKey: ['diagnostico'], queryFn: () => new Promise(r => { resolver = r; }) }); });
+  await act(async () => { resolver?.(1); await pedido; });
+  for (let i = 0; i < 6; i++) act(() => { vi.advanceTimersByTime(100); client.setQueryData(['outra'], i); });
+  expect(root.inert).toBe(false);
+  act(() => { parar(); client.clear(); });
+});
+
 for (const chave of ['ml-listings-busca', 'ml-listings-mercado', 'ml-promo-participacoes']) {
   it(`${chave}: busca interativa mantém foco e aceita digitação durante leitura sem cópia`, async () => {
     const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);

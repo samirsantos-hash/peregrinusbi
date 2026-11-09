@@ -1,5 +1,10 @@
 # Roadmap
 
+## Diagnóstico travado — 09/11
+- [x] Conferir ambas as telas: promoções falha na leitura integral da loja grande; dois eixos permanece em coleta por mais de dois minutos.
+- [x] Corrigir bloqueio órfão do carregamento e atraso indefinido da liberação causado por eventos de outras consultas, mantendo dados finais somente após conclusão.
+- [x] Onze regressões passaram; diagnóstico real da AUTOPECASLONDRINA liberado com 1.381 anúncios e controles visíveis, sem publicação. Coleta completa ainda é demorada; a leitura integral de promoções continua pendente e não foi declarada corrigida.
+
 ## Foco na busca — 09/11
 - [x] Reproduzir em sessão autenticada: busca bloqueava a página e perdia foco e caracteres.
 - [x] Tornar buscas e participações dependentes não bloqueantes em Anúncios/Mercado, preservando abertura e seleção de loja/período.

@@ -20,6 +20,10 @@ export function IndicadorCarregamento() {
     let porSelecao = false;
     const atualizar = () => {
       const cache = client.getQueryCache().getAll();
+      const observadas = new Set(cache.filter(q => q.getObserversCount() > 0).map(q => q.queryHash));
+      for (const hash of consultas.keys()) {
+        if (!observadas.has(hash)) consultas.delete(hash);
+      }
       const bloqueante = (q: (typeof cache)[number]) => porSelecao || q.meta?.carregamentoNaoBloqueante !== true;
       if (porSelecao && cache.some(q => q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && q.state.data === undefined)) setBloqueioSelecao(true);
       setAtualizando(cache.filter(q => q.getObserversCount() > 0 && q.state.fetchStatus === 'fetching' && (q.state.data !== undefined || !bloqueante(q))).length);
@@ -34,9 +38,11 @@ export function IndicadorCarregamento() {
       const progresso = progressoConsultas(consultas);
       const milissegundos = inicio ? Date.now() - inicio : 0;
       setEstado({ ...progresso, segundos: Math.floor(milissegundos / 1000), milissegundos });
-      if (fechar) { clearTimeout(fechar); fechar = undefined; }
-      if ((progresso.total > 0 && progresso.concluidas === progresso.total) || (porSelecao && progresso.total === 0)) {
+      const finalizado = (progresso.total > 0 && progresso.concluidas === progresso.total) || ((porSelecao || inicio > 0) && progresso.total === 0);
+      if (!finalizado && fechar) { clearTimeout(fechar); fechar = undefined; }
+      if (finalizado && !fechar) {
         fechar = setTimeout(() => {
+          fechar = undefined;
           consultas.clear(); inicio = 0;
           porSelecao = false; setSelecao(false); setBloqueioSelecao(false);
           setEstado({ total: 0, concluidas: 0, percentual: 0, segundos: 0, milissegundos: 0 });
