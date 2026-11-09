@@ -19,6 +19,7 @@ import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPain
 import { useDesenvolvedor } from '@/hooks/useDesenvolvedor';
 import { registrarAviso } from '@/lib/avisosDesenvolvedor';
 import SinergiaPublicidadeApi from '@/components/ml/SinergiaPublicidade';
+import { ConfigurarLimitesAds } from '@/components/ml/ads/ConfigurarLimitesAds';
 
 /** Janela de comparação: 30 dias contra os 30 anteriores (a API guarda 90). */
 const DIAS = 30;
@@ -186,6 +187,7 @@ export default function Publicidade() {
 
         {estado.data?.status === "ativo" && (
           <>
+            {painel && <ConfigurarLimitesAds key={contaId} contaId={contaId} limites={painel.limites} aoSalvar={recarregar} />}
             <SinergiaPublicidadeApi accountId={contaId} />
             {dados.isLoading && <Carregando texto="Montando o painel de publicidade…" />}
             {dados.isError && <EmptyState falta="Não foi possível carregar os dados de publicidade." acao="Recarregue a página ou clique em Atualizar." />}

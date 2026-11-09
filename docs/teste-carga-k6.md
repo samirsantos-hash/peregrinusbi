@@ -1,5 +1,7 @@
 # Teste de carga público — 04/11/2026
 
+- 09/11: configuração independente de KPIs de publicidade, teste público prévio existente de 1.000 VUs: 28.254 requisições, uma falha (0,00354%), p95 documentos 126,57ms; entrega pública somente, não mede sessão, salvamento ou consultas Ads.
+
 - 08/11: skeleton inicial e progresso por seleção, teste prévio de 1.000 usuários: 28.473 requisições, zero falhas, p95 de documentos 69,72ms. Somente entrega pública, não mede consultas autenticadas ou tempo de análise.
 
 - 07/11: cache IndexedDB e revalidação sem bloqueio; teste público prévio existente (1.000 VUs): 28.231 requisições, zero falhas, p95 HTTP 162,77ms. Não mede sessão, cache do navegador nem desempenho das consultas autenticadas.

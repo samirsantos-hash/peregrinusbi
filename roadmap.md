@@ -1,5 +1,11 @@
 # Roadmap
 
+## Correções da gestão de publicidade — 09/11
+- [x] Primeira etapa: limites independentes de TACOS, ACOS, ROAS, CTR, CPC e meta de investimento por loja, com autorização existente, valores atuais e PATCH somente de campos editados; campanhas/orçamentos não alterados.
+- [x] 91 testes passaram e build OK; desktop/483px e salvamento/releitura reais na AUTOPECASLONDRINA conferidos, mantendo TACOS efetivo em 5%. Corrigido CORS PATCH de ml-settings e implantada somente essa função compartilhada; interface não publicada.
+- [x] Teste público prévio: 28.254 requisições, uma falha (0,00354%), p95 de documentos 126,57ms; não mede capacidade autenticada.
+- [ ] Próximas etapas aguardam revisão de Samir: loja herdada do painel, janela analítica de sete dias ancorada em Ads completos e gráfico de desvios; preservar janela operacional de 30 dias.
+
 ## Modo Didático — primeira etapa, 09/11
 - [x] Alternador Didático/Avançado por usuário, Didático padrão; Avançado preserva as telas atuais.
 - [x] Métricas de Negócio somente leitura, seis indicadores sem cartões e um gráfico mensal separado; medições e comparações ausentes explícitas.

@@ -1,5 +1,7 @@
 # Account summary
 
+- Ads KPI limit editing reuses audited ml-settings PATCH and existing configuration/store authorization; sends only edited fields, never campaign budgets, and converts display percentages at the persistence boundary.
+
 - Listing SWOT compares nullable metrics against other selected own-store listings only; keep external opportunities/threats unverified and never infer promotion returns or market rankings.
 
 - Title v2 is a local editorial heuristic: fetch category limits via credential-free fixed public category URLs, keep unknown limits null, exclude length/estimated visual cut from scores, and never auto-write titles or activate AI.

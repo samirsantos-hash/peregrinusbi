@@ -244,6 +244,7 @@ Só `super_admin`, `admin` ou `gerente` com a conta em `allowed_cust_ids`. Não 
 - `GET /ml-settings?account_id=<uuid>` → `200 { account_id, meta_investimento_ads, acos_alvo, margem_minima, alerta_acos, alerta_roas, alerta_ctr, alerta_cpc, alerta_tacos, atualizado_em }`.
 - `PATCH { account_id, ...campos }` → `200` com o objeto gravado. Frações entre 0 e 1 (3% = `0.03`); `acos_alvo` e `margem_minima` aceitam `null`.
 - Erros: 400 `{ erros: string[] }`, 401, 403, 404 conta não encontrada, 405.
+- A tela Publicidade oferece configuração independente de TACOS, ACOS, ROAS, CTR, CPC e meta de investimento; envia somente campos editados, sem alterar campanhas/orçamentos. Exige `integracoes.configurar` além do acesso atual à conta. CORS permite `GET, PATCH, OPTIONS` para salvamento pelo navegador.
 
 ## Tabelas e RPCs
 
