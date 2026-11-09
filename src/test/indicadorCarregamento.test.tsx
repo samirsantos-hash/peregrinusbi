@@ -26,6 +26,11 @@ it('libera a página somente depois de 100% e da exibição da conclusão', asyn
   });
   expect(root.inert).toBe(true);
   expect(root.classList.contains('pagina-aguardando-consultas')).toBe(true);
+  expect(screen.queryByRole('status', { name: 'Carregando painel' })).toBeNull();
+  act(() => { vi.advanceTimersByTime(2000); });
+  expect(screen.queryByRole('status', { name: 'Carregando painel' })).toBeNull();
+  act(() => { vi.advanceTimersByTime(100); });
+  expect(screen.getByRole('status', { name: 'Carregando painel' })).toBeTruthy();
   await act(async () => { concluirA?.(1); await a; });
   expect(screen.getByRole('status', { name: 'Carregando painel' })).toBeTruthy();
   expect(screen.queryByRole('progressbar')).toBeNull();
@@ -90,6 +95,9 @@ it('troca de loja ou período mede 50%, tempo real e mantém bloqueio até a con
   });
   expect(root.inert).toBe(true);
   expect(screen.getByText(/2s decorridos/)).toBeTruthy();
+  expect(screen.queryByRole('status', { name: 'Carregando painel' })).toBeNull();
+  act(() => { vi.advanceTimersByTime(100); });
+  expect(screen.getByRole('status', { name: 'Carregando painel' })).toBeTruthy();
   await act(async () => { resolverA?.(1); await a; });
   expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('50');
   await act(async () => { resolverB?.(2); await b; });
