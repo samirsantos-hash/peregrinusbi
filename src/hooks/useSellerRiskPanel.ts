@@ -21,9 +21,10 @@ export interface RiskPanelData {
  * Enquanto o mês corrente estiver parcial, snapshots (BPC/Reputação) e baseline
  * de churn usam o último mês fechado.
  */
-export function useSellerRiskPanel() {
+export function useSellerRiskPanel(enabled = true) {
   return useQuery({
     queryKey: ["seller-risk-panel"],
+    enabled,
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<RiskPanelData | null> => {
       const { data: monthsRows, error: mErr } = await supabase

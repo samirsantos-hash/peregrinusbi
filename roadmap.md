@@ -1,5 +1,14 @@
 # Roadmap
 
+## Modo Didático — primeira etapa, 09/11
+- [x] Alternador Didático/Avançado por usuário, Didático padrão; Avançado preserva as telas atuais.
+- [x] Métricas de Negócio somente leitura, seis indicadores sem cartões e um gráfico mensal separado; medições e comparações ausentes explícitas.
+- [x] Não montar análises avançadas nem buscar catálogo, elegibilidade, campanhas e risco no Didático.
+- [x] Testes de preferência e isolamento aprovados; k6 público 28.203 requisições, zero falhas, p95 154,51ms; compilação aprovada.
+- [ ] Conferência visual e leitura real bloqueadas: navegador de teste permanece com raiz vazia após restaurar sessão, sem erro capturado; não declarar fluxo autenticado conferido.
+- [ ] Próxima etapa depende da revisão de Samir: Reputação; depois Quality Index, Tempo de resposta e Clips.
+
+
 ## Diagnóstico travado — 09/11
 - [x] Conferir ambas as telas: promoções falha na leitura integral da loja grande; dois eixos permanece em coleta por mais de dois minutos.
 - [x] Corrigir bloqueio órfão do carregamento e atraso indefinido da liberação causado por eventos de outras consultas, mantendo dados finais somente após conclusão.

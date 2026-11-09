@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 import { useJuniorMode } from "@/hooks/useJuniorMode";
+import type { ModoPainel } from '@/lib/modoPainel';
 
 
 /* ------------------------------------------------------------------ */
@@ -71,6 +72,8 @@ interface DashboardHeaderProps {
   dailyDisponivel?: boolean;
   /** Base para o calendário (mensal + diária); padrão = allKpis */
   calendarKpis?: any[];
+  modoPainel?: ModoPainel;
+  onModoPainelChange?: (modo: ModoPainel) => void;
 }
 
 const DashboardHeader = ({
@@ -86,6 +89,8 @@ const DashboardHeader = ({
   onPeriodChange,
   dailyDisponivel = true,
   calendarKpis,
+  modoPainel,
+  onModoPainelChange,
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
   const [calOpen, setCalOpen] = useState(false);
@@ -439,7 +444,10 @@ const DashboardHeader = ({
 
 
             {/* Refresh button */}
-            <Button
+            {modoPainel && onModoPainelChange ? <div className="flex flex-wrap gap-1" role="group" aria-label="Profundidade do painel">
+              <Button variant={modoPainel === 'didatico' ? 'secondary' : 'outline'} aria-pressed={modoPainel === 'didatico'} onClick={() => onModoPainelChange('didatico')} className="panel-control min-h-10 gap-2 text-xs text-primary"><GraduationCap className="h-4 w-4" aria-hidden="true" />Modo Didático</Button>
+              <Button variant={modoPainel === 'avancado' ? 'secondary' : 'outline'} aria-pressed={modoPainel === 'avancado'} onClick={() => onModoPainelChange('avancado')} className="panel-control min-h-10 gap-2 text-xs"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />Avançado</Button>
+            </div> : <Button
               variant="outline"
               onClick={toggleJunior}
               aria-label="Modo didático"
@@ -449,7 +457,7 @@ const DashboardHeader = ({
             >
               {juniorMode ? <GraduationCap className="h-4 w-4 text-primary" aria-hidden="true" /> : <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" />}
               {juniorMode ? "Modo Didático" : "Modo Avançado"}
-            </Button>
+            </Button>}
             {onRefresh && (
               <Button
                 variant="ghost"
