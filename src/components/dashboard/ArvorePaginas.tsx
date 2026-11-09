@@ -7,13 +7,16 @@ import { RAMOS_ACESSOS, destinoAcesso } from '@/config/arvoreAcessos';
 import { useAuth } from '@/hooks/useAuth';
 import { useMyAccess } from '@/hooks/useMyAccess';
 import { useContasMl, useSouConsultor } from '@/lib/mlFuncoes';
+import { resolverContaPublicidade } from '@/lib/contaPublicidade';
 
 export default function ArvorePaginas({ children }: { children: React.ReactNode }) {
   const [aberto, setAberto] = useState(false);
   const [params] = useSearchParams(); const location = useLocation(); const navigate = useNavigate();
   const { user, isAdmin, isGerente, isGestorLoja } = useAuth();
   const { allowedSellers } = useMyAccess(); const consultor = useSouConsultor(user?.id); const contas = useContasMl();
-  const conta = contas.data?.find(c => c.id === params.get('conta') || String(c.ml_user_id) === params.get('loja')) ?? ((!params.get('conta') && !params.get('loja')) ? contas.data?.[0] : undefined);
+  const conta = location.pathname === '/publicidade'
+    ? resolverContaPublicidade(contas.data, params.get('loja'), params.get('conta'))
+    : contas.data?.find(c => c.id === params.get('conta') || String(c.ml_user_id) === params.get('loja')) ?? ((!params.get('conta') && !params.get('loja')) ? contas.data?.[0] : undefined);
   const cust = conta ? String(conta.ml_user_id) : params.get('loja') ?? undefined;
   const ramo = RAMOS_ACESSOS.find(r => r.acessos.some(a => a.caminho === location.pathname && a.aba === (params.get('aba') ?? (location.pathname === '/anuncios' ? 'anuncios' : undefined)))) ?? RAMOS_ACESSOS.find(r => r.acessos.some(a => a.caminho === location.pathname));
   const sub = ramo?.acessos.find(a => a.caminho === location.pathname && (a.aba === params.get('aba') || !a.aba));

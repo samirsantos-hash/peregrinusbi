@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import BuscarLojaMl from "@/components/ml/BuscarLojaMl";
+import { resolverContaPublicidade } from '@/lib/contaPublicidade';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader } from "@/components/ds";
 import { DialogoPrevia } from "@/components/ml/acoes/DialogoPrevia";
@@ -33,7 +33,10 @@ export default function Publicidade() {
   const [params, setParams] = useSearchParams();
   const contas = useContasMl();
   const { autorizado: isDesenvolvedor } = useDesenvolvedor();
-  const contaId = params.get("conta") ?? "";
+  const conta = resolverContaPublicidade(contas.data, params.get('loja'), params.get('conta'));
+  const contaId = conta?.id ?? '';
+  const custId = params.get('loja') ?? (conta ? String(conta.ml_user_id) : undefined);
+  const voltarPainel = () => navigate(custId ? `/?loja=${encodeURIComponent(custId)}` : '/');
   const [atualizando, setAtualizando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
 
@@ -42,11 +45,6 @@ export default function Publicidade() {
     for (const [k, v] of Object.entries(novos)) v ? p.set(k, v) : p.delete(k);
     setParams(p, { replace: true });
   };
-
-  useEffect(() => {
-    if (!contaId && contas.data?.length) mudar({ conta: contas.data[0].id });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contas.data, contaId]);
 
   const estado = useQuery({
     queryKey: ["ads-estado", contaId],
@@ -116,6 +114,7 @@ export default function Publicidade() {
   const acao = useAcaoEmLote("ml-ads-action", contaId, recarregar);
 
   const atualizar = async () => {
+    if (!contaId) return;
     setAtualizando(true);
     setAviso(null);
     try {
@@ -143,7 +142,7 @@ export default function Publicidade() {
   return (
     <div className="min-h-screen">
       <div className="mx-auto max-w-7xl px-4 py-8 space-y-4">
-        <Button variant="ghost" size="sm" className="gap-1.5 px-2" onClick={() => navigate("/")}>
+        <Button variant="ghost" size="sm" className="gap-1.5 px-2" onClick={voltarPainel}>
           <ArrowLeft className="h-4 w-4" /> Painel
         </Button>
         <PageHeader
@@ -151,9 +150,7 @@ export default function Publicidade() {
           periodo={fonte}
           acoes={
             <div className="flex flex-wrap items-center gap-2">
-              {(contas.data?.length ?? 0) > 1 && (
-                <BuscarLojaMl contas={contas.data ?? []} value={contaId} onChange={(v) => mudar({ conta: v })} />
-              )}
+              {conta && <span className="text-sm text-muted-foreground break-all">Loja: {conta.nickname ?? custId} · Cust ID: {custId}</span>}
               {contaId && (
                 <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
                   <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${atualizando ? "animate-spin" : ""}`} /> {atualizando ? "Lendo o Mercado Livre…" : "Atualizar"}
@@ -166,6 +163,12 @@ export default function Publicidade() {
         {aviso && <p className="text-sm text-ec-ambar">{isDesenvolvedor ? aviso : 'A atualização não foi concluída integralmente. Os dados disponíveis foram mantidos.'}</p>}
         {contas.isLoading && <Carregando />}
         {contas.isError && <EmptyState falta="Não foi possível carregar suas contas." acao="Recarregue a página." />}
+        {contas.isSuccess && contas.data.length > 0 && !conta && (
+          <EmptyState
+            falta={custId || params.get('conta') ? 'A loja selecionada não possui uma conta de publicidade disponível para este acesso.' : 'Selecione uma loja no painel para consultar suas campanhas.'}
+            acao="Volte ao painel. Nenhuma outra loja foi selecionada."
+          />
+        )}
         {contas.data && contas.data.length === 0 && (
           <EmptyState
             falta="Nenhuma conta do Mercado Livre ligada ao seu usuário."
@@ -202,7 +205,7 @@ export default function Publicidade() {
                   <VisaoGeralAds painel={painel} faturamentoEm={dados.data?.faturamentoEm ?? null} aoVerAnuncios={(filtro) => mudar({ aba: "anuncios", filtro })} />
                 </TabsContent>
                 <TabsContent value="campanhas" className="mt-4">
-                  <CampanhasAds painel={painel} acao={acao} custId={String(contas.data?.find((c) => c.id === contaId)?.ml_user_id ?? "")} contaId={contaId} />
+                  <CampanhasAds painel={painel} acao={acao} custId={custId ?? ''} contaId={contaId} />
                 </TabsContent>
                 <TabsContent value="anuncios" className="mt-4">
                   <AnunciosAds

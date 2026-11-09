@@ -31,7 +31,7 @@ export function destinoAcesso(a: AcessoArvore, custId?: string, contaId?: string
   const params = new URLSearchParams();
   if (!a.caminho) { params.set('aba', a.secao ?? 'efficiency'); if (a.subaba) params.set('subaba', a.subaba); }
   else if (a.aba) params.set('aba', a.aba);
-  if (a.caminho === '/mercado' || a.caminho === '/publicidade' || a.caminho === '/perguntas') { if (contaId) params.set('conta', contaId); }
+  if (a.caminho === '/mercado' || a.caminho === '/publicidade' || a.caminho === '/perguntas') { if (contaId) params.set('conta', contaId); if (a.caminho === '/publicidade' && custId) params.set('loja', custId); }
   else if (a.caminho !== '/multilojas' && custId) params.set('loja', custId);
   return `${a.caminho ?? '/'}${params.toString() ? `?${params.toString()}` : ''}`;
 }

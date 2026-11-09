@@ -13,6 +13,7 @@ import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useAnaliseMl } from "@/hooks/useAnaliseMl";
 import CampanhaGrafico, { type LinhaDiaCampanha } from "@/components/ml/ads/CampanhaGrafico";
 import SinergiaPublicidadeApi from "@/components/ml/SinergiaPublicidade";
+import { destinoAcesso } from '@/config/arvoreAcessos';
 
 type Campanha = {
   id: string;
@@ -203,7 +204,7 @@ export default function GestaoAds({ custId }: { custId: string }) {
             Consultar
           </Button>
           {souConsultor && (
-            <Button size="sm" onClick={() => navigate("/publicidade")}>
+            <Button size="sm" onClick={() => navigate(destinoAcesso({ id: 'gestao-campanhas', label: '', permissao: 'publicidade.visualizar', caminho: '/publicidade', aba: 'campanhas' }, custId))}>
               <Megaphone className="mr-1.5 h-3.5 w-3.5" />
               Gerenciar
             </Button>

@@ -1,5 +1,7 @@
 # Account summary
 
+- Publicidade resolves only an explicitly identified manageable store via resolverContaPublicidade; links and returns carry the panel Cust ID, with no independent selector or first-account fallback, to prevent cross-store actions.
+
 - Ads chart breaches use alertasGraficoAds with current store limits and measured values only; strict maximum/minimum comparisons drive red sphere/ring dots and tooltips, while monetary lines get only same-date ratio alerts, never invented currency targets.
 
 - Ads KPI limit editing reuses audited ml-settings PATCH and existing configuration/store authorization; sends only edited fields, never campaign budgets, and converts display percentages at the persistence boundary.
