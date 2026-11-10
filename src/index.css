@@ -2970,10 +2970,21 @@ html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-executiv
   }
 }
 /* Linhas fluidas topográficas no fundo de todo o painel */
-.painel-ambiente-linhas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; -webkit-mask-image: radial-gradient(ellipse 65% 55% at 50% 50%, transparent 20%, rgba(0,0,0,.85) 75%, black 100%); mask-image: radial-gradient(ellipse 65% 55% at 50% 50%, transparent 20%, rgba(0,0,0,.85) 75%, black 100%); }
-.painel-linha-suave { stroke: hsl(0 0% 100% / .12); }
-.painel-linha-destaque { stroke: hsl(var(--panel-positive) / .22); }
-:root:not(.dark) .painel-linha-suave { stroke: hsl(var(--panel-positive) / .16); }
+.painel-ambiente-linhas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; color: hsl(152 18% 68%); }
+.dark .painel-ambiente-linhas { color: hsl(152 18% 68% / .35); }
+.painel-ambiente-laser path { fill: none; stroke: hsl(var(--panel-positive)); stroke-width: 1.2; stroke-linecap: round; stroke-dasharray: 120 3000; stroke-dashoffset: 3120; filter: drop-shadow(0 0 5px hsl(var(--panel-positive))); animation: painel-laser 13s linear infinite; }
+.painel-ambiente-laser path:nth-child(1) { animation-duration: 10s; }
+.painel-ambiente-laser path:nth-child(2) { animation-duration: 14s; animation-delay: 2.5s; }
+.painel-ambiente-laser path:nth-child(3) { animation-duration: 12s; animation-delay: 5s; }
+.painel-ambiente-laser path:nth-child(4) { animation-duration: 16s; animation-delay: 1.5s; }
+.painel-ambiente-laser path:nth-child(5) { animation-duration: 11s; animation-delay: 7s; }
+.painel-ambiente-laser path:nth-child(6) { animation-duration: 15s; animation-delay: 3.5s; }
+.painel-ambiente-laser path:nth-child(7) { animation-duration: 13s; animation-delay: 8.5s; }
+.painel-ambiente-laser path:nth-child(8) { animation-duration: 17s; animation-delay: 4.5s; }
+.painel-ambiente-laser path:nth-child(9) { animation-duration: 10s; animation-delay: 9s; }
+.painel-ambiente-laser path:nth-child(10) { animation-duration: 18s; animation-delay: .5s; }
+@keyframes painel-laser { 0% { stroke-dashoffset: 3120; opacity: 0; } 10%, 90% { opacity: 1; } 100% { stroke-dashoffset: -120; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .painel-ambiente-laser { display: none; } }
 
 .painel-ambiente-brilho path { fill: none; stroke: hsl(var(--panel-positive) / .55); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 150 3000; stroke-dashoffset: 3150; filter: drop-shadow(0 0 5px hsl(var(--panel-positive) / .8)); animation: painel-brilho-linha 13s linear infinite; }
 :root:not(.dark) .painel-ambiente-brilho path { stroke: hsl(0 0% 100% / .95); filter: drop-shadow(0 0 5px hsl(0 0% 100% / .9)); }
