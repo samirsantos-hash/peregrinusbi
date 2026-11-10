@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Menu de lojas Liquid Glass — 10/11
+- [x] Ajustar ao exemplo React enviado às 21:44: largura de 340px, busca com ícone à esquerda, espaço vertical na lista e nomes mais nítidos; manter Cust ID e dados reais.
 - [x] Aplicar vidro, busca fixa, rolagem fina e seleção verde somente ao menu de lojas; preservar funções e tema claro; usar Cust ID conforme resposta de Samir.
 - [x] Compilação aprovada e três regressões de navegação passaram; k6 público: 28.460 requisições, zero falhas, p95 documentos 74,13ms (não mede capacidade autenticada). Sem publicar.
 - [ ] Conferência visual e seleção real bloqueadas: sessão autorizada não permitiu concluir a abertura do menu; temas e largura móvel não verificados.

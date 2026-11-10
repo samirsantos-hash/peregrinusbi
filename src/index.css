@@ -3202,6 +3202,7 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
   --store-menu-shadow: 0 24px 48px hsl(var(--panel-black) / .15), inset 0 1px 1px hsl(var(--panel-white) / .7);
   --store-menu-text: hsl(var(--panel-text));
   --store-menu-muted: hsl(var(--panel-text) / .75);
+  --store-menu-name: hsl(var(--panel-text) / .9);
   --store-menu-subtext: hsl(var(--panel-text) / .65);
   --store-menu-search: hsl(var(--panel-white) / .4);
   --store-menu-hover: hsl(var(--panel-black) / .04);
@@ -3219,6 +3220,7 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
   --store-menu-shadow: 0 24px 48px hsl(var(--panel-black) / .55), inset 0 1px 1px hsl(var(--panel-white) / .14);
   --store-menu-text: hsl(var(--panel-white));
   --store-menu-muted: hsl(var(--panel-white) / .75);
+  --store-menu-name: hsl(var(--panel-white) / .9);
   --store-menu-subtext: hsl(var(--panel-white) / .55);
   --store-menu-search: hsl(var(--panel-black) / .2);
   --store-menu-hover: hsl(var(--panel-white) / .06);
@@ -3241,10 +3243,11 @@ html body [data-ui-surface="popover"].dropdown-vidro {
 .dropdown-vidro [cmdk-root] { color: var(--store-menu-text); border-radius: 0; }
 .dropdown-vidro [cmdk-group] { padding: 0; color: inherit; }
 .dropdown-vidro [cmdk-input-wrapper] {
-  padding: 0 16px;
+  padding: 0 12px;
   background: var(--store-menu-search);
   border-bottom: 1px solid var(--store-menu-edge);
 }
+.dropdown-vidro [cmdk-input-wrapper] svg { color: var(--store-menu-subtext); opacity: 1; }
 .dropdown-vidro [cmdk-input-wrapper]:focus-within { border-bottom-color: var(--store-menu-focus); }
 .dropdown-vidro .dropdown-vidro-search {
   height: 44px;
@@ -3283,4 +3286,5 @@ html body [data-ui-surface="popover"].dropdown-vidro {
   font-weight: 600;
 }
 .dropdown-vidro .item-subtext { color: var(--store-menu-subtext); font-size: .75rem; margin-left: auto; }
+.dropdown-vidro .dropdown-vidro-item:not([data-active="true"]) > div > span:first-child { color: var(--store-menu-name); }
 .dropdown-vidro [data-active="true"] .item-subtext { color: var(--store-menu-active-subtext); }

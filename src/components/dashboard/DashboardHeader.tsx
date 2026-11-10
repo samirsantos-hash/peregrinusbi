@@ -303,7 +303,7 @@ const DashboardHeader = ({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="dropdown-vidro w-[440px] max-w-[calc(100vw-24px)] p-0" align="start">
+              <PopoverContent className="dropdown-vidro flex w-[340px] max-w-[calc(100vw-24px)] flex-col p-0" align="start">
                 <Command
                   className="bg-transparent"
                   filter={(value, search) => {
@@ -316,7 +316,7 @@ const DashboardHeader = ({
                   }}
                 >
                   <CommandInput placeholder="Pesquisar por nome ou Cust ID..." className="dropdown-vidro-search" />
-                  <CommandList className="dropdown-vidro-scroll">
+                  <CommandList className="dropdown-vidro-scroll flex flex-col py-2">
                     <CommandEmpty>Nenhuma loja encontrada.</CommandEmpty>
                     <CommandGroup>
                       <CommandItem
