@@ -3416,3 +3416,22 @@ html body .peregrinus-panel .kpi-vidro.liquid-card::before {
   html body .peregrinus-panel .kpi-vidro.liquid-card::before { animation: none; }
   html body .peregrinus-panel .kpi-vidro.liquid-card:hover { transform: none; }
 }
+
+/* Quadros de gráfico: mesmo vidro líquido, contorno estático (gráficos densos não animam a borda) */
+html body .peregrinus-panel .vidro-grafico.liquid-card {
+  position: relative; isolation: isolate; overflow: hidden; border-radius: 20px;
+  border: 1px solid hsl(var(--glow-neutro) / 0.12);
+  backdrop-filter: blur(calc(20px * var(--glass-intensity, 1))) saturate(150%);
+  -webkit-backdrop-filter: blur(calc(20px * var(--glass-intensity, 1))) saturate(150%);
+  background: linear-gradient(145deg, hsl(var(--glow-verde) / 0.06), hsl(var(--glow-neutro) / 0.01)), hsl(var(--card) / 0.55);
+}
+html.dark body .peregrinus-panel .vidro-grafico.liquid-card {
+  box-shadow: 0 16px 32px -10px hsl(0 0% 0% / .4), inset 0 1px 1px hsl(0 0% 100% / .15), inset 0 -1px 1px hsl(0 0% 0% / .3);
+}
+html body .peregrinus-panel .vidro-grafico.liquid-card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none; z-index: 0;
+  background: linear-gradient(160deg, hsl(var(--glow-verde) / .55), transparent 35%, transparent 70%, hsl(var(--glow-neutro) / .25));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+html body .peregrinus-panel .vidro-grafico.liquid-card > * { position: relative; z-index: 1; }

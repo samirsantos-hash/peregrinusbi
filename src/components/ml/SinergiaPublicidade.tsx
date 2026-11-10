@@ -23,7 +23,7 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
   return <section aria-label="Sinergia e dependência de publicidade" className="resumo-sinergia space-y-5 border-t border-border/50 pt-5">
     <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
-    <div className="resumo-sinergia-evolucao"><GraficoPublicidadeSerie pontos={pontos} compacto={compacto} limites={limites} /></div>
+    <div className="resumo-sinergia-evolucao noite-vidro liquid-card vidro-grafico p-4 sm:p-5"><GraficoPublicidadeSerie pontos={pontos} compacto={compacto} limites={limites} /></div>
     {piloto && <div className="flex justify-end">
       <Button variant="ghost" size="sm" onClick={piloto.alternar} className="text-xs text-muted-foreground">
         {piloto.ativo ? "Voltar à leitura publicada" : "Ver piloto de visitas"}
