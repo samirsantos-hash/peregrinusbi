@@ -3097,7 +3097,7 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
   background: rgba(48,209,88,.08) !important; border-left: 3px solid #30d158 !important; color: #fff !important;
 }
 
-/* Cartões Apple Liquid Glass (tema escuro), referência enviada 10/11 */
+/* Shared intensity is inherited by each panel section. */
 :root { --glass-intensity: 1; }
 /* Intensidade: 0.5 sutil, 1 equilíbrio, 1.4 denso; sobrescreva no contêiner pai (style="--glass-intensity: 1.25") */
 .dark .kpi-vidro, .dark .glass-card, .dark .multilojas-chart, .dark .carteira-kpi, .dark [data-card-surface] {
@@ -3156,35 +3156,35 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
 /* Valor principal com acabamento nítido e alto brilho */
 .dark .kpi-vidro-valor,
 .dark .glass-card .valor-destaque {
-  color: #ffffff !important;
+  color: hsl(var(--panel-text)) !important;
   font-weight: 700 !important;
-  letter-spacing: -0.03em !important;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0 !important;
+  text-shadow: none;
 }
 
 /* Rótulos e legendas secundárias */
 .dark .kpi-vidro p:first-child,
 .dark .glass-card .rotulo {
-  color: rgba(255, 255, 255, 0.62) !important;
+  color: hsl(var(--panel-text-secondary)) !important;
   font-weight: 500 !important;
-  letter-spacing: -0.01em !important;
+  letter-spacing: 0 !important;
 }
 
 /* Indicadores Semânticos com Brilho Neon Natural */
 .dark .kpi-vidro span[aria-label*="Subiu"],
 .dark .kpi-vidro .badge-positivo {
-  color: #3BD394 !important;
-  background: rgba(59, 211, 148, 0.12) !important;
-  border: 1px solid rgba(59, 211, 148, 0.28) !important;
-  text-shadow: 0 0 12px rgba(59, 211, 148, 0.45);
+  color: hsl(var(--panel-positive)) !important;
+  background: hsl(var(--panel-positive) / .12) !important;
+  border: 1px solid hsl(var(--panel-positive) / .28) !important;
+  text-shadow: none;
 }
 
 .dark .kpi-vidro span[aria-label*="Caiu"],
 .dark .kpi-vidro .badge-negativo {
-  color: #D62410 !important;
-  background: rgba(214, 36, 16, 0.12) !important;
-  border: 1px solid rgba(214, 36, 16, 0.28) !important;
-  text-shadow: 0 0 12px rgba(214, 36, 16, 0.45);
+  color: hsl(var(--destructive)) !important;
+  background: hsl(var(--destructive) / .12) !important;
+  border: 1px solid hsl(var(--destructive) / .28) !important;
+  text-shadow: none;
 }@media (prefers-reduced-motion: reduce) { .dark .kpi-vidro:hover, .dark .glass-card:hover, .dark .multilojas-chart:hover { transform: none; } }
 
 /* Store menu reference: portal-scoped material, independent of other menus. */
@@ -3290,4 +3290,85 @@ html body [data-ui-surface="popover"].dropdown-vidro {
     -webkit-backdrop-filter: none !important;
     border-color: hsl(var(--border)) !important;
   }
+}
+
+/* efeito-vidro: panel cards only. Optical layers never filter their content. */
+:root {
+  --card-liquid-fill: linear-gradient(145deg, hsl(var(--panel-white) / .66), hsl(var(--panel-white) / .46)), hsl(var(--panel-surface) / .3);
+  --card-liquid-edge: hsl(var(--panel-black) / .12);
+  --card-liquid-top: hsl(var(--panel-white) / .95);
+  --card-liquid-shadow: 0 12px 28px -10px hsl(var(--panel-black) / .16), inset 0 1px 1px hsl(var(--panel-white) / .8);
+  --card-liquid-rim: linear-gradient(135deg, hsl(var(--panel-white) / .95), transparent 32%, hsl(var(--panel-brand) / .28) 68%, hsl(var(--panel-white) / .7));
+  --card-liquid-backdrop: blur(clamp(12px, calc(24px * var(--glass-intensity)), 32px)) saturate(150%);
+}
+.dark {
+  --card-liquid-fill: linear-gradient(145deg, hsl(var(--panel-white) / calc(.065 * var(--glass-intensity))), hsl(var(--panel-white) / .025)), hsl(var(--panel-surface) / .48);
+  --card-liquid-edge: hsl(var(--panel-white) / .1);
+  --card-liquid-top: hsl(var(--panel-white) / .28);
+  --card-liquid-shadow: 0 16px 32px -10px hsl(var(--panel-black) / .5), inset 0 1px 1px hsl(var(--panel-white) / .18), inset 0 -1px 1px hsl(var(--panel-black) / .3);
+  --card-liquid-rim: linear-gradient(135deg, hsl(var(--panel-white) / .5), transparent 32%, hsl(var(--panel-brand) / .32) 68%, hsl(var(--panel-white) / .16));
+}
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro,.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.noite-vidro,.cartao-branco,.cart-card,.cart-ficha,.multilojas-chart,.carteira-kpi.carteira-kpi.carteira-kpi,[data-card-surface]) {
+  position: relative;
+  isolation: isolate;
+  background: var(--card-liquid-fill) !important;
+  border: 1px solid var(--card-liquid-edge) !important;
+  border-top-color: var(--card-liquid-top) !important;
+  box-shadow: var(--card-liquid-shadow) !important;
+  backdrop-filter: var(--card-liquid-backdrop) !important;
+  -webkit-backdrop-filter: var(--card-liquid-backdrop) !important;
+  transition: transform 160ms var(--curva-rapida), opacity 160ms var(--curva-rapida) !important;
+}
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro,.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.noite-vidro,.cartao-branco,.cart-card,.cart-ficha,.multilojas-chart,.carteira-kpi,[data-card-surface])::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: var(--card-liquid-rim) !important;
+  pointer-events: none;
+  z-index: 0;
+  -webkit-mask: linear-gradient(hsl(var(--panel-white)) 0 0) content-box, linear-gradient(hsl(var(--panel-white)) 0 0);
+  mask: linear-gradient(hsl(var(--panel-white)) 0 0) content-box, linear-gradient(hsl(var(--panel-white)) 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+/* Remove the old full-face reflection so it cannot wash out chart labels. */
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro,.ds-kpi,.glass-card,.glass-card-highlight,.ds-glass-surface,.noite-vidro,.cartao-branco,.cart-card,.cart-ficha,.multilojas-chart,.carteira-kpi,[data-card-surface])::after {
+  content: none !important;
+  display: none !important;
+}
+/* Nested surfaces inherit the material without stacking blur or opacity. */
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.glass-card,.ds-glass-surface,.noite-vidro,.cart-card,[data-card-surface]) :is(.kpi-vidro,.ds-kpi,.glass-card,.ds-glass-surface,.noite-vidro,.cartao-branco,.cart-card,.cart-ficha,.carteira-kpi.carteira-kpi.carteira-kpi,[data-card-surface]) {
+  background: var(--panel-fill-nested) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro-valor,.carteira-kpi-valor,.valor-destaque) {
+  color: hsl(var(--panel-text)) !important;
+  letter-spacing: 0 !important;
+  text-shadow: none !important;
+  font-variant-numeric: tabular-nums;
+}
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro > p:first-child,.glass-card .rotulo) {
+  color: hsl(var(--panel-text) / .8) !important;
+  letter-spacing: 0 !important;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro,.ds-kpi,.glass-card,.multilojas-chart,.carteira-kpi):hover { transform: translateY(-2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro,.ds-kpi,.glass-card,.multilojas-chart,.carteira-kpi):hover { transform: none !important; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html body .peregrinus-panel.peregrinus-panel.peregrinus-panel { --card-liquid-fill: hsl(var(--panel-surface)); }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html body .peregrinus-panel.peregrinus-panel.peregrinus-panel {
+    --card-liquid-fill: hsl(var(--panel-surface));
+    --card-liquid-backdrop: none;
+  }
+  html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro,.ds-kpi,.glass-card,.noite-vidro,.carteira-kpi,[data-card-surface])::before { display: none !important; }
 }
