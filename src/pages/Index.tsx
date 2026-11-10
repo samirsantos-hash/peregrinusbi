@@ -111,7 +111,9 @@ function formatDateString(date: Date): string {
 
 const Index = () => {
   const { user, isAdmin, isGerente, isGestorLoja, signOut } = useAuth();
-  const { modo, alternar, didatico } = useModoPainel(user?.id);
+  // Modos Didático/Avançado suspensos a pedido de Samir (10/11/2026): painel completo sempre, sem alternador.
+  useModoPainel(user?.id);
+  const didatico = false;
   const { pode, data: permissoes } = usePermissoes();
   const souConsultor = useSouConsultor(user?.id);
   const contasMl = useContasMl();
@@ -512,8 +514,6 @@ const Index = () => {
               isRefreshing={isRefreshing}
               onPeriodChange={handlePeriodChange}
               dailyDisponivel={!isConsolidado && hasRealData && allKpisDaily.length > 0}
-              modoPainel={modo}
-              onModoPainelChange={alternar}
             />
             {didatico ? <div className="flex items-start gap-0 lg:gap-4 isolate">
               <PainelSidebar didatico ativa="efficiency" subativa={paginaDidatica(searchParams.get('subaba'))} onSubChange={selecionarSubanalise} onChange={() => selecionarSubanalise('efficiency', 'indicadores')} mobileAberto={menuAberto} onMobileChange={setMenuAberto} />
