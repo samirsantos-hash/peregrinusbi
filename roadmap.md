@@ -569,3 +569,11 @@
 - [x] Botão Campanhas: tabela sob demanda e gráfico diário da campanha clicada (investimento, vendas, ROAS, ACOS, TACOS, cliques, CPC, CTR).
 - [x] Oportunidades: promoções via API com investimento da loja, rebate do ML, recomendação pelo maior rebate e aviso amarelo até 7 dias; sem API segue a planilha.
 - [x] Radar de qualidade/Clips movido para a aba Clips.
+
+## Conformidade com os termos do Mercado Livre — 10/11
+- [x] Etapa 1: pergunta do comprador vai à IA sem telefone, e-mail, documento, CEP, links e @usuário; sugestão com contato é bloqueada. 8 testes passaram.
+- [ ] Etapa 2: tela "Ao vivo" com prévia, confirmação e registro (aguarda "OK, próxima etapa").
+- [ ] Etapa 3: conferir consultas de concorrentes/estudo de mercado contra a documentação oficial.
+- [ ] Etapa 4: prazo de guarda e limpeza ao desconectar (aguarda Samir confirmar prazo).
+- [ ] Etapa 5: agentes externos desligados por padrão e registro de consultas.
+- Documentação de base: regras e diretrizes enviadas por Samir (Dados e gestão via API; Estrutura de gestão).

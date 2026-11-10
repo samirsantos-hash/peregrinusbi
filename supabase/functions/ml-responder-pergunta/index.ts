@@ -7,6 +7,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireEnv } from "../_shared/env.ts";
 import { exigirPermissao } from '../_shared/permissoes.ts';
+import { contemDadosPessoais, limparDadosPessoais } from "../_shared/limparDadosPessoais.ts";
 
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -56,7 +57,7 @@ Use apenas os dados do anúncio abaixo. Se a informação não estiver neles, di
 Não inclua telefone, e-mail, links, redes sociais nem peça contato fora do Mercado Livre (é proibido).
 Anúncio: ${it.title ?? q.item_id}. Preço: ${it.price ?? "sem dado"}. Estoque: ${it.available_quantity ?? "sem dado"}. Frete grátis: ${it.shipping?.free_shipping ? "sim" : "não informado"}.
 Ficha técnica: ${ficha || "sem dado"}
-Pergunta: ${String(q.text ?? "").slice(0, 800)}
+Pergunta: ${limparDadosPessoais(String(q.text ?? "")).slice(0, 800)}
 Responda só com o texto da resposta.`;
     const r = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
@@ -85,6 +86,7 @@ Responda só com o texto da resposta.`;
     }
     texto = texto.trim().slice(0, 2000);
     if (!texto) return json({ error: "A IA não sugeriu uma resposta para esta pergunta." }, 422);
+    if (contemDadosPessoais(texto)) return json({ error: "A sugestão trouxe contato ou link, que o Mercado Livre proíbe. Escreva a resposta sem esses dados." }, 422);
     return json({ sugestao: texto });
   }
 

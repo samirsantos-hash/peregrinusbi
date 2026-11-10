@@ -1,5 +1,7 @@
 # Regras das funções do Mercado Livre
 
+- Free text from buyers goes to AI only after `_shared/limparDadosPessoais.ts`, and suggestions containing contacts or links are rejected, to keep personal data out of AI calls and comply with ML terms.
+
 - User-triggered reads and writes require `_shared/permissoes.ts` capability checks in addition to existing store authorization; batch confirmation rechecks the saved preview capability, while automated imports/syncs use only the validated refresh secret to avoid browser bypasses.
 
 - `ml-market-access` is a developer/master-only, account-authorized diagnostic using bounded allowlisted sequential GET probes; its fixed application-token competitor sample tests public catalog offers/visits only, never private third-party orders. It returns only status, field presence and counts, never upstream payloads or inferred competitor sales, without changing ML or business data.
