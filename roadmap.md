@@ -1,5 +1,9 @@
 # Roadmap
 
+## Vidro da referência no Resumo — 10/11
+- [x] Aplicar acabamento Apple Glass somente no Resumo de loja e carteira, preservando métricas, períodos, controles, cores e modos suspensos.
+- [x] Build OK e dez regressões aprovadas; carteira real conferida no computador e celular sem excesso horizontal. k6 prévio: 28.231 requisições, zero falhas, p95 documentos 123,92ms; não mede capacidade autenticada. Sem publicar.
+
 ## Árvore esquerda no modo Didático — 09/11
 - [x] Reutilizar a navegação esquerda com Métricas de Negócio → Indicadores de negócio e Faturamento mensal, sem acessos avançados nem mudança de loja.
 - [x] Oito regressões aprovadas e build OK; k6 público prévio: 28.351 requisições, zero falhas, p95 documentos 113,42ms (não mede capacidade autenticada). Próximas etapas preservadas, sem publicar.

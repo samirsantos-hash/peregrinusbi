@@ -61,7 +61,7 @@ export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtua
     { rotulo: "Faturamento", valor: brl(atual.gmv), delta: variacao(atual.gmv, anterior.gmv), ano: brl(anoAnterior.linhas ? anoAnterior.gmv : null) },
     { rotulo: "Itens vendidos", valor: int(atual.itens), delta: dItens, ano: int(anoAnterior.linhas ? anoAnterior.itens : null), nota: mix ? "Ticket subiu junto: possível mudança de mix" : undefined },
     { rotulo: "Ticket médio", valor: brl(tA), delta: dTicket, ano: brl(tY) },
-    { rotulo: "Pedidos", valor: pedidos === null ? "Sem dado" : int(pedidos), delta: null, ano: "—", nota: pedidos === null ? "A planilha mensal não traz pedidos deste mês" : "Total do mês na planilha mensal; sem recorte por dia, então sem comparação" },
+    { rotulo: "Pedidos", valor: pedidos === null ? "Sem dado" : int(pedidos), delta: null, ano: "—", nota: pedidos === null ? "Pedidos indisponíveis no histórico deste mês" : "Total mensal; sem recorte por dia, então sem comparação" },
     { rotulo: "Visitas", valor: int(atual.visitas), delta: variacao(atual.visitas, anterior.visitas), ano: int(anoAnterior.linhas ? anoAnterior.visitas : null) },
   ];
   const carteira: Linha[] = [
@@ -105,8 +105,8 @@ export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtua
           Os itens vendidos caíram {pct(dItens)} e o ticket médio subiu {pct(dTicket)}. Isso pode ser mudança de mix, não queda de demanda.
         </p>
       )}
-      {mostraVolume && <Bloco titulo="Volume" linhas={volume} />}
-      {mostraCarteira && <Bloco titulo="Carteira" linhas={carteira} />}
+      {mostraVolume && <Bloco titulo="Volume de vendas" linhas={volume} />}
+      {mostraCarteira && <Bloco titulo="Movimentação da carteira" linhas={carteira} />}
       {alav.length > 0 && <Bloco titulo="Alavancas" linhas={alav} />}
     </div>
   );

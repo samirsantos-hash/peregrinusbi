@@ -2984,3 +2984,89 @@ html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-executiv
 .painel-ambiente-brilho path:nth-child(8) { animation-duration: 14s; animation-delay: 2.5s; }
 @keyframes painel-brilho-linha { from { stroke-dashoffset: 3150; } to { stroke-dashoffset: -150; } }
 @media (prefers-reduced-motion: reduce) { .painel-ambiente-brilho { display: none; } }
+
+/* Executive reference: local materials only; Home and other sections keep
+   their existing surfaces, typography and data definitions. */
+.resumo-apple-glass {
+  --summary-fill: hsl(var(--panel-white) / .035);
+  --summary-edge: hsl(var(--panel-white) / .07);
+  --summary-specular: hsl(var(--panel-white) / .22);
+  --summary-shadow: 0 16px 36px hsl(var(--panel-black) / .42), inset 0 1px 1px hsl(var(--panel-white) / .14);
+  --summary-backdrop: blur(24px) saturate(190%);
+  --summary-hover-fill: hsl(var(--panel-white) / .06);
+  --summary-reflection: linear-gradient(180deg, hsl(var(--panel-white) / .035), transparent 60%);
+  font-family: "DM Sans", sans-serif;
+  letter-spacing: 0;
+}
+:root:not(.dark) .resumo-apple-glass {
+  --summary-fill: hsl(var(--panel-white) / .38);
+  --summary-edge: hsl(var(--panel-black) / .08);
+  --summary-specular: hsl(var(--panel-white) / .8);
+  --summary-shadow: 0 12px 28px hsl(var(--panel-black) / .1), inset 0 1px 1px hsl(var(--panel-white) / .7);
+  --summary-hover-fill: hsl(var(--panel-white) / .48);
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-ref {
+  --summary-fill: inherit;
+  --summary-edge: inherit;
+  --summary-shadow: inherit;
+  --summary-reflection: inherit;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.noite-vidro, .ds-kpi, .carteira-kpi.carteira-kpi.carteira-kpi) {
+  background: var(--summary-fill) !important;
+  border: 1px solid var(--summary-edge) !important;
+  border-top-color: var(--summary-specular) !important;
+  border-radius: 16px !important;
+  box-shadow: var(--summary-shadow) !important;
+  backdrop-filter: var(--summary-backdrop) !important;
+  -webkit-backdrop-filter: var(--summary-backdrop) !important;
+  font-family: "DM Sans", sans-serif;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .carteira-leitura {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: "DM Sans", sans-serif;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .carteira-leitura > div > section {
+  margin-top: 28px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .carteira-leitura section > .grid {
+  gap: 16px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .carteira-kpi.carteira-kpi.carteira-kpi {
+  min-height: 125px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .carteira-kpi > div {
+  margin-top: auto;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.carteira-kpi > p:first-child, .kpi-vidro > p:first-child) {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-ref .resumo-executivo .kpi-vidro.noite-vidro {
+  min-height: 132px;
+  padding: 20px;
+  gap: 8px;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-ref .kpi-vidro span[aria-label] svg {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+}
+html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-ref .kpi-vidro-detalhes > span {
+  font-size: 12px;
+  line-height: 18px;
+}
+@media (max-width: 639px) {
+  html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .carteira-kpi.carteira-kpi.carteira-kpi,
+  html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-ref .resumo-executivo .kpi-vidro.noite-vidro {
+    padding: 16px;
+  }
+  html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .carteira-leitura section > .grid { gap: 12px; }
+}

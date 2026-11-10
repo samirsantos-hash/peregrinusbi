@@ -567,7 +567,7 @@ const Index = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                   className="mt-0">
-                  <TabsContent value="efficiency" className="mt-0 space-y-5">
+                  <TabsContent value="efficiency" className="resumo-apple-glass mt-0 space-y-5">
                     <NovidadesPrompt />
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     {pagina === "geral" && selectedSeller && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} />}
