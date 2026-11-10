@@ -13,6 +13,7 @@ import FunilDiarioResumo from './FunilDiarioResumo';
 import { receitaPorVisita } from '@/lib/funilDiarioResumo';
 import ImpressoesFunil from './ImpressoesFunil';
 import AnunciosMaisCancelados from './AnunciosMaisCancelados';
+import VendasHojeLateral from './VendasHojeLateral';
 
 type Total = { faturamento: number; pedidos: number; unidades: number; visitas: number | null; conversao: number | null; cancelados: number; taxaCancelamento: number | null; ticket: number | null; serie: { data: string; faturamento: number; pedidos?: number; cancelados?: number; visitas?: number | null }[] };
 type Resposta = { atual: Total; anterior: Total; periodo: { inicio: string; fim: string }; anteriorPeriodo: { inicio: string; fim: string }; consultadoEm: string };
@@ -103,7 +104,8 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
         </Button>
       </header>
 
-      <div className="resumo-visual-ref space-y-8">
+      <div className="grid grid-cols-1 gap-5 2xl:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="resumo-visual-ref min-w-0 space-y-8">
       {/* Nível superior: Macro (8) × Saúde operacional (4) — mesma altura */}
       <div className="space-y-3">
         <Rotulo>Resumo executivo</Rotulo>
@@ -196,6 +198,8 @@ export default function ResumoLojaApi({ custId, historico, pagina = "geral" }: {
         </div>
       </div>
 
+      </div>
+      <VendasHojeLateral custId={custId} />
       </div>
       {pagina !== "indicadores" && <LeituraContaApi custId={custId} faturamento30d={a.faturamento} ticketDelta={delta(a.ticket, p.ticket)} />}
 

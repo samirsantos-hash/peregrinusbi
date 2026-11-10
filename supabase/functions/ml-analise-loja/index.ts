@@ -14,6 +14,7 @@ import { lerConstrucaoAnuncios } from './construcaoAnuncios.ts';
 import { lerRespostaAnuncios, validarPeriodoResposta } from './respostaAnuncios.ts';
 import { lerExperienciaAnuncios } from './experienciaAnuncios.ts';
 import { experienciaPedidos } from './experienciaPedidos.ts';
+import { lerVendasHoje } from './vendasHoje.ts';
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -21,7 +22,7 @@ Deno.serve(async req => {
   const user = createClient(requireEnv('SUPABASE_URL'), requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
   const { data: auth } = await user.auth.getUser();
   if (!auth.user) return json({ error: 'Faça login.' }, 401);
-  const body = z.object({ cust_id: z.string().regex(/^\d+$/), inicio: z.string().optional(), fim: z.string().optional(), item_ids: z.array(z.string().regex(/^MLB\d+$/)).min(1).max(20).optional(), offset: z.number().int().min(0).max(20000).optional(), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais', 'curvaABC', 'participacaoPromocoes', 'diagnosticoConstrucao', 'diagnosticoResposta', 'diagnosticoExperiencia']), dias: z.union([z.literal(7), z.literal(30)]).optional(), anterior: z.boolean().optional(), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
+  const body = z.object({ cust_id: z.string().regex(/^\d+$/), inicio: z.string().optional(), fim: z.string().optional(), item_ids: z.array(z.string().regex(/^MLB\d+$/)).min(1).max(20).optional(), offset: z.number().int().min(0).max(20000).optional(), modo: z.enum(['resumo', 'full', 'vendas7d', 'vendas30d', 'campanhasDiagnostico', 'cancelamentosMensais', 'curvaABC', 'participacaoPromocoes', 'diagnosticoConstrucao', 'diagnosticoResposta', 'diagnosticoExperiencia', 'hoje']), dias: z.union([z.literal(7), z.literal(30)]).optional(), anterior: z.boolean().optional(), mes: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/).optional() }).safeParse(await req.json().catch(() => null));
   if (!body.success) return json({ error: 'Informe loja e análise válidas.' }, 400);
   const { cust_id, modo } = body.data;
   if (['diagnosticoConstrucao', 'diagnosticoResposta', 'diagnosticoExperiencia'].includes(modo) && (!body.data.item_ids?.length || new Set(body.data.item_ids).size !== body.data.item_ids.length)) return json({ error: 'Informe de 1 a 20 anúncios distintos.' }, 400);
@@ -59,6 +60,7 @@ Deno.serve(async req => {
     if (modo === 'diagnosticoExperiencia') return json(await lerExperienciaAnuncios(get, cust_id, body.data.item_ids ?? [], body.data.inicio ?? '', body.data.fim ?? ''));
     if (modo === 'diagnosticoResposta') return json(await lerRespostaAnuncios(get, cust_id, body.data.item_ids ?? [], body.data.inicio ?? '', body.data.fim ?? ''));
     if (modo === 'diagnosticoConstrucao') return json(await lerConstrucaoAnuncios(get, cust_id, body.data.item_ids ?? []));
+    if (modo === 'hoje') return json(await lerVendasHoje(get, cust_id));
     if (modo === 'participacaoPromocoes') return json(await lerParticipacaoPromocoes(get, cust_id, body.data.offset ?? 0));
     const dias = modo === 'curvaABC' ? body.data.dias ?? 30 : modo === 'vendas7d' ? 7 : 30;
     // curvaABC anterior: same-length window immediately before the current one.
