@@ -2970,9 +2970,9 @@ html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-executiv
   }
 }
 /* Linhas fluidas topográficas no fundo de todo o painel */
-.painel-ambiente-linhas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; color: hsl(152 18% 68%); }
-.dark .painel-ambiente-linhas { color: hsl(152 18% 68% / .35); }
-.painel-ambiente-laser path { fill: none; stroke: hsl(var(--panel-positive)); stroke-width: 1.2; stroke-linecap: round; stroke-dasharray: 120 3000; stroke-dashoffset: 3120; filter: drop-shadow(0 0 5px hsl(var(--panel-positive))); animation: painel-laser 13s linear infinite; }
+.painel-ambiente-linhas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; color: hsl(152 45% 45% / .5); -webkit-mask-image: radial-gradient(ellipse 75% 65% at 48% 52%, transparent 35%, rgba(0,0,0,.7) 75%, black 100%); mask-image: radial-gradient(ellipse 75% 65% at 48% 52%, transparent 35%, rgba(0,0,0,.7) 75%, black 100%); }
+.dark .painel-ambiente-linhas { color: hsl(135 63% 50% / .4); }
+.painel-ambiente-laser path { fill: none; stroke: hsl(var(--panel-positive)); stroke-width: 1.2; stroke-linecap: round; stroke-width: 1.1; stroke-dasharray: 140 2800; stroke-dashoffset: 2940; filter: drop-shadow(0 0 5px hsl(var(--panel-positive))); animation: painel-laser 13s linear infinite; }
 .painel-ambiente-laser path:nth-child(1) { animation-duration: 10s; }
 .painel-ambiente-laser path:nth-child(2) { animation-duration: 14s; animation-delay: 2.5s; }
 .painel-ambiente-laser path:nth-child(3) { animation-duration: 12s; animation-delay: 5s; }
@@ -2983,7 +2983,7 @@ html body .peregrinus-panel.peregrinus-panel .resumo-visual-ref .resumo-executiv
 .painel-ambiente-laser path:nth-child(8) { animation-duration: 17s; animation-delay: 4.5s; }
 .painel-ambiente-laser path:nth-child(9) { animation-duration: 10s; animation-delay: 9s; }
 .painel-ambiente-laser path:nth-child(10) { animation-duration: 18s; animation-delay: .5s; }
-@keyframes painel-laser { 0% { stroke-dashoffset: 3120; opacity: 0; } 10%, 90% { opacity: 1; } 100% { stroke-dashoffset: -120; opacity: 0; } }
+@keyframes painel-laser { 0% { stroke-dashoffset: 2940; opacity: 0; } 10%, 90% { opacity: 1; } 100% { stroke-dashoffset: -140; opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .painel-ambiente-laser { display: none; } }
 
 .painel-ambiente-brilho path { fill: none; stroke: hsl(var(--panel-positive) / .55); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 150 3000; stroke-dashoffset: 3150; filter: drop-shadow(0 0 5px hsl(var(--panel-positive) / .8)); animation: painel-brilho-linha 13s linear infinite; }

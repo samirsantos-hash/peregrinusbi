@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 
 /** Ambiente contínuo independente das consultas; animação local, sem rede. */
-const LINHAS_FLUIDAS = Array.from({ length: 10 }, (_, i) => { const t = 200 - i * 50, c = 700 - i * 100; return `M 1200,${t} C ${c},${t + 100} ${c},${1000 - t - 100} 1200,${1000 - t}`; });
+const LINHAS_FLUIDAS = ["M 1290,290 C 1325,350 1320,440 1285,505 C 1250,560 1225,510 1235,430 C 1245,355 1265,250 1290,290 Z","M 1370,160 C 1350,230 1370,360 1345,460 C 1315,580 1240,630 1200,690 C 1170,740 1195,830 1250,910","M 1410,110 C 1370,210 1400,340 1375,475 C 1345,620 1250,670 1190,740 C 1140,800 1150,880 1200,940","M 1440,60 C 1390,180 1420,320 1395,490 C 1360,650 1250,710 1170,780 C 1100,840 1110,920 1150,970","M 1460,10 C 1400,160 1440,300 1410,510 C 1370,680 1240,750 1145,820 C 1060,880 1070,950 1100,1000","M 1340,-30 C 1310,120 1400,260 1380,480 C 1350,670 1210,760 1110,845 C 1010,920 1020,990 1040,1040","M 1190,-60 C 1230,100 1340,220 1320,440 C 1290,640 1150,750 1060,850 C 970,930 960,1010 990,1070","M 1040,-70 C 1120,110 1250,210 1230,420 C 1200,610 1070,730 980,840 C 900,930 890,1020 920,1090"];
 
 export function AmbientePainel() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -66,5 +66,5 @@ export function AmbientePainel() {
       ctx.clearRect(0, 0, width, height);
     };
   }, []);
-  return <div className="painel-ambiente" aria-hidden="true"><div className="painel-ambiente-fumaca" /><svg className="painel-ambiente-linhas" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="painel-linha-degrade" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="currentColor" stopOpacity="0" /><stop offset="25%" stopColor="currentColor" stopOpacity=".8" /><stop offset="75%" stopColor="currentColor" stopOpacity=".8" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs><g fill="none" stroke="url(#painel-linha-degrade)" strokeWidth="0.6">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g><g className="painel-ambiente-laser">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g></svg><canvas ref={ref} className="painel-ambiente-chuva" /></div>;
+  return <div className="painel-ambiente" aria-hidden="true"><div className="painel-ambiente-fumaca" /><svg className="painel-ambiente-linhas" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="painel-linha-degrade" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="currentColor" stopOpacity=".9" /><stop offset="45%" stopColor="currentColor" stopOpacity=".45" /><stop offset="85%" stopColor="currentColor" stopOpacity=".1" /><stop offset="100%" stopColor="currentColor" stopOpacity="0" /></linearGradient></defs><g fill="none" stroke="url(#painel-linha-degrade)" strokeWidth="0.65">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g><g className="painel-ambiente-laser">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g></svg><canvas ref={ref} className="painel-ambiente-chuva" /></div>;
 }
