@@ -53,6 +53,12 @@ export function DeltaCapsula({ delta, pontos = false, melhorQuando = "subir", pe
   );
 }
 
+/** Tema semântico do vidro: verde = melhorou, vermelho = piorou, neutro = estável/sem comparação. */
+export function temaDoVidro(delta: number | null | undefined, melhorQuando: MelhorQuando = "subir"): "verde" | "vermelho" | "neutro" {
+  if (delta == null || !Number.isFinite(delta) || Math.abs(delta) < 0.05 || melhorQuando === "neutro") return "neutro";
+  return (delta > 0) === (melhorQuando === "subir") ? "verde" : "vermelho";
+}
+
 type KpiVidroProps = {
   rotulo: string;
   valor: string;
@@ -83,10 +89,12 @@ export default function KpiVidro({
   focal,
   className,
 }: KpiVidroProps) {
+  const temaVidro = temaDoVidro(delta, melhorQuando);
   return (
     <div
+      data-tema={temaVidro}
       className={cn(
-        "kpi-vidro noite-vidro flex h-full min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5",
+        "kpi-vidro noite-vidro liquid-card flex h-full min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5",
         "backdrop-blur-xl",
         "transition-transform duration-150",
         className,

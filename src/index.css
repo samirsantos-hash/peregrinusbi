@@ -3372,3 +3372,47 @@ html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro > p
   }
   html body .peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.kpi-vidro,.ds-kpi,.glass-card,.noite-vidro,.carteira-kpi,[data-card-surface])::before { display: none !important; }
 }
+
+/* ===== Cartões de números: Liquid Glass com luz de contorno (efeito-vidro) ===== */
+:root {
+  --glow-verde: 158 68% 30%;
+  --glow-vermelho: 7 86% 45%;
+  --glow-neutro: 220 10% 40%;
+}
+.dark {
+  --glow-verde: 155 63% 53%;
+  --glow-vermelho: 7 86% 52%;
+  --glow-neutro: 0 0% 100%;
+}
+@property --glow-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+html body .peregrinus-panel .kpi-vidro.liquid-card {
+  --card-glow: var(--glow-neutro);
+  position: relative; isolation: isolate; overflow: hidden; border-radius: 20px;
+  backdrop-filter: blur(calc(24px * var(--glass-intensity, 1))) saturate(160%);
+  -webkit-backdrop-filter: blur(calc(24px * var(--glass-intensity, 1))) saturate(160%);
+  background: linear-gradient(145deg, hsl(var(--card-glow) / 0.08), hsl(var(--card-glow) / 0.01)), hsl(var(--card) / 0.6);
+  border-color: hsl(var(--card-glow) / 0.14);
+  transition: transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s ease;
+}
+html body .peregrinus-panel .kpi-vidro.liquid-card[data-tema="verde"] { --card-glow: var(--glow-verde); }
+html body .peregrinus-panel .kpi-vidro.liquid-card[data-tema="vermelho"] { --card-glow: var(--glow-vermelho); }
+html.dark body .peregrinus-panel .kpi-vidro.liquid-card {
+  box-shadow: 0 16px 32px -10px hsl(0 0% 0% / .4), inset 0 1px 1px hsl(0 0% 100% / .15), inset 0 -1px 1px hsl(0 0% 0% / .3);
+}
+html body .peregrinus-panel .kpi-vidro.liquid-card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px;
+  background: conic-gradient(from var(--glow-angle), transparent 60%, hsl(var(--card-glow) / .8) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  pointer-events: none; z-index: 0;
+  animation: kpiGiroLuz 4s linear infinite;
+}
+@keyframes kpiGiroLuz { to { --glow-angle: 360deg; } }
+@media (hover: hover) and (pointer: fine) {
+  html body .peregrinus-panel .kpi-vidro.liquid-card:hover { transform: translateY(-3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .peregrinus-panel .kpi-vidro.liquid-card::before { animation: none; }
+  html body .peregrinus-panel .kpi-vidro.liquid-card:hover { transform: none; }
+}
