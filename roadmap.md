@@ -1,5 +1,11 @@
 # Roadmap
 
+## Profundidade Liquid Glass — 10/11
+- [x] Aplicar saturação 210%, topo especular, espessura e sombras da referência nos cartões escuros e menu de lojas; manter intensidade configurável e tema claro.
+- [x] Não aplicar filtro SVG ao conteúdo: distorceria textos e gráficos, em vez de refratar somente o fundo; não ampliar cartões para evitar sobreposições. Movimento reduzido e transparência reduzida preservados.
+- [x] Compilação aprovada; teste público obrigatório executado antes do ajuste, sem publicação.
+- [ ] Conferência visual bloqueada: captura do painel autenticado excedeu o tempo; intensidade e aparência finais não verificadas.
+
 ## Menu de lojas Liquid Glass — 10/11
 - [x] Ajustar ao exemplo React enviado às 21:44: largura de 340px, busca com ícone à esquerda, espaço vertical na lista e nomes mais nítidos; manter Cust ID e dados reais.
 - [x] Aplicar vidro, busca fixa, rolagem fina e seleção verde somente ao menu de lojas; preservar funções e tema claro; usar Cust ID conforme resposta de Samir.

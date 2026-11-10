@@ -3102,9 +3102,12 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
 /* Intensidade: 0.5 sutil, 1 equilíbrio, 1.4 denso; sobrescreva no contêiner pai (style="--glass-intensity: 1.25") */
 .dark .kpi-vidro, .dark .glass-card, .dark .multilojas-chart, .dark .carteira-kpi, .dark [data-card-surface] {
   --glass-bg-alpha: calc(.035 * var(--glass-intensity)); --glass-blur: calc(24px * var(--glass-intensity));
-  --glass-saturate: calc(100% + 90% * var(--glass-intensity)); --glass-contrast: calc(1 + .05 * var(--glass-intensity));
-  --glass-border-alpha: calc(.08 * var(--glass-intensity)); --glass-specular-alpha: min(.6, calc(.22 * var(--glass-intensity)));
-  --glass-shadow-alpha: min(.8, calc(.45 * var(--glass-intensity)));
+  --glass-saturate: calc(100% + 110% * var(--glass-intensity)); --glass-contrast: calc(1 + .05 * var(--glass-intensity));
+  --glass-border-alpha: calc(.06 * var(--glass-intensity)); --glass-specular-alpha: min(.6, calc(.28 * var(--glass-intensity)));
+  --glass-shadow-alpha: min(.8, calc(.65 * var(--glass-intensity)));
+  --liquid-fill: hsl(var(--panel-white) / var(--glass-bg-alpha));
+  --liquid-shadow: 0 24px 48px -12px hsl(var(--panel-black) / var(--glass-shadow-alpha)), inset 0 1px 1px hsl(var(--panel-white) / calc(.18 * var(--glass-intensity))), inset 0 -1px 1px hsl(var(--panel-black) / .4);
+  --liquid-hover-shadow: 0 32px 56px -12px hsl(var(--panel-black) / min(.9, calc(.8 * var(--glass-intensity)))), inset 0 1px 1px hsl(var(--panel-white) / calc(.25 * var(--glass-intensity))), inset 0 -1px 1px hsl(var(--panel-black) / .4);
 }
 /* =========================================================================
    CARDS DE KPI E CONTAINERS DE GRÁFICOS (Apple Liquid Glass)
@@ -3117,43 +3120,33 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
   position: relative;
   
   /* Fundo translúcido com gradiente de luz superior */
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, calc(var(--glass-bg-alpha) * 1.5)) 0%,
-    rgba(255, 255, 255, var(--glass-bg-alpha)) 100%
-  ) !important;
+  background: var(--liquid-fill) !important;
 
   /* Desfoque dinâmico com super-saturação para refratar as cores de fundo */
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) contrast(var(--glass-contrast)) !important;
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate)) contrast(var(--glass-contrast)) !important;
 
   /* Borda Especular da Apple: topo luminoso, laterais discretas */
-  border: 1px solid rgba(255, 255, 255, var(--glass-border-alpha)) !important;
-  border-top: 1px solid rgba(255, 255, 255, var(--glass-specular-alpha)) !important;
-  border-radius: 16px !important;
+  border: 1px solid hsl(var(--panel-white) / var(--glass-border-alpha)) !important;
+  border-top: 1px solid hsl(var(--panel-white) / var(--glass-specular-alpha)) !important;
+  border-radius: 18px !important;
 
   /* Camada dupla de profundidade: sombra de contato + chanfro interno */
-  box-shadow: 
-    0 16px 36px rgba(0, 0, 0, var(--glass-shadow-alpha)),
-    inset 0 1px 1px rgba(255, 255, 255, calc(var(--glass-specular-alpha) * 0.9)),
-    inset 0 -1px 1px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: var(--liquid-shadow) !important;
 
-  transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 220ms ease,
-              border-color 220ms ease,
-              background-color 220ms ease !important;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* Microinteração ao passar o mouse */
+@media (hover: hover) and (pointer: fine) {
 .dark .kpi-vidro:hover,
 .dark .glass-card:hover,
 .dark .multilojas-chart:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, calc(var(--glass-bg-alpha) * 1.8)) !important;
-  border-top-color: rgba(255, 255, 255, calc(var(--glass-specular-alpha) * 1.4)) !important;
-  box-shadow: 
-    0 22px 48px rgba(0, 0, 0, calc(var(--glass-shadow-alpha) * 1.25)),
-    inset 0 1px 1px rgba(255, 255, 255, calc(var(--glass-specular-alpha) * 1.3)) !important;
+  transform: translateY(-4px);
+  background: hsl(var(--panel-white) / calc(.06 * var(--glass-intensity))) !important;
+  border-top-color: hsl(var(--panel-white) / min(.7, calc(.45 * var(--glass-intensity)))) !important;
+  box-shadow: var(--liquid-hover-shadow) !important;
+}
 }
 
 /* =========================================================================
@@ -3215,9 +3208,9 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
 }
 .dark {
   --store-menu-fill: hsl(var(--panel-white) / .035);
-  --store-menu-edge: hsl(var(--panel-white) / .08);
-  --store-menu-top: hsl(var(--panel-white) / .22);
-  --store-menu-shadow: 0 24px 48px hsl(var(--panel-black) / .55), inset 0 1px 1px hsl(var(--panel-white) / .14);
+  --store-menu-edge: hsl(var(--panel-white) / .06);
+  --store-menu-top: hsl(var(--panel-white) / .28);
+  --store-menu-shadow: 0 24px 48px -12px hsl(var(--panel-black) / .65), inset 0 1px 1px hsl(var(--panel-white) / .18), inset 0 -1px 1px hsl(var(--panel-black) / .4);
   --store-menu-text: hsl(var(--panel-white));
   --store-menu-muted: hsl(var(--panel-white) / .75);
   --store-menu-name: hsl(var(--panel-white) / .9);
@@ -3229,8 +3222,8 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
 }
 html body [data-ui-surface="popover"].dropdown-vidro {
   background: var(--store-menu-fill) !important;
-  backdrop-filter: blur(24px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  backdrop-filter: blur(24px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(210%) !important;
   border: 1px solid var(--store-menu-edge) !important;
   border-top-color: var(--store-menu-top) !important;
   border-radius: 14px !important;
@@ -3288,3 +3281,13 @@ html body [data-ui-surface="popover"].dropdown-vidro {
 .dropdown-vidro .item-subtext { color: var(--store-menu-subtext); font-size: .75rem; margin-left: auto; }
 .dropdown-vidro .dropdown-vidro-item:not([data-active="true"]) > div > span:first-child { color: var(--store-menu-name); }
 .dropdown-vidro [data-active="true"] .item-subtext { color: var(--store-menu-active-subtext); }
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  html body .dark :is(.kpi-vidro, .glass-card, .multilojas-chart, .carteira-kpi, [data-card-surface]),
+  html body [data-ui-surface="popover"].dropdown-vidro {
+    background: hsl(var(--popover)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-color: hsl(var(--border)) !important;
+  }
+}
