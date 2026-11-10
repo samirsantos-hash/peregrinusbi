@@ -3098,7 +3098,14 @@ html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass .resumo-visual-
 }
 
 /* Cartões Apple Liquid Glass (tema escuro), referência enviada 10/11 */
-.dark { --glass-bg-alpha: .035; --glass-blur: 24px; --glass-saturate: 190%; --glass-contrast: 1.05; --glass-border-alpha: .08; --glass-specular-alpha: .22; --glass-shadow-alpha: .45; }
+:root { --glass-intensity: 1; }
+/* Intensidade: 0.5 sutil, 1 equilíbrio, 1.4 denso; sobrescreva no contêiner pai (style="--glass-intensity: 1.25") */
+.dark .kpi-vidro, .dark .glass-card, .dark .multilojas-chart, .dark .carteira-kpi, .dark [data-card-surface] {
+  --glass-bg-alpha: calc(.035 * var(--glass-intensity)); --glass-blur: calc(24px * var(--glass-intensity));
+  --glass-saturate: calc(100% + 90% * var(--glass-intensity)); --glass-contrast: calc(1 + .05 * var(--glass-intensity));
+  --glass-border-alpha: calc(.08 * var(--glass-intensity)); --glass-specular-alpha: min(.6, calc(.22 * var(--glass-intensity)));
+  --glass-shadow-alpha: min(.8, calc(.45 * var(--glass-intensity)));
+}
 /* =========================================================================
    CARDS DE KPI E CONTAINERS DE GRÁFICOS (Apple Liquid Glass)
    ========================================================================= */
