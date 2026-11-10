@@ -55,9 +55,16 @@ Deno.serve(async (req) => {
   // Rotina programada sem loja: atualiza cada loja conectada, uma por vez
   // (chamadas paralelas ao ML dão 429). Limitado às lojas ativas.
   if (rotina && !body.account_id && !body.cust_id) {
-    const { data: contas } = await db.from("ml_accounts").select("id, nickname").eq("status", "active").limit(200);
+    // A função tem limite de tempo: cada execução atualiza as lojas mais antigas
+    // (sem atualização em 20 h) até ~110 s; a rotina roda a cada 15 min e retoma.
+    const corte = new Date(Date.now() - 20 * 3600_000).toISOString();
+    const { data: contas } = await db.from("ml_accounts").select("id, nickname").eq("status", "active")
+      .or(`last_sync_daily_at.is.null,last_sync_daily_at.lt.${corte}`)
+      .order("last_sync_daily_at", { ascending: true, nullsFirst: true }).limit(200);
     const resumo: { loja: string; status: number }[] = [];
+    const fimRotina = Date.now() + 110_000;
     for (const c of contas ?? []) {
+      if (Date.now() > fimRotina) break;
       const r = await fetch(`${URL_}/functions/v1/ml-sync-loja`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-refresh-secret": segredo },
