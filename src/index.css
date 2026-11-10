@@ -6,29 +6,41 @@
 .boas-vindas-laser-texto { text-shadow: 0 2px 16px hsl(var(--welcome-backdrop) / .8); }
 .boas-vindas-laser button { color: hsl(var(--welcome-ink)); background: hsl(var(--welcome-backdrop) / .5); border-color: hsl(var(--welcome-ink) / .3); }
 
-/* Camadas curvas do funil: materiais derivados dos tokens do tema. */
+/* Corpo contínuo de vidro; a camada vetorial nunca filtra os dados. */
 .funil-suave {
-  --funil-face: hsl(var(--primary) / .48);
-  --funil-lateral: hsl(var(--primary) / .82);
-  --funil-topo: hsl(var(--primary) / .65);
-  --funil-reflexo: hsl(var(--foreground) / .15);
-  --funil-contorno: hsl(var(--primary) / .5);
-  --funil-sombra: 0 10px 16px -10px hsl(var(--foreground) / .25);
+  --funil-vidro-cor: hsl(var(--primary));
+  --funil-reflexo: hsl(var(--foreground) / .4);
+  --funil-contorno: hsl(var(--foreground) / .15);
+  --funil-base: hsl(var(--background) / .8);
+  --funil-sombra: 0 20px 32px hsl(var(--background) / .4);
+  --funil-texto-sombra: 0 4px 12px hsl(var(--background) / .35);
 }
-.funil-volume {
+.funil-fluido-container {
   position: relative;
   isolation: isolate;
-  min-height: 160px;
-  padding: 48px 16% 28px;
-  filter: drop-shadow(var(--funil-sombra));
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 80px 0 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 }
-.funil-volume svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; overflow: visible; }
-.funil-volume .funil-corpo { stroke: var(--funil-contorno); stroke-width: 1; }
-.funil-volume .funil-topo { fill: var(--funil-topo); stroke: var(--funil-reflexo); stroke-width: 1; }
-.funil-volume:last-child { --funil-face: hsl(var(--muted) / .9); --funil-lateral: hsl(var(--primary) / .4); --funil-topo: hsl(var(--primary) / .32); }
-.funil-volume p { overflow-wrap: anywhere; color: hsl(var(--foreground)); }
+.funil-fluido-svg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; filter: drop-shadow(var(--funil-sombra)); }
+.funil-fluido-svg .funil-corpo { stroke: var(--funil-contorno); stroke-width: 1; }
+.funil-fluido-svg .funil-topo { stroke: var(--funil-reflexo); stroke-width: 1.5; }
+.funil-fluido-svg .funil-reflexo { stroke: var(--funil-reflexo); }
+.funil-fluido-svg .funil-base { fill: var(--funil-base); stroke: var(--funil-vidro-cor); stroke-opacity: .3; }
+.funil-fluido-svg .funil-divisoria { stroke: var(--funil-contorno); }
+.funil-etapa { position: relative; z-index: 1; width: 60%; min-height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 4px; text-align: center; }
+.funil-etapa:last-child { width: 46%; }
+.funil-etapa p { max-width: 100%; overflow-wrap: anywhere; letter-spacing: 0; }
+.funil-etapa .funil-etapa-valor { font-size: 32px; font-weight: 700; line-height: 1.2; text-shadow: var(--funil-texto-sombra); }
 @media (max-width: 640px) {
-  .funil-volume { min-height: 148px; padding: 44px 12% 24px; }
+  .funil-fluido-container { padding: 72px 0 56px; }
+  .funil-etapa { min-height: 132px; }
+  .funil-etapa .funil-etapa-valor { font-size: 28px; }
 }
 
 html body [data-ui-surface="sheet"].listing-detail-sheet {

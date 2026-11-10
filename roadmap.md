@@ -1,5 +1,10 @@
 # Roadmap
 
+## Funil contínuo de vidro — 10/11
+- [x] Substituir fatias separadas pelo corpo contínuo da referência, com topo elíptico, base e divisão curva; preservar cálculos e dados existentes.
+- [x] Oito testes aprovados e compilação OK; k6 público prévio: 28.441 requisições, zero falhas; não mede capacidade autenticada. Sem publicação.
+- [ ] Conferência visual bloqueada: o navegador autenticado excedeu o tempo ao abrir o painel; aparência nos temas e celular não verificada.
+
 ## Profundidade Liquid Glass — 10/11
 - [x] Aplicar saturação 210%, topo especular, espessura e sombras da referência nos cartões escuros e menu de lojas; manter intensidade configurável e tema claro.
 - [x] Não aplicar filtro SVG ao conteúdo: distorceria textos e gráficos, em vez de refratar somente o fundo; não ampliar cartões para evitar sobreposições. Movimento reduzido e transparência reduzida preservados.

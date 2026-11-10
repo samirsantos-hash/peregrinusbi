@@ -53,8 +53,6 @@ export default function FunilVendas({
   const { etapas, cvr, maiorAbandono } = d.funil;
   const ticket = d.unidades > 0 ? d.fat / d.unidades : 0;
   const receitaVisita = d.fat / d.visitas;
-  const topo = Math.max(1, etapas[0].valor);
-  const larg = (i: number) => Math.max(66, Math.sqrt(Math.min(1, etapas[i].valor / topo)) * 100);
 
   return (
     <section aria-label="Funil de conversão" className="funil-suave space-y-4 py-3">
@@ -71,9 +69,28 @@ export default function FunilVendas({
       )}
 
       <div className="grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2 flex flex-col items-center gap-0" role="img" aria-label="Funil de etapas reais">
+        <div className="funil-fluido-container lg:col-span-2" role="group" aria-label="Funil de etapas reais">
+          <svg className="funil-fluido-svg" viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id={`${materialId}-corpo`} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="var(--funil-vidro-cor)" stopOpacity=".1" />
+                <stop offset="20%" stopColor="var(--funil-vidro-cor)" stopOpacity=".4" />
+                <stop offset="50%" stopColor="var(--funil-vidro-cor)" stopOpacity=".15" />
+                <stop offset="80%" stopColor="var(--funil-vidro-cor)" stopOpacity=".5" />
+                <stop offset="100%" stopColor="var(--funil-vidro-cor)" stopOpacity=".1" />
+              </linearGradient>
+              <radialGradient id={`${materialId}-topo`}>
+                <stop offset="50%" stopColor="var(--funil-vidro-cor)" stopOpacity=".12" />
+                <stop offset="100%" stopColor="var(--funil-vidro-cor)" stopOpacity=".45" />
+              </radialGradient>
+            </defs>
+            <path className="funil-corpo" d="M50 60 C50 100 750 100 750 60 L600 340 C600 370 200 370 200 340 Z" fill={`url(#${materialId}-corpo)`} />
+            <ellipse className="funil-topo" cx="400" cy="60" rx="350" ry="40" fill={`url(#${materialId}-topo)`} />
+            <ellipse className="funil-reflexo" cx="400" cy="58" rx="348" ry="38" fill="none" strokeWidth="1" strokeDasharray="400 1000" strokeDashoffset="1200" />
+            <ellipse className="funil-base" cx="400" cy="340" rx="200" ry="25" />
+            <path className="funil-divisoria" d="M125 200 C125 230 675 230 675 200" fill="none" strokeDasharray="6 6" />
+          </svg>
           {etapas.map((e, i) => {
-            const w = larg(i);
             const daAnterior = i > 0 && etapas[i - 1].valor > 0 ? e.valor / etapas[i - 1].valor : 1;
             const eMaiorDrop =
               maiorAbandono != null &&
@@ -88,14 +105,8 @@ export default function FunilVendas({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.08, duration: 0.28 }}
                 title={`${e.nome}: ${num(e.valor)}${e.fonte === "estimativa" ? " (estimativa)" : ""}`}
-                className="funil-volume flex flex-col items-center justify-center gap-1 text-center"
-                style={{ width: `${w}%` }}
+                className="funil-etapa"
               >
-                <svg viewBox="0 0 400 160" preserveAspectRatio="none" aria-hidden="true">
-                  <defs><linearGradient id={`${materialId}-${i}`} x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="var(--funil-lateral)" /><stop offset=".5" stopColor="var(--funil-face)" /><stop offset="1" stopColor="var(--funil-lateral)" /></linearGradient></defs>
-                  <path className="funil-corpo" style={{ fill: `url(#${materialId}-${i})` }} d="M2 32 L48 128 C66 164 334 164 352 128 L398 32 Z" />
-                  <ellipse className="funil-topo" cx="200" cy="32" rx="198" ry="30" />
-                </svg>
                 <div className="relative flex max-w-full items-center gap-1.5">
                   <p className="text-xs font-medium tracking-normal text-foreground">{e.nome}</p>
                   {e.fonte === "estimativa" && (
@@ -104,7 +115,7 @@ export default function FunilVendas({
                     </span>
                   )}
                 </div>
-                <p className="relative max-w-full whitespace-nowrap text-xl font-semibold tabular-nums leading-tight text-foreground">
+                <p className="funil-etapa-valor tabular-nums text-foreground">
                   <NumeroAnimado valor={num(e.valor)} />
                 </p>
                 {e.nota && <p className="relative max-w-full text-xs text-muted-foreground">{e.nota}</p>}
