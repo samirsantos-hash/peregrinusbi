@@ -66,5 +66,5 @@ export function AmbientePainel() {
       ctx.clearRect(0, 0, width, height);
     };
   }, []);
-  return <div className="painel-ambiente" aria-hidden="true"><div className="painel-ambiente-fumaca" /><svg className="painel-ambiente-linhas" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="currentColor" strokeWidth="1.5">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g></svg><canvas ref={ref} className="painel-ambiente-chuva" /></div>;
+  return <div className="painel-ambiente" aria-hidden="true"><div className="painel-ambiente-fumaca" /><svg className="painel-ambiente-linhas" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="currentColor" strokeWidth="1.5">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g><g className="painel-ambiente-brilho">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g></svg><canvas ref={ref} className="painel-ambiente-chuva" /></div>;
 }
