@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 
 /** Ambiente contínuo independente das consultas; animação local, sem rede. */
-const LINHAS_FLUIDAS = ["M -50,-50 Q 150,150 350,-50", "M -50,0 Q 200,200 400,-50", "M -50,50 Q 250,250 450,-50", "M -50,100 Q 300,300 500,-50", "M-100,150 C200,300 400,100 650,250 C900,400 1150,150 1550,350", "M-100,190 C200,340 400,140 650,290 C900,440 1150,190 1550,390", "M-100,230 C200,380 400,180 650,330 C900,480 1150,230 1550,430", "M-100,270 C200,420 400,220 650,370 C900,520 1150,270 1550,470", "M-100,600 C300,500 600,900 1000,600 C1250,400 1350,700 1550,550", "M-100,640 C300,540 600,940 1000,640 C1250,440 1350,740 1550,590", "M-100,680 C300,580 600,980 1000,680 C1250,480 1350,780 1550,630", "M-100,720 C300,620 600,1020 1000,720 C1250,520 1350,820 1550,670", "M 1200,950 Q 1350,750 1550,950", "M 1150,950 Q 1300,700 1550,900", "M 1100,950 Q 1250,650 1550,850", "M 1050,950 Q 1200,600 1550,800"];
+const LINHAS_FLUIDAS = ["M -80,40 C 180,90 220,320 180,500 C 140,680 80,820 -60,940", "M -20,-20 C 260,50 320,280 280,520 C 240,740 180,900 0,1000", "M 10,-50 C 300,30 370,260 330,530 C 290,770 230,940 30,1030", "M 40,-80 C 340,10 420,240 380,540 C 340,800 280,980 60,1060", "M 1520,40 C 1260,90 1220,320 1260,500 C 1300,680 1360,820 1500,940", "M 1460,-20 C 1180,50 1120,280 1160,520 C 1200,740 1260,900 1440,1000", "M 1430,-50 C 1140,30 1070,260 1110,530 C 1150,770 1210,940 1410,1030", "M 1400,-80 C 1100,10 1020,240 1060,540 C 1100,800 1160,980 1380,1060"];
+const LINHAS_DESTAQUE = ["M -50,10 C 220,70 270,300 230,510 C 190,710 130,860 -30,970", "M 1490,10 C 1220,70 1170,300 1210,510 C 1250,710 1310,860 1470,970"];
+const LINHAS_ECO = ["M -100,350 C 60,250 140,120 180,-60", "M -80,390 C 90,280 180,140 220,-40", "M 1540,550 C 1380,650 1300,780 1260,960", "M 1520,510 C 1350,620 1260,760 1220,940"];
 
 export function AmbientePainel() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -66,5 +68,5 @@ export function AmbientePainel() {
       ctx.clearRect(0, 0, width, height);
     };
   }, []);
-  return <div className="painel-ambiente" aria-hidden="true"><div className="painel-ambiente-fumaca" /><svg className="painel-ambiente-linhas" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"><g fill="none" stroke="currentColor" strokeWidth="1.5">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g><g className="painel-ambiente-brilho">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}</g></svg><canvas ref={ref} className="painel-ambiente-chuva" /></div>;
+  return <div className="painel-ambiente" aria-hidden="true"><div className="painel-ambiente-fumaca" /><svg className="painel-ambiente-linhas" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice"><g fill="none" strokeWidth="0.8" className="painel-linha-suave">{LINHAS_FLUIDAS.map((d) => <path key={d} d={d} />)}<g opacity="0.6">{LINHAS_ECO.map((d) => <path key={d} d={d} />)}</g></g><g fill="none" strokeWidth="0.9" className="painel-linha-destaque">{LINHAS_DESTAQUE.map((d) => <path key={d} d={d} />)}</g></svg><canvas ref={ref} className="painel-ambiente-chuva" /></div>;
 }
