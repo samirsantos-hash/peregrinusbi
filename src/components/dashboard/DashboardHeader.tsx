@@ -280,14 +280,14 @@ const DashboardHeader = ({
                         )}
                       </span>
                       <span className="mx-1 text-border">|</span>
-                      <span className="text-xs text-muted-foreground mr-1">ID:</span>
+                      <span className="text-xs text-muted-foreground mr-1">Cust ID:</span>
                       <span className="text-xs break-all tnum">{selectedSellerObj.custId}</span>
                       <span
                         role="button"
                         tabIndex={0}
-                        aria-label="Copiar ID"
-                        title="Copiar ID do seller"
-                        onClick={(e) => handleCopy(e, selectedSellerObj.custId, "custId", "ID")}
+                        aria-label="Copiar Cust ID"
+                        title="Copiar Cust ID da loja"
+                        onClick={(e) => handleCopy(e, selectedSellerObj.custId, "custId", "Cust ID")}
                         className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-muted/60 text-muted-foreground hover:text-neon-blue transition-colors"
                       >
                         {copiedField === "custId" ? (
@@ -303,7 +303,7 @@ const DashboardHeader = ({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[340px] max-w-[calc(100vw-24px)] p-0 bg-popover border-border" align="start">
+              <PopoverContent className="dropdown-vidro w-[440px] max-w-[calc(100vw-24px)] p-0" align="start">
                 <Command
                   className="bg-transparent"
                   filter={(value, search) => {
@@ -315,8 +315,8 @@ const DashboardHeader = ({
                     return haystack.includes(needle) ? 1 : 0;
                   }}
                 >
-                  <CommandInput placeholder="Pesquisar por nome ou Cust ID..." className="h-9" />
-                  <CommandList>
+                  <CommandInput placeholder="Pesquisar por nome ou Cust ID..." className="dropdown-vidro-search" />
+                  <CommandList className="dropdown-vidro-scroll">
                     <CommandEmpty>Nenhuma loja encontrada.</CommandEmpty>
                     <CommandGroup>
                       <CommandItem
@@ -325,10 +325,11 @@ const DashboardHeader = ({
                           onSellerChange("");
                           setStoreOpen(false);
                         }}
-                        className="cursor-pointer"
+                        className="dropdown-vidro-item"
+                        data-active={!selectedSeller}
                       >
-                        <Check className={cn("mr-2 h-4 w-4", !selectedSeller ? "opacity-100 text-neon-blue" : "opacity-0")} />
-                        <span className="font-medium">Todas as lojas da sua carteira</span>
+                        <Check className={cn("h-4 w-4 shrink-0", !selectedSeller ? "opacity-100" : "opacity-0")} />
+                        <span className="min-w-0 break-words">Todas as lojas da sua carteira</span>
                       </CommandItem>
                       {sellers.map((s) => (
                         <CommandItem
@@ -338,15 +339,13 @@ const DashboardHeader = ({
                             onSellerChange(s.id);
                             setStoreOpen(false);
                           }}
-                          className="cursor-pointer"
+                          className="dropdown-vidro-item"
+                          data-active={selectedSeller === s.id}
                         >
-                          <Check className={cn("mr-2 h-4 w-4", selectedSeller === s.id ? "opacity-100 text-neon-blue" : "opacity-0")} />
-                          <div className="flex items-center gap-1 truncate">
-                            <span className="text-xs text-muted-foreground">Loja:</span>
-                            <span className="font-medium">{s.nickname}</span>
-                            <span className="mx-1 text-border">|</span>
-                            <span className="text-xs text-muted-foreground">ID:</span>
-                            <span className="text-xs tabular-nums">{s.custId}</span>
+                          <Check className={cn("h-4 w-4 shrink-0", selectedSeller === s.id ? "opacity-100" : "opacity-0")} />
+                          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                            <span className="min-w-0 flex-1 break-all">Loja: {s.nickname}</span>
+                            <span className="item-subtext tabular-nums">Cust ID: {s.custId}</span>
                           </div>
                         </CommandItem>
                       ))}

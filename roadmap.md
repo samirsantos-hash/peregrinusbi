@@ -1,5 +1,10 @@
 # Roadmap
 
+## Menu de lojas Liquid Glass — 10/11
+- [x] Aplicar vidro, busca fixa, rolagem fina e seleção verde somente ao menu de lojas; preservar funções e tema claro; usar Cust ID conforme resposta de Samir.
+- [x] Compilação aprovada e três regressões de navegação passaram; k6 público: 28.460 requisições, zero falhas, p95 documentos 74,13ms (não mede capacidade autenticada). Sem publicar.
+- [ ] Conferência visual e seleção real bloqueadas: sessão autorizada não permitiu concluir a abertura do menu; temas e largura móvel não verificados.
+
 ## Vidro da referência no Resumo — 10/11
 - [x] Aplicar acabamento Apple Glass somente no Resumo de loja e carteira, preservando métricas, períodos, controles, cores e modos suspensos.
 - [x] Build OK e dez regressões aprovadas; carteira real conferida no computador e celular sem excesso horizontal. k6 prévio: 28.231 requisições, zero falhas, p95 documentos 123,92ms; não mede capacidade autenticada. Sem publicar.
