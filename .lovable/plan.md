@@ -1,6 +1,8 @@
 # Ajustes de conformidade com os termos do Mercado Livre
 
-As etapas seguem a ordem combinada. Cada uma é entregue e conferida separadamente, sem publicar.
+Base: as regras de trabalho e as diretrizes que você enviou nos documentos "Dados e gestão via API do Mercado Livre" e "Estrutura de gestão no Mercado". Elas pedem só os canais da documentação oficial, nenhuma coleta de páginas, e toda escrita com prévia "antes → depois", confirmação sem duplicar e registro.
+
+As etapas seguem a ordem combinada. Faço uma por vez e paro ao fim de cada uma até você responder "OK, próxima etapa". Nada será publicado.
 
 ## Etapa 1 — Proteger dados pessoais nas perguntas enviadas à IA
 - Antes de pedir a sugestão, apagar da pergunta do comprador telefone, e-mail, CPF/CNPJ, CEP, links e @usuário. Cada um vira um marcador, como "[telefone removido]".
@@ -9,16 +11,17 @@ As etapas seguem a ordem combinada. Cada uma é entregue e conferida separadamen
 - Testes com exemplos reais de formato: "(43) 99999-0000", "fulano@gmail.com", "123.456.789-00", "wa.me/...".
 
 ## Etapa 2 — Resposta da tela "Ao vivo" com prévia e confirmação
+- Hoje essa tela descumpre a sua regra 5: envia a resposta sem prévia, sem proteção contra clique duplo e sem registro.
 - A tela "Ao vivo" passa a usar o mesmo fluxo da tela Perguntas: pré-visualizar, confirmar e enviar.
 - Fica com a mesma proteção contra envio em dobro e o mesmo registro de quem respondeu e quando.
 - A função antiga continua só para sugerir o rascunho com IA. A parte que enviava a resposta direto é removida.
 - Conferir na loja de teste sem enviar resposta real (somente a prévia).
 
-## Etapa 3 — Concorrentes sem guardar dados de terceiros
-- Conferir quais telas de concorrentes e de estudo de mercado gravam dados de outras lojas.
-- Fazer as comparações apenas no momento da consulta, sem histórico de lojas concorrentes.
-- Mostrar o aviso "comparação no momento da consulta".
-- Antes de liberar de novo qualquer histórico, você confere no portal de desenvolvedores do Mercado Livre se o aplicativo tem essa permissão.
+## Etapa 3 — Conferir se concorrentes e estudo de mercado seguem a documentação
+- Os documentos preveem o estudo de mercado pelos canais oficiais (mais vendidos, tendências, concorrência em catálogo). Por isso, o risco aqui fica baixo.
+- Listar cada consulta feita a esse respeito e confirmar que todas estão nos links oficiais que você enviou. Nenhuma pode ler páginas do site.
+- Qualquer consulta fora dessa lista será removida ou substituída, e eu aviso antes.
+- Conferir se dados de outras lojas são gravados. Se forem, guardar só o necessário para a comparação, como a faixa de preço, sem copiar textos ou fotos.
 
 ## Etapa 4 — Prazo de guarda e desconexão
 - Ao desconectar uma loja: apagar o acesso dela e os resumos e cópias ligados a ela.
@@ -30,7 +33,7 @@ As etapas seguem a ordem combinada. Cada uma é entregue e conferida separadamen
 - Registrar cada consulta feita por agente: quem fez, qual ferramenta, qual loja e quando, sem guardar o conteúdo devolvido.
 
 ## O que depende de você
-- Conferir no portal de desenvolvedores do Mercado Livre as permissões aprovadas para o aplicativo.
+- Conferir no portal de desenvolvedores do Mercado Livre se as permissões de leitura e escrita do aplicativo cobrem perguntas, promoções, publicidade e preço.
 - Confirmar o prazo de guarda (24 meses ou outro).
 - Validação jurídica, se desejar. Este plano é técnico.
 
