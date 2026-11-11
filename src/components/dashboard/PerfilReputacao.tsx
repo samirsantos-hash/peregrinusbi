@@ -3,7 +3,7 @@ import { MedalhaML } from "@/components/ds/MedalhaML";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TIER_THRESHOLDS } from "@/hooks/useClassificacaoLojas";
-import { desempenhoVendedor, metaEnvios, perfilLegivel, tierPorMedalha } from "@/lib/perfilReputacao";
+import { desempenhoVendedor, evolucaoTier, metaEnvios, perfilLegivel, tierPorMedalha } from "@/lib/perfilReputacao";
 import { num } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 type Seller = { nickname: string; custId?: string; cluster?: string; subCluster?: string };
 type Reputacao = { nivel?: string | null; medalha?: string | null; atrasos?: number | null; reclamacoes?: number | null; cancelamentos?: number | null; vendas_concluidas_60d?: number | null };
 
-export default function PerfilReputacao({ seller, repLevel, requisitos = false }: { seller?: Seller; repLevel?: string; requisitos?: boolean }) {
+type KpiAtual = { tgmv?: number; adsInvestment?: number; llStockAvailabilityScore?: number; repCancellationsRate?: number };
+export default function PerfilReputacao({ seller, repLevel, requisitos = false, kpi }: { seller?: Seller; repLevel?: string; requisitos?: boolean; kpi?: KpiAtual }) {
   const consulta = useQuery({ queryKey: ["ml-sync-tema", seller?.custId, "reputacao"], enabled: !!seller?.custId, staleTime: 60_000,
     queryFn: async () => {
       const { data, error } = await supabase.from("ml_sync_tema").select("dados, erro, atualizado_em").eq("cust_id", seller?.custId ?? "").eq("tema", "reputacao").maybeSingle();
@@ -85,6 +86,30 @@ export default function PerfilReputacao({ seller, repLevel, requisitos = false }
         <div><p className="text-xs text-muted-foreground">Profissionalização / segmentação</p><p className="font-medium">{perfilLegivel(seller.subCluster)}</p></div>
         <div><p className="text-xs text-muted-foreground">Classificação</p><p className="font-medium">{tier ? `Tier ${tier} associado à medalha` : "Sem tier confirmado"}</p></div>
       </div>
+      {(() => {
+        const ev = evolucaoTier({ tier: tier as 1|2|3|null,
+          sowPads: kpi && (kpi.tgmv ?? 0) > 0 ? ((kpi.adsInvestment ?? 0) / kpi.tgmv!) * 100 : null,
+          oos: kpi && (kpi.llStockAvailabilityScore ?? 0) > 0 ? 100 - kpi.llStockAvailabilityScore! : null,
+          bs: kpi && (kpi.repCancellationsRate ?? 0) > 0 ? kpi.repCancellationsRate! * 100 : null }, TIER_THRESHOLDS);
+        const envio = envios ? { nome: "Envios no prazo", valor: envios.noPrazo, limite: envios.meta, sentido: "min" as const, ok: envios.atingida, gap: Math.max(0, envios.meta - envios.noPrazo), acao: envios.atingida ? "Mantenha" : `Melhorar envios no prazo em ${num(envios.meta - envios.noPrazo, 1)} p.p.` } : null;
+        const linhas = [...ev.linhas, ...(envio ? [envio] : [])];
+        const pendentes = linhas.filter(l => l.ok === false);
+        return <div className="rounded-xl border border-border p-5 space-y-3 liquid-card">
+          <h3 className="text-base font-semibold">Comparativo: onde a conta está e o que fazer para evoluir</h3>
+          <p className="text-sm text-muted-foreground">{tier === 1 ? "A loja já está no Tier 1: o objetivo é manter os indicadores." : `Alvo: Tier ${ev.alvo}. ${pendentes.length ? `${pendentes.length} indicador(es) abaixo do necessário.` : "Os indicadores medidos já atendem o alvo."}`}</p>
+          <div className="overflow-x-auto"><table className="w-full text-sm tabular-nums [&_th]:p-2 [&_td]:p-2">
+            <thead className="text-left text-muted-foreground"><tr><th>Indicador</th><th>Atual</th><th>Necessário (Tier {ev.alvo})</th><th>Lacuna</th><th>O que fazer</th></tr></thead>
+            <tbody className="divide-y divide-border">{linhas.map(l => <tr key={l.nome}>
+              <th className="text-left font-medium">{l.nome}</th>
+              <td>{l.valor == null ? "—" : `${num(l.valor, 2)}%`}</td>
+              <td>{l.sentido === "min" ? "≥" : "≤"} {num(l.limite, 2)}%</td>
+              <td className={l.ok == null ? "text-muted-foreground" : l.ok ? "text-primary font-semibold" : "text-destructive font-semibold"}>{l.ok == null ? "—" : l.ok ? "Atende" : `${num(l.gap ?? 0, 2)} p.p.`}</td>
+              <td>{l.acao}</td>
+            </tr>)}</tbody>
+          </table></div>
+          <p className="text-xs text-muted-foreground">Indicadores do último mês disponível e envios dos últimos 60 dias. Atender a régua não garante a mudança de medalha, que depende do Mercado Livre.</p>
+        </div>;
+      })()}
       <div className="space-y-3">
         <h3 className="text-base font-semibold">Requisitos por tier</h3>
         <div className="overflow-x-auto"><table className="w-full text-sm [&_th]:p-3 [&_td]:p-3 tabular-nums">

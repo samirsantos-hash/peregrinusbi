@@ -684,7 +684,7 @@ const Index = () => {
                     {pagina === "promocoes" && <PromocoesResultados key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />}
                   </TabsContent>
                   <TabsContent value="reputation" className="mt-0 space-y-5">
-                    {(pagina === "resumo" || pagina === "requisitos") && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} requisitos={pagina === "requisitos"} />}
+                    {(pagina === "resumo" || pagina === "requisitos") && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} requisitos={pagina === "requisitos"} kpi={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]} />}
                     <EstudoReputacao sellerId={selectedSeller || undefined} custId={sellerCustIdMap[selectedSeller]} pagina={pagina} de={dateRange?.from ? formatDateString(dateRange.from) : undefined} ate={dateRange?.to ? formatDateString(dateRange.to) : undefined} />
                   </TabsContent>
                   <TabsContent value="perguntas" className="mt-0 space-y-5">

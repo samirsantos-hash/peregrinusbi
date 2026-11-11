@@ -49,3 +49,20 @@ export function desempenhoVendedor(d: { reclamacoes?: number | null; cancelament
     return { chave, taxa, qtd, limite, permitidos, folga: qtd != null && permitidos != null ? permitidos - qtd : null, ok: taxa <= limite };
   });
 }
+
+type Limites = { sowPads: number; oos: number; bs: number };
+/** Compara indicadores atuais com o tier-alvo (próximo acima; Tier 1 mantém). Ausência fica null, sem ação inventada. */
+export function evolucaoTier(atual: { tier: 1 | 2 | 3 | null; sowPads: number | null; oos: number | null; bs: number | null }, limites: Record<1 | 2 | 3, Limites>) {
+  const alvo: 1 | 2 | 3 = atual.tier === 1 ? 1 : atual.tier === 2 ? 1 : 2;
+  const l = limites[alvo];
+  const linha = (nome: string, valor: number | null, limite: number, sentido: "min" | "max", acao: (gap: number) => string) => {
+    if (valor == null || !Number.isFinite(valor)) return { nome, valor: null, limite, sentido, ok: null, gap: null, acao: "Sem medição disponível" };
+    const gap = sentido === "min" ? limite - valor : valor - limite;
+    return { nome, valor, limite, sentido, ok: gap <= 0, gap: Math.max(0, gap), acao: gap <= 0 ? "Mantenha" : acao(gap) };
+  };
+  return { alvo, linhas: [
+    linha("Investimento Ads / faturamento", atual.sowPads, l.sowPads, "min", g => `Aumentar investimento em Ads em ${g.toFixed(2).replace(".", ",")} p.p. do faturamento`),
+    linha("Falta de estoque", atual.oos, l.oos, "max", g => `Reduzir falta de estoque em ${g.toFixed(1).replace(".", ",")} p.p.`),
+    linha("Bad Seller · referência", atual.bs, l.bs, "max", g => `Reduzir em ${g.toFixed(1).replace(".", ",")} p.p.`),
+  ] };
+}

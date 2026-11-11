@@ -19,3 +19,9 @@ describe("desempenho do vendedor", () => {
   });
   it("taxa ausente fica sem cálculo", () => { expect(desempenhoVendedor({ vendas_concluidas_60d: 10 })[0].taxa).toBeNull(); });
 });
+import { evolucaoTier } from "@/lib/perfilReputacao";
+const L = { 1: { sowPads: 2.5, oos: 15, bs: 35 }, 2: { sowPads: 1.25, oos: 25, bs: 45 }, 3: { sowPads: 0.5, oos: 35, bs: 55 } } as const;
+describe("evolução de tier", () => {
+  it("Gold mira Tier 1 e mostra lacuna de Ads", () => { const r = evolucaoTier({ tier: 2, sowPads: 1.5, oos: 10, bs: null }, L); expect(r.alvo).toBe(1); expect(r.linhas[0].gap).toBeCloseTo(1); expect(r.linhas[1].ok).toBe(true); expect(r.linhas[2].ok).toBeNull(); });
+  it("sem medalha mira Tier 2", () => { expect(evolucaoTier({ tier: null, sowPads: 0, oos: 0, bs: 0 }, L).alvo).toBe(2); });
+});
