@@ -11,3 +11,11 @@ describe("meta de envios 97%", () => {
   it("4% de atraso não atinge a meta", () => { expect(metaEnvios(0.04, 500)!.atingida).toBe(false); });
   it("sem taxa não calcula", () => { expect(metaEnvios(null, 100)).toBeNull(); });
 });
+import { desempenhoVendedor } from "@/lib/perfilReputacao";
+describe("desempenho do vendedor", () => {
+  it("calcula quantidades e folga sobre 92.770 vendas", () => {
+    const [rec, can, atr] = desempenhoVendedor({ reclamacoes: 0.0039, cancelamentos: 0, atrasos: 0.0013, vendas_concluidas_60d: 92770 });
+    expect(rec.qtd).toBe(362); expect(rec.permitidos).toBe(927); expect(can.ok).toBe(true); expect(atr.permitidos).toBe(2783); expect(atr.qtd).toBe(121);
+  });
+  it("taxa ausente fica sem cálculo", () => { expect(desempenhoVendedor({ vendas_concluidas_60d: 10 })[0].taxa).toBeNull(); });
+});

@@ -32,3 +32,20 @@ export function metaEnvios(taxaAtraso?: number | null, vendas?: number | null, m
   return { noPrazo, atrasoPct, meta, atingida: noPrazo >= meta, atrasosAtuais, atrasosPermitidos,
     folga: atrasosAtuais != null && atrasosPermitidos != null ? atrasosPermitidos - atrasosAtuais : null };
 }
+
+/** Limites de referência da reputação verde no Mercado Livre (taxas sobre vendas de 60 dias). */
+export const LIMITES_REPUTACAO = { reclamacoes: 1, cancelamentos: 0.5, atrasos: 100 - META_ENVIOS_NO_PRAZO } as const;
+
+/** Desempenho por indicador: taxa em %, quantidade estimada nas vendas, limite e folga. Ausência fica null. */
+export function desempenhoVendedor(d: { reclamacoes?: number | null; cancelamentos?: number | null; atrasos?: number | null; vendas_concluidas_60d?: number | null }) {
+  const vendas = d.vendas_concluidas_60d ?? null;
+  return (Object.keys(LIMITES_REPUTACAO) as (keyof typeof LIMITES_REPUTACAO)[]).map((chave) => {
+    const bruto = d[chave];
+    if (bruto == null || !Number.isFinite(bruto)) return { chave, taxa: null, qtd: null, limite: LIMITES_REPUTACAO[chave], permitidos: null, folga: null, ok: null };
+    const taxa = bruto <= 1 ? bruto * 100 : bruto;
+    const limite = LIMITES_REPUTACAO[chave];
+    const qtd = vendas ? Math.round((taxa / 100) * vendas) : null;
+    const permitidos = vendas ? Math.floor((limite / 100) * vendas + 1e-9) : null;
+    return { chave, taxa, qtd, limite, permitidos, folga: qtd != null && permitidos != null ? permitidos - qtd : null, ok: taxa <= limite };
+  });
+}

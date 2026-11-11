@@ -3,13 +3,13 @@ import { MedalhaML } from "@/components/ds/MedalhaML";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { TIER_THRESHOLDS } from "@/hooks/useClassificacaoLojas";
-import { metaEnvios, perfilLegivel, tierPorMedalha } from "@/lib/perfilReputacao";
+import { desempenhoVendedor, metaEnvios, perfilLegivel, tierPorMedalha } from "@/lib/perfilReputacao";
 import { num } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Seller = { nickname: string; custId?: string; cluster?: string; subCluster?: string };
-type Reputacao = { nivel?: string | null; medalha?: string | null; atrasos?: number | null; vendas_concluidas_60d?: number | null };
+type Reputacao = { nivel?: string | null; medalha?: string | null; atrasos?: number | null; reclamacoes?: number | null; cancelamentos?: number | null; vendas_concluidas_60d?: number | null };
 
 export default function PerfilReputacao({ seller, repLevel, requisitos = false }: { seller?: Seller; repLevel?: string; requisitos?: boolean }) {
   const consulta = useQuery({ queryKey: ["ml-sync-tema", seller?.custId, "reputacao"], enabled: !!seller?.custId, staleTime: 60_000,
@@ -67,6 +67,18 @@ export default function PerfilReputacao({ seller, repLevel, requisitos = false }
         </> : <p className="text-sm text-muted-foreground">Sem taxa de atraso disponível para calcular a meta.</p>}
       </div>
     </div>
+    {r && <div className="rounded-xl border border-border p-5 space-y-3 liquid-card">
+      <p className="text-sm font-semibold">Desempenho do vendedor · últimos 60 dias ({num(r.vendas_concluidas_60d ?? 0)} vendas)</p>
+      <div className="overflow-x-auto"><table className="w-full text-sm tabular-nums [&_th]:p-2 [&_td]:p-2">
+        <thead className="text-left text-muted-foreground"><tr><th>Indicador</th><th>Taxa</th><th>Ocorrências</th><th>Limite</th><th>Permitidas</th><th>Situação</th></tr></thead>
+        <tbody className="divide-y divide-border">{desempenhoVendedor(r).map(l => <tr key={l.chave}>
+          <th className="text-left font-medium">{{ reclamacoes: "Reclamações", cancelamentos: "Cancelamentos", atrasos: "Envios com atraso" }[l.chave]}</th>
+          <td>{l.taxa == null ? "—" : `${num(l.taxa, 2)}%`}</td><td>{l.qtd == null ? "—" : num(l.qtd)}</td><td>≤ {num(l.limite, 1)}%</td><td>{l.permitidos == null ? "—" : num(l.permitidos)}</td>
+          <td className={l.ok == null ? "text-muted-foreground" : l.ok ? "text-primary font-semibold" : "text-destructive font-semibold"}>{l.ok == null ? "Sem dado" : l.ok ? `Dentro · folga de ${num(l.folga ?? 0)}` : `Acima em ${num(-(l.folga ?? 0))}`}</td>
+        </tr>)}</tbody>
+      </table></div>
+      <p className="text-xs text-muted-foreground">Ocorrências estimadas pela taxa sobre as vendas concluídas. Limite de atrasos segue a meta de 97% de envios no prazo.</p>
+    </div>}
     {requisitos && <>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-y border-border py-4">
         <div><p className="text-xs text-muted-foreground">Maturação</p><p className="font-medium">{perfil}</p></div>
