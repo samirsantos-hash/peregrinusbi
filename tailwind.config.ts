@@ -21,6 +21,8 @@ export default {
       colors: {
         "medal-gold": "hsl(var(--medal-gold))",
         "medal-silver": "hsl(var(--medal-silver))",
+        "medal-platinum": "hsl(var(--medal-platinum))",
+        "medal-mercadolider": "hsl(var(--medal-mercadolider))",
         "ml-amarelo": "hsl(var(--ml-amarelo))",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

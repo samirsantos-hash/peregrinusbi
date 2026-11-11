@@ -17,3 +17,18 @@ export function perfilLegivel(perfil?: string | null) {
   };
   return rotulos[valor.toLowerCase()] ?? (valor || "Não informado");
 }
+/** Meta de envios no prazo (padrão de referência importado: 97%). */
+export const META_ENVIOS_NO_PRAZO = 97;
+
+/** Calcula envios no prazo e a folga até a meta. `taxaAtraso` aceita fração (0,02) ou percentual (2). */
+export function metaEnvios(taxaAtraso?: number | null, vendas?: number | null, meta = META_ENVIOS_NO_PRAZO) {
+  if (taxaAtraso == null || !Number.isFinite(taxaAtraso)) return null;
+  const atrasoPct = taxaAtraso <= 1 ? taxaAtraso * 100 : taxaAtraso;
+  const noPrazo = Math.max(0, 100 - atrasoPct);
+  const limiteAtraso = 100 - meta;
+  const temVendas = vendas != null && vendas > 0;
+  const atrasosAtuais = temVendas ? Math.round((atrasoPct / 100) * vendas!) : null;
+  const atrasosPermitidos = temVendas ? Math.floor((limiteAtraso / 100) * vendas! + 1e-9) : null;
+  return { noPrazo, atrasoPct, meta, atingida: noPrazo >= meta, atrasosAtuais, atrasosPermitidos,
+    folga: atrasosAtuais != null && atrasosPermitidos != null ? atrasosPermitidos - atrasosAtuais : null };
+}
