@@ -14,6 +14,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 import { z } from 'npm:zod@3';
+import { sendTemplateEmail } from '../_shared/transactional-email-templates/send-email.ts';
+import { descreverAparelho, ehAcessoNovo } from './acessos.ts';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;
 const admin = createClient(URL_, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
@@ -57,6 +59,21 @@ function mascarar(email: string) {
   return `${u.slice(0, 2)}***@${d}`;
 }
 
+async function registrarAcesso(req: Request, userId: string, email: string) {
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || null;
+  const aparelho = descreverAparelho(req.headers.get('user-agent'));
+  const chave = await hash(userId + '|' + aparelho);
+  const desde = new Date(Date.now() - 90 * 86_400_000).toISOString();
+  // Guarda por 90 dias (LGPD).
+  await admin.from('acessos_login').delete().lt('criado_em', desde);
+  const { data: anteriores } = await admin.from('acessos_login').select('aparelho_chave').eq('user_id', userId).gte('criado_em', desde).limit(500);
+  const { data: novo } = await admin.from('acessos_login').insert({ user_id: userId, ip, aparelho, aparelho_chave: chave }).select('id').single();
+  if (!ehAcessoNovo((anteriores ?? []).map((r) => r.aparelho_chave), chave)) return;
+  await alertar('acesso_novo', `Acesso de aparelho novo para ${mascarar(email)}: ${aparelho}.`);
+  const quando = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' });
+  await sendTemplateEmail('novo-acesso', email, { templateData: { quando, aparelho, ip: ip ?? undefined }, idempotencyKey: `novo-acesso-${novo?.id ?? chave}` });
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'metodo' }, 405);
@@ -87,6 +104,7 @@ Deno.serve(async (req) => {
       return json({ error: 'credenciais', restantes: LOGIN_BLOQUEIO - total }, 401);
     }
     await admin.from('auth_tentativas').delete().eq('tipo', 'login_falha').eq('chave', chaveEmail);
+    try { await registrarAcesso(req, data.user.id, email); } catch (e) { console.warn('registro de acesso falhou', (e as Error).message); }
     return json({ access_token: data.session.access_token, refresh_token: data.session.refresh_token });
   }
 

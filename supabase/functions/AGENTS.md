@@ -29,3 +29,4 @@
 - Toda função lê o acesso da loja por `_shared/mlTokenAtual.ts`: se venceu ou vence em até 5 min, renova na hora com o mesmo lock da `ml-token-refresh` (refresh token é de uso único); a rotina de 30 min continua como renovação antecipada.
 
 - Login/reset go only through `auth-guard` (hashed attempts, neutral reply, brand-domain link); the client never calls signInWithPassword/resetPasswordForEmail directly, so limits apply.
+- Successful logins in `auth-guard` record IP/device in `acessos_login` (90-day retention, master/dev read); a device unseen in 90 days with prior history alerts developers and emails the user via the `novo-acesso` template.

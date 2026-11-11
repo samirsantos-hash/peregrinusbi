@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      acessos_login: {
+        Row: {
+          aparelho: string | null
+          aparelho_chave: string
+          criado_em: string
+          id: number
+          ip: string | null
+          user_id: string
+        }
+        Insert: {
+          aparelho?: string | null
+          aparelho_chave: string
+          criado_em?: string
+          id?: never
+          ip?: string | null
+          user_id: string
+        }
+        Update: {
+          aparelho?: string | null
+          aparelho_chave?: string
+          criado_em?: string
+          id?: never
+          ip?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       alerta_inatividade_ciente: {
         Row: {
           ciente_em: string

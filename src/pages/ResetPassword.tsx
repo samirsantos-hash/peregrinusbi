@@ -115,6 +115,8 @@ const ResetPassword = () => {
     }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
+    // Encerra a conta nos outros aparelhos; este continua conectado.
+    if (!error) await supabase.auth.signOut({ scope: "others" });
     setLoading(false);
 
     if (error) {

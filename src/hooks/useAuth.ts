@@ -204,6 +204,9 @@ export function useAuth() {
     // Alguns projetos exigem a senha atual; se ela não foi enviada, avisamos de forma clara.
     if (error) return { error };
 
+    // Encerra a conta nos outros aparelhos; este continua conectado.
+    await supabase.auth.signOut({ scope: "others" });
+
     if (user) {
       const { data, error: markError } = await supabase.functions.invoke("admin-users", {
         body: { action: "mark_password_changed", userId: user.id },
