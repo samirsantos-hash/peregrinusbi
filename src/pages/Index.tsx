@@ -624,7 +624,7 @@ const Index = () => {
                     {pagina === "produtos" && <FullProdutosApi key={selectedSeller} custId={sellerCustIdMap[selectedSeller]} />}
                   </TabsContent>
                   <TabsContent value="competitiveness" className="mt-0 space-y-5">
-                    {pagina === "carteira" ? <CarteiraNaSecao secao="competitiveness" /> : pagina === "concorrentes" ? <BuscaConcorrentes /> : <CompetitivenessPanel pagina={pagina} kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map(s => ({ id: s.id }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />}
+                    {pagina === "carteira" ? <CarteiraNaSecao secao="competitiveness" /> : pagina === "concorrentes" ? <BuscaConcorrentes /> : <CompetitivenessPanel pagina={pagina} custId={selectedSeller ? sellerCustIdMap[selectedSeller] : undefined} kpis={displayKpis} monthlyKpis={allKpisMonthly} sellers={sellers.map(s => ({ id: s.id }))} sellerCustIdMap={sellerCustIdMap} listingsQuality={listingsQuality} dataGranularity={granularity} />}
                   </TabsContent>
                   <TabsContent value="publicidade" className="mt-0 space-y-5">
                     {isConsolidado ? <CarteiraNaSecao secao="publicidade" /> : <>

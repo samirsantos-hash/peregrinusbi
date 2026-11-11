@@ -12,6 +12,7 @@ import PairplotMatrix from "./PairplotMatrix";
 import MultidimensionalBubbleChart from "./MultidimensionalBubbleChart";
 import McKinseyActionPlans from "./McKinseyActionPlans";
 import PriceAuditTable from "./PriceAuditTable";
+import AlertasCatalogo from "./AlertasCatalogo";
 import CompetitivenessInsights from "./CompetitivenessInsights";
 import PriceCompetitivenessChart from "./PriceCompetitivenessChart";
 import InsightsPrecificacaoPanel from "@/components/seller/InsightsPrecificacaoPanel";
@@ -58,6 +59,7 @@ interface CompetitivenessPanelProps {
   listingsQuality?: ListingQuality[];
   dataGranularity?: "consolidated" | "daily";
   pagina?: string;
+  custId?: string;
 }
 
 /* ── Shared Tooltip ── */
@@ -106,7 +108,7 @@ const ScatterTooltipContent = ({ active, payload }: any) => {
   );
 };
 
-const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCustIdMap = {}, listingsQuality = [], dataGranularity = "daily", pagina = "todas" }: CompetitivenessPanelProps) => {
+const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCustIdMap = {}, listingsQuality = [], dataGranularity = "daily", pagina = "todas", custId }: CompetitivenessPanelProps) => {
   const [scatterPeriod, setScatterPeriod] = useState("15");
   const [bubblePeriod, setBubblePeriod] = useState("15");
 
@@ -392,6 +394,7 @@ const CompetitivenessPanel = ({ kpis, monthlyKpis = [], sellers = [], sellerCust
       )}
 
       {(pagina === "todas" || pagina === "resumo-preco") && <>
+      <AlertasCatalogo custId={custId} />
       {/* Summary Cards — uses MONTHLY % */}
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
         {[
