@@ -1,4 +1,5 @@
 import { podeExportar } from '@/lib/permissaoExportar';
+import { ANIMACAO_GRAFICO } from "@/lib/animacaoGrafico";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -485,9 +486,9 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
             <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
-            <Bar dataKey="gmv" name="GMV" fill={COLORS[0]} opacity={0.5} />
-            <Line dataKey="mm7" name="MM7" stroke={COLORS[1]} dot={false} strokeWidth={2} connectNulls />
-            <Line dataKey="mm28" name="MM28" stroke={COLORS[3]} dot={false} strokeWidth={2} connectNulls />
+            <Bar {...ANIMACAO_GRAFICO} dataKey="gmv" name="GMV" fill={COLORS[0]} opacity={0.5} />
+            <Line {...ANIMACAO_GRAFICO} dataKey="mm7" name="MM7" stroke={COLORS[1]} dot={false} strokeWidth={2} connectNulls />
+            <Line {...ANIMACAO_GRAFICO} dataKey="mm28" name="MM28" stroke={COLORS[3]} dot={false} strokeWidth={2} connectNulls />
           </ComposedChart>
         </ResponsiveContainer>
       </Card>
@@ -505,7 +506,7 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
               <XAxis dataKey="nome" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} interval={0} angle={-20} height={50} textAnchor="end" />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
-              <Bar dataKey="v" name="Valor">
+              <Bar {...ANIMACAO_GRAFICO} dataKey="v" name="Valor">
                 {cascata.map((c, i) => <Cell key={i} fill={c.v >= 0 ? COLORS[2] : COLORS[4]} />)}
               </Bar>
             </BarChart>
@@ -531,7 +532,7 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
               <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <YAxis type="category" dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} width={100} />
               <Tooltip formatter={(v: number) => fPct(v)} />
-              <Bar dataKey="margem" name="Margem">
+              <Bar {...ANIMACAO_GRAFICO} dataKey="margem" name="Margem">
                 {porLoja.map((l, i) => <Cell key={i} fill={l.margem >= 0.72 ? COLORS[2] : l.margem >= 0.68 ? COLORS[1] : COLORS[4]} />)}
               </Bar>
             </BarChart>
@@ -546,7 +547,7 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
               <Tooltip formatter={(v: number) => v.toFixed(2)} />
               <ReferenceLine y={1} stroke={COLORS[3]} strokeDasharray="4 4" />
-              <Bar dataKey="idx" name="Índice" fill={COLORS[1]} />
+              <Bar {...ANIMACAO_GRAFICO} dataKey="idx" name="Índice" fill={COLORS[1]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -559,7 +560,7 @@ const Diretoria = ({ d, delta, onSelecionarLoja }: { d: Ctx; delta: (a: number, 
             <XAxis dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
             <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} domain={[0, 1]} />
             <Tooltip formatter={(v: number) => fPct(v)} />
-            <Area dataKey="acum" name="Acumulado" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.25} />
+            <Area {...ANIMACAO_GRAFICO} dataKey="acum" name="Acumulado" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.25} />
           </AreaChart>
         </ResponsiveContainer>
       </Card>
@@ -693,7 +694,7 @@ const Lojas = ({ d }: { d: Ctx }) => {
               <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
               <YAxis type="category" dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} width={100} />
               <Tooltip formatter={(v: number) => v.toFixed(1)} />
-              <Bar dataKey="score" name="Score" fill={COLORS[0]} />
+              <Bar {...ANIMACAO_GRAFICO} dataKey="score" name="Score" fill={COLORS[0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -721,7 +722,7 @@ const Lojas = ({ d }: { d: Ctx }) => {
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
             {mmPorLoja.map((m, i) => (
-              <Line key={m.loja} dataKey={m.loja} stroke={COLORS[i % COLORS.length]} dot={false} strokeWidth={2} connectNulls />
+              <Line {...ANIMACAO_GRAFICO} key={m.loja} dataKey={m.loja} stroke={COLORS[i % COLORS.length]} dot={false} strokeWidth={2} connectNulls />
             ))}
           </ComposedChart>
         </ResponsiveContainer>
@@ -735,8 +736,8 @@ const Lojas = ({ d }: { d: Ctx }) => {
             <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
-            <Bar dataKey="volume" name="Efeito volume" stackId="a" fill={COLORS[0]} />
-            <Bar dataKey="ticket" name="Efeito ticket/mix" stackId="a" fill={COLORS[1]} />
+            <Bar {...ANIMACAO_GRAFICO} dataKey="volume" name="Efeito volume" stackId="a" fill={COLORS[0]} />
+            <Bar {...ANIMACAO_GRAFICO} dataKey="ticket" name="Efeito ticket/mix" stackId="a" fill={COLORS[1]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>
@@ -802,10 +803,10 @@ const Series = ({ d }: { d: Ctx }) => {
             <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
-            <Bar dataKey="gmv" name="GMV" fill={COLORS[0]} opacity={0.4} />
-            <Line dataKey="mm7" name="MM7" stroke={COLORS[1]} dot={false} strokeWidth={2} connectNulls />
-            <Line dataKey="mm28" name="MM28" stroke={COLORS[3]} dot={false} strokeWidth={2} connectNulls />
-            <Line dataKey="tend" name="Tendência" stroke={COLORS[4]} dot={false} strokeDasharray="5 4" />
+            <Bar {...ANIMACAO_GRAFICO} dataKey="gmv" name="GMV" fill={COLORS[0]} opacity={0.4} />
+            <Line {...ANIMACAO_GRAFICO} dataKey="mm7" name="MM7" stroke={COLORS[1]} dot={false} strokeWidth={2} connectNulls />
+            <Line {...ANIMACAO_GRAFICO} dataKey="mm28" name="MM28" stroke={COLORS[3]} dot={false} strokeWidth={2} connectNulls />
+            <Line {...ANIMACAO_GRAFICO} dataKey="tend" name="Tendência" stroke={COLORS[4]} dot={false} strokeDasharray="5 4" />
           </ComposedChart>
         </ResponsiveContainer>
       </Card>
@@ -818,10 +819,10 @@ const Series = ({ d }: { d: Ctx }) => {
             <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <ReferenceLine y={0} stroke={COLORS[3]} />
-            <Bar dataKey="acel" name="Aceleração">
+            <Bar {...ANIMACAO_GRAFICO} dataKey="acel" name="Aceleração">
               {linha.map((r, i) => <Cell key={i} fill={(r.acel ?? 0) >= 0 ? COLORS[2] : COLORS[4]} />)}
             </Bar>
-            <Line dataKey="vel" name="Velocidade" stroke={COLORS[1]} dot={false} strokeWidth={2} connectNulls />
+            <Line {...ANIMACAO_GRAFICO} dataKey="vel" name="Velocidade" stroke={COLORS[1]} dot={false} strokeWidth={2} connectNulls />
           </ComposedChart>
         </ResponsiveContainer>
       </Card>
@@ -835,8 +836,8 @@ const Series = ({ d }: { d: Ctx }) => {
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
-              <Line dataKey="dsz" name="Dessazonalizado" stroke={COLORS[0]} dot={false} connectNulls />
-              <Line dataKey="resid" name="Resíduo" stroke={COLORS[4]} dot={false} connectNulls />
+              <Line {...ANIMACAO_GRAFICO} dataKey="dsz" name="Dessazonalizado" stroke={COLORS[0]} dot={false} connectNulls />
+              <Line {...ANIMACAO_GRAFICO} dataKey="resid" name="Resíduo" stroke={COLORS[4]} dot={false} connectNulls />
             </ComposedChart>
           </ResponsiveContainer>
         </Card>
@@ -849,7 +850,7 @@ const Series = ({ d }: { d: Ctx }) => {
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
               <Tooltip formatter={(v: number) => v.toFixed(1)} />
               <ReferenceLine y={0} stroke={COLORS[3]} />
-              <Area dataKey="cusum" name="CUSUM" stroke={COLORS[5]} fill={COLORS[5]} fillOpacity={0.2} />
+              <Area {...ANIMACAO_GRAFICO} dataKey="cusum" name="CUSUM" stroke={COLORS[5]} fill={COLORS[5]} fillOpacity={0.2} />
             </AreaChart>
           </ResponsiveContainer>
         </Card>
@@ -861,7 +862,7 @@ const Series = ({ d }: { d: Ctx }) => {
               <XAxis dataKey="hora" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} interval={2} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
-              <Bar dataKey="gmv" name="GMV" fill={COLORS[0]} />
+              <Bar {...ANIMACAO_GRAFICO} dataKey="gmv" name="GMV" fill={COLORS[0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -938,10 +939,10 @@ const Projecao = ({ d }: { d: Ctx }) => {
             <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
             <Tooltip formatter={(v: number) => fBRL(v)} />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
-            <Area dataKey="hi" name="IC 95% sup." stroke="none" fill={COLORS[0]} fillOpacity={0.12} />
-            <Area dataKey="lo" name="IC 95% inf." stroke="none" fill="hsl(var(--background))" fillOpacity={0.9} />
-            <Line dataKey="real" name="Realizado" stroke={COLORS[3]} dot={false} />
-            <Line dataKey="proj" name="Projeção" stroke={COLORS[1]} dot={false} strokeWidth={2} />
+            <Area {...ANIMACAO_GRAFICO} dataKey="hi" name="IC 95% sup." stroke="none" fill={COLORS[0]} fillOpacity={0.12} />
+            <Area {...ANIMACAO_GRAFICO} dataKey="lo" name="IC 95% inf." stroke="none" fill="hsl(var(--background))" fillOpacity={0.9} />
+            <Line {...ANIMACAO_GRAFICO} dataKey="real" name="Realizado" stroke={COLORS[3]} dot={false} />
+            <Line {...ANIMACAO_GRAFICO} dataKey="proj" name="Projeção" stroke={COLORS[1]} dot={false} strokeWidth={2} />
           </ComposedChart>
         </ResponsiveContainer>
       </Card>
@@ -1041,8 +1042,8 @@ const Concentracao = ({ d }: { d: Ctx }) => {
               <YAxis yAxisId="l" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
               <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} domain={[0, 1]} />
               <Tooltip formatter={(v: number, n: string) => (n === "Acumulado" ? fPct(v) : fBRL(v))} />
-              <Bar yAxisId="l" dataKey="gmv" name="GMV" fill={COLORS[0]} />
-              <Line yAxisId="r" dataKey="acum" name="Acumulado" stroke={COLORS[1]} dot={false} strokeWidth={2} />
+              <Bar {...ANIMACAO_GRAFICO} yAxisId="l" dataKey="gmv" name="GMV" fill={COLORS[0]} />
+              <Line {...ANIMACAO_GRAFICO} yAxisId="r" dataKey="acum" name="Acumulado" stroke={COLORS[1]} dot={false} strokeWidth={2} />
             </ComposedChart>
           </ResponsiveContainer>
         </Card>
@@ -1054,8 +1055,8 @@ const Concentracao = ({ d }: { d: Ctx }) => {
               <XAxis dataKey="x" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
-              <Area dataKey="y" name="Lorenz" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.2} />
-              <Line dataKey="ref" name="Igualdade" stroke={COLORS[3]} dot={false} strokeDasharray="4 4" />
+              <Area {...ANIMACAO_GRAFICO} dataKey="y" name="Lorenz" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.2} />
+              <Line {...ANIMACAO_GRAFICO} dataKey="ref" name="Igualdade" stroke={COLORS[3]} dot={false} strokeDasharray="4 4" />
             </AreaChart>
           </ResponsiveContainer>
         </Card>
@@ -1067,7 +1068,7 @@ const Concentracao = ({ d }: { d: Ctx }) => {
               <XAxis dataKey="n" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
-              <Bar dataKey="perda" name="Perda de GMV" fill={COLORS[4]} />
+              <Bar {...ANIMACAO_GRAFICO} dataKey="perda" name="Perda de GMV" fill={COLORS[4]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -1079,7 +1080,7 @@ const Concentracao = ({ d }: { d: Ctx }) => {
               <XAxis type="number" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
               <YAxis type="category" dataKey="loja" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} width={100} />
               <Tooltip formatter={(v: number) => fInt(v)} />
-              <Bar dataKey="hhi" name="HHI" fill={COLORS[5]} />
+              <Bar {...ANIMACAO_GRAFICO} dataKey="hhi" name="HHI" fill={COLORS[5]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -1159,7 +1160,7 @@ const Geografia = ({ d }: { d: Ctx }) => {
               <XAxis dataKey="regiao" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
               <Tooltip formatter={(v: number) => fBRL(v)} />
-              <Bar dataKey="gmv" name="GMV" fill={COLORS[1]} />
+              <Bar {...ANIMACAO_GRAFICO} dataKey="gmv" name="GMV" fill={COLORS[1]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -1292,8 +1293,8 @@ const Clientes = ({ d }: { d: Ctx }) => {
               <XAxis dataKey="decil" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <Tooltip formatter={(v: number) => fPct(v)} />
-              <Bar dataKey="share" name="Share" fill={COLORS[0]} />
-              <Line dataKey="acum" name="Acumulado" stroke={COLORS[1]} dot={false} strokeWidth={2} />
+              <Bar {...ANIMACAO_GRAFICO} dataKey="share" name="Share" fill={COLORS[0]} />
+              <Line {...ANIMACAO_GRAFICO} dataKey="acum" name="Acumulado" stroke={COLORS[1]} dot={false} strokeWidth={2} />
             </ComposedChart>
           </ResponsiveContainer>
         </Card>
@@ -1305,7 +1306,7 @@ const Clientes = ({ d }: { d: Ctx }) => {
               <XAxis dataKey="faixa" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} />
               <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fInt(v)} />
               <Tooltip formatter={(v: number) => fInt(v)} />
-              <Bar dataKey="n" name="Clientes" fill={COLORS[3]} />
+              <Bar {...ANIMACAO_GRAFICO} dataKey="n" name="Clientes" fill={COLORS[3]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -1371,9 +1372,9 @@ const Operacao = ({ d }: { d: Ctx }) => {
               <YAxis yAxisId="r" orientation="right" tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => `${(v * 100).toFixed(0).replace(".", ",")}%`} />
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
-              <Bar yAxisId="l" dataKey="ticket" name="Ticket" fill={COLORS[0]} />
-              <Bar yAxisId="l" dataKey="fretePed" name="Frete/pedido" fill={COLORS[1]} />
-              <Line yAxisId="r" dataKey="devol" name="% devolução" stroke={COLORS[4]} dot={false} strokeWidth={2} />
+              <Bar {...ANIMACAO_GRAFICO} yAxisId="l" dataKey="ticket" name="Ticket" fill={COLORS[0]} />
+              <Bar {...ANIMACAO_GRAFICO} yAxisId="l" dataKey="fretePed" name="Frete/pedido" fill={COLORS[1]} />
+              <Line {...ANIMACAO_GRAFICO} yAxisId="r" dataKey="devol" name="% devolução" stroke={COLORS[4]} dot={false} strokeWidth={2} />
             </ComposedChart>
           </ResponsiveContainer>
         </Card>
@@ -1387,7 +1388,7 @@ const Operacao = ({ d }: { d: Ctx }) => {
               <Tooltip formatter={(v: number) => fBRL(v)} />
               <Legend wrapperStyle={{ fontSize: 9 }} />
               {modais.slice(0, 6).map((m, i) => (
-                <Bar key={m.modal} dataKey={m.modal} stackId="a" fill={COLORS[i % COLORS.length]} />
+                <Bar {...ANIMACAO_GRAFICO} key={m.modal} dataKey={m.modal} stackId="a" fill={COLORS[i % COLORS.length]} />
               ))}
             </BarChart>
           </ResponsiveContainer>
@@ -1474,8 +1475,8 @@ const Publicidade = ({ d }: { d: Ctx }) => {
             <YAxis tick={{ fontSize: 11, fill: "hsl(var(--axis))" }} tickFormatter={(v) => fShort(v)} />
             <Tooltip />
             <Legend wrapperStyle={{ fontSize: 11, paddingTop: 8 }} iconSize={9} />
-            <Bar dataKey="pago" name="Pago" fill={COLORS[1]} />
-            <Bar dataKey="org" name="Orgânico" fill={COLORS[3]} />
+            <Bar {...ANIMACAO_GRAFICO} dataKey="pago" name="Pago" fill={COLORS[1]} />
+            <Bar {...ANIMACAO_GRAFICO} dataKey="org" name="Orgânico" fill={COLORS[3]} />
           </BarChart>
         </ResponsiveContainer>
       </Card>

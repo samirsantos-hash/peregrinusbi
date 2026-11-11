@@ -94,7 +94,7 @@ export default function KpiVidro({
       data-tema={temaDoVidro(delta, melhorQuando)}
       className={cn(
         // O material e o movimento pertencem ao CSS temático do vidro.
-        "kpi-vidro noite-vidro liquid-card flex h-full min-w-0 flex-col justify-between gap-4 p-4 sm:p-5",
+        "kpi-vidro kpi-cascata noite-vidro liquid-card flex h-full min-w-0 flex-col justify-between gap-4 p-4 sm:p-5",
         className,
       )}
     >
@@ -111,7 +111,7 @@ export default function KpiVidro({
           )}
           title={valor}
         >
-          <NumeroAnimado valor={valor} />
+          <NumeroAnimado valor={valor} atraso={260} />
         </p>
         <div className="kpi-vidro-detalhes flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
           <DeltaCapsula delta={delta} pontos={deltaPontos} melhorQuando={melhorQuando} periodo={periodo} />

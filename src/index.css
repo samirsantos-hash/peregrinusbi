@@ -3783,3 +3783,15 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
 .arvore-acordeao { animation: arvore-abrir 240ms cubic-bezier(.2,.8,.2,1) both; transform-origin: top; }
 @keyframes arvore-abrir { from { opacity: 0; transform: translateY(-4px) scaleY(.96); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .arvore-acordeao { animation: none; } }
+
+/* Cartões de números sobem em cascata ao aparecer (máx. 8 em sequência) */
+.kpi-cascata { animation: kpi-subir 260ms cubic-bezier(.2,.8,.2,1) both; }
+.kpi-cascata:nth-child(2) { animation-delay: 50ms; }
+.kpi-cascata:nth-child(3) { animation-delay: 100ms; }
+.kpi-cascata:nth-child(4) { animation-delay: 150ms; }
+.kpi-cascata:nth-child(5) { animation-delay: 200ms; }
+.kpi-cascata:nth-child(6) { animation-delay: 250ms; }
+.kpi-cascata:nth-child(7) { animation-delay: 300ms; }
+.kpi-cascata:nth-child(n+8) { animation-delay: 350ms; }
+@keyframes kpi-subir { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .kpi-cascata { animation: none; } }

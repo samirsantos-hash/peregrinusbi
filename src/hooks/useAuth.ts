@@ -1,3 +1,4 @@
+import { apagarPeriodosSalvos } from "@/lib/periodoSalvo";
 import { limparCachePainel } from "@/lib/cachePainel";
 import { limparAcessoCompartilhado } from "@/hooks/useMyAccess";
 import { useState, useEffect } from "react";
@@ -191,6 +192,7 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    apagarPeriodosSalvos();
     await limparCachePainel();
     limparPerfilCompartilhado();
     limparAcessoCompartilhado();

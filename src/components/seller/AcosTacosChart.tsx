@@ -1,3 +1,4 @@
+import { ANIMACAO_GRAFICO } from "@/lib/animacaoGrafico";
 import { useMemo } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
@@ -273,7 +274,7 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
               fill: "hsl(var(--axis))",
             }}
           />
-          <Area
+          <Area {...ANIMACAO_GRAFICO}
             dataKey="faixa"
             fill={TACOS_COLOR}
             fillOpacity={0.1}
@@ -283,7 +284,7 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
             activeDot={false}
             name="% do faturamento vindo de Ads"
           />
-          <Line
+          <Line {...ANIMACAO_GRAFICO}
             type="linear"
             dataKey="acosPlot"
             name="ACOS"
@@ -294,7 +295,7 @@ export default function AcosTacosChart({ pontos }: { pontos: PontoAds[] }) {
             dot={dotFactory(ACOS_COLOR, "acosAcimaTeto")}
             activeDot={{ r: 5 }}
           />
-          <Line
+          <Line {...ANIMACAO_GRAFICO}
             type="linear"
             dataKey="tacosPlot"
             name="TACOS"

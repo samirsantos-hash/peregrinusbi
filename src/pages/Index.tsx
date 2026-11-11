@@ -2,7 +2,7 @@ import AguiaLogo from "@/components/aura/AguiaLogo";
 import MarcaEcom from "@/components/MarcaEcom";
 import CarteiraNaSecao from "@/components/carteira/deepdive/CarteiraNaSecao";
 import MlAoVivo from "@/components/ml/MlAoVivo";
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,7 @@ import ClipsAudiencePanel from "@/components/dashboard/ClipsAudiencePanel";
 import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
 import VisaoGeralSecao from "@/components/dashboard/VisaoGeralSecao";
 import { formatarPeriodoBr } from "@/lib/periodoResumo";
+import { lerPeriodoSalvo, salvarPeriodo } from "@/lib/periodoSalvo";
 import { briefingPeriodo } from "@/lib/briefingPeriodo";
 import { ABA_ALIAS, getSubanalise } from "@/config/sellerTabs";
 import PerfilReputacao from "@/components/dashboard/PerfilReputacao";
@@ -159,8 +160,18 @@ const Index = () => {
     }
   }, [abaRaw, searchParams, setSearchParams]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [granularity, setGranularity] = useState<Granularity>("consolidated");
-  const [activePeriod, setActivePeriod] = useState<string>("q1");
+  const [granularity, setGranularity] = useState<Granularity>(() => (lerPeriodoSalvo(user?.id)?.granularidade as Granularity) ?? "consolidated");
+  const [activePeriod, setActivePeriod] = useState<string>(() => lerPeriodoSalvo(user?.id)?.periodo ?? "q1");
+  const periodoRestaurado = useRef<string | null>(null);
+  useEffect(() => {
+    if (!user?.id || periodoRestaurado.current === user.id) return;
+    periodoRestaurado.current = user.id;
+    const salvo = lerPeriodoSalvo(user.id);
+    if (salvo) { setActivePeriod(salvo.periodo); setGranularity(salvo.granularidade as Granularity); }
+  }, [user?.id]);
+  useEffect(() => {
+    if (user?.id && periodoRestaurado.current === user.id) salvarPeriodo(user.id, { periodo: activePeriod, granularidade: granularity });
+  }, [user?.id, activePeriod, granularity]);
   // Sem loja selecionada = leitura consolidada da carteira
 
   // Handle period changes from DashboardHeader

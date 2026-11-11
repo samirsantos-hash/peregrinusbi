@@ -20,7 +20,7 @@ export function duracaoNumero(de: number, para: number) {
 }
 
 /** React owns every displayed value; never mutate text nodes behind it. */
-export function useNumeroAnimado(valor: string, duracao?: number) {
+export function useNumeroAnimado(valor: string, duracao?: number, atraso = 0) {
   const [texto, setTexto] = useState(valor);
   const atual = useRef(0);
   const { carregando, ciclo } = useEstadoApresentacao();
@@ -37,7 +37,7 @@ export function useNumeroAnimado(valor: string, duracao?: number) {
     }
     const de = atual.current;
     const tempo = Math.max(1, duracao ?? duracaoNumero(de, numero.valor));
-    const inicio = performance.now();
+    let inicio = 0;
     let raf = 0;
     const passo = (agora: number) => {
       const p = Math.min(1, (agora - inicio) / tempo);
@@ -48,8 +48,10 @@ export function useNumeroAnimado(valor: string, duracao?: number) {
       }) + numero.sufixo);
       if (p < 1) raf = requestAnimationFrame(passo);
     };
-    raf = requestAnimationFrame(passo);
-    return () => cancelAnimationFrame(raf);
-  }, [valor, duracao, carregando, ciclo]);
+    const pausa = de === 0 ? Math.max(0, atraso) : 0;
+    const espera = pausa ? window.setTimeout(() => { inicio = performance.now(); raf = requestAnimationFrame(passo); }, pausa) : 0;
+    if (!pausa) { inicio = performance.now(); raf = requestAnimationFrame(passo); }
+    return () => { window.clearTimeout(espera); cancelAnimationFrame(raf); };
+  }, [valor, duracao, carregando, ciclo, atraso]);
   return texto;
 }
