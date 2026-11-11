@@ -214,6 +214,43 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
         </div>
       </div>
 
+      {/* Diagrama: como o índice é calculado */}
+      <div className="glass-card p-5 sm:p-6 space-y-4">
+        <div>
+          <h3 className="text-base font-semibold">Como o Quality Index é calculado</h3>
+          <p className="text-xs text-muted-foreground">Cada indicador vira uma nota de 0 a 100. As notas formam o pilar pela média ponderada, e os pilares formam o índice. Itens sem medição ficam fora da conta, e os pesos restantes são redistribuídos.</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {qi.pilares.map((p, i) => (
+              <div key={p.id} className="rounded-lg border border-border/60 p-3 space-y-2" style={{ borderLeft: `3px solid ${CORES_PILAR[i % CORES_PILAR.length]}` }}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold truncate">{limpar(p.label)}</span>
+                  <span className="text-xs font-bold tabular-nums shrink-0" style={{ color: CORES_PILAR[i % CORES_PILAR.length] }}>{(p.peso * 100).toFixed(0)}% do índice</span>
+                </div>
+                <ul className="space-y-1">
+                  {p.topicos.map((tp) => (
+                    <li key={tp.id} className="flex items-center gap-2 text-[11px]">
+                      <span className="text-muted-foreground">└</span>
+                      <span className="truncate flex-1">{tp.label}</span>
+                      <span className="tabular-nums text-muted-foreground shrink-0">{(tp.peso * 100).toFixed(0)}% do pilar</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="flex lg:flex-col items-center justify-center gap-2 text-muted-foreground">
+            <span className="text-lg" aria-hidden>→</span>
+            <div className="rounded-xl border border-primary/40 bg-primary/10 px-5 py-4 text-center">
+              <p className="text-[11px] text-muted-foreground">Quality Index</p>
+              <p className={`text-3xl font-bold tabular-nums ${tGeral.text}`}>{qi.scoreGeral ?? "—"}</p>
+              <p className="text-[10px] text-muted-foreground">meta 70</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Alertas críticos */}
       {qi.alertasCriticos.length > 0 && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4">
