@@ -186,8 +186,8 @@ function Conteudo({
                       <tab.icon className="h-4 w-4 shrink-0" />
                       {!recolhida && <><span className="whitespace-normal flex-1 text-left">{tab.label}</span>{subs.length > 0 && (ramos.includes(id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
                     </Button>
-                    {!recolhida && ramos.includes(id) && subs.length > 0 && <ul className="ml-5 pl-2 border-l border-border space-y-1 py-1">
-                      {subs.map(sub => { const IconeSub = ICONES_SUBANALISE[sub.id] ?? ChartNoAxesCombined; return <li key={sub.id}><Button variant="ghost" onMouseEnter={() => antecipar(sub)} onFocus={() => antecipar(sub)} onTouchStart={() => antecipar(sub)} onClick={() => {
+                    {!recolhida && ramos.includes(id) && subs.length > 0 && <ul className="arvore-ramos ml-5 space-y-1 py-1">
+                      {subs.map(sub => { const IconeSub = ICONES_SUBANALISE[sub.id] ?? ChartNoAxesCombined; return <li key={sub.id} data-ativo={ativa === id && subativa === sub.id ? "" : undefined}><Button variant="ghost" onMouseEnter={() => antecipar(sub)} onFocus={() => antecipar(sub)} onTouchStart={() => antecipar(sub)} onClick={() => {
                         if ((id === "reputation" || id === "competitiveness" || id === "publicidade") && (ativa !== id || subativa !== sub.id)) {
                           window.__lovableEvents?.track?.("project.seller_section_opened", {
                             section: id === "competitiveness" ? "price" : id === "publicidade" ? "advertising" : "reputation",

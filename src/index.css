@@ -3771,3 +3771,10 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
   background: linear-gradient(145deg, hsl(var(--vidro-tinta-vermelho) / calc(0.04 * var(--glass-intensity, 1))) 0%, hsl(0 0% 100% / 0.01) 100%) !important;
   border-top-color: hsl(var(--vidro-tinta-vermelho) / 0.25) !important;
 }
+
+/* Chaveamento em L do menu lateral: cada subopção recebe um ramo; o ativo acende em verde. */
+.arvore-ramos > li { position: relative; padding-left: 1rem; }
+.arvore-ramos > li::before { content: ""; position: absolute; left: 0; top: -0.25rem; bottom: 0; border-left: 1px solid hsl(var(--border)); }
+.arvore-ramos > li:last-child::before { bottom: auto; height: calc(50% + 0.25rem); }
+.arvore-ramos > li::after { content: ""; position: absolute; left: 0; top: 50%; width: 0.75rem; height: 0.5rem; margin-top: -0.5rem; border-left: 1px solid hsl(var(--border)); border-bottom: 1px solid hsl(var(--border)); border-bottom-left-radius: 0.5rem; }
+.arvore-ramos > li[data-ativo]::after { border-color: hsl(var(--primary)); border-width: 0 0 2px 2px; }
