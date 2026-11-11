@@ -64,7 +64,34 @@ export default function EstudoReputacao({ sellerId, custId, pagina, de, ate }: {
       </>}
       <p className="text-sm text-muted-foreground">Diferenças entre mês fechado e janela móvel não provam melhora ou piora recente. Não há percentil da vertical sem pares comparáveis, nem relação causal entre taxa e faturamento.</p>
     </>}
-    {pagina === 'requisitos' && <div className="space-y-4 border-t border-border pt-5"><h3 className="text-lg font-semibold">Confiabilidade e referências do estudo</h3><dl className="space-y-4 text-sm"><div><dt className="font-semibold">Nível e medalha</dt><dd className="text-muted-foreground">Estado observado na última atualização. Os registros disponíveis não comprovam subida, queda ou perda de medalha ao longo dos meses.</dd></div><div><dt className="font-semibold">Baixo volume</dt><dd className="text-muted-foreground">O estudo sugere piso entre 20 e 50 pedidos, ainda não definido. Sem base específica e ocorrências, não aplicamos piso arbitrário, ajuste estatístico ou alerta de risco.</dd></div><div><dt className="font-semibold">Limites em validação</dt><dd className="text-muted-foreground">Reclamações 2%, atrasos 5%, cancelamentos 3% e disputas 1% são referências do documento, não requisitos oficiais confirmados por medalha ou categoria. A régua de tier acima permanece independente.</dd></div><div><dt className="font-semibold">Comparação entre pares</dt><dd className="text-muted-foreground">Mediana e percentil exigem mesma vertical, mês e volume comparável, respeitando as lojas autorizadas. Os 96,9% de cobertura e 12,7% acima da referência de atrasos descrevem a base do estudo, não a carteira atual.</dd></div><div><dt className="font-semibold">Histórico de nível e experiência por anúncio</dt><dd className="text-muted-foreground">Não disponíveis nesta leitura. Exigem fotografias datadas e métricas oficiais por anúncio; não são reconstruídos a partir das taxas da loja.</dd></div></dl></div>}
+    {pagina === 'requisitos' && <section className="space-y-5 border-t border-border pt-5" aria-label="Como ler o estudo de reputação">
+      <div><p className="text-xs font-semibold uppercase tracking-widest text-primary">Como ler este estudo</p><h3 className="text-2xl font-semibold">Do dado à conclusão: o que vale e o que não vale</h3></div>
+      <ol className="grid grid-cols-1 md:grid-cols-4 gap-3 items-stretch" aria-label="Diagrama do estudo">
+        {[
+          { n: "1", t: "Dado da loja", d: "Medalha e nível na última atualização" },
+          { n: "2", t: "Volume mínimo", d: "Piso de 20 a 50 pedidos, ainda em definição" },
+          { n: "3", t: "Comparação justa", d: "Mesma vertical, mês e volume parecido" },
+          { n: "4", t: "Leitura", d: "Referência de apoio, não requisito oficial" },
+        ].map((e, k, arr) => <li key={e.n} className="relative rounded-xl border border-border p-4 liquid-card">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-semibold">{e.n}</span>
+          <p className="mt-3 font-semibold">{e.t}</p><p className="text-sm text-muted-foreground">{e.d}</p>
+          {k < arr.length - 1 && <span className="hidden md:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10 h-6 w-6 items-center justify-center rounded-full bg-background border border-border text-primary" aria-hidden>→</span>}
+        </li>)}
+      </ol>
+      <div className="rounded-xl border border-border p-4 liquid-card">
+        <p className="text-sm font-semibold mb-3">Referências do estudo (em validação)</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 tabular-nums">
+          {[["Reclamações","2%"],["Atrasos","5%"],["Cancelamentos","3%"],["Disputas","1%"]].map(([a,b]) => <div key={a}><p className="text-3xl font-semibold">{b}</p><p className="text-xs text-muted-foreground">{a}</p></div>)}
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+        <div className="rounded-xl border border-border p-4 liquid-card"><p className="font-semibold text-primary mb-2">O estudo mostra</p><ul className="space-y-1 list-disc pl-4">
+          <li>Medalha e nível atuais da loja</li><li>Base do estudo: 96,9% de cobertura</li><li>12,7% da base acima da referência de atrasos</li></ul></div>
+        <div className="rounded-xl border border-border p-4 liquid-card"><p className="font-semibold text-destructive mb-2">O estudo não mostra</p><ul className="space-y-1 list-disc pl-4">
+          <li>Subida, queda ou perda de medalha ao longo dos meses</li><li>Alerta de risco para lojas de baixo volume</li><li>Histórico de nível e experiência por anúncio</li></ul></div>
+      </div>
+      <p className="text-xs text-muted-foreground">As referências não substituem a régua de tier nem as regras do Mercado Livre. Os percentuais da base descrevem o estudo, não a carteira atual.</p>
+    </section>}
     {atual.isError || atual.data?.erro ? <p className="text-sm text-destructive">A leitura atual da reputação está indisponível; o histórico não a substitui.</p> : atual.data && <p className="text-xs text-muted-foreground">Última atualização em {new Date(atual.data.atualizado_em).toLocaleString('pt-BR')} · não é atualização em tempo real.</p>}
     {mensal.isError && pagina !== 'analise' && <p className="text-sm text-destructive">Histórico mensal indisponível nesta leitura.</p>}
   </section>;
