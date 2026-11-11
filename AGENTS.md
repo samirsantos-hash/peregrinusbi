@@ -53,4 +53,4 @@
 - Panel rain; login ropes. Clips pair metrics. Campaign TACOS: same-date store revenue, gaps=null; no API/import blends. Flex uses scoped monthly rows, confirmed city, nullable coverage and same-store comparisons.
 - Query cache: user-scoped IndexedDB aggregates, 24h, purged on logout/access change; restore before routes, no blocking revalidation; >1s reports `resposta_lenta`.
 - Every change runs `scripts/k6-publico.js` first (rules in docs/teste-carga-k6.md).
-- Login and password-reset requests go through the `auth-guard` function (hashed email/IP attempts in `auth_tentativas`, neutral reset reply, fixed brand-domain reset link, security alerts in `developer_alerts`); the client never calls signInWithPassword or resetPasswordForEmail directly, so limits apply.
+- Login/reset go only through `auth-guard` (hashed attempts, neutral reply, brand-domain link) so limits apply.
