@@ -28,5 +28,4 @@
 - `ml-sync-loja` (admin ou x-refresh-secret; sem loja no corpo e com segredo, atualiza todas as lojas ativas em sequência — rotina a cada 15 min, retomando lojas sem atualização há 20 h por ~110 s de execução; o segredo do cofre é copiado do ambiente pela ação admin `sincronizar_segredo`) lê o ML com o token da própria loja e grava um resumo por tema em `ml_sync_tema`; o painel mostra cada tema na aba correspondente via `src/components/ml/MlAoVivo.tsx`, sem misturar com as fontes de planilha.
 - Toda função lê o acesso da loja por `_shared/mlTokenAtual.ts`: se venceu ou vence em até 5 min, renova na hora com o mesmo lock da `ml-token-refresh` (refresh token é de uso único); a rotina de 30 min continua como renovação antecipada.
 
-- Login/reset go only through `auth-guard` (hashed attempts, neutral reply, brand-domain link); the client never calls signInWithPassword/resetPasswordForEmail directly, so limits apply.
-- Successful logins in `auth-guard` record IP/device in `acessos_login` (90-day retention, master/dev read); a device unseen in 90 days with prior history alerts developers and emails the user via the `novo-acesso` template.
+- Auth rules (login/reset and login-access records) live in supabase/functions/auth-guard/AGENTS.md.
