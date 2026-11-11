@@ -3729,3 +3729,19 @@ html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-pa
   background: linear-gradient(135deg, hsl(var(--luz-brilho)) 0%, hsl(0 0% 100% / 0.01) 20%, transparent 35%);
 }
 html.dark body .peregrinus-panel .side-card-glass > * { position: relative; z-index: 1; }
+
+/* Cartões de gráfico usam o mesmo vidro do menu de pesquisa (denso e nítido) */
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.vidro-grafico, .multilojas-chart).vidro-grafico,
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .multilojas-page .multilojas-chart.multilojas-chart {
+  background: var(--store-menu-fill) !important;
+  backdrop-filter: blur(24px) saturate(210%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(210%) !important;
+  border: 1px solid var(--store-menu-edge) !important;
+  border-top-color: var(--store-menu-top) !important;
+  border-radius: 14px !important;
+  box-shadow: var(--store-menu-shadow) !important;
+}
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel :is(.vidro-grafico, .multilojas-chart)::after { content: none !important; }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html body .peregrinus-panel :is(.vidro-grafico, .multilojas-chart) { background: hsl(var(--popover)) !important; }
+}
