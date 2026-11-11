@@ -516,9 +516,7 @@ const Index = () => {
               dailyDisponivel={!isConsolidado && hasRealData && allKpisDaily.length > 0}
             />
             {didatico ? <div className="flex items-start gap-0 lg:gap-4 isolate">
-              <PainelSidebar didatico ativa="efficiency" subativa={paginaDidatica(searchParams.get('subaba'))} onSubChange={selecionarSubanalise} onChange={() => selecionarSubanalise('efficiency', 'indicadores')} mobileAberto={menuAberto} onMobileChange={setMenuAberto} />
               <div className="panel-content relative z-0 flex-1 min-w-0 space-y-4">
-                <div className="lg:hidden"><Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}><Menu className="h-4 w-4" />Seções</Button></div>
                 <GuardaPermissao permissao="resumo.visualizar"><MetricasNegocioDidatico pagina={paginaDidatica(searchParams.get('subaba'))} custId={sellerCustIdMap[selectedSeller]} mensal={allKpisMonthly} inicio={dateRange?.from ? formatDateString(dateRange.from) : undefined} fim={dateRange?.to ? formatDateString(dateRange.to) : undefined} /></GuardaPermissao>
               </div>
             </div> : <Tabs value={activeTab} onValueChange={setActiveTab} className="resumo-apple-glass painel-apple-glass w-full">
