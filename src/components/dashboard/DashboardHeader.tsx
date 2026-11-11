@@ -306,7 +306,7 @@ const DashboardHeader = ({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="dropdown-vidro flex w-[340px] max-w-[calc(100vw-24px)] flex-col p-0" align="start">
+              <PopoverContent className="dropdown-vidro flex w-[460px] max-w-[calc(100vw-24px)] flex-col p-0" align="start">
                 <Command
                   className="bg-transparent"
                   filter={(value, search) => {
@@ -346,7 +346,7 @@ const DashboardHeader = ({
                           data-active={selectedSeller === s.id}
                         >
                           <Check className={cn("h-4 w-4 shrink-0", selectedSeller === s.id ? "opacity-100" : "opacity-0")} />
-                          <div className="flex min-w-0 flex-1 items-center gap-4 whitespace-nowrap">
+                          <div className="flex min-w-0 flex-1 items-center gap-3 whitespace-nowrap">
                             <span className="item-nome min-w-0 flex-1 truncate" title={s.nickname}>Loja: {s.nickname}</span>
                             <span className="item-subtext ml-auto shrink-0 tabular-nums">Cust ID: {s.custId}</span>
                           </div>
