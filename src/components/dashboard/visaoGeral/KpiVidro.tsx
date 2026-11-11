@@ -94,7 +94,7 @@ export default function KpiVidro({
       data-tema={temaDoVidro(delta, melhorQuando)}
       className={cn(
         // O material e o movimento pertencem ao CSS temático do vidro.
-        "kpi-vidro noite-vidro flex h-full min-w-0 flex-col justify-between gap-4 p-4 sm:p-5",
+        "kpi-vidro noite-vidro liquid-card flex h-full min-w-0 flex-col justify-between gap-4 p-4 sm:p-5",
         className,
       )}
     >

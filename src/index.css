@@ -3552,3 +3552,47 @@ html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glas
     border-top-color: var(--summary-3d-top) !important;
   }
 }
+
+/* Lente translúcida (referência 11/11): fundo quase invisível, desfoque revela linhas. Só tema escuro; claro mantém leitura. */
+.dark .resumo-apple-glass {
+  --lente-fundo: 0 0% 100% / 0.02;
+  --lente-borda: 0 0% 100% / 0.03;
+  --lente-topo: 0 0% 100% / 0.12;
+  --lente-verde: 155 63% 53%;
+  --lente-vermelho: 7 86% 45%;
+}
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.dark .resumo-apple-glass :is(.noite-vidro,.ds-kpi,.carteira-kpi.carteira-kpi.carteira-kpi,.liquid-card),
+.dark html body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.noite-vidro,.ds-kpi,.carteira-kpi.carteira-kpi.carteira-kpi,.liquid-card),
+html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.noite-vidro,.ds-kpi,.carteira-kpi.carteira-kpi.carteira-kpi,.liquid-card) {
+  background: hsl(var(--lente-fundo)) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
+  border: 1px solid hsl(var(--lente-borda)) !important;
+  border-top-color: hsl(var(--lente-topo)) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 16px 40px -10px hsl(0 0% 0% / 0.4), inset 0 1px 1px hsl(0 0% 100% / 0.06) !important;
+}
+html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass .liquid-card[data-tema="verde"] {
+  background: linear-gradient(145deg, hsl(var(--lente-verde) / 0.05), hsl(0 0% 100% / 0.01)) !important;
+  border-top-color: hsl(var(--lente-verde) / 0.18) !important;
+  border-left-color: hsl(var(--lente-verde) / 0.05) !important;
+}
+html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass .liquid-card[data-tema="vermelho"] {
+  background: linear-gradient(145deg, hsl(var(--lente-vermelho) / 0.05), hsl(0 0% 100% / 0.01)) !important;
+  border-top-color: hsl(var(--lente-vermelho) / 0.18) !important;
+  border-left-color: hsl(var(--lente-vermelho) / 0.05) !important;
+}
+html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass .liquid-card[data-tema="neutro"] {
+  background: linear-gradient(145deg, hsl(0 0% 100% / 0.03), hsl(0 0% 100% / 0)) !important;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass .liquid-card[data-tema="verde"]:hover {
+    background: linear-gradient(145deg, hsl(var(--lente-verde) / 0.08), hsl(0 0% 100% / 0.02)) !important;
+  }
+  html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass .liquid-card[data-tema="vermelho"]:hover {
+    background: linear-gradient(145deg, hsl(var(--lente-vermelho) / 0.08), hsl(0 0% 100% / 0.02)) !important;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .dark .resumo-apple-glass { --lente-fundo: var(--panel-surface); }
+}
