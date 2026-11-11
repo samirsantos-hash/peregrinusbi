@@ -4,12 +4,13 @@ import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { TrendingUp, TrendingDown, GraduationCap, SlidersHorizontal, Store, Check, ChevronsUpDown, RefreshCw, Copy, Calendar as CalendarIcon } from "lucide-react";
+import { TrendingUp, TrendingDown, GraduationCap, SlidersHorizontal, Store, Check, ChevronsUpDown, Star, RefreshCw, Copy, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { ptBR } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import { lerFavoritas, salvarFavoritas, alternarFavorita, ordenarComFavoritas } from "@/lib/lojasFavoritas";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
 import { useJuniorMode } from "@/hooks/useJuniorMode";
@@ -93,6 +94,8 @@ const DashboardHeader = ({
   onModoPainelChange,
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
+  const [favoritas, setFavoritas] = useState<string[]>(() => lerFavoritas());
+  const alternarFav = (id: string) => setFavoritas((atual) => { const n = alternarFavorita(atual, id); salvarFavoritas(n); return n; });
   const [calOpen, setCalOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("");
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
@@ -331,7 +334,7 @@ const DashboardHeader = ({
                         <Check className={cn("h-4 w-4 shrink-0", !selectedSeller ? "opacity-100" : "opacity-0")} />
                         <span className="min-w-0 break-words">Todas as lojas da sua carteira</span>
                       </CommandItem>
-                      {sellers.map((s) => (
+                      {ordenarComFavoritas(sellers, favoritas).map((s) => (
                         <CommandItem
                           key={s.id}
                           value={`${s.nickname} ${s.custId}`}
@@ -347,6 +350,17 @@ const DashboardHeader = ({
                             <span className="item-nome min-w-0 flex-1 truncate" title={s.nickname}>Loja: {s.nickname}</span>
                             <span className="item-subtext ml-auto shrink-0 tabular-nums">Cust ID: {s.custId}</span>
                           </div>
+                          <button
+                            type="button"
+                            aria-label={favoritas.includes(s.id) ? `Desafixar ${s.nickname}` : `Fixar ${s.nickname} no topo`}
+                            aria-pressed={favoritas.includes(s.id)}
+                            title={favoritas.includes(s.id) ? "Desafixar do topo" : "Fixar no topo"}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); alternarFav(s.id); }}
+                            className="shrink-0 rounded-md p-1 text-muted-foreground transition-transform hover:text-primary active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            <Star className={cn("h-4 w-4", favoritas.includes(s.id) && "fill-primary text-primary")} />
+                          </button>
                         </CommandItem>
                       ))}
                     </CommandGroup>
