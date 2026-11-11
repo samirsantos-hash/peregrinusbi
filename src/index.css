@@ -3596,3 +3596,18 @@ html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-pa
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .dark .resumo-apple-glass { --lente-fundo: var(--panel-surface); }
 }
+
+/* Desbloqueio de camadas: o vidro enxerga as linhas topográficas do fundo */
+html body .peregrinus-panel,
+html body .peregrinus-panel .resumo-apple-glass,
+html body .peregrinus-panel section,
+html body .peregrinus-panel .cards-grid { background: transparent !important; }
+html body .peregrinus-panel .resumo-apple-glass .liquid-card { position: relative; z-index: 10; transform: translateZ(0); }
+.dark html body .peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.liquid-card, .noite-vidro),
+html.dark body .peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.liquid-card, .noite-vidro) {
+  background: hsl(0 0% 100% / 0.015) !important;
+  backdrop-filter: blur(28px) saturate(220%) contrast(110%) brightness(1.1) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(220%) contrast(110%) brightness(1.1) !important;
+}
+.painel-ambiente-linhas g { stroke-width: 0.95px !important; filter: drop-shadow(0 0 2px hsl(155 63% 53% / 0.4)); }
+@media (prefers-reduced-transparency: reduce) { .painel-ambiente-linhas g { filter: none; } }
