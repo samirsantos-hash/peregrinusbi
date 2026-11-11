@@ -3644,8 +3644,12 @@ html.dark body .peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.liqui
 /* Céu noturno suave (tema escuro) */
 html.dark body {
   background-color: hsl(150 25% 2%);
-  background-image: radial-gradient(ellipse 120% 100% at 50% -10%, hsl(152 46% 7%) 0%, hsl(160 23% 3%) 50%, hsl(120 20% 1%) 100%);
-  background-attachment: fixed; background-repeat: no-repeat;
+  background-image:
+    radial-gradient(ellipse 120% 120% at 30% -10%, hsl(147 56% 7%) 0%, hsl(150 50% 2%) 50%, hsl(120 33% 1%) 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  background-attachment: fixed; background-repeat: no-repeat, repeat;
+  background-size: 100% 100%, 256px 256px;
+  background-blend-mode: screen;
 }
 /* Controle de intensidade do vidro */
 .glass-slider-container { align-items: center; gap: 12px; padding: 8px 16px; border-radius: 999px; width: max-content;
