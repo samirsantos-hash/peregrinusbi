@@ -1,5 +1,10 @@
 # Roadmap
 
+## Refinamento translúcido somente no Resumo — 11/11
+- [x] Substituir acabamento 3D por vidro neutro, borda 8%, topo discreto, blur 24px e saturação 140%; raio 16px, sem reflexo diagonal exagerado. Preservar tema claro, dados, navegação e fundo das demais áreas.
+- [x] Teste público prévio: 28.488 requisições, zero falhas, p95 documentos 50,40ms; não mede capacidade autenticada. Compilação OK, sem publicar.
+- [ ] Conferência visual bloqueada: navegador com sessão autorizada não respondeu em 70s; Resumo real, temas, celular, foco, menus e movimento reduzido não verificados. Requer navegador de teste funcional.
+
 ## Vidro 3D somente no Resumo — 11/11
 - [x] Adaptar espessura, bordas direcionais e reflexo diagonal do arquivo enviado somente ao Resumo, preservando textos, números, dados e navegação; não ampliar cartões nem acumular filtros internos.
 - [x] Teste público prévio: 28.498 requisições, zero falhas; não mede capacidade autenticada. Sem publicação ou expansão para outras áreas.
