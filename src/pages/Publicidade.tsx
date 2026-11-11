@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ExternalLink, Loader2, Plus, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { precisaCompletar } from '@/lib/completarAds';
 import { resolverContaPublicidade } from '@/lib/contaPublicidade';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader } from "@/components/ds";
@@ -90,6 +91,7 @@ export default function Publicidade() {
           faturamento: fat,
         }, hojeRef, DIAS),
         faturamentoEm: (vendas.data?.atualizado_em ?? null) as string | null,
+        ultimoDia: (serie.data.length ? serie.data[serie.data.length - 1].dia : null) as string | null,
       };
     },
   });
@@ -136,6 +138,20 @@ export default function Publicidade() {
   };
 
   const painel = dados.data?.painel;
+  // Faltam dias recentes? Busca sozinho uma vez por loja nesta sessão; spinner nas células até terminar (máx. 90 s).
+  const [completando, setCompletando] = useState(false);
+  const ultimoDia = dados.data?.ultimoDia;
+  useEffect(() => {
+    if (!contaId || !dados.isSuccess || !painel) return;
+    const chave = `peregrinus:ads-completar:${contaId}`;
+    if (sessionStorage.getItem(chave) || !precisaCompletar(ultimoDia, painel.hoje)) return;
+    sessionStorage.setItem(chave, "1");
+    setCompletando(true);
+    const limite = setTimeout(() => setCompletando(false), 90_000);
+    chamarFuncaoMl("ml-ads-sync", { account_id: contaId }).catch(() => undefined)
+      .finally(() => { clearTimeout(limite); setCompletando(false); recarregar(); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contaId, dados.isSuccess, ultimoDia]);
   const fonte = estado.data
     ? `Fonte: Mercado Livre · atualizado em ${dataHoraBr(estado.data.synced_at)}${painel ? ` · ${DIAS} dias até ${painel.hoje.split("-").reverse().slice(0, 2).join("/")}` : ""}`
     : "Fonte: Mercado Livre";
@@ -171,6 +187,7 @@ export default function Publicidade() {
           }
         />
 
+        {completando && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Completando dados…</p>}
         {aviso && <p className="text-sm text-ec-ambar">{isDesenvolvedor ? aviso : 'A atualização não foi concluída integralmente. Os dados disponíveis foram mantidos.'}</p>}
         {contas.isLoading && <Carregando />}
         {contas.isError && <EmptyState falta="Não foi possível carregar suas contas." acao="Recarregue a página." />}
@@ -228,7 +245,7 @@ export default function Publicidade() {
                   <VisaoGeralAds painel={painel} faturamentoEm={dados.data?.faturamentoEm ?? null} aoVerAnuncios={(filtro) => mudar({ aba: "anuncios", filtro })} />
                 </TabsContent>
                 <TabsContent value="campanhas" className="mt-4">
-                  <CampanhasAds painel={painel} acao={acao} custId={custId ?? ''} contaId={contaId} />
+                  <CampanhasAds painel={painel} acao={acao} custId={custId ?? ''} contaId={contaId} completando={completando} />
                 </TabsContent>
                 <TabsContent value="anuncios" className="mt-4">
                   <AnunciosAds

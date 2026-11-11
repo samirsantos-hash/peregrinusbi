@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import CampanhaGrafico, { type LinhaDiaCampanha } from "@/components/ml/ads/CampanhaGrafico";
 import { useAnaliseMl } from "@/hooks/useAnaliseMl";
 import { fetchAllRows } from "@/lib/fetchAllRows";
+import { CelulaCarregando } from "@/components/ds/CelulaCarregando";
 import { tacosCampanha, type FaturamentoDia } from "@/lib/campanhaEvolucao";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ds";
@@ -22,7 +23,7 @@ const ativa = (s: string | null) => (s ?? "").toLowerCase() === "active";
 type GrupoResumo = PainelAds["grupos"][number];
 
 /** Detalhe expandido: série diária da campanha e estatísticas do anúncio principal lidas ao vivo. */
-function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, tacos, carregando, limites }: { c: CampanhaLinha; custId: string; item: GrupoResumo | null; i: any; somas?: { impressoes: number; cliques: number; unidades: number }; linhas: LinhaDiaCampanha[]; faturamentoDia: FaturamentoDia[]; tacos: number | null; carregando: boolean; limites: PainelAds['limites'] }) {
+function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, tacos, carregando, completando, limites }: { c: CampanhaLinha; custId: string; item: GrupoResumo | null; i: any; somas?: { impressoes: number; cliques: number; unidades: number }; linhas: LinhaDiaCampanha[]; faturamentoDia: FaturamentoDia[]; tacos: number | null; carregando: boolean; completando: boolean; limites: PainelAds['limites'] }) {
   const est = useQuery({
     queryKey: ["ads-camp-item", custId, item?.item_id],
     enabled: !!custId && !!item?.item_id,
@@ -56,7 +57,7 @@ function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, ta
         {kpis.map(([r, v]) => (
           <div key={r} className="space-y-1">
             <p className="text-[11px] text-muted-foreground">{r}</p>
-            <p className="text-base font-semibold tabular-nums">{v}</p>
+            <p className="text-base font-semibold tabular-nums"><CelulaCarregando valor={v} carregando={completando || carregando || est.isLoading} /></p>
           </div>
         ))}
       </div>
@@ -67,7 +68,7 @@ function DetalheCampanha({ c, custId, item, i, somas, linhas, faturamentoDia, ta
   );
 }
 
-export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { painel: PainelAds; acao: AcaoEmLote; custId?: string; contaId?: string }) {
+export function CampanhasAds({ painel, acao, custId = "", contaId = "", completando = false }: { painel: PainelAds; acao: AcaoEmLote; custId?: string; contaId?: string; completando?: boolean }) {
   const { pode } = usePermissoes();
   const alterar = pode('publicidade.campanhas');
   const [form, setForm] = useState<{ campanha: CampanhaLinha | null } | null>(null);
@@ -89,6 +90,7 @@ export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { pain
     },
   });
   // Anúncio principal de cada campanha: o de maior investimento no período.
+  const ocupado = completando || serie.isLoading || resumo.isLoading;
   const principal = new Map<number, GrupoResumo>();
   const itensCamp = new Map<number, Set<string>>();
   for (const g of painel.grupos) {
@@ -215,13 +217,13 @@ export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { pain
                       {c.roas_target != null ? vezes(c.roas_target) : c.acos_target != null ? `ACOS ${num(c.acos_target, 1)}%` : "—"}
                     </td>
                     <td className="pr-2 py-1.5 text-right">{ad ? `${num(ad.ativos)} / ${num(ad.total)}` : "0"}</td>
-                    <td className="pr-2 py-1.5 text-right">{brl(i?.investimento, true)}</td>
-                    <td className="pr-2 py-1.5 text-right">{brl(i?.receita, true)}</td>
-                    <td className={`pr-2 py-1.5 text-right ${abaixoAlvo ? "text-ec-ambar font-medium" : ""}`} title={abaixoAlvo ? "Abaixo do ROAS alvo da campanha" : undefined}>{vezes(i?.roas)}</td>
-                    <td className="pr-2 py-1.5 text-right">{pctFracao(i?.acos)}</td>
-                    <td className="pr-2 py-1.5 text-right" title="Participação do investimento desta campanha no faturamento total da loja">{resumo.isLoading || serie.isLoading ? "…" : pctFracao(tacos, 2)}</td>
-                    <td className="pr-2 py-1.5 text-right">{pctFracao(i?.ctr, 2)}</td>
-                    <td className="pr-2 py-1.5 text-right">{brl(i?.cpc, true)}</td>
+                    <td className="pr-2 py-1.5 text-right"><CelulaCarregando valor={brl(i?.investimento, true)} carregando={ocupado} /></td>
+                    <td className="pr-2 py-1.5 text-right"><CelulaCarregando valor={brl(i?.receita, true)} carregando={ocupado} /></td>
+                    <td className={`pr-2 py-1.5 text-right ${abaixoAlvo ? "text-ec-ambar font-medium" : ""}`} title={abaixoAlvo ? "Abaixo do ROAS alvo da campanha" : undefined}><CelulaCarregando valor={vezes(i?.roas)} carregando={ocupado} /></td>
+                    <td className="pr-2 py-1.5 text-right"><CelulaCarregando valor={pctFracao(i?.acos)} carregando={ocupado} /></td>
+                    <td className="pr-2 py-1.5 text-right" title="Participação do investimento desta campanha no faturamento total da loja"><CelulaCarregando valor={pctFracao(tacos, 2)} carregando={ocupado} /></td>
+                    <td className="pr-2 py-1.5 text-right"><CelulaCarregando valor={pctFracao(i?.ctr, 2)} carregando={ocupado} /></td>
+                    <td className="pr-2 py-1.5 text-right"><CelulaCarregando valor={brl(i?.cpc, true)} carregando={ocupado} /></td>
                     <td className="pr-2 py-1.5 max-w-[240px]">
                       {m && m.somas.dias === 0 ? <span className="text-muted-foreground">sem métrica no período</span>
                         : al.length ? <span className="text-destructive">{al.join(" · ")}</span>
@@ -239,7 +241,7 @@ export function CampanhasAds({ painel, acao, custId = "", contaId = "" }: { pain
                   </tr>
                   {exp && (
                     <tr className="border-t border-border bg-muted/10">
-                      <td colSpan={15}><DetalheCampanha c={c} custId={custId} item={g} i={i} somas={m?.somas} linhas={linhas} faturamentoDia={faturamentoDia} tacos={tacos} carregando={serie.isLoading} limites={painel.limites} /></td>
+                      <td colSpan={15}><DetalheCampanha c={c} custId={custId} item={g} i={i} somas={m?.somas} linhas={linhas} faturamentoDia={faturamentoDia} tacos={tacos} carregando={serie.isLoading} completando={ocupado} limites={painel.limites} /></td>
                     </tr>
                   )}
                   </Fragment>
