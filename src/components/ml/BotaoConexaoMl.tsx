@@ -47,8 +47,8 @@ export default function BotaoConexaoMl({ custId }: { custId?: string }) {
         <PopoverTrigger asChild>
           <Button variant="outline" className={base} aria-label="Mercado Livre conectado — ver detalhes">
             <span className="relative flex h-2 w-2" aria-hidden>
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ml-amarelo opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-ml-amarelo" />
             </span>
             <span className="hidden sm:inline">Mercado Livre conectado</span>
             <span className="sm:hidden">Conectado</span>
@@ -69,6 +69,7 @@ export default function BotaoConexaoMl({ custId }: { custId?: string }) {
     <Button onClick={conectar} disabled={abrindo}
       className={`${base} border border-ml-amarelo/40 bg-ml-amarelo/15 text-foreground hover:bg-ml-amarelo/25`}>
       {abrindo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plug className="h-4 w-4" />}
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-destructive" aria-label="Desconectado" />
       <span className="hidden sm:inline">Conectar Mercado Livre</span>
       <span className="sm:hidden">Conectar ML</span>
     </Button>
