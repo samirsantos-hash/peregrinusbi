@@ -3611,3 +3611,28 @@ html.dark body .peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.liqui
 }
 .painel-ambiente-linhas g { stroke-width: 0.95px !important; filter: drop-shadow(0 0 2px hsl(155 63% 53% / 0.4)); }
 @media (prefers-reduced-transparency: reduce) { .painel-ambiente-linhas g { filter: none; } }
+
+/* Pesquisa do menu de lojas: lupa e campo alinhados, sem borda/fundo duplicados */
+.dropdown-vidro { overflow: hidden; }
+.dropdown-vidro [cmdk-input-wrapper] { display: flex; align-items: center; gap: 0; padding: 0 16px; background: hsl(0 0% 0% / .25); }
+:root:not(.dark) .dropdown-vidro [cmdk-input-wrapper] { background: hsl(0 0% 100% / .35); }
+.dropdown-vidro [cmdk-input-wrapper] svg { width: 18px !important; height: 18px !important; flex-shrink: 0; margin-right: 0 !important; }
+.dropdown-vidro .dropdown-vidro-search { flex: 1 1 auto; min-width: 0; height: auto; padding: 14px 12px; background: transparent !important; border: 0 !important; outline: none !important; box-shadow: none !important; border-radius: 0; font-size: .85rem; }
+
+/* Gráficos de Multilojas (tema escuro): fio metálico girando na borda */
+@property --metal-angle { syntax: "<angle>"; initial-value: 0deg; inherits: false; }
+.dark .multilojas-page .multilojas-chart {
+  position: relative; isolation: isolate; border-color: transparent !important; border-radius: 20px;
+  background: hsl(0 0% 100% / .02) !important;
+  backdrop-filter: blur(32px) saturate(180%); -webkit-backdrop-filter: blur(32px) saturate(180%);
+  box-shadow: 0 16px 40px hsl(0 0% 0% / .3);
+}
+.dark .multilojas-page .multilojas-chart::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none; z-index: 0;
+  background: conic-gradient(from var(--metal-angle), hsl(0 0% 100% / .05) 0deg 60deg, hsl(0 0% 100% / .6) 120deg, hsl(155 63% 53% / .5) 150deg, hsl(0 0% 100% / .05) 210deg 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  animation: giroMetal 6s linear infinite;
+}
+@keyframes giroMetal { to { --metal-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) { .dark .multilojas-page .multilojas-chart::after { animation: none; --metal-angle: 120deg; } }
