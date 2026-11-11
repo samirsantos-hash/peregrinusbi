@@ -50,6 +50,27 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_tentativas: {
+        Row: {
+          chave: string
+          criado_em: string
+          id: number
+          tipo: string
+        }
+        Insert: {
+          chave: string
+          criado_em?: string
+          id?: never
+          tipo: string
+        }
+        Update: {
+          chave?: string
+          criado_em?: string
+          id?: never
+          tipo?: string
+        }
+        Relationships: []
+      }
       benchmark_uplift_full: {
         Row: {
           base_amostra: string

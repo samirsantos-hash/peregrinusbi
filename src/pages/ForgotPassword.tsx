@@ -30,18 +30,24 @@ const ForgotPassword = () => {
 
   const sendReset = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+    // O servidor limita os pedidos (3 a cada 15 min) e o link volta sempre ao domínio do painel.
+    const { error } = await supabase.functions.invoke("auth-guard", { body: { acao: "reset", email } });
     setLoading(false);
 
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      let minutos: number | undefined;
+      const ctx = (error as { context?: Response }).context;
+      if (ctx && ctx.status === 429) {
+        try { minutos = (await ctx.json())?.minutos; } catch { /* sem corpo */ }
+        toast({ title: "Muitos pedidos", description: `Aguarde ${minutos ?? 15} minutos para pedir um novo link.`, variant: "destructive" });
+      } else {
+        toast({ title: "Não foi possível enviar", description: "Tente novamente em instantes.", variant: "destructive" });
+      }
     } else {
       setSent(true);
       setSentTo(email);
-      setResendCooldown(30);
-      toast({ title: "E-mail enviado", description: `Link enviado para ${email}` });
+      setResendCooldown(60);
+      toast({ title: "Pedido recebido", description: "Se o e-mail estiver cadastrado, o link chega em instantes." });
     }
   };
 
@@ -84,7 +90,7 @@ const ForgotPassword = () => {
         ) : (
           <div className="space-y-3">
             <div className="rounded-md border border-border/50 bg-muted/30 p-3 text-center">
-              <p className="text-xs text-muted-foreground">Link enviado para:</p>
+              <p className="text-xs text-muted-foreground">Pedido feito para:</p>
               <p className="text-sm font-medium break-all">{sentTo}</p>
             </div>
             <p className="text-xs text-center text-muted-foreground">

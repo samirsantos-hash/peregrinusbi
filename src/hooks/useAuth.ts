@@ -163,8 +163,30 @@ export function useAuth() {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error };
+    // Passa pela proteção de tentativas: 3 erros alertam, 5 em 30 min bloqueiam.
+    const { data, error } = await supabase.functions.invoke("auth-guard", {
+      body: { acao: "login", email, senha: password },
+    });
+    if (error || !data?.access_token) {
+      let corpo: { error?: string; minutos?: number; restantes?: number } = data ?? {};
+      const ctx = (error as { context?: Response } | null)?.context;
+      if (ctx && typeof ctx.json === "function") {
+        try { corpo = await ctx.json(); } catch { /* resposta sem corpo */ }
+      }
+      if (corpo.error === "bloqueado") {
+        return { error: new Error(`Acesso bloqueado por muitas tentativas. Tente novamente em ${corpo.minutos ?? 30} minutos.`) };
+      }
+      if (corpo.error === "credenciais") {
+        const aviso = corpo.restantes && corpo.restantes <= 2 ? ` Restam ${corpo.restantes} tentativas antes do bloqueio.` : "";
+        return { error: new Error(`E-mail ou senha incorretos.${aviso}`) };
+      }
+      return { error: new Error("Não foi possível entrar agora. Tente novamente.") };
+    }
+    const { error: sessaoErro } = await supabase.auth.setSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+    });
+    return { error: sessaoErro };
   };
 
   const signOut = async () => {
