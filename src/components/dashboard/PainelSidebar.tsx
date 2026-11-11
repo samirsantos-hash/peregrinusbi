@@ -171,7 +171,7 @@ function Conteudo({
                   <li key={id}>
                     <Button variant="ghost" aria-label={tab.label} aria-expanded={subs.length ? aberta === id : undefined}
                       onClick={() => {
-                        if (id === "efficiency" && !aberta === id) {
+                        if (id === "efficiency" && aberta !== id) {
                           window.__lovableEvents?.track?.("project.summary_tree_opened", {
                             consultant_access: consultantAccess,
                             seller_scope: sellerScope,
