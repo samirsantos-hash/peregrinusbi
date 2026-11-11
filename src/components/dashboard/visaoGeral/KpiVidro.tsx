@@ -89,14 +89,11 @@ export default function KpiVidro({
   focal,
   className,
 }: KpiVidroProps) {
-  const temaVidro = temaDoVidro(delta, melhorQuando);
   return (
     <div
-      data-tema={temaVidro}
       className={cn(
-        "kpi-vidro noite-vidro liquid-card flex h-full min-w-0 flex-col justify-between gap-4 rounded-2xl border border-border bg-card p-4 sm:p-5",
-        "backdrop-blur-xl",
-        "transition-transform duration-150",
+        // O material e o movimento pertencem ao CSS temático do vidro.
+        "kpi-vidro noite-vidro flex h-full min-w-0 flex-col justify-between gap-4 p-4 sm:p-5",
         className,
       )}
     >

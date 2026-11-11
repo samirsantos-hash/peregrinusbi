@@ -1,5 +1,10 @@
 # Roadmap
 
+## Indicadores sem camada opaca — 11/11
+- [x] Aplicar a estrutura enviada ao KpiVidro: retirar bg-card, borda, blur e liquid-card do cartão; deixar o acabamento sob controle do CSS existente. Preservar cores temáticas legíveis, animação numérica e comparação sem alterar cálculos ou fundo.
+- [x] Quatro regressões aprovadas e compilação OK; teste público prévio: 28.447 requisições, zero falhas (não mede capacidade autenticada). Sem publicação.
+- [ ] Conferência visual bloqueada: sessão restaurada não exibiu um KpiVidro em 20s; aparência final, temas e celular ainda não verificados.
+
 ## Refinamento translúcido somente no Resumo — 11/11
 - [x] Substituir acabamento 3D por vidro neutro, borda 8%, topo discreto, blur 24px e saturação 140%; raio 16px, sem reflexo diagonal exagerado. Preservar tema claro, dados, navegação e fundo das demais áreas.
 - [x] Teste público prévio: 28.488 requisições, zero falhas, p95 documentos 50,40ms; não mede capacidade autenticada. Compilação OK, sem publicar.
