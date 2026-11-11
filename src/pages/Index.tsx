@@ -521,7 +521,7 @@ const Index = () => {
                 <div className="lg:hidden"><Button variant="outline" size="sm" className="gap-2" onClick={() => setMenuAberto(true)}><Menu className="h-4 w-4" />Seções</Button></div>
                 <GuardaPermissao permissao="resumo.visualizar"><MetricasNegocioDidatico pagina={paginaDidatica(searchParams.get('subaba'))} custId={sellerCustIdMap[selectedSeller]} mensal={allKpisMonthly} inicio={dateRange?.from ? formatDateString(dateRange.from) : undefined} fim={dateRange?.to ? formatDateString(dateRange.to) : undefined} /></GuardaPermissao>
               </div>
-            </div> : <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            </div> : <Tabs value={activeTab} onValueChange={setActiveTab} className="resumo-apple-glass painel-apple-glass w-full">
               <div className="flex items-start gap-0 lg:gap-4 isolate">
                 <PainelSidebar
                   consultantAccess={souConsultor}
@@ -567,7 +567,7 @@ const Index = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                   className="mt-0">
-                  <TabsContent value="efficiency" className="resumo-apple-glass mt-0 space-y-5">
+                  <TabsContent value="efficiency" className="mt-0 space-y-5">
                     <NovidadesPrompt />
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     {pagina === "geral" && selectedSeller && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} />}
