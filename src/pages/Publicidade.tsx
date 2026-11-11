@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, ExternalLink, Loader2, Plus, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { resolverContaPublicidade } from '@/lib/contaPublicidade';
@@ -182,10 +182,22 @@ export default function Publicidade() {
           <EmptyState falta="Publicidade ainda não foi lida nesta conta." acao="Clique em Atualizar para ler campanhas e métricas do Mercado Livre." />
         )}
         {estado.data?.status === "sem_product_ads" && (
-          <EmptyState
-            falta="Esta conta não tem Product Ads ativo no Mercado Livre."
-            acao="O vendedor ativa em Mercado Livre > Publicidade. Depois, clique em Atualizar."
-          />
+          <div className="glass-card rounded-xl p-5 space-y-3">
+            <p className="font-semibold">Criar a primeira campanha desta loja</p>
+            <p className="text-sm text-muted-foreground">
+              Esta loja ainda não usa Publicidade no Mercado Livre. A primeira campanha é criada lá, porque o Mercado Livre pede que o vendedor aceite os termos de Publicidade uma vez. Depois disso, clique em Atualizar: as próximas campanhas e anúncios podem ser criados e ajustados por aqui.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" asChild>
+                <a href="https://ads.mercadolivre.com.br/" target="_blank" rel="noopener noreferrer">
+                  <Plus className="h-3.5 w-3.5 mr-1.5" /> Criar primeira campanha <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                </a>
+              </Button>
+              <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Já criei, atualizar
+              </Button>
+            </div>
+          </div>
         )}
 
         {estado.data?.status === "ativo" && (
