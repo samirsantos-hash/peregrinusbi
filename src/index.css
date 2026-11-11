@@ -3657,3 +3657,51 @@ input[type="range"].glass-slider::-webkit-slider-thumb { -webkit-appearance: non
   background: hsl(var(--primary)); border: 2px solid hsl(0 0% 100%); box-shadow: 0 0 10px hsl(var(--primary) / .6); transition: transform .1s ease; }
 input[type="range"].glass-slider::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: hsl(var(--primary)); border: 2px solid hsl(0 0% 100%); }
 input[type="range"].glass-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+/* Luz direcional e rebatida (Specular + Bounce) — só tema escuro, cartões do painel */
+:root {
+  --luz-especular: 0 0% 100% / 0.35;
+  --luz-especular-forte: 0 0% 100% / 0.5;
+  --luz-rebatida: 0 0% 100% / 0.1;
+  --luz-brilho: 0 0% 100% / 0.08;
+  --sombra-contato: 0 0% 0% / 0.5;
+  --sombra-dispersa: 0 0% 0% / 0.3;
+  --sombra-espessura: 0 0% 0% / 0.2;
+}
+html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.noite-vidro,.ds-kpi,.carteira-kpi.carteira-kpi.carteira-kpi,.liquid-card) {
+  position: relative;
+  border-radius: 28px !important;
+  isolation: isolate;
+  backdrop-filter: blur(48px) saturate(220%) contrast(110%) !important;
+  -webkit-backdrop-filter: blur(48px) saturate(220%) contrast(110%) !important;
+  box-shadow:
+    0 12px 24px -8px hsl(var(--sombra-contato)),
+    0 32px 64px -12px hsl(var(--sombra-dispersa)),
+    inset -1px -1px 2px hsl(var(--luz-rebatida)),
+    inset 0 -2px 4px hsl(var(--sombra-espessura)) !important;
+  transition: transform .3s cubic-bezier(.17,.84,.44,1), box-shadow .3s ease !important;
+}
+html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.noite-vidro,.ds-kpi,.carteira-kpi.carteira-kpi.carteira-kpi,.liquid-card)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  box-shadow: inset 1.5px 1.5px 2px hsl(var(--luz-especular));
+  background: linear-gradient(135deg, hsl(var(--luz-brilho)) 0%, hsl(0 0% 100% / 0.01) 25%, transparent 40%);
+  transition: box-shadow .3s ease;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.noite-vidro,.ds-kpi,.carteira-kpi.carteira-kpi.carteira-kpi,.liquid-card):hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow:
+      0 16px 32px -8px hsl(0 0% 0% / 0.6),
+      0 40px 80px -12px hsl(0 0% 0% / 0.4),
+      inset -1px -1px 2px hsl(0 0% 100% / 0.15),
+      inset 0 -2px 4px hsl(var(--sombra-espessura)) !important;
+  }
+  html.dark body .peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.noite-vidro,.ds-kpi,.carteira-kpi.carteira-kpi.carteira-kpi,.liquid-card):hover::after {
+    box-shadow: inset 1.5px 1.5px 3px hsl(var(--luz-especular-forte));
+  }
+}
