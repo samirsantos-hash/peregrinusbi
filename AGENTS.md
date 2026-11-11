@@ -53,3 +53,4 @@
 - Panel rain; login ropes. Clips pair metrics. Campaign TACOS: same-date store revenue, gaps=null; no API/import blends. Flex uses scoped monthly rows, confirmed city, nullable coverage and same-store comparisons.
 - Query cache: user-scoped IndexedDB aggregates, 24h, purged on logout/access change; restore before routes, no blocking revalidation; >1s reports `resposta_lenta`.
 - Every change runs `scripts/k6-publico.js` first (rules in docs/teste-carga-k6.md).
+- Client levels (Tiro/Medius/Peritus) are presets in src/lib/permissoes.ts that only fill the approved checklist; enforcement stays in the existing server-side permission RPCs.

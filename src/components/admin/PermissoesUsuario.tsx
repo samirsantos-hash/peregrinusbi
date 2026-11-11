@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
 import { Loader2, Save, ShieldCheck } from 'lucide-react';
-import { FUNCOES_PERMISSAO, alterarChecklist } from '@/lib/permissoes';
+import { FUNCOES_PERMISSAO, NIVEIS_CLIENTE, alterarChecklist, nivelDoChecklist } from '@/lib/permissoes';
 import { rpcPermissoes } from '@/hooks/usePermissoes';
 import { useToast } from '@/hooks/use-toast';
 
@@ -37,6 +37,11 @@ export default function PermissoesUsuario({ userId, email, onClose, onSaved }: {
       {!dados && !erro && <Loader2 className="h-6 w-6 animate-spin text-primary" />}
       {dados && <>
         <div className="border-b border-border pb-3 text-sm text-muted-foreground">{dados.master ? 'Master · acesso completo' : dados.legado ? 'Aguardando revisão · acessos atuais preservados' : dados.revisado_em ? `Revisado em ${new Date(dados.revisado_em).toLocaleString('pt-BR')}` : 'Sem funções liberadas'}</div>
+        {!dados.master && <section aria-label="Nível do cliente" className="space-y-2">
+          <h3 className="text-base font-semibold">Nível do cliente</h3>
+          <div className="grid gap-2 sm:grid-cols-3">{NIVEIS_CLIENTE.map(n => { const ativo = nivelDoChecklist(selecionadas) === n.id; return <button key={n.id} type="button" disabled={salvando} aria-pressed={ativo} onClick={() => setSelecionadas(n.permissoes)} className={`rounded-lg border p-3 text-left transition-transform active:scale-[0.98] ${ativo ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted/30'}`}><span className="block font-semibold">{n.nome}</span><span className="block text-xs text-muted-foreground">{n.descricao}</span></button>; })}</div>
+          <p className="text-xs text-muted-foreground">O nível marca as liberações abaixo; você ainda pode ajustar item a item antes de aprovar.</p>
+        </section>}
         <div className="flex-1 overflow-auto min-h-0">
           {grupos.map(grupo => <section key={grupo} className="mb-5">
             <h3 className="text-base font-semibold py-3">{grupo}</h3>
