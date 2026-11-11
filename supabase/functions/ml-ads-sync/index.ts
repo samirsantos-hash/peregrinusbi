@@ -122,6 +122,12 @@ Deno.serve(async (req) => {
     const paginar = (url: string) => paginarAds(url, ler, semTempo);
 
     const adv = await ler(`${API}/advertising/advertisers?product_id=PADS`, V1);
+    // 404 aqui significa que a loja nunca ativou Product Ads; não é falha.
+    if (!adv.ok && (adv.status === 404 || adv.codigo === "not_found")) {
+      await admin.from("ml_ads_estado").upsert({ account_id: conta.id, status: "sem_product_ads", synced_at: agoraIso() });
+      resumo.push({ ...base, status: "sem_product_ads", erros });
+      continue;
+    }
     if (!adv.ok) {
       resumo.push({ ...base, status: "erro", erros: [`${adv.codigo ?? adv.status}: ${adv.erro}`] });
       continue;
