@@ -22,9 +22,9 @@ export default function VendasHojeLateral({ custId }: { custId: string }) {
   const d = q.data, hora = new Date(d.consultadoEm);
   return (
     <aside className="flex min-w-0 flex-col gap-3" aria-label="Vendas de hoje">
-      <section className="noite-vidro overflow-hidden rounded-xl border border-primary/40 bg-card">
+      <section className="side-card-glass noite-vidro overflow-hidden rounded-xl border border-primary/40 bg-card">
         <div className="p-4">
-          <h4 className="text-sm font-semibold text-foreground">Vendas de hoje</h4>
+          <div className="flex items-center justify-between"><h4 className="text-sm font-semibold text-foreground">Vendas de hoje</h4><span className="live-indicator" aria-label="Ao vivo" /></div>
           <p className="mt-3 text-center text-3xl font-bold tabular-nums text-foreground">{brl(d.faturamento)}</p>
           <p className="mt-1 flex items-center justify-center gap-1.5 text-xs tabular-nums text-muted-foreground">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-destructive" aria-hidden />
