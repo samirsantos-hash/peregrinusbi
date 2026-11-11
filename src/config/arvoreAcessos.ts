@@ -20,11 +20,11 @@ RAMOS_ACESSOS.push(
   { id: 'multilojas', label: 'Multilojas', icon: Store, order: 13, descricao: 'Rede de lojas', juniorTip: '', acessos: [externo('rede', 'Visão da rede de lojas', '/multilojas', 'multilojas.visualizar')] },
 );
 export const GRUPOS_ACESSOS = [
-  { titulo: 'Visão geral', ids: ['efficiency', 'reputation'] },
-  { titulo: 'Anúncios', ids: ['anuncios', 'quality', 'clips'] },
-  { titulo: 'Desempenho comercial', ids: ['opportunities', 'competitiveness', 'publicidade', 'mercado'] },
-  { titulo: 'Operação', ids: ['logistics', 'perguntas'] },
-  { titulo: 'Planejamento', ids: ['pock', 'metas', 'correlacoes', 'multilojas'] },
+  { titulo: 'Comando Central', ids: ['efficiency', 'reputation'] },
+  { titulo: 'Motor de Vendas', ids: ['competitiveness', 'publicidade', 'opportunities', 'mercado'] },
+  { titulo: 'Anúncios & Conteúdo', ids: ['anuncios', 'quality', 'clips', 'correlacoes'] },
+  { titulo: 'Operação', ids: ['logistics', 'perguntas', 'pock'] },
+  { titulo: 'Planejamento', ids: ['metas', 'multilojas'] },
 ];
 
 // Only implemented read-only views belong to the simplified tree.
@@ -35,7 +35,7 @@ export const RAMOS_DIDATICOS: RamoArvore[] = RAMOS_ACESSOS.filter(r => r.id === 
     { id: 'historico', label: 'Faturamento mensal', secao: 'efficiency', subaba: 'historico', permissao: 'resumo.visualizar' },
   ],
 }));
-export const GRUPOS_DIDATICOS = [{ titulo: 'Visão geral', ids: ['efficiency'] }];
+export const GRUPOS_DIDATICOS = [{ titulo: 'Comando Central', ids: ['efficiency'] }];
 
 export function paginaDidatica(id: string | null): 'indicadores' | 'historico' {
   return id === 'historico' ? 'historico' : 'indicadores';

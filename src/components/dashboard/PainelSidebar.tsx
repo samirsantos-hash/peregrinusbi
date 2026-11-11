@@ -143,8 +143,9 @@ function Conteudo({
   };
   const visivel = (a: AcessoArvore) => pode(a.permissao) && (!a.consultor || consultantAccess) && (!a.rede || redeAccess) && (a.caminho !== "/anuncios" || pode("anuncios.visualizar"));
   const filhos = (id: string) => catalogo.find(t => t.id === id)?.acessos.filter(visivel) ?? [];
-  const [ramos, setRamos] = useState<string[]>([ativa]);
-  useEffect(() => { setRamos(atual => atual.includes(ativa) ? atual : [...atual, ativa]); }, [ativa]);
+  // Acordeão: só uma seção aberta por vez.
+  const [aberta, setAberta] = useState<string | null>(ativa);
+  useEffect(() => { setAberta(ativa); }, [ativa]);
   const tabIntegracao = {
     id: "integracao", label: "Integração", icon: Plug, order: 11.5,
     descricao: "Conectar contas do Mercado Livre",
@@ -158,7 +159,7 @@ function Conteudo({
             {!recolhida && (
               <p className="px-3 mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-normal text-muted-foreground">
                 {g.titulo}
-                {g.titulo === "Visão geral" && <NovidadeTip id="sidebar" />}
+                {g.titulo === "Comando Central" && <NovidadeTip id="sidebar" />}
               </p>
             )}
             <ul className="space-y-0.5">
@@ -168,9 +169,9 @@ function Conteudo({
                 if (!tab || (!subs.length && !(SECAO_PERMISSAO[id] && pode(`${SECAO_PERMISSAO[id]}.visualizar`)))) return null;
                 return (
                   <li key={id}>
-                    <Button variant="ghost" aria-label={tab.label} aria-expanded={subs.length ? ramos.includes(id) : undefined}
+                    <Button variant="ghost" aria-label={tab.label} aria-expanded={subs.length ? aberta === id : undefined}
                       onClick={() => {
-                        if (id === "efficiency" && !ramos.includes(id)) {
+                        if (id === "efficiency" && !aberta === id) {
                           window.__lovableEvents?.track?.("project.summary_tree_opened", {
                             consultant_access: consultantAccess,
                             seller_scope: sellerScope,
@@ -178,15 +179,15 @@ function Conteudo({
                           });
                         }
                         if (recolhida) onToggle();
-                        if (subs.length) setRamos(atual => atual.includes(id) ? atual.filter(r => r !== id) : [...atual, id]);
+                        if (subs.length) setAberta(a => a === id ? null : id);
                         else onChange(id);
                       }}
                       className={cn("panel-nav-item w-full min-h-10 h-auto py-2 gap-2 px-3 justify-start text-[13px]", ativa === id ? "bg-muted text-primary" : "text-foreground/80", recolhida && "justify-center px-0")}
                       title={recolhida ? tab.label : undefined}>
                       <tab.icon className="h-4 w-4 shrink-0" />
-                      {!recolhida && <><span className="whitespace-normal flex-1 text-left">{tab.label}</span>{subs.length > 0 && (ramos.includes(id) ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
+                      {!recolhida && <><span className="whitespace-normal flex-1 text-left">{tab.label}</span>{subs.length > 0 && (aberta === id ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />)}</>}
                     </Button>
-                    {!recolhida && ramos.includes(id) && subs.length > 0 && <ul className="arvore-ramos ml-5 space-y-1 py-1">
+                    {!recolhida && aberta === id && subs.length > 0 && <ul className="arvore-ramos arvore-acordeao ml-5 space-y-1 py-1">
                       {subs.map(sub => { const IconeSub = ICONES_SUBANALISE[sub.id] ?? ChartNoAxesCombined; return <li key={sub.id} data-ativo={ativa === id && subativa === sub.id ? "" : undefined}><Button variant="ghost" onMouseEnter={() => antecipar(sub)} onFocus={() => antecipar(sub)} onTouchStart={() => antecipar(sub)} onClick={() => {
                         if ((id === "reputation" || id === "competitiveness" || id === "publicidade") && (ativa !== id || subativa !== sub.id)) {
                           window.__lovableEvents?.track?.("project.seller_section_opened", {

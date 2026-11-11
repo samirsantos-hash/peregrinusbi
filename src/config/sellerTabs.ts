@@ -55,7 +55,7 @@ export const SELLER_TABS: SellerTab[] = [
   { id: "reputation", label: "Reputação & Funil", icon: HeartPulse, order: 1.2,
     descricao: "Reclamações, atrasos, cancelamentos e disputas",
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
-  { id: "perguntas", label: "Perguntas", icon: MessageCircleQuestion, order: 9.5,
+  { id: "perguntas", label: "Atendimento", icon: MessageCircleQuestion, order: 9.5,
     descricao: "Perguntas dos compradores, respostas e tempo de resposta",
     juniorTip: "Pergunta sem resposta é venda perdida. Responder em até 1 hora melhora a conversão." },
   { id: "metas", label: "Metas", icon: Target, order: 10,
@@ -78,11 +78,11 @@ export function getSecao(id: string) {
 }
 
 export const GRUPOS_SECOES = [
-  { titulo: "Visão geral", ids: ["efficiency", "reputation"] },
-  { titulo: "Desempenho comercial", ids: ["competitiveness", "publicidade", "opportunities", "clips"] },
-  { titulo: "Operação", ids: ["logistics", "perguntas"] },
+  { titulo: "Comando Central", ids: ["efficiency", "reputation"] },
+  { titulo: "Motor de Vendas", ids: ["competitiveness", "publicidade", "opportunities", "clips"] },
   { titulo: "Anúncios", ids: ["quality", "correlacoes"] },
-  { titulo: "Planejamento", ids: ["pock", "metas"] },
+  { titulo: "Operação", ids: ["logistics", "perguntas", "pock"] },
+  { titulo: "Planejamento", ids: ["metas"] },
 ];
 
 /** Aba legada "Faturamento" redireciona para a Visão geral unificada. */

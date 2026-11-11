@@ -3778,3 +3778,8 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
 .arvore-ramos > li:last-child::before { bottom: auto; height: calc(50% + 0.25rem); }
 .arvore-ramos > li::after { content: ""; position: absolute; left: 0; top: 50%; width: 0.75rem; height: 0.5rem; margin-top: -0.5rem; border-left: 1px solid hsl(var(--border)); border-bottom: 1px solid hsl(var(--border)); border-bottom-left-radius: 0.5rem; }
 .arvore-ramos > li[data-ativo]::after { border-color: hsl(var(--primary)); border-width: 0 0 2px 2px; }
+
+/* Acordeão do menu lateral: entrada suave da seção aberta */
+.arvore-acordeao { animation: arvore-abrir 240ms cubic-bezier(.2,.8,.2,1) both; transform-origin: top; }
+@keyframes arvore-abrir { from { opacity: 0; transform: translateY(-4px) scaleY(.96); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .arvore-acordeao { animation: none; } }
