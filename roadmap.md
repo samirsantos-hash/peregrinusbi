@@ -1,5 +1,11 @@
 # Roadmap
 
+## Vidro 3D somente no Resumo — 11/11
+- [x] Adaptar espessura, bordas direcionais e reflexo diagonal do arquivo enviado somente ao Resumo, preservando textos, números, dados e navegação; não ampliar cartões nem acumular filtros internos.
+- [x] Teste público prévio: 28.498 requisições, zero falhas; não mede capacidade autenticada. Sem publicação ou expansão para outras áreas.
+- [ ] Conferência visual bloqueada: navegador autenticado abriu a raiz, mas não respondeu à leitura do Resumo em 100s; temas, celular e movimento reduzido não conferidos. Compilação OK.
+- [ ] Aplicação nas demais áreas depende da aprovação de Samir após avaliar o Resumo.
+
 ## Funil contínuo de vidro — 10/11
 - [x] Substituir fatias separadas pelo corpo contínuo da referência, com topo elíptico, base e divisão curva; preservar cálculos e dados existentes.
 - [x] Oito testes aprovados e compilação OK; k6 público prévio: 28.441 requisições, zero falhas; não mede capacidade autenticada. Sem publicação.
