@@ -1,4 +1,5 @@
 import { limparCachePainel } from "@/lib/cachePainel";
+import { limparAcessoCompartilhado } from "@/hooks/useMyAccess";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
@@ -192,6 +193,7 @@ export function useAuth() {
   const signOut = async () => {
     await limparCachePainel();
     limparPerfilCompartilhado();
+    limparAcessoCompartilhado();
     await supabase.auth.signOut();
   };
 

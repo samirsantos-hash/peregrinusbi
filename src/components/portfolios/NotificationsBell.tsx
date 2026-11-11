@@ -34,7 +34,7 @@ export default function NotificationsBell() {
       .order("created_at", { ascending: false })
       .limit(30);
     setItems(((data as any[]) || []) as NotificationRow[]);
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => {
     load();
@@ -52,7 +52,7 @@ export default function NotificationsBell() {
       supabase.removeChannel(channel);
       clearInterval(interval);
     };
-  }, [user, load]);
+  }, [user?.id, load]);
 
   const unread = items.filter((n) => !n.read).length;
 
