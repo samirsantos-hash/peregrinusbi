@@ -10,9 +10,10 @@ describe('Evolução das campanhas', () => {
   it('calcula TACOS pelos totais da loja, não receita atribuída nem média diária', () => {
     expect(tacosCampanha([linha('2026-10-27', 20), linha('2026-10-28', 80)], [{ data: '2026-10-27', faturamento: 1000 }, { data: '2026-10-28', faturamento: 9000 }], '2026-10-27', '2026-10-28')).toBe(0.01);
   });
-  it('não calcula TACOS com dia ausente ou custo desconhecido', () => {
+  it('usa só as datas com investimento medido e anula custo desconhecido ou faturamento ausente', () => {
     const f = [{ data: '2026-10-27', faturamento: 1000 }, { data: '2026-10-28', faturamento: 9000 }];
-    expect(tacosCampanha([linha('2026-10-27', 20)], f, '2026-10-27', '2026-10-28')).toBeNull();
+    expect(tacosCampanha([linha('2026-10-27', 20)], f, '2026-10-27', '2026-10-28')).toBe(0.02);
+    expect(tacosCampanha([linha('2026-10-29', 20)], f, '2026-10-29', '2026-10-29')).toBeNull();
     expect(tacosCampanha([linha('2026-10-27', null)], f, '2026-10-27', '2026-10-27')).toBeNull();
     expect(tacosCampanha([linha('2026-10-27', 0)], f, '2026-10-27', '2026-10-27')).toBe(0);
   });

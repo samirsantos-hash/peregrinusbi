@@ -18,12 +18,14 @@ export function serieCampanha(linhas: DiaCampanha[], faturamento: FaturamentoDia
 export function tacosCampanha(linhas: DiaCampanha[], faturamento: FaturamentoDia[], de: string, ate: string) {
   const custos = new Map(linhas.map(l => [l.dia, valor(l.cost)]));
   const fat = new Map(faturamento.map(l => [l.data.slice(0, 10), valor(l.faturamento)]));
-  let investimento = 0, receita = 0;
-  if (de > ate) return null;
+  let investimento = 0, receita = 0, medidos = 0;
+  if (de > ate || !linhas.length) return null;
   for (let dia = de; dia <= ate; dia = new Date(Date.parse(`${dia}T00:00:00Z`) + 86400000).toISOString().slice(0, 10)) {
+    // Mesmo critério do TACOS da conta: só as datas com investimento medido; custo desconhecido ou faturamento ausente anula.
+    if (!custos.has(dia)) continue;
     const c = custos.get(dia), f = fat.get(dia);
     if (c == null || f == null) return null;
-    investimento += c; receita += f;
+    investimento += c; receita += f; medidos++;
   }
-  return razao(investimento, receita);
+  return medidos ? razao(investimento, receita) : null;
 }

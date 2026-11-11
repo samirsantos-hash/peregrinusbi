@@ -22,7 +22,7 @@ import SinergiaPublicidadeApi from '@/components/ml/SinergiaPublicidade';
 import { ConfigurarLimitesAds } from '@/components/ml/ads/ConfigurarLimitesAds';
 
 /** Janela de comparação: 30 dias contra os 30 anteriores (a API guarda 90). */
-const DIAS = 30;
+const PERIODOS = [7, 15, 30, 45] as const;
 
 type Estado = { status: "ativo" | "sem_product_ads"; synced_at: string; metricas_campanha_em: string | null };
 type RespostaSync = { contas?: { status: string; dias_pendentes: number; erros: string[] }[] };
@@ -39,6 +39,7 @@ export default function Publicidade() {
   const voltarPainel = () => navigate(custId ? `/?loja=${encodeURIComponent(custId)}` : '/');
   const [atualizando, setAtualizando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  const DIAS = (PERIODOS as readonly number[]).includes(Number(params.get('periodo'))) ? Number(params.get('periodo')) : 30;
 
   const mudar = (novos: Record<string, string | null>) => {
     const p = new URLSearchParams(params);
@@ -57,7 +58,7 @@ export default function Publicidade() {
   });
 
   const dados = useQuery({
-    queryKey: ["ads-painel", contaId],
+    queryKey: ["ads-painel", contaId, DIAS],
     enabled: !!contaId && estado.data?.status === "ativo",
     queryFn: async () => {
       const sb = supabase as any;
@@ -151,6 +152,16 @@ export default function Publicidade() {
           acoes={
             <div className="flex flex-wrap items-center gap-2">
               {conta && <span className="text-sm text-muted-foreground break-all">Loja: {conta.nickname ?? custId} · Cust ID: {custId}</span>}
+              {contaId && (
+                <div className="flex rounded-md border border-border overflow-hidden" role="group" aria-label="Período">
+                  {PERIODOS.map((p) => (
+                    <button key={p} type="button" onClick={() => mudar({ periodo: p === 30 ? null : String(p) })}
+                      className={`px-2.5 py-1 text-xs ${DIAS === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      {p} dias
+                    </button>
+                  ))}
+                </div>
+              )}
               {contaId && (
                 <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
                   <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${atualizando ? "animate-spin" : ""}`} /> {atualizando ? "Lendo o Mercado Livre…" : "Atualizar"}
