@@ -91,7 +91,7 @@ export const ABA_ALIAS: Record<string, string> = { executive: "efficiency" };
 export const SUBANALISES: Record<string, { id: string; label: string }[]> = {
   correlacoes: [{ id: "geral", label: "Sinergia dos indicadores" }, { id: "anuncios", label: "Desempenho por anúncio" }, { id: "conteudo", label: "Conteúdo e oferta" }],
   efficiency: [{ id: "analise", label: "Análise geral" }, { id: "geral", label: "Resumo geral da conta" }, { id: "indicadores", label: "Indicadores e faturamento" }],
-  reputation: [{ id: "resumo", label: "Resumo da reputação" }, { id: "indicadores", label: "Indicadores" }, { id: "analise", label: "Análise geral" }, { id: "requisitos", label: "Análise McKinsey" }],
+  reputation: [{ id: "resumo", label: "Resumo da reputação" }, { id: "analise", label: "Análise geral" }, { id: "requisitos", label: "Análise McKinsey" }],
   competitiveness: [{ id: "resumo-preco", label: "Índice de competitividade" }, { id: "carteira", label: "Leitura da carteira" }, { id: "mckinsey", label: "Análise McKinsey" }, { id: "estrategica", label: "Leitura estratégica" }, { id: "evolucao", label: "Evolução de competitividade" }, { id: "insights", label: "Insights" }, { id: "concorrentes", label: "Concorrentes" }],
   publicidade: [{ id: "resumo", label: "Resumo da publicidade" }, { id: "sinergia", label: "Sinergia e dependência" }, { id: "produtos", label: "Produtos mais vendidos" }, { id: "historico", label: "Evolução e eficiência" }],
   logistics: [{ id: "resumo-logistica", label: "Resumo de logística" }, { id: "envios", label: "Envios dos pedidos" }, { id: "full", label: "Full e estoque" }, { id: "flex", label: "Flex por loja" }],
