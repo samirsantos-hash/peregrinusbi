@@ -52,7 +52,7 @@ export const SELLER_TABS: SellerTab[] = [
   { id: "opportunities", label: "Oportunidades", icon: Gift, order: 8,
     descricao: "Onde há receita não capturada",
     juniorTip: "CDP = combustível do algoritmo. Item elegível sem opt-in = dinheiro na mesa." },
-  { id: "reputation", label: "Reputação", icon: HeartPulse, order: 1.2,
+  { id: "reputation", label: "Reputação & Funil", icon: HeartPulse, order: 1.2,
     descricao: "Reclamações, atrasos, cancelamentos e disputas",
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
   { id: "perguntas", label: "Perguntas", icon: MessageCircleQuestion, order: 9.5,
