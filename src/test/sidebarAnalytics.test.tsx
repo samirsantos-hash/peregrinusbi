@@ -26,7 +26,7 @@ describe("tree analytics", () => {
     fireEvent.click(screen.getByRole("button", { name: "Resumo" }));
     expect(track).toHaveBeenCalledTimes(1);
   });
-  it.each([["reputation", "Reputação", "Perfil, tier e requisitos", "reputation", "requisitos"],
+  it.each([["reputation", "Reputação", "Análise McKinsey", "reputation", "requisitos"],
     ["competitiveness", "Preço", "Análise McKinsey", "price", "mckinsey"],
     ["publicidade", "Publicidade", "Sinergia e dependência", "advertising", "sinergia"]])(
     "records %s destination with bounded context", (section, parent, child, category, subsection) => {
@@ -44,7 +44,7 @@ describe("tree analytics", () => {
   });
   it("navigation still works without collector", () => {
     const select = mount(); delete window.__lovableEvents;
-    fireEvent.click(screen.getByRole("button", { name: "Perfil, tier e requisitos" }));
+    fireEvent.click(screen.getByRole("button", { name: "Análise McKinsey" }));
     expect(select).toHaveBeenCalledWith("reputation", "requisitos");
   });
 });
