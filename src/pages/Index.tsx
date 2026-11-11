@@ -640,8 +640,8 @@ const Index = () => {
                       return (
                         <>
                           {/* 1. Índice e indicadores */}
-                          {pagina === "resumo" && <QualityIndexPanelV2 custId={sellerCustIdMap[selectedSeller]} sellerUuid={selectedSeller} />}
-                          {pagina === "indicadores" && <QualityKpiCards
+                          {(pagina === "resumo" || pagina === "indicadores") && <QualityIndexPanelV2 custId={sellerCustIdMap[selectedSeller]} sellerUuid={selectedSeller} />}
+                          {(pagina === "resumo" || pagina === "indicadores") && <QualityKpiCards
                             scoreCaracteristica={qd.atributos?.valor ?? 0}
                             pontuacaoLlGtin={qd.gtin?.valor ?? 0}
                             scoreOfertaFinal={qd.oferta ?? 0}

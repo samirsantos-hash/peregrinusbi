@@ -95,7 +95,7 @@ export const SUBANALISES: Record<string, { id: string; label: string }[]> = {
   competitiveness: [{ id: "resumo-preco", label: "Índice de competitividade" }, { id: "carteira", label: "Leitura da carteira" }, { id: "mckinsey", label: "Análise McKinsey" }, { id: "estrategica", label: "Leitura estratégica" }, { id: "evolucao", label: "Evolução de competitividade" }, { id: "insights", label: "Insights" }, { id: "concorrentes", label: "Concorrentes" }],
   publicidade: [{ id: "resumo", label: "Resumo da publicidade" }, { id: "sinergia", label: "Sinergia e dependência" }, { id: "produtos", label: "Produtos mais vendidos" }, { id: "historico", label: "Evolução e eficiência" }],
   logistics: [{ id: "resumo-logistica", label: "Resumo de logística" }, { id: "envios", label: "Envios dos pedidos" }, { id: "full", label: "Full e estoque" }, { id: "flex", label: "Flex por loja" }],
-  quality: [{ id: "resumo", label: "Resumo da qualidade" }, { id: "indicadores", label: "Indicadores" }, { id: "analise", label: "Evolução e diagnóstico" }, { id: "anuncios", label: "Ações por anúncio" }],
+  quality: [{ id: "resumo", label: "Resumo e indicadores" }, { id: "analise", label: "Evolução e diagnóstico" }, { id: "anuncios", label: "Ações por anúncio" }],
   clips: [{ id: "resumo", label: "Desempenho e ranking" }, { id: "qualidade", label: "Qualidade dos Clips" }],
   opportunities: [{ id: "resumo", label: "Resumo de oportunidades" }, { id: "promocoes", label: "Promoções" }, { id: "campanhas", label: "Campanhas e participação" }, { id: "cofinanciadas", label: "Campanhas cofinanciadas" }],
   pock: [{ id: "resumo", label: "Potencial da loja" }, { id: "carteira", label: "Comparação da carteira" }, { id: "produtos", label: "Produtos para Full" }],
