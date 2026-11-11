@@ -1,5 +1,10 @@
 # Roadmap
 
+## Vidro semântico nos indicadores do Resumo — 11/11
+- [x] Conectar o tema do cartão à comparação existente e adaptar os degradês enviados à paleta vigente, sem âmbar, texto branco fixo ou alteração de métricas; manter ausência e indicadores neutros sem cor de julgamento.
+- [x] Oito testes aprovados e compilação OK; k6 público prévio: 28.380 requisições, zero falhas, somente entrega pública, não capacidade autenticada. Sem publicação.
+- [ ] Conferência visual bloqueada: sessão autorizada permaneceu no skeleton e depois o navegador deixou de responder; cartões reais, temas, celular, foco, menus e movimento reduzido não verificados.
+
 ## Indicadores sem camada opaca — 11/11
 - [x] Aplicar a estrutura enviada ao KpiVidro: retirar bg-card, borda, blur e liquid-card do cartão; deixar o acabamento sob controle do CSS existente. Preservar cores temáticas legíveis, animação numérica e comparação sem alterar cálculos ou fundo.
 - [x] Quatro regressões aprovadas e compilação OK; teste público prévio: 28.447 requisições, zero falhas (não mede capacidade autenticada). Sem publicação.
