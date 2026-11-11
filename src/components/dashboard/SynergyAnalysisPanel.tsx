@@ -2,12 +2,16 @@ import { pearsonPareado } from "@/lib/sinergiaPublicidade";
 import { num } from "@/lib/format";
 import TooltipInfo from "./TooltipInfo";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, ResponsiveContainer, Tooltip } from "recharts";
-import { CalendarDays, GitCompareArrows, Search, ArrowDown } from "lucide-react";
+import { MoveUp, MoveDown, Minus, CalendarDays, GitCompareArrows, Search, ArrowDown } from "lucide-react";
 
 const METRICAS = [
   { key: "gmv", label: "Faturamento" }, { key: "adsInvestment", label: "Ads" },
   { key: "visits", label: "Visitas" }, { key: "repCancellationsRate", label: "Cancelamentos" },
 ] as const;
+const Setas = ({ r }: { r: number | null }) => r == null || Math.abs(r) < .2
+  ? <span className="flex justify-center"><Minus size={12} aria-hidden /></span>
+  : <span className="flex justify-center gap-0.5" aria-hidden><MoveUp size={12} />{r > 0 ? <MoveUp size={12} /> : <MoveDown size={12} />}</span>;
+const leitura = (r: number | null) => r == null ? "" : Math.abs(r) < .2 ? "Sem relação clara" : r > 0 ? "Crescem juntos" : "Direções opostas";
 const numero = (v: unknown) => typeof v === "number" && Number.isFinite(v) ? v : null;
 const intensidade = (r: number | null) => r == null ? "Sem dado" : Math.abs(r) >= .7 ? "Forte" : Math.abs(r) >= .4 ? "Moderada" : "Fraca";
 const tom = (r: number | null) => {
@@ -30,13 +34,19 @@ export default function SynergyAnalysisPanel({ kpis, compacto = false }: { kpis:
     <div className="flex items-center gap-2"><h4 className="text-sm font-semibold">Análise de sinergia operacional</h4>
       <TooltipInfo text="Pearson: r = Σ[(x − média x)(y − média y)] ÷ √[Σ(x − média x)² × Σ(y − média y)²]. Mínimo de 7 observações pareadas; série constante ou incompleta não vira zero." />
     </div>
+    {!compacto && <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-lg border border-border/50 p-3 text-[11px] text-muted-foreground" aria-label="Como ler a matriz">
+      <span className="flex items-center gap-1 text-ec-verde-txt"><MoveUp size={12} /><MoveUp size={12} /> Verde: crescem juntos</span>
+      <span className="flex items-center gap-1 text-destructive"><MoveUp size={12} /><MoveDown size={12} /> Vermelho: um sobe, o outro cai</span>
+      <span className="flex items-center gap-1"><Minus size={12} /> Sem cor: sem relação clara</span>
+      <span>Força: Forte ≥ 0,7 · Moderada ≥ 0,4 · Fraca abaixo</span>
+    </div>}
     {!compacto && <div className="overflow-x-auto">
       <table className="w-full border-separate border-spacing-1 text-xs">
         <caption className="mb-3 text-left text-muted-foreground">Matriz de correlação · Pearson</caption>
         <thead><tr><th />{METRICAS.map(m => <th key={m.key} className="p-2 font-medium text-muted-foreground">{m.label}</th>)}</tr></thead>
         <tbody>{METRICAS.map(a => <tr key={a.key}><th className="text-left font-medium text-muted-foreground">{a.label}</th>{METRICAS.map(b => {
           const r = coef(a.key, b.key);
-          return <td key={b.key} className={`h-16 min-w-[64px] rounded-xl text-center backdrop-blur-xl transition-colors ${tom(r)}`}><span className="block font-semibold tabular-nums">{a.key === b.key ? "—" : r == null ? "Sem dado" : num(r, 2)}</span>{a.key !== b.key && <span className="text-[10px]">{intensidade(r)}</span>}</td>;
+          return <td key={b.key} className={`h-16 min-w-[64px] rounded-xl text-center backdrop-blur-xl transition-colors ${tom(r)}`}><span className="block font-semibold tabular-nums">{a.key === b.key ? "—" : r == null ? "Sem dado" : num(r, 2)}</span>{a.key !== b.key && r != null && <><Setas r={r} /><span className="block text-[10px] leading-tight">{leitura(r)}</span></>}{a.key !== b.key && <span className="text-[10px]">{intensidade(r)}</span>}</td>;
         })}</tr>)}</tbody>
       </table>
     </div>}

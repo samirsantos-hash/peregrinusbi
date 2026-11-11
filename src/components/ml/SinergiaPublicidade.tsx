@@ -20,8 +20,8 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
     const data = (s?: string) => s?.split('-').reverse().join('/') ?? '—';
     return `${num(m.dias)} de ${num(cobertura.total)} datas medidas${m.inicio ? ` · ${data(m.inicio)} a ${data(m.fim)}` : ''}${m.dias < cobertura.total ? ' · período parcial' : ''}`;
   };
-  return <section aria-label="Sinergia e dependência de publicidade" className="resumo-sinergia space-y-5 border-t border-border/50 pt-5">
-    <h4 className="text-sm font-semibold">Sinergia e dependência de publicidade</h4>
+  return <section aria-label={exibirMatriz ? "Sinergia e dependência de publicidade" : "Evolução de investimento e faturamento"} className="resumo-sinergia space-y-5 border-t border-border/50 pt-5">
+    <h4 className="text-sm font-semibold">{exibirMatriz ? "Sinergia e dependência de publicidade" : "Evolução de investimento e faturamento"}</h4>
     <p className="text-xs text-muted-foreground">{fonte}</p>
     <div className="resumo-sinergia-evolucao noite-vidro liquid-card vidro-grafico p-4 sm:p-5"><GraficoPublicidadeSerie pontos={pontos} compacto={compacto} limites={limites} /></div>
     {piloto && <div className="flex justify-end">
@@ -29,6 +29,7 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
         {piloto.ativo ? "Voltar à leitura publicada" : "Ver piloto de visitas"}
       </Button>
     </div>}
+    {exibirMatriz && <>
     <div className="grid min-w-0 items-start gap-6">
     {exibirMatriz && <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />}
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
@@ -44,6 +45,7 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
       <p>ROAS = soma das vendas atribuídas a Ads ÷ soma do investimento. Faturamento total ÷ Ads não é ROAS.</p>
     </div>}
     <p className="text-xs text-muted-foreground">Atribuição não mede vendas incrementais nem prevê o que aconteceria ao desligar campanhas.</p>
+    </>}
   </section>;
 }
 

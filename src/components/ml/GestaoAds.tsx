@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useAnaliseMl } from "@/hooks/useAnaliseMl";
 import CampanhaGrafico, { type LinhaDiaCampanha } from "@/components/ml/ads/CampanhaGrafico";
-import SinergiaPublicidadeApi from "@/components/ml/SinergiaPublicidade";
 import { destinoAcesso } from '@/config/arvoreAcessos';
 
 type Campanha = {
@@ -277,7 +276,10 @@ export default function GestaoAds({ custId }: { custId: string }) {
             </Button>
           </div>
 
-          <SinergiaPublicidadeApi custId={custId} />
+          <div className="flex items-center justify-between gap-2 rounded-xl border border-border/60 p-3">
+            <p className="text-xs text-muted-foreground">Como Ads, visitas e cancelamentos acompanham o faturamento.</p>
+            <Button size="sm" variant="outline" className="active:scale-[0.98]" onClick={() => navigate(destinoAcesso({ id: 'sinergia', label: '', permissao: 'publicidade.visualizar', secao: 'publicidade', subaba: 'sinergia' } as any, custId))}>Ver sinergia completa</Button>
+          </div>
 
           {/* Micro — campanhas */}
           {visao === "campanhas" && <section className="space-y-3">

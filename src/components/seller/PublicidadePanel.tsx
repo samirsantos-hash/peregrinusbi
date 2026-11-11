@@ -95,7 +95,7 @@ const PublicidadePanel = ({ sellerUuid, custId, fromDate, toDate, sellerNickname
 
   return (
     <div className="space-y-5">
-      {visitas.carregando ? <p className="text-xs text-muted-foreground">Carregando visitas do piloto…</p> : <SinergiaIndicadores exibirMatriz={!soEvolucao} custId={custId} de={fromDate} ate={toDate} piloto={visitasPiloto.piloto} fonte={`Histórico importado · ${fromDate} a ${toDate}${visitas.nota}`} pontos={visitas.pontos} />}
+      {(visitas.carregando ? <p className="text-xs text-muted-foreground">Carregando visitas do piloto…</p> : <SinergiaIndicadores exibirMatriz={!soEvolucao} custId={custId} de={fromDate} ate={toDate} piloto={visitasPiloto.piloto} fonte={`Histórico importado · ${fromDate} a ${toDate}${visitas.nota}`} pontos={visitas.pontos} />)}
       {/* Banner sem dados */}
       {semDados && !soEvolucao && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning">
