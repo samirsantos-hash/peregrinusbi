@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { JuniorModeProvider } from "@/hooks/useJuniorMode";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ControleVidro } from "@/components/ControleVidro";
 import { GlassPointer } from "@/components/ds/GlassPointer";
 import { ChuvaPainel } from "@/components/chuva/ChuvaPainel";
 import { IndicadorCarregamento } from "@/components/chuva/IndicadorCarregamento";
@@ -168,6 +169,7 @@ const App = () => (
               <AlertaInatividade />
               <AvisosGlobais />
               <ThemeToggle />
+              <ControleVidro />
             </ContextoNavegacaoProvider>
           </BrowserRouter>
         </JuniorModeProvider>
