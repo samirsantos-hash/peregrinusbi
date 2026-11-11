@@ -3636,3 +3636,7 @@ html.dark body .peregrinus-panel.peregrinus-panel .resumo-apple-glass :is(.liqui
 }
 @keyframes giroMetal { to { --metal-angle: 360deg; } }
 @media (prefers-reduced-motion: reduce) { .dark .multilojas-page .multilojas-chart::after { animation: none; --metal-angle: 120deg; } }
+
+/* Itens do menu de lojas: pílula flutuante e nome com reticências */
+.dropdown-vidro .dropdown-vidro-item { margin: 2px 8px; padding: 10px 12px; border-radius: 8px; gap: 12px; transition: background-color .2s ease, color .2s ease; }
+.dropdown-vidro .dropdown-vidro-item .item-subtext { font-size: .75rem; }

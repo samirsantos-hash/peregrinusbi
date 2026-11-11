@@ -343,9 +343,9 @@ const DashboardHeader = ({
                           data-active={selectedSeller === s.id}
                         >
                           <Check className={cn("h-4 w-4 shrink-0", selectedSeller === s.id ? "opacity-100" : "opacity-0")} />
-                          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-                            <span className="min-w-0 flex-1 break-all">Loja: {s.nickname}</span>
-                            <span className="item-subtext tabular-nums">Cust ID: {s.custId}</span>
+                          <div className="flex min-w-0 flex-1 items-center gap-4 whitespace-nowrap">
+                            <span className="item-nome min-w-0 flex-1 truncate" title={s.nickname}>Loja: {s.nickname}</span>
+                            <span className="item-subtext ml-auto shrink-0 tabular-nums">Cust ID: {s.custId}</span>
                           </div>
                         </CommandItem>
                       ))}
