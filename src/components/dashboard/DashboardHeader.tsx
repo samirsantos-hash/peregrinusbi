@@ -98,6 +98,21 @@ const DashboardHeader = ({
   const alternarFav = (id: string) => setFavoritas((atual) => { const n = alternarFavorita(atual, id); salvarFavoritas(n); return n; });
   const [calOpen, setCalOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("");
+  // Seleção pendente: loja e período só valem após clicar em "Ir".
+  const [pSeller, setPSeller] = useState(selectedSeller);
+  useEffect(() => setPSeller(selectedSeller), [selectedSeller]);
+  const [pRange, setPRange] = useState<DateRange | undefined>(dateRange);
+  useEffect(() => setPRange(dateRange), [dateRange]);
+  const [pPeriod, setPPeriod] = useState<string | null>(null);
+  const chaveRange = (r?: DateRange) => (r?.from ? fmtISO(r.from) + (r.to ? fmtISO(r.to) : "") : "");
+  const pendente = pSeller !== selectedSeller || pPeriod !== null || chaveRange(pRange) !== chaveRange(dateRange);
+  const ir = () => {
+    playClick();
+    if (pPeriod !== null) { setActivePeriod(pPeriod); onPeriodChange?.(pPeriod); }
+    if (chaveRange(pRange) !== chaveRange(dateRange)) onDateRangeChange(pRange);
+    if (pSeller !== selectedSeller) onSellerChange(pSeller);
+    setPPeriod(null);
+  };
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
 
   const { playClick } = useSoundFeedback();
@@ -119,7 +134,7 @@ const DashboardHeader = ({
     return { anchorDate: anchor, minDate: min, availableDays: days };
   }, [baseCal]);
 
-  const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
+  const selectedSellerObj = sellers.find((s) => s.id === pSeller);
 
   const handleCopy = async (
     e: React.MouseEvent,
@@ -180,9 +195,9 @@ const DashboardHeader = ({
 
   /** Registros e dias com dado dentro do intervalo selecionado. */
   const auditoria = useMemo(() => {
-    if (!dateRange?.from) return { registros: allKpis.length, dias: diasComDado.size, vazio: diasComDado.size === 0 };
-    const from = fmtISO(dateRange.from);
-    const to = fmtISO(dateRange.to ?? dateRange.from);
+    if (!pRange?.from) return { registros: allKpis.length, dias: diasComDado.size, vazio: diasComDado.size === 0 };
+    const from = fmtISO(pRange.from);
+    const to = fmtISO(pRange.to ?? pRange.from);
     const datas = new Set<string>();
     let registros = 0;
     for (const k of allKpis as any[]) {
@@ -193,18 +208,17 @@ const DashboardHeader = ({
       }
     }
     return { registros, dias: datas.size, vazio: registros === 0 };
-  }, [allKpis, dateRange, diasComDado]);
+  }, [allKpis, pRange, diasComDado]);
 
   const aplicarIntervalo = (range: DateRange | undefined) => {
-    onDateRangeChange(range);
+    setPRange(range);
     if (!range?.from) return;
     const from = range.from;
     const to = range.to ?? range.from;
     const span = differenceInDays(to, from) + 1;
     // Intervalos curtos usam a base diária (quando existe); longos usam a mensal.
     const key = dailyDisponivel && span <= 92 ? "custom-diario" : "custom";
-    setActivePeriod(key);
-    onPeriodChange?.(key);
+    setPPeriod(key);
   };
 
   const presets = [
@@ -218,18 +232,17 @@ const DashboardHeader = ({
     playClick();
     const from = subLocalDays(anchorDate, p.dias - 1);
     const key = dailyDisponivel ? p.key : "custom";
-    setActivePeriod(key);
-    onPeriodChange?.(key);
-    onDateRangeChange({ from: from < minDate ? minDate : from, to: anchorDate });
+    setPPeriod(key);
+    setPRange({ from: from < minDate ? minDate : from, to: anchorDate });
     setCalOpen(false);
   };
 
   const rotuloIntervalo = useMemo(() => {
-    if (!dateRange?.from) return "Selecionar período";
-    const f = fmtBR(dateRange.from);
-    const t = dateRange.to ? fmtBR(dateRange.to) : f;
+    if (!pRange?.from) return "Selecionar período";
+    const f = fmtBR(pRange.from);
+    const t = pRange.to ? fmtBR(pRange.to) : f;
     return f === t ? f : `${f} — ${t}`;
-  }, [dateRange]);
+  }, [pRange]);
 
   // Abre no período completo disponível (uma única vez)
   const initialized = useRef(false);
@@ -325,13 +338,13 @@ const DashboardHeader = ({
                       <CommandItem
                         value="Todas as lojas da sua carteira consolidado"
                         onSelect={() => {
-                          onSellerChange("");
+                          setPSeller("");
                           setStoreOpen(false);
                         }}
                         className="dropdown-vidro-item"
-                        data-active={!selectedSeller}
+                        data-active={!pSeller}
                       >
-                        <Check className={cn("h-4 w-4 shrink-0", !selectedSeller ? "opacity-100" : "opacity-0")} />
+                        <Check className={cn("h-4 w-4 shrink-0", !pSeller ? "opacity-100" : "opacity-0")} />
                         <span className="min-w-0 break-words">Todas as lojas da sua carteira</span>
                       </CommandItem>
                       {ordenarComFavoritas(sellers, favoritas).map((s) => (
@@ -339,13 +352,13 @@ const DashboardHeader = ({
                           key={s.id}
                           value={`${s.nickname} ${s.custId}`}
                           onSelect={() => {
-                            onSellerChange(s.id);
+                            setPSeller(s.id);
                             setStoreOpen(false);
                           }}
                           className="dropdown-vidro-item"
-                          data-active={selectedSeller === s.id}
+                          data-active={pSeller === s.id}
                         >
-                          <Check className={cn("h-4 w-4 shrink-0", selectedSeller === s.id ? "opacity-100" : "opacity-0")} />
+                          <Check className={cn("h-4 w-4 shrink-0", pSeller === s.id ? "opacity-100" : "opacity-0")} />
                           <div className="flex min-w-0 flex-1 items-center gap-3 whitespace-nowrap">
                             <span className="item-nome min-w-0 flex-1 truncate" title={s.nickname}>Loja: {s.nickname}</span>
                             <span className="item-subtext ml-auto shrink-0 tabular-nums">Cust ID: {s.custId}</span>
@@ -407,9 +420,8 @@ const DashboardHeader = ({
                     aria-pressed={activePeriod === "all"}
                     onClick={() => {
                       playClick();
-                      setActivePeriod("all");
-                      onPeriodChange?.("all");
-                      onDateRangeChange({ from: minDate, to: anchorDate });
+                      setPPeriod("all");
+                      setPRange({ from: minDate, to: anchorDate });
                       setCalOpen(false);
                     }}
                     className={cn(
@@ -425,8 +437,8 @@ const DashboardHeader = ({
 
                 <Calendar
                   mode="range"
-                  defaultMonth={dateRange?.from ?? anchorDate}
-                  selected={dateRange}
+                  defaultMonth={pRange?.from ?? anchorDate}
+                  selected={pRange}
                   onSelect={(r) => aplicarIntervalo(r)}
                   numberOfMonths={2}
                   locale={ptBR}
@@ -455,6 +467,15 @@ const DashboardHeader = ({
               </PopoverContent>
             </Popover>
 
+            <Button
+              type="button"
+              onClick={ir}
+              disabled={!pendente}
+              className="panel-control min-h-10 px-5 text-xs font-semibold"
+              title={pendente ? "Carregar a loja e o período escolhidos" : "Nada novo para carregar"}
+            >
+              Ir
+            </Button>
 
             {/* Refresh button */}
             {modoPainel && onModoPainelChange ? <div className="flex flex-wrap gap-1" role="group" aria-label="Profundidade do painel">
