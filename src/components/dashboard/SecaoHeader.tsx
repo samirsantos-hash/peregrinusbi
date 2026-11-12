@@ -1,5 +1,20 @@
-import { useEffect, useRef } from "react";
-import { ExternalLink } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Copy, ExternalLink } from "lucide-react";
+
+function BotaoCopiar({ valor, rotulo }: { valor: string; rotulo: string }) {
+  const [ok, setOk] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => navigator.clipboard?.writeText(valor).then(() => { setOk(true); setTimeout(() => setOk(false), 1500); })}
+      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-transform hover:text-foreground active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      aria-label={ok ? `${rotulo} copiado` : `Copiar ${rotulo}`}
+      title={ok ? "Copiado" : `Copiar ${rotulo}`}
+    >
+      {ok ? <Check aria-hidden="true" className="h-3.5 w-3.5 text-primary" /> : <Copy aria-hidden="true" className="h-3.5 w-3.5" />}
+    </button>
+  );
+}
 import { getSecao } from "@/config/sellerTabs";
 import { abrirSellerNoMeli } from "@/lib/sellerLink";
 
@@ -51,24 +66,28 @@ export default function SecaoHeader({ ativa, subTitulo, loja, contexto, resumo, 
         {(loja || contexto) && (
           <p className="flex min-w-0 flex-wrap items-center gap-1.5" aria-label="Contexto da seção">
             {loja && (
+              <span className="inline-flex items-center gap-0.5">
               <button
                 type="button"
                 onClick={() => custId && abrirSellerNoMeli(custId, loja)}
                 disabled={!custId}
-                className="inline-flex max-w-[20rem] items-center gap-1.5 rounded-full border border-primary/50 bg-primary/10 px-3 py-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="inline-flex max-w-[20rem] items-center gap-1.5 rounded-full border border-primary/50 bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 title={`Abrir a página do vendedor ${loja}`}
               >
                 <span className="truncate">{loja}</span>
-                <ExternalLink aria-hidden="true" className="h-4 w-4 shrink-0" />
+                <ExternalLink aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
               </button>
+              <BotaoCopiar valor={loja} rotulo="nome da loja" />
+              </span>
             )}
             {custId != null && (
-              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-base font-semibold tabular-nums text-foreground">
-                <span className="text-sm font-medium text-muted-foreground">Cust ID:</span>{custId}
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-2.5 py-1 text-sm font-semibold tabular-nums text-foreground">
+                <span className="text-xs font-medium text-muted-foreground">Cust ID:</span><span className="select-all">{custId}</span>
+                <BotaoCopiar valor={String(custId)} rotulo="Cust ID" />
               </span>
             )}
             {contexto && (
-              <span className="inline-flex max-w-full items-center truncate rounded-full border px-3 py-1.5 text-base font-semibold tabular-nums" style={{ color: "hsl(var(--ec-amarelo))", borderColor: "hsl(var(--ec-amarelo) / 0.5)", background: "hsl(var(--ec-amarelo) / 0.08)" }} title={contexto}>
+              <span className="inline-flex max-w-full items-center truncate rounded-full border px-2.5 py-1 text-sm font-semibold tabular-nums" style={{ color: "hsl(var(--ec-amarelo))", borderColor: "hsl(var(--ec-amarelo) / 0.5)", background: "hsl(var(--ec-amarelo) / 0.08)" }} title={contexto}>
                 {contexto}
               </span>
             )}
