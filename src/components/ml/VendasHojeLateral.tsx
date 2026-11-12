@@ -21,7 +21,7 @@ export default function VendasHojeLateral({ custId }: { custId: string }) {
   if (q.error || !q.data) return <div className="noite-vidro rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">Vendas de hoje indisponíveis no momento.</div>;
   const d = q.data, hora = new Date(d.consultadoEm);
   return (
-    <aside className="flex min-w-0 flex-col gap-3" aria-label="Vendas de hoje">
+    <aside className="alq-direita flex min-w-0 flex-col gap-3" aria-label="Vendas de hoje">
       <section className="side-card-glass noite-vidro overflow-hidden rounded-xl border border-primary/40 bg-card">
         <div className="p-4">
           <div className="flex items-center justify-between"><h4 className="text-sm font-semibold text-foreground">Vendas de hoje</h4><span className="live-indicator" aria-label="Ao vivo" /></div>

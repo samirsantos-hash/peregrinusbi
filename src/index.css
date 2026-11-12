@@ -3820,8 +3820,7 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
   border: 1px solid rgba(255, 255, 255, 0.03) !important;
   box-shadow:
     0 16px 32px -8px rgba(0, 0, 0, 0.6),
-    inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.25),
-    inset -1px -1px 3px rgb(var(--alq-dourado) / 0.1) !important;
+    inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.25) !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
@@ -3843,6 +3842,21 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
   .dark .paleta-alquimia .kpi-vidro:hover,
   .dark .paleta-alquimia .liquid-card-3d:hover {
     transform: translateY(-2px);
+    box-shadow:
+      0 24px 48px -12px rgba(0, 0, 0, 0.8),
+      inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.35) !important;
+  }
+}
+/* Reflexo dourado só nos cartões da coluna da direita */
+.dark .paleta-alquimia .alq-direita > div {
+  box-shadow:
+    0 16px 32px -8px rgba(0, 0, 0, 0.6),
+    inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.25),
+    inset -1px -1px 3px rgb(var(--alq-dourado) / 0.1) !important;
+  transition: box-shadow 0.2s ease;
+}
+@media (hover: hover) {
+  .dark .paleta-alquimia .alq-direita > div:hover {
     box-shadow:
       0 24px 48px -12px rgba(0, 0, 0, 0.8),
       inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.35),
