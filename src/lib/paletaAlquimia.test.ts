@@ -7,9 +7,10 @@ describe("paleta Alquimia", () => {
     salvarPaletaAlquimia("u1", true);
     expect(lerPaletaAlquimia("u1")).toBe(true);
   });
-  it("não vaza para outro usuário", () => {
-    salvarPaletaAlquimia("u1", true);
-    expect(lerPaletaAlquimia("u2")).toBe(false);
+  it("começa ligada e desligar não vaza para outro usuário", () => {
+    expect(lerPaletaAlquimia("u1")).toBe(true);
+    salvarPaletaAlquimia("u1", false);
+    expect(lerPaletaAlquimia("u2")).toBe(true);
   });
   it("desfazer volta ao visual atual", () => {
     salvarPaletaAlquimia("u1", true);
@@ -17,8 +18,8 @@ describe("paleta Alquimia", () => {
     expect(lerPaletaAlquimia("u1")).toBe(false);
   });
   it("sair apaga a escolha", () => {
-    salvarPaletaAlquimia("u1", true);
+    salvarPaletaAlquimia("u1", false);
     apagarPaletasAlquimia();
-    expect(lerPaletaAlquimia("u1")).toBe(false);
+    expect(lerPaletaAlquimia("u1")).toBe(true);
   });
 });

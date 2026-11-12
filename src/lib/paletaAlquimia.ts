@@ -1,15 +1,15 @@
 const PREFIXO = "peregrinus:paleta-alquimia:";
 
 export function lerPaletaAlquimia(userId: string | null | undefined): boolean {
-  if (!userId) return false;
-  try { return localStorage.getItem(PREFIXO + userId) === "1"; } catch { return false; }
+  if (!userId) return true;
+  try { return localStorage.getItem(PREFIXO + userId) !== "0"; } catch { return true; }
 }
 
 export function salvarPaletaAlquimia(userId: string | null | undefined, ligada: boolean) {
   if (!userId) return;
   try {
-    if (ligada) localStorage.setItem(PREFIXO + userId, "1");
-    else localStorage.removeItem(PREFIXO + userId);
+    if (ligada) localStorage.removeItem(PREFIXO + userId);
+    else localStorage.setItem(PREFIXO + userId, "0");
   } catch { /* armazenamento indisponível */ }
 }
 
