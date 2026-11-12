@@ -11,6 +11,7 @@ import GraficoPublicidadeSerie from "@/components/dashboard/GraficoPublicidadeSe
 import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import CancelamentosMensais from "@/components/ml/CancelamentosMensais";
 import { Button } from "@/components/ui/button";
+import { TrendingUp } from "lucide-react";
 import type { Limites } from '../../../supabase/functions/_shared/mlAdsGestao';
 
 export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = true, fonte, custId, de, ate, piloto, limites }: { pontos: PontoPublicidade[]; compacto?: boolean; exibirMatriz?: boolean; fonte: string; custId?: string; de?: string; ate?: string; limites?: Limites; piloto?: { ativo: boolean; alternar: () => void } }) {
@@ -34,10 +35,14 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
     {exibirMatriz && <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />}
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
     </div>
-    <dl className="grid grid-cols-1 gap-5 border-t border-border/50 pt-4 sm:grid-cols-2">
-      <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-xl font-medium tabular-nums">{cobertura.participacao.valor == null ? "Sem dado" : pctFracao(cobertura.participacao.valor, 1)}</dd><p className="mt-2 text-xs text-muted-foreground">{notaCobertura(cobertura.participacao)}</p></div>
-      <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-xl font-medium tabular-nums">{cobertura.tacos.valor == null ? "Sem dado" : pctFracao(cobertura.tacos.valor, 2)}</dd><p className="mt-2 text-xs text-muted-foreground">{notaCobertura(cobertura.tacos)}</p></div>
+    <div className="liquid-card noite-vidro space-y-5 rounded-2xl border border-border/50 p-5 sm:p-6">
+    <h4 className="flex items-center gap-2 border-b border-border/50 pb-4 text-sm font-semibold uppercase tracking-wider"><TrendingUp className="h-5 w-5 text-primary" aria-hidden />Investimento e retorno em Ads</h4>
+    <dl className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div><dt className="text-xs text-muted-foreground">Participação atribuída a Ads</dt><dd className="text-3xl font-bold tracking-tight tabular-nums">{cobertura.participacao.valor == null ? "Sem dado" : pctFracao(cobertura.participacao.valor, 1)}</dd><p className="mt-2 w-fit rounded-md border border-border/50 bg-muted/30 px-2 py-1 text-xs text-muted-foreground">{notaCobertura(cobertura.participacao)}</p></div>
+      <div><dt className="text-xs text-muted-foreground">Dependência de investimento · TACOS</dt><dd className="text-3xl font-bold tracking-tight tabular-nums">{cobertura.tacos.valor == null ? "Sem dado" : pctFracao(cobertura.tacos.valor, 2)}</dd><p className="mt-2 w-fit rounded-md border border-border/50 bg-muted/30 px-2 py-1 text-xs text-muted-foreground">{notaCobertura(cobertura.tacos)}</p></div>
     </dl>
+    <div className="space-y-1 border-t border-border/40 pt-4 text-xs leading-relaxed text-muted-foreground">
+    <p className="font-medium uppercase tracking-wider text-primary/80">Metodologia e cobertura</p>
     {cobertura.participacao.incompativel && <p className="text-xs text-muted-foreground">A receita atribuída supera o faturamento pago; participação indisponível por diferença de atribuição.</p>}
     {(r.investimento == null || r.receitaAds == null) && <p className="text-xs text-muted-foreground">Cobertura incompleta: cada indicador considera apenas as datas com sua métrica de Ads e faturamento medidos juntos. Não representa o período inteiro; dias ausentes não representam gasto zero.</p>}
     {!compacto && <div className="space-y-1 text-xs text-muted-foreground">
@@ -45,6 +50,8 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
       <p>ROAS = soma das vendas atribuídas a Ads ÷ soma do investimento. Faturamento total ÷ Ads não é ROAS.</p>
     </div>}
     <p className="text-xs text-muted-foreground">Atribuição não mede vendas incrementais nem prevê o que aconteceria ao desligar campanhas.</p>
+    </div>
+    </div>
     </>}
   </section>;
 }
