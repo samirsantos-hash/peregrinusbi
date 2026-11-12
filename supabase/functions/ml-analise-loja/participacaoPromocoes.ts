@@ -8,9 +8,16 @@ export async function lerParticipacaoPromocoes(get: (path: string) => Promise<an
   const falhas: string[] = [];
   const fim = Math.min(offset + 20, ids.length);
   for (let off = offset; off < fim; off += 20) {
-    const lote = await get(`/items?ids=${ids.slice(off, off + 20).join(',')}&attributes=id,seller_id,title,status`);
-    if (!Array.isArray(lote)) throw new Error('Catálogo não confirmado.');
-    const detalhes = new Map(lote.filter(e => e.code === 200).map(e => [e.body.id, e.body]));
+    const blocoIds = ids.slice(off, off + 20);
+    let detalhes = new Map<string, any>();
+    try {
+      const lote = await get(`/items?ids=${blocoIds.join(',')}&attributes=id,seller_id,title,status`);
+      if (!Array.isArray(lote)) throw new Error('Catálogo não confirmado.');
+      detalhes = new Map(lote.filter(e => e.code === 200).map(e => [e.body.id, e.body]));
+    } catch {
+      // Multiget refused (e.g. 403 on one item): read one by one; unread items count as unavailable, never as "no promotion".
+      for (const id of blocoIds) { try { const d = await get(`/items/${id}?attributes=id,seller_id,title,status`); if (d?.id) detalhes.set(d.id, d); } catch { /* indisponível */ } }
+    }
     for (let i = off; i < Math.min(fim, off + 20); i += 3) {
       await Promise.all(ids.slice(i, Math.min(i + 3, off + 20)).map(async id => {
         const d = detalhes.get(id);
