@@ -1,3 +1,5 @@
+import { useAuth } from "@/hooks/useAuth";
+import { lerPaletaAlquimia } from "@/lib/paletaAlquimia";
 import { podeExportar } from '@/lib/permissaoExportar';
 import { ANIMACAO_GRAFICO } from "@/lib/animacaoGrafico";
 import { linhaCsvSegura } from "@/lib/csvSafe";
@@ -123,6 +125,7 @@ const TABS_ANALITICAS = [
 type Tab = string;
 
 const Multilojas = () => {
+  const alquimia = lerPaletaAlquimia(useAuth().user?.id);
   const navigate = useNavigate();
   const perfilML = usePerfilMultilojas();
   const { perfil, escopoRede, podeCarregar, podeConfigurar, temAcesso, lojas, minhasLojas, rotuloPerfil } = perfilML;
@@ -241,7 +244,7 @@ const Multilojas = () => {
 
   if (perfilML.loading || (carregando && !modoLocal)) {
     return (
-      <div className="multilojas-page resumo-apple-glass min-h-screen bg-background text-foreground">
+      <div className={`multilojas-page resumo-apple-glass min-h-screen bg-background text-foreground${alquimia ? " paleta-alquimia" : ""}`}>
         <Topo titulo="Multilojas · gestão consolidada de rede" />
         <div className="py-24 text-center text-xs text-muted-foreground flex flex-col items-center gap-2">
           <Loader2 className="w-6 h-6 animate-spin text-primary" /> Carregando as cargas publicadas…
@@ -252,7 +255,7 @@ const Multilojas = () => {
 
   if (!temAcesso) {
     return (
-      <div className="multilojas-page resumo-apple-glass min-h-screen bg-background text-foreground">
+      <div className={`multilojas-page resumo-apple-glass min-h-screen bg-background text-foreground${alquimia ? " paleta-alquimia" : ""}`}>
         <Topo titulo="Multilojas" />
         <div className="py-24 text-center text-xs text-muted-foreground">
           Esta aba é restrita a Administrador, Consultor e Gestor de Loja Oficial.
@@ -325,7 +328,7 @@ const Multilojas = () => {
   };
 
   return (
-    <div className="multilojas-page resumo-apple-glass min-h-screen bg-background text-foreground">
+    <div className={`multilojas-page resumo-apple-glass min-h-screen bg-background text-foreground${alquimia ? " paleta-alquimia" : ""}`}>
       <header className="sticky top-0 z-30 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="mx-auto w-full max-w-[1600px] px-3 sm:px-5 py-3 flex items-center gap-3 flex-wrap">
         <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="gap-2"><ArrowLeft className="w-4 h-4" />Voltar</Button>

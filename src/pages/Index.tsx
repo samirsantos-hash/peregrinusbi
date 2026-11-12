@@ -535,7 +535,7 @@ const Index = () => {
               <div className="panel-content relative z-0 flex-1 min-w-0 space-y-4">
                 <GuardaPermissao permissao="resumo.visualizar"><MetricasNegocioDidatico pagina={paginaDidatica(searchParams.get('subaba'))} custId={sellerCustIdMap[selectedSeller]} mensal={allKpisMonthly} inicio={dateRange?.from ? formatDateString(dateRange.from) : undefined} fim={dateRange?.to ? formatDateString(dateRange.to) : undefined} /></GuardaPermissao>
               </div>
-            </div> : <Tabs value={activeTab} onValueChange={setActiveTab} className="resumo-apple-glass painel-apple-glass w-full">
+            </div> : <Tabs value={activeTab} onValueChange={setActiveTab} className={`resumo-apple-glass painel-apple-glass w-full${paletaAlquimia ? " paleta-alquimia" : ""}`}>
               <div className="flex items-start gap-0 lg:gap-4 isolate">
                 <PainelSidebar
                   consultantAccess={souConsultor}
@@ -582,7 +582,7 @@ const Index = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                   className="mt-0">
-                  <TabsContent value="efficiency" className={`mt-0 space-y-5${pagina === "geral" && paletaAlquimia ? " paleta-alquimia" : ""}`}>
+                  <TabsContent value="efficiency" className="mt-0 space-y-5">
                     {pagina === "geral" && (
                       <div className="flex justify-end">
                         <label className="inline-flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">

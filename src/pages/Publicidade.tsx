@@ -1,3 +1,5 @@
+import { useAuth } from "@/hooks/useAuth";
+import { lerPaletaAlquimia } from "@/lib/paletaAlquimia";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,6 +31,7 @@ type Estado = { status: "ativo" | "sem_product_ads"; synced_at: string; metricas
 type RespostaSync = { contas?: { status: string; dias_pendentes: number; erros: string[] }[] };
 
 export default function Publicidade() {
+  const alquimia = lerPaletaAlquimia(useAuth().user?.id);
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [params, setParams] = useSearchParams();
@@ -157,7 +160,7 @@ export default function Publicidade() {
     : "Fonte: Mercado Livre";
 
   return (
-    <div className="resumo-apple-glass min-h-screen">
+    <div className={`resumo-apple-glass min-h-screen${alquimia ? " paleta-alquimia" : ""}`}>
       <div className="mx-auto max-w-7xl px-4 py-8 space-y-4">
         <Button variant="ghost" size="sm" className="gap-1.5 px-2" onClick={voltarPainel}>
           <ArrowLeft className="h-4 w-4" /> Painel
