@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
+import { ExternalLink } from "lucide-react";
 import { getSecao } from "@/config/sellerTabs";
+import { abrirSellerNoMeli } from "@/lib/sellerLink";
 
 interface Props {
   /** id da aba ativa */
@@ -11,10 +13,12 @@ interface Props {
   contexto?: string | null;
   /** substitui a descrição fixa (ex.: briefing do período) */
   resumo?: string | null;
+  /** Cust ID da loja selecionada */
+  custId?: number | null;
 }
 
 /** Título da seção — único <h1> da página, com foco e anúncio em troca de seção. */
-export default function SecaoHeader({ ativa, subTitulo, loja, contexto, resumo }: Props) {
+export default function SecaoHeader({ ativa, subTitulo, loja, contexto, resumo, custId }: Props) {
   const { label, descricao: fixa } = getSecao(ativa);
   const descricao = resumo || fixa;
   const h1Ref = useRef<HTMLHeadingElement>(null);
@@ -47,12 +51,24 @@ export default function SecaoHeader({ ativa, subTitulo, loja, contexto, resumo }
         {(loja || contexto) && (
           <p className="flex min-w-0 flex-wrap items-center gap-1.5" aria-label="Contexto da seção">
             {loja && (
-              <span className="panel-section-meta inline-flex max-w-[16rem] items-center truncate rounded-full border border-border/60 bg-muted/40 px-2 py-1" title={loja}>
-                {loja}
+              <button
+                type="button"
+                onClick={() => custId && abrirSellerNoMeli(custId, loja)}
+                disabled={!custId}
+                className="inline-flex max-w-[20rem] items-center gap-1.5 rounded-full border border-primary/50 bg-primary/10 px-3 py-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                title={`Abrir a página do vendedor ${loja}`}
+              >
+                <span className="truncate">{loja}</span>
+                <ExternalLink aria-hidden="true" className="h-4 w-4 shrink-0" />
+              </button>
+            )}
+            {custId != null && (
+              <span className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/60 px-3 py-1.5 text-base font-semibold tabular-nums text-foreground">
+                <span className="text-sm font-medium text-muted-foreground">Cust ID:</span>{custId}
               </span>
             )}
             {contexto && (
-              <span className="panel-section-meta inline-flex max-w-full items-center truncate rounded-full border border-border/60 bg-muted/40 px-2 py-1 tabular-nums" title={contexto}>
+              <span className="inline-flex max-w-full items-center truncate rounded-full border px-3 py-1.5 text-base font-semibold tabular-nums" style={{ color: "hsl(var(--ec-amarelo))", borderColor: "hsl(var(--ec-amarelo) / 0.5)", background: "hsl(var(--ec-amarelo) / 0.08)" }} title={contexto}>
                 {contexto}
               </span>
             )}

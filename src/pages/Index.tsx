@@ -552,6 +552,7 @@ const Index = () => {
                     subTitulo={subanalise?.label}
                     loja={sellers.find((s) => s.id === selectedSeller)?.nickname ?? null}
                     contexto={dateDebugLabel}
+                    custId={selectedSeller ? sellerCustIdMap[selectedSeller] ?? null : null}
                     resumo={activeTab === "efficiency" && !isConsolidado && dateRange?.from
                       ? briefingPeriodo(allKpisDaily as any, formatDateString(dateRange.from), formatDateString(dateRange.to ?? dateRange.from))
                       : null}
