@@ -3795,3 +3795,69 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
 .kpi-cascata:nth-child(n+8) { animation-delay: 350ms; }
 @keyframes kpi-subir { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .kpi-cascata { animation: none; } }
+
+/* Paleta Alquimia — só no Resumo geral, tema escuro, com o botão ligado */
+.dark .paleta-alquimia {
+  --alq-fundo-1: #0a1710;
+  --alq-fundo-2: #050806;
+  --alq-fundo-3: #020302;
+  --alq-azul: #0057b7;
+  --alq-dourado: 255 215 0;
+  --alq-sucesso: #30d158;
+  position: relative;
+  isolation: isolate;
+  border-radius: 20px;
+  padding: 12px;
+  background: radial-gradient(ellipse 120% 120% at 50% -10%, var(--alq-fundo-1) 0%, var(--alq-fundo-2) 50%, var(--alq-fundo-3) 100%);
+}
+.dark .paleta-alquimia .kpi-vidro,
+.dark .paleta-alquimia .liquid-card-3d,
+.dark .paleta-alquimia .vidro-grafico {
+  position: relative;
+  background: rgba(255, 255, 255, 0.015) !important;
+  backdrop-filter: blur(32px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.03) !important;
+  box-shadow:
+    0 16px 32px -8px rgba(0, 0, 0, 0.6),
+    inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.25),
+    inset -1px -1px 3px rgb(var(--alq-dourado) / 0.1) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .dark .paleta-alquimia .kpi-vidro,
+  .dark .paleta-alquimia .liquid-card-3d,
+  .dark .paleta-alquimia .vidro-grafico { background: rgba(10, 23, 16, 0.92) !important; }
+}
+.dark .paleta-alquimia .kpi-vidro::after,
+.dark .paleta-alquimia .liquid-card-3d::after,
+.dark .paleta-alquimia .vidro-grafico::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(0, 87, 183, 0.08) 0%, rgba(255, 255, 255, 0.01) 20%, transparent 40%);
+}
+@media (hover: hover) {
+  .dark .paleta-alquimia .kpi-vidro:hover,
+  .dark .paleta-alquimia .liquid-card-3d:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 24px 48px -12px rgba(0, 0, 0, 0.8),
+      inset 1.5px 1.5px 2px rgba(255, 255, 255, 0.35),
+      inset -1px -1px 4px rgb(var(--alq-dourado) / 0.25) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dark .paleta-alquimia .kpi-vidro:hover,
+  .dark .paleta-alquimia .liquid-card-3d:hover { transform: none; }
+}
+.dark .paleta-alquimia a,
+.dark .paleta-alquimia :focus-visible { color: #4d94e6; outline-color: var(--alq-azul); }
+.dark .paleta-alquimia .recharts-line-curve,
+.dark .paleta-alquimia .recharts-area-curve { stroke: var(--alq-azul); }
+.dark .paleta-alquimia .text-ec-verde-txt,
+.dark .paleta-alquimia .text-success,
+.dark .paleta-alquimia .text-positive,
+.dark .paleta-alquimia [data-tom="positivo"] { color: var(--alq-sucesso) !important; }

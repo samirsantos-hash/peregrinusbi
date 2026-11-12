@@ -45,6 +45,8 @@ import ConversaoPorMLBPanel from "@/components/dashboard/ConversaoPorMLBPanel";
 import VisaoGeralSecao from "@/components/dashboard/VisaoGeralSecao";
 import { formatarPeriodoBr } from "@/lib/periodoResumo";
 import { lerPeriodoSalvo, salvarPeriodo } from "@/lib/periodoSalvo";
+import { lerPaletaAlquimia, salvarPaletaAlquimia } from "@/lib/paletaAlquimia";
+import { Switch } from "@/components/ui/switch";
 import { briefingPeriodo } from "@/lib/briefingPeriodo";
 import { ABA_ALIAS, getSubanalise } from "@/config/sellerTabs";
 import PerfilReputacao from "@/components/dashboard/PerfilReputacao";
@@ -160,6 +162,9 @@ const Index = () => {
     }
   }, [abaRaw, searchParams, setSearchParams]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [paletaAlquimia, setPaletaAlquimia] = useState<boolean>(() => lerPaletaAlquimia(user?.id));
+  useEffect(() => { setPaletaAlquimia(lerPaletaAlquimia(user?.id)); }, [user?.id]);
+  const alternarPaletaAlquimia = (v: boolean) => { setPaletaAlquimia(v); salvarPaletaAlquimia(user?.id, v); };
   const [granularity, setGranularity] = useState<Granularity>(() => (lerPeriodoSalvo(user?.id)?.granularidade as Granularity) ?? "consolidated");
   const [activePeriod, setActivePeriod] = useState<string>(() => lerPeriodoSalvo(user?.id)?.periodo ?? "q1");
   const periodoRestaurado = useRef<string | null>(null);
@@ -577,7 +582,15 @@ const Index = () => {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                   className="mt-0">
-                  <TabsContent value="efficiency" className="mt-0 space-y-5">
+                  <TabsContent value="efficiency" className={`mt-0 space-y-5${pagina === "geral" && paletaAlquimia ? " paleta-alquimia" : ""}`}>
+                    {pagina === "geral" && (
+                      <div className="flex justify-end">
+                        <label className="inline-flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                          <Switch checked={paletaAlquimia} onCheckedChange={alternarPaletaAlquimia} aria-label="Paleta Alquimia" />
+                          Paleta Alquimia
+                        </label>
+                      </div>
+                    )}
                     <NovidadesPrompt />
                     <JuniorActionBanner abaId="efficiency" dados={dadosJunior} />
                     {pagina === "geral" && selectedSeller && <PerfilReputacao seller={sellers.find(s => s.id === selectedSeller)} repLevel={[...allKpisMonthly].sort((a,b) => b.date.localeCompare(a.date))[0]?.repLevel} />}
