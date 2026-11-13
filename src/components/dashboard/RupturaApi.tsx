@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { brl, num } from "@/lib/format";
+import { planejarReposicao } from "@/lib/fullReposicao";
+import { Input } from "@/components/ui/input";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import { avaliarRuptura, QUALIDADE_MIN, type LinhaRuptura } from "@/lib/rupturaApi";
 import type { EligibilityItem } from "@/hooks/useEligibility";
 
@@ -16,7 +19,7 @@ const ROTULO: Record<LinhaRuptura["severidade"], string> = {
 };
 const COR: Record<LinhaRuptura["severidade"], string> = {
   critical: "bg-destructive/15 text-destructive border-destructive/30",
-  warn: "bg-destructive/5 text-destructive border-destructive/20",
+  warn: "bg-muted/20 text-foreground border-border",
   ok: "bg-primary/10 text-primary border-primary/30",
   sem: "bg-muted text-muted-foreground border-border",
 };
@@ -36,6 +39,8 @@ export function useContaMl(custId?: string) {
 
 export default function RupturaApi({ accountId, custId, planilha }: { accountId: string; custId?: string; planilha: EligibilityItem[] }) {
   const [filtro, setFiltro] = useState<"risco" | "todos" | "qualidade" | "promo">("risco");
+  const [prazo, setPrazo] = useState("");
+  const prazoValido = prazo.trim() !== "" && Number.isInteger(Number(prazo)) && Number(prazo) >= 0 && Number(prazo) <= 90;
   const q = useQuery({
     queryKey: ["ruptura-api", accountId],
     staleTime: 5 * 60_000,
@@ -43,7 +48,7 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
       const sb = supabase as any;
       const desde = new Date(Date.now() - 30 * 864e5).toISOString();
       const [an, pe, pr] = await Promise.all([
-        sb.from("ml_listings").select("item_id, titulo, estoque, preco, saude, logistica, status").eq("account_id", accountId).eq("status", "active").limit(5000),
+        fetchAllRows((from, to) => sb.from("ml_listings").select("item_id, titulo, estoque, preco, saude, logistica, status").eq("account_id", accountId).eq("status", "active").order("item_id").range(from, to)),
         sb.from("ml_questions").select("item_id").eq("account_id", accountId).gte("data_criacao", desde).limit(10000),
         sb.from("ml_promotion_items").select("item_id, status").eq("account_id", accountId).limit(20000),
       ]);
@@ -72,9 +77,6 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
     if (vendasApi.data) {
       for (const it of vendasApi.data) vendas.set(soDigitos(it.id), it.unidades);
       for (const a of q.data.anuncios) if (!vendas.has(soDigitos(a.item_id))) vendas.set(soDigitos(a.item_id), 0);
-    } else for (const it of planilha) {
-      const k = soDigitos(it.itemId);
-      vendas.set(k, Math.max(vendas.get(k) ?? 0, it.pedidos7d || 0));
     }
     const perg = new Map<string, number>();
     for (const p of q.data.perguntas) if (p.item_id) perg.set(p.item_id, (perg.get(p.item_id) ?? 0) + 1);
@@ -83,7 +85,7 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
     return q.data.anuncios.map((a: any) => avaliarRuptura({
       itemId: a.item_id, titulo: a.titulo ?? a.item_id, estoque: a.estoque, preco: a.preco != null ? Number(a.preco) : null,
       saude: a.saude != null ? Number(a.saude) : null, logistica: a.logistica,
-      vendas7d: vendas.has(soDigitos(a.item_id)) ? vendas.get(soDigitos(a.item_id))! : null,
+      vendas7d: vendas.has(soDigitos(a.item_id)) ? vendas.get(soDigitos(a.item_id)) ?? null : null,
       perguntas30d: perg.get(a.item_id) ?? 0, emPromocao: ativa.has(a.item_id), promocaoDisponivel: disp.has(a.item_id),
     })).sort((x: LinhaRuptura, y: LinhaRuptura) => {
       const r = { critical: 0, warn: 1, ok: 2, sem: 3 } as const;
@@ -108,6 +110,8 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
     const ws = XLSX.utils.json_to_sheet(vis.map((l) => ({
       MLB: l.itemId, Título: l.titulo, "Vendas 7d": l.vendas7d ?? "", "Estoque (ML)": l.estoque ?? "", "Preço (ML)": l.preco ?? "",
       "Cobertura (dias)": l.cobertura ?? "", "Enviar p/ Full (4 sem.)": l.envio ?? "", "Valor do envio": l.valorEnvio ?? "",
+      "Já no Full": l.logistica === "fulfillment" ? "Sim" : l.logistica ? "Não" : "Não confirmado",
+      "Iniciar reposição em dias": prazoValido ? planejarReposicao(l.vendas7d, 7, l.estoque, Number(prazo))?.iniciarEm ?? "" : "",
       Qualidade: l.qualidade ?? "", "Perguntas 30d": l.perguntas30d, Promoção: l.emPromocao ? "Ativa" : l.promocaoDisponivel ? "Disponível" : "Nenhuma",
       Situação: ROTULO[l.severidade], Ações: l.acoes.join("; "),
     })));
@@ -123,7 +127,7 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
           <h3 className="text-sm font-semibold uppercase tracking-wider">Risco de ruptura & recomendação Full</h3>
           <p className="text-[11px] text-muted-foreground mt-1 tabular-nums">
             Direto do Mercado Livre · {num(linhas.length)} anúncios ativos ·{" "}
-            <span className="text-destructive font-medium">{crit} ruptura</span> · {warn} baixa cobertura · envio sugerido {brl(valor)}
+            <span className="text-destructive font-medium">{crit} ruptura</span> · {warn} baixa cobertura · valor dos produtos sugeridos {brl(valor)}
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -133,12 +137,13 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
           <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5" onClick={baixar}><Download className="w-3.5 h-3.5" />Baixar planilha</Button>
         </div>
       </div>
+      <div className="max-w-sm space-y-1"><label htmlFor="ruptura-prazo" className="text-xs text-muted-foreground">Prazo até ficar disponível no Full (dias)</label><Input id="ruptura-prazo" type="number" min={0} max={90} step={1} placeholder="Informe transporte + recebimento" value={prazo} onChange={e => setPrazo(e.target.value)} /></div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[980px] text-xs tabular-nums">
           <thead>
             <tr className="border-b border-border/50 text-[10px] uppercase tracking-wider text-muted-foreground">
               <th className="text-left py-2 px-2">Anúncio</th><th className="text-right px-2">Vendas 7d</th><th className="text-right px-2">Estoque</th>
-              <th className="text-right px-2">Preço</th><th className="text-right px-2">Cobertura</th><th className="text-right px-2">Enviar p/ Full</th>
+              <th className="text-left px-2">Full / reposição</th><th className="text-right px-2">Preço</th><th className="text-right px-2">Cobertura</th><th className="text-right px-2">Enviar p/ Full</th>
               <th className="text-right px-2">Qualidade</th><th className="text-right px-2">Perguntas 30d</th><th className="text-left px-2">Promoção</th>
               <th className="text-left px-2">Recomendação</th>
             </tr>
@@ -152,6 +157,7 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
                 </td>
                 <td className="text-right px-2 py-2">{l.vendas7d == null ? "Sem dado" : num(l.vendas7d)}</td>
                 <td className="text-right px-2 py-2">{l.estoque == null ? "Sem dado" : num(l.estoque)}</td>
+                <td className="px-2 py-2 min-w-40 space-y-1"><p>{l.logistica === "fulfillment" ? "Já no Full" : l.logistica ? "Fora do Full" : "Não confirmado"}</p><p className="text-muted-foreground">{prazoValido ? (() => { const p = planejarReposicao(l.vendas7d, 7, l.estoque, Number(prazo)); return p?.iniciarEm == null ? "Prazo não calculável" : p.iniciarEm === 0 ? "Iniciar agora" : `Iniciar em até ${num(p.iniciarEm)} dias`; })() : "Informe prazo de chegada"}</p></td>
                 <td className="text-right px-2 py-2">{l.preco == null ? "Sem dado" : brl(l.preco)}</td>
                 <td className={`text-right px-2 py-2 ${l.severidade === "critical" ? "text-destructive font-semibold" : ""}`}>{l.cobertura == null ? "Sem dado" : `${num(l.cobertura, 1)} d`}</td>
                 <td className="text-right px-2 py-2 font-semibold">{l.envio == null ? "Sem dado" : num(l.envio)}</td>
@@ -168,7 +174,7 @@ export default function RupturaApi({ accountId, custId, planilha }: { accountId:
         </table>
         {!vis.length && <p className="text-sm text-muted-foreground py-4">Nenhum anúncio neste filtro.</p>}
       </div>
-      <p className="text-[11px] text-muted-foreground">{fonteApi ? "Estoque, preço, vendas pagas dos últimos 7 dias, qualidade, perguntas e promoções vêm do Mercado Livre." : "Estoque, preço, qualidade, perguntas e promoções vêm do Mercado Livre. As vendas por anúncio não puderam ser lidas agora; o ritmo dos últimos 7 dias vem da planilha mais recente."} Envio cobre 28 dias no ritmo atual, descontando o estoque.</p>
+      <p className="text-[11px] text-muted-foreground">{fonteApi ? "Ritmo observado nas vendas pagas dos últimos 7 dias; estoque disponível no anúncio, não estoque físico total." : "Vendas recentes não confirmadas: cobertura, quantidade e prazo de reposição permanecem indisponíveis."} Quantidade base cobre 28 dias no ritmo observado, descontando o disponível; prazo de início usa transporte e recebimento informados. Elegibilidade e agenda exigem confirmação no Mercado Livre.</p>
     </div>
   );
 }

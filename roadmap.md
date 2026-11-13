@@ -1,5 +1,12 @@
 # Roadmap
 
+## Full — estoque e reposição — 13/11
+- [x] Separar produto, estoque, reposição e melhorias em células legíveis, com vermelho apenas para risco real.
+- [x] Incluir produtos já no Full e distinguir estoque disponível para venda Full do total físico; fallback individual quando o lote é recusado.
+- [x] Calcular cenários de envio para 7, 10 e 15 dias e prazo estimado de início da reposição com prazo de transporte/recebimento informado, sem confundir pesos com quantidades. Seis testes aprovados, build OK.
+- [ ] Nota oficial de qualidade de estoque e benefícios aguardam recurso verificável do Mercado Livre; indisponibilidade explícita no potencial da loja, sem substituição por qualidade do anúncio.
+- [ ] Conferência visual real bloqueada: painel autenticado não passou do carregamento e consulta Full retornou 502; computador/celular não validados. k6 público prévio: 28.522 requisições, zero falhas, p95 documentos 60,20ms, somente entrega pública. Sem publicação.
+
 ## Vendas com e sem publicidade — 13/11
 - [x] Conexão oficial existente validada; `organic_units_amount` e `total_amount` lidos com paginação diária completa, sem subtração.
 - [x] Gráfico real conferido na AUTOPECASLONDRINA em 1280px/480px: duas curvas, escopo de campanhas explícito e ausência preservada; oito testes aprovados e build OK. Em 06/11: R$580,07 atribuídos e R$1.726 sem publicidade. k6 público prévio: 28.492 requisições e uma falha (0,00351%), não mede capacidade autenticada.

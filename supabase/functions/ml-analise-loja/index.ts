@@ -210,11 +210,17 @@ Deno.serve(async req => {
     const candidates: any[] = [];
     for (let off = 0; off < ranked.length && candidates.length < 20; off += 20) {
       const ids = ranked.slice(off, off + 20).map(i => i.id);
-      const items = await get(`/items?ids=${ids.join(',')}`);
+      let items = await get(`/items?ids=${ids.join(',')}`).catch(() => null);
+      if (!Array.isArray(items)) {
+        items = [];
+        for (const id of ids) {
+          const item = await get(`/items/${id}`).catch(() => null);
+          if (item) items.push({ code: 200, body: item });
+        }
+      }
       for (const entry of items) {
         const item = entry.body;
         if (entry.code !== 200 || String(item?.seller_id) !== cust_id) continue;
-        if (item.shipping?.logistic_type === 'fulfillment') continue;
         const demand = atual.itens.find(i => i.id === item.id);
         if (!demand) continue;
         let qualidade: any = null;
@@ -224,7 +230,7 @@ Deno.serve(async req => {
           const m = typeof p.max_size === 'string' ? p.max_size.match(/^(\d+)x(\d+)$/) : null;
           return m ? { largura: Number(m[1]), altura: Number(m[2]) } : { largura: null, altura: null };
         });
-        candidates.push({ id: item.id, titulo: item.title, sku: item.seller_custom_field ?? null, link: item.permalink, foto: item.thumbnail ?? null, estoque: typeof item.available_quantity === 'number' ? item.available_quantity : null, status: item.status, saude: typeof item.health === 'number' ? item.health : null, qualidade, fotos, unidades: demand.unidades, faturamento: demand.faturamento, diario: atual.serie.map(d => ({ data: d.data, faturamento: demand.diario[d.data] ?? 0 })) });
+        candidates.push({ id: item.id, titulo: item.title, sku: item.seller_custom_field ?? null, link: item.permalink, foto: item.thumbnail ?? null, estoque: typeof item.available_quantity === 'number' ? item.available_quantity : null, logistica: item.shipping?.logistic_type ?? null, estoqueFull: item.shipping?.logistic_type === 'fulfillment' && typeof item.available_quantity === 'number' ? item.available_quantity : null, status: item.status, saude: typeof item.health === 'number' ? item.health : null, qualidade, fotos, unidades: demand.unidades, faturamento: demand.faturamento, diario: atual.serie.map(d => ({ data: d.data, faturamento: demand.diario[d.data] ?? 0 })) });
         if (candidates.length === 20) break;
       }
     }
