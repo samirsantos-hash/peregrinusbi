@@ -51,7 +51,7 @@ import { briefingPeriodo } from "@/lib/briefingPeriodo";
 import { ABA_ALIAS, getSubanalise } from "@/config/sellerTabs";
 import PerfilReputacao from "@/components/dashboard/PerfilReputacao";
 import ProdutosMaisVendidos from "@/components/dashboard/ProdutosMaisVendidos";
-import { SECAO_PERMISSAO } from '@/lib/permissoes';
+import { SECAO_PERMISSAO, subanalisesDoNivel } from '@/lib/permissoes';
 import { usePermissoes } from '@/hooks/usePermissoes';
 import GuardaPermissao from '@/components/GuardaPermissao';
 import { useListingsQuality } from "@/hooks/useListingsQuality";
@@ -136,7 +136,9 @@ const Index = () => {
     if (primeira) { const next = new URLSearchParams(searchParams); next.set('aba', primeira[0]); setSearchParams(next, { replace: true }); }
   }, [activeTab, permissoes, searchParams, setSearchParams]);
   const [menuAberto, setMenuAberto] = useState(false);
-  const subanalise = getSubanalise(activeTab, searchParams.get("subaba"));
+  const limiteNivel = subanalisesDoNivel(permissoes?.permissoes, permissoes?.master);
+  const subaPedida = searchParams.get("subaba");
+  const subanalise = getSubanalise(activeTab, limiteNivel?.[activeTab] && !limiteNivel[activeTab].includes(subaPedida ?? "") ? limiteNivel[activeTab][0] : subaPedida);
   const pagina = subanalise?.id;
   const selecionarSubanalise = (secao: string, id: string) => {
     const next = new URLSearchParams(searchParams);

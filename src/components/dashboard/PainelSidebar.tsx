@@ -11,7 +11,7 @@ import { RAMOS_ACESSOS, GRUPOS_ACESSOS, RAMOS_DIDATICOS, GRUPOS_DIDATICOS, desti
 import { NovidadeTip } from "@/components/novidades/novidades";
 import { Button } from "@/components/ui/button";
 import { usePermissoes } from '@/hooks/usePermissoes';
-import { SECAO_PERMISSAO } from '@/lib/permissoes';
+import { SECAO_PERMISSAO, subanalisesDoNivel } from '@/lib/permissoes';
 
 const CHAVE = "peregrinus.sidebar.collapsed";
 
@@ -132,7 +132,8 @@ function Conteudo({
   mostrarToggle: boolean;
 }) {
   const tabAlertas = porId(ID_ALERTAS);
-  const { pode } = usePermissoes();
+  const { pode, data: estadoPerm, master: ehMaster } = usePermissoes();
+  const limiteNivel = subanalisesDoNivel(estadoPerm?.permissoes, ehMaster);
   const navigate = useNavigate();
   const client = useQueryClient();
   const catalogo = didatico ? RAMOS_DIDATICOS : RAMOS_ACESSOS;
@@ -142,7 +143,7 @@ function Conteudo({
     void anteciparConsulta(client, ['ml-curva-abc', custId, 30]);
   };
   const visivel = (a: AcessoArvore) => pode(a.permissao) && (!a.consultor || consultantAccess) && (!a.rede || redeAccess) && (a.caminho !== "/anuncios" || pode("anuncios.visualizar"));
-  const filhos = (id: string) => catalogo.find(t => t.id === id)?.acessos.filter(visivel) ?? [];
+  const filhos = (id: string) => catalogo.find(t => t.id === id)?.acessos.filter(visivel).filter(a => !limiteNivel?.[id] || limiteNivel[id].includes(a.subaba ?? a.id)) ?? [];
   // Acordeão: só uma seção aberta por vez.
   const [aberta, setAberta] = useState<string | null>(ativa);
   useEffect(() => { setAberta(ativa); }, [ativa]);

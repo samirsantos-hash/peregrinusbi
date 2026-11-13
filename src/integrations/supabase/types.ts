@@ -3397,6 +3397,7 @@ export type Database = {
           cust_ids: string[]
           id: string
           name: string
+          plano: string | null
           seller_aliases: Json
         }
         Insert: {
@@ -3406,6 +3407,7 @@ export type Database = {
           cust_ids?: string[]
           id?: string
           name: string
+          plano?: string | null
           seller_aliases?: Json
         }
         Update: {
@@ -3415,6 +3417,7 @@ export type Database = {
           cust_ids?: string[]
           id?: string
           name?: string
+          plano?: string | null
           seller_aliases?: Json
         }
         Relationships: []

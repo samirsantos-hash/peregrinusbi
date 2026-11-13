@@ -218,6 +218,13 @@
       "when": 1794356509182,
       "tag": "0030_acessos_login",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1794538614042,
+      "tag": "0031_plano_carteira",
+      "breakpoints": true
     }
   ]
 }

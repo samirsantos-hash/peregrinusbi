@@ -38,15 +38,22 @@ export function podeExecutar(estado: EstadoPermissoes | undefined, permissao: st
   if (!estado || !PERMISSOES_VALIDAS.includes(permissao)) return false;
   return estado.master || (estado.permissoes.includes(permissao) && (!PERMISSAO_PAI[permissao] || estado.permissoes.includes(PERMISSAO_PAI[permissao])));
 }export type NivelCliente = 'tiro' | 'medius' | 'peritus';
-const VER_TIRO = ['resumo', 'reputacao', 'preco', 'publicidade', 'promocoes', 'clips', 'logistica', 'qualidade', 'anuncios'].map(f => `${f}.visualizar`);
-const VER_MEDIUS = [...VER_TIRO, ...['perguntas', 'full', 'metas', 'correlacoes', 'alertas', 'mercado', 'relatorios'].map(f => `${f}.visualizar`), 'relatorios.exportar'];
+// Tiro (plano básico): só a Análise geral do Resumo, como leitura consolidada de tudo.
+const VER_TIRO = ['resumo.visualizar'];
+const VER_MEDIUS = [...VER_TIRO, ...['reputacao', 'preco', 'publicidade', 'promocoes', 'clips', 'logistica', 'qualidade', 'anuncios', 'perguntas', 'full', 'metas', 'correlacoes', 'alertas', 'mercado', 'relatorios'].map(f => `${f}.visualizar`), 'relatorios.exportar'];
 const PERITUS = PERMISSOES_VALIDAS.filter(p => !p.startsWith('usuarios.'));
 export const NIVEIS_CLIENTE: { id: NivelCliente; nome: string; descricao: string; permissoes: string[] }[] = [
-  { id: 'tiro', nome: 'Tiro', descricao: 'Somente visualização, sem perguntas e sem alterar dados.', permissoes: [...VER_TIRO].sort() },
+  { id: 'tiro', nome: 'Tiro', descricao: 'Plano básico: somente a Análise geral (resumo de todas as informações), sem alterar dados.', permissoes: [...VER_TIRO].sort() },
   { id: 'medius', nome: 'Medius', descricao: 'Mais análises e relatórios, com consumo médio de recursos; sem alterar dados.', permissoes: [...VER_MEDIUS].sort() },
   { id: 'peritus', nome: 'Peritus', descricao: 'Nível de consultor: visualiza e faz a gestão.', permissoes: [...PERITUS].sort() },
 ];
 export function nivelDoChecklist(permissoes: string[]): NivelCliente | null {
   const atual = [...permissoes].sort().join('|');
   return NIVEIS_CLIENTE.find(n => n.permissoes.join('|') === atual)?.id ?? null;
+}
+
+/** Subanálises liberadas pelo nível; null = todas. Tiro vê só a Análise geral do Resumo. */
+export function subanalisesDoNivel(permissoes: string[] | undefined, master = false): Record<string, string[]> | null {
+  if (master || !permissoes) return null;
+  return nivelDoChecklist(permissoes) === 'tiro' ? { efficiency: ['analise'] } : null;
 }
