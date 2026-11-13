@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { exigirPermissao } from '../_shared/permissoes.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -96,7 +97,18 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Remaining actions are admin-only
+    const { data: masterData } = await adminClient.from('user_roles').select('role').eq('user_id', callerId).eq('role', 'super_admin').maybeSingle();
+    const acoes: Record<string, string> = { create_user: 'usuarios.criar', reset_password: 'usuarios.senhas', delete_user: 'usuarios.pausar', set_paused: 'usuarios.pausar', list_paused: 'usuarios.visualizar', update_wallet: 'carteiras.alterar', grant_wallet_access: 'carteiras.alterar' };
+    if (action === 'update_role' && !masterData) return new Response(JSON.stringify({ error: 'Somente master altera categorias.' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const requerida = acoes[action];
+    if (requerida) { const negado = await exigirPermissao(req, requerida); if (negado) return negado; }
+    if (!requerida && action !== 'update_role') return new Response(JSON.stringify({ error: 'Ação inválida.' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const alvos = [body.targetUserId, ...(Array.isArray(body.targetUserIds) ? body.targetUserIds : [])].filter(Boolean);
+    for (const alvo of alvos) {
+      const { data: alvoMaster } = await adminClient.from('user_roles').select('role').eq('user_id', alvo).eq('role', 'super_admin').maybeSingle();
+      if (alvoMaster) return new Response(JSON.stringify({ error: 'Conta master protegida de alteração por este controle.' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    // Keep existing operational role checks for legacy accounts; reviewed grants can delegate actions.
     const { data: roleData } = await adminClient
       .from("user_roles")
       .select("role")
@@ -104,7 +116,7 @@ Deno.serve(async (req) => {
       .eq("role", "admin")
       .maybeSingle();
 
-    if (!roleData) {
+    if (!roleData && !masterData && !requerida) {
       return new Response(JSON.stringify({ error: "Forbidden: admin only" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -114,6 +126,7 @@ Deno.serve(async (req) => {
     if (action === "create_user") {
       const { email, cnpj, allowedCustIds, role, password } = body;
       const userRole = ["admin", "gerente"].includes(role) ? role : "user";
+      if (userRole !== 'user' && !masterData) return new Response(JSON.stringify({ error: 'Somente master atribui categorias administrativas.' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
       const customPassword = typeof password === "string" ? password.trim() : "";
       if (customPassword && customPassword.length < 8) {
@@ -165,6 +178,9 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
+      const { data: jaMaster } = await adminClient.from('user_roles').select('role').eq('user_id', newUserId).eq('role', 'super_admin').maybeSingle();
+      if (jaMaster) return new Response(JSON.stringify({ error: 'Conta master já existente; cadastro não altera seu acesso.' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
       console.log(`User ${reused ? "reused" : "created"}: ${newUserId}, setting password in auth...`);
 

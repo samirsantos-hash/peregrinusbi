@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 // ml-ads-sync
 // Lê Product Ads de cada conta conectada. Não escreve no Mercado Livre.
@@ -18,6 +19,7 @@ import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "../_shared/env.ts";
 import { buscarMl } from "../_shared/mlHttp.ts";
+import { paginarAds, confirmarDiaAds } from "../_shared/mlAdsPaginacao.ts";
 import { segredoConfere } from "../_shared/mlGestao.ts";
 import { cors, resposta } from "../_shared/mlConta.ts";
 import {
@@ -28,12 +30,13 @@ import {
   lerAnunciantes,
   metricasPorGrupo,
   serieDiaria,
+  ordenarCampanhasAds,
 } from "../_shared/mlAds.ts";
 
 const API = "https://api.mercadolibre.com";
 const V1 = { "Api-Version": "1" };
 const V2 = { "api-version": "2" };
-const ORCAMENTO_MS = 110_000;
+const ORCAMENTO_MS = 80_000;
 const CAMPANHAS_A_CADA_MS = 20 * 3_600_000;
 
 type Conta = { id: string; ml_user_id: number };
@@ -42,20 +45,6 @@ const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : n
 const txt = (v: unknown) => (typeof v === "string" && v ? v : null);
 const agoraIso = () => new Date().toISOString();
 
-async function paginar(token: string, url: string) {
-  const items: Record<string, unknown>[] = [];
-  for (let offset = 0; offset < 10_000; offset += 50) {
-    const sep = url.includes("?") ? "&" : "?";
-    const resposta = await buscarMl(`${url}${sep}limit=50&offset=${offset}`, token, fetch, V2);
-    if (!resposta.ok) return { ok: false as const, erro: resposta.erro, items };
-    const corpo = resposta.json as { results?: unknown; paging?: { total?: number } };
-    const lista = Array.isArray(corpo.results) ? corpo.results as Record<string, unknown>[] : [];
-    items.push(...lista);
-    const total = corpo.paging?.total ?? lista.length;
-    if (lista.length < 50 || offset + 50 >= total) break;
-  }
-  return { ok: true as const, items };
-}
 
 function linhaMetrica(accountId: string, nivel: "campanha" | "anuncio", campaignId: number, adGroupId: number, dia: string, m: MetricasAds) {
   return {
@@ -82,11 +71,15 @@ function linhaMetrica(accountId: string, nivel: "campanha" | "anuncio", campaign
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'integracoes.atualizar', true); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return resposta({ error: "use POST" }, 405);
   const inicio = Date.now();
+  const deadlineAt = inicio + ORCAMENTO_MS;
+  // Leave 30 seconds for controlled persistence, summaries and diagnostics.
+  const adminFetch: typeof fetch = (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(Math.max(1, Math.min(5000, inicio + 110_000 - Date.now()))) });
 
   const url = requireEnv("SUPABASE_URL");
-  const admin = createClient(url, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
+  const admin = createClient(url, requireEnv("SUPABASE_SERVICE_ROLE_KEY"), { global: { fetch: adminFetch } });
   const body = await req.json().catch(() => ({})) as { account_id?: string };
   const cron = segredoConfere(req.headers.get("x-refresh-secret") ?? "", requireEnv("REFRESH_TRIGGER_SECRET"));
 
@@ -110,7 +103,7 @@ Deno.serve(async (req) => {
 
   const janela = janelaMetricasAds(new Date());
   const resumo = [];
-  const semTempo = () => Date.now() - inicio > ORCAMENTO_MS;
+  const semTempo = () => Date.now() >= deadlineAt;
 
   for (const conta of (contas ?? []) as Conta[]) {
     const base = { account_id: conta.id, ml_user_id: conta.ml_user_id, anunciantes: 0, campanhas: 0, anuncios: 0, dias_lidos: 0, dias_pendentes: 0 };
@@ -125,8 +118,16 @@ Deno.serve(async (req) => {
       continue;
     }
     const token = tok.access_token as string;
+    const ler = (url: string, headers = V2) => buscarMl(url, token, fetch, headers, { deadlineAt });
+    const paginar = (url: string) => paginarAds(url, ler, semTempo);
 
-    const adv = await buscarMl(`${API}/advertising/advertisers?product_id=PADS`, token, fetch, V1);
+    const adv = await ler(`${API}/advertising/advertisers?product_id=PADS`, V1);
+    // 404 aqui significa que a loja nunca ativou Product Ads; não é falha.
+    if (!adv.ok && (adv.status === 404 || adv.codigo === "not_found")) {
+      await admin.from("ml_ads_estado").upsert({ account_id: conta.id, status: "sem_product_ads", synced_at: agoraIso() });
+      resumo.push({ ...base, status: "sem_product_ads", erros });
+      continue;
+    }
     if (!adv.ok) {
       resumo.push({ ...base, status: "erro", erros: [`${adv.codigo ?? adv.status}: ${adv.erro}`] });
       continue;
@@ -156,10 +157,12 @@ Deno.serve(async (req) => {
     let campanhasCompletas = true;
 
     for (const a of anunciantes) {
+      if (semTempo()) { campanhasCompletas = false; pendentes++; break; }
       const vistas = new Map<number, Record<string, unknown>>();
       for (const status of ["active", "paused"]) {
-        const lote = await paginar(token, `${API}/advertising/${a.site_id}/advertisers/${a.advertiser_id}/product_ads/campaigns/search?filters[status]=${status}`);
-        if (!lote.ok) erros.push(lote.erro);
+        if (semTempo()) { campanhasCompletas = false; pendentes++; break; }
+        const lote = await paginar(`${API}/advertising/${a.site_id}/advertisers/${a.advertiser_id}/product_ads/campaigns/search?filters[status]=${status}`);
+        if (!lote.ok) { erros.push(lote.erro); campanhasCompletas = false; }
         for (const c of lote.items) {
           const id = num(c.id);
           if (id != null) vistas.set(id, c);
@@ -187,7 +190,7 @@ Deno.serve(async (req) => {
       if (linhasCampanha.length) await admin.from("ml_ads_campaigns").upsert(linhasCampanha);
       campanhas += linhasCampanha.length;
 
-      const grupos = await paginar(token, `${API}/advertising/${a.site_id}/advertisers/${a.advertiser_id}/product_ads/ad_groups/search`);
+      const grupos = await paginar(`${API}/advertising/${a.site_id}/advertisers/${a.advertiser_id}/product_ads/ad_groups/search`);
       if (!grupos.ok) erros.push(grupos.erro);
       const linhasGrupo = grupos.items.flatMap((g) => {
         const id = num(g.id);
@@ -210,22 +213,43 @@ Deno.serve(async (req) => {
       if (linhasGrupo.length) await admin.from("ml_ads_ads").upsert(linhasGrupo);
       anuncios += linhasGrupo.length;
 
-      for (const campanha of linhasCampanha) {
-        if (lerCampanhas) {
-          if (semTempo()) { campanhasCompletas = false; break; }
-          const detalhe = await buscarMl(
+      // Complete campaign costs first; ad-group history must not starve later campaigns.
+      const custos: { campaign_id: number; dia: string; cost: number | null; synced_at: string }[] = [];
+      for (let offset = 0; ; offset += 1000) {
+        if (semTempo()) { campanhasCompletas = false; pendentes++; break; }
+        const { data: pagina, error: erroCustos } = await admin.from('ml_ads_metrics_daily')
+          .select('campaign_id,dia,cost,synced_at').eq('account_id', conta.id).eq('nivel', 'campanha')
+          .gte('dia', janela.date_from).lte('dia', janela.date_to).order('campaign_id').order('dia').range(offset, offset + 999);
+        if (erroCustos) { campanhasCompletas = false; erros.push('Falha na leitura da cobertura de campanhas.'); break; }
+        custos.push(...(pagina ?? []));
+        if ((pagina?.length ?? 0) < 1000) break;
+      }
+      const cobertura = ordenarCampanhasAds(linhasCampanha, custos, janela);
+      let faltamCampanhas = cobertura.incompletas;
+      for (const campanha of cobertura.ordenadas) {
+        if (lerCampanhas || cobertura.incompletas > 0) {
+          if (semTempo()) { campanhasCompletas = false; pendentes += faltamCampanhas; break; }
+          const detalhe = await ler(
             `${API}/advertising/${a.site_id}/product_ads/campaigns/${campanha.campaign_id}?date_from=${janela.date_from}&date_to=${janela.date_to}&metrics=${METRICAS}&aggregation_type=DAILY`,
-            token, fetch, V2,
           );
           if (!detalhe.ok) {
             erros.push(detalhe.erro);
             campanhasCompletas = false;
           } else {
             const pontos = serieDiaria(detalhe.json).map((p) => linhaMetrica(conta.id, "campanha", campanha.campaign_id, 0, p.dia, p.metricas));
-            if (pontos.length) await admin.from("ml_ads_metrics_daily").upsert(pontos);
+            const confirmacao = ordenarCampanhasAds([campanha], pontos, janela);
+            if (confirmacao.incompletas > 0) { campanhasCompletas = false; erros.push('Cobertura diária incompleta na campanha.'); }
+            if (pontos.length) {
+              const { error: erroGravar } = await admin.from("ml_ads_metrics_daily").upsert(pontos);
+              if (erroGravar) { campanhasCompletas = false; erros.push('Falha ao guardar custos diários.'); }
+              else if (confirmacao.incompletas === 0) faltamCampanhas = Math.max(0, faltamCampanhas - 1);
+            }
           }
         }
+      }
 
+      for (const campanha of linhasCampanha) {
+        if (semTempo()) break;
         const { data: lidosRows } = await admin.from("ml_ads_dias_sync").select("dia, synced_at")
           .eq("account_id", conta.id).eq("campaign_id", campanha.campaign_id).gte("dia", janela.date_from);
         const lidos = new Map<string, string>((lidosRows ?? []).map((r) => [r.dia as string, r.synced_at as string]));
@@ -234,15 +258,22 @@ Deno.serve(async (req) => {
           if (semTempo()) { pendentes += faltam.length - i; break; }
           const dia = faltam[i];
           const lote = await paginar(
-            token,
             `${API}/advertising/${a.site_id}/product_ads/campaigns/${campanha.campaign_id}/ad_groups/metrics?date_from=${dia}&date_to=${dia}&metrics=${METRICAS}`,
           );
-          if (!lote.ok) { erros.push(lote.erro); pendentes++; continue; }
+          if (!lote.ok) erros.push(lote.erro);
           const linhas = metricasPorGrupo({ results: lote.items })
             .map((g) => linhaMetrica(conta.id, "anuncio", campanha.campaign_id, g.ad_group_id, dia, g.metricas));
-          if (linhas.length) await admin.from("ml_ads_metrics_daily").upsert(linhas);
-          await admin.from("ml_ads_dias_sync").upsert({ account_id: conta.id, campaign_id: campanha.campaign_id, dia, synced_at: agoraIso() });
-          diasLidos++;
+          const confirmado = await confirmarDiaAds(lote.ok, async () => {
+            if (!linhas.length) return true;
+            const { error } = await admin.from("ml_ads_metrics_daily").upsert(linhas);
+            if (error) erros.push('Falha ao guardar métricas diárias.');
+            return !error;
+          }, async () => {
+            const { error } = await admin.from("ml_ads_dias_sync").upsert({ account_id: conta.id, campaign_id: campanha.campaign_id, dia, synced_at: agoraIso() });
+            if (error) erros.push('Falha ao confirmar cobertura diária.');
+            return !error;
+          });
+          if (confirmado) diasLidos++; else pendentes++;
         }
       }
     }
@@ -258,6 +289,7 @@ Deno.serve(async (req) => {
 
   // Avisos operacionais da rotina também chegam ao painel privado, sem payloads ou tokens.
   for (const c of resumo) {
+    if (Date.now() >= inicio + 100_000) break;
     if (!c.erros.length && c.dias_pendentes === 0) continue;
     const codigo = c.status === 'sem_token' ? 'ads_autorizacao' : c.status === 'erro' ? 'ads_falhou' : c.erros.length ? 'ads_aviso' : 'ads_pendente';
     const { data: recente } = await admin.from('developer_alerts').select('id').eq('origem', `Publicidade · ${c.ml_user_id}`).eq('codigo', codigo).gte('criado_em', new Date(Date.now() - 3600000).toISOString()).limit(1);

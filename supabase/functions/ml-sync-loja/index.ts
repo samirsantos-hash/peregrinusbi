@@ -1,4 +1,6 @@
+import { exigirPermissao, segredoRotina } from '../_shared/permissoes.ts';
 import { tokenAtual } from "../_shared/mlTokenAtual.ts";
+import { mixEnvios } from './envios.ts';
 // ml-sync-loja
 // Busca no Mercado Livre, com o token da própria loja conectada, os dados de cada
 // tema (reputação, anúncios, vendas, visitas, envios, perguntas, promoções, Ads)
@@ -27,6 +29,7 @@ function segredoOk(a: string, b: string) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const negado = await exigirPermissao(req, 'integracoes.atualizar', true); if (negado) return negado;
   const URL_ = requireEnv("SUPABASE_URL");
   const db = createClient(URL_, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
 
@@ -37,14 +40,13 @@ Deno.serve(async (req) => {
     });
     const { data: u } = await sbUser.auth.getUser();
     if (!u?.user) return json({ error: "Faça login." }, 401);
-    const { data: adm } = await sbUser.rpc("is_admin");
-    if (!adm) return json({ error: "Só administradores podem atualizar." }, 403);
   }
 
   const body = await req.json().catch(() => ({}));
   // Admin: copia a senha das rotinas do ambiente para o cofre do banco,
   // que é de onde a atualização programada a lê. O valor nunca sai do servidor.
   if (body.sincronizar_segredo) {
+    if (!segredoRotina(req)) { const cliente = createClient(URL_, requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } }); const { data: master } = await cliente.rpc('is_super_admin'); if (!master) return json({ error: 'Configuração reservada à master.' }, 403); }
     const { error } = await db.rpc("ml_set_trigger_secret", { p_value: requireEnv("REFRESH_TRIGGER_SECRET") });
     return json({ ok: !error, erro: error?.message ?? null }, error ? 500 : 200);
   }
@@ -53,9 +55,16 @@ Deno.serve(async (req) => {
   // Rotina programada sem loja: atualiza cada loja conectada, uma por vez
   // (chamadas paralelas ao ML dão 429). Limitado às lojas ativas.
   if (rotina && !body.account_id && !body.cust_id) {
-    const { data: contas } = await db.from("ml_accounts").select("id, nickname").eq("status", "active").limit(200);
+    // A função tem limite de tempo: cada execução atualiza as lojas mais antigas
+    // (sem atualização em 20 h) até ~110 s; a rotina roda a cada 15 min e retoma.
+    const corte = new Date(Date.now() - 20 * 3600_000).toISOString();
+    const { data: contas } = await db.from("ml_accounts").select("id, nickname").eq("status", "active")
+      .or(`last_sync_daily_at.is.null,last_sync_daily_at.lt.${corte}`)
+      .order("last_sync_daily_at", { ascending: true, nullsFirst: true }).limit(200);
     const resumo: { loja: string; status: number }[] = [];
+    const fimRotina = Date.now() + 110_000;
     for (const c of contas ?? []) {
+      if (Date.now() > fimRotina) break;
       const r = await fetch(`${URL_}/functions/v1/ml-sync-loja`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-refresh-secret": segredo },
@@ -74,6 +83,7 @@ Deno.serve(async (req) => {
   else return json({ error: "Informe account_id ou cust_id." }, 400);
   const { data: conta } = await q.maybeSingle();
   if (!conta) return json({ error: "Loja não conectada ao Mercado Livre." }, 404);
+  if (!rotina) { const cliente = createClient(URL_, requireEnv('SUPABASE_ANON_KEY'), { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } }); const { data: pode } = await cliente.rpc('ml_pode_gerir_conta', { p_account_id: conta.id }); if (!pode) return json({ error: 'Loja fora da sua carteira.' }, 403); }
 
   const tok = await tokenAtual(db, conta.id);
   if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) {
@@ -81,12 +91,17 @@ Deno.serve(async (req) => {
   }
   const uid = String(conta.ml_user_id);
   const cust = uid;
+  const accessToken = tok.access_token;
+  const accountId = conta.id;
+  const soEnvios = body.tema === 'envios';
 
-  async function get(path: string, extra: Record<string, string> = {}) {
+  async function get(path: string, extra: Record<string, string> = {}, deadline = Infinity) {
     for (let t = 0; t < 3; t++) {
+      const restante = Math.min(20_000, deadline - Date.now());
+      if (restante <= 0) throw new Error('Prazo de consulta encerrado.');
       const r = await fetch(API + path, {
-        headers: { Authorization: `Bearer ${tok!.access_token}`, ...extra },
-        signal: AbortSignal.timeout(20_000),
+        headers: { Authorization: `Bearer ${accessToken}`, ...extra },
+        signal: AbortSignal.timeout(restante),
       });
       if (r.status === 429) { await espera(1500 * (t + 1)); continue; }
       const j = await r.json().catch(() => ({}));
@@ -96,9 +111,11 @@ Deno.serve(async (req) => {
     throw new Error("limite de consultas do ML; tente de novo");
   }
   async function salvar(tema: string, fn: () => Promise<unknown>) {
+    if (soEnvios && tema !== 'envios' && tema !== 'vendas') return { tema, ignorado: true };
     let dados: unknown = null, erro: string | null = null;
     try { dados = await fn(); } catch (e) { erro = String((e as Error).message ?? e).replace(/https?:\/\/\S+/g, "").replace(/APP_USR-\S+/g, "").slice(0, 200); }
-    await db.from("ml_sync_tema").upsert({ account_id: conta!.id, cust_id: cust, tema, dados, erro, atualizado_em: new Date().toISOString() });
+    if (soEnvios && tema === 'vendas') return { tema, ok: !erro, erro };
+    await db.from("ml_sync_tema").upsert({ account_id: accountId, cust_id: cust, tema, dados, erro, atualizado_em: new Date().toISOString() });
     return { tema, ok: !erro, erro };
   }
 
@@ -154,11 +171,20 @@ Deno.serve(async (req) => {
 
   // 3. Vendas (30 dias) + 4. Envios por modalidade
   let pedidos: any[] = [];
+  let pedidosCompletos = false;
   res.push(await salvar("vendas", async () => {
+    let totalEsperado: number | null = null;
+    const vistos = new Set<string>();
     for (let off = 0; off < 5000; off += 50) {
       const s = await get(`/orders/search?seller=${uid}&order.date_created.from=${desde.toISOString()}&sort=date_desc&limit=50&offset=${off}`);
-      pedidos.push(...(s.results ?? []));
-      if ((s.results ?? []).length < 50) break;
+      if (!Number.isInteger(s.paging?.total) || (totalEsperado !== null && totalEsperado !== s.paging.total)) throw new Error('Cobertura de pedidos não confirmada.');
+      totalEsperado = s.paging.total;
+      for (const p of s.results ?? []) {
+        if (!p.id || vistos.has(String(p.id))) throw new Error('Paginação de pedidos incompleta.');
+        vistos.add(String(p.id)); pedidos.push(p);
+      }
+      if (pedidos.length === totalEsperado) { pedidosCompletos = true; break; }
+      if (!(s.results ?? []).length) break;
     }
     const porDia: Record<string, { faturamento: number; pedidos: number; cancelados: number; valor_cancelado: number }> = {};
     for (let d = new Date(desde); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { faturamento: 0, pedidos: 0, cancelados: 0, valor_cancelado: 0 };
@@ -182,15 +208,9 @@ Deno.serve(async (req) => {
   }));
 
   res.push(await salvar("envios", async () => {
-    const mix: Record<string, { pedidos: number; faturamento: number }> = {};
-    for (const p of pedidos) {
-      if (p.status === "cancelled") continue;
-      const item = p.order_items?.[0]?.item?.id;
-      const tipo = anuncioPorId.get(item)?.envio ?? "sem_info";
-      mix[tipo] ??= { pedidos: 0, faturamento: 0 };
-      mix[tipo].pedidos++; mix[tipo].faturamento += Number(p.total_amount) || 0;
-    }
-    return { mix, base: "pedidos dos últimos 30 dias pela modalidade do anúncio" };
+    if (!pedidosCompletos) throw new Error('Leitura de pedidos incompleta; mix de envios indisponível.');
+    const prazo = Date.now() + 45_000;
+    return mixEnvios(pedidos, uid, (id) => get(`/shipments/${id}`, { 'x-format-new': 'true' }, prazo), prazo);
   }));
 
   // 5. Visitas (30 dias)
@@ -220,6 +240,10 @@ Deno.serve(async (req) => {
     const desde90 = new Date(hoje.getTime() - 90 * 864e5);
     const porDia: Record<string, { recebidas: number; respondidas: number; sem_resposta: number }> = {};
     for (let d = new Date(desde90); d <= hoje; d = new Date(d.getTime() + 864e5)) porDia[dia(d.toISOString())] = { recebidas: 0, respondidas: 0, sem_resposta: 0 };
+    // Se o limite de leitura foi atingido, dias anteriores à pergunta mais antiga lida não têm cobertura.
+    const truncado = total != null && hist.length < total;
+    const maisAntiga = hist.reduce((m: string | null, q: any) => (q.date_created && (!m || q.date_created < m) ? q.date_created : m), null);
+    const cobertoDesde = truncado && maisAntiga ? dia(maisAntiga) : null;
     for (const q of hist) {
       const k = dia(q.date_created ?? "");
       if (!porDia[k]) continue;
@@ -231,9 +255,10 @@ Deno.serve(async (req) => {
       total,
       importadas: hist.length,
       respondidas: resp.length,
-      mediana_horas_resposta: resp.length ? resp[Math.floor(resp.length / 2)] : null,
+      mediana_horas_resposta: resp.length ? (resp.length % 2 ? resp[(resp.length - 1) / 2] : (resp[resp.length / 2 - 1] + resp[resp.length / 2]) / 2) : null,
       ate_1h: resp.length ? resp.filter((h) => h <= 1).length / resp.length : null,
-      serie: Object.entries(porDia).map(([data, v]) => ({ data, ...v })),
+      serie: Object.entries(porDia).map(([data, v]) => (cobertoDesde && data < cobertoDesde ? { data, recebidas: null, respondidas: null, sem_resposta: null } : { data, ...v })),
+      coberto_desde: cobertoDesde,
       pendentes: (pend.questions ?? []).slice(0, 50).map((q: any) => ({ item: q.item_id, texto: String(q.text ?? "").slice(0, 500), data: q.date_created })),
       historico: hist.slice(0, 500).map((q: any) => ({
         id: q.id, item: q.item_id, status: q.status, data: q.date_created,
@@ -268,6 +293,6 @@ Deno.serve(async (req) => {
     };
   }));
 
-  await db.from("ml_accounts").update({ last_sync_daily_at: new Date().toISOString() }).eq("id", conta.id);
+  if (!soEnvios) await db.from("ml_accounts").update({ last_sync_daily_at: new Date().toISOString() }).eq("id", conta.id);
   return json({ loja: conta.nickname, temas: res });
 });

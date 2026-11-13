@@ -14,14 +14,15 @@ export default function VerticalCarteirasTabela({ sellerId }: { sellerId?: strin
   const [carteira, setCarteira] = useState<string>("todas");
   const [aberta, setAberta] = useState<string | null>(null);
 
-  const { data } = useQuery({
+  const { data, isError } = useQuery({
     queryKey: ["vertical-carteiras"],
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const [{ data: sellers }, { data: carteiras }] = await Promise.all([
+      const [{ data: sellers, error: e1 }, { data: carteiras, error: e2 }] = await Promise.all([
         fetchAllRows((a, b) => supabase.from("sellers").select("id,cust_id,nickname,vertical_dominant").order("id").range(a, b)),
         supabase.from("portfolios").select("id,name,cust_ids").order("name"),
       ]);
+      if (e1 || e2) throw e1 ?? e2;
       // Dois últimos meses fechados (o mês corrente fica de fora por estar incompleto)
       const hoje = new Date();
       const mesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-01`;
@@ -30,18 +31,21 @@ export default function VerticalCarteirasTabela({ sellerId }: { sellerId?: strin
       if (!m2) return { sellers, carteiras: carteiras ?? [], kpi: [], m2: null };
       const d = new Date(m2 + "T00:00:00"); d.setMonth(d.getMonth() - 1);
       const m1 = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
-      const { data: kpi } = await fetchAllRows((a, b) =>
+      const { data: kpi, error: e3 } = await fetchAllRows((a, b) =>
         supabase.from("sellers_kpi").select("seller_id,data,tgmv_lc").in("data", [m1, m2]).order("seller_id").order("data").range(a, b));
+      if (e3) throw e3;
       return { sellers, carteiras: carteiras ?? [], kpi, m2 };
     },
   });
 
   const r = useMemo(() => {
     if (!data) return null;
-    const fat = new Map<string, { atual: number; anterior: number }>();
+    const fat = new Map<string, { atual: number | null; anterior: number | null }>();
     for (const k of data.kpi as any[]) {
-      const e = fat.get(k.seller_id) ?? { atual: 0, anterior: 0 };
-      if (k.data === data.m2) e.atual += Number(k.tgmv_lc) || 0; else e.anterior += Number(k.tgmv_lc) || 0;
+      const e = fat.get(k.seller_id) ?? { atual: null, anterior: null };
+      const v = k.tgmv_lc == null || k.tgmv_lc === "" ? null : Number(k.tgmv_lc) || 0;
+      if (v == null) { fat.set(k.seller_id, e); continue; }
+      if (k.data === data.m2) e.atual = (e.atual ?? 0) + v; else e.anterior = (e.anterior ?? 0) + v;
       fat.set(k.seller_id, e);
     }
     const lojas: LojaMes[] = (data.sellers as any[]).filter((s) => fat.has(s.id)).map((s) => ({
@@ -55,6 +59,7 @@ export default function VerticalCarteirasTabela({ sellerId }: { sellerId?: strin
     return { ...comp, info, naCarteira };
   }, [data, carteira]);
 
+  if (isError) return <div className="glass-card p-5 text-xs text-destructive">Não foi possível carregar a comparação por vertical agora.</div>;
   if (!r) return <div className="glass-card p-5 text-xs text-muted-foreground">Carregando comparação por vertical…</div>;
   const mesRot = data?.m2 ? `${data.m2.slice(5, 7)}/${data.m2.slice(0, 4)}` : "";
   const linhas = r.verticais.map((v) => {
@@ -98,7 +103,7 @@ export default function VerticalCarteirasTabela({ sellerId }: { sellerId?: strin
                 {aberta === v.vertical && [...ls].sort((a, b) => (b.vsMediana ?? -9) - (a.vsMediana ?? -9)).map((l) => (
                   <tr key={l.sellerId} className={`border-b border-border/30 ${l.sellerId === sellerId ? "bg-cyan-400/10" : ""}`}>
                     <td className="py-1.5 pl-5 pr-3 text-muted-foreground" colSpan={2}>{r.info.get(l.sellerId)?.nickname ?? "—"}</td>
-                    <td className="py-1.5 pr-3 text-right">{brl(l.atual)}</td>
+                    <td className="py-1.5 pr-3 text-right">{l.atual == null ? "Sem dado" : brl(l.atual)}</td>
                     <td className="py-1.5 pr-3 text-right">{cresc(l.crescimento)}</td>
                     <td />
                     <td className={`py-1.5 text-right ${l.vsMediana === null ? "" : l.vsMediana >= 0 ? "text-ok" : "text-crit"}`}>{pp(l.vsMediana)}</td>

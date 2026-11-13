@@ -1,12 +1,11 @@
 // Navegação macro → micro: resultado, causas, produtos e planejamento.
 
 import {
-  DollarSign,
   LayoutDashboard,
   Truck,
   Shield,
   Video,
-  Swords,
+  Tags,
   Gift,
   HeartPulse,
   Link2,
@@ -25,18 +24,16 @@ export type SellerTab = {
   descricao: string;
   juniorTip: string;
   order: number;
+  children?: { id: string; label: string }[];
 };
 
 export const SELLER_TABS: SellerTab[] = [
-  { id: "efficiency", label: "Resumo", icon: DollarSign, order: 1,
-    descricao: "Visão geral da saúde da loja no período",
-    juniorTip: "Comece aqui. Dá a fotografia completa em uma tela." },
+  { id: "efficiency", label: "Resumo", icon: LayoutDashboard, order: 1,
+    descricao: "Resultado, causas, ritmo e conversão — Resumo e Faturamento numa só leitura",
+    juniorTip: "Comece aqui. Cadeia científica: efeito → tráfego → tendência → funil." },
   { id: "pock", label: "Full", icon: Gauge, order: 1.5,
     descricao: "Potencial da loja e produtos para avaliar no Full",
     juniorTip: "Potencial da loja, evolução e balanceamento de produtos para Full." },
-  { id: "executive", label: "Faturamento", icon: LayoutDashboard, order: 2,
-    descricao: "GMV, itens vendidos e ticket médio",
-    juniorTip: "Analise tendências de GMV e eficiência dos Ads antes de qualquer reunião." },
   { id: "logistics", label: "Logística", icon: Truck, order: 3,
     descricao: "Envios, prazos e adesão ao FULL",
     juniorTip: "Full é o fator de maior peso no algoritmo. Sempre analise aqui depois do Resumo." },
@@ -46,7 +43,7 @@ export const SELLER_TABS: SellerTab[] = [
   { id: "clips", label: "Clips", icon: Video, order: 5,
     descricao: "Vídeos publicados e desempenho",
     juniorTip: "Canal novo de tráfego orgânico — meta: 20 clips/mês, 8.000 visitas." },
-  { id: "competitiveness", label: "Preço", icon: Swords, order: 6,
+  { id: "competitiveness", label: "Preço", icon: Tags, order: 6,
     descricao: "Competitividade frente aos concorrentes",
     juniorTip: "% Não Competitivo > 30%? O algoritmo começa a esconder o anúncio." },
   { id: "publicidade", label: "Publicidade", icon: Megaphone, order: 7,
@@ -55,10 +52,10 @@ export const SELLER_TABS: SellerTab[] = [
   { id: "opportunities", label: "Oportunidades", icon: Gift, order: 8,
     descricao: "Onde há receita não capturada",
     juniorTip: "CDP = combustível do algoritmo. Item elegível sem opt-in = dinheiro na mesa." },
-  { id: "reputation", label: "Reputação", icon: HeartPulse, order: 9,
+  { id: "reputation", label: "Reputação & Funil", icon: HeartPulse, order: 1.2,
     descricao: "Reclamações, atrasos, cancelamentos e disputas",
     juniorTip: "Verde escuro é pré-requisito para Tier 1. Reclamação > 3% = risco de rebaixamento." },
-  { id: "perguntas", label: "Perguntas", icon: MessageCircleQuestion, order: 9.5,
+  { id: "perguntas", label: "Atendimento", icon: MessageCircleQuestion, order: 9.5,
     descricao: "Perguntas dos compradores, respostas e tempo de resposta",
     juniorTip: "Pergunta sem resposta é venda perdida. Responder em até 1 hora melhora a conversão." },
   { id: "metas", label: "Metas", icon: Target, order: 10,
@@ -81,8 +78,30 @@ export function getSecao(id: string) {
 }
 
 export const GRUPOS_SECOES = [
-  { titulo: "Visão geral", ids: ["efficiency", "executive"] },
-  { titulo: "Desempenho comercial", ids: ["competitiveness", "publicidade", "opportunities", "clips"] },
-  { titulo: "Operação e anúncios", ids: ["logistics", "reputation", "quality", "perguntas"] },
-  { titulo: "Planejamento", ids: ["pock", "metas", "correlacoes"] },
+  { titulo: "Comando Central", ids: ["efficiency", "reputation"] },
+  { titulo: "Motor de Vendas", ids: ["competitiveness", "publicidade", "opportunities", "clips"] },
+  { titulo: "Anúncios", ids: ["quality", "correlacoes"] },
+  { titulo: "Operação", ids: ["logistics", "perguntas", "pock"] },
+  { titulo: "Planejamento", ids: ["metas"] },
 ];
+
+/** Aba legada "Faturamento" redireciona para a Visão geral unificada. */
+export const ABA_ALIAS: Record<string, string> = { executive: "efficiency" };
+
+export const SUBANALISES: Record<string, { id: string; label: string }[]> = {
+  correlacoes: [{ id: "geral", label: "Sinergia dos indicadores" }, { id: "anuncios", label: "Desempenho por anúncio" }, { id: "conteudo", label: "Conteúdo e oferta" }],
+  efficiency: [{ id: "analise", label: "Análise geral" }, { id: "geral", label: "Resumo geral da conta" }, { id: "indicadores", label: "Indicadores e faturamento" }],
+  reputation: [{ id: "resumo", label: "Resumo da reputação" }, { id: "analise", label: "Análise geral" }, { id: "requisitos", label: "Análise McKinsey" }],
+  competitiveness: [{ id: "resumo-preco", label: "Índice de competitividade" }, { id: "carteira", label: "Leitura da carteira" }, { id: "mckinsey", label: "Análise McKinsey" }, { id: "evolucao", label: "Evolução de competitividade" }, { id: "insights", label: "Insights" }, { id: "concorrentes", label: "Concorrentes" }],
+  publicidade: [{ id: "resumo", label: "Resumo da publicidade" }, { id: "sinergia", label: "Sinergia e dependência" }, { id: "produtos", label: "Produtos mais vendidos" }, { id: "historico", label: "Evolução e eficiência" }],
+  logistics: [{ id: "resumo-logistica", label: "Resumo de logística" }, { id: "envios", label: "Envios dos pedidos" }, { id: "full", label: "Full e estoque" }, { id: "flex", label: "Flex por loja" }],
+  quality: [{ id: "resumo", label: "Resumo e indicadores" }, { id: "analise", label: "Evolução e diagnóstico" }, { id: "anuncios", label: "Ações por anúncio" }],
+  clips: [{ id: "resumo", label: "Desempenho e ranking" }],
+  opportunities: [{ id: "resumo", label: "Resumo de oportunidades" }, { id: "promocoes", label: "Promoções" }, { id: "campanhas", label: "Campanhas e participação" }, { id: "cofinanciadas", label: "Campanhas cofinanciadas" }],
+  pock: [{ id: "resumo", label: "Potencial da loja" }, { id: "carteira", label: "Comparação da carteira" }, { id: "produtos", label: "Produtos para Full" }],
+};
+
+export function getSubanalise(secao: string, id?: string | null) {
+  const opcoes = SUBANALISES[secao] ?? [];
+  return opcoes.find(opcao => opcao.id === id) ?? opcoes[0];
+}

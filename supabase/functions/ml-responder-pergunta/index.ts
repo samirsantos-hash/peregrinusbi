@@ -6,6 +6,8 @@ import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireEnv } from "../_shared/env.ts";
+import { exigirPermissao } from '../_shared/permissoes.ts';
+import { contemDadosPessoais, limparDadosPessoais } from "../_shared/limparDadosPessoais.ts";
 
 const json = (b: unknown, status = 200) =>
   new Response(JSON.stringify(b), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -13,6 +15,7 @@ const API = "https://api.mercadolibre.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const negado = await exigirPermissao(req, 'perguntas.responder'); if (negado) return negado;
   const URL_ = requireEnv("SUPABASE_URL");
   const db = createClient(URL_, requireEnv("SUPABASE_SERVICE_ROLE_KEY"));
   const sbUser = createClient(URL_, requireEnv("SUPABASE_ANON_KEY"), {
@@ -31,6 +34,8 @@ Deno.serve(async (req) => {
 
   const { data: conta } = await db.from("ml_accounts").select("id").eq("status", "active").eq("ml_user_id", Number(cust)).maybeSingle();
   if (!conta) return json({ error: "Loja não conectada ao Mercado Livre." }, 404);
+  const { data: podeConta } = await sbUser.rpc('ml_pode_gerir_conta', { p_account_id: conta.id });
+  if (!podeConta) return json({ error: 'Loja fora da sua carteira.' }, 403);
   const tok = await tokenAtual(db, conta.id);
   if (!tok?.access_token || Date.parse(tok.expires_at) <= Date.now()) return json({ error: "Acesso da loja vencido; aguarde a renovação automática." }, 409);
   const ml = (path: string, init: RequestInit = {}) => fetch(API + path, {
@@ -52,7 +57,7 @@ Use apenas os dados do anúncio abaixo. Se a informação não estiver neles, di
 Não inclua telefone, e-mail, links, redes sociais nem peça contato fora do Mercado Livre (é proibido).
 Anúncio: ${it.title ?? q.item_id}. Preço: ${it.price ?? "sem dado"}. Estoque: ${it.available_quantity ?? "sem dado"}. Frete grátis: ${it.shipping?.free_shipping ? "sim" : "não informado"}.
 Ficha técnica: ${ficha || "sem dado"}
-Pergunta: ${String(q.text ?? "").slice(0, 800)}
+Pergunta: ${limparDadosPessoais(String(q.text ?? "")).slice(0, 800)}
 Responda só com o texto da resposta.`;
     const r = await fetch("https://ai.gateway.lovable.dev/v1/responses", {
       method: "POST",
@@ -68,7 +73,8 @@ Responda só com o texto da resposta.`;
       return json({ error: msg }, r.status);
     }
     let texto = "", buf = "";
-    const rd = r.body!.getReader(); const dec = new TextDecoder();
+    if (!r.body) return json({ error: 'Resposta da IA indisponível.' }, 502);
+    const rd = r.body.getReader(); const dec = new TextDecoder();
     for (;;) {
       const { done, value } = await rd.read(); if (done) break;
       buf += dec.decode(value, { stream: true });
@@ -80,6 +86,7 @@ Responda só com o texto da resposta.`;
     }
     texto = texto.trim().slice(0, 2000);
     if (!texto) return json({ error: "A IA não sugeriu uma resposta para esta pergunta." }, 422);
+    if (contemDadosPessoais(texto)) return json({ error: "A sugestão trouxe contato ou link, que o Mercado Livre proíbe. Escreva a resposta sem esses dados." }, 422);
     return json({ sugestao: texto });
   }
 

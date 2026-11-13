@@ -1,0 +1,184 @@
+import { act, cleanup, render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider, QueryObserver } from '@tanstack/react-query';
+import { afterEach, expect, it, vi } from 'vitest';
+import { IndicadorCarregamento } from '@/components/chuva/IndicadorCarregamento';
+import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregamento';
+
+afterEach(() => { cleanup(); document.getElementById('root')?.remove(); vi.useRealTimers(); });
+
+for (const remover of [false, true]) it(`libera consultas abandonadas ${remover ? 'removidas do cache' : 'sem observadores'} sem esperar a resposta`, async () => {
+  vi.useFakeTimers();
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  let parar = () => {};
+  const queryKey = ['diagnostico-abandonado'];
+  act(() => { parar = new QueryObserver(client, { queryKey, enabled: false }).subscribe(() => {}); });
+  let resolver: ((v: number) => void) | undefined;
+  let pedido: Promise<number> = Promise.resolve(0);
+  act(() => { pedido = client.fetchQuery({ queryKey, queryFn: () => new Promise<number>(r => { resolver = r; }) }).catch(() => 0); });
+  expect(root.inert).toBe(true);
+  act(() => { if (remover) client.removeQueries({ queryKey }); else parar(); vi.advanceTimersByTime(600); });
+  expect(root.inert).toBe(false);
+  expect(root.classList.contains('pagina-aguardando-consultas')).toBe(false);
+  await act(async () => { resolver?.(1); await pedido; });
+  act(() => { parar(); client.clear(); });
+});
+
+it('eventos de outras consultas não adiam a liberação após conclusão', async () => {
+  vi.useFakeTimers();
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient();
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  let parar = () => {};
+  act(() => { parar = new QueryObserver(client, { queryKey: ['diagnostico'], enabled: false }).subscribe(() => {}); });
+  let resolver: ((v: number) => void) | undefined;
+  let pedido: Promise<number> = Promise.resolve(0);
+  act(() => { pedido = client.fetchQuery({ queryKey: ['diagnostico'], queryFn: () => new Promise(r => { resolver = r; }) }); });
+  await act(async () => { resolver?.(1); await pedido; });
+  for (let i = 0; i < 6; i++) act(() => { vi.advanceTimersByTime(100); client.setQueryData(['outra'], i); });
+  expect(root.inert).toBe(false);
+  act(() => { parar(); client.clear(); });
+});
+
+for (const chave of ['ml-listings-busca', 'ml-listings-mercado', 'ml-promo-participacoes']) {
+  it(`${chave}: busca interativa mantém foco e aceita digitação durante leitura sem cópia`, async () => {
+    const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(<QueryClientProvider client={client}><input aria-label="Busca" /><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+    const campo = screen.getByRole('textbox') as HTMLInputElement;
+    campo.focus();
+    const queryKey = [chave, 'loja', 'MLB400'];
+    const meta = { carregamentoNaoBloqueante: true };
+    let parar = () => {};
+    act(() => { parar = new QueryObserver(client, { queryKey, meta, enabled: false }).subscribe(() => {}); });
+    let resolver: ((v: number) => void) | undefined;
+    let pedido: Promise<number> = Promise.resolve(0);
+    act(() => { pedido = client.fetchQuery({ queryKey, meta, queryFn: () => new Promise(r => { resolver = r; }) }); });
+    expect(root.inert).toBe(false);
+    expect(document.activeElement).toBe(campo);
+    expect(screen.getByRole('status', { name: 'Atualização dos dados' })).toBeTruthy();
+    expect(root.classList.contains('pagina-aguardando-consultas')).toBe(false);
+    await act(async () => { resolver?.(1); await pedido; });
+    expect(document.activeElement).toBe(campo);
+    act(() => { parar(); client.clear(); });
+  });
+}
+
+it('seleção explícita sem cópia continua bloqueando mesmo com consulta de busca', async () => {
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  const queryKey = ['ml-listings-busca', 'outra-loja', 'MLB400'];
+  const meta = { carregamentoNaoBloqueante: true };
+  let parar = () => {};
+  act(() => { parar = new QueryObserver(client, { queryKey, meta, enabled: false }).subscribe(() => {}); });
+  let resolver: ((v: number) => void) | undefined;
+  let pedido: Promise<number> = Promise.resolve(0);
+  act(() => { sinalizarSelecaoCarregamento(); pedido = client.fetchQuery({ queryKey, meta, queryFn: () => new Promise(r => { resolver = r; }) }); });
+  expect(root.inert).toBe(true);
+  await act(async () => { resolver?.(1); await pedido; });
+  act(() => { parar(); client.clear(); });
+});
+
+it('libera a página somente depois de 100% e da exibição da conclusão', async () => {
+  vi.useFakeTimers();
+  const root = document.createElement('div');
+  root.id = 'root';
+  root.inert = false;
+  document.body.append(root);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  let concluirA: ((valor: number) => void) | undefined;
+  let concluirB: ((valor: number) => void) | undefined;
+  let a: Promise<number>;
+  let b: Promise<number>;
+  const pararA = new QueryObserver(client, { queryKey: ['a'], enabled: false }).subscribe(() => {});
+  const pararB = new QueryObserver(client, { queryKey: ['b'], enabled: false }).subscribe(() => {});
+  act(() => {
+    a = client.fetchQuery({ queryKey: ['a'], queryFn: () => new Promise<number>(r => { concluirA = r; }) });
+    b = client.fetchQuery({ queryKey: ['b'], queryFn: () => new Promise<number>(r => { concluirB = r; }) });
+  });
+  expect(root.inert).toBe(true);
+  expect(root.classList.contains('pagina-aguardando-consultas')).toBe(true);
+  expect(screen.queryByRole('status', { name: 'Carregando painel' })).toBeNull();
+  act(() => { vi.advanceTimersByTime(2000); });
+  expect(screen.queryByRole('status', { name: 'Carregando painel' })).toBeNull();
+  act(() => { vi.advanceTimersByTime(100); });
+  expect(screen.getByRole('status', { name: 'Carregando painel' })).toBeTruthy();
+  await act(async () => { concluirA?.(1); await a; });
+  expect(screen.getByRole('status', { name: 'Carregando painel' })).toBeTruthy();
+  expect(screen.queryByRole('progressbar')).toBeNull();
+  expect(root.inert).toBe(true);
+  await act(async () => { concluirB?.(2); await b; });
+  expect(screen.getByRole('status', { name: 'Carregando painel' })).toBeTruthy();
+  expect(root.inert).toBe(true);
+  act(() => { vi.advanceTimersByTime(600); });
+  expect(root.inert).toBe(false);
+  expect(root.classList.contains('pagina-aguardando-consultas')).toBe(false);
+  expect(screen.queryByRole('status')).toBeNull();
+  pararA(); pararB();
+  act(() => { client.clear(); });
+});
+
+it('mostra a cópia e atualiza sem esconder nem bloquear a página', async () => {
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  client.setQueryData(['ml-curva-abc', 'loja-1', 30], { total: 10 });
+  const parar = new QueryObserver(client, { queryKey: ['ml-curva-abc', 'loja-1', 30], enabled: false }).subscribe(() => {});
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  let resolver: ((v: { total: number }) => void) | undefined;
+  let pedido: Promise<{ total: number }>;
+  act(() => { sinalizarSelecaoCarregamento(); });
+  act(() => { pedido = client.fetchQuery({ queryKey: ['ml-curva-abc', 'loja-1', 30], queryFn: () => new Promise(r => { resolver = r; }) }); });
+  expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('0');
+  expect(root.inert).toBe(false);
+  expect(root.classList.contains('pagina-aguardando-consultas')).toBe(false);
+  expect(client.getQueryData(['ml-curva-abc', 'loja-1', 30])).toEqual({ total: 10 });
+  await act(async () => { resolver?.({ total: 12 }); await pedido; });
+  expect(client.getQueryData(['ml-curva-abc', 'loja-1', 30])).toEqual({ total: 12 });
+  act(() => { parar(); client.clear(); });
+});
+
+it('antecipação sem observador não bloqueia a página', async () => {
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient();
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  let resolver: ((v: number) => void) | undefined;
+  let pedido: Promise<number>;
+  act(() => { pedido = client.fetchQuery({ queryKey: ['prefetch'], queryFn: () => new Promise(r => { resolver = r; }) }); });
+  expect(root.inert).toBe(false);
+  await act(async () => { resolver?.(1); await pedido; });
+  act(() => { client.clear(); });
+});
+
+it('troca de loja ou período mede 50%, tempo real e mantém bloqueio até a conclusão', async () => {
+  vi.useFakeTimers();
+  const root = document.createElement('div'); root.id = 'root'; root.inert = false; document.body.append(root);
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(<QueryClientProvider client={client}><IndicadorCarregamento /></QueryClientProvider>, { container: root });
+  const pararA = new QueryObserver(client, { queryKey: ['loja-2', 7], enabled: false }).subscribe(() => {});
+  const pararB = new QueryObserver(client, { queryKey: ['loja-2-anterior', 7], enabled: false }).subscribe(() => {});
+  let resolverA: ((v: number) => void) | undefined;
+  let resolverB: ((v: number) => void) | undefined;
+  let a: Promise<number> = Promise.resolve(0), b: Promise<number> = Promise.resolve(0);
+  act(() => {
+    sinalizarSelecaoCarregamento();
+    a = client.fetchQuery({ queryKey: ['loja-2', 7], queryFn: () => new Promise(r => { resolverA = r; }) });
+    b = client.fetchQuery({ queryKey: ['loja-2-anterior', 7], queryFn: () => new Promise(r => { resolverB = r; }) });
+    vi.advanceTimersByTime(2000);
+  });
+  expect(root.inert).toBe(true);
+  expect(screen.getByText(/2s decorridos/)).toBeTruthy();
+  expect(screen.queryByRole('status', { name: 'Carregando painel' })).toBeNull();
+  act(() => { vi.advanceTimersByTime(100); });
+  expect(screen.getByRole('status', { name: 'Carregando painel' })).toBeTruthy();
+  await act(async () => { resolverA?.(1); await a; });
+  expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('50');
+  await act(async () => { resolverB?.(2); await b; });
+  expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('100');
+  expect(root.inert).toBe(true);
+  act(() => { vi.advanceTimersByTime(600); });
+  expect(root.inert).toBe(false);
+  act(() => { pararA(); pararB(); client.clear(); });
+});

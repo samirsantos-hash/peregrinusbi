@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { brlCurto, numCurto } from "@/lib/format";
 import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -237,9 +238,9 @@ export default function CppVerticalAnalysis({ seller, rawRows, startDate, endDat
               </div>
             </div>
             <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-              <span>🟢 Mais barato</span>
-              <span>⚪ Mesmo preço</span>
-              <span>🔴 Mais caro</span>
+              <span><IconeIndicador simbolo="🟢" className="h-3 w-3 mr-1" />Mais barato</span>
+              <span><IconeIndicador simbolo="⚪" className="h-3 w-3 mr-1" />Mesmo preço</span>
+              <span><IconeIndicador simbolo="🔴" className="h-3 w-3 mr-1" />Mais caro</span>
             </div>
           </CardContent>
         </Card>

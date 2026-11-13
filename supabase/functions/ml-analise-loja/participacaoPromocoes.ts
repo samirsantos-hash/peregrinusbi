@@ -1,0 +1,42 @@
+import { lerCatalogoAbc } from './abcPedidos.ts';
+import { lerPromoDoItem, participa, nomeTipo } from '../_shared/mlPromocoes.ts';
+
+/** Read each own-store item's complete current promotion response; no saved-sync inference. */
+export async function lerParticipacaoPromocoes(get: (path: string) => Promise<any>, cust: string, offset = 0) {
+  const ids = await lerCatalogoAbc(get, cust);
+  const itens: { item_id: string; titulo: string; status: string; promocoes: { id: string; nome: string; status: string; inicio: string | null; fim: string | null }[] }[] = [];
+  const falhas: string[] = [];
+  const fim = Math.min(offset + 20, ids.length);
+  for (let off = offset; off < fim; off += 20) {
+    const blocoIds = ids.slice(off, off + 20);
+    let detalhes = new Map<string, any>();
+    try {
+      const lote = await get(`/items?ids=${blocoIds.join(',')}&attributes=id,seller_id,title,status`);
+      if (!Array.isArray(lote)) throw new Error('Catálogo não confirmado.');
+      detalhes = new Map(lote.filter(e => e.code === 200).map(e => [e.body.id, e.body]));
+    } catch {
+      // Multiget refused (e.g. 403 on one item): read one by one; unread items count as unavailable, never as "no promotion".
+      for (const id of blocoIds) { try { const d = await get(`/items/${id}?attributes=id,seller_id,title,status`); if (d?.id) detalhes.set(d.id, d); } catch { /* indisponível */ } }
+    }
+    for (let i = off; i < Math.min(fim, off + 20); i += 3) {
+      await Promise.all(ids.slice(i, Math.min(i + 3, off + 20)).map(async id => {
+        const d = detalhes.get(id);
+        if (!d || String(d.seller_id) !== cust || !['active', 'paused'].includes(d.status)) { falhas.push(id); return; }
+        try {
+          const bruto = await get(`/seller-promotions/items/${id}?app_version=v2`);
+          if (!Array.isArray(bruto)) throw new Error('Participação não confirmada.');
+          const parsed = bruto.map(lerPromoDoItem);
+          if (parsed.some(p => p === null)) throw new Error('Participação não confirmada.');
+          const promos = new Map<string, { id: string; nome: string; status: string; inicio: string | null; fim: string | null }>();
+          for (const p of parsed) {
+            if (!p || !participa(p.status)) continue;
+            const chave = `${p.tipo}:${p.promotion_id ?? p.offer_id ?? p.tipo}`;
+            promos.set(chave, { id: chave, nome: p.nome ?? nomeTipo(p.tipo), status: p.status, inicio: p.inicio, fim: p.fim });
+          }
+          itens.push({ item_id: id, titulo: d.title ?? id, status: d.status, promocoes: [...promos.values()] });
+        } catch { falhas.push(id); }
+      }));
+    }
+  }
+  return { itens: itens.sort((a, b) => a.item_id.localeCompare(b.item_id)), universo: ids.length, catalogo: ids, offset, proximo: fim < ids.length ? fim : null, medidos: itens.length, indisponiveis: falhas.length, coberturaCompleta: falhas.length === 0 && offset === 0 && fim === ids.length, consultadoEm: new Date().toISOString() };
+}

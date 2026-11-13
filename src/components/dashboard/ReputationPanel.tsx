@@ -1,3 +1,4 @@
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Activity, ShieldCheck } from "lucide-react";
@@ -32,6 +33,7 @@ interface KpiLike {
 interface ReputationPanelProps {
   kpis: KpiLike[];
   dataGranularity?: "consolidated" | "daily";
+  pagina?: "resumo" | "indicadores" | "analise";
 }
 
 type Severity = "green" | "yellow" | "red";
@@ -85,7 +87,7 @@ function StatusPill({ sev }: { sev: Severity }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
       style={{ color: COR_SEV[sev], borderColor: COR_SEV[sev].replace(")", " / 0.4)"), background: COR_SEV[sev].replace(")", " / 0.1)") }}>
-      <span className="w-2 h-2 rounded-full" style={{ background: COR_SEV[sev], boxShadow: `0 0 8px ${COR_SEV[sev]}` }} />
+      <IconeIndicador simbolo={SEVERITY_CONFIG[sev].emoji} className="h-3 w-3" />
       {ROTULO_SEV[sev]}
     </span>
   );
@@ -99,7 +101,7 @@ function nivelLegivel(n?: string) {
   return [cor[base] ?? base, medalha ? `MercadoLíder ${medalha[0].toUpperCase()}${medalha.slice(1)}` : ""].filter(Boolean).join(" · ");
 }
 
-const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelProps) => {
+const ReputationPanel = ({ kpis, dataGranularity = "daily", pagina = "analise" }: ReputationPanelProps) => {
   const { lights, latest, trendData, overallSeverity, slopes } = useMemo(() => {
     if (kpis.length === 0) {
       return {
@@ -245,7 +247,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
       </div>
 
       {/* Traffic Lights */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {pagina !== "analise" && <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {lights.map((light, idx) => {
           const cfg = SEVERITY_CONFIG[light.severity];
           const slope =
@@ -294,14 +296,14 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
             </motion.div>
           );
         })}
-      </div>
+      </div>}
 
       {/* Evolução única: uma linha suave por indicador, cada uma com cor própria */}
-      {trendData.length >= 1 && (() => {
+      {pagina === "analise" && trendData.length >= 1 && (() => {
         const CORES: Record<string, string> = {
           claims: "hsl(var(--brand-blue))",
-          delays: "hsl(var(--ec-laranja, 25 75% 44%))",
-          cancels: "hsl(var(--media))",
+          delays: "hsl(var(--chart-2))",
+          cancels: "hsl(var(--destructive))",
         };
         const statusCor = (v: number, a: number, c: number) =>
           v >= c ? "hsl(var(--crit))" : v >= a ? "hsl(var(--attention-text))" : "hsl(var(--ok))";
@@ -329,7 +331,7 @@ const ReputationPanel = ({ kpis, dataGranularity = "daily" }: ReputationPanelPro
                       <span className="text-xl font-bold tabular-nums" style={{ color: statusCor(m.valor, m.atencao, m.critico) }}>
                         {m.valor.toFixed(2).replace(".", ",")}%
                       </span>
-                      <span className="text-[10px] font-semibold" style={{ color: corTend }}>{tend}</span>
+                      <span className="text-[10px] font-semibold" style={{ color: corTend }}><IconeIndicador simbolo={tend.slice(0, 1)} className="h-3 w-3 mr-1" />{tend.slice(2)}</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
                       meta &lt; {m.atencao}% · crítico ≥ {m.critico}%

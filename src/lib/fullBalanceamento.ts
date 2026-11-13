@@ -1,6 +1,6 @@
 import { solveQP } from 'quadprog';
 import { LIMITES } from '../../supabase/functions/_shared/mlMelhorias';
-export type FullProduto = { id: string; titulo: string; sku: string | null; link: string; foto: string | null; estoque: number | null; status: string; saude: number | null; qualidade: { score: number | null; pendencias: { titulo: string }[] } | null; fotos: { largura: number | null; altura: number | null }[]; unidades: number; faturamento: number; diario: { data: string; faturamento: number }[] };
+export type FullProduto = { id: string; titulo: string; sku: string | null; link: string; foto: string | null; estoque: number | null; logistica?: string | null; estoqueFull?: number | null; promocoes?: string[] | null; ads?: boolean | null; flex?: boolean | null; status: string; saude: number | null; qualidade: { score: number | null; pendencias: { titulo: string }[] } | null; fotos: { largura: number | null; altura: number | null }[]; unidades: number; faturamento: number; diario: { data: string; faturamento: number }[] };
 export function alertasFull(p: FullProduto) {
   const alertas: string[] = [];
   if (p.status !== 'active') alertas.push('Anúncio não está ativo');

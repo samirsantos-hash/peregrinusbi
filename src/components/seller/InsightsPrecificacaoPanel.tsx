@@ -1,3 +1,6 @@
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
+import { Button } from "@/components/ui/button";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { gerarInsights, type InsightPreco, type DadosMes } from "@/lib/queries/insightsPrecificacao";
@@ -23,11 +26,11 @@ function InsightCard({ insight, defaultAberto = false }: { insight: InsightPreco
       className="rounded-xl border overflow-hidden"
       style={{ borderColor: cfg.borda, backgroundColor: cfg.bg }}
     >
-      <button
+      <Button variant="ghost"
         onClick={() => setAberto((v) => !v)}
-        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-background/[0.02] transition-colors"
+        className="w-full h-auto whitespace-normal rounded-none flex items-center gap-3 px-4 py-3 text-left hover:bg-background/[0.02] transition-colors"
       >
-        <span className="text-2xl leading-none">{cfg.icone}</span>
+        <IconeIndicador simbolo={cfg.icone} className="h-5 w-5" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span
@@ -52,22 +55,22 @@ function InsightCard({ insight, defaultAberto = false }: { insight: InsightPreco
             {insight.metrica}
           </p>
           <span className="text-[10px] text-muted-foreground">
-            {aberto ? "▲ fechar" : "▼ ver análise"}
+            {aberto ? <ChevronUp className="inline h-3 w-3" aria-hidden="true" /> : <ChevronDown className="inline h-3 w-3" aria-hidden="true" />} {aberto ? "fechar" : "ver análise"}
           </span>
         </div>
-      </button>
+      </Button>
 
       {aberto && (
         <div className="px-4 pb-4 pt-1 space-y-3 border-t" style={{ borderColor: cfg.borda }}>
-          <Section title="📊 O que foi identificado" text={insight.identificado} />
-          <Section title="🤖 Por que isso importa para o algoritmo" text={insight.porque} />
-          <Section title="🔍 O que investigar / hipótese de causa" text={insight.investigar} />
+          <Section simbolo="📊" title="O que foi identificado" text={insight.identificado} />
+          <Section simbolo="🤖" title="Por que isso importa para o algoritmo" text={insight.porque} />
+          <Section simbolo="🔍" title="O que investigar / hipótese de causa" text={insight.investigar} />
           <div
             className="rounded-lg p-3 border"
             style={{ borderColor: cfg.borda, backgroundColor: "rgba(255,255,255,0.02)" }}
           >
             <p className="text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: cfg.cor }}>
-              💡 Sugestão de ação
+              <IconeIndicador simbolo="💡" className="h-3 w-3 mr-1" /> Sugestão de ação
             </p>
             <p className="text-xs text-foreground leading-relaxed">{insight.sugestao}</p>
           </div>
@@ -77,10 +80,10 @@ function InsightCard({ insight, defaultAberto = false }: { insight: InsightPreco
   );
 }
 
-function Section({ title, text }: { title: string; text: string }) {
+function Section({ title, text, simbolo }: { title: string; text: string; simbolo: string }) {
   return (
     <div>
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">{title}</p>
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-1"><IconeIndicador simbolo={simbolo} className="h-3 w-3 mr-1" />{title}</p>
       <p className="text-xs text-foreground/90 leading-relaxed">{text}</p>
     </div>
   );
@@ -91,7 +94,7 @@ export interface InsightsPrecificacaoPanelProps {
   dadosAtual: DadosMes | null;
   priceScore?: number | null;
   temCDP?: boolean;
-  pctOptinCDP?: number;
+  pctOptinCDP?: number | null;
   isMercadoLider?: boolean;
 }
 
@@ -100,7 +103,7 @@ export function InsightsPrecificacaoPanel({
   dadosAtual,
   priceScore = null,
   temCDP = false,
-  pctOptinCDP = 0,
+  pctOptinCDP = null,
   isMercadoLider = false,
 }: InsightsPrecificacaoPanelProps) {
   const insights = useMemo(() => {
@@ -127,22 +130,22 @@ export function InsightsPrecificacaoPanel({
         <div className="flex items-center gap-2 flex-wrap">
           {nAlertas > 0 && (
             <span className="status-badge text-[11px]" style={{ color: TIPO_CFG.alerta.cor, borderColor: TIPO_CFG.alerta.borda, backgroundColor: TIPO_CFG.alerta.bg }}>
-              🚨 {nAlertas} alerta{nAlertas > 1 ? "s" : ""}
+              <IconeIndicador simbolo="🚨" className="h-3 w-3 mr-1" /> {nAlertas} alerta{nAlertas > 1 ? "s" : ""}
             </span>
           )}
           {nInvestigar > 0 && (
             <span className="status-badge text-[11px]" style={{ color: TIPO_CFG.investigar.cor, borderColor: TIPO_CFG.investigar.borda, backgroundColor: TIPO_CFG.investigar.bg }}>
-              🔍 {nInvestigar} a investigar
+              <IconeIndicador simbolo="🔍" className="h-3 w-3 mr-1" /> {nInvestigar} a investigar
             </span>
           )}
           {nOportunidades > 0 && (
             <span className="status-badge text-[11px]" style={{ color: TIPO_CFG.oportunidade.cor, borderColor: TIPO_CFG.oportunidade.borda, backgroundColor: TIPO_CFG.oportunidade.bg }}>
-              💡 {nOportunidades} oportunidade{nOportunidades > 1 ? "s" : ""}
+              <IconeIndicador simbolo="💡" className="h-3 w-3 mr-1" /> {nOportunidades} oportunidade{nOportunidades > 1 ? "s" : ""}
             </span>
           )}
           {nTendencias > 0 && (
             <span className="status-badge text-[11px]" style={{ color: TIPO_CFG.tendencia.cor, borderColor: TIPO_CFG.tendencia.borda, backgroundColor: TIPO_CFG.tendencia.bg }}>
-              📈 {nTendencias} tendência{nTendencias > 1 ? "s" : ""}
+              <IconeIndicador simbolo="📈" className="h-3 w-3 mr-1" /> {nTendencias} tendência{nTendencias > 1 ? "s" : ""}
             </span>
           )}
         </div>
@@ -163,7 +166,7 @@ export function InsightsPrecificacaoPanel({
       {insights.length === 0 && dadosAtual && historico.length >= 2 && (
         <div className="rounded-xl border border-emerald/30 bg-emerald/5 p-6 text-center">
           <p className="text-sm font-medium text-emerald mb-1">
-            ✅ Nenhum ponto crítico identificado na análise de preços.
+            <IconeIndicador simbolo="✅" className="h-3 w-3 mr-1" /> Nenhum ponto crítico identificado na análise de preços.
           </p>
           <p className="text-[11px] text-muted-foreground">
             A competitividade está saudável e dentro dos limites algorítmicos do ML.

@@ -1,10 +1,13 @@
+import { useAuth } from "@/hooks/useAuth";
+import { lerPaletaAlquimia } from "@/lib/paletaAlquimia";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Loader2, RefreshCw } from "lucide-react";
+import { ArrowLeft, ExternalLink, Loader2, Plus, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { precisaCompletar } from '@/lib/completarAds';
+import { resolverContaPublicidade } from '@/lib/contaPublicidade';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EmptyState, PageHeader } from "@/components/ds";
 import { DialogoPrevia } from "@/components/ml/acoes/DialogoPrevia";
@@ -15,36 +18,38 @@ import { AnunciosAds } from "@/components/ml/ads/AnunciosAds";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { useAcaoEmLote } from "@/lib/mlAcoes";
 import { chamarFuncaoMl, dataHoraBr, useContasMl } from "@/lib/mlFuncoes";
-import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel } from "@/lib/adsAnalise";
+import { type CampanhaLinha, type GrupoPainel, type LinhaCampanhaDia, montarPainel, faturamentoAlinhado } from "@/lib/adsAnalise";
 import { useDesenvolvedor } from '@/hooks/useDesenvolvedor';
 import { registrarAviso } from '@/lib/avisosDesenvolvedor';
+import SinergiaPublicidadeApi from '@/components/ml/SinergiaPublicidade';
+import { ConfigurarLimitesAds } from '@/components/ml/ads/ConfigurarLimitesAds';
 
 /** Janela de comparação: 30 dias contra os 30 anteriores (a API guarda 90). */
-const DIAS = 30;
+const PERIODOS = [7, 15, 30, 45] as const;
 
 type Estado = { status: "ativo" | "sem_product_ads"; synced_at: string; metricas_campanha_em: string | null };
 type RespostaSync = { contas?: { status: string; dias_pendentes: number; erros: string[] }[] };
 
 export default function Publicidade() {
+  const alquimia = lerPaletaAlquimia(useAuth().user?.id);
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [params, setParams] = useSearchParams();
   const contas = useContasMl();
   const { autorizado: isDesenvolvedor } = useDesenvolvedor();
-  const contaId = params.get("conta") ?? "";
+  const conta = resolverContaPublicidade(contas.data, params.get('loja'), params.get('conta'));
+  const contaId = conta?.id ?? '';
+  const custId = params.get('loja') ?? (conta ? String(conta.ml_user_id) : undefined);
+  const voltarPainel = () => navigate(custId ? `/?loja=${encodeURIComponent(custId)}` : '/');
   const [atualizando, setAtualizando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  const DIAS = (PERIODOS as readonly number[]).includes(Number(params.get('periodo'))) ? Number(params.get('periodo')) : 30;
 
   const mudar = (novos: Record<string, string | null>) => {
     const p = new URLSearchParams(params);
     for (const [k, v] of Object.entries(novos)) v ? p.set(k, v) : p.delete(k);
     setParams(p, { replace: true });
   };
-
-  useEffect(() => {
-    if (!contaId && contas.data?.length) mudar({ conta: contas.data[0].id });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [contas.data, contaId]);
 
   const estado = useQuery({
     queryKey: ["ads-estado", contaId],
@@ -57,7 +62,7 @@ export default function Publicidade() {
   });
 
   const dados = useQuery({
-    queryKey: ["ads-painel", contaId],
+    queryKey: ["ads-painel", contaId, DIAS],
     enabled: !!contaId && estado.data?.status === "ativo",
     queryFn: async () => {
       const sb = supabase as any;
@@ -76,16 +81,20 @@ export default function Publicidade() {
       ]);
       const erro = campanhas.error ?? serie.error ?? grupos.error ?? settings.error;
       if (erro) throw erro;
-      const fat = (vendas.data?.dados as { faturamento_30d?: unknown } | null)?.faturamento_30d;
+      const hojeRef = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+      const vendasSerie = (vendas.data?.dados as { serie?: { data?: string; faturamento?: unknown }[] } | null)?.serie;
+      // TACOS só com faturamento das mesmas datas do investimento; sem alinhamento, fica indisponível.
+      const fat = faturamentoAlinhado(vendasSerie, serie.data, hojeRef, DIAS);
       return {
         painel: montarPainel({
           campanhas: campanhas.data,
           serie: serie.data,
           grupos: grupos.data,
           settings: settings.data,
-          faturamento: typeof fat === "number" && Number.isFinite(fat) ? fat : null,
-        }, undefined, DIAS),
+          faturamento: fat,
+        }, hojeRef, DIAS),
         faturamentoEm: (vendas.data?.atualizado_em ?? null) as string | null,
+        ultimoDia: (serie.data.length ? serie.data[serie.data.length - 1].dia : null) as string | null,
       };
     },
   });
@@ -111,6 +120,7 @@ export default function Publicidade() {
   const acao = useAcaoEmLote("ml-ads-action", contaId, recarregar);
 
   const atualizar = async () => {
+    if (!contaId) return;
     setAtualizando(true);
     setAviso(null);
     try {
@@ -131,14 +141,28 @@ export default function Publicidade() {
   };
 
   const painel = dados.data?.painel;
+  // Faltam dias recentes? Busca sozinho uma vez por loja nesta sessão; spinner nas células até terminar (máx. 90 s).
+  const [completando, setCompletando] = useState(false);
+  const ultimoDia = dados.data?.ultimoDia;
+  useEffect(() => {
+    if (!contaId || !dados.isSuccess || !painel) return;
+    const chave = `peregrinus:ads-completar:${contaId}`;
+    if (sessionStorage.getItem(chave) || !precisaCompletar(ultimoDia, painel.hoje)) return;
+    sessionStorage.setItem(chave, "1");
+    setCompletando(true);
+    const limite = setTimeout(() => setCompletando(false), 90_000);
+    chamarFuncaoMl("ml-ads-sync", { account_id: contaId }).catch(() => undefined)
+      .finally(() => { clearTimeout(limite); setCompletando(false); recarregar(); });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contaId, dados.isSuccess, ultimoDia]);
   const fonte = estado.data
     ? `Fonte: Mercado Livre · atualizado em ${dataHoraBr(estado.data.synced_at)}${painel ? ` · ${DIAS} dias até ${painel.hoje.split("-").reverse().slice(0, 2).join("/")}` : ""}`
     : "Fonte: Mercado Livre";
 
   return (
-    <div className="min-h-screen">
+    <div className={`resumo-apple-glass min-h-screen${alquimia ? " paleta-alquimia" : ""}`}>
       <div className="mx-auto max-w-7xl px-4 py-8 space-y-4">
-        <Button variant="ghost" size="sm" className="gap-1.5 px-2" onClick={() => navigate("/")}>
+        <Button variant="ghost" size="sm" className="gap-1.5 px-2" onClick={voltarPainel}>
           <ArrowLeft className="h-4 w-4" /> Painel
         </Button>
         <PageHeader
@@ -146,15 +170,16 @@ export default function Publicidade() {
           periodo={fonte}
           acoes={
             <div className="flex flex-wrap items-center gap-2">
-              {(contas.data?.length ?? 0) > 1 && (
-                <Select value={contaId} onValueChange={(v) => mudar({ conta: v })}>
-                  <SelectTrigger className="w-56 h-9"><SelectValue placeholder="Conta" /></SelectTrigger>
-                  <SelectContent>
-                    {contas.data!.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>{c.nickname ?? c.ml_user_id} · {c.site_id}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {conta && <span className="text-sm text-muted-foreground break-all">Loja: {conta.nickname ?? custId} · Cust ID: {custId}</span>}
+              {contaId && (
+                <div className="flex rounded-md border border-border overflow-hidden" role="group" aria-label="Período">
+                  {PERIODOS.map((p) => (
+                    <button key={p} type="button" onClick={() => mudar({ periodo: p === 30 ? null : String(p) })}
+                      className={`px-2.5 py-1 text-xs ${DIAS === p ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}>
+                      {p} dias
+                    </button>
+                  ))}
+                </div>
               )}
               {contaId && (
                 <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
@@ -165,9 +190,16 @@ export default function Publicidade() {
           }
         />
 
+        {completando && <p className="flex items-center gap-2 text-sm text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Completando dados…</p>}
         {aviso && <p className="text-sm text-ec-ambar">{isDesenvolvedor ? aviso : 'A atualização não foi concluída integralmente. Os dados disponíveis foram mantidos.'}</p>}
         {contas.isLoading && <Carregando />}
         {contas.isError && <EmptyState falta="Não foi possível carregar suas contas." acao="Recarregue a página." />}
+        {contas.isSuccess && contas.data.length > 0 && !conta && (
+          <EmptyState
+            falta={custId || params.get('conta') ? 'A loja selecionada não possui uma conta de publicidade disponível para este acesso.' : 'Selecione uma loja no painel para consultar suas campanhas.'}
+            acao="Volte ao painel. Nenhuma outra loja foi selecionada."
+          />
+        )}
         {contas.data && contas.data.length === 0 && (
           <EmptyState
             falta="Nenhuma conta do Mercado Livre ligada ao seu usuário."
@@ -181,14 +213,28 @@ export default function Publicidade() {
           <EmptyState falta="Publicidade ainda não foi lida nesta conta." acao="Clique em Atualizar para ler campanhas e métricas do Mercado Livre." />
         )}
         {estado.data?.status === "sem_product_ads" && (
-          <EmptyState
-            falta="Esta conta não tem Product Ads ativo no Mercado Livre."
-            acao="O vendedor ativa em Mercado Livre > Publicidade. Depois, clique em Atualizar."
-          />
+          <div className="glass-card rounded-xl p-5 space-y-3">
+            <p className="font-semibold">Criar a primeira campanha desta loja</p>
+            <p className="text-sm text-muted-foreground">
+              Esta loja ainda não usa Publicidade no Mercado Livre. A primeira campanha é criada lá, porque o Mercado Livre pede que o vendedor aceite os termos de Publicidade uma vez. Depois disso, clique em Atualizar: as próximas campanhas e anúncios podem ser criados e ajustados por aqui.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" asChild>
+                <a href="https://ads.mercadolivre.com.br/" target="_blank" rel="noopener noreferrer">
+                  <Plus className="h-3.5 w-3.5 mr-1.5" /> Criar primeira campanha <ExternalLink className="h-3.5 w-3.5 ml-1.5" />
+                </a>
+              </Button>
+              <Button size="sm" variant="outline" onClick={atualizar} disabled={atualizando}>
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5" /> Já criei, atualizar
+              </Button>
+            </div>
+          </div>
         )}
 
         {estado.data?.status === "ativo" && (
           <>
+            {painel && <ConfigurarLimitesAds key={contaId} contaId={contaId} limites={painel.limites} aoSalvar={recarregar} />}
+            <SinergiaPublicidadeApi accountId={contaId} limites={painel?.limites} />
             {dados.isLoading && <Carregando texto="Montando o painel de publicidade…" />}
             {dados.isError && <EmptyState falta="Não foi possível carregar os dados de publicidade." acao="Recarregue a página ou clique em Atualizar." />}
             {painel && (
@@ -202,7 +248,7 @@ export default function Publicidade() {
                   <VisaoGeralAds painel={painel} faturamentoEm={dados.data?.faturamentoEm ?? null} aoVerAnuncios={(filtro) => mudar({ aba: "anuncios", filtro })} />
                 </TabsContent>
                 <TabsContent value="campanhas" className="mt-4">
-                  <CampanhasAds painel={painel} acao={acao} />
+                  <CampanhasAds painel={painel} acao={acao} custId={custId ?? ''} contaId={contaId} completando={completando} />
                 </TabsContent>
                 <TabsContent value="anuncios" className="mt-4">
                   <AnunciosAds

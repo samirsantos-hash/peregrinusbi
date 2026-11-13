@@ -85,6 +85,146 @@
       "when": 1792777703962,
       "tag": "0011_developer_alerts_private",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1793104899906,
+      "tag": "0012_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1793130612354,
+      "tag": "0013_scoped_indicator_read_summaries",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1793130714035,
+      "tag": "0014_scoped_portfolio_trends",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793130805403,
+      "tag": "0015_scoped_portfolio_monthly_summary",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793294918279,
+      "tag": "0016_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1793725209786,
+      "tag": "0017_permissoes_individuais_master",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1793725306698,
+      "tag": "0018_consultas_checklist_e_guardas",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1793725468983,
+      "tag": "0019_permissoes_rpc_e_escopo_lojas",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1793726094490,
+      "tag": "0020_preservar_legado_e_proteger_master",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1793726669525,
+      "tag": "0021_bloquear_gravacao_direta_checklist",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1793800029761,
+      "tag": "0022_master_integration_visibility",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1793811345252,
+      "tag": "0023_alerta_lentidao_1s",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1793812722374,
+      "tag": "0024_rls_por_consulta",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793812878870,
+      "tag": "0025_rls_escopo_uma_vez",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793813309879,
+      "tag": "0026_escopo_lojas_rapido",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1793881254000,
+      "tag": "0027_remover_leituras_abertas",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1794355296700,
+      "tag": "0028_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1794355877233,
+      "tag": "0029_migration",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1794356509182,
+      "tag": "0030_acessos_login",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1794538614042,
+      "tag": "0031_plano_carteira",
+      "breakpoints": true
     }
   ]
 }

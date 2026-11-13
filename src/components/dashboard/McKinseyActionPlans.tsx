@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import { Copy, Rocket, Search, AlertTriangle, ExternalLink } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -14,14 +14,16 @@ interface Props {
 
 type Quadrant = "invest" | "seo" | "critical" | "maintain";
 
-function classifyItem(item: ListingQuality): Quadrant {
+function classifyItem(item: ListingQuality): Quadrant | null {
   // Força Competitiva = avg of offer scores (price, stock, shipping, promotions)
-  const offerScores = [item.llPriceScore, item.llStockAvailabilityScore, item.llFreeShippingScore, item.llPromotionsScore].filter(s => s > 0);
-  const forcaCompetitiva = offerScores.length > 0 ? offerScores.reduce((a, b) => a + b, 0) / offerScores.length : 50;
+  const offerScores = [item.llPriceScore, item.llStockAvailabilityScore, item.llFreeShippingScore, item.llPromotionsScore].filter((s): s is number => typeof s === "number" && Number.isFinite(s));
+  if (offerScores.length < 3) return null; // cobertura mínima: 3 de 4 dimensões medidas
+  const forcaCompetitiva = offerScores.reduce((a, b) => a + b, 0) / offerScores.length;
 
   // Atratividade = avg of content scores (pictures, title, description, tech specs)
-  const contentScores = [item.llPicturesScore, item.llTitleScore, item.llDescriptionScore, item.llTechSpecsScore].filter(s => s > 0);
-  const atratividade = contentScores.length > 0 ? contentScores.reduce((a, b) => a + b, 0) / contentScores.length : 50;
+  const contentScores = [item.llPicturesScore, item.llTitleScore, item.llDescriptionScore, item.llTechSpecsScore].filter((s): s is number => typeof s === "number" && Number.isFinite(s));
+  if (contentScores.length < 3) return null;
+  const atratividade = contentScores.reduce((a, b) => a + b, 0) / contentScores.length;
 
   const threshold = 65;
   if (forcaCompetitiva >= threshold && atratividade >= threshold) return "invest";
@@ -36,6 +38,7 @@ function buildMlbLink(itemId: string): string {
 }
 
 const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) => {
+  const openPlans = useRef<string[]>([]);
   const classifiedItems = useMemo(() => {
     return listingsQuality.map((item) => ({
       ...item,
@@ -80,7 +83,17 @@ const McKinseyActionPlans = ({ listingsQuality, sellerName = "Seller" }: Props) 
         </h3>
       </div>
 
-      <Accordion type="multiple" className="space-y-2">
+      <Accordion type="multiple" className="space-y-2" onValueChange={(values) => {
+        const categories: Record<string, string> = { invest: "growth", seo: "listing_quality", critical: "inventory" };
+        for (const value of values) {
+          if (!openPlans.current.includes(value) && categories[value]) {
+            window.__lovableEvents?.track?.("project.diagnostic_recommendation_opened", {
+              recommendation_category: categories[value], dashboard_context: "seller_segment_action_plan",
+            });
+          }
+        }
+        openPlans.current = values;
+      }}>
         {/* 🚀 Prioridade Máxima */}
         {investRows.length > 0 && (
           <AccordionItem value="invest" className="border border-emerald/20 rounded-lg bg-emerald/5 px-1">

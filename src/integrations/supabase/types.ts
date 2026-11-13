@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      acessos_login: {
+        Row: {
+          aparelho: string | null
+          aparelho_chave: string
+          criado_em: string
+          id: number
+          ip: string | null
+          user_id: string
+        }
+        Insert: {
+          aparelho?: string | null
+          aparelho_chave: string
+          criado_em?: string
+          id?: never
+          ip?: string | null
+          user_id: string
+        }
+        Update: {
+          aparelho?: string | null
+          aparelho_chave?: string
+          criado_em?: string
+          id?: never
+          ip?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       alerta_inatividade_ciente: {
         Row: {
           ciente_em: string
@@ -47,6 +74,27 @@ export type Database = {
         }
         Update: {
           email_prefixo?: string
+        }
+        Relationships: []
+      }
+      auth_tentativas: {
+        Row: {
+          chave: string
+          criado_em: string
+          id: number
+          tipo: string
+        }
+        Insert: {
+          chave: string
+          criado_em?: string
+          id?: never
+          tipo: string
+        }
+        Update: {
+          chave?: string
+          criado_em?: string
+          id?: never
+          tipo?: string
         }
         Relationships: []
       }
@@ -1555,6 +1603,7 @@ export type Database = {
       }
       ml_accounts: {
         Row: {
+          conectado_por: string | null
           created_at: string | null
           id: string
           last_sync_daily_at: string | null
@@ -1565,6 +1614,7 @@ export type Database = {
           tenant_id: string
         }
         Insert: {
+          conectado_por?: string | null
           created_at?: string | null
           id?: string
           last_sync_daily_at?: string | null
@@ -1575,6 +1625,7 @@ export type Database = {
           tenant_id: string
         }
         Update: {
+          conectado_por?: string | null
           created_at?: string | null
           id?: string
           last_sync_daily_at?: string | null
@@ -3252,6 +3303,59 @@ export type Database = {
           },
         ]
       }
+      permissao_catalogo: {
+        Row: {
+          chave: string
+          pai: string | null
+        }
+        Insert: {
+          chave: string
+          pai?: string | null
+        }
+        Update: {
+          chave?: string
+          pai?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissao_catalogo_pai_fkey"
+            columns: ["pai"]
+            isOneToOne: false
+            referencedRelation: "permissao_catalogo"
+            referencedColumns: ["chave"]
+          },
+        ]
+      }
+      permissoes_auditoria: {
+        Row: {
+          antes: string[]
+          aprovado_por: string
+          criado_em: string
+          depois: string[]
+          id: string
+          legado_anterior: boolean
+          user_id: string
+        }
+        Insert: {
+          antes: string[]
+          aprovado_por: string
+          criado_em?: string
+          depois: string[]
+          id?: string
+          legado_anterior: boolean
+          user_id: string
+        }
+        Update: {
+          antes?: string[]
+          aprovado_por?: string
+          criado_em?: string
+          depois?: string[]
+          id?: string
+          legado_anterior?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
       portfolio_notifications: {
         Row: {
           added_cust_ids: string[]
@@ -3293,6 +3397,7 @@ export type Database = {
           cust_ids: string[]
           id: string
           name: string
+          plano: string | null
           seller_aliases: Json
         }
         Insert: {
@@ -3302,6 +3407,7 @@ export type Database = {
           cust_ids?: string[]
           id?: string
           name: string
+          plano?: string | null
           seller_aliases?: Json
         }
         Update: {
@@ -3311,6 +3417,7 @@ export type Database = {
           cust_ids?: string[]
           id?: string
           name?: string
+          plano?: string | null
           seller_aliases?: Json
         }
         Relationships: []
@@ -4330,6 +4437,53 @@ export type Database = {
         }
         Relationships: []
       }
+      usuario_permissao_estado: {
+        Row: {
+          legado: boolean
+          permissoes_legadas: string[]
+          revisado_em: string | null
+          revisado_por: string | null
+          user_id: string
+        }
+        Insert: {
+          legado?: boolean
+          permissoes_legadas?: string[]
+          revisado_em?: string | null
+          revisado_por?: string | null
+          user_id: string
+        }
+        Update: {
+          legado?: boolean
+          permissoes_legadas?: string[]
+          revisado_em?: string | null
+          revisado_por?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      usuario_permissoes: {
+        Row: {
+          permissao: string
+          user_id: string
+        }
+        Insert: {
+          permissao: string
+          user_id: string
+        }
+        Update: {
+          permissao?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usuario_permissoes_permissao_fkey"
+            columns: ["permissao"]
+            isOneToOne: false
+            referencedRelation: "permissao_catalogo"
+            referencedColumns: ["chave"]
+          },
+        ]
+      }
     }
     Views: {
       multilojas_carga_publica: {
@@ -4450,6 +4604,8 @@ export type Database = {
           origem: string
         }[]
       }
+      checklist_escopo_loja: { Args: { p_cust: string }; Returns: boolean }
+      escopo_lojas_ids: { Args: never; Returns: string[] }
       get_allowed_cust_ids: { Args: never; Returns: string[] }
       get_data_coverage: {
         Args: never
@@ -4461,6 +4617,11 @@ export type Database = {
       }
       get_meus_grupos: { Args: never; Returns: string[] }
       get_perfil: { Args: never; Returns: string }
+      guard_permissao_tabela: {
+        Args: { p_escrita: boolean; p_tabela: string }
+        Returns: boolean
+      }
+      guard_tema_ml: { Args: { p_tema: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4468,8 +4629,115 @@ export type Database = {
         }
         Returns: boolean
       }
+      indicadores_carteira: {
+        Args: { p_seller_ids: string[] }
+        Returns: {
+          data: string
+          is_latest: boolean
+          metrics: Json
+          seller_id: string
+        }[]
+      }
+      indicadores_classificacao: {
+        Args: { p_seller_ids: string[] }
+        Returns: {
+          data: string
+          gmv_lc: number
+          inv_pads: number
+          ll_stock_availability_score: number
+          meses_total: number
+          rep_cancellations_rate: number
+          rep_current_level: string
+          seller_id: string
+          tgmv_lc: number
+          tim_month_id: number
+          tsi: number
+          visits: number
+        }[]
+      }
+      indicadores_tendencias: {
+        Args: { p_seller_ids: string[] }
+        Returns: {
+          ads_trend: number
+          seller_id: string
+          tgmv_trend: number
+          visits_trend: number
+        }[]
+      }
+      indicadores_ultimos: {
+        Args: { p_seller_ids: string[] }
+        Returns: {
+          bpc: number | null
+          cdp_tgmv_lc: number | null
+          cdp_tsi: number | null
+          created_at: string
+          data: string
+          f_tgmv_lc: number | null
+          f_tsi: number | null
+          gmv_lc: number | null
+          gmv_lc_m1: number | null
+          id: string
+          inv_pads: number | null
+          ll_description_score: number | null
+          ll_free_shipping_score: number | null
+          ll_pictures_score: number | null
+          ll_price_score: number | null
+          ll_promotions_score: number | null
+          ll_stock_availability_score: number | null
+          ll_tech_specs_score: number | null
+          ll_title_score: number | null
+          min_price_rival: number | null
+          orders_clips: number | null
+          pontuacao_ipi: number | null
+          pontuacao_ll_gtin: number | null
+          rep_cancellations_rate: number | null
+          rep_claims_rate: number | null
+          rep_current_level: string | null
+          rep_delayed_ht_rate: number | null
+          score_caracteristica_final: number | null
+          score_final_full: number | null
+          score_final_pads: number | null
+          score_oferta_final: number | null
+          score_photo: number | null
+          score_qualidade_final: number | null
+          score_title: number | null
+          seller_id: string
+          sellers_clips_publi: number | null
+          si_clips: number | null
+          tgmv_lc: number | null
+          tgmv_lc_clips: number | null
+          tgmv_lc_flex: number | null
+          tgmv_lc_full: number | null
+          tgmv_lc_pads: number | null
+          tgmv_orders: number | null
+          tim_month_id: number | null
+          tsi: number | null
+          tsi_flex: number | null
+          tsi_pads: number | null
+          uplift_gmv_lc_m1: number | null
+          visitas_clips: number | null
+          visits: number | null
+          visits_cheaper: number | null
+          visits_expensive: number | null
+          visits_match: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "sellers_kpi"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      indicadores_verticais: {
+        Args: { p_seller_ids: string[] }
+        Returns: {
+          seller_id: string
+          vertical: string
+        }[]
+      }
       is_admin: { Args: never; Returns: boolean }
       is_super_admin: { Args: never; Returns: boolean }
+      minhas_permissoes: { Args: never; Returns: Json }
       ml_ads_painel_grupos: {
         Args: { p_account_id: string; p_dias?: number }
         Returns: {
@@ -4582,6 +4850,20 @@ export type Database = {
       }
       ml_e_consultor: { Args: { p_user_id: string }; Returns: boolean }
       ml_lojas_do_usuario: { Args: never; Returns: string[] }
+      ml_minhas_contas_status: {
+        Args: never
+        Returns: {
+          account_id: string
+          jobs_concluidos: number
+          jobs_total: number
+          ml_user_id: number
+          nickname: string
+          site_id: string
+          status: string
+          tem_token: boolean
+          token_expira_em: string
+        }[]
+      }
       ml_notificacao_lida: { Args: { p_id: string }; Returns: undefined }
       ml_pode_carregar: { Args: never; Returns: boolean }
       ml_pode_gerir_conta: { Args: { p_account_id: string }; Returns: boolean }
@@ -4625,6 +4907,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      permissoes_do_usuario: { Args: { p_user_id: string }; Returns: Json }
       qualidade_divergencias: {
         Args: { _mes: string }
         Returns: {
@@ -4674,7 +4957,27 @@ export type Database = {
         Args: { p_codigo: string; p_duracao_ms?: number; p_origem: string }
         Returns: undefined
       }
+      salvar_permissoes: {
+        Args: { p_permissoes: string[]; p_user_id: string }
+        Returns: undefined
+      }
       sou_desenvolvedor: { Args: never; Returns: boolean }
+      tem_permissao: { Args: { p_permissao: string }; Returns: boolean }
+      usuario_tem_alguma_permissao: {
+        Args: { p_permissoes: string[] }
+        Returns: boolean
+      }
+      usuario_tem_permissao: {
+        Args: { p_permissao: string; p_user_id: string }
+        Returns: boolean
+      }
+      usuarios_revisao: {
+        Args: never
+        Returns: {
+          revisado: boolean
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_role:

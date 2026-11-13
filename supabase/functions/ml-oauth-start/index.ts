@@ -5,6 +5,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireEnv } from "../_shared/env.ts";
+import { exigirPermissao } from '../_shared/permissoes.ts';
 
 // ATENÇÃO: autorização usa "mercadolivre.com.br", token usa "mercadolibre.com".
 const AUTH_URL = "https://auth.mercadolivre.com.br/authorization";
@@ -80,8 +81,7 @@ Deno.serve(async (req) => {
   if (errClaims || !claims?.claims?.sub) return json({ error: "Unauthorized" }, 401);
   const userId = String(claims.claims.sub);
 
-  const { data: ehSuper } = await admin.rpc("has_role", { _user_id: userId, _role: "super_admin" });
-  if (!ehSuper) return json({ error: "apenas super_admin pode conectar contas" }, 403);
+  const negado = await exigirPermissao(req, 'integracoes.conectar'); if (negado) return negado;
 
   // Nunca confie no body: o tenant é resolvido/validado no servidor.
   const pedido = corpo.tenant_id == null ? null : String(corpo.tenant_id);

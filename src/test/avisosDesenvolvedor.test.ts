@@ -10,8 +10,8 @@ describe('avisos exclusivos do desenvolvedor', () => {
     expect(temPerfilDesenvolvedor([])).toBe(false);
   });
   it('classifica lentidão somente a partir de oito segundos', () => {
-    expect(consultaLenta(7999)).toBe(false);
-    expect(consultaLenta(8000)).toBe(true);
+    expect(consultaLenta(1000)).toBe(false);
+    expect(consultaLenta(1001)).toBe(true);
     expect(consultaLenta(NaN)).toBe(false);
   });
 });

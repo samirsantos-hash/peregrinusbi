@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "../_shared/env.ts";
 
@@ -105,6 +106,7 @@ async function invokeImport(
       "Content-Type": "application/json",
       Authorization: `Bearer ${serviceKey}`,
       apikey: serviceKey,
+      'x-refresh-secret': requireEnv('REFRESH_TRIGGER_SECRET'),
     },
     body: JSON.stringify({ csv }),
   });
@@ -117,6 +119,7 @@ async function invokeImport(
 // ---------- Main handler ----------
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const negado = await exigirPermissao(req, 'dados.importar', true); if (negado) return negado;
 
   try {
     const supabaseUrl = requireEnv("SUPABASE_URL");

@@ -1,3 +1,4 @@
+import { NIVEIS_CLIENTE } from "@/lib/permissoes";
 import { useState, useEffect, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -69,13 +70,13 @@ export function usePortfolios() {
     await load();
   }, [queryClient, load]);
 
-  const create = async (name: string, custIds: string[], assignedTo?: string) => {
+  const create = async (name: string, custIds: string[], assignedTo?: string, plano?: string, clienteId?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: "Not authenticated" };
 
     const { data: inserted, error } = await supabase
       .from("portfolios" as any)
-      .insert({ name, cust_ids: custIds, created_by: user.id, assigned_to: assignedTo || null } as any)
+      .insert({ name, cust_ids: custIds, created_by: user.id, assigned_to: assignedTo || null, plano: plano || null } as any)
       .select("id")
       .single();
 
@@ -94,6 +95,11 @@ export function usePortfolios() {
       } as any);
     }
 
+    if (plano && clienteId) {
+      const nivel = NIVEIS_CLIENTE.find(n => n.id === plano);
+      const { error: errPlano } = await (supabase.rpc as any)('salvar_permissoes', { p_user_id: clienteId, p_permissoes: nivel?.permissoes ?? [] });
+      if (errPlano) toast({ title: "Carteira criada, mas o plano não foi aplicado ao usuário", description: "Somente a conta master pode liberar acessos.", variant: "destructive" });
+    }
     toast({ title: "Carteira criada com sucesso!" });
     clearCarteiraCache();
     await queryClient.invalidateQueries();

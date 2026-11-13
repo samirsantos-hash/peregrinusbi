@@ -4,14 +4,17 @@ import { useSoundFeedback } from "@/hooks/useSoundFeedback";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { TrendingUp, TrendingDown, Sparkles, Store, Check, ChevronsUpDown, RefreshCw, Copy, Calendar as CalendarIcon } from "lucide-react";
+import { TrendingUp, TrendingDown, GraduationCap, SlidersHorizontal, Store, Check, ChevronsUpDown, Star, RefreshCw, Copy, Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { ptBR } from "date-fns/locale";
 import { toast } from "@/hooks/use-toast";
 import { differenceInDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import { lerFavoritas, salvarFavoritas, alternarFavorita, ordenarComFavoritas } from "@/lib/lojasFavoritas";
 import { type DateRange } from "react-day-picker";
 import TooltipInfo from "./TooltipInfo";
+import { useJuniorMode } from "@/hooks/useJuniorMode";
+import type { ModoPainel } from '@/lib/modoPainel';
 
 
 /* ------------------------------------------------------------------ */
@@ -70,6 +73,8 @@ interface DashboardHeaderProps {
   dailyDisponivel?: boolean;
   /** Base para o calendário (mensal + diária); padrão = allKpis */
   calendarKpis?: any[];
+  modoPainel?: ModoPainel;
+  onModoPainelChange?: (modo: ModoPainel) => void;
 }
 
 const DashboardHeader = ({
@@ -85,13 +90,35 @@ const DashboardHeader = ({
   onPeriodChange,
   dailyDisponivel = true,
   calendarKpis,
+  modoPainel,
+  onModoPainelChange,
 }: DashboardHeaderProps) => {
   const [storeOpen, setStoreOpen] = useState(false);
+  const [favoritas, setFavoritas] = useState<string[]>(() => lerFavoritas());
+  const alternarFav = (id: string) => setFavoritas((atual) => { const n = alternarFavorita(atual, id); salvarFavoritas(n); return n; });
   const [calOpen, setCalOpen] = useState(false);
   const [activePeriod, setActivePeriod] = useState<string>("");
+  // Seleção pendente: loja e período só valem após clicar em "Ir".
+  const [pSeller, setPSeller] = useState(selectedSeller);
+  useEffect(() => setPSeller(selectedSeller), [selectedSeller]);
+  const [pRange, setPRange] = useState<DateRange | undefined>(dateRange);
+  useEffect(() => setPRange(dateRange), [dateRange]);
+  const [pPeriod, setPPeriod] = useState<string | null>(null);
+  const chaveRange = (r?: DateRange) => (r?.from ? fmtISO(r.from) + (r.to ? fmtISO(r.to) : "") : "");
+  const pendente = pSeller !== selectedSeller || pPeriod !== null || chaveRange(pRange) !== chaveRange(dateRange);
+  const ir = () => {
+    playClick();
+    // Loja primeiro: a troca de loja zera o intervalo; o período escolhido é aplicado depois.
+    const trocouLoja = pSeller !== selectedSeller;
+    if (trocouLoja) onSellerChange(pSeller);
+    if (pPeriod !== null) { setActivePeriod(pPeriod); onPeriodChange?.(pPeriod); }
+    if (pPeriod?.startsWith("custom") || (pPeriod === null && (trocouLoja || chaveRange(pRange) !== chaveRange(dateRange)))) onDateRangeChange(pRange);
+    setPPeriod(null);
+  };
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);
 
   const { playClick } = useSoundFeedback();
+  const { enabled: juniorMode, toggle: toggleJunior } = useJuniorMode();
 
   // Anchor date = max date in the FULL (unfiltered) dataset
   const baseCal = calendarKpis && calendarKpis.length > 0 ? calendarKpis : allKpis;
@@ -109,7 +136,7 @@ const DashboardHeader = ({
     return { anchorDate: anchor, minDate: min, availableDays: days };
   }, [baseCal]);
 
-  const selectedSellerObj = sellers.find((s) => s.id === selectedSeller);
+  const selectedSellerObj = sellers.find((s) => s.id === pSeller);
 
   const handleCopy = async (
     e: React.MouseEvent,
@@ -170,9 +197,9 @@ const DashboardHeader = ({
 
   /** Registros e dias com dado dentro do intervalo selecionado. */
   const auditoria = useMemo(() => {
-    if (!dateRange?.from) return { registros: allKpis.length, dias: diasComDado.size, vazio: diasComDado.size === 0 };
-    const from = fmtISO(dateRange.from);
-    const to = fmtISO(dateRange.to ?? dateRange.from);
+    if (!pRange?.from) return { registros: allKpis.length, dias: diasComDado.size, vazio: diasComDado.size === 0 };
+    const from = fmtISO(pRange.from);
+    const to = fmtISO(pRange.to ?? pRange.from);
     const datas = new Set<string>();
     let registros = 0;
     for (const k of allKpis as any[]) {
@@ -183,18 +210,17 @@ const DashboardHeader = ({
       }
     }
     return { registros, dias: datas.size, vazio: registros === 0 };
-  }, [allKpis, dateRange, diasComDado]);
+  }, [allKpis, pRange, diasComDado]);
 
   const aplicarIntervalo = (range: DateRange | undefined) => {
-    onDateRangeChange(range);
+    setPRange(range);
     if (!range?.from) return;
     const from = range.from;
     const to = range.to ?? range.from;
     const span = differenceInDays(to, from) + 1;
     // Intervalos curtos usam a base diária (quando existe); longos usam a mensal.
     const key = dailyDisponivel && span <= 92 ? "custom-diario" : "custom";
-    setActivePeriod(key);
-    onPeriodChange?.(key);
+    setPPeriod(key);
   };
 
   const presets = [
@@ -208,18 +234,17 @@ const DashboardHeader = ({
     playClick();
     const from = subLocalDays(anchorDate, p.dias - 1);
     const key = dailyDisponivel ? p.key : "custom";
-    setActivePeriod(key);
-    onPeriodChange?.(key);
-    onDateRangeChange({ from: from < minDate ? minDate : from, to: anchorDate });
+    setPPeriod(key);
+    setPRange({ from: from < minDate ? minDate : from, to: anchorDate });
     setCalOpen(false);
   };
 
   const rotuloIntervalo = useMemo(() => {
-    if (!dateRange?.from) return "Selecionar período";
-    const f = fmtBR(dateRange.from);
-    const t = dateRange.to ? fmtBR(dateRange.to) : f;
+    if (!pRange?.from) return "Selecionar período";
+    const f = fmtBR(pRange.from);
+    const t = pRange.to ? fmtBR(pRange.to) : f;
     return f === t ? f : `${f} — ${t}`;
-  }, [dateRange]);
+  }, [pRange]);
 
   // Abre no período completo disponível (uma única vez)
   const initialized = useRef(false);
@@ -238,7 +263,7 @@ const DashboardHeader = ({
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="space-y-4">
+      className="panel-filterbar space-y-4">
 
       <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 xl:gap-4 w-full min-w-0">
         {/* Left - Store selector + Date */}
@@ -252,7 +277,7 @@ const DashboardHeader = ({
                   variant="outline"
                   role="combobox"
                   aria-expanded={storeOpen}
-                  className="w-full sm:w-auto sm:min-w-[300px] sm:max-w-[560px] max-w-full h-auto min-h-10 py-1.5 justify-between glass-card border-glass-border bg-card/60 font-normal"
+                  className="panel-control w-full sm:w-auto sm:min-w-[300px] sm:max-w-[560px] max-w-full h-auto min-h-10 py-1.5 justify-between border-border bg-card font-normal"
                 >
                   {selectedSellerObj ? (
                     <span className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-left min-w-0">
@@ -273,14 +298,14 @@ const DashboardHeader = ({
                         )}
                       </span>
                       <span className="mx-1 text-border">|</span>
-                      <span className="text-xs text-muted-foreground mr-1">ID:</span>
-                      <span className="text-xs font-mono break-all tnum">{selectedSellerObj.custId}</span>
+                      <span className="text-xs text-muted-foreground mr-1">Cust ID:</span>
+                      <span className="text-xs break-all tnum">{selectedSellerObj.custId}</span>
                       <span
                         role="button"
                         tabIndex={0}
-                        aria-label="Copiar ID"
-                        title="Copiar ID do seller"
-                        onClick={(e) => handleCopy(e, selectedSellerObj.custId, "custId", "ID")}
+                        aria-label="Copiar Cust ID"
+                        title="Copiar Cust ID da loja"
+                        onClick={(e) => handleCopy(e, selectedSellerObj.custId, "custId", "Cust ID")}
                         className="inline-flex items-center justify-center h-5 w-5 rounded hover:bg-muted/60 text-muted-foreground hover:text-neon-blue transition-colors"
                       >
                         {copiedField === "custId" ? (
@@ -296,7 +321,7 @@ const DashboardHeader = ({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[340px] p-0 bg-card border-glass-border" align="start">
+              <PopoverContent className="dropdown-vidro flex w-[460px] max-w-[calc(100vw-24px)] flex-col p-0" align="start">
                 <Command
                   className="bg-transparent"
                   filter={(value, search) => {
@@ -308,39 +333,49 @@ const DashboardHeader = ({
                     return haystack.includes(needle) ? 1 : 0;
                   }}
                 >
-                  <CommandInput placeholder="Pesquisar por nome ou Cust ID..." className="h-9" />
-                  <CommandList>
+                  <CommandInput placeholder="Pesquisar por nome ou Cust ID..." className="dropdown-vidro-search" />
+                  <CommandList className="dropdown-vidro-scroll flex flex-col py-2">
                     <CommandEmpty>Nenhuma loja encontrada.</CommandEmpty>
                     <CommandGroup>
                       <CommandItem
                         value="Todas as lojas da sua carteira consolidado"
                         onSelect={() => {
-                          onSellerChange("");
+                          setPSeller("");
                           setStoreOpen(false);
                         }}
-                        className="cursor-pointer"
+                        className="dropdown-vidro-item"
+                        data-active={!pSeller}
                       >
-                        <Check className={cn("mr-2 h-4 w-4", !selectedSeller ? "opacity-100 text-neon-blue" : "opacity-0")} />
-                        <span className="font-medium">Todas as lojas da sua carteira</span>
+                        <Check className={cn("h-4 w-4 shrink-0", !pSeller ? "opacity-100" : "opacity-0")} />
+                        <span className="min-w-0 break-words">Todas as lojas da sua carteira</span>
                       </CommandItem>
-                      {sellers.map((s) => (
+                      {ordenarComFavoritas(sellers, favoritas).map((s) => (
                         <CommandItem
                           key={s.id}
                           value={`${s.nickname} ${s.custId}`}
                           onSelect={() => {
-                            onSellerChange(s.id);
+                            setPSeller(s.id);
                             setStoreOpen(false);
                           }}
-                          className="cursor-pointer"
+                          className="dropdown-vidro-item"
+                          data-active={pSeller === s.id}
                         >
-                          <Check className={cn("mr-2 h-4 w-4", selectedSeller === s.id ? "opacity-100 text-neon-blue" : "opacity-0")} />
-                          <div className="flex items-center gap-1 truncate">
-                            <span className="text-xs text-muted-foreground">Loja:</span>
-                            <span className="font-medium">{s.nickname}</span>
-                            <span className="mx-1 text-border">|</span>
-                            <span className="text-xs text-muted-foreground">ID:</span>
-                            <span className="text-xs font-mono">{s.custId}</span>
+                          <Check className={cn("h-4 w-4 shrink-0", pSeller === s.id ? "opacity-100" : "opacity-0")} />
+                          <div className="flex min-w-0 flex-1 items-center gap-3 whitespace-nowrap">
+                            <span className="item-nome min-w-0 flex-1 truncate" title={s.nickname}>Loja: {s.nickname}</span>
+                            <span className="item-subtext ml-auto shrink-0 tabular-nums">Cust ID: {s.custId}</span>
                           </div>
+                          <button
+                            type="button"
+                            aria-label={favoritas.includes(s.id) ? `Desafixar ${s.nickname}` : `Fixar ${s.nickname} no topo`}
+                            aria-pressed={favoritas.includes(s.id)}
+                            title={favoritas.includes(s.id) ? "Desafixar do topo" : "Fixar no topo"}
+                            onPointerDown={(e) => e.stopPropagation()}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); alternarFav(s.id); }}
+                            className="shrink-0 rounded-md p-1 text-muted-foreground transition-transform hover:text-primary active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            <Star className={cn("h-4 w-4", favoritas.includes(s.id) && "fill-primary text-primary")} />
+                          </button>
                         </CommandItem>
                       ))}
                     </CommandGroup>
@@ -357,7 +392,7 @@ const DashboardHeader = ({
                 <Button
                   variant="outline"
                   className={cn(
-                    "h-9 justify-start gap-2 glass-card border-glass-border bg-card/60 font-normal text-xs",
+                    "panel-control min-h-10 justify-start gap-2 border-border bg-card font-normal text-xs",
                     auditoria.vazio && "border-destructive/50 text-destructive",
                   )}
                   title="Selecionar período no calendário"
@@ -369,37 +404,43 @@ const DashboardHeader = ({
               <PopoverContent className="w-auto p-0 bg-card border-glass-border" align="start">
                 <div className="flex flex-wrap items-center gap-1 border-b border-border/50 p-2">
                   {presets.map((p) => (
-                    <button
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
                       key={p.label}
                       onClick={() => aplicarPreset(p)}
-                      className="px-2 py-1 text-[11px] rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      className="h-9 px-2 text-[11px]"
                     >
                       {p.label}
-                    </button>
+                    </Button>
                   ))}
-                  <button
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-pressed={activePeriod === "all"}
                     onClick={() => {
                       playClick();
-                      setActivePeriod("all");
-                      onPeriodChange?.("all");
-                      onDateRangeChange({ from: minDate, to: anchorDate });
+                      setPPeriod("all");
+                      setPRange({ from: minDate, to: anchorDate });
                       setCalOpen(false);
                     }}
                     className={cn(
-                      "px-2 py-1 text-[11px] rounded-md",
+                      "h-9 px-2 text-[11px]",
                       activePeriod === "all"
                         ? "bg-primary/15 text-primary"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
                     )}
                   >
                     Todo período
-                  </button>
+                  </Button>
                 </div>
 
                 <Calendar
                   mode="range"
-                  defaultMonth={dateRange?.from ?? anchorDate}
-                  selected={dateRange}
+                  defaultMonth={pRange?.from ?? anchorDate}
+                  selected={pRange}
                   onSelect={(r) => aplicarIntervalo(r)}
                   numberOfMonths={2}
                   locale={ptBR}
@@ -428,16 +469,41 @@ const DashboardHeader = ({
               </PopoverContent>
             </Popover>
 
+            <Button
+              type="button"
+              onClick={ir}
+              disabled={!pendente}
+              className="panel-control min-h-10 px-5 text-xs font-semibold"
+              title={pendente ? "Carregar a loja e o período escolhidos" : "Nada novo para carregar"}
+            >
+              Ir
+            </Button>
 
             {/* Refresh button */}
+            {modoPainel && onModoPainelChange ? <div className="flex flex-wrap gap-1" role="group" aria-label="Profundidade do painel">
+              <Button variant={modoPainel === 'didatico' ? 'secondary' : 'outline'} aria-pressed={modoPainel === 'didatico'} onClick={() => onModoPainelChange('didatico')} className="panel-control min-h-10 gap-2 text-xs text-primary"><GraduationCap className="h-4 w-4" aria-hidden="true" />Modo Didático</Button>
+              <Button variant={modoPainel === 'avancado' ? 'secondary' : 'outline'} aria-pressed={modoPainel === 'avancado'} onClick={() => onModoPainelChange('avancado')} className="panel-control min-h-10 gap-2 text-xs"><SlidersHorizontal className="h-4 w-4" aria-hidden="true" />Avançado</Button>
+            </div> : <Button
+              variant="outline"
+              onClick={toggleJunior}
+              aria-label="Modo didático"
+              aria-pressed={juniorMode}
+              className="panel-control border-border bg-card min-h-10 gap-2 text-xs"
+              title={juniorMode ? "Ocultar orientações didáticas" : "Mostrar orientações didáticas"}
+            >
+              {juniorMode ? <GraduationCap className="h-4 w-4 text-primary" aria-hidden="true" /> : <SlidersHorizontal className="h-4 w-4 text-primary" aria-hidden="true" />}
+              {juniorMode ? "Modo Didático" : "Modo Avançado"}
+            </Button>}
             {onRefresh && (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className="glass-card border-glass-border bg-card/60 h-9 w-9"
-                title="Atualizar dados"
+                aria-busy={isRefreshing}
+                className="panel-control h-10 w-10"
+                title={isRefreshing ? "Atualizando dados" : "Atualizar dados"}
+                aria-label={isRefreshing ? "Atualizando dados" : "Atualizar dados"}
               >
                 <RefreshCw className={cn("h-4 w-4 text-neon-blue", isRefreshing && "animate-spin")} />
               </Button>

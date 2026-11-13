@@ -21,10 +21,10 @@ interface Linha { rotulo: string; valor: string; delta: number | null; ano: stri
 
 function Card({ l }: { l: Linha }) {
   return (
-    <div className="rounded-lg border border-border/50 bg-card/60 p-3 min-w-0">
+    <div className="carteira-kpi rounded-lg border border-border/50 bg-card/60 p-3 min-w-0">
       <p className="text-[11px] text-muted-foreground">{l.rotulo}</p>
-      <p className="text-lg font-semibold tabular-nums leading-tight mt-0.5">{l.valor}</p>
-      <div className="flex items-center justify-between gap-2 text-[11px] mt-1">
+      <p className="carteira-kpi-valor text-lg font-semibold tabular-nums leading-tight mt-0.5">{l.valor}</p>
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-[11px] mt-1">
         <Delta v={l.delta} />
         <span className="text-muted-foreground tabular-nums truncate">ano ant. {l.ano}</span>
       </div>
@@ -42,7 +42,7 @@ function Bloco({ titulo, linhas }: { titulo: string; linhas: Linha[] }) {
   return (
     <section>
       <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">{titulo}</h2>
-      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7">
+      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
         {linhas.map((l) => <Card key={l.rotulo} l={l} />)}
       </div>
     </section>
@@ -61,7 +61,7 @@ export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtua
     { rotulo: "Faturamento", valor: brl(atual.gmv), delta: variacao(atual.gmv, anterior.gmv), ano: brl(anoAnterior.linhas ? anoAnterior.gmv : null) },
     { rotulo: "Itens vendidos", valor: int(atual.itens), delta: dItens, ano: int(anoAnterior.linhas ? anoAnterior.itens : null), nota: mix ? "Ticket subiu junto: possível mudança de mix" : undefined },
     { rotulo: "Ticket médio", valor: brl(tA), delta: dTicket, ano: brl(tY) },
-    { rotulo: "Pedidos", valor: pedidos === null ? "Sem dado" : int(pedidos), delta: null, ano: "—", nota: pedidos === null ? "A planilha mensal não traz pedidos deste mês" : "Total do mês na planilha mensal; sem recorte por dia, então sem comparação" },
+    { rotulo: "Pedidos", valor: pedidos === null ? "Sem dado" : int(pedidos), delta: null, ano: "—", nota: pedidos === null ? "Pedidos indisponíveis no histórico deste mês" : "Total mensal; sem recorte por dia, então sem comparação" },
     { rotulo: "Visitas", valor: int(atual.visitas), delta: variacao(atual.visitas, anterior.visitas), ano: int(anoAnterior.linhas ? anoAnterior.visitas : null) },
   ];
   const carteira: Linha[] = [
@@ -105,8 +105,8 @@ export default function FaixaKpis({ janelas, atual, anterior, anoAnterior, cAtua
           Os itens vendidos caíram {pct(dItens)} e o ticket médio subiu {pct(dTicket)}. Isso pode ser mudança de mix, não queda de demanda.
         </p>
       )}
-      {mostraVolume && <Bloco titulo="Volume" linhas={volume} />}
-      {mostraCarteira && <Bloco titulo="Carteira" linhas={carteira} />}
+      {mostraVolume && <Bloco titulo="Volume de vendas" linhas={volume} />}
+      {mostraCarteira && <Bloco titulo="Movimentação da carteira" linhas={carteira} />}
       {alav.length > 0 && <Bloco titulo="Alavancas" linhas={alav} />}
     </div>
   );

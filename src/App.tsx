@@ -1,3 +1,5 @@
+import PersistenciaCache from "@/components/PersistenciaCache";
+import SaidaEmergencia from "@/components/SaidaEmergencia";
 import { Toaster } from "@/components/ui/toaster";
 import ConectarConvite from "./pages/ConectarConvite";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -6,12 +8,19 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { JuniorModeProvider } from "@/hooks/useJuniorMode";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GlassPointer } from "@/components/ds/GlassPointer";
+import { ChuvaPainel } from "@/components/chuva/ChuvaPainel";
+import { IndicadorCarregamento } from "@/components/chuva/IndicadorCarregamento";
+import BoasVindasLaser from "@/components/chuva/BoasVindasLaser";
 import { QueryCache, MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import GuardaPermissao from '@/components/GuardaPermissao';
+import { useLocation } from 'react-router-dom';
 import { Loader2 } from "lucide-react";
 import { useSessionTracker } from "@/hooks/useSessionTracker";
 import Index from "./pages/Index";
+import ArvorePaginas from '@/components/dashboard/ArvorePaginas';
 import Auth from "./pages/Auth";
 import OAuthConsent from "./pages/OAuthConsent";
 import { oauthReturnPath } from "@/lib/oauth-return-path";
@@ -54,13 +63,18 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60_000,
-      refetchOnWindowFocus: true,
+      gcTime: 24 * 60 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
       refetchOnMount: "always",
     },
   },
 });
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
+  const { pathname } = useLocation();
+  const caminhos: Record<string, string | string[]> = { '/admin': ['usuarios.visualizar', 'carteiras.visualizar', 'dados.visualizar', 'integracoes.visualizar'], '/cpp': 'resumo.visualizar', '/gestao-carteira': 'carteiras.visualizar', '/carteira-dados': 'carteiras.visualizar', '/carteira': 'carteiras.visualizar', '/multilojas': 'multilojas.visualizar', '/integracoes': 'integracoes.visualizar', '/perguntas': 'perguntas.visualizar', '/anuncios': 'anuncios.visualizar', '/mercado': 'mercado.visualizar', '/publicidade': 'publicidade.visualizar' };
+  const permissao = caminhos[pathname] ?? (pathname.startsWith('/lojas/') || pathname.startsWith('/grupos/') ? 'carteiras.visualizar' : undefined);
   const { user, loading, isAdmin, isGerente, mustChangePassword } = useAuth();
   useSessionTracker(user);
 
@@ -74,13 +88,13 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 
   if (!user) return <Navigate to="/auth" replace />;
   if (mustChangePassword) return <Navigate to="/change-password" replace />;
-  if (adminOnly && !isAdmin && !isGerente) return <Navigate to="/" replace />;
 
   return (
-    <>
-      {children}
+    <div className="peregrinus-panel min-w-0">
+      <ChuvaPainel />
+      <div className="entrada-pagina">{permissao ? <GuardaPermissao permissao={permissao}>{['/anuncios', '/multilojas', '/perguntas', '/mercado', '/publicidade'].includes(pathname) ? <ArvorePaginas>{children}</ArvorePaginas> : children}</GuardaPermissao> : children}</div>
       <RodapeInstitucional />
-    </>
+    </div>
   );
 }
 
@@ -99,6 +113,9 @@ const AppRoutes = () => {
     <>
       {/* Fundo Glass Verde vem do CSS (ambiente fixo) */}
       <AuraReveal />
+      <GlassPointer />
+      <IndicadorCarregamento />
+      <BoasVindasLaser />
       <div className="relative z-10">
       <Routes>
       <Route path="/auth" element={user ? <Navigate to={oauthReturnPath(new URLSearchParams(window.location.search).get("next"))} replace /> : <Auth />} />
@@ -136,6 +153,8 @@ const AppRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    <PersistenciaCache>
+    <SaidaEmergencia />
     <TooltipProvider>
       <SoundProvider>
         <ThemeProvider>
@@ -155,6 +174,7 @@ const App = () => (
         </ThemeProvider>
       </SoundProvider>
     </TooltipProvider>
+    </PersistenciaCache>
   </QueryClientProvider>
 );
 
