@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, FolderPlus, Folder, Trash2, Calendar, Pencil, RefreshCw } from "lucide-react";
+import { Search, Loader2, FolderPlus, Folder, Trash2, Calendar, Pencil, RefreshCw } from "lucide-react";
 import { usePortfolios, type Portfolio } from "@/hooks/usePortfolios";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +26,7 @@ export default function PortfolioManager() {
   const [editPortfolio, setEditPortfolio] = useState<Portfolio | null>(null);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [busca, setBusca] = useState("");
   const { toast } = useToast();
 
   const loadSellers = useCallback(() => {
@@ -47,6 +49,11 @@ export default function PortfolioManager() {
       setSyncing(false);
     }
   };
+
+  const termo = busca.trim().toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  const filtradas = termo
+    ? portfolios.filter((p) => (p.name ?? "").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(termo))
+    : portfolios;
 
   if (loading) {
     return (
@@ -81,6 +88,17 @@ export default function PortfolioManager() {
         </div>
       </div>
 
+      {portfolios.length > 0 && (
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input value={busca} onChange={(e) => setBusca(e.target.value)} placeholder="Pesquisar carteira pelo nome…" className="pl-9" aria-label="Pesquisar carteira pelo nome" />
+        </div>
+      )}
+
+      {portfolios.length > 0 && filtradas.length === 0 && (
+        <p className="text-sm text-muted-foreground">Nenhuma carteira encontrada para “{busca}”.</p>
+      )}
+
       {portfolios.length === 0 ? (
         <div className="text-center py-16 space-y-3">
           <Folder className="w-12 h-12 mx-auto text-muted-foreground/30" />
@@ -92,7 +110,7 @@ export default function PortfolioManager() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {portfolios.map((p, i) => (
+          {filtradas.map((p, i) => (
             <motion.div
               key={p.id}
               initial={{ opacity: 0, y: 20 }}

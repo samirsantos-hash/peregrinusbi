@@ -3884,3 +3884,12 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
 .dark .paleta-alquimia .text-success,
 .dark .paleta-alquimia .text-positive,
 .dark .paleta-alquimia [data-tom="positivo"] { color: var(--alq-sucesso) !important; }
+
+/* Proporções dos cartões de volume (Resumo) */
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi.carteira-kpi.carteira-kpi { container-type: inline-size; min-height: 0 !important; gap: 6px !important; padding: 16px !important; }
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi .carteira-kpi-valor.carteira-kpi-valor {
+  font-size: clamp(16px, 11cqi, 24px) !important; line-height: 1.2 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > p:first-child { font-size: 13px !important; line-height: 18px !important; }
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > div { margin-top: 4px !important; justify-content: flex-start !important; gap: 4px 12px !important; font-size: 12px !important; }
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > p:not(:first-child):not(.carteira-kpi-valor) { font-size: 11px !important; line-height: 16px !important; }
