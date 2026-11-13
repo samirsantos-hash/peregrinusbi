@@ -9,6 +9,7 @@ import { lerQualidade } from '../_shared/mlMelhorias.ts';
 import { amostraCampanhas } from '../_shared/mlCampanhasDiagnostico.ts';
 import { janelaMensal, projetarCancelamentosMensais } from './cancelamentosMensais.ts';
 import { agregarPedidosAbc, lerCatalogoAbc } from './abcPedidos.ts';
+import { lerPromoDoItem, participa, nomeTipo } from '../_shared/mlPromocoes.ts';
 import { lerParticipacaoPromocoes } from './participacaoPromocoes.ts';
 import { lerConstrucaoAnuncios } from './construcaoAnuncios.ts';
 import { lerRespostaAnuncios, validarPeriodoResposta } from './respostaAnuncios.ts';
@@ -230,10 +231,30 @@ Deno.serve(async req => {
           const m = typeof p.max_size === 'string' ? p.max_size.match(/^(\d+)x(\d+)$/) : null;
           return m ? { largura: Number(m[1]), altura: Number(m[2]) } : { largura: null, altura: null };
         });
-        candidates.push({ id: item.id, titulo: item.title, sku: item.seller_custom_field ?? null, link: item.permalink, foto: item.thumbnail ?? null, estoque: typeof item.available_quantity === 'number' ? item.available_quantity : null, logistica: item.shipping?.logistic_type ?? null, estoqueFull: item.shipping?.logistic_type === 'fulfillment' && typeof item.available_quantity === 'number' ? item.available_quantity : null, status: item.status, saude: typeof item.health === 'number' ? item.health : null, qualidade, fotos, unidades: demand.unidades, faturamento: demand.faturamento, diario: atual.serie.map(d => ({ data: d.data, faturamento: demand.diario[d.data] ?? 0 })) });
+        candidates.push({ id: item.id, titulo: item.title, sku: item.seller_custom_field ?? null, link: item.permalink, foto: item.thumbnail ?? null, estoque: typeof item.available_quantity === 'number' ? item.available_quantity : null, logistica: item.shipping?.logistic_type ?? null, flex: Array.isArray(item.shipping?.tags) ? (item.shipping.logistic_type === 'self_service' || item.shipping.tags.includes('self_service_in')) : null, estoqueFull: item.shipping?.logistic_type === 'fulfillment' && typeof item.available_quantity === 'number' ? item.available_quantity : null, status: item.status, saude: typeof item.health === 'number' ? item.health : null, qualidade, fotos, unidades: demand.unidades, faturamento: demand.faturamento, diario: atual.serie.map(d => ({ data: d.data, faturamento: demand.diario[d.data] ?? 0 })) });
         if (candidates.length === 20) break;
       }
     }
+    // Completeness checklist: unread sources stay null, never 'absent'.
+    for (let i = 0; i < candidates.length; i += 3) {
+      await Promise.all(candidates.slice(i, i + 3).map(async c => {
+        try {
+          const bruto = await get(`/seller-promotions/items/${c.id}?app_version=v2`);
+          if (!Array.isArray(bruto)) throw new Error('x');
+          const parsed = bruto.map(lerPromoDoItem);
+          if (parsed.some(p => p === null)) throw new Error('x');
+          const m = new Map<string, string>();
+          for (const p of parsed) if (p && participa(p.status)) m.set(`${p.tipo}:${p.promotion_id ?? p.offer_id ?? p.tipo}`, p.nome ?? nomeTipo(p.tipo));
+          c.promocoes = [...m.values()];
+        } catch { c.promocoes = null; }
+      }));
+    }
+    try {
+      const { data: grupos, error } = await db.from('ml_ads_ads').select('external_id, status').eq('account_id', conta.id).limit(5000);
+      if (error) throw error;
+      const ativos = new Set((grupos ?? []).filter((g: any) => g.status === 'active').map((g: any) => g.external_id));
+      for (const c of candidates) c.ads = grupos && grupos.length ? ativos.has(c.id) : null;
+    } catch { for (const c of candidates) c.ads = null; }
     return json({ periodo, candidatos: candidates, universoVendido: ranked.length, limite: 20, consultadoEm: new Date().toISOString(), elegibilidadeFull: null });
   } catch (e) { return json({ error: e instanceof Error ? e.message : 'Leitura indisponível.' }, 502); }
 });
