@@ -3893,3 +3893,6 @@ html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi .car
 html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > p:first-child { font-size: 13px !important; line-height: 18px !important; }
 html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > div { margin-top: 4px !important; justify-content: flex-start !important; gap: 4px 12px !important; font-size: 12px !important; }
 html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > p:not(:first-child):not(.carteira-kpi-valor) { font-size: 11px !important; line-height: 16px !important; }
+/* Indicador de alta/queda maior e proporcional ao valor */
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > div > :first-child { font-size: clamp(13px, 7cqi, 16px) !important; font-weight: 600 !important; line-height: 1.2 !important; }
+html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > div > :first-child svg { width: 1em !important; height: 1em !important; }
