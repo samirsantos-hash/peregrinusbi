@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { brl, num } from "@/lib/format";
-import { planejarReposicao } from "@/lib/fullReposicao";
+import { iniciarReposicao as planejarReposicao } from "@/lib/fullReposicao";
 import { Input } from "@/components/ui/input";
 import { fetchAllRows } from "@/lib/fetchAllRows";
 import { avaliarRuptura, QUALIDADE_MIN, type LinhaRuptura } from "@/lib/rupturaApi";

@@ -11,3 +11,9 @@ export function planejarReposicao(unidades: number | null, dias: number, estoque
   const recomendado = Math.ceil(diaria * ALVO_DIAS) + seguranca;
   return { diaria, cobertura, seguranca, recomendado, envio: Math.max(0, recomendado - estoque), risco: cobertura != null && cobertura < LIMITE_RUPTURA_DIAS, cenarios: [7, 10, 15].map(d => ({ dias: d, unidades: Math.max(0, Math.ceil(diaria * d - estoque)) })) };
 }
+/** Days until a refill must start given a user-informed lead time (used by the stockout screen). */
+export function iniciarReposicao(unidades: number | null, dias: number, estoque: number | null, prazo: number) {
+  const p = planejarReposicao(unidades, dias, estoque);
+  if (!p || !Number.isFinite(prazo) || prazo < 0) return null;
+  return { iniciarEm: p.cobertura == null ? null : Math.max(0, Math.floor(p.cobertura - prazo)) };
+}
