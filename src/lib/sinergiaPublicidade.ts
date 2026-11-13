@@ -1,4 +1,4 @@
-export type PontoPublicidade = { data: string; investimento: number | null; faturamento: number | null; receitaAds: number | null; visitas?: number | null; cancelamentos?: number | null };
+export type PontoPublicidade = { data: string; investimento: number | null; faturamento: number | null; receitaAds: number | null; receitaOrganica?: number | null; visitas?: number | null; cancelamentos?: number | null };
 
 /** Fills days the read left empty. A series of only zeros counts as unmeasured. A real visit above zero is kept, and a missing synced day stays empty. */
 export function completarVisitasPiloto<T extends { data: string; visitas?: number | null }>(pontos: T[], serie: { data?: unknown; visitas?: unknown }[] | null | undefined, ativo: boolean) {

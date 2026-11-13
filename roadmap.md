@@ -1,9 +1,14 @@
 # Roadmap
 
+## Vendas com e sem publicidade — 13/11
+- [x] Conexão oficial existente validada; `organic_units_amount` e `total_amount` lidos com paginação diária completa, sem subtração.
+- [x] Gráfico real conferido na AUTOPECASLONDRINA em 1280px/480px: duas curvas, escopo de campanhas explícito e ausência preservada; oito testes aprovados e build OK. Em 06/11: R$580,07 atribuídos e R$1.726 sem publicidade. k6 público prévio: 28.492 requisições e uma falha (0,00351%), não mede capacidade autenticada.
+- [x] Interface mantida em teste, sem publicar; leitura oficial implantada no serviço compartilhado.
+
 ## Gráficos de publicidade — 13/11
 - [x] Reduzir esferas e retirar ligação contínua do investimento no gráfico combinado; permitir seleção de faturamento, investimento, receita Ads, ACOS, TACOS, ROAS e todas as métricas.
 - [x] Comparar faturamento pago e receita atribuída em gráfico não empilhado.
-- [ ] Vendas sem atribuição aguardam fonte verificável; leitura existente não separa pedidos por aquisição e não autoriza subtração.
+- [x] Vendas sem publicidade confirmadas pelo campo oficial de receita orgânica; escopo dos produtos das campanhas, não orgânico de toda a loja.
 - [x] 27 testes aprovados e controles semana/todas as métricas, tooltip e 480px conferidos na AUTOPECASLONDRINA; k6 prévio 28.503 requisições sem falhas, somente entrega pública. Sem publicar.
 
 ## Vidro semântico nos indicadores do Resumo — 11/11

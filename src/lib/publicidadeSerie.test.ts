@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { agruparPublicidade } from './publicidadeSerie';
+import { somarAtribuicaoAds } from '../../supabase/functions/_shared/mlAdsAtribuicao';
 
 describe('métricas selecionáveis de publicidade', () => {
   const pontos = [
@@ -23,5 +24,18 @@ describe('métricas selecionáveis de publicidade', () => {
   it('não divide por denominador zero', () => {
     const [p] = agruparPublicidade([{ ...pontos[0], faturamento: 0, receitaAds: 0, investimento: 0 }], false);
     expect(p.roas).toBeNull(); expect(p.acos).toBeNull(); expect(p.tacos).toBeNull();
+  });
+  it('usa receita orgânica informada, não a diferença entre faturamento e Ads', () => {
+    const [p] = agruparPublicidade([{ ...pontos[0], receitaOrganica: 17 }], false);
+    expect(p.receitaOrganica).toBe(17);
+    expect(somarAtribuicaoAds([{ total_amount: 50, organic_units_amount: 17 }])).toEqual({ receitaAds: 50, receitaOrganica: 17 });
+  });
+  it('preserva ausência de orgânico mesmo quando há receita atribuída', () => {
+    expect(somarAtribuicaoAds([{ total_amount: 50 }])).toEqual({ receitaAds: 50, receitaOrganica: null });
+    expect(agruparPublicidade(pontos, false)[0].receitaOrganica).toBeNull();
+  });
+  it('não soma cobertura orgânica parcial e preserva zero confirmado', () => {
+    expect(somarAtribuicaoAds([{ total_amount: 50, organic_units_amount: 17 }, { total_amount: 20 }]).receitaOrganica).toBeNull();
+    expect(somarAtribuicaoAds([{ total_amount: 0, organic_units_amount: 0 }]).receitaOrganica).toBe(0);
   });
 });

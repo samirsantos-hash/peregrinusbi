@@ -3903,6 +3903,7 @@ html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > di
   --ads-series-faturamento: var(--panel-brand);
   --ads-series-investimento: var(--panel-text-secondary);
   --ads-series-receitaAds: var(--panel-positive);
+  --ads-series-receitaOrganica: var(--chart-4);
   --ads-series-roas: var(--chart-4);
   --ads-series-acos: var(--chart-5);
   --ads-series-tacos: var(--chart-3);
@@ -3911,12 +3912,14 @@ html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > di
   --ads-series-faturamento: 216 100% 62%;
   --ads-series-investimento: 46 65% 52%;
   --ads-series-receitaAds: 155 63% 53%;
+  --ads-series-receitaOrganica: 216 100% 62%;
   --ads-series-roas: 209 27% 70%;
   --ads-series-acos: 0 0% 92%;
   --ads-series-tacos: 181 51% 57%;
 }
 html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-faturamento .recharts-line-curve { stroke: hsl(var(--ads-series-faturamento)) !important; }
 html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-receitaAds .recharts-line-curve { stroke: hsl(var(--ads-series-receitaAds)) !important; }
+html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-receitaOrganica .recharts-line-curve { stroke: hsl(var(--ads-series-receitaOrganica)) !important; }
 html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-roas .recharts-line-curve { stroke: hsl(var(--ads-series-roas)) !important; }
 html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-acos .recharts-line-curve { stroke: hsl(var(--ads-series-acos)) !important; }
 html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-tacos .recharts-line-curve { stroke: hsl(var(--ads-series-tacos)) !important; }

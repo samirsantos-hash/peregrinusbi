@@ -10,10 +10,10 @@ export function agruparPublicidade(pontos: PontoPublicidade[], semanal: boolean)
     grupos.set(data, [...(grupos.get(data) ?? []), p]);
   }
   return [...grupos].sort(([a], [b]) => a.localeCompare(b)).map(([data, ps]) => {
-    const soma = (campo: 'faturamento' | 'investimento' | 'receitaAds') => ps.every(p => p[campo] != null && Number.isFinite(p[campo]) && (p[campo] ?? -1) >= 0)
+    const soma = (campo: 'faturamento' | 'investimento' | 'receitaAds' | 'receitaOrganica') => ps.every(p => p[campo] != null && Number.isFinite(p[campo]) && (p[campo] ?? -1) >= 0)
       ? ps.reduce((s, p) => s + (p[campo] ?? 0), 0) : null;
     const faturamento = soma('faturamento'), investimento = soma('investimento'), receitaAds = soma('receitaAds');
-    return { data, faturamento, investimento, receitaAds,
+    return { data, faturamento, investimento, receitaAds, receitaOrganica: soma('receitaOrganica'),
       roas: investimento != null && investimento > 0 && receitaAds != null ? receitaAds / investimento : null,
       acos: investimento != null && receitaAds != null && receitaAds > 0 ? investimento / receitaAds : null,
       tacos: investimento != null && faturamento != null && faturamento > 0 ? investimento / faturamento : null };

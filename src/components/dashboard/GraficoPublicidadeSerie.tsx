@@ -9,11 +9,12 @@ import type { Limites } from '../../../supabase/functions/_shared/mlAdsGestao';
 import { motivoAlertaAds } from '@/lib/alertasGraficoAds';
 import { PontoRupturaAds } from '@/components/ml/ads/PontoRupturaAds';
 
-type Metrica = 'faturamento' | 'investimento' | 'receitaAds' | 'roas' | 'acos' | 'tacos';
+type Metrica = 'faturamento' | 'investimento' | 'receitaAds' | 'receitaOrganica' | 'roas' | 'acos' | 'tacos';
 const METRICAS: { id: Metrica; nome: string; eixo: string }[] = [
   { id: 'faturamento', nome: 'Faturamento pago', eixo: 'receita' },
   { id: 'investimento', nome: 'Investimento Ads', eixo: 'ads' },
   { id: 'receitaAds', nome: 'Receita atribuída a Ads', eixo: 'receita' },
+  { id: 'receitaOrganica', nome: 'Receita sem publicidade', eixo: 'receita' },
   { id: 'roas', nome: 'ROAS', eixo: 'roas' },
   { id: 'acos', nome: 'ACOS', eixo: 'taxas' },
   { id: 'tacos', nome: 'TACOS', eixo: 'taxas' },
@@ -23,7 +24,7 @@ const formatar = (id: Metrica, v: number | null) => v == null ? 'Sem dado' : id 
 export default function GraficoPublicidadeSerie({ pontos, compacto = false, limites, compararVendas = false }: { pontos: PontoPublicidade[]; compacto?: boolean; limites?: Limites; compararVendas?: boolean }) {
   const mobile = useIsMobile();
   const [semanal, setSemanal] = useState(false);
-  const [selecionadas, setSelecionadas] = useState<Metrica[]>(compararVendas ? ['faturamento', 'receitaAds'] : ['faturamento', 'investimento', 'roas']);
+  const [selecionadas, setSelecionadas] = useState<Metrica[]>(compararVendas ? ['receitaAds', 'receitaOrganica'] : ['faturamento', 'investimento', 'roas']);
   const serie = agruparPublicidade(pontos, semanal);
   const defs = METRICAS.filter(m => selecionadas.includes(m.id));
   const todos = selecionadas.length === METRICAS.length;
@@ -32,7 +33,7 @@ export default function GraficoPublicidadeSerie({ pontos, compacto = false, limi
   const tem = (eixo: string) => defs.some(m => m.eixo === eixo);
   return <div className="ads-serie-chart space-y-3 min-w-0" aria-label={compararVendas ? 'Comparação de faturamento e receita atribuída' : 'Gráfico Faturamento Ads ROAS'}>
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h4 className="text-sm font-semibold">{compararVendas ? 'Faturamento pago × receita atribuída a publicidade' : 'Evolução da publicidade'}</h4>
+      <h4 className="text-sm font-semibold">{compararVendas ? 'Vendas com e sem publicidade' : 'Evolução da publicidade'}</h4>
       {!compacto && <div className="flex gap-1" role="group" aria-label="Agrupar evolução">
         <Button size="sm" variant={semanal ? "ghost" : "secondary"} aria-pressed={!semanal} onClick={() => setSemanal(false)}>Dia</Button>
         <Button size="sm" variant={semanal ? "secondary" : "ghost"} aria-pressed={semanal} onClick={() => setSemanal(true)}>Semana</Button>
@@ -68,6 +69,6 @@ export default function GraficoPublicidadeSerie({ pontos, compacto = false, limi
         </ComposedChart>
       </ResponsiveContainer>
     </div>
-    <p className="text-xs text-muted-foreground">{compararVendas ? 'Receita atribuída segue a janela do Mercado Livre; não é uma divisão exclusiva entre vendas pagas e orgânicas. Vendas sem atribuição: sem medição confirmada.' : 'Investimento: pontos sem ligação. Esferas vermelhas: limite configurado excedido, com valor e referência ao passar o mouse ou tocar. ROAS em x; ACOS e TACOS em %; valores financeiros em R$.'}</p>
+    <p className="text-xs text-muted-foreground">{compararVendas ? `Escopo: produtos das campanhas de publicidade, não toda a loja. Valores em R$ e atribuição conforme o Mercado Livre; não medem efeito incremental.${pontos.some(p => p.receitaOrganica == null) ? ' Receita sem publicidade indisponível nas datas sem medição confirmada; não calculada por subtração.' : ''}` : 'Investimento: pontos sem ligação. Esferas vermelhas: limite configurado excedido, com valor e referência ao passar o mouse ou tocar. ROAS em x; ACOS e TACOS em %; valores financeiros em R$.'}</p>
   </div>;
 }

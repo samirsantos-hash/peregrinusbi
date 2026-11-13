@@ -12,9 +12,10 @@ import SynergyAnalysisPanel from "@/components/dashboard/SynergyAnalysisPanel";
 import CancelamentosMensais from "@/components/ml/CancelamentosMensais";
 import { Button } from "@/components/ui/button";
 import { TrendingUp } from "lucide-react";
+import { chamarFuncaoMl } from '@/lib/mlFuncoes';
 import type { Limites } from '../../../supabase/functions/_shared/mlAdsGestao';
 
-export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = true, fonte, custId, de, ate, piloto, limites }: { pontos: PontoPublicidade[]; compacto?: boolean; exibirMatriz?: boolean; fonte: string; custId?: string; de?: string; ate?: string; limites?: Limites; piloto?: { ativo: boolean; alternar: () => void } }) {
+export function SinergiaIndicadores({ pontos, pontosAtribuicao, avisoAtribuicao, carregandoAtribuicao, compacto = false, exibirMatriz = true, fonte, custId, de, ate, piloto, limites }: { pontos: PontoPublicidade[]; pontosAtribuicao?: PontoPublicidade[]; avisoAtribuicao?: string | null; carregandoAtribuicao?: boolean; compacto?: boolean; exibirMatriz?: boolean; fonte: string; custId?: string; de?: string; ate?: string; limites?: Limites; piloto?: { ativo: boolean; alternar: () => void } }) {
   const r = calcularSinergiaPublicidade(pontos);
   const cobertura = indicadoresPublicidadeCoberta(pontos);
   const notaCobertura = (m: { dias: number; inicio?: string; fim?: string }) => {
@@ -31,7 +32,10 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
       </Button>
     </div>}
     {exibirMatriz && <>
-    <div className="resumo-sinergia-evolucao noite-vidro liquid-card vidro-grafico p-4 sm:p-5"><GraficoPublicidadeSerie pontos={pontos} compacto={compacto} compararVendas /></div>
+    <div className="resumo-sinergia-evolucao noite-vidro liquid-card vidro-grafico p-4 sm:p-5">
+      {carregandoAtribuicao ? <div role="status" className="flex items-center gap-2 text-sm"><span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />Conferindo vendas com e sem publicidade…</div> : <GraficoPublicidadeSerie pontos={pontosAtribuicao ?? pontos} compacto={compacto} compararVendas />}
+      {avisoAtribuicao && <p role="status" className="mt-2 text-xs text-muted-foreground">{avisoAtribuicao}</p>}
+    </div>
     <div className="grid min-w-0 items-start gap-6">
     {exibirMatriz && <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />}
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />
@@ -108,6 +112,8 @@ export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, c
   const loja = custId ?? vinculo.data;
   const { piloto, aplicar } = usePilotoVisitas(loja);
   const periodo = resumo.data?.periodo;
+  const atribuicao = useQuery({ queryKey: ['ads-atribuicao-oficial', loja, periodo?.inicio, periodo?.fim], enabled: !!loja && !!accountId && !!periodo, staleTime: 300_000, retry: false,
+    queryFn: () => chamarFuncaoMl<{ serie?: { data: string; receitaAds: number | null; receitaOrganica: number | null }[]; aviso?: string | null }>('ml-gestao-ads', { cust_id: loja, modo: 'atribuicao', de: periodo?.inicio, ate: periodo?.fim }) });
   const diario = useQuery({ queryKey: ["sinergia-ads-diario", accountId, periodo?.inicio, periodo?.fim], enabled: !!accountId && !!periodo, staleTime: 300_000,
     queryFn: async () => {
       const { data, error } = await fetchAllRows<Linha>((de, ate) => (supabase as any).from("ml_ads_metrics_daily")
@@ -123,7 +129,8 @@ export default function SinergiaPublicidadeApi({ custId, accountId: fornecida, c
   });
   const visitas = aplicar(pontos);
   if (resumo.isLoading || diario.isLoading || vinculo.isLoading || visitas.carregando) return <Skeleton className="h-28 w-full" />;
-  return <SinergiaIndicadores pontos={visitas.pontos} compacto={compacto} limites={limites} piloto={piloto} custId={loja} de={periodo?.inicio} ate={periodo?.fim} fonte={periodo
+  const pontosAtribuicao = (atribuicao.data?.serie ?? []).map(p => ({ ...p, faturamento: null, investimento: null }));
+  return <SinergiaIndicadores pontos={visitas.pontos} pontosAtribuicao={pontosAtribuicao} carregandoAtribuicao={atribuicao.isLoading} avisoAtribuicao={atribuicao.data?.aviso ?? (atribuicao.error ? 'Leitura das vendas com e sem publicidade indisponível. Tente novamente mais tarde.' : null)} compacto={compacto} limites={limites} piloto={piloto} custId={loja} de={periodo?.inicio} ate={periodo?.fim} fonte={periodo
     ? `Mercado Livre · ${periodo.inicio.split("-").reverse().join("/")} a ${periodo.fim.split("-").reverse().join("/")} · dias completos UTC${resumo.error || diario.error ? " · leitura indisponível" : ""}${visitas.nota}`
     : "Mercado Livre · sem leitura de faturamento e publicidade no mesmo período"} />;
 }

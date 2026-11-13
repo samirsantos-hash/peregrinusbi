@@ -206,6 +206,12 @@ Contrato próprio (uma pergunta por vez), com a mesma idempotência das ações 
 
 ### Publicidade (Product Ads)
 
+#### `ml-gestao-ads`: atribuição diária
+
+- Entrada com JWT: `{ cust_id, modo: "atribuicao", de: "AAAA-MM-DD", ate: "AAAA-MM-DD" }`, até 90 dias UTC completos. Reutiliza `publicidade.visualizar`, visibilidade da loja e token próprio renovado, sem nova conexão nem escrita no ML.
+- Saída: `{ periodo, usa_ads, completo, linhas_lidas, escopo: "campanhas_product_ads", serie: [{ data, receitaAds, receitaOrganica }], aviso }`. Métricas solicitadas: `total_amount` e `organic_units_amount` no endpoint oficial `campaigns/search` com `aggregation_type=DAILY`; só valores retornados e paginação completa podem formar a série. Ausência não é zero e nunca usa faturamento menos Ads.
+- Escopo dos produtos de campanhas, não total orgânico da loja; prazo de 50s para iniciar GETs e paginação de até 10.000 linhas. Falha/limite devolve aviso e datas null; não expõe compradores, tokens ou corpos brutos. Erros 400 período, 401 sessão, 403 carteira/capacidade, 404 conexão, 409 token, 502 leitura inicial.
+
 #### `ml-ads-sync`
 
 - Entrada: `{ account_id }` com JWT, ou `x-refresh-secret` com `{ account_id? }`.
