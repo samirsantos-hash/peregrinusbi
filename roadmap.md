@@ -5,7 +5,7 @@
 - [x] Incluir produtos já no Full e distinguir estoque disponível para venda Full do total físico; fallback individual quando o lote é recusado.
 - [x] Calcular cenários de envio para 7, 10 e 15 dias e prazo estimado de início da reposição com prazo de transporte/recebimento informado, sem confundir pesos com quantidades. Seis testes aprovados, build OK.
 - [ ] Nota oficial de qualidade de estoque e benefícios aguardam recurso verificável do Mercado Livre; indisponibilidade explícita no potencial da loja, sem substituição por qualidade do anúncio.
-- [ ] Conferência visual real bloqueada: painel autenticado não passou do carregamento e consulta Full retornou 502; computador/celular não validados. k6 público prévio: 28.522 requisições, zero falhas, p95 documentos 60,20ms, somente entrega pública. Sem publicação.
+- [ ] Conferência visual real bloqueada: painel autenticado não passou do carregamento; computador/celular não validados. Leitura oficial final confirmada na AUTOPECASLONDRINA: 20 produtos, 19 já no Full, HTTP 200 após fallback individual. k6 público prévio: 28.522 requisições, zero falhas, p95 documentos 60,20ms, somente entrega pública. Sem publicação.
 
 ## Vendas com e sem publicidade — 13/11
 - [x] Conexão oficial existente validada; `organic_units_amount` e `total_amount` lidos com paginação diária completa, sem subtração.
