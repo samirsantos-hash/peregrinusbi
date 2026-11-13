@@ -354,9 +354,16 @@ const Index = () => {
   // Auto-anchor dateRange on first load / seller change
   useEffect(() => {
     if (allKpis.length > 0 && !dateRange) {
-      setDateRange({ from: minDate, to: anchorDate });
+      // Mantém o período escolhido (7, 15, 30 dias) ao abrir ou trocar de loja.
+      const n = Number(activePeriod);
+      if (n > 0) {
+        const from = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate() - (n - 1));
+        setDateRange({ from: from < minDate ? minDate : from, to: anchorDate });
+      } else {
+        setDateRange({ from: minDate, to: anchorDate });
+      }
     }
-  }, [allKpis, dateRange, minDate, anchorDate]);
+  }, [allKpis, dateRange, minDate, anchorDate, activePeriod]);
 
   // FILTERED kpis — used by all panels
   const filteredKpis: any[] = useMemo(() => {

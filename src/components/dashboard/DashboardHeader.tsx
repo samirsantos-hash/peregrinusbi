@@ -108,9 +108,11 @@ const DashboardHeader = ({
   const pendente = pSeller !== selectedSeller || pPeriod !== null || chaveRange(pRange) !== chaveRange(dateRange);
   const ir = () => {
     playClick();
+    // Loja primeiro: a troca de loja zera o intervalo; o período escolhido é aplicado depois.
+    const trocouLoja = pSeller !== selectedSeller;
+    if (trocouLoja) onSellerChange(pSeller);
     if (pPeriod !== null) { setActivePeriod(pPeriod); onPeriodChange?.(pPeriod); }
-    if (chaveRange(pRange) !== chaveRange(dateRange)) onDateRangeChange(pRange);
-    if (pSeller !== selectedSeller) onSellerChange(pSeller);
+    if (pPeriod?.startsWith("custom") || (pPeriod === null && (trocouLoja || chaveRange(pRange) !== chaveRange(dateRange)))) onDateRangeChange(pRange);
     setPPeriod(null);
   };
   const [copiedField, setCopiedField] = useState<"nickname" | "custId" | null>(null);

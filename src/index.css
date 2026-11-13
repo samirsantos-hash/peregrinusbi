@@ -3870,16 +3870,17 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
 .dark .paleta-alquimia :focus-visible { outline-color: var(--alq-azul); }
 .dark .paleta-alquimia a[href*="mercadoli"] { color: hsl(0 0% 100%); }
 /* Linhas em tons de azul (1ª, 2ª e 3ª série) e áreas com preenchimento azul translúcido */
-.dark .paleta-alquimia .recharts-line .recharts-line-curve,
-.dark .paleta-alquimia .recharts-area .recharts-area-curve { stroke: #3d8bff !important; stroke-width: 2.25px; filter: drop-shadow(0 0 4px rgba(61, 139, 255, 0.45)); }
-.dark .paleta-alquimia .recharts-line:nth-of-type(2n) .recharts-line-curve,
-.dark .paleta-alquimia .recharts-area:nth-of-type(2n) .recharts-area-curve { stroke: #7ab8ff !important; }
-.dark .paleta-alquimia .recharts-line:nth-of-type(3n) .recharts-line-curve,
-.dark .paleta-alquimia .recharts-area:nth-of-type(3n) .recharts-area-curve { stroke: #0057b7 !important; }
-.dark .paleta-alquimia .recharts-area .recharts-area-area { fill: rgba(61, 139, 255, 0.14) !important; }
+.dark .paleta-alquimia .recharts-line:nth-child(4n+1 of .recharts-line) .recharts-line-curve, .dark .paleta-alquimia .recharts-area:nth-child(4n+1 of .recharts-area) .recharts-area-curve { stroke: #3d8bff !important; stroke-width: 2.25px; filter: drop-shadow(0 0 4px #3d8bff66); }
+.dark .paleta-alquimia .recharts-line:nth-child(4n+2 of .recharts-line) .recharts-line-curve, .dark .paleta-alquimia .recharts-area:nth-child(4n+2 of .recharts-area) .recharts-area-curve { stroke: #d4af37 !important; stroke-width: 2.25px; filter: drop-shadow(0 0 4px #d4af3766); }
+.dark .paleta-alquimia .recharts-line:nth-child(4n+3 of .recharts-line) .recharts-line-curve, .dark .paleta-alquimia .recharts-area:nth-child(4n+3 of .recharts-area) .recharts-area-curve { stroke: #3bd394 !important; stroke-width: 2.25px; filter: drop-shadow(0 0 4px #3bd39466); }
+.dark .paleta-alquimia .recharts-line:nth-child(4n+4 of .recharts-line) .recharts-line-curve, .dark .paleta-alquimia .recharts-area:nth-child(4n+4 of .recharts-area) .recharts-area-curve { stroke: #9fb3c8 !important; stroke-width: 2.25px; filter: drop-shadow(0 0 4px #9fb3c866); }
+.dark .paleta-alquimia .recharts-area:nth-child(4n+1 of .recharts-area) .recharts-area-area { fill: #3d8bff24 !important; }
+.dark .paleta-alquimia .recharts-area:nth-child(4n+2 of .recharts-area) .recharts-area-area { fill: #d4af3724 !important; }
+.dark .paleta-alquimia .recharts-area:nth-child(4n+3 of .recharts-area) .recharts-area-area { fill: #3bd39424 !important; }
+.dark .paleta-alquimia .recharts-area:nth-child(4n+4 of .recharts-area) .recharts-area-area { fill: #9fb3c824 !important; }
 .dark .paleta-alquimia .recharts-line .recharts-dot,
 .dark .paleta-alquimia .recharts-area .recharts-dot,
-.dark .paleta-alquimia .recharts-active-dot circle { stroke: #3d8bff !important; }
+.dark .paleta-alquimia .recharts-active-dot circle { stroke: currentColor; }
 .dark .paleta-alquimia .text-ec-verde-txt,
 .dark .paleta-alquimia .text-success,
 .dark .paleta-alquimia .text-positive,
