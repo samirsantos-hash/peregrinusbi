@@ -1,5 +1,11 @@
 # Roadmap
 
+## Gráficos de publicidade — 13/11
+- [x] Reduzir esferas e retirar ligação contínua do investimento no gráfico combinado; permitir seleção de faturamento, investimento, receita Ads, ACOS, TACOS, ROAS e todas as métricas.
+- [x] Comparar faturamento pago e receita atribuída em gráfico não empilhado.
+- [ ] Vendas sem atribuição aguardam fonte verificável; leitura existente não separa pedidos por aquisição e não autoriza subtração.
+- [x] 27 testes aprovados e controles semana/todas as métricas, tooltip e 480px conferidos na AUTOPECASLONDRINA; k6 prévio 28.503 requisições sem falhas, somente entrega pública. Sem publicar.
+
 ## Vidro semântico nos indicadores do Resumo — 11/11
 - [x] Conectar o tema do cartão à comparação existente e adaptar os degradês enviados à paleta vigente, sem âmbar, texto branco fixo ou alteração de métricas; manter ausência e indicadores neutros sem cor de julgamento.
 - [x] Oito testes aprovados e compilação OK; k6 público prévio: 28.380 requisições, zero falhas, somente entrega pública, não capacidade autenticada. Sem publicação.

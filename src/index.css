@@ -3869,7 +3869,7 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
 }
 .dark .paleta-alquimia :focus-visible { outline-color: var(--alq-azul); }
 .dark .paleta-alquimia a[href*="mercadoli"] { color: hsl(0 0% 100%); }
-/* Linhas em tons de azul (1ª, 2ª e 3ª série) e áreas com preenchimento azul translúcido */
+/* Séries distintas e harmonizadas da Paleta Alquimia. */
 .dark .paleta-alquimia .recharts-line:nth-child(4n+1 of .recharts-line) .recharts-line-curve, .dark .paleta-alquimia .recharts-area:nth-child(4n+1 of .recharts-area) .recharts-area-curve { stroke: #3d8bff !important; stroke-width: 2.25px; filter: drop-shadow(0 0 4px #3d8bff66); }
 .dark .paleta-alquimia .recharts-line:nth-child(4n+2 of .recharts-line) .recharts-line-curve, .dark .paleta-alquimia .recharts-area:nth-child(4n+2 of .recharts-area) .recharts-area-curve { stroke: #d4af37 !important; stroke-width: 2.25px; filter: drop-shadow(0 0 4px #d4af3766); }
 .dark .paleta-alquimia .recharts-line:nth-child(4n+3 of .recharts-line) .recharts-line-curve, .dark .paleta-alquimia .recharts-area:nth-child(4n+3 of .recharts-area) .recharts-area-curve { stroke: #3bd394 !important; stroke-width: 2.25px; filter: drop-shadow(0 0 4px #3bd39466); }
@@ -3897,3 +3897,26 @@ html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > p:
 /* Indicador de alta/queda maior e proporcional ao valor */
 html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > div > :first-child { font-size: clamp(13px, 7cqi, 16px) !important; font-weight: 600 !important; line-height: 1.2 !important; }
 html body .peregrinus-panel.peregrinus-panel.peregrinus-panel .carteira-kpi > div > :first-child svg { width: 1em !important; height: 1em !important; }
+
+/* Identidade estável por métrica: selecionar séries não troca suas cores. */
+.ads-serie-chart {
+  --ads-series-faturamento: var(--panel-brand);
+  --ads-series-investimento: var(--panel-text-secondary);
+  --ads-series-receitaAds: var(--panel-positive);
+  --ads-series-roas: var(--chart-4);
+  --ads-series-acos: var(--chart-5);
+  --ads-series-tacos: var(--chart-3);
+}
+.dark .paleta-alquimia .ads-serie-chart {
+  --ads-series-faturamento: 216 100% 62%;
+  --ads-series-investimento: 46 65% 52%;
+  --ads-series-receitaAds: 155 63% 53%;
+  --ads-series-roas: 209 27% 70%;
+  --ads-series-acos: 0 0% 92%;
+  --ads-series-tacos: 181 51% 57%;
+}
+html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-faturamento .recharts-line-curve { stroke: hsl(var(--ads-series-faturamento)) !important; }
+html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-receitaAds .recharts-line-curve { stroke: hsl(var(--ads-series-receitaAds)) !important; }
+html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-roas .recharts-line-curve { stroke: hsl(var(--ads-series-roas)) !important; }
+html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-acos .recharts-line-curve { stroke: hsl(var(--ads-series-acos)) !important; }
+html body .ads-serie-chart.ads-serie-chart.ads-serie-chart.ads-serie-chart .ads-metrica-tacos .recharts-line-curve { stroke: hsl(var(--ads-series-tacos)) !important; }

@@ -31,6 +31,7 @@ export function SinergiaIndicadores({ pontos, compacto = false, exibirMatriz = t
       </Button>
     </div>}
     {exibirMatriz && <>
+    <div className="resumo-sinergia-evolucao noite-vidro liquid-card vidro-grafico p-4 sm:p-5"><GraficoPublicidadeSerie pontos={pontos} compacto={compacto} compararVendas /></div>
     <div className="grid min-w-0 items-start gap-6">
     {exibirMatriz && <SynergyAnalysisPanel compacto={compacto} kpis={pontos.map(p => ({ gmv: p.faturamento, adsInvestment: p.investimento, visits: p.visitas, repCancellationsRate: p.cancelamentos }))} />}
     <CancelamentosMensais custId={custId} de={de ?? pontos[0]?.data} ate={ate ?? pontos[pontos.length - 1]?.data} />

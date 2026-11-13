@@ -1,65 +1,73 @@
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { ComposedChart, Line, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { Button } from "@/components/ui/button";
-import { brl, brlCurto, num } from "@/lib/format";
+import { brl, brlCurto, num, pctFracao } from "@/lib/format";
 import type { PontoPublicidade } from "@/lib/sinergiaPublicidade";
+import { agruparPublicidade } from '@/lib/publicidadeSerie';
 import type { Limites } from '../../../supabase/functions/_shared/mlAdsGestao';
 import { motivoAlertaAds } from '@/lib/alertasGraficoAds';
 import { PontoRupturaAds } from '@/components/ml/ads/PontoRupturaAds';
 
-export default function GraficoPublicidadeSerie({ pontos, compacto = false, limites }: { pontos: PontoPublicidade[]; compacto?: boolean; limites?: Limites }) {
+type Metrica = 'faturamento' | 'investimento' | 'receitaAds' | 'roas' | 'acos' | 'tacos';
+const METRICAS: { id: Metrica; nome: string; eixo: string }[] = [
+  { id: 'faturamento', nome: 'Faturamento pago', eixo: 'receita' },
+  { id: 'investimento', nome: 'Investimento Ads', eixo: 'ads' },
+  { id: 'receitaAds', nome: 'Receita atribuída a Ads', eixo: 'receita' },
+  { id: 'roas', nome: 'ROAS', eixo: 'roas' },
+  { id: 'acos', nome: 'ACOS', eixo: 'taxas' },
+  { id: 'tacos', nome: 'TACOS', eixo: 'taxas' },
+];
+const formatar = (id: Metrica, v: number | null) => v == null ? 'Sem dado' : id === 'roas' ? `${num(v, 2)}x` : id === 'acos' || id === 'tacos' ? pctFracao(v, 2) : brl(v);
+
+export default function GraficoPublicidadeSerie({ pontos, compacto = false, limites, compararVendas = false }: { pontos: PontoPublicidade[]; compacto?: boolean; limites?: Limites; compararVendas?: boolean }) {
   const mobile = useIsMobile();
   const [semanal, setSemanal] = useState(false);
-  const grupos = new Map<string, PontoPublicidade[]>();
-  for (const p of pontos) {
-    const data = new Date(`${p.data}T12:00:00Z`);
-    if (semanal) data.setUTCDate(data.getUTCDate() - (data.getUTCDay() + 6) % 7);
-    const chave = semanal ? data.toISOString().slice(0, 10) : p.data;
-    grupos.set(chave, [...(grupos.get(chave) ?? []), p]);
-  }
-  const serie = [...grupos].sort(([a], [b]) => a.localeCompare(b)).map(([data, ps]) => {
-    const soma = (campo: "faturamento" | "investimento" | "receitaAds") => ps.every(p => p[campo] != null && Number.isFinite(p[campo])) ? ps.reduce((s, p) => s + (p[campo] ?? 0), 0) : null;
-    const investimento = soma("investimento"), receitaAds = soma("receitaAds");
-    const faturamento = soma('faturamento');
-    return { data, faturamento, investimento, receitaAds, roas: investimento != null && investimento > 0 && receitaAds != null ? receitaAds / investimento : null,
-      acos: investimento != null && receitaAds != null && receitaAds > 0 ? investimento / receitaAds : null,
-      tacos: investimento != null && faturamento != null && faturamento > 0 ? investimento / faturamento : null };
-  });
-  return <div className="space-y-3" aria-label="Gráfico Faturamento Ads ROAS">
+  const [selecionadas, setSelecionadas] = useState<Metrica[]>(compararVendas ? ['faturamento', 'receitaAds'] : ['faturamento', 'investimento', 'roas']);
+  const serie = agruparPublicidade(pontos, semanal);
+  const defs = METRICAS.filter(m => selecionadas.includes(m.id));
+  const todos = selecionadas.length === METRICAS.length;
+  const alternar = (id: Metrica) => setSelecionadas(s => s.includes(id) ? s.length === 1 ? s : s.filter(m => m !== id) : [...s, id]);
+  const motivos = (id: Metrica, p: Record<string, unknown>) => (id === 'investimento' ? ['acos', 'tacos'] : [id]).map(m => motivoAlertaAds(m, p[m], limites)).filter((t): t is string => t != null);
+  const tem = (eixo: string) => defs.some(m => m.eixo === eixo);
+  return <div className="ads-serie-chart space-y-3 min-w-0" aria-label={compararVendas ? 'Comparação de faturamento e receita atribuída' : 'Gráfico Faturamento Ads ROAS'}>
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h4 className="text-sm font-semibold">Faturamento × Ads × ROAS</h4>
+      <h4 className="text-sm font-semibold">{compararVendas ? 'Faturamento pago × receita atribuída a publicidade' : 'Evolução da publicidade'}</h4>
       {!compacto && <div className="flex gap-1" role="group" aria-label="Agrupar evolução">
         <Button size="sm" variant={semanal ? "ghost" : "secondary"} aria-pressed={!semanal} onClick={() => setSemanal(false)}>Dia</Button>
         <Button size="sm" variant={semanal ? "secondary" : "ghost"} aria-pressed={semanal} onClick={() => setSemanal(true)}>Semana</Button>
       </div>}
     </div>
+    {!compararVendas && <div className="flex flex-wrap gap-1.5" role="group" aria-label="Métricas do gráfico">
+      {METRICAS.map(m => <Button key={m.id} size="sm" variant={selecionadas.includes(m.id) ? 'secondary' : 'outline'} aria-pressed={selecionadas.includes(m.id)} onClick={() => alternar(m.id)}>{m.nome}</Button>)}
+      <Button size="sm" variant={todos ? 'secondary' : 'outline'} aria-pressed={todos} onClick={() => setSelecionadas(METRICAS.map(m => m.id))}>Tudo junto</Button>
+    </div>}
     <div className={compacto ? "h-[220px]" : "h-[340px]"}>
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={serie} barCategoryGap="35%" margin={{ top: 12, right: 8, bottom: 8, left: 8 }}>
+        <ComposedChart data={serie} margin={{ top: 12, right: 8, bottom: 8, left: 0 }}>
           <CartesianGrid vertical={false} stroke="hsl(var(--border))" />
-          <XAxis dataKey="data" tickFormatter={d => d.slice(5).split('-').reverse().join('/')} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={mobile ? 40 : 30} height={36} padding={{ left: 12, right: 12 }} />
-          <YAxis yAxisId="faturamento" width={70} tickCount={mobile ? 4 : 5} tickFormatter={brlCurto} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-          <YAxis yAxisId="ads" orientation="right" width={65} tickCount={mobile ? 4 : 5} tickFormatter={brlCurto} tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-          <YAxis yAxisId="roas" hide domain={[0, 'auto']} />
-          <Tooltip content={({ active, payload, label }) => {
+          <XAxis dataKey="data" tickFormatter={d => d.slice(5).split('-').reverse().join('/')} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} interval="preserveStartEnd" minTickGap={40} height={36} padding={{ left: 10, right: 10 }} />
+          <YAxis yAxisId="receita" hide={!tem('receita')} width={mobile ? 56 : 70} tickCount={4} tickFormatter={brlCurto} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+          <YAxis yAxisId="ads" orientation="right" hide={!tem('ads')} width={mobile ? 50 : 65} tickCount={4} tickFormatter={brlCurto} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+          <YAxis yAxisId="roas" hide={tem('receita') || tem('ads') || !tem('roas')} domain={[0, 'auto']} width={48} tickFormatter={v => `${num(v, 1)}x`} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+          <YAxis yAxisId="taxas" orientation="right" hide={tem('ads') || !tem('taxas')} width={48} domain={[0, 'auto']} tickFormatter={v => pctFracao(v, 0)} tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+          <Tooltip content={({ active, payload }) => {
             const p = payload?.[0]?.payload;
             if (!active || !p) return null;
-            return <div className="panel-glass-tooltip space-y-2 p-3 text-xs tabular-nums">
-              <p className="text-muted-foreground">{String(label).split('-').reverse().join('/')}</p>
-              <p>Faturamento: {p.faturamento == null ? 'Sem dado' : brl(p.faturamento)}</p>
-              <p>Investimento Ads: {p.investimento == null ? 'Sem dado' : brl(p.investimento)}</p>
-              <p>Vendas por Ads: {p.receitaAds == null ? 'Sem dado' : brl(p.receitaAds)}</p>
-              <p>ROAS: {p.roas == null ? 'Sem dado' : `${num(p.roas, 2)}x`}</p>
-              {['roas', 'acos', 'tacos'].map(m => motivoAlertaAds(m, p[m], limites)).filter((t): t is string => t != null).map(t => <p key={t} className="text-destructive">{t}</p>)}
+            return <div className="panel-glass-tooltip max-w-[260px] space-y-2 p-3 text-xs tabular-nums">
+              <p className="text-muted-foreground">{String(p.data).split('-').reverse().join('/')}</p>
+              {defs.map(m => <p key={m.id}>{m.nome}: {formatar(m.id, p[m.id])}</p>)}
+              {[...new Set(defs.flatMap(m => motivos(m.id, p)))].map(t => <p key={t} className="text-destructive">{t}</p>)}
             </div>;
           }} />
-          <Line yAxisId="faturamento" dataKey="faturamento" stroke="hsl(var(--panel-positive))" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
-          <Line yAxisId="ads" dataKey="investimento" stroke="hsl(var(--panel-text-secondary))" strokeWidth={2} dot={p => <PontoRupturaAds cx={p.cx} cy={p.cy} motivos={['acos', 'tacos'].map(m => motivoAlertaAds(m, p.payload[m], limites)).filter((s): s is string => s != null)} />} connectNulls={false} isAnimationActive={false} />
-          <Line yAxisId="roas" dataKey="roas" stroke="hsl(var(--panel-text))" strokeDasharray="4 4" strokeWidth={1.5} dot={p => <PontoRupturaAds cx={p.cx} cy={p.cy} motivos={[motivoAlertaAds('roas', p.payload.roas, limites)].filter((s): s is string => s != null)} />} connectNulls={false} isAnimationActive={false} />
+          <Legend iconType="circle" wrapperStyle={{ fontSize: 11 }} />
+          {defs.map(m => m.id === 'investimento' ? <Scatter key={m.id} name={m.nome} yAxisId={m.eixo} dataKey={m.id} fill={`hsl(var(--ads-series-${m.id}))`} isAnimationActive={false} shape={p => {
+            const ms = motivos(m.id, p.payload);
+            return ms.length ? <PontoRupturaAds cx={p.cx} cy={p.cy} motivos={ms} /> : <circle cx={p.cx} cy={p.cy} r={2.5} fill={`hsl(var(--ads-series-${m.id}))`} />;
+          }} /> : <Line key={m.id} className={`ads-metrica-${m.id}`} name={m.nome} yAxisId={m.eixo} dataKey={m.id} stroke={`hsl(var(--ads-series-${m.id}))`} strokeWidth={2} strokeDasharray={m.id === 'roas' ? '4 4' : m.id === 'acos' ? '7 3' : m.id === 'tacos' ? '2 3' : undefined} dot={p => <PontoRupturaAds cx={p.cx} cy={p.cy} motivos={motivos(m.id, p.payload)} />} activeDot={{ r: 4 }} connectNulls={false} isAnimationActive={false} />)}
         </ComposedChart>
       </ResponsiveContainer>
     </div>
-    <p className="text-xs text-muted-foreground">Faturamento: linha verde, eixo esquerdo · Investimento Ads: linha cinza, eixo direito · ROAS: linha pontilhada, escala própria em x.</p>
+    <p className="text-xs text-muted-foreground">{compararVendas ? 'Receita atribuída segue a janela do Mercado Livre; não é uma divisão exclusiva entre vendas pagas e orgânicas. Vendas sem atribuição: sem medição confirmada.' : 'Investimento: pontos sem ligação. Esferas vermelhas: limite configurado excedido, com valor e referência ao passar o mouse ou tocar. ROAS em x; ACOS e TACOS em %; valores financeiros em R$.'}</p>
   </div>;
 }
