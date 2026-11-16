@@ -82,6 +82,8 @@ export function servirAcaoEmLote(opcoes: Opcoes) {
     const alvo = await contaComToken(admin, accountId);
     if (!alvo.ok) return resposta({ error: alvo.erro }, 409);
     const ctx: Contexto = { admin, conta: alvo.conta, token: alvo.token, userId, accountId };
+    const { data: tokInfo } = await admin.from("ml_tokens").select("scope").eq("account_id", accountId).order("expires_at", { ascending: false }).limit(1).maybeSingle();
+    const escopo = (tokInfo?.scope as string | undefined) ?? null;
 
     const { data: existente } = await admin.from("ml_action_requests")
       .select("id, acao, status, antes, resposta_ml, payload")
@@ -150,7 +152,8 @@ export function servirAcaoEmLote(opcoes: Opcoes) {
           usuario_id: userId,
           account_id: accountId,
           acao: typeof linha.dados.acao_log === "string" ? linha.dados.acao_log : opcoes.acao,
-          payload: { item: linha.chave, chamada: ex.auditoria.payload, antes: linha.antes, depois: linha.depois },
+          // Só identifica o acesso usado (usuário ML e permissões); nunca grava o token.
+          payload: { item: linha.chave, chamada: ex.auditoria.payload, antes: linha.antes, depois: linha.depois, acesso: { ml_user_id: alvo.conta.ml_user_id, escopo: escopo ?? null } },
           resposta_ml: ex.auditoria.resposta,
           codigo_ml: ex.auditoria.codigo,
         });

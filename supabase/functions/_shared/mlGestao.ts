@@ -169,6 +169,7 @@ export function decidirIdempotencia(
 
 export function traduzirErroMl(status: number, codigo: string | null, mensagem: string | null): string {
   const c = (codigo ?? "").toLowerCase();
+  if (c.includes("mclics") && c.includes("unauthorized")) return "O Mercado Livre não liberou alterar Publicidade para o usuário que conectou esta loja. Conecte com o dono da conta ou um usuário com permissão de Publicidade.";
   if (status === 401 || c === "unauthorized" || c === "invalid_token") return "A autorização da conta expirou. Conecte de novo.";
   if (status === 403 || c.includes("unauthorized") || c === "forbidden") return "O Mercado Livre recusou esta ação. Falta permissão no aplicativo.";
   if (status === 404) return "O Mercado Livre não encontrou este recurso.";
