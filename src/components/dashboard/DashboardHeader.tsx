@@ -108,6 +108,8 @@ const DashboardHeader = ({
   const pendente = pSeller !== selectedSeller || pPeriod !== null || chaveRange(pRange) !== chaveRange(dateRange);
   const ir = () => {
     playClick();
+    // A escolha do usuário vale mais que a abertura automática no período completo.
+    initialized.current = true;
     // Loja primeiro: a troca de loja zera o intervalo; o período escolhido é aplicado depois.
     const trocouLoja = pSeller !== selectedSeller;
     if (trocouLoja) onSellerChange(pSeller);

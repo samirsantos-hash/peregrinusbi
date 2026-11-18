@@ -354,18 +354,26 @@ const Index = () => {
   }, [allKpis]);
 
   // Auto-anchor dateRange on first load / seller change
+  // Guarda de qual loja/base veio o último intervalo automático, para refazê-lo quando os dados da loja nova chegarem.
+  const ancoraAuto = useRef<{ chave: string; range: DateRange } | null>(null);
   useEffect(() => {
-    if (allKpis.length > 0 && !dateRange) {
+    const chave = `${selectedSeller}|${granularity}|${minStr}|${anchorStr}|${activePeriod}`;
+    const eraAuto = !!dateRange && ancoraAuto.current?.range === dateRange;
+    if (allKpis.length > 0 && (!dateRange || (eraAuto && ancoraAuto.current!.chave !== chave))) {
       // Mantém o período escolhido (7, 15, 30 dias) ao abrir ou trocar de loja.
       const n = Number(activePeriod);
       if (n > 0) {
         const from = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), anchorDate.getDate() - (n - 1));
-        setDateRange({ from: from < minDate ? minDate : from, to: anchorDate });
+        const r = { from: from < minDate ? minDate : from, to: anchorDate };
+        ancoraAuto.current = { chave, range: r };
+        setDateRange(r);
       } else {
-        setDateRange({ from: minDate, to: anchorDate });
+        const r = { from: minDate, to: anchorDate };
+        ancoraAuto.current = { chave, range: r };
+        setDateRange(r);
       }
     }
-  }, [allKpis, dateRange, minDate, anchorDate, activePeriod]);
+  }, [allKpis, dateRange, minDate, anchorDate, minStr, anchorStr, activePeriod, selectedSeller, granularity]);
 
   // FILTERED kpis — used by all panels
   const filteredKpis: any[] = useMemo(() => {
