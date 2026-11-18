@@ -57,3 +57,15 @@ export function subanalisesDoNivel(permissoes: string[] | undefined, master = fa
   if (master || !permissoes) return null;
   return nivelDoChecklist(permissoes) === 'tiro' ? { efficiency: ['analise'] } : null;
 }
+
+export type PerfilEquipe = 'consultor' | 'analista';
+// Analista: vê todos os indicadores, sem nenhuma ação de alteração (preços, promoções, campanhas etc.).
+const ANALISTA = [...FUNCOES_PERMISSAO.map(f => `${f.id}.visualizar`).filter(p => p !== 'usuarios.visualizar'), 'relatorios.exportar'];
+export const PERFIS_EQUIPE: { id: PerfilEquipe; nome: string; descricao: string; permissoes: string[] }[] = [
+  { id: 'consultor', nome: 'Consultor', descricao: 'Vê tudo e faz a gestão das contas: preços, promoções, campanhas e perguntas.', permissoes: [...PERITUS].sort() },
+  { id: 'analista', nome: 'Analista', descricao: 'Vê todos os indicadores de desempenho, sem alterar preços, promoções ou campanhas.', permissoes: [...ANALISTA].sort() },
+];
+export function perfilDoChecklist(permissoes: string[]): PerfilEquipe | null {
+  const atual = [...permissoes].sort().join('|');
+  return PERFIS_EQUIPE.find(n => n.permissoes.join('|') === atual)?.id ?? null;
+}

@@ -9,3 +9,14 @@ describe('níveis de cliente', () => {
   it('Peritus faz gestão sem administrar usuários', () => { expect(n('peritus')).toContain('perguntas.responder'); expect(n('peritus')).toContain('carteiras.alterar'); expect(n('peritus').some(p => p.startsWith('usuarios.'))).toBe(false); });
   it('reconhece o nível pelo checklist', () => { expect(nivelDoChecklist([...n('medius')].reverse())).toBe('medius'); expect(nivelDoChecklist(['reputacao.visualizar'])).toBeNull(); });
 });
+
+import { PERFIS_EQUIPE, perfilDoChecklist, PERMISSAO_PAI } from './permissoes';
+describe('perfis da equipe', () => {
+  const analista = PERFIS_EQUIPE.find(p => p.id === 'analista')!.permissoes;
+  it('analista não altera preços, promoções nem campanhas', () => {
+    for (const p of ['preco.alterar', 'promocoes.aplicar', 'promocoes.remover', 'publicidade.campanhas', 'publicidade.anuncios']) expect(analista).not.toContain(p);
+    expect(analista.filter(p => PERMISSAO_PAI[p] && p !== 'relatorios.exportar')).toEqual([]);
+  });
+  it('analista vê os indicadores', () => { for (const p of ['resumo.visualizar', 'publicidade.visualizar', 'preco.visualizar']) expect(analista).toContain(p); });
+  it('troca reconhece o perfil', () => { expect(perfilDoChecklist(analista)).toBe('analista'); expect(perfilDoChecklist(PERFIS_EQUIPE[0].permissoes)).toBe('consultor'); });
+});
