@@ -3870,7 +3870,7 @@ html.dark body .resumo-apple-glass .kpi-vidro[data-tema="vermelho"] {
 .dark .paleta-alquimia :focus-visible { outline-color: var(--alq-azul); }
 .dark .paleta-alquimia a[href*="mercadoli"] { color: hsl(0 0% 100%); }
 /* Séries distintas e harmonizadas da Paleta Alquimia. */
-.dark .paleta-alquimia {
+.dark .paleta-alquimia, .dark .paleta-alquimia .recharts-wrapper {
   --series-1: 216 100% 62%; --warning: 46 65% 52%; --ok: 155 63% 53%;
   --series-2: 211 30% 70%; --series-3: 184 60% 61%; --attention-text: 46 58% 78%;
 }
