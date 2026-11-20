@@ -26,22 +26,31 @@ export async function buscarMl(
   token: string,
   buscar: Buscar = fetch,
   extra: Record<string, string> = {},
+  opcoes: { deadlineAt?: number } = {},
 ): Promise<RespostaMl> {
+  const restante = () => (opcoes.deadlineAt ?? Infinity) - Date.now();
+  const limite: RespostaMl = { ok: false, status: 0, codigo: 'limite_tempo', erro: 'Limite de tempo; segue na próxima execução.' };
   let ultimo: RespostaMl = { ok: false, status: 0, codigo: null, erro: "O Mercado Livre não respondeu." };
   for (let t = 0; t < 3; t++) {
+    if (restante() <= 0) return limite;
     let res: Response;
+    let texto: string;
     try {
       res = await buscar(url, {
         headers: { Authorization: `Bearer ${token}`, Accept: "application/json", ...extra },
-        signal: AbortSignal.timeout(TIMEOUT_MS),
+        signal: AbortSignal.timeout(Math.max(1, Math.min(TIMEOUT_MS, restante()))),
       });
+      texto = await res.text();
     } catch (error) {
+      if (restante() <= 0) return limite;
       const timeout = error instanceof DOMException && error.name === "TimeoutError";
       ultimo = { ok: false, status: 0, codigo: timeout ? "timeout" : "rede", erro: timeout ? "O Mercado Livre demorou para responder." : "Falha de rede ao falar com o Mercado Livre." };
-      if (t < 2) await esperar(esperaRetryMs(t));
+      if (t < 2) {
+        if (restante() <= esperaRetryMs(t)) return limite;
+        await esperar(esperaRetryMs(t));
+      }
       continue;
     }
-    const texto = await res.text();
     let json: unknown = {};
     if (texto) {
       try { json = jsonMl(texto); } catch { json = {}; }
@@ -50,7 +59,10 @@ export async function buscarMl(
     const codigo = codigoDe(json);
     ultimo = { ok: false, status: res.status, codigo, erro: traduzirErroMl(res.status, codigo, mensagemDe(json)) };
     if (res.status !== 429 && res.status < 500) return ultimo;
-    if (t < 2) await esperar(esperaRetryMs(t));
+    if (t < 2) {
+      if (restante() <= esperaRetryMs(t)) return limite;
+      await esperar(esperaRetryMs(t));
+    }
   }
   return ultimo;
 }

@@ -19,19 +19,25 @@ export type DadosMes = {
   totalBPC: number;
 };
 
+export function percentualForaCDP(adesao: number | null | undefined): number | null {
+  return adesao != null && Number.isFinite(adesao) && adesao >= 0 && adesao <= 100 ? 100 - adesao : null;
+}
+
 export function gerarInsights(
   historico: DadosMes[],
   dadosAtual: DadosMes,
   _priceScore: number | null,
   _temCDP: boolean,
-  pctOptinCDP: number,
+  pctOptinCDP: number | null | undefined,
   _isMercadoLider: boolean,
 ): InsightPreco[] {
   const insights: InsightPreco[] = [];
-  if (historico.length < 2) return insights;
+  if (historico.length < 2 || dadosAtual.totalBPC <= 0) return insights;
 
   const atual = dadosAtual;
-  const anterior = historico.at(-2)!;
+  const foraCDP = percentualForaCDP(pctOptinCDP);
+  const anterior = historico.at(-2);
+  if (!anterior || anterior.totalBPC <= 0) return insights;
 
   // 1: Não competitivo crítico / atenção
   if (atual.pctMaisCaro >= 30) {
@@ -39,11 +45,11 @@ export function gerarInsights(
       id: "nao_competitivo_critico",
       tipo: "alerta",
       urgencia: "alta",
-      titulo: "Preço não competitivo acima do limite algorítmico",
+      titulo: "Preço alto acima do limiar interno de investigação (30%)",
       metrica: `${atual.pctMaisCaro.toFixed(1)}%`,
-      identificado: `Em ${atual.pctMaisCaro.toFixed(1)}% das comparações de preço ativadas pelo ML, o seller estava mais caro que o concorrente direto. O limite que dispara penalização é 30%.`,
+      identificado: `Em ${atual.pctMaisCaro.toFixed(1)}% das comparações de preço ativadas pelo ML, o seller estava mais caro que o concorrente direto. 30% é um limiar interno de investigação, não uma regra oficial de penalização.`,
       porque:
-        "O algoritmo do ML cruza CTR com taxa de conversão em tempo real. Quando um anúncio recebe cliques mas não converte por causa do preço, ele é progressivamente rebaixado nos resultados de busca — sem necessidade de ação do ML, acontece automaticamente.",
+        "Preço acima do concorrente pode reduzir a conversão quando o comprador compara ofertas. Não há evidência no painel de rebaixamento automático; use o limiar para priorizar a investigação.",
       investigar:
         "Identificar quais categorias ou produtos específicos concentram essa desvantagem. Verificar se houve reajuste de preço recente ou se um concorrente reduziu o preço. Comparar o preço atual com os 3 primeiros resultados da busca no ML para os produtos de maior GMV.",
       sugestao:
@@ -54,11 +60,11 @@ export function gerarInsights(
       id: "nao_competitivo_atencao",
       tipo: "investigar",
       urgencia: "media",
-      titulo: "Preço em zona de atenção — 10pp do limite de penalização",
+      titulo: "Preço em zona de atenção — perto do limiar interno de 30%",
       metrica: `${atual.pctMaisCaro.toFixed(1)}%`,
-      identificado: `${atual.pctMaisCaro.toFixed(1)}% das comparações com preço mais caro. Ainda dentro do tolerável pelo algoritmo, mas com pouca margem antes de atingir os 30% de limite.`,
+      identificado: `${atual.pctMaisCaro.toFixed(1)}% das comparações com preço mais caro. Abaixo do limiar interno de 30%, mas próximo dele.`,
       porque:
-        "Entre 20% e 30%, o algoritmo ainda não penaliza diretamente, mas a conversão já começa a cair porque o comprador vê o rival mais barato na comparação de preço.",
+        "Entre 20% e 30% o comprador já encontra com frequência um rival mais barato na comparação; vale acompanhar a conversão dos itens afetados.",
       investigar:
         "Verificar tendência: está subindo ou descendo nos últimos 3 meses? Se subindo, identificar a causa (reajuste do seller ou concorrente mais barato entrando no mercado).",
       sugestao: "Monitorar mensalmente e agir preventivamente nos SKUs de maior volume antes de ultrapassar 30%.",
@@ -118,7 +124,7 @@ export function gerarInsights(
       identificado: `${atual.pctEquivalente.toFixed(0)}% das comparações mostram o seller com preço igual ao rival, mas apenas ${atual.pctMaisBarato.toFixed(0)}% mais barato. Quando os preços são iguais, o comprador decide por outros fatores: frete, reputação, CDP.`,
       porque:
         'Empate de preço é onde o CDP tem maior impacto. A tag "Oferta Imperdível" gerada pela CDP desempata a decisão de compra a favor do seller — sem precisar reduzir o preço base.',
-      investigar: `Verificar quantos itens com preço equivalente ao concorrente estão participando da CDP. Se ${(100 - pctOptinCDP).toFixed(0)}% do catálogo está fora da CDP, essa é a alavanca mais imediata disponível.`,
+      investigar: `Verificar quantos itens com preço equivalente ao concorrente estão participando da CDP.${foraCDP != null ? ` A planilha informa ${foraCDP.toFixed(0)}% do catálogo fora da CDP.` : " A adesão do catálogo à CDP não foi informada na planilha."}`,
       sugestao:
         "Ativar CDP nos itens que já têm preço equivalente ao rival. Nesses casos, o custo do desconto é mínimo (já está empatado) e o ganho de visibilidade pela tag é máximo. Priorizar itens com coparticipação do ML disponível.",
     });

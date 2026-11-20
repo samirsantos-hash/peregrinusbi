@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 // ml-promotions-item
 // Lê ao vivo as promoções de um anúncio (convites, participações e o desconto individual). Não escreve no ML.
 //
@@ -17,6 +18,7 @@ const API = "https://api.mercadolibre.com";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'promocoes.visualizar', false); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return resposta({ error: "use POST" }, 405);
   const body = await req.json().catch(() => null) as { account_id?: string; item_id?: unknown } | null;
   if (!body) return resposta({ error: "Corpo inválido." }, 400);

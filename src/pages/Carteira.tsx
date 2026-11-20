@@ -241,12 +241,19 @@ function useAgg(ds: CarteiraDataset) {
 
 type Agg = ReturnType<typeof useAgg>;
 
+/** Somente a última posição de categorias (mesma base do KPI de anúncios); somar todas as datas multiplica o catálogo. */
+function ultimaPosicaoListings<T extends { data: string }>(ls: T[]): T[] {
+  if (!ls.length) return ls;
+  const ult = ls.reduce((m, l) => (l.data > m ? l.data : m), ls[0].data);
+  return ls.filter((l) => l.data === ult);
+}
+
 /* ═══════════════ 01 · Panorama ═══════════════ */
 function Panorama({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
   const { set } = useDrill();
   const catRows = useMemo(() => {
     const m = new Map<string, number>();
-    for (const l of ds.listings) m.set(l.categoria, (m.get(l.categoria) ?? 0) + l.itens);
+    for (const l of ultimaPosicaoListings(ds.listings)) m.set(l.categoria, (m.get(l.categoria) ?? 0) + l.itens);
     const arr = Array.from(m.entries()).map(([cat, itens]) => ({ cat, itens })).sort((a, b) => b.itens - a.itens);
     const tot = arr.reduce((s, r) => s + r.itens, 0) || 1;
     let cum = 0;
@@ -451,11 +458,12 @@ function CurvaA({ ag }: { ag: Agg }) {
 function Categorias({ ds, ag }: { ds: CarteiraDataset; ag: Agg }) {
   const { set } = useDrill();
   const { rows, cats } = useMemo(() => {
+    const atuais = ultimaPosicaoListings(ds.listings);
     const totalCat = new Map<string, number>();
-    for (const l of ds.listings) totalCat.set(l.categoria, (totalCat.get(l.categoria) ?? 0) + l.itens);
+    for (const l of atuais) totalCat.set(l.categoria, (totalCat.get(l.categoria) ?? 0) + l.itens);
     const cats = Array.from(totalCat.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([c]) => c);
     const reg = new Map<string, any>();
-    for (const l of ds.listings) {
+    for (const l of atuais) {
       const s = ds.sellerById.get(l.sellerId);
       const r = s?.regiao ?? "ND";
       const cur = reg.get(r) ?? { regiao: r, total: 0 };

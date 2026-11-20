@@ -248,6 +248,7 @@ function NovoEstudo({ contaId, itemInicial, ocupado, aoEstudar }: {
 
   const resultados = useQuery({
     queryKey: ["ml-listings-mercado", contaId, busca],
+    meta: { carregamentoNaoBloqueante: busca.length > 0 },
     enabled: !escolhido && (busca.length === 0 || busca.length >= 2),
     queryFn: async () => {
       if (!busca) {

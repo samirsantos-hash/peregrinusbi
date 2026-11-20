@@ -20,7 +20,8 @@ export const CHURN_Z_HIGH = -1.5;
 
 export interface SellerMonthTriplet {
   sellerId: string;
-  current: number;
+  /** null = mês corrente sem registro (não é faturamento zero). */
+  current: number | null;
   closed: number;
   prior: number;
 }
@@ -126,7 +127,8 @@ export function evaluateChurn(
 ): ChurnSignal[] {
   const signals: ChurnSignal[] = [];
 
-  if (t.current <= 0 && t.closed > 0 && t.prior > 0) {
+  // Churn absoluto exige faturamento zero confirmado no mês corrente.
+  if (t.current != null && t.current <= 0 && t.closed > 0 && t.prior > 0) {
     signals.push({
       type: "absolute",
       severity: "alta",

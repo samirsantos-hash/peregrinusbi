@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 // ml-questions-answer
 // Responde uma pergunta do comprador no Mercado Livre em duas etapas: prévia e confirmação.
 //
@@ -37,6 +38,7 @@ async function auditar(admin: SupabaseClient, userId: string, accountId: string,
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'perguntas.responder', false); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return resposta({ error: "use POST" }, 405);
 
   const body = await req.json().catch(() => null) as Record<string, unknown> | null;

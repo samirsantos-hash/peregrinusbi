@@ -1,3 +1,4 @@
+import { IconeIndicador } from "@/components/ds/IconeIndicador";
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Pause, Play, ChevronLeft, ChevronRight } from "lucide-react";
@@ -263,7 +264,7 @@ const TickerLojas = ({ base, prev, dias, periodoAtual, periodoAnterior, onSeleci
             <div className="flex items-baseline justify-between gap-2">
               <span className="text-[18px] font-bold tabular-nums leading-tight">{formatar(metrica, l.valor)}</span>
               <span className={`text-[13px] font-semibold tabular-nums ${cor}`}>
-                <span aria-hidden>{seta} </span>{textoDelta}
+                <IconeIndicador simbolo={seta} className="h-3 w-3 mr-1" />{textoDelta}
               </span>
             </div>
             {l.basePequena && <div className="text-[10px] text-muted-foreground leading-none">base pequena</div>}
@@ -295,7 +296,7 @@ const TickerLojas = ({ base, prev, dias, periodoAtual, periodoAnterior, onSeleci
               <span>sem base de comparação</span>
             ) : (
               <span className={indice.dGrupo >= 0 ? "text-emerald" : "text-destructive"}>
-                <span aria-hidden>{indice.dGrupo >= 0 ? "▲" : "▼"} </span>
+                <IconeIndicador simbolo={indice.dGrupo >= 0 ? "▲" : "▼"} className="h-3 w-3 mr-1" />
                 {indice.dGrupo >= 0 ? "+" : ""}{(indice.dGrupo * 100).toFixed(1).replace(".", ",")}% vs. período anterior
               </span>
             )}

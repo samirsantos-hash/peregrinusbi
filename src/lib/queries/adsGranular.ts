@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/fetchAllRows";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type Granularidade = "dia" | "semana" | "mes" | "trimestre";
@@ -111,14 +112,17 @@ export async function getTopProdutosAds(
   params: { sellerUuid: string; fromDate: string; toDate: string; limite?: number },
 ): Promise<ProdutoAds[]> {
   const { sellerUuid, fromDate, toDate, limite = 20 } = params;
-  const { data } = await supabase
+  // Leitura completa e paginada (ordem estável); a última leitura de cada anúncio prevalece.
+  const { data, error } = await fetchAllRows((de, ate) => supabase
     .from("seller_eligibility")
     .select("item_id, item_name, pedidos_7d, media_tsi_diario_7d, discount_total, flag_item_s_optin, data")
     .eq("seller_id", sellerUuid)
     .gte("data", fromDate)
     .lte("data", toDate)
     .order("data", { ascending: true })
-    .limit(5000);
+    .order("item_id", { ascending: true })
+    .range(de, ate));
+  if (error) throw error;
 
   const mapa = new Map<string, ProdutoAds>();
   for (const r of data ?? []) {

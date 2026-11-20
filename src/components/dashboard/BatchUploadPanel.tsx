@@ -564,7 +564,7 @@ const BatchUploadPanel = ({ onSuccess }: BatchUploadPanelProps) => {
               <PartyPopper className="w-6 h-6 text-emerald shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-semibold text-emerald">
-                  ✅ Atualização de Base Concluída com Sucesso!
+                  Atualização de Base Concluída com Sucesso!
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {totalSuccess} de {totalStaged} planilha(s) processada(s).

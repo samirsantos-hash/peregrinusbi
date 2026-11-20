@@ -38,12 +38,12 @@ export default function AlertaInatividade() {
 
   return (
     <AlertDialog open={itens.length > 0}>
-      <AlertDialogContent>
+      <AlertDialogContent className="w-[calc(100vw-32px)] !max-w-sm gap-3 !rounded-lg p-4">
         <AlertDialogHeader>
-          <AlertDialogTitle>Usuários sem acesso há 3 dias ou mais</AlertDialogTitle>
-          <AlertDialogDescription>Estes usuários não entram no painel há pelo menos 3 dias:</AlertDialogDescription>
+          <AlertDialogTitle className="text-base">Usuários sem acesso há 3 dias ou mais</AlertDialogTitle>
+          <AlertDialogDescription className="text-xs">Estes usuários não entram no painel há pelo menos 3 dias:</AlertDialogDescription>
         </AlertDialogHeader>
-        <ul className="max-h-64 overflow-auto space-y-1 text-sm">
+        <ul className="max-h-[min(160px,30vh)] overflow-auto space-y-1 text-xs">
           {itens.map((i) => (
             <li key={i.user_id} className="flex justify-between gap-2 border-b border-border/40 py-1">
               <span className="truncate">{i.email}</span>

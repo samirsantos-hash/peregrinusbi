@@ -160,7 +160,7 @@ export default function NivelLayout({
           {kpis.length > 0 && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {kpis.slice(0, 4).map((k) => (
-                <div key={k.rotulo} className="rounded-lg border border-border px-3 py-2">
+                <div key={k.rotulo} className="ds-kpi rounded-lg border border-border px-3 py-2">
                   <div className="text-[11px] text-muted-foreground">{k.rotulo}</div>
                   <div className="font-mono tabular-nums text-lg">{k.valor}</div>
                   {k.detalhe && <div className="text-[11px] text-muted-foreground">{k.detalhe}</div>}

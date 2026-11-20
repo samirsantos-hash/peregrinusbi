@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 // ml-trends-sync
 // Guarda os termos em alta da semana (/trends) do Brasil e das categorias mais vendidas de cada conta,
 // para comparar semana a semana. O ML só devolve a semana atual: 50 termos, sem volume de busca.
@@ -82,6 +83,7 @@ async function escopoDaCategoria(admin: SupabaseClient, token: string, categoria
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'mercado.visualizar', true); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return resposta({ error: "use POST" }, 405);
   const inicio = Date.now();
   const admin = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"));

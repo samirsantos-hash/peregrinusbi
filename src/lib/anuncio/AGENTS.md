@@ -1,0 +1,6 @@
+# Listing calculations
+
+- ABC classification is pure and separate from paid-order collection; require complete order/catalog coverage before classification and never substitute lifetime sales, missing costs or competitor scores for measured period contribution.- Two-axis listing diagnosis (src/lib/anuncio/diagnostico.ts) keeps unmeasured dimensions null, needs both axes before a quadrant, and labels cuts as provisional; response uses only measured same-window data, never lifetime sales.
+- Diagnosis dimensions v2 live in src/lib/anuncio/dimensoes.ts: commercial exposure merges logistics and listing type (no separate type score), the price-vs-type rule is only a margin warning, photos use original max_size, and below-minimum samples stay null.
+- Stage-two construction maps allowlisted live item metadata through construcao.ts; measured zero differs from absent legacy scores, missing original dimensions/category metadata stays null, and current price never implies competitiveness without a verified comparison.
+- Diagnostic Excel exports serialize the displayed batch scores and dimensions without rescoring; preserve blanks versus measured zeros and include coverage, current weights and criteria for reproducible comparisons.

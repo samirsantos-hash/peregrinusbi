@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 export interface CategoryShare {
   categoria: string;
@@ -18,10 +19,14 @@ export function useCategoryMix(sellerId: string | undefined) {
     queryFn: async (): Promise<{ categorias: CategoryShare[]; data: string | null; totalItens: number }> => {
       if (!sellerId) return { categorias: [], data: null, totalItens: 0 };
 
-      const { data, error } = await supabase
+      const latest = await supabase.from("live_listings").select("data").eq("seller_id", sellerId)
+        .not("data", "is", null).order("data", { ascending: false }).limit(1).maybeSingle();
+      if (latest.error) throw latest.error;
+      if (!latest.data?.data) return { categorias: [], data: null, totalItens: 0 };
+      const { data, error } = await fetchAllRows((from, to) => supabase
         .from("live_listings")
         .select("data, itens, categoria, dom_domain_agg1, vertical")
-        .eq("seller_id", sellerId);
+        .eq("seller_id", sellerId).eq("data", latest.data?.data ?? "").order("id").range(from, to));
 
       if (error) throw error;
       if (!data?.length) return { categorias: [], data: null, totalItens: 0 };

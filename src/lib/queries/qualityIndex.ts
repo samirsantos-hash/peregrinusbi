@@ -8,7 +8,8 @@ export type Topico = {
   id: string;
   label: string;
   valor: number | string;
-  score: number;
+  /** null = sem medição; não entra na média do pilar. */
+  score: number | null;
   peso: number;
   status: StatusLevel;
   acaoSugerida: string;
@@ -19,7 +20,8 @@ export type PilarScore = {
   id: "logistica" | "cdp" | "reputacao" | "relevancia";
   label: string;
   peso: number;
-  score: number;
+  /** null = pilar sem evidência suficiente. */
+  score: number | null;
   scoreNota: string;
   status: StatusLevel;
   topicos: Topico[];
@@ -28,7 +30,7 @@ export type PilarScore = {
 export type QualityIndex = {
   custId: string;
   mes: string | null;
-  scoreGeral: number;
+  scoreGeral: number | null;
   notaGeral: string;
   pilares: PilarScore[];
   tendencia: number[];
@@ -49,8 +51,8 @@ function normalizar(
   return Math.round(sentido === "maior_melhor" ? pct * 100 : (1 - pct) * 100);
 }
 
-function scoreReputacao(level: string | null | undefined): number {
-  if (!level) return 50;
+function scoreReputacao(level: string | null | undefined): number | null {
+  if (!level) return null;
   const l = String(level).toLowerCase();
   if (l.includes("platinum")) return 100;
   if (l.includes("gold")) return 85;
@@ -58,7 +60,7 @@ function scoreReputacao(level: string | null | undefined): number {
   if (l.includes("yellow") || l.includes("amarel")) return 40;
   if (l.includes("orange") || l.includes("laranja")) return 20;
   if (l.includes("red") || l.includes("vermelh")) return 0;
-  return 50;
+  return null;
 }
 
 function toNota(score: number): string {
@@ -77,6 +79,31 @@ function toStatus(score: number): StatusLevel {
 }
 
 type CppRow = Record<string, any>;
+
+/** Número medido ou null (vazio/indefinido não vira zero). */
+export function medido(v: unknown): number | null {
+  if (v == null || v === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Taxa de reclamações chega como fração (0,06 = 6%); devolve percentual. */
+export function taxaReclamacoesPct(v: unknown): number | null {
+  const n = medido(v);
+  return n == null ? null : n * 100;
+}
+
+/** Média ponderada só dos tópicos medidos, com pesos renormalizados. */
+export function mediaMedida(itens: { score: number | null; peso: number }[]): number | null {
+  const ok = itens.filter((i) => i.score != null);
+  const peso = ok.reduce((a, i) => a + i.peso, 0);
+  if (!ok.length || peso <= 0) return null;
+  return Math.round(ok.reduce((a, i) => a + (i.score as number) * i.peso, 0) / peso);
+}
+
+function notaDe(score: number | null) { return score == null ? "—" : toNota(score); }
+function statusDe(score: number | null): StatusLevel { return score == null ? "atencao" : toStatus(score); }
+const fmtPct = (v: number | null) => (v == null ? "Sem dado" : `${v.toFixed(2)}%`);
 type ListingsStats = { avgCarac: number | null };
 
 // ─── Pilares ──────────────────────────────────────────────────────────────────
@@ -88,16 +115,20 @@ function calcPilarLogistica(row: CppRow): PilarScore {
   const shareFull = tgmv > 0 ? (fbm / tgmv) * 100 : 0;
   const shareFlex = tgmv > 0 ? (flex / tgmv) * 100 : 0;
   const shareVeloc = shareFull + shareFlex;
-  const claims = Number(row.rep_claims_rate) || 0;
+  const claims = taxaReclamacoesPct(row.rep_claims_rate);
 
   const scoreFull = normalizar(shareFull, 0, 80, "maior_melhor");
   const scoreFlex = normalizar(shareFlex, 0, 30, "maior_melhor");
   const scoreVeloc = normalizar(shareVeloc, 0, 80, "maior_melhor");
-  const scoreAtraso = normalizar(claims, 0, 10, "menor_melhor");
+  const scoreAtraso = claims == null ? null : normalizar(claims, 0, 10, "menor_melhor");
+  const semGmv = tgmv <= 0;
 
-  const scoreTotal = Math.round(
-    scoreFull * 0.5 + scoreFlex * 0.2 + scoreVeloc * 0.2 + scoreAtraso * 0.1,
-  );
+  const scoreTotal = mediaMedida([
+    { score: semGmv ? null : scoreFull, peso: 0.5 },
+    { score: semGmv ? null : scoreFlex, peso: 0.2 },
+    { score: semGmv ? null : scoreVeloc, peso: 0.2 },
+    { score: scoreAtraso, peso: 0.1 },
+  ]);
 
   const topicos: Topico[] = [
     {
@@ -144,12 +175,14 @@ function calcPilarLogistica(row: CppRow): PilarScore {
     {
       id: "taxa_reclamacoes_log",
       label: "Taxa de Reclamações",
-      valor: `${claims.toFixed(2)}%`,
+      valor: fmtPct(claims),
       score: scoreAtraso,
       peso: 0.1,
-      status: claims < 2 ? "ok" : claims < 5 ? "atencao" : "critico",
+      status: claims == null ? "atencao" : claims < 2 ? "ok" : claims < 5 ? "atencao" : "critico",
       acaoSugerida:
-        claims >= 5
+        claims == null
+          ? "Taxa de reclamações sem medição no período."
+          : claims >= 5
           ? "Reclamações críticas. Verificar SLA do CD e atrasos de entrega."
           : claims >= 2
             ? "Reclamações em atenção. Investigar atrasos."
@@ -163,33 +196,37 @@ function calcPilarLogistica(row: CppRow): PilarScore {
     label: "🥇 Logística de Velocidade",
     peso: 0.3,
     score: scoreTotal,
-    scoreNota: toNota(scoreTotal),
-    status: toStatus(scoreTotal),
+    scoreNota: notaDe(scoreTotal),
+    status: statusDe(scoreTotal),
     topicos,
   };
 }
 
 function calcPilarCdp(row: CppRow): PilarScore {
-  const scoreCdpFinal = Number(row.score_final_cdp) || 0;
-  const cdpTsi = Number(row.cdp_tsi) || 0;
-  const tsi = Number(row.tsi) || 0;
-  const pctPedidosCdp = tsi > 0 ? (cdpTsi / tsi) * 100 : 0;
+  // Score do plano em escala fixa 0–36 (contrato); sem detecção automática de escala.
+  const scoreCdpBruto = medido(row.score_final_cdp);
+  const scoreCdpFinal = scoreCdpBruto != null && scoreCdpBruto >= 0 && scoreCdpBruto <= 36 ? scoreCdpBruto : null;
+  const cdpTsi = medido(row.cdp_tsi);
+  const tsi = medido(row.tsi);
+  const pctPedidosCdp = tsi != null && tsi > 0 && cdpTsi != null ? (cdpTsi / tsi) * 100 : null;
 
-  const scoreScore = normalizar(scoreCdpFinal, 0, 36, "maior_melhor");
-  const scorePedidos = normalizar(pctPedidosCdp, 0, 60, "maior_melhor");
+  const scoreScore = scoreCdpFinal == null ? null : normalizar(scoreCdpFinal, 0, 36, "maior_melhor");
+  const scorePedidos = pctPedidosCdp == null ? null : normalizar(pctPedidosCdp, 0, 60, "maior_melhor");
 
-  const scoreTotal = Math.round(scoreScore * 0.6 + scorePedidos * 0.4);
+  const scoreTotal = mediaMedida([{ score: scoreScore, peso: 0.6 }, { score: scorePedidos, peso: 0.4 }]);
 
   const topicos: Topico[] = [
     {
       id: "score_final_cdp",
       label: "Score CDP do Plano",
-      valor: `${scoreCdpFinal.toFixed(0)} / 36`,
+      valor: scoreCdpFinal == null ? "Sem dado" : `${scoreCdpFinal.toFixed(0)} / 36`,
       score: scoreScore,
       peso: 0.6,
-      status: scoreCdpFinal >= 30 ? "ok" : scoreCdpFinal >= 15 ? "atencao" : "critico",
+      status: scoreCdpFinal == null ? "atencao" : scoreCdpFinal >= 30 ? "ok" : scoreCdpFinal >= 15 ? "atencao" : "critico",
       acaoSugerida:
-        scoreCdpFinal >= 30
+        scoreCdpFinal == null
+          ? "Score CDP do plano não medido no período."
+          : scoreCdpFinal >= 30
           ? "Score CDP próximo do máximo. Manter participação ativa."
           : scoreCdpFinal >= 15
             ? "Score CDP parcial. Ampliar opt-in nos itens elegíveis."
@@ -199,12 +236,14 @@ function calcPilarCdp(row: CppRow): PilarScore {
     {
       id: "pct_pedidos_cdp",
       label: "% Pedidos via CDP",
-      valor: `${pctPedidosCdp.toFixed(1)}%`,
+      valor: pctPedidosCdp == null ? "Sem dado" : `${pctPedidosCdp.toFixed(1)}%`,
       score: scorePedidos,
       peso: 0.4,
-      status: pctPedidosCdp >= 40 ? "ok" : pctPedidosCdp >= 20 ? "atencao" : "critico",
+      status: pctPedidosCdp == null ? "atencao" : pctPedidosCdp >= 40 ? "ok" : pctPedidosCdp >= 20 ? "atencao" : "critico",
       acaoSugerida:
-        pctPedidosCdp >= 40
+        pctPedidosCdp == null
+          ? "Pedidos do período sem medição."
+          : pctPedidosCdp >= 40
           ? "Boa conversão via CDP."
           : `Apenas ${pctPedidosCdp.toFixed(0)}% dos pedidos passam pela CDP. Aumentar opt-in.`,
       fonte: "cpp_mensal.cdp_tsi / tsi",
@@ -216,22 +255,26 @@ function calcPilarCdp(row: CppRow): PilarScore {
     label: "🥈 Central de Promoção (CDP)",
     peso: 0.25,
     score: scoreTotal,
-    scoreNota: toNota(scoreTotal),
-    status: toStatus(scoreTotal),
+    scoreNota: notaDe(scoreTotal),
+    status: statusDe(scoreTotal),
     topicos,
   };
 }
 
 function calcPilarReputacao(row: CppRow): PilarScore {
   const level = (row.rep_current_level as string) || null;
-  const claims = Number(row.rep_claims_rate) || 0;
-  const scoreServicos = Number(row.score_final_servicos) || 0;
+  const claims = taxaReclamacoesPct(row.rep_claims_rate);
+  const scoreServicos = medido(row.score_final_servicos);
 
   const scoreLevel = scoreReputacao(level);
-  const scoreClaims = normalizar(claims, 0, 10, "menor_melhor");
-  const scoreServ = normalizar(scoreServicos, 0, 100, "maior_melhor");
+  const scoreClaims = claims == null ? null : normalizar(claims, 0, 10, "menor_melhor");
+  const scoreServ = scoreServicos == null ? null : normalizar(scoreServicos, 0, 100, "maior_melhor");
 
-  const scoreTotal = Math.round(scoreLevel * 0.5 + scoreClaims * 0.35 + scoreServ * 0.15);
+  const scoreTotal = mediaMedida([
+    { score: scoreLevel, peso: 0.5 },
+    { score: scoreClaims, peso: 0.35 },
+    { score: scoreServ, peso: 0.15 },
+  ]);
 
   const topicos: Topico[] = [
     {
@@ -240,9 +283,11 @@ function calcPilarReputacao(row: CppRow): PilarScore {
       valor: level || "—",
       score: scoreLevel,
       peso: 0.5,
-      status: scoreLevel >= 70 ? "ok" : scoreLevel >= 40 ? "atencao" : "critico",
+      status: scoreLevel == null ? "atencao" : scoreLevel >= 70 ? "ok" : scoreLevel >= 40 ? "atencao" : "critico",
       acaoSugerida:
-        scoreLevel >= 85
+        scoreLevel == null
+          ? "Nível de reputação não identificado no período."
+          : scoreLevel >= 85
           ? "Reputação Platinum/Gold — pré-requisito do algoritmo atendido."
           : scoreLevel >= 70
             ? "Reputação Silver. Melhorar reclamações e atrasos para atingir Gold."
@@ -252,12 +297,14 @@ function calcPilarReputacao(row: CppRow): PilarScore {
     {
       id: "taxa_reclamacoes",
       label: "Taxa de Reclamações",
-      valor: `${claims.toFixed(2)}%`,
+      valor: fmtPct(claims),
       score: scoreClaims,
       peso: 0.35,
-      status: claims < 2 ? "ok" : claims < 5 ? "atencao" : "critico",
+      status: claims == null ? "atencao" : claims < 2 ? "ok" : claims < 5 ? "atencao" : "critico",
       acaoSugerida:
-        claims >= 5
+        claims == null
+          ? "Taxa de reclamações sem medição no período."
+          : claims >= 5
           ? "Reclamações críticas (> 5%). Risco de suspensão."
           : claims >= 2
             ? `Reclamações em ${claims.toFixed(2)}% — acima da meta de 2%.`
@@ -267,12 +314,14 @@ function calcPilarReputacao(row: CppRow): PilarScore {
     {
       id: "score_servicos",
       label: "Score de Serviços",
-      valor: `${scoreServicos.toFixed(0)} / 100`,
+      valor: scoreServicos == null ? "Sem dado" : `${scoreServicos.toFixed(0)} / 100`,
       score: scoreServ,
       peso: 0.15,
-      status: scoreServicos >= 70 ? "ok" : scoreServicos >= 45 ? "atencao" : "critico",
+      status: scoreServicos == null ? "atencao" : scoreServicos >= 70 ? "ok" : scoreServicos >= 45 ? "atencao" : "critico",
       acaoSugerida:
-        scoreServicos >= 70
+        scoreServicos == null
+          ? "Score de serviços não medido no período."
+          : scoreServicos >= 70
           ? "Score de serviços saudável."
           : "Verificar atrasos, cancelamentos e qualidade do atendimento.",
       fonte: "cpp_mensal.score_final_servicos",
@@ -284,33 +333,35 @@ function calcPilarReputacao(row: CppRow): PilarScore {
     label: "🥉 Reputação e Autoridade",
     peso: 0.25,
     score: scoreTotal,
-    scoreNota: toNota(scoreTotal),
-    status: toStatus(scoreTotal),
+    scoreNota: notaDe(scoreTotal),
+    status: statusDe(scoreTotal),
     topicos,
   };
 }
 
 function calcPilarRelevancia(row: CppRow, listingsStats?: ListingsStats): PilarScore {
-  const ipi = Number(row.pontuacao_ipi) || 0;
+  const ipiMedido = medido(row.pontuacao_ipi);
+  const ipi = ipiMedido ?? 0;
   const avgCarac = listingsStats?.avgCarac ?? null;
 
-  const scoreIpi = normalizar(ipi, 0, 100, "maior_melhor");
-  const scoreCarac =
-    avgCarac !== null ? normalizar(avgCarac, 0, 100, "maior_melhor") : 50;
+  const scoreIpi = ipiMedido == null ? null : normalizar(ipi, 0, 100, "maior_melhor");
+  const scoreCarac = avgCarac !== null ? normalizar(avgCarac, 0, 100, "maior_melhor") : null;
 
   // Pesos redistribuídos (sem visits_expensive e GTIN/IPI por item — não disponíveis no schema)
-  const scoreTotal = Math.round(scoreIpi * 0.65 + scoreCarac * 0.35);
+  const scoreTotal = mediaMedida([{ score: scoreIpi, peso: 0.65 }, { score: scoreCarac, peso: 0.35 }]);
 
   const topicos: Topico[] = [
     {
       id: "pontuacao_ipi",
       label: "IPI Médio do Catálogo",
-      valor: `${ipi.toFixed(0)} / 100`,
+      valor: ipiMedido == null ? "Sem dado" : `${ipi.toFixed(0)} / 100`,
       score: scoreIpi,
       peso: 0.65,
-      status: ipi >= 70 ? "ok" : ipi >= 50 ? "atencao" : "critico",
+      status: ipiMedido == null ? "atencao" : ipi >= 70 ? "ok" : ipi >= 50 ? "atencao" : "critico",
       acaoSugerida:
-        ipi >= 70
+        ipiMedido == null
+          ? "IPI do catálogo não medido no período."
+          : ipi >= 70
           ? "IPI acima de 70 — anúncios elegíveis para posições de destaque orgânico."
           : ipi >= 50
             ? `IPI em ${ipi.toFixed(0)}. Corrigir título, fotos e ficha técnica para ultrapassar 70.`
@@ -333,7 +384,7 @@ function calcPilarRelevancia(row: CppRow, listingsStats?: ListingsStats): PilarS
               : "critico",
       acaoSugerida:
         avgCarac === null
-          ? "Dados de ficha técnica indisponíveis. Carregar seller_listings_quality."
+          ? "Ficha técnica sem medição no período."
           : avgCarac >= 80
             ? "Boa cobertura de ficha técnica."
             : "Ficha incompleta em parte do catálogo — anúncios invisíveis para buscas específicas.",
@@ -346,8 +397,8 @@ function calcPilarRelevancia(row: CppRow, listingsStats?: ListingsStats): PilarS
     label: "4º Relevância do Anúncio",
     peso: 0.2,
     score: scoreTotal,
-    scoreNota: toNota(scoreTotal),
-    status: toStatus(scoreTotal),
+    scoreNota: notaDe(scoreTotal),
+    status: statusDe(scoreTotal),
     topicos,
   };
 }
@@ -395,8 +446,8 @@ export async function getQualityIndex(
         tgmv_lc_flex: r.tgmv_lc_flex,
         tsi: r.tsi,
         cdp_tsi: r.cdp_tsi,
-        score_final_cdp: 0,
-        score_final_servicos: 0,
+        score_final_cdp: null,
+        score_final_servicos: null,
         pontuacao_ipi: r.pontuacao_ipi,
         rep_current_level: r.rep_current_level,
         rep_claims_rate: r.rep_claims_rate,
@@ -436,7 +487,7 @@ export async function getQualityIndex(
     calcPilarRelevancia(current, listingsStats),
   ];
 
-  const scoreGeral = Math.round(pilares.reduce((acc, p) => acc + p.score * p.peso, 0));
+  const scoreGeral = mediaMedida(pilares);
 
   const tendencia = [...rows]
     .reverse()
@@ -447,8 +498,9 @@ export async function getQualityIndex(
         calcPilarReputacao(r),
         calcPilarRelevancia(r, listingsStats),
       ];
-      return Math.round(arr.reduce((acc, p) => acc + p.score * p.peso, 0));
-    });
+      return mediaMedida(arr);
+    })
+    .filter((v): v is number => v != null);
 
   const alertasCriticos = pilares
     .flatMap((p) => p.topicos)
@@ -461,7 +513,7 @@ export async function getQualityIndex(
     custId,
     mes: (current.mes_ref as string) || String(current.tim_month_id),
     scoreGeral,
-    notaGeral: toNota(scoreGeral),
+    notaGeral: notaDe(scoreGeral),
     pilares,
     tendencia,
     alertasCriticos,

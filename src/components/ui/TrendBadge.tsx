@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
 
 type TrendBadgeProps = {
   /** Série temporal — ordem cronológica (mais antigo → mais recente). */
@@ -63,7 +64,7 @@ export function TrendBadge({
       ? "text-destructive bg-destructive/10 border-destructive/30"
       : "text-warning bg-warning/10 border-warning/30";
 
-  const icone = positivo ? "↑" : negativo ? "↓" : "→";
+  const Icone = direcao === "subindo" ? ArrowUp : direcao === "caindo" ? ArrowDown : ArrowRight;
   const label = positivo ? "Melhora" : negativo ? "Piora" : "Estável";
 
   let valorDelta: string;
@@ -86,7 +87,7 @@ export function TrendBadge({
       )}
       title={`${label} · ${valorDelta} (slope ${slope >= 0 ? "+" : ""}${slope.toFixed(2)})`}
     >
-      <span aria-hidden>{icone}</span>
+      <Icone aria-hidden="true" className="h-3 w-3" />
       <span>{label}</span>
       <span className="font-mono">{valorDelta}</span>
     </span>

@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 // ml-busca-concorrentes
 // Busca pública de anúncios no Mercado Livre (Brasil) para comparar concorrentes.
 // A API de busca exige token: usa token de aplicativo (client_credentials), nunca token de loja.
@@ -33,6 +34,7 @@ async function appToken(): Promise<string> {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'preco.visualizar', false); if (checklistNegado) return checklistNegado;
   try {
     const auth = req.headers.get("Authorization") ?? "";
     const sb = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_ANON_KEY"), {

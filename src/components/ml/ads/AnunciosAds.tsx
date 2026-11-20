@@ -1,3 +1,4 @@
+import { usePermissoes } from '@/hooks/usePermissoes';
 import { useEffect, useMemo, useState } from "react";
 import { ExternalLink, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,8 @@ export function AnunciosAds({ painel, acao, accountId, filtroInicial }: {
   accountId: string;
   filtroInicial: string | null;
 }) {
+  const { pode } = usePermissoes();
+  const alterar = pode('publicidade.anuncios');
   const [filtro, setFiltro] = useState(filtroInicial && FILTROS[filtroInicial] ? filtroInicial : "com_investimento");
   const [campanha, setCampanha] = useState("todas");
   const [termo, setTermo] = useState("");
@@ -70,6 +73,7 @@ export function AnunciosAds({ painel, acao, accountId, filtroInicial }: {
   const marcarTodos = () => setSel(todosMarcados ? new Set() : new Set(visiveis.slice(0, MAX_GRUPOS_LOTE).map((g) => g.ad_group_id)));
   const ids = [...sel];
   const enviar = (dados: Record<string, unknown>) => {
+    if (!alterar) return;
     acao.previa({ ...dados, ad_group_ids: ids });
     setSel(new Set());
   };
@@ -123,7 +127,7 @@ export function AnunciosAds({ painel, acao, accountId, filtroInicial }: {
           <table className="w-full text-xs tabular-nums">
             <thead className="text-muted-foreground text-left">
               <tr className="border-b border-border">
-                <th className="py-2 px-2 w-6"><Checkbox checked={todosMarcados} onCheckedChange={marcarTodos} aria-label="Selecionar visíveis" /></th>
+                <th className="py-2 px-2 w-6"><Checkbox disabled={!alterar} checked={todosMarcados} onCheckedChange={marcarTodos} aria-label="Selecionar visíveis" /></th>
                 <th className="pr-2">Anúncio</th>
                 <th className="pr-2">Campanha</th>
                 <th className="pr-2 text-right">Investimento</th>
@@ -140,7 +144,7 @@ export function AnunciosAds({ painel, acao, accountId, filtroInicial }: {
             <tbody>
               {visiveis.map((g) => (
                 <tr key={g.ad_group_id} className="border-t border-border align-top">
-                  <td className="py-2 px-2"><Checkbox checked={sel.has(g.ad_group_id)} onCheckedChange={() => alternar(g.ad_group_id)} aria-label="Selecionar" /></td>
+                  <td className="py-2 px-2"><Checkbox disabled={!alterar} checked={sel.has(g.ad_group_id)} onCheckedChange={() => alternar(g.ad_group_id)} aria-label="Selecionar" /></td>
                   <td className="py-1.5 pr-2 min-w-[220px]">
                     <div className="flex gap-2">
                       {g.thumbnail && <img src={g.thumbnail} alt="" className="h-9 w-9 object-contain border border-border shrink-0" />}

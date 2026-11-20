@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { rpcPermissoes } from './usePermissoes';
 
 export interface MetaLoja {
   id: string;
@@ -53,6 +54,7 @@ export function useSalvarMeta() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: MetaInput) => {
+      if (!await rpcPermissoes<boolean>('tem_permissao', { p_permissao: 'metas.alterar' })) throw new Error('Alteração de metas não liberada.');
       const { data: sessao } = await supabase.auth.getUser();
       const { error } = await supabase.from("metas_loja" as any).upsert(
         {
@@ -78,6 +80,7 @@ export function useRemoverMeta() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id }: { id: string; sellerId: string }) => {
+      if (!await rpcPermissoes<boolean>('tem_permissao', { p_permissao: 'metas.alterar' })) throw new Error('Alteração de metas não liberada.');
       const { error } = await supabase.from("metas_loja" as any).delete().eq("id", id);
       if (error) throw error;
     },

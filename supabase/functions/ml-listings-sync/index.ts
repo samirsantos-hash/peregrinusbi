@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 // ml-listings-sync
 // Lê os anúncios ativos e pausados da conta e grava em ml_listings para a busca do painel. Não escreve no ML.
 //
@@ -41,6 +42,7 @@ async function idsDaConta(token: string, userId: number): Promise<{ ok: true; id
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'integracoes.atualizar', true); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return resposta({ error: "use POST" }, 405);
   const inicio = Date.now();
   const semTempo = () => Date.now() - inicio > ORCAMENTO_MS;

@@ -1,0 +1,3 @@
+REVOKE INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER ON public.usuario_permissoes,public.usuario_permissao_estado,public.permissoes_auditoria,public.permissao_catalogo FROM authenticated,anon;
+GRANT SELECT ON public.usuario_permissoes,public.usuario_permissao_estado,public.permissoes_auditoria,public.permissao_catalogo TO authenticated;
+GRANT ALL ON public.usuario_permissoes,public.usuario_permissao_estado,public.permissoes_auditoria,public.permissao_catalogo TO service_role;

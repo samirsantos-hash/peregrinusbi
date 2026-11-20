@@ -18,28 +18,33 @@ interface QualityIndexPanelProps {
 function computeQualityIndex(
   latest: SellerKPI,
   campaign?: SellerCampaign | null
-): { score: number; pillars: { name: string; score: number; max: number; details: string }[] } {
+): { score: number; pillars: { name: string; score: number | null; max: number; details: string }[] } {
   // Pilar Logística (25 pts)
   const potenciaFull = latest.tsi > 0 ? (latest.pctFull || 0) : 0;
   const logScore = potenciaFull >= 70 ? 25 : Math.round((potenciaFull / 70) * 25);
 
   // Pilar SEO & Catálogo (25 pts)
   // Note: PONTUACAO_LL_* fields have 0% coverage — only use if > 0
-  let seoScore = 25;
+  let seoScore: number | null = 25;
+  let seoEvidencias = 0;
   const seoIssues: string[] = [];
   const hasLlData = latest.llPicturesScore > 0 || latest.llTitleScore > 0 || latest.llTechSpecsScore > 0 || latest.llDescriptionScore > 0;
   if (!hasLlData) {
     // No LL data available — use score_photo and score_title as proxy
+    if (latest.scorePhoto > 0) seoEvidencias++;
+    if (latest.scoreTitle > 0) seoEvidencias++;
     if (latest.scorePhoto > 0 && latest.scorePhoto < 70) { seoScore -= 7; seoIssues.push("Fotos"); }
     if (latest.scoreTitle > 0 && latest.scoreTitle < 70) { seoScore -= 7; seoIssues.push("Título"); }
   } else {
+    seoEvidencias = [latest.llPicturesScore, latest.llTitleScore, latest.llTechSpecsScore, latest.llDescriptionScore].filter((v) => v > 0).length;
     if (latest.llPicturesScore > 0 && latest.llPicturesScore < 70) { seoScore -= 5; seoIssues.push("Fotos"); }
     if (latest.llTitleScore > 0 && latest.llTitleScore < 70) { seoScore -= 5; seoIssues.push("Título"); }
     if (latest.llTechSpecsScore > 0 && latest.llTechSpecsScore < 70) { seoScore -= 5; seoIssues.push("Ficha Técnica"); }
     if (latest.llDescriptionScore > 0 && latest.llDescriptionScore < 70) { seoScore -= 5; seoIssues.push("Descrição"); }
   }
   if (latest.pontuacaoLlGtin === 0) { seoScore -= 5; seoIssues.push("EAN/GTIN"); }
-  seoScore = Math.max(0, seoScore);
+  // Sem evidência obrigatória, a nota de SEO fica suspensa (nunca "Todos os critérios OK").
+  seoScore = seoEvidencias === 0 ? null : Math.max(0, seoScore);
 
   // Pilar Conversão (25 pts)
   const sellerConv = latest.visits > 0 ? (latest.tsi / latest.visits) * 100 : 0;
@@ -52,13 +57,14 @@ function computeQualityIndex(
   const hasPromo = latest.scoreOferta > 0 && latest.scoreOferta >= 30;
   const promoScore = hasPromo ? 25 : (latest.scoreOferta > 0 ? Math.round((latest.scoreOferta / 30) * 25) : 0);
 
-  const total = Math.min(100, logScore + seoScore + convScore + promoScore);
+  const medidos = [logScore, seoScore, convScore, promoScore].filter((v): v is number => v != null);
+  const total = Math.min(100, Math.round((medidos.reduce((a, b) => a + b, 0) / (medidos.length * 25)) * 100));
 
   return {
     score: total,
     pillars: [
       { name: "Logística", score: logScore, max: 25, details: `Potência Full: ${potenciaFull.toFixed(1).replace(".", ",")}%` },
-      { name: "SEO & Catálogo", score: seoScore, max: 25, details: seoIssues.length ? `Pendências: ${seoIssues.join(", ")}` : "Todos os critérios OK" },
+      { name: "SEO & Catálogo", score: seoScore, max: 25, details: seoScore == null ? "Sem medição de fotos, título ou ficha no período" : seoIssues.length ? `Pendências: ${seoIssues.join(", ")}` : "Critérios medidos OK" },
       { name: "Conversão", score: convScore, max: 25, details: `Seller: ${sellerConv.toFixed(2).replace(".", ",")}% ${verticalConv > 0 ? `vs Vertical: ${verticalConv.toFixed(2).replace(".", ",")}%` : ""}` },
       { name: "Promoções", score: promoScore, max: 25, details: hasPromo ? "Campanhas ativas" : "Baixa adesão a campanhas" },
     ],
@@ -135,7 +141,7 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
         >
           <ShieldAlert className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-bold text-destructive">🚨 RISCO DE PENALIZAÇÃO</p>
+            <p className="text-sm font-bold text-destructive">RISCO DE PENALIZAÇÃO</p>
             <p className="text-xs text-destructive/80 mt-1">
               Tráfego alto sem conversão detectado. O algoritmo irá derrubar seu ranking orgânico se os anúncios não forem otimizados agora.
             </p>
@@ -158,13 +164,13 @@ export default function QualityIndexPanel({ kpis, campaign, allKpis }: QualityIn
           {/* Pillar breakdown */}
           <div className="w-full mt-4 space-y-2">
             {index.pillars.map((p) => {
-              const pct = (p.score / p.max) * 100;
+              const pct = p.score == null ? 0 : (p.score / p.max) * 100;
               const barColor = pct >= 80 ? "bg-emerald" : pct >= 50 ? "bg-warning" : "bg-destructive";
               return (
                 <div key={p.name} className="space-y-1">
                   <div className="flex justify-between text-[11px]">
                     <span className="text-muted-foreground">{p.name}</span>
-                    <span className="font-mono font-semibold">{p.score}/{p.max}</span>
+                    <span className="font-mono font-semibold">{p.score == null ? "Sem dado" : `${p.score}/${p.max}`}</span>
                   </div>
                   <div className="w-full h-1.5 bg-muted/40 rounded-full overflow-hidden">
                     <motion.div

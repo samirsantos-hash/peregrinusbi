@@ -20,3 +20,11 @@ export function strengthLabel(r: number): { label: string; tone: "muted" | "warn
   if (a < 0.6) return { label: "Moderada", tone: "warning" };
   return r >= 0 ? { label: "Forte +", tone: "emerald" } : { label: "Forte −", tone: "destructive" };
 }
+/** Pearson com pelo menos 7 pares e variação nas duas séries; caso contrário, indisponível (null). */
+export function pearsonValido(xs: number[], ys: number[], minimo = 7): number | null {
+  const n = Math.min(xs.length, ys.length);
+  if (n < minimo) return null;
+  const varia = (a: number[]) => a.slice(0, n).some((v) => v !== a[0]);
+  if (!varia(xs) || !varia(ys)) return null;
+  return pearson(xs.slice(0, n), ys.slice(0, n));
+}

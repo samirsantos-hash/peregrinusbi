@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { transformKpi, type SellerKPI } from "@/hooks/useSellerData";
+import { fetchAllRows } from "@/lib/fetchAllRows";
 
 /** Colunas somáveis (volume/valor) */
 const SUM_COLS = [
@@ -20,8 +21,6 @@ const AVG_COLS = [
   "ll_price_score", "ll_stock_availability_score", "ll_free_shipping_score", "ll_promotions_score",
 ] as const;
 
-const SELECT = ["seller_id", "data", ...SUM_COLS, ...AVG_COLS].join(", ");
-
 export interface LojaDiagnostico {
   sellerId: string;
   nickname: string;
@@ -38,36 +37,11 @@ export interface CarteiraConsolidado {
   totalLojasComDado: number;
 }
 
-async function fetchAll(): Promise<any[]> {
-  const page = 1000;
-
-  // 1ª página + contagem total → demais páginas em paralelo (evita 8 idas sequenciais)
-  const first = await supabase
-    .from("sellers_kpi")
-    .select(SELECT, { count: "exact" })
-    .order("data", { ascending: true })
-    .range(0, page - 1);
-  if (first.error) throw first.error;
-
-  const rows: any[] = [...(first.data || [])];
-  const total = first.count ?? rows.length;
-  const pages = Math.min(40, Math.ceil(total / page));
-  if (pages <= 1) return rows;
-
-  const rest = await Promise.all(
-    Array.from({ length: pages - 1 }, (_, k) =>
-      supabase
-        .from("sellers_kpi")
-        .select(SELECT)
-        .order("data", { ascending: true })
-        .range((k + 1) * page, (k + 2) * page - 1),
-    ),
-  );
-  for (const r of rest) {
-    if (r.error) throw r.error;
-    rows.push(...(r.data || []));
-  }
-  return rows;
+async function fetchAll(ids: string[]): Promise<any[]> {
+  const { data, error } = await fetchAllRows<any>((from, to) =>
+    supabase.rpc("indicadores_carteira", { p_seller_ids: ids }).order("is_latest").order("data").order("seller_id").range(from, to));
+  if (error) throw error;
+  return data;
 }
 
 function num(v: any) {
@@ -84,17 +58,23 @@ export function useCarteiraConsolidado(
   enabled: boolean,
 ) {
   return useQuery({
-    queryKey: ["carteira-consolidado"],
-    enabled,
+    queryKey: ["carteira-consolidado", sellers.map(s => s.id).sort().join(",")],
+    enabled: enabled && sellers.length > 0,
     staleTime: 5 * 60 * 1000,
     queryFn: async (): Promise<CarteiraConsolidado> => {
-      const rows = await fetchAll();
+      const rows = await fetchAll(sellers.map(s => s.id));
 
       /* ---- agregação por mês ---- */
       const byDate = new Map<string, { sum: Record<string, number>; avg: Record<string, { s: number; n: number }> }>();
       const lastBySeller = new Map<string, any>();
 
-      for (const r of rows) {
+      for (const entry of rows) {
+        const r = entry.metrics;
+        if (entry.is_latest) {
+          lastBySeller.set(entry.seller_id, r);
+          continue;
+        }
+        r.data = entry.data;
         const d = r.data as string;
         if (!d) continue;
         let bucket = byDate.get(d);
@@ -111,8 +91,6 @@ export function useCarteiraConsolidado(
             bucket.avg[c] = a;
           }
         }
-        const prev = lastBySeller.get(r.seller_id);
-        if (!prev || String(prev.data) < d) lastBySeller.set(r.seller_id, r);
       }
 
       const kpis: SellerKPI[] = [...byDate.entries()]

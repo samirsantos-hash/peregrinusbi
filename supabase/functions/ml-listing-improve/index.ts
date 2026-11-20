@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 // ml-listing-improve
 // Melhorias de anúncio: lê o anúncio no ML, aponta problemas por regras fixas e pede à IA
 // explicação, análise livre, títulos e descrição sugeridos. Só sugere: não escreve no ML.
@@ -145,6 +146,7 @@ async function analisar(
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'anuncios.visualizar', true); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return resposta({ error: "use POST" }, 405);
   const inicio = Date.now();
   const admin = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"));

@@ -189,7 +189,7 @@ export function alertasDoAnuncio(g: GrupoAnalisado, c: ContextoAlertas): AlertaA
   if (ativo && g.pausadoNoMl) {
     a.push({ id: "pausado_ml", nivel: "alto", texto: "Ativo em Ads com o anúncio pausado no Mercado Livre.", acao: "Pausar no Ads ou reativar o anúncio." });
   }
-  if ((g.cliques ?? 0) >= REGRAS_ADS.cliquesSemVenda && (g.unidades ?? 0) === 0 && i.investimento > 0) {
+  if ((g.cliques ?? 0) >= REGRAS_ADS.cliquesSemVenda && g.unidades === 0 && i.investimento > 0) {
     a.push({
       id: "sem_venda",
       nivel: "alto",
@@ -352,7 +352,7 @@ export type LinhaCampanhaDia = LinhaDia & { campaign_id: number };
 const ativa = (s: string | null) => (s ?? "").toLowerCase() === "active";
 export const orcamentoDiario = (c: CampanhaLinha) => c.budget ?? c.daily_budget ?? 0;
 
-/** Tudo o que a tela de Publicidade mostra, a partir das tabelas lidas. TACOS só no período atual (faturamento de 30 dias). */
+/** Tudo o que a tela de Publicidade mostra, a partir das tabelas lidas. TACOS só com faturamento das mesmas datas do investimento. */
 export function montarPainel(d: {
   campanhas: CampanhaLinha[];
   serie: LinhaCampanhaDia[];
@@ -385,6 +385,34 @@ export function montarPainel(d: {
 
 export type PainelAds = ReturnType<typeof montarPainel>;
 
+/**
+ * Faturamento da loja somado exatamente nas datas com investimento medido no período atual.
+ * Se alguma dessas datas não tiver faturamento diário, devolve null (TACOS não é calculado).
+ */
+export function faturamentoAlinhado(
+  vendas: { data?: string; faturamento?: unknown }[] | null | undefined,
+  serie: LinhaDia[],
+  hoje: string,
+  dias: number,
+): number | null {
+  if (!vendas?.length) return null;
+  const p = periodos(hoje, dias).atual;
+  const datasCusto = new Set(serie.filter((l) => l.dia >= p.de && l.dia <= p.ate && l.cost != null).map((l) => l.dia));
+  if (!datasCusto.size) return null;
+  const porDia = new Map<string, number>();
+  for (const v of vendas) {
+    const n = Number(v.faturamento);
+    if (v.data && v.faturamento != null && Number.isFinite(n)) porDia.set(String(v.data).slice(0, 10), n);
+  }
+  let total = 0;
+  for (const d of datasCusto) {
+    const f = porDia.get(d);
+    if (f == null) return null;
+    total += f;
+  }
+  return Math.round(total * 100) / 100;
+}
+
 /** Quanto do investimento do período vai para anúncios com cada problema (pesa no TACOS da conta). */
 export function investimentoEmRisco(grupos: GrupoAnalisado[]): { id: string; rotulo: string; anuncios: number; custo: number; fracao: number | null }[] {
   const total = grupos.reduce((s, g) => s + g.ind.investimento, 0);
@@ -394,7 +422,7 @@ export function investimentoEmRisco(grupos: GrupoAnalisado[]): { id: string; rot
     return { id, rotulo, anuncios: gs.length, custo, fracao: total > 0 ? custo / total : null };
   };
   return [
-    faixa("sem_venda", "Sem venda no período", (g) => (g.unidades ?? 0) === 0),
+    faixa("sem_venda", "Sem venda no período", (g) => g.unidades === 0),
     faixa("qualidade", "Qualidade Básica no ML", (g) => g.qualidade === "basica"),
     faixa("fotos", "Fotos abaixo de 1200 px", (g) => g.fotosSituacao != null && g.fotosSituacao !== "ok"),
     faixa("ficha", "Ficha com obrigatórios vazios", (g) => g.fichaIncompleta === true),

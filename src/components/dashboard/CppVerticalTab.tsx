@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { brlCurto, numCurto } from "@/lib/format";
 import { useState, useMemo } from "react";
 import { format } from "date-fns";
@@ -462,7 +463,7 @@ export default function CppVerticalTab({ data, rawRows, dateRange }: Props) {
                 )}
 
                 <div className="flex justify-between text-[10px] text-muted-foreground">
-                  <span>🟢 Mais barato</span><span>⚪ Mesmo preço</span><span>🔴 Mais caro</span>
+                  <span><IconeIndicador simbolo="🟢" className="h-3 w-3 mr-1" />Mais barato</span><span><IconeIndicador simbolo="⚪" className="h-3 w-3 mr-1" />Mesmo preço</span><span><IconeIndicador simbolo="🔴" className="h-3 w-3 mr-1" />Mais caro</span>
                 </div>
 
                 {/* Interpretation */}

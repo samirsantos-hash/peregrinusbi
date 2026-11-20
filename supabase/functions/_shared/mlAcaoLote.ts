@@ -11,6 +11,7 @@
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "./env.ts";
 import { type Conta, contaComToken, cors, exigirGestor, resposta } from "./mlConta.ts";
+import { exigirPermissao, permissaoAcao } from './permissoes.ts';
 
 const ORCAMENTO_MS = 110_000;
 
@@ -81,11 +82,19 @@ export function servirAcaoEmLote(opcoes: Opcoes) {
     const alvo = await contaComToken(admin, accountId);
     if (!alvo.ok) return resposta({ error: alvo.erro }, 409);
     const ctx: Contexto = { admin, conta: alvo.conta, token: alvo.token, userId, accountId };
+    const { data: tokInfo } = await admin.from("ml_tokens").select("scope").eq("account_id", accountId).order("expires_at", { ascending: false }).limit(1).maybeSingle();
+    const escopo = (tokInfo?.scope as string | undefined) ?? null;
 
     const { data: existente } = await admin.from("ml_action_requests")
-      .select("id, acao, status, antes, resposta_ml")
+      .select("id, acao, status, antes, resposta_ml, payload")
       .eq("account_id", accountId).eq("usuario_id", userId).eq("idempotency_key", chave).maybeSingle();
     if (existente && existente.acao !== opcoes.acao) return resposta({ error: "Esta chave de envio já foi usada em outra ação." }, 409);
+    const dadosPermissao = etapa === 'previa' ? body : (existente?.payload as Record<string, unknown> | null)?.permissao_dados as Record<string, unknown> | undefined;
+    const permissao = permissaoAcao(opcoes.acao, dadosPermissao ?? {});
+    // Old previews have no capability metadata: require a new preview instead of guessing.
+    if (!permissao) return resposta({ error: 'Gere uma nova prévia com a função autorizada.' }, 403);
+    const negado = await exigirPermissao(req, permissao);
+    if (negado) return negado;
     if (existente?.status === "committed") {
       const resultados = (existente.resposta_ml as { resultados?: Resultado[] } | null)?.resultados ?? [];
       return resposta({ etapa: "confirmar", status: "ja_feito", resultados });
@@ -105,7 +114,7 @@ export function servirAcaoEmLote(opcoes: Opcoes) {
         status: "preview",
         antes: { linhas: p.linhas },
         depois: { linhas: p.linhas.map((l) => ({ chave: l.chave, depois: l.depois })) },
-        payload: { itens: p.linhas.map((l) => l.chave) },
+        payload: { itens: p.linhas.map((l) => l.chave), permissao_dados: { tipo: body.tipo, acao: body.acao } },
         estado_ml_hash: null,
       });
       if (error) return resposta({ error: "Não foi possível registrar a prévia." }, 500);
@@ -143,7 +152,8 @@ export function servirAcaoEmLote(opcoes: Opcoes) {
           usuario_id: userId,
           account_id: accountId,
           acao: typeof linha.dados.acao_log === "string" ? linha.dados.acao_log : opcoes.acao,
-          payload: { item: linha.chave, chamada: ex.auditoria.payload, antes: linha.antes, depois: linha.depois },
+          // Só identifica o acesso usado (usuário ML e permissões); nunca grava o token.
+          payload: { item: linha.chave, chamada: ex.auditoria.payload, antes: linha.antes, depois: linha.depois, acesso: { ml_user_id: alvo.conta.ml_user_id, escopo: escopo ?? null } },
           resposta_ml: ex.auditoria.resposta,
           codigo_ml: ex.auditoria.codigo,
         });

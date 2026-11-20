@@ -26,7 +26,16 @@ export default function PlanoAcao({ itens }: { itens: DiagnosticoLoja[] }) {
             </tr></thead>
             <tbody>
               {vis.map((d) => (
-                <tr key={d.loja.id} onClick={() => nav(`/lojas/${d.loja.id}`)} className="border-b border-border/20 cursor-pointer hover:bg-muted/40">
+                <tr key={d.loja.id} onClick={() => {
+                  nav(`/lojas/${d.loja.id}`);
+                  if (d.alertas.length > 0) {
+                    const categories: Record<TipoAlerta, string> = { queda: "revenue_decline", full: "logistics", ads: "advertising", promocao: "promotions", competitividade: "price" };
+                    window.__lovableEvents?.track?.("project.diagnostic_recommendation_opened", {
+                      recommendation_category: d.alertas.length === 1 ? categories[d.alertas[0].tipo] : "multiple_issues",
+                      dashboard_context: "portfolio_action_plan",
+                    });
+                  }
+                }} className="border-b border-border/20 cursor-pointer hover:bg-muted/40">
                   <td className="py-1.5"><span className="font-medium">{d.loja.nickname}</span> <span className="text-muted-foreground">{d.loja.custId}</span></td>
                   <td className="text-right tabular-nums">{brl(d.gmv)}</td>
                   <td className="text-right tabular-nums">{brl(d.gmvAnterior)}</td>

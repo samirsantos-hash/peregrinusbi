@@ -26,6 +26,8 @@ export async function exigirGestor(
   const { data, error } = await cliente.auth.getUser();
   if (error || !data.user) return { ok: false, res: resposta({ error: "Faça login." }, 401) };
   if (typeof accountId !== "string" || !accountId) return { ok: false, res: resposta({ error: "Informe account_id." }, 400) };
+  const { data: liberado } = await cliente.rpc('usuario_tem_alguma_permissao', { p_permissoes: ['anuncios.visualizar', 'perguntas.visualizar', 'publicidade.visualizar', 'promocoes.visualizar', 'mercado.visualizar', 'integracoes.visualizar'] });
+  if (!liberado) return { ok: false, res: resposta({ error: 'Função não liberada pela conta master.' }, 403) };
   const { data: pode } = await cliente.rpc("ml_pode_gerir_conta", { p_account_id: accountId });
   if (!pode) return { ok: false, res: resposta({ error: "Você não gerencia esta conta." }, 403) };
   return { ok: true, userId: data.user.id };

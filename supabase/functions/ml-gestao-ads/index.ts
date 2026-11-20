@@ -1,9 +1,11 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { tokenAtual } from "../_shared/mlTokenAtual.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { z } from "npm:zod@3";
 import { requireEnv } from "../_shared/env.ts";
 import { adsNumber, adsPeriod, adsRatios, canManageAds } from "../_shared/mlAdsRules.ts";
+import { somarAtribuicaoAds } from '../_shared/mlAdsAtribuicao.ts';
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -11,6 +13,7 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const checklistNegado = await exigirPermissao(req, 'publicidade.visualizar', false); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return json({ error: "Método não permitido." }, 405);
   const url = requireEnv("SUPABASE_URL");
   const userClient = createClient(url, requireEnv("SUPABASE_ANON_KEY"), {
@@ -18,7 +21,7 @@ Deno.serve(async (req) => {
   });
   const { data: auth, error: authError } = await userClient.auth.getUser();
   if (authError || !auth.user) return json({ error: "Faça login." }, 401);
-  const parsed = z.object({ cust_id: z.string().regex(/^\d+$/), dias: z.union([z.literal(7), z.literal(14), z.literal(30), z.literal(60), z.literal(90)]).default(30) }).strict().safeParse(await req.json().catch(() => null));
+  const parsed = z.object({ cust_id: z.string().regex(/^\d+$/), dias: z.union([z.literal(7), z.literal(14), z.literal(30), z.literal(60), z.literal(90)]).default(30), modo: z.literal('atribuicao').optional(), de: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(), ate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional() }).strict().safeParse(await req.json().catch(() => null));
   if (!parsed.success) return json({ error: "Informe a loja e um período válido. Esta consulta não altera campanhas." }, 400);
   const { cust_id: cust, dias } = parsed.data;
   const { data: visible, error: permissionError } = await userClient.from("ml_sync_tema").select("cust_id").eq("cust_id", cust).limit(1);
@@ -29,7 +32,11 @@ Deno.serve(async (req) => {
   const token = await tokenAtual(db, account.id);
   if (!token?.access_token || Date.parse(token.expires_at) <= Date.now()) return json({ error: "Acesso da loja vencido; aguarde a renovação automática ou reconecte a loja em Integrações." }, 409);
   const [{ data: sa }, { data: perfil }] = await Promise.all([userClient.rpc("is_super_admin"), userClient.rpc("get_perfil")]);
-  const periodo = adsPeriod(dias);
+  const periodo = parsed.data.modo ? { inicio: parsed.data.de ?? '', fim: parsed.data.ate ?? '' } : adsPeriod(dias);
+  if (parsed.data.modo) {
+    const inicio = Date.parse(`${periodo.inicio}T00:00:00Z`), fim = Date.parse(`${periodo.fim}T00:00:00Z`);
+    if (!Number.isFinite(inicio) || !Number.isFinite(fim) || fim < inicio || (fim - inicio) / 86400000 >= 90 || fim >= Date.parse(new Date().toISOString().slice(0, 10))) return json({ error: 'Selecione até 90 dias completos.' }, 400);
+  }
   const base = { periodo, loja: account.nickname, pode_gerenciar: canManageAds(sa, perfil), atualizado_em: new Date().toISOString() };
   try {
     const get = async (path: string, version: string) => {
@@ -48,6 +55,37 @@ Deno.serve(async (req) => {
     // Never select a foreign site or a different account's advertiser supplied by the caller.
     const advertiser = (advertisers.advertisers ?? []).find((a: any) => a.site_id === "MLB");
     if (!advertiser) return json({ ...base, usa_ads: false, campanhas: [], resumo: null });
+    if (parsed.data.modo) {
+      const deadline = Date.now() + 50_000;
+      const fontes = new Map<string, unknown[]>();
+      let linhas = 0;
+      let completo = false;
+      let aviso: string | null = null;
+      for (let offset = 0; offset < 10000; offset += 100) {
+        if (Date.now() >= deadline) { aviso = 'Leitura parcial: limite de tempo atingido.'; break; }
+        try {
+          const params = new URLSearchParams({ limit: '100', offset: String(offset), date_from: periodo.inicio, date_to: periodo.fim, metrics: 'total_amount,organic_units_amount', aggregation_type: 'DAILY' });
+          const detalhe = await get(`/advertising/MLB/advertisers/${advertiser.advertiser_id}/product_ads/campaigns/search?${params}`, '2');
+          const rows = detalhe.results;
+          if (!Array.isArray(rows)) throw new Error('O Mercado Livre não retornou uma série diária para esta consulta.');
+          for (const row of rows) {
+            const dia = typeof row.date === 'string' ? row.date.slice(0, 10) : '';
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dia) || dia < periodo.inicio || dia > periodo.fim) continue;
+            fontes.set(dia, [...(fontes.get(dia) ?? []), row.metrics ?? row]);
+          }
+          linhas += rows.length;
+          const total = detalhe.paging?.total ?? detalhe.pagination?.total;
+          if (rows.length < 100 || (typeof total === 'number' && linhas >= total)) { completo = true; break; }
+        } catch (error) { completo = false; aviso = error instanceof Error ? error.message : 'O Mercado Livre não disponibilizou a separação diária com e sem publicidade nesta leitura.'; break; }
+      }
+      const serie = [];
+      for (let t = Date.parse(`${periodo.inicio}T00:00:00Z`); t <= Date.parse(`${periodo.fim}T00:00:00Z`); t += 86400000) {
+        const data = new Date(t).toISOString().slice(0, 10), fs = fontes.get(data) ?? [];
+        const medido = completo && fs.length > 0;
+        serie.push({ data, ...(medido ? somarAtribuicaoAds(fs) : { receitaAds: null, receitaOrganica: null }) });
+      }
+      return json({ ...base, usa_ads: true, completo, linhas_lidas: linhas, escopo: 'campanhas_product_ads', serie, aviso });
+    }
     const path = `/advertising/MLB/advertisers/${encodeURIComponent(String(advertiser.advertiser_id))}/product_ads/campaigns/search`;
     const params = new URLSearchParams({ limit: "50", date_from: periodo.inicio, date_to: periodo.fim,
       metrics: "clicks,prints,cost,acos,direct_amount,indirect_amount,total_amount,units_quantity", metrics_summary: "true" });

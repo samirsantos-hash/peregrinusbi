@@ -1,3 +1,4 @@
+import { podeExportar } from '@/lib/permissaoExportar';
 import { validarArquivoUpload } from "@/lib/uploadGuard";
 import { linhaCsvSegura } from "@/lib/csvSafe";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -37,7 +38,8 @@ const ignoradas = (e: ExecLinha) =>
   Math.max(0, (e.linhas_lidas ?? 0) - (e.linhas_gravadas ?? 0));
 
 /** CSV com ; e BOM — abre direto no Excel pt-BR. */
-function baixarCsv(nome: string, cabecalho: string[], linhas: (string | number)[][]) {
+async function baixarCsv(nome: string, cabecalho: string[], linhas: (string | number)[][]) {
+  if (!(await podeExportar())) return;
   const txt = [cabecalho, ...linhas].map((l) => linhaCsvSegura(l)).join("\r\n");
   const url = URL.createObjectURL(new Blob(["\uFEFF" + txt], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a");

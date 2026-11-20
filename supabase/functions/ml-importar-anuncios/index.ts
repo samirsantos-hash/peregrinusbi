@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 // ml-importar-anuncios
 // Importa anúncios das lojas pelo cust_id, sem autorização da loja: usa os MLBs já
 // conhecidos (seller_eligibility) e consulta /items em lote com token de aplicativo.
@@ -34,6 +35,7 @@ const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const negado = await exigirPermissao(req, 'dados.importar', true); if (negado) return negado;
   try {
     const sbUser = createClient(requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_ANON_KEY"), {
       global: { headers: { Authorization: req.headers.get("Authorization") ?? "" } },

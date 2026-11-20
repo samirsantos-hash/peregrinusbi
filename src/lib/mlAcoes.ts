@@ -1,3 +1,4 @@
+import { usePermissoes } from '@/hooks/usePermissoes';
 import { useState } from "react";
 import { chamarFuncaoMl } from "@/lib/mlFuncoes";
 
@@ -39,10 +40,15 @@ export type FaseAcao =
 
 /** Prévia (antes → depois) e confirmação com a mesma chave de idempotência, contra uma Edge Function de lote. */
 export function useAcaoEmLote(funcao: string, accountId: string, aoConcluir?: () => void) {
+  const { pode } = usePermissoes();
+  const [capacidade, setCapacidade] = useState<string | null>(null);
   const [estado, setEstado] = useState<FaseAcao>({ fase: "ocioso" });
   const [erro, setErro] = useState<string | null>(null);
 
   const previa = async (dados: Record<string, unknown>) => {
+    const permissao = funcao === 'ml-price-action' ? 'preco.alterar' : funcao === 'ml-ads-action' ? (String(dados.tipo).startsWith('campanha_') ? 'publicidade.campanhas' : 'publicidade.anuncios') : funcao === 'ml-promotions-action' ? (['sair', 'cupom_excluir'].includes(String(dados.acao)) ? 'promocoes.remover' : 'promocoes.aplicar') : null;
+    if (!permissao || !pode(permissao)) { setErro('Função não liberada pela conta master.'); return; }
+    setCapacidade(permissao);
     const chave = crypto.randomUUID();
     setErro(null);
     setEstado({ fase: "carregando" });
@@ -56,13 +62,21 @@ export function useAcaoEmLote(funcao: string, accountId: string, aoConcluir?: ()
   };
 
   const confirmar = async () => {
-    if (estado.fase !== "previa") return;
+    if (estado.fase !== 'previa' || !capacidade || !pode(capacidade)) { setErro('Função não liberada pela conta master.'); return; }
     const { chave, linhas } = estado;
     setErro(null);
     setEstado({ fase: "enviando", chave, linhas });
     try {
       const r = await chamarFuncaoMl<{ resultados: ResultadoLinha[] }>(funcao, { account_id: accountId, etapa: "confirmar", idempotency_key: chave });
-      setEstado({ fase: "resultado", linhas, resultados: r.resultados ?? [] });
+      const resultados = r.resultados ?? [];
+      const aplicadas = resultados.filter(x => x.status === "feito").length;
+      if (aplicadas > 0) {
+        window.__lovableEvents?.track?.("project.listing_changes_confirmed", {
+          change_area: funcao === "ml-price-action" ? "price" : funcao === "ml-ads-action" ? "advertising" : "promotions",
+          applied_count: aplicadas,
+        });
+      }
+      setEstado({ fase: "resultado", linhas, resultados });
       aoConcluir?.();
     } catch (e) {
       setErro(e instanceof Error ? e.message : "Não foi possível enviar ao Mercado Livre.");

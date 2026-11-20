@@ -1,0 +1,36 @@
+import { useState } from "react";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Cell } from "recharts";
+import { TrendingUp, TrendingDown, Compass, ShieldAlert } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { brl, num, pctFracao } from "@/lib/format";
+import { compararSwot, valorSwot, type EvidenciaSwot, type MetricaSwot } from "@/lib/anuncio/swot";
+import type { AnuncioComparavel } from "@/lib/mlComparacaoAnuncios";
+
+const rotulos: Record<MetricaSwot, string> = { visitas: "Visitas", pedidos: "Pedidos pagos", conversao: "Conversão por pedido", receitaVisita: "Receita por visita" };
+const formatar = (valor: number, metrica: MetricaSwot) => metrica === "conversao" ? pctFracao(valor, 2) : metrica === "receitaVisita" ? brl(valor, true) : num(valor);
+function Evidencia({ dado }: { dado: EvidenciaSwot }) {
+  return <li className="py-2"><p className="text-sm font-medium">{rotulos[dado.metrica]} · <span className="tabular-nums">{formatar(dado.valor, dado.metrica)}</span></p><p className="mt-1 text-xs text-muted-foreground">{dado.metrica === "conversao" ? `${dado.delta > 0 ? "+" : ""}${num(dado.delta * 100, 2)} p.p.` : dado.referencia > 0 ? `${dado.delta > 0 ? "+" : ""}${num(dado.delta / dado.referencia * 100, 1)}%` : "Referência igual a zero"} vs outros selecionados · referência {formatar(dado.referencia, dado.metrica)}</p></li>;
+}
+export default function SwotAnuncios({ itens }: { itens: AnuncioComparavel[] }) {
+  const [foco, setFoco] = useState(itens[0]?.id ?? "");
+  const atual = itens.find(i => i.id === foco) ?? itens[0];
+  if (!atual) return null;
+  const leitura = compararSwot(atual, itens);
+  return <section aria-label="Análise SWOT dos anúncios" className="min-w-0 space-y-5">
+    <header className="flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-lg font-semibold">Análise SWOT</h3><p className="mt-1 text-xs text-muted-foreground">Comparação interna · mesmos 30 dias · {itens.length} anúncios selecionados</p></div><Select value={atual.id} onValueChange={setFoco}><SelectTrigger className="w-full sm:w-60" aria-label="Anúncio em foco na SWOT"><SelectValue /></SelectTrigger><SelectContent>{itens.map(i => <SelectItem key={i.id} value={i.id}>{i.id}</SelectItem>)}</SelectContent></Select></header>
+    <p className="text-sm break-words">{atual.titulo}</p>
+    <div className="grid min-w-0 gap-5 md:grid-cols-2">
+      {(["visitas", "pedidos", "conversao", "receitaVisita"] as const).map(m => {
+        const dados = itens.map(i => ({ id: i.id, titulo: i.titulo, valor: valorSwot(i, m) }));
+        return <section key={m} aria-label={`Comparativo de ${rotulos[m]}`} className="min-w-0 border-b border-border pb-3"><h4 className="text-sm font-medium">{rotulos[m]}</h4>{dados.some(d => d.valor !== null) ? <div className="mt-2 h-[180px] min-w-0"><ResponsiveContainer width="100%" height="100%"><BarChart data={dados} layout="vertical" margin={{ top: 8, right: 16, bottom: 0, left: 0 }}><CartesianGrid horizontal={false} stroke="hsl(var(--border))" /><XAxis type="number" tickFormatter={v => formatar(v, m)} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} tickCount={3} /><YAxis type="category" dataKey="id" width={115} tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} /><Tooltip cursor={false} content={({ active, payload }) => { const d = payload?.[0]?.payload; return active && d ? <div className="panel-glass-tooltip max-w-64 p-3 text-xs"><p className="break-words">{d.titulo}</p><p className="mt-1 tabular-nums">{d.valor == null ? "Sem dado" : formatar(d.valor, m)}</p></div> : null; }} /><Bar dataKey="valor" maxBarSize={22} radius={[0, 6, 6, 0]} isAnimationActive={false}>{dados.map(d => <Cell key={d.id} fill={d.id === atual.id ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"} fillOpacity={d.id === atual.id ? 1 : .45} />)}</Bar></BarChart></ResponsiveContainer></div> : <p className="py-6 text-sm text-muted-foreground">Sem dados confirmados nesta consulta.</p>}{dados.some(d => d.valor === null) && <p className="text-xs text-muted-foreground">Sem dado: {dados.filter(d => d.valor === null).map(d => d.id).join(", ")}</p>}</section>;
+      })}
+    </div>
+    <p className="text-xs text-muted-foreground">Referência: mediana dos outros anúncios selecionados, sem o anúncio em foco. Produtos diferentes não constituem um benchmark de categoria. Receita por visita não é lucro.</p>
+    <div className="grid min-w-0 gap-3 md:grid-cols-2">
+      <article className="noite-vidro min-w-0 rounded-2xl p-4"><h4 className="flex items-center gap-2 text-sm font-semibold"><TrendingUp className="h-4 w-4 text-primary" />Forças</h4><ul className="mt-2 divide-y divide-border">{leitura.forcas.map(d => <Evidencia key={d.metrica} dado={d} />)}</ul>{!leitura.forcas.length && <p className="mt-3 text-sm text-muted-foreground">Sem vantagem relativa comprovada nesta seleção.</p>}</article>
+      <article className="noite-vidro min-w-0 rounded-2xl p-4"><h4 className="flex items-center gap-2 text-sm font-semibold"><TrendingDown className="h-4 w-4 text-destructive" />Fraquezas</h4><ul className="mt-2 divide-y divide-border">{leitura.fraquezas.map(d => <Evidencia key={d.metrica} dado={d} />)}</ul>{!leitura.fraquezas.length && <p className="mt-3 text-sm text-muted-foreground">Sem desvantagem relativa comprovada nesta seleção.</p>}</article>
+      <article className="noite-vidro min-w-0 rounded-2xl p-4"><h4 className="flex items-center gap-2 text-sm font-semibold"><Compass className="h-4 w-4 text-primary" />Oportunidades a validar</h4><ul className="mt-3 space-y-3 text-sm text-muted-foreground">{leitura.revisarConversao && <li>Conversão abaixo da referência: revisar título, conteúdo e oferta; validar em novo período antes de atribuir melhora.</li>}{leitura.revisarAlcance && <li>Menos visitas e maior conversão: investigar alcance e disponibilidade, sem presumir retorno de investimento.</li>}{!leitura.revisarConversao && !leitura.revisarAlcance && <li>Sem oportunidade específica sustentada por esta comparação.</li>}<li>Mercado externo e elegibilidade de promoções não avaliados nesta leitura.</li></ul></article>
+      <article className="noite-vidro min-w-0 rounded-2xl p-4"><h4 className="flex items-center gap-2 text-sm font-semibold"><ShieldAlert className="h-4 w-4 text-destructive" />Ameaças e pontos de atenção</h4><p className="mt-3 text-sm text-muted-foreground">Ameaças externas não verificadas: sem histórico de concorrência ou demanda nesta consulta.</p><p className="mt-3 text-sm">{leitura.cancelados === null ? "Cancelamentos indisponíveis nesta leitura." : leitura.cancelados > 0 ? `${num(leitura.cancelados)} pedidos cancelados observados · revisar causas, sem atribuir ao comprador.` : "Nenhum pedido cancelado na leitura completa."}</p><p className="mt-2 text-xs text-muted-foreground">Cancelamentos são um sinal operacional interno, não prova de ameaça externa. Promoção atual não comprova desempenho histórico.</p></article>
+    </div>
+  </section>;
+}

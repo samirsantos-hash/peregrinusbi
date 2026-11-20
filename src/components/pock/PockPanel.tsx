@@ -232,6 +232,14 @@ export default function PockPanel({ sellerId, nickname, custId, segmento, progra
 
       {/* FAIXA 2 — Qualidade de Atendimento */}
       <section className="border-t border-border py-4 space-y-3">
+        <h3 className="text-sm font-semibold">Qualidade de estoque · Mercado Livre</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 border border-border rounded-md divide-y sm:divide-y-0 sm:divide-x divide-border">
+          <div className="p-4 space-y-2"><p className="text-xs text-muted-foreground">Nota oficial da loja</p><p className="text-sm font-medium">Não disponibilizada</p><p className="text-xs text-muted-foreground">A conexão atual não confirmou uma nota oficial de qualidade do estoque Full. Qualidade do anúncio e uso de Full são indicadores diferentes.</p></div>
+          <div className="p-4 space-y-2"><p className="text-xs text-muted-foreground">Agenda e capacidade</p><p className="text-sm font-medium">Benefícios não confirmados</p><p className="text-xs text-muted-foreground">As opções de recebimento devem ser conferidas no Mercado Livre; não são deduzidas da nota dos anúncios.</p></div>
+          <div className="p-4 space-y-2"><p className="text-xs text-muted-foreground">Exposição e posições</p><p className="text-sm font-medium">Sem medição verificável</p><p className="text-xs text-muted-foreground">Não há posição ou ganho de exposição confirmado a partir da qualidade de estoque nesta leitura.</p></div>
+        </div>
+      </section>
+      <section className="border-t border-border py-4 space-y-3">
         <div className="flex items-center gap-2 flex-wrap">
           <h3 className="text-sm font-semibold">Qualidade de Atendimento</h3>
           <span

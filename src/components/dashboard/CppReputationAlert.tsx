@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useMemo } from "react";
 import { ShieldAlert, ShieldCheck, Activity } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -235,7 +236,7 @@ export default function CppReputationAlert({ data, selectedSeller }: Props) {
                       {ratio && Number(ratio) > 1 ? ` — este seller está ${ratio}x acima` : ""}
                     </p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
-                      🟢 ≤{cfg.greenMax}% · 🟡 ≤{cfg.yellowMax}% · 🔴 &gt;{cfg.yellowMax}%
+                      <IconeIndicador simbolo="🟢" className="h-3 w-3" /> ≤{cfg.greenMax}% · <IconeIndicador simbolo="🟡" className="h-3 w-3" /> ≤{cfg.yellowMax}% · <IconeIndicador simbolo="🔴" className="h-3 w-3" /> &gt;{cfg.yellowMax}%
                     </p>
                   </TooltipContent>
                 </Tooltip>

@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,17 +99,17 @@ function RepTooltip({ active, payload }: any) {
       <p className="font-semibold text-foreground">{p.mesLabel}</p>
       <div className="border-t border-border/30 my-1" />
       <div className="flex justify-between items-center">
-        <span className="text-warning">🟡 Reclamações:</span>
+        <span className="text-warning"><IconeIndicador simbolo="🟡" className="h-3 w-3 mr-1" /> Reclamações:</span>
         <span className="font-mono tabular-nums text-foreground">
           {fmtPct(p.claims)}{" "}
-          <span className="text-muted-foreground text-[10px]">{claimsDelta.text}</span>
+          <span className="text-muted-foreground text-[10px]"><TextoComIcones texto={claimsDelta.text} /></span>
         </span>
       </div>
       <div className="flex justify-between items-center">
-        <span className="text-destructive">🔴 Atrasos HT:</span>
+        <span className="text-destructive"><IconeIndicador simbolo="🔴" className="h-3 w-3 mr-1" /> Atrasos HT:</span>
         <span className="font-mono tabular-nums text-foreground">
           {fmtPct(p.atrasos)}{" "}
-          <span className="text-muted-foreground text-[10px]">{atrasosDelta.text}</span>
+          <span className="text-muted-foreground text-[10px]"><TextoComIcones texto={atrasosDelta.text} /></span>
         </span>
       </div>
       <div className="border-t border-border/30 my-1" />
@@ -351,7 +352,7 @@ export default function GraficoReputacao() {
               </TooltipProvider>
             </div>
           </div>
-          <p className="text-[10px] text-muted-foreground mt-1">↓ menor = melhor</p>
+          <p className="text-[10px] text-muted-foreground mt-1"><IconeIndicador simbolo="↓" className="h-3 w-3" /> menor = melhor</p>
         </CardHeader>
         <CardContent>
           <div className="relative h-[320px]">
@@ -406,7 +407,7 @@ export default function GraficoReputacao() {
                 <Line
                   type="linear"
                   dataKey="claims"
-                  name="🟡 Reclamações"
+                  name="Reclamações"
                   stroke="hsl(var(--ec-ambar))"
                   strokeWidth={2}
                   connectNulls={false}
@@ -417,7 +418,7 @@ export default function GraficoReputacao() {
                 <Line
                   type="linear"
                   dataKey="atrasos"
-                  name="🔴 Atrasos HT"
+                  name="Atrasos HT"
                   stroke="hsl(var(--ec-vermelho))"
                   strokeWidth={2}
                   connectNulls={false}

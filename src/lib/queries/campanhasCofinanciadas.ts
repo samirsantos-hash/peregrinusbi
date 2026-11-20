@@ -93,7 +93,9 @@ export function buildCampanhasCofinanciadas(items: EligibilityItem[]): CampanhaP
   for (const it of items) {
     const k = String(it.itemId);
     const prev = byId.get(k);
-    if (!prev || (it.discountTotal || 0) > (prev.discountTotal || 0)) byId.set(k, it);
+    // Posição mais recente; desconto só desempata na mesma data (maior desconto).
+    const dIt = String(it.data ?? ""), dPrev = String(prev?.data ?? "");
+    if (!prev || dIt > dPrev || (dIt === dPrev && (it.discountTotal || 0) > (prev.discountTotal || 0))) byId.set(k, it);
   }
 
   const itens: CampanhaItem[] = Array.from(byId.values())

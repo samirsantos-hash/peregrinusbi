@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireEnv } from "../_shared/env.ts";
 
@@ -53,6 +54,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+  const checklistNegado = await exigirPermissao(req, 'dados.importar', true); if (checklistNegado) return checklistNegado;
 
   try {
     const supabaseUrl = requireEnv("SUPABASE_URL");

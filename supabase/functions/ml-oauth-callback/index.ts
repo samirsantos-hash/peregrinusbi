@@ -140,6 +140,7 @@ Deno.serve(async (req) => {
           nickname: perfil.nickname ?? null,
           site_id: perfil.site_id ?? "MLB",
           status: "active",
+          ...(st.usuario_id ? { conectado_por: st.usuario_id } : {}),
         },
         { onConflict: "ml_user_id" },
       )

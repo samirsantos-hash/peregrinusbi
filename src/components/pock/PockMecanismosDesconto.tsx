@@ -20,8 +20,10 @@ const fmtBRL = (v: number) =>
 
 export default function PockMecanismosDesconto({ mecanismos, base, mesReferencia }: Props) {
   const ordenados = useMemo(() => {
-    const comValor = mecanismos.filter((m) => m.valor > 0).sort((a, b) => b.valor - a.valor);
-    const zerados = mecanismos.filter((m) => !(m.valor > 0));
+    const medidos = mecanismos.filter((m): m is PockMecanismo & { valor: number } => m.valor != null);
+    const comValor = medidos.filter((m) => m.valor > 0).sort((a, b) => b.valor - a.valor);
+    // Só mecanismos medidos com zero; sem medição não aparece como zerado.
+    const zerados = medidos.filter((m) => m.valor === 0);
     return [...comValor, ...zerados];
   }, [mecanismos]);
 

@@ -44,8 +44,10 @@ const CompetitivenessInsights = ({ kpis }: Props) => {
 
     // ── Competitiveness Evolution ──
     if (dates.length >= 3) {
-      const firstHalf = dates.slice(0, Math.floor(dates.length / 2));
-      const secondHalf = dates.slice(Math.floor(dates.length / 2));
+      // Janelas equivalentes: mesmo número de períodos em cada metade (o do meio fica de fora se ímpar).
+      const meia = Math.floor(dates.length / 2);
+      const firstHalf = dates.slice(0, meia);
+      const secondHalf = dates.slice(dates.length - meia);
 
       const calcGap = (subset: string[]) => {
         const filtered = kpis.filter((k) => subset.includes(k.date));
@@ -68,14 +70,14 @@ const CompetitivenessInsights = ({ kpis }: Props) => {
         result.push({
           icon: TrendingUp,
           title: "Competitividade em Alta",
-          text: `Sua competitividade média melhorou ${fmtNum(gapDelta, 1)}% no período${visitsDelta > 0 ? `, o que resultou em um aumento de ${fmtNum(visitsDelta, 0)}% nas visitas totais` : ""}. Continue monitorando os preços rivais para manter a tendência.`,
+          text: `A participação da faixa de preço alto caiu ${fmtNum(gapDelta, 1)} p.p. entre as duas metades equivalentes do período${visitsDelta !== 0 ? `; no mesmo intervalo as visitas variaram ${fmtNum(visitsDelta, 0)}% (variação observada, sem relação de causa comprovada)` : ""}. Continue monitorando os preços rivais.`,
           type: "positive",
         });
       } else if (gapDelta < -2) {
         result.push({
           icon: TrendingDown,
           title: "Competitividade em Queda",
-          text: `O gap de preço aumentou ${fmtNum(Math.abs(gapDelta), 1)}% no período. Os rivais estão se tornando mais agressivos. Considere revisar sua estratégia de precificação.`,
+          text: `A participação da faixa de preço alto subiu ${fmtNum(Math.abs(gapDelta), 1)} p.p. entre as duas metades equivalentes do período. Vale revisar os preços dos itens de maior volume.`,
           type: "critical",
         });
       }
@@ -86,29 +88,30 @@ const CompetitivenessInsights = ({ kpis }: Props) => {
       result.push({
         icon: AlertTriangle,
         title: "Concentração de Preço Alto",
-        text: `Alerta: ${fmtNum(pctExpensive, 0)}% das suas visitas estão concentradas em anúncios onde você é mais caro que o rival. O risco de queda na conversão é alto. Recomenda-se auditoria de preços imediata.`,
+        text: `${fmtNum(pctExpensive, 0)}% da composição das faixas de preço está na faixa de preço alto frente ao rival. Recomenda-se auditoria de preços nos itens de maior volume.`,
         type: "critical",
       });
     } else if (pctExpensive > 40) {
       result.push({
         icon: AlertTriangle,
         title: "Atenção ao Preço",
-        text: `${fmtNum(pctExpensive, 0)}% das visitas estão em anúncios com preço acima do rival. Monitore de perto — acima de 50% a conversão tende a cair significativamente.`,
+        text: `${fmtNum(pctExpensive, 0)}% da composição das faixas de preço está na faixa de preço alto frente ao rival. Monitore de perto.`,
         type: "critical",
       });
     } else if (pctCheaper > 60) {
       result.push({
         icon: Lightbulb,
         title: "Posição de Preço Vantajosa",
-        text: `${fmtNum(pctCheaper, 0)}% das visitas estão em anúncios com preço abaixo do rival. Você pode testar aumentos marginais de preço para melhorar a margem sem perder competitividade.`,
+        text: `${fmtNum(pctCheaper, 0)}% da composição das faixas de preço está na faixa mais barata que o rival. Pode haver espaço para testar ajustes marginais de preço, acompanhando o resultado.`,
         type: "positive",
       });
     }
 
     // ── Price vs Volume Elasticity ──
     if (dates.length >= 4) {
-      const firstQ = dates.slice(0, Math.floor(dates.length / 2));
-      const secondQ = dates.slice(Math.floor(dates.length / 2));
+      const meiaQ = Math.floor(dates.length / 2);
+      const firstQ = dates.slice(0, meiaQ);
+      const secondQ = dates.slice(dates.length - meiaQ);
 
       const avgPrice1 = (() => {
         const entries = kpis.filter((k) => firstQ.includes(k.date) && k.minPriceRival > 0);
@@ -128,40 +131,29 @@ const CompetitivenessInsights = ({ kpis }: Props) => {
       if (priceDelta < -3 && gmvDelta < 3) {
         result.push({
           icon: Target,
-          title: "Baixa Elasticidade de Preço",
-          text: `O preço rival caiu ${fmtNum(Math.abs(priceDelta), 1)}% mas o volume de vendas não acompanhou (+${fmtNum(gmvDelta, 1)}%). Recomenda-se voltar ao preço anterior e focar em Ads para gerar demanda.`,
+          title: "Preço rival em queda",
+          text: `O menor preço rival caiu ${fmtNum(Math.abs(priceDelta), 1)}% entre metades equivalentes do período, e seu faturamento variou ${fmtNum(gmvDelta, 1)}%. São variações observadas no mesmo intervalo; não medem elasticidade nem causa.`,
           type: "neutral",
         });
       } else if (priceDelta < -3 && gmvDelta > 10) {
         result.push({
           icon: Lightbulb,
-          title: "Alta Elasticidade de Preço",
-          text: `A redução de preço de ${fmtNum(Math.abs(priceDelta), 1)}% gerou um aumento de ${fmtNum(gmvDelta, 1)}% no volume. O mercado responde bem a promoções — considere escalar campanhas de desconto.`,
+          title: "Preço rival em queda e faturamento em alta",
+          text: `O menor preço rival caiu ${fmtNum(Math.abs(priceDelta), 1)}% e seu faturamento subiu ${fmtNum(gmvDelta, 1)}% entre metades equivalentes do período. Variações observadas juntas, sem relação de causa comprovada.`,
           type: "positive",
         });
       } else if (priceDelta > 3 && gmvDelta > 0) {
         result.push({
           icon: Lightbulb,
-          title: "Poder de Precificação",
-          text: `Mesmo com o preço rival subindo ${fmtNum(priceDelta, 1)}%, seu GMV cresceu ${fmtNum(gmvDelta, 1)}%. Isso indica forte posicionamento de marca — teste aumentos de margem.`,
+          title: "Preço rival em alta",
+          text: `O menor preço rival subiu ${fmtNum(priceDelta, 1)}% e seu faturamento cresceu ${fmtNum(gmvDelta, 1)}% entre metades equivalentes do período. Variações observadas juntas, sem relação de causa comprovada.`,
           type: "positive",
         });
       }
     }
 
-    // ── Market Share / Dominance Insight ──
-    // Each date entry is typically a monthly record, so avgGmvPerPeriod is per-month
-    const numPeriods = Math.max(dates.length, 1);
-    const avgGmvPerPeriod = totalGmv / numPeriods;
-    const periodLabel = numPeriods <= 1 ? "no período" : "/mês";
-    if (avgGmvPerPeriod > 50000 && pctExpensive < 20) {
-      result.push({
-        icon: Lightbulb,
-        title: "Líder de Categoria",
-        text: `Com faturamento médio de ${fmtBRLCompact(avgGmvPerPeriod)}${periodLabel} e apenas ${fmtNum(pctExpensive, 0)}% de visitas caras, sua conta atingiu a Liderança de Categoria. O crescimento agora virá da otimização de margem e não apenas de volume.`,
-        type: "positive",
-      });
-    }
+    // Faturamento médio não demonstra liderança de categoria; leitura removida.
+    void totalGmv;
 
     return result;
   }, [kpis]);

@@ -35,7 +35,7 @@ export default function HomeResumo({ nome, loja, todos, de, ate }: { nome?: stri
     return pp ? a - p : ((a - p) / p) * 100;
   };
   const itens = d ? [
-    { rot: "Faturamento", ic: BadgeDollarSign, val: brlCurto(d.a.fat), un: "", v: varia(d.a.fat, d.p?.fat), cor: "text-[#0B7A4D]" },
+    { rot: "Faturamento", ic: BadgeDollarSign, val: brlCurto(d.a.fat), un: "", v: varia(d.a.fat, d.p?.fat), cor: "text-emerald-400" },
     { rot: "Vendas", ic: ShoppingBag, val: num(d.a.vendas), un: "unidades", v: varia(d.a.vendas, d.p?.vendas), cor: "" },
     { rot: "Conversão", ic: MousePointerClick, val: d.a.conv == null ? "Sem dado" : pct(d.a.conv, 2), un: "das visitas", v: varia(d.a.conv, d.p?.conv, true), pp: true, cor: "" },
     { rot: "Ticket médio", ic: Receipt, val: d.a.ticket == null ? "Sem dado" : brlCurto(d.a.ticket), un: "por unidade", v: varia(d.a.ticket, d.p?.ticket), cor: "" },
@@ -47,7 +47,7 @@ export default function HomeResumo({ nome, loja, todos, de, ate }: { nome?: stri
         <h1 className="text-xl font-bold tracking-tight">
           {saudacao()}{nome ? <>, <span className="font-extrabold">{nome}</span></> : null}
         </h1>
-        <p className="text-[11px] text-white/60">
+        <p className="text-[11px] text-muted-foreground">
           {loja ?? "Carteira consolidada"}{de && ate ? `, de ${br(de)} a ${br(ate)} comparado ao período anterior` : ""}
         </p>
       </div>
@@ -60,17 +60,17 @@ export default function HomeResumo({ nome, loja, todos, de, ate }: { nome?: stri
               <div key={i.rot} className="cartao-branco p-4 min-h-[112px] flex flex-col justify-between">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold">{i.rot}</span>
-                  <span className="grid place-items-center w-5 h-5 rounded-lg bg-[rgba(20,168,108,.14)] text-[#0B7A4D]"><Ic className="w-[11px] h-[11px]" strokeWidth={2.4} /></span>
+                  <span className="grid place-items-center w-5 h-5 rounded-lg bg-emerald-500/15 text-emerald-400"><Ic className="w-[11px] h-[11px]" strokeWidth={2.4} /></span>
                 </div>
                 <div className="flex items-end justify-between gap-2">
                   <div className="min-w-0">
-                    <span className={`text-xl font-extrabold tabular-nums ${ruim ? "text-[#D62410]" : i.cor}`}>{i.val}</span>
-                    {i.un && <span className="ml-1 text-[10px] text-[#6B706D]">{i.un}</span>}
+                    <span className={`text-xl font-extrabold tabular-nums ${ruim ? "text-rose-400" : i.cor}`}>{i.val}</span>
+                    {i.un && <span className="ml-1 text-[10px] text-muted-foreground">{i.un}</span>}
                   </div>
                   {i.v == null ? (
-                    <span className="text-[10px] text-[#6B706D]">sem comparação</span>
+                    <span className="text-[10px] text-muted-foreground">sem comparação</span>
                   ) : (
-                    <span className={`h-[22px] px-2 rounded-full inline-flex items-center text-[11px] font-extrabold tabular-nums ${ruim ? "bg-[#D62410] text-white" : "bg-[rgba(20,168,108,.14)] text-[#0B7A4D]"}`}>
+                    <span className={`h-[22px] px-2 rounded-full inline-flex items-center text-[11px] font-extrabold tabular-nums ${ruim ? "border border-rose-500/20 bg-rose-500/10 text-rose-400" : "border border-emerald-500/20 bg-emerald-500/10 text-emerald-400"}`}>
                       {i.v > 0 ? "+" : i.v < 0 ? "−" : ""}{Math.abs(i.v).toLocaleString("pt-BR", { maximumFractionDigits: 1, minimumFractionDigits: 1 })}{i.pp ? " p.p." : "%"}
                     </span>
                   )}

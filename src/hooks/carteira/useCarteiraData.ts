@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMyAccess } from "@/hooks/useMyAccess";
+import { fetchAllRows } from "@/lib/fetchAllRows";
+import { fetchScopedRows } from "@/lib/scopedRows";
 
 export interface CarteiraSeller {
   id: string; custId: string; nick: string; uf: string; regiao: string;
@@ -43,29 +45,11 @@ const REGIAO: Record<string, string> = {
   PR: "Sul", RS: "Sul", SC: "Sul",
 };
 
-const PAGE = 1000;
-const CONCURRENCY = 6;
-
-/** Paginação em lotes paralelos — reduz drasticamente o tempo vs. round-trips sequenciais. */
-async function page<T = any>(build: () => any, max = 120): Promise<T[]> {
-  const out: T[] = [];
-  let start = 0;
-  while (start < max) {
-    const batch = Array.from({ length: Math.min(CONCURRENCY, max - start) }, (_, k) => start + k);
-    const res = await Promise.all(
-      batch.map((i) => build().range(i * PAGE, i * PAGE + PAGE - 1))
-    );
-    let done = false;
-    for (const { data, error } of res as any[]) {
-      if (error) { console.warn("[carteira]", error.message); done = true; break; }
-      if (!data?.length) { done = true; break; }
-      out.push(...(data as T[]));
-      if (data.length < PAGE) { done = true; break; }
-    }
-    if (done) break;
-    start += batch.length;
-  }
-  return out;
+/** Sequential pages avoid empty speculative queries and never accept partial results. */
+async function page<T = any>(build: () => any): Promise<T[]> {
+  const { data, error } = await fetchAllRows<T>((from, to) => build().range(from, to));
+  if (error) throw error;
+  return data;
 }
 
 /** Cache em memória por escopo — evita refetch ao trocar de aba/carteira. */
@@ -116,7 +100,7 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
       setError(null);
       try {
         const rawSellers = await page(() =>
-          supabase.from("sellers").select("id, cust_id, nickname, cus_state, cluster_seller, vertical_dominant")
+          supabase.from("sellers").select("id, cust_id, nickname, cus_state, cluster_seller, vertical_dominant").order("id")
         );
         const allow = isAdmin ? null : new Set(allowedCustIds.map(String));
         const only = custIdsFilter?.length ? new Set(custIdsFilter.map(String)) : null;
@@ -137,9 +121,12 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
           });
         const ids = new Set(sellers.map((s) => s.id));
         const idList = [...ids];
-        // Filtro server-side quando a carteira é pequena (evita trazer a rede inteira)
-        const scoped = <B extends { in: (c: string, v: any[]) => B }>(q: B): B =>
-          idList.length > 0 && idList.length <= 300 ? q.in("seller_id", idList) : q;
+        if (!idList.length) {
+          if (alive) { setData(EMPTY); CACHE.set(cacheKey, EMPTY); }
+          return;
+        }
+        const readScoped = (build: () => any): Promise<any[]> => fetchScopedRows(idList, (batch, from, to) =>
+          build().in("seller_id", batch).order("seller_id").order("id").range(from, to));
 
         const since = isoDaysAgo(60);
         const kpiCols = "seller_id, data, tgmv_lc, tsi, visits, inv_pads, tgmv_lc_pads, tsi_pads";
@@ -149,17 +136,14 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
           .from("seller_eligibility").select("data").order("data", { ascending: false }).limit(1);
         const eligDate = lastElig?.[0]?.data ?? null;
 
-        const [rawDaily, rawMonthly, rawListings, rawElig, rawGrants] = await Promise.all([
-          page(() => scoped(supabase.from("sellers_kpi_daily").select(kpiCols).gte("data", since).order("data") as any)),
-          page(() => scoped(supabase.from("sellers_kpi").select(kpiCols).gte("data", isoDaysAgo(400)).order("data") as any)),
-          page(() => scoped(supabase.from("live_listings").select("seller_id, data, categoria, vertical, dom_domain_agg1, itens") as any)),
-          eligDate
-            ? page(() => scoped(supabase.from("seller_eligibility")
+        const rawDaily = await readScoped(() => supabase.from("sellers_kpi_daily").select(kpiCols).gte("data", since).order("data"));
+        const rawMonthly = await readScoped(() => supabase.from("sellers_kpi").select(kpiCols).gte("data", isoDaysAgo(400)).order("data"));
+        const rawListings = await readScoped(() => supabase.from("live_listings").select("seller_id, data, categoria, vertical, dom_domain_agg1, itens"));
+        const rawElig = eligDate
+            ? await readScoped(() => supabase.from("seller_eligibility")
                 .select("seller_id, item_id, item_name, discount_total, discount_seller_percentage, flag_item_s_optin, pedidos_7d, media_tsi_diario_7d, campaign_type")
-                .eq("data", eligDate) as any))
-            : Promise.resolve([] as any[]),
-          page(() => scoped(supabase.from("seller_grants").select("seller_id, cust_id, expiration_date, days_to_expire, salesforce_url") as any)),
-        ]);
+                .eq("data", eligDate)) : [];
+        const rawGrants = await readScoped(() => supabase.from("seller_grants").select("seller_id, cust_id, expiration_date, days_to_expire, salesforce_url"));
 
         if (!alive) return;
 
@@ -197,7 +181,7 @@ export function useCarteiraData(custIdsFilter?: string[], enabled = true) {
             expiracao: r.expiration_date, dias: num(r.days_to_expire), url: r.salesforce_url ?? null,
           }));
 
-        const refDate = daily.length ? daily[daily.length - 1].data : eligDate;
+        const refDate = daily.length ? daily.reduce((max, r) => r.data > max ? r.data : max, "") : eligDate;
 
         const next: CarteiraDataset = {
           sellers, sellerById: new Map(sellers.map((s) => [s.id, s])),

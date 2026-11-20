@@ -8,6 +8,7 @@ import CopiarAnuncio from "@/components/ds/CopiarAnuncio";
 import { brl, num, pctFracao } from "@/lib/format";
 import { ordenarAnuncios, type AnuncioComparavel, type MetricaAnuncio } from "@/lib/mlComparacaoAnuncios";
 import { toast } from "sonner";
+import SwotAnuncios from "./SwotAnuncios";
 
 const tipo = (id?: string | null) => id === "gold_special" ? "Clássico" : id === "gold_pro" ? "Premium" : "Outro";
 const valor = (n: number | null) => n == null ? "Sem dado" : num(n);
@@ -78,11 +79,14 @@ export default function CompararAnuncios({ custId, itens }: { custId: string; it
     </div>
     {stats.length > 0 && <div className="space-y-3 border-t border-border pt-3">
       <p className="text-xs text-muted-foreground">30 dias completos · {periodo?.inicio.split("-").reverse().join("/")} a {periodo?.fim.split("-").reverse().join("/")} · pedidos pagos, por data de criação</p>
+      <SwotAnuncios itens={stats} />
+      <details className="border-t border-border pt-3"><summary className="cursor-pointer text-sm font-medium">Dados detalhados da comparação</summary><div className="mt-3 space-y-3">
       <div className="flex flex-wrap gap-2">{(["visitas", "pedidos", "conversao"] as const).map(m => <Button key={m} size="sm" variant={metrica === m ? "default" : "outline"} onClick={() => setMetrica(m)}>{m === "visitas" ? "Mais visitas" : m === "pedidos" ? "Mais vendas" : "Maior conversão"}</Button>)}</div>
       <div className="overflow-x-auto"><table className="w-full text-xs tnum text-left"><thead className="text-muted-foreground"><tr>{["Anúncio", "Tipo", "Visitas", "Cliques Ads", "Pedidos pagos", "Unidades", "Faturamento", "Cancelados", "Conversão", "Promoção atual"].map(label => <th key={label} className="p-2 whitespace-nowrap">{label}</th>)}</tr></thead>
         <tbody>{ordenados.map(x => <tr key={x.id} className="border-t border-border"><td className="p-2 min-w-[200px] max-w-[300px] break-words">{x.titulo}<div className="text-muted-foreground">{x.id}</div></td><td className="p-2">{tipo(x.tipo)}</td><td className="p-2">{valor(x.visitas)}</td><td className="p-2">{valor(x.cliques)}</td><td className="p-2">{valor(x.pedidos)}</td><td className="p-2">{valor(x.unidades)}</td><td className="p-2 whitespace-nowrap">{x.faturamento == null ? "Sem dado" : brl(x.faturamento, true)}</td><td className="p-2">{valor(x.cancelados)}</td><td className="p-2">{pctFracao(x.conversao, 2)}</td><td className="p-2">{x.promocao == null ? "Sem dado" : x.promocao ? "Ativa" : "Não"}</td></tr>)}</tbody>
       </table></div>
       {stats.length > 1 && ordenados[0]?.[metrica] != null && <p className="text-sm"><strong>Destaque observado:</strong> {ordenados[0].titulo} · {metrica === "conversao" ? pctFracao(ordenados[0].conversao, 2) : num(ordenados[0][metrica])} {metrica === "visitas" ? "visitas" : metrica === "pedidos" ? "pedidos pagos" : "de conversão"}.</p>}
+      </div></details>
       <p className="text-xs text-muted-foreground">Cliques por anúncio e volume de buscas não estão disponíveis nesta consulta. Visitas não são buscas. Promoção é a situação atual, não o histórico dos 30 dias. A comparação mostra resultados observados, não previsão de vendas.</p>
       {stats.some(x => !x.completo) && <p className="text-xs text-destructive">Consulta de pedidos incompleta: vendas e conversão indisponíveis para evitar totais parciais.</p>}
     </div>}

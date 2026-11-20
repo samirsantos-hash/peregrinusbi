@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { sinalizarSelecaoCarregamento } from '@/components/chuva/selecaoCarregamento';
 
 export interface ContextoNavegacao {
   periodo: { inicio: string; fim: string };
@@ -33,6 +34,7 @@ function parsePeriodo(raw: string | null) {
 export function ContextoNavegacaoProvider({ children }: { children: React.ReactNode }) {
   const [params, setParams] = useSearchParams();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   const periodo = useMemo(() => parsePeriodo(params.get("periodo")), [params]);
   const programaId = params.get("programa");
@@ -68,8 +70,34 @@ export function ContextoNavegacaoProvider({ children }: { children: React.ReactN
       }
       const qs = merged.toString();
       navigate(qs ? `${caminho}?${qs}` : caminho);
+      const destinationSeller = /^\/lojas\/([^/]+)(?:\/|$)/.exec(caminho)?.[1];
+      const currentSeller = /^\/lojas\/([^/]+)(?:\/|$)/.exec(pathname)?.[1];
+      // Selecting another seller counts; moving between analyses of the same seller does not.
+      if (destinationSeller && destinationSeller !== currentSeller) {
+        window.__lovableEvents?.track?.("project.seller_selection_changed", {
+          source_view: /^\/(carteira|grupos)(\/|$)/.test(pathname)
+            ? "portfolio"
+            : currentSeller ? "seller_analysis" : "dashboard",
+          seller_scope: "single_store",
+        });
+      }
+      // Only explicit entry into a store/listing analysis; never emit IDs or URLs.
+      const analysisLevel = /^\/lojas\/[^/]+\/?$/.test(caminho)
+        ? "store"
+        : /^\/lojas\/[^/]+\/anuncios\/[^/]+\/?$/.test(caminho)
+          ? "listing"
+          : null;
+      if (analysisLevel && caminho.replace(/\/$/, "") !== pathname.replace(/\/$/, "")) {
+        window.__lovableEvents?.track?.("project.seller_analysis_opened", {
+          analysis_level: analysisLevel,
+          source: /^\/(carteira|grupos)(\/|$)/.test(pathname)
+            ? "portfolio"
+            : pathname.startsWith("/lojas/") ? "seller_analysis" : "dashboard",
+          seller_scope: "single_store",
+        });
+      }
     },
-    [navigate, params],
+    [navigate, params, pathname],
   );
 
   const api: Api = {
@@ -78,7 +106,7 @@ export function ContextoNavegacaoProvider({ children }: { children: React.ReactN
     filtros,
     aba,
     queryString,
-    setPeriodo: (p) => atualizar("periodo", `${p.inicio}:${p.fim}`),
+    setPeriodo: (p) => { if (p.inicio !== periodo.inicio || p.fim !== periodo.fim) sinalizarSelecaoCarregamento(); atualizar("periodo", `${p.inicio}:${p.fim}`); },
     setPrograma: (id) => atualizar("programa", id),
     setFiltro: (chave, valor) =>
       atualizar(chave, valor === null ? null : typeof valor === "boolean" ? String(valor) : valor),

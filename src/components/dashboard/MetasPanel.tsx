@@ -9,6 +9,7 @@ import { useEligibility } from "@/hooks/useEligibility";
 import { useMetasLoja, useSalvarMeta, useRemoverMeta } from "@/hooks/useMetasLoja";
 import { fmtBRL } from "@/utils/formatters";
 import type { SellerKPI } from "@/hooks/useSellerData";
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 interface Props {
   sellerId: string;
@@ -24,7 +25,8 @@ function rotuloMes(mes: string) {
   return `${MESES[idx] ?? m}/${ano}`;
 }
 
-function pctAtingido(real: number, meta: number | null): number | null {
+function pctAtingido(real: number | null, meta: number | null): number | null {
+  if (real == null) return null;
   if (meta == null || meta <= 0) return null;
   return (real / meta) * 100;
 }
@@ -46,11 +48,12 @@ function numeroOuNull(v: string): number | null {
 }
 
 const MetasPanel = ({ sellerId, kpis }: Props) => {
+  const { pode } = usePermissoes();
   const { toast } = useToast();
   const { data: metas = [], isLoading } = useMetasLoja(sellerId);
   const salvar = useSalvarMeta();
   const remover = useRemoverMeta();
-  const { data: eligibility = [] } = useEligibility(sellerId);
+  const { data: eligibility = [], isSuccess: elegCarregada } = useEligibility(sellerId);
 
   const hoje = new Date();
   const mesAtual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
@@ -75,7 +78,9 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
   }, [kpis]);
 
   /** MLBs em risco de ruptura (snapshot atual da elegibilidade) */
-  const mlbsEmRisco = useMemo(() => {
+  const mlbsEmRisco = useMemo((): number | null => {
+    // Sem posição carregada (ou vazia), não há como afirmar zero anúncios em risco.
+    if (!elegCarregada || eligibility.length === 0) return null;
     const porMlb = new Map<string, { pedidos: number; estoque: number }>();
     for (const it of eligibility) {
       porMlb.set(String(it.itemId), {
@@ -90,17 +95,18 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
       if (estoque / diaria < 14) risco += 1;
     });
     return risco;
-  }, [eligibility]);
+  }, [eligibility, elegCarregada]);
 
   const linhas = useMemo(
     () =>
       metas.map((m) => {
-        const real = realPorMes.get(m.mes) || { faturamento: 0, clips: 0 };
+        // Mês sem medição fica indisponível, nunca realizado zero.
+        const real = realPorMes.get(m.mes) ?? null;
         const ehMesAtual = m.mes === mesAtual;
         return {
           ...m,
-          realFaturamento: real.faturamento,
-          realClips: real.clips,
+          realFaturamento: real ? real.faturamento : null,
+          realClips: real ? real.clips : null,
           realReposicao: ehMesAtual ? mlbsEmRisco : null,
         };
       }),
@@ -137,7 +143,7 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
   return (
     <div className="space-y-5">
       {/* Formulário */}
-      <div className="rounded-lg border border-muted/20 bg-surface-alt p-4 sm:p-5">
+      <fieldset disabled={!pode('metas.alterar')} className="rounded-lg border border-muted/20 bg-surface-alt p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-4">
           <Target className="h-4 w-4 text-brand-blue" />
           <h3 className="text-sm font-semibold">Definir metas do mês</h3>
@@ -167,7 +173,7 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
             </Button>
           </div>
         </div>
-      </div>
+      </fieldset>
 
       {/* Comparativo meta x real */}
       <div className="rounded-lg border border-muted/20 bg-surface-alt p-4 sm:p-5">
@@ -207,17 +213,17 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
                     <tr key={l.id} className="border-b border-muted/10 tnum">
                       <td className="py-2 pr-3 font-medium">{rotuloMes(l.mes)}</td>
                       <td className="py-2 pr-3">{l.metaFaturamento == null ? "—" : fmtBRL(l.metaFaturamento)}</td>
-                      <td className="py-2 pr-3">{fmtBRL(l.realFaturamento)}</td>
+                      <td className="py-2 pr-3">{l.realFaturamento == null ? "Sem dado" : fmtBRL(l.realFaturamento)}</td>
                       <td className="py-2 pr-3">
                         <Badge variant="outline" className={corAtingimento(pctFat)}>
-                          {pctFat == null ? "sem meta" : `${pctFat.toFixed(0).replace(".", ",")}%`}
+                          {pctFat == null ? (l.realFaturamento == null ? "sem dado" : "sem meta") : `${pctFat.toFixed(0).replace(".", ",")}%`}
                         </Badge>
                       </td>
                       <td className="py-2 pr-3">{l.metaClips == null ? "—" : fmtBRL(l.metaClips)}</td>
-                      <td className="py-2 pr-3">{fmtBRL(l.realClips)}</td>
+                      <td className="py-2 pr-3">{l.realClips == null ? "Sem dado" : fmtBRL(l.realClips)}</td>
                       <td className="py-2 pr-3">
                         <Badge variant="outline" className={corAtingimento(pctClips)}>
-                          {pctClips == null ? "sem meta" : `${pctClips.toFixed(0).replace(".", ",")}%`}
+                          {pctClips == null ? (l.realClips == null ? "sem dado" : "sem meta") : `${pctClips.toFixed(0).replace(".", ",")}%`}
                         </Badge>
                       </td>
                       <td className="py-2 pr-3">{l.metaReposicao == null ? "—" : l.metaReposicao}</td>
@@ -235,6 +241,7 @@ const MetasPanel = ({ sellerId, kpis }: Props) => {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          disabled={!pode('metas.alterar')}
                           aria-label={`Remover meta de ${rotuloMes(l.mes)}`}
                           onClick={() => remover.mutate({ id: l.id, sellerId })}
                         >

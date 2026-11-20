@@ -2,7 +2,8 @@
  * Sistema de Design Peregrinus — componentes base.
  * Verde é o único destaque; vermelho só para alerta real; amarelo só preenchimento.
  */
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode } from "react";
+import { useNumeroAnimado } from "@/hooks/useNumeroAnimado";
 import { ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -74,29 +75,6 @@ export interface KpiCardProps {
   melhorQuando?: "subir" | "descer" | "neutro";
 }
 
-/** Conta do zero até o número do texto (formato pt-BR), mantendo prefixo, sufixo e casas. */
-function useContagem(texto: string) {
-  const [saida, setSaida] = useState(texto);
-  const anterior = useRef(0);
-  useEffect(() => {
-    const m = texto.match(/-?\d{1,3}(?:\.\d{3})*(?:,\d+)?|-?\d+(?:,\d+)?/);
-    if (!m || window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setSaida(texto); return; }
-    const casas = (m[0].split(",")[1] ?? "").length;
-    const alvo = Number(m[0].replace(/\./g, "").replace(",", "."));
-    const de = anterior.current; anterior.current = alvo;
-    const t0 = performance.now(); let id = 0;
-    const passo = (t: number) => {
-      const k = Math.min(1, (t - t0) / 700), e = 1 - Math.pow(1 - k, 4);
-      const v = (de + (alvo - de) * e).toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
-      setSaida(texto.replace(m[0], v));
-      if (k < 1) id = requestAnimationFrame(passo);
-    };
-    id = requestAnimationFrame(passo);
-    return () => cancelAnimationFrame(id);
-  }, [texto]);
-  return saida;
-}
-
 function SetaVariacao({ variacao, melhorQuando = "subir" }: { variacao: number; melhorQuando?: "subir" | "descer" | "neutro" }) {
   const sobe = variacao > 0, estavel = Math.abs(variacao) < 0.05;
   const bom = melhorQuando === "neutro" || estavel ? null : (sobe === (melhorQuando === "subir"));
@@ -113,7 +91,7 @@ function SetaVariacao({ variacao, melhorQuando = "subir" }: { variacao: number; 
 
 export function KpiCard({ rotulo, valor, referencia, focal, faixa, faixaTexto, naoConfirmado, className, onClick, variacao, melhorQuando }: KpiCardProps) {
   const Comp = onClick ? "button" : "div";
-  const valorAnimado = useContagem(valor);
+  const valorAnimado = useNumeroAnimado(valor);
   return (
     <Comp
       onClick={onClick}
@@ -124,7 +102,7 @@ export function KpiCard({ rotulo, valor, referencia, focal, faixa, faixaTexto, n
         {naoConfirmado && <span title="Regra de cálculo ainda não confirmada" className="ml-1 text-ec-laranja">*</span>}
       </p>
       <div className="mt-1.5 flex items-baseline gap-2 flex-wrap">
-        <span className={focal ? "ds-numero-focal" : "ds-numero-sec"} style={faixa ? { color: FAIXA_TXT[faixa] } : undefined}>
+        <span data-contando aria-label={valor} className={focal ? "ds-numero-focal" : "ds-numero-sec"} style={faixa ? { color: FAIXA_TXT[faixa] } : undefined}>
           {valorAnimado}
         </span>
         {variacao != null && Number.isFinite(variacao) && <SetaVariacao variacao={variacao} melhorQuando={melhorQuando} />}

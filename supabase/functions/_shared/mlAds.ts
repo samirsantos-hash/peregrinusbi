@@ -46,6 +46,23 @@ export function lerMetricas(fonte: unknown): MetricasAds {
 
 export type PontoDiario = { dia: string; metricas: MetricasAds };
 
+/** Resume campaign reads from confirmed costs, prioritizing missing dates then oldest reads. */
+export function ordenarCampanhasAds<T extends { campaign_id: number }>(campanhas: T[], rows: { campaign_id: number; dia: string; cost: number | null; synced_at: string }[], janela: { date_from: string; date_to: string }) {
+  const datas = new Set<string>();
+  for (let t = Date.parse(`${janela.date_from}T00:00:00Z`); t <= Date.parse(`${janela.date_to}T00:00:00Z`); t += 86400000) datas.add(new Date(t).toISOString().slice(0, 10));
+  const estado = new Map<number, { dias: Set<string>; lido: number }>();
+  for (const r of rows) {
+    if (!datas.has(r.dia)) continue;
+    const s = estado.get(r.campaign_id) ?? { dias: new Set<string>(), lido: Infinity };
+    if (r.cost !== null && Number.isFinite(r.cost) && r.cost >= 0) s.dias.add(r.dia);
+    s.lido = Math.min(s.lido, Date.parse(r.synced_at) || 0);
+    estado.set(r.campaign_id, s);
+  }
+  const completa = (id: number) => estado.get(id)?.dias.size === datas.size;
+  const ordenadas = [...campanhas].sort((a, b) => Number(completa(a.campaign_id)) - Number(completa(b.campaign_id)) || (estado.get(a.campaign_id)?.lido ?? 0) - (estado.get(b.campaign_id)?.lido ?? 0) || a.campaign_id - b.campaign_id);
+  return { ordenadas, incompletas: campanhas.filter(c => !completa(c.campaign_id)).length };
+}
+
 export function serieDiaria(json: unknown): PontoDiario[] {
   if (!json || typeof json !== "object") return [];
   const corpo = json as { results?: unknown };

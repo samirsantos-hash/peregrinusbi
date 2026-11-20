@@ -1,3 +1,4 @@
+import { exigirPermissao } from '../_shared/permissoes.ts';
 // ml-market-study
 // Estudo de mercado a partir de um anúncio da conta: concorrentes no catálogo, preços (quartis),
 // mais vendidos e termos em alta da categoria, tarifa do ML e margem opcional. Sinais por regras
@@ -56,6 +57,7 @@ function lerValor(v: unknown): number | null | "invalido" {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const checklistNegado = await exigirPermissao(req, 'mercado.visualizar', false); if (checklistNegado) return checklistNegado;
   if (req.method !== "POST") return resposta({ error: "use POST" }, 405);
   const inicio = Date.now();
   const noPrazo = () => Date.now() - inicio < ORCAMENTO_COLETA_MS;

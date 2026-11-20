@@ -19,10 +19,6 @@ function statusTone(s: StatusLevel) {
   return { text: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30", bar: "bg-destructive" };
 }
 
-function statusEmoji(s: StatusLevel) {
-  return s === "ok" ? "🟢" : s === "atencao" ? "🟡" : "🔴";
-}
-
 function limpar(t: string) { return t.replace(/^[^\p{L}\d]+/u, "").replace(/^\d+º\s*/, ""); }
 
 function ScoreBig({ score, nota }: { score: number; nota: string }) {
@@ -43,19 +39,16 @@ function TopicoRow({ topico }: { topico: Topico }) {
         <div className="flex items-center gap-2 min-w-0">
           <span className={`w-2 h-2 rounded-full shrink-0 ${t.bar}`} />
           <span className="text-xs font-semibold truncate">{topico.label}</span>
-          <span className="text-[10px] text-muted-foreground font-mono truncate hidden md:inline">
-            ({topico.fonte})
-          </span>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           <span className="text-xs font-mono font-bold tabular-nums">{topico.valor}</span>
           <div className="w-24 h-1.5 bg-muted/40 rounded-full overflow-hidden">
             <div
               className={`h-full ${t.bar} rounded-full transition-[transform,opacity,background-color,border-color,color]`}
-              style={{ width: `${topico.score}%` }}
+              style={{ width: `${topico.score ?? 0}%` }}
             />
           </div>
-          <span className={`text-[11px] font-mono tabular-nums ${t.text} w-8 text-right`}>{topico.score}</span>
+          <span className={`text-[11px] font-mono tabular-nums ${t.text} w-8 text-right`}>{topico.score ?? "—"}</span>
         </div>
       </div>
       {topico.status !== "ok" && (
@@ -91,7 +84,7 @@ function PilarCard({
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <div className="flex items-baseline gap-1">
-            <span className={`text-2xl font-bold tabular-nums ${t.text}`}>{pilar.score}</span>
+            <span className={`text-2xl font-bold tabular-nums ${t.text}`}>{pilar.score ?? "—"}</span>
             <span className="text-xs text-muted-foreground">/100</span>
           </div>
           {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -123,7 +116,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
   });
 
   const pilarMaisFraco = useMemo(
-    () => (qi ? [...qi.pilares].sort((a, b) => a.score - b.score)[0] : null),
+    () => (qi ? [...qi.pilares].filter((p) => p.score != null).sort((a, b) => (a.score as number) - (b.score as number))[0] : null),
     [qi],
   );
 
@@ -141,7 +134,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
   const nT = qi.tendencia.length;
   const tendenciaData = qi.tendencia.map((v, i) => ({ i: i === nT - 1 ? "Atual" : `-${nT - 1 - i}m`, v }));
   const mesBR = (() => { const m = String(qi.mes).match(/^(\d{4})-(\d{2})/); return m ? `${m[2]}/${m[1]}` : qi.mes; })();
-  const tGeral = statusTone(qi.scoreGeral >= 70 ? "ok" : qi.scoreGeral >= 45 ? "atencao" : "critico");
+  const tGeral = statusTone(qi.scoreGeral == null ? "atencao" : qi.scoreGeral >= 70 ? "ok" : qi.scoreGeral >= 45 ? "atencao" : "critico");
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
@@ -153,7 +146,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
             <p className="text-xs text-muted-foreground">Mês de referência: <span className="tabular-nums">{mesBR}</span> · 4 pilares</p>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className={`text-5xl font-bold tabular-nums ${tGeral.text}`}>{qi.scoreGeral}</span>
+            <span className={`text-5xl font-bold tabular-nums ${tGeral.text}`}>{qi.scoreGeral ?? "Sem dado"}</span>
             <span className="text-sm text-muted-foreground">/100</span>
           </div>
           <div className="space-y-2.5">
@@ -165,14 +158,14 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
                     <span className="truncate">{limpar(p.label)}</span>
                     <span className="text-muted-foreground shrink-0">· peso {(p.peso * 100).toFixed(0)}%</span>
                   </span>
-                  <span className="font-semibold tabular-nums shrink-0">{p.score}</span>
+                  <span className="font-semibold tabular-nums shrink-0">{p.score ?? "Sem dado"}</span>
                 </div>
                 <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
                     style={{ background: CORES_PILAR[i % CORES_PILAR.length], boxShadow: `0 0 10px ${CORES_PILAR[i % CORES_PILAR.length]}` }}
                     initial={{ width: 0 }}
-                    animate={{ width: `${p.score}%` }}
+                    animate={{ width: `${p.score ?? 0}%` }}
                     transition={{ duration: 0.9, delay: i * 0.08 }}
                   />
                 </div>
@@ -221,6 +214,43 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
         </div>
       </div>
 
+      {/* Diagrama: como o índice é calculado */}
+      <div className="glass-card p-5 sm:p-6 space-y-4">
+        <div>
+          <h3 className="text-base font-semibold">Como o Quality Index é calculado</h3>
+          <p className="text-xs text-muted-foreground">Cada indicador vira uma nota de 0 a 100. As notas formam o pilar pela média ponderada, e os pilares formam o índice. Itens sem medição ficam fora da conta, e os pesos restantes são redistribuídos.</p>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {qi.pilares.map((p, i) => (
+              <div key={p.id} className="rounded-lg border border-border/60 p-3 space-y-2" style={{ borderLeft: `3px solid ${CORES_PILAR[i % CORES_PILAR.length]}` }}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold truncate">{limpar(p.label)}</span>
+                  <span className="text-xs font-bold tabular-nums shrink-0" style={{ color: CORES_PILAR[i % CORES_PILAR.length] }}>{(p.peso * 100).toFixed(0)}% do índice</span>
+                </div>
+                <ul className="space-y-1">
+                  {p.topicos.map((tp) => (
+                    <li key={tp.id} className="flex items-center gap-2 text-[11px]">
+                      <span className="text-muted-foreground">└</span>
+                      <span className="truncate flex-1">{tp.label}</span>
+                      <span className="tabular-nums text-muted-foreground shrink-0">{(tp.peso * 100).toFixed(0)}% do pilar</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="flex lg:flex-col items-center justify-center gap-2 text-muted-foreground">
+            <span className="text-lg" aria-hidden>→</span>
+            <div className="rounded-xl border border-primary/40 bg-primary/10 px-5 py-4 text-center">
+              <p className="text-[11px] text-muted-foreground">Quality Index</p>
+              <p className={`text-3xl font-bold tabular-nums ${tGeral.text}`}>{qi.scoreGeral ?? "—"}</p>
+              <p className="text-[10px] text-muted-foreground">meta 70</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Alertas críticos */}
       {qi.alertasCriticos.length > 0 && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4">
@@ -239,7 +269,7 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
       {pilarMaisFraco && (
         <div className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-xs">
           <span className="font-semibold">Pilar mais fraco:</span> {limpar(pilarMaisFraco.label)} ({pilarMaisFraco.score}/100).
-          Melhorar este pilar tem o maior impacto relativo no score geral.
+          Entre os pilares medidos, é o de menor nota.
         </div>
       )}
 
@@ -250,7 +280,15 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
             key={p.id}
             pilar={p}
             expanded={expanded === p.id}
-            onToggle={() => setExpanded(expanded === p.id ? null : p.id)}
+            onToggle={() => {
+              setExpanded(expanded === p.id ? null : p.id);
+              if (expanded !== p.id) {
+                const categories = { logistica: "logistics", cdp: "promotions", reputacao: "reputation", relevancia: "listing_quality" } as const;
+                window.__lovableEvents?.track?.("project.diagnostic_recommendation_opened", {
+                  recommendation_category: categories[p.id], dashboard_context: "seller_quality_index",
+                });
+              }
+            }}
           />
         ))}
       </div>
@@ -272,15 +310,15 @@ export default function QualityIndexPanel({ custId, sellerUuid }: Props) {
               return (
                 <tr key={p.id} className="border-b border-border/50">
                   <td className="py-2">{limpar(p.label)}</td>
-                  <td className={`py-2 text-right font-mono font-bold tabular-nums ${t.text}`}>{p.score}</td>
+                  <td className={`py-2 text-right font-mono font-bold tabular-nums ${t.text}`}>{p.score ?? "—"}</td>
                   <td className="py-2 text-right font-mono tabular-nums">{(p.peso * 100).toFixed(0).replace(".", ",")}%</td>
-                  <td className="py-2 text-right font-mono tabular-nums">{(p.score * p.peso).toFixed(1).replace(".", ",")} pts</td>
+                  <td className="py-2 text-right font-mono tabular-nums">{p.score == null ? "—" : `${(p.score * p.peso).toFixed(1).replace(".", ",")} pts`}</td>
                 </tr>
               );
             })}
             <tr className="bg-muted/30 font-bold">
               <td className="py-2" colSpan={3}>Quality Index Total</td>
-              <td className={`py-2 text-right font-mono text-base tabular-nums ${tGeral.text}`}>{qi.scoreGeral}</td>
+              <td className={`py-2 text-right font-mono text-base tabular-nums ${tGeral.text}`}>{qi.scoreGeral ?? "—"}</td>
             </tr>
           </tbody>
         </table>

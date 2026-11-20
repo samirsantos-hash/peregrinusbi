@@ -1,0 +1,205 @@
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { FileSpreadsheet, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import { podeExportar } from '@/lib/permissaoExportar';
+import { criarExcelDiagnostico } from '@/lib/anuncio/exportarDiagnostico';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { EmptyState } from '@/components/ds';
+import DetalheAnuncioAbc from '@/components/ml/DetalheAnuncioAbc';
+import { useListingsQuality } from '@/hooks/useListingsQuality';
+import { useConstrucaoAnuncios } from '@/hooks/useConstrucaoAnuncios';
+import { useRespostaAnuncios } from '@/hooks/useRespostaAnuncios';
+import { useExperienciaAnuncios } from '@/hooks/useExperienciaAnuncios';
+import { anunciosExperienciaA, notaExperienciaLida, type ExperienciaLida } from '@/lib/anuncio/experiencia';
+import { notasResposta, referenciasResposta } from '@/lib/anuncio/resposta';
+import { notasConstrucaoLida } from '@/lib/anuncio/construcao';
+import { chamarFuncaoMl } from '@/lib/mlFuncoes';
+import { supabase } from '@/integrations/supabase/client';
+import { fetchAllRows } from '@/lib/fetchAllRows';
+import { brl, num, pct } from '@/lib/format';
+import type { ItemVendas } from '@/lib/anuncio/curvaAbc';
+import {
+  CORTES_PADRAO, QUADRANTES, ROTULO_DIMENSAO, ROTULO_QUADRANTE, diagnosticar, filaDeAcao, lotesDeCorrecao,
+  mediana, montarDimensoes, notaGiro, SEM_PROMOCAO, perfilarCatalogo, type Dimensao, type Diagnostico, type Quadrante,
+} from '@/lib/anuncio/diagnostico';
+
+type Dados = { periodo: { inicio: string; fim: string }; itens: ItemVendas[]; experienciaPedidos?: Omit<ExperienciaLida, 'disponivel'>[]; coberturaCompleta: boolean; catalogoCompleto: boolean };
+const dataBr = (s: string) => s.split('-').reverse().join('/');
+const ind = (v: number | null) => v == null ? '—' : num(Math.round(v));
+const POS: Record<Quadrante, string> = { falha_dupla: 'col-start-1 row-start-2', potencial_reprimido: 'col-start-2 row-start-2', produto_ou_demanda: 'col-start-1 row-start-1', saudavel: 'col-start-2 row-start-1' };
+const TOM: Record<Quadrante, string> = { saudavel: 'text-emerald', potencial_reprimido: 'text-primary', produto_ou_demanda: 'text-foreground', falha_dupla: 'text-destructive' };
+
+export default function DiagnosticoDoisEixos({ custId, contaId }: { custId: string; contaId: string }) {
+  const catalogo = useQuery({
+    queryKey: ['diag-catalogo', contaId], enabled: !!contaId,
+    queryFn: async () => {
+      const sb = supabase as any;
+      const est = await sb.from('ml_listings_estado').select('pendentes, completo_em').eq('account_id', contaId).maybeSingle();
+      if (est.error) throw est.error;
+      const tipos = await fetchAllRows((de: number, ate: number) => sb.from('ml_listings').select('item_id, tipo_anuncio, logistica, frete_gratis, preco').eq('account_id', contaId).order('item_id').range(de, ate));
+      if (tipos.error) throw tipos.error;
+      const promo = await fetchAllRows((de: number, ate: number) => sb.from('ml_promotion_items').select('item_id').eq('account_id', contaId).in('status', ['started', 'pending', 'programmed', 'active']).order('item_id').range(de, ate));
+      if (promo.error) throw promo.error;
+      const completo = !!est.data?.completo_em && (est.data?.pendentes ?? 1) === 0;
+      return { completo, tipos: new Map<string, any>(((tipos.data ?? []) as any[]).map(r => [r.item_id, r])), promo: new Set<string>(((promo.data ?? []) as any[]).map(r => r.item_id)) };
+    },
+  });
+  const [lote, setLote] = useState<ReturnType<typeof lotesDeCorrecao>[number] | null>(null);
+  const [mlb, setMlb] = useState<string | null>(null);
+  const [exportando, setExportando] = useState(false);
+  async function exportarLotes(selecionado?: ReturnType<typeof lotesDeCorrecao>[number]) {
+    if (!calc || !vendas.data || exportando) return;
+    setExportando(true);
+    try {
+      if (!(await podeExportar())) return;
+      const arquivo = criarExcelDiagnostico({ custId, periodo: vendas.data.periodo, lotes: selecionado ? [selecionado] : calc.lotes, porMlb: calc.porMlb, titulos: calc.titulos });
+      const blob = new Blob([arquivo], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `diagnostico-lotes-${selecionado?.gargalo ?? 'todos'}-${vendas.data.periodo.inicio}-${vendas.data.periodo.fim}.xlsx`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+    } catch { toast.error('Não foi possível exportar os lotes. Tente novamente.'); }
+    finally { setExportando(false); }
+  }
+  const seller = useQuery({
+    queryKey: ['seller-por-cust', custId], enabled: !!custId,
+    queryFn: async () => { const { data, error } = await supabase.from('sellers').select('id').eq('cust_id', custId as any).maybeSingle(); if (error) throw error; return data?.id ?? null; },
+  });
+  const qualidade = useListingsQuality(seller.data ?? undefined);
+  const vendas = useQuery({
+    queryKey: ['ml-curva-abc-experiencia-v1', custId, 30], enabled: !!custId, retry: false,
+    queryFn: async () => {
+      const d = await chamarFuncaoMl<Dados>('ml-analise-loja', { cust_id: custId, modo: 'curvaABC', dias: 30 });
+      if (!d.coberturaCompleta || !d.catalogoCompleto) throw new Error('Cobertura incompleta; classificação suspensa.');
+      return d;
+    },
+  });
+
+  const construcao = useConstrucaoAnuncios(custId, vendas.data?.itens.map(i => i.mlb) ?? []);
+  const resposta = useRespostaAnuncios(custId, vendas.data?.itens.map(i => i.mlb) ?? [], vendas.data?.periodo);
+  const idsA = useMemo(() => vendas.data ? anunciosExperienciaA(vendas.data.itens) : [], [vendas.data]);
+  const experiencia = useExperienciaAnuncios(custId, idsA, vendas.data?.periodo, !construcao.carregando && !resposta.carregando);
+  const calc = useMemo(() => {
+    if (!vendas.data) return null;
+    const qMap = new Map((qualidade.data ?? []).map(q => [q.itemId.replace(/\D/g, ''), q]));
+    const med = mediana(vendas.data.itens.map(i => i.unidades));
+    const refs = referenciasResposta(vendas.data.itens.map(i => ({ visitas: resposta.porMlb.get(i.mlb) ?? null, pedidos: i.pedidos })));
+    const fat = new Map<string, number>();
+    const titulos = new Map<string, string>();
+    const ds: Diagnostico[] = vendas.data.itens.map(i => {
+      fat.set(i.mlb, i.faturamentoCents); titulos.set(i.mlb, i.titulo);
+      const q = qMap.get(i.mlb.replace(/\D/g, ''));
+      const cat = catalogo.data;
+      const promoAtual = cat?.completo ? (cat.promo.has(i.mlb) ? 100 : SEM_PROMOCAO) : null;
+      const leitura = construcao.porMlb.get(i.mlb);
+      return diagnosticar(i.mlb, montarDimensoes({
+        medidas: leitura ? notasConstrucaoLida(leitura) : { fotos: { nota: null, evidencia: 'fotos não lidas', acao: null }, fichaTecnica: { nota: null, evidencia: 'ficha técnica não lida', acao: null }, preco: { nota: null, evidencia: 'preço atual não lido; sem referência comparável confirmada', acao: null } },
+        envio: leitura ? { envio: leitura.envio, tipo: leitura.tipo, precoCents: leitura.moeda === 'BRL' && leitura.preco !== null ? Math.round(leitura.preco * 100) : Number.NaN } : (() => { const r = cat?.tipos.get(i.mlb); return r ? { envio: r.logistica ? { free_shipping: !!r.frete_gratis, logistic_type: r.logistica } : null, tipo: r.tipo_anuncio ?? null, precoCents: Math.round(Number(r.preco ?? 0) * 100) } : null; })(),
+        promocoes: promoAtual ?? q?.llPromotionsScore, preco: q?.llPriceScore, fotos: q?.llPicturesScore, titulo: q?.llTitleScore, descricao: q?.llDescriptionScore,
+      }, notaGiro(i.unidades, med), { ...notasResposta(resposta.porMlb.get(i.mlb) ?? null, i.pedidos, refs), experiencia: (() => {
+        const cohort = vendas.data.experienciaPedidos?.find(e => e.item_id === i.mlb);
+        const lida = experiencia.porMlb.get(i.mlb);
+        return notaExperienciaLida(idsA.includes(i.mlb) && cohort && lida ? { ...cohort, ...lida } : undefined);
+      })() }));
+    });
+    let perfil = null;
+    try { perfil = perfilarCatalogo(ds, fat); } catch { perfil = null; }
+    const fila = filaDeAcao(ds, fat);
+    return { ds, perfil, fila, lotes: lotesDeCorrecao(fila), titulos, porMlb: new Map(ds.map(d => [d.mlb, d])) };
+  }, [vendas.data, qualidade.data, catalogo.data, construcao.porMlb, resposta.porMlb, experiencia.porMlb, idsA]);
+
+  if (!custId) return <EmptyState falta="Selecione uma loja." acao="Escolha a loja no seletor acima." />;
+  if (vendas.isPending || catalogo.isPending || seller.isPending || (!!seller.data && qualidade.isPending) || construcao.carregando || resposta.carregando || experiencia.carregando) return <div role="status" className="flex gap-2 items-center py-8 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" />Montando o diagnóstico… {num(construcao.lidos)} anúncios lidos · visitas confirmadas em {num(resposta.medidos)} de {num(resposta.total)} · experiência consultada em {num(experiencia.consultados)} de {num(experiencia.total)} da curva A</div>;
+  if (vendas.isError) return <EmptyState falta={vendas.error.message} acao="Tente atualizar em instantes." />;
+  if (catalogo.isError || seller.isError || qualidade.isError) return <EmptyState falta="Não foi possível ler as notas de qualidade." acao="Tente atualizar em instantes." />;
+  if (!calc || !vendas.data) return null;
+  const { perfil, fila, lotes, titulos, porMlb } = calc;
+  const detalhe = mlb ? porMlb.get(mlb) : null;
+
+  return <section className="space-y-5 min-w-0">
+    <div>
+      <h2 className="text-xl font-semibold">Diagnóstico em dois eixos</h2>
+      <p className="text-xs text-muted-foreground mt-1">{dataBr(vendas.data.periodo.inicio)} – {dataBr(vendas.data.periodo.fim)} · Construção (o que o anúncio é) × Resposta (como o mercado reage).</p>
+      <p className="text-xs text-muted-foreground mt-2">Dados atuais lidos para {num(construcao.lidos)} de {num(construcao.total)} anúncios.{!construcao.completo && ' Leitura parcial: anúncios ou dimensões não confirmados permanecem sem medição.'} Preço atual consultado; comparação de preço permanece sem medição quando não há referência comparável confirmada.</p>
+      <p className="text-xs text-muted-foreground mt-2">Visitas confirmadas em {num(resposta.medidos)} de {num(resposta.total)} anúncios, nas mesmas datas das vendas. Conversão = pedidos pagos ÷ visitas; mínimo de 50 visitas para pontuar. Referência: mediana dos anúncios medidos desta loja, incluindo taxas zero.{!resposta.completo && ' Cobertura parcial: visitas ausentes não contam como zero.'}</p>
+      <p className="text-xs text-muted-foreground mt-2">Experiência consultada em {num(experiencia.consultados)} de {num(experiencia.total)} anúncios da curva A de faturamento. Cancelamentos são pedidos distintos desta janela; não significam culpa do vendedor ou reembolso. Reclamações e atrasos sem contagens confirmadas permanecem sem medição, sem aumentar a confiança. Nota exige todas as ocorrências e ao menos 20 pedidos pagos; referências provisórias: 2% de reclamações, 5% de atrasos e 3% de cancelamentos.</p>
+    </div>
+
+    {!perfil ? <EmptyState falta="Nenhum anúncio pôde ser diagnosticado nos dois eixos." acao="As notas de construção ainda não estão disponíveis para estes anúncios." /> : <>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div>
+          <div className="grid grid-cols-[auto_1fr_1fr] grid-rows-[1fr_1fr_auto] gap-2 text-xs">
+            <span className="row-span-2 [writing-mode:vertical-rl] rotate-180 text-center text-muted-foreground">Construção ↑</span>
+            <div className="col-start-2 col-span-2 row-start-1 row-span-2 grid grid-cols-2 grid-rows-2 gap-2">
+              {QUADRANTES.map(q => { const d = perfil.distribuicao[q]; return <div key={q} className={`${POS[q]} rounded-lg border bg-card p-3 ${perfil.quadranteDominante === q ? 'ring-1 ring-primary' : ''}`}>
+                <p className={`font-semibold ${TOM[q]}`}>{ROTULO_QUADRANTE[q]}</p>
+                <p className="text-2xl font-semibold tabular-nums">{num(d.itens)}</p>
+                <p className="text-muted-foreground tabular-nums">{pct(d.participacao * 100)} · {brl(d.faturamentoCents / 100)}</p>
+              </div>; })}
+            </div>
+            <span className="col-start-2 col-span-2 text-center text-muted-foreground">Resposta →</span>
+          </div>
+        </div>
+        <div className="space-y-3 text-sm">
+          <p><span className="font-semibold">{ROTULO_QUADRANTE[perfil.quadranteDominante]} domina.</span> {perfil.leitura}</p>
+          {perfil.gargaloRecorrente && <p>Gargalo recorrente: <b>{ROTULO_DIMENSAO[perfil.gargaloRecorrente.dimensao]}</b> em {pct(perfil.gargaloRecorrente.participacao * 100)} dos anúncios diagnosticados.</p>}
+          <p className="text-xs text-muted-foreground">{num(perfil.diagnosticados)} de {num(perfil.anuncios)} anúncios diagnosticados; Construção considera fotos com dimensões originais, ficha técnica da categoria, exposição comercial e participação atual em promoções{!catalogo.data?.completo ? ' — participação suspensa: catálogo ainda não lido por inteiro' : ''}, além de título e descrição quando medidos. Resposta considera giro, visitas relativas, conversão e experiência quando confirmados na mesma janela. Ausências não recebem nota nem garantem confiança alta. A confiança depende da cobertura de cada anúncio.</p>
+          <p className="text-xs text-muted-foreground">Cortes provisórios: Construção {CORTES_PADRAO.construcao}, Resposta {CORTES_PADRAO.resposta}.{perfil.corteSemSeparacao && ' Atenção: mais de 90% dos anúncios ficam do mesmo lado de um corte — ele ainda não separa bem este catálogo.'}</p>
+        </div>
+      </div>
+
+      {lotes.length > 0 && <div className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-semibold">Lotes de correção</h3>
+          <Button variant="outline" size="sm" disabled={exportando} onClick={() => void exportarLotes()}><FileSpreadsheet className="h-4 w-4 mr-1" />{exportando ? 'Exportando…' : 'Exportar lotes em Excel'}</Button>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {lotes.map(l => <button key={l.gargalo} type="button" onClick={() => setLote(l)} className="text-left rounded-lg border bg-card p-3 hover:border-primary">
+            <p className="font-semibold">{l.gargalo === 'indefinido' ? 'Sem gargalo definido' : ROTULO_DIMENSAO[l.gargalo as Dimensao]}</p>
+            <p className="text-xs text-muted-foreground tabular-nums">{num(l.itens.length)} anúncios · {brl(l.faturamentoEmJogo / 100)} em jogo</p>
+            {l.acaoComum && <p className="text-xs mt-1">{l.acaoComum}</p>}
+          </button>)}
+        </div>
+      </div>}
+
+      <div className="space-y-2">
+        <h3 className="font-semibold">Fila de ação</h3>
+        {fila.length === 0 ? <p className="text-sm text-muted-foreground">Nenhum anúncio em Potencial reprimido ou Falha dupla.</p> :
+          <div className="overflow-auto max-h-[480px] rounded-lg border"><table className="w-full text-xs">
+            <thead className="sticky top-0 bg-card"><tr className="text-left text-muted-foreground"><th className="p-2">Anúncio</th><th className="p-2">Quadrante</th><th className="p-2 text-right">Constr.</th><th className="p-2 text-right">Resp.</th><th className="p-2">Gargalo</th><th className="p-2 text-right">Faturamento</th><th className="p-2">Confiança</th></tr></thead>
+            <tbody>{fila.map(f => <tr key={f.mlb} className="border-t">
+              <td className="p-2 max-w-[260px]"><button type="button" className="text-left hover:underline" onClick={() => setMlb(f.mlb)}><span className="line-clamp-2">{titulos.get(f.mlb)}</span><span className="text-muted-foreground">{f.mlb}</span></button>{f.acao && <p className="text-muted-foreground">{f.acao}</p>}</td>
+              <td className={`p-2 ${TOM[f.quadrante]}`}>{ROTULO_QUADRANTE[f.quadrante]}</td>
+              <td className="p-2 text-right tabular-nums">{ind(f.construcao)}</td><td className="p-2 text-right tabular-nums">{ind(f.resposta)}</td>
+              <td className="p-2">{f.gargalo ? ROTULO_DIMENSAO[f.gargalo] : '—'}</td>
+              <td className="p-2 text-right tabular-nums">{brl(f.faturamentoCents / 100)}</td><td className="p-2">{f.confianca}</td>
+            </tr>)}</tbody>
+          </table></div>}
+      </div>
+    </>}
+
+    <Sheet open={!!lote} onOpenChange={o => !o && setLote(null)}>
+      <SheetContent side="right" className="!left-auto !right-0 !w-[min(88vw,480px)] !max-w-[min(88vw,480px)] overflow-y-auto">
+        <SheetHeader><SheetTitle>{lote && (lote.gargalo === 'indefinido' ? 'Sem gargalo definido' : ROTULO_DIMENSAO[lote.gargalo as Dimensao])}</SheetTitle><SheetDescription>{lote && `${num(lote.itens.length)} anúncios com o mesmo gargalo`}</SheetDescription></SheetHeader>
+        <Button className="mt-4" variant="outline" size="sm" disabled={exportando || !lote?.itens.length} onClick={() => lote && void exportarLotes(lote)}><FileSpreadsheet className="h-4 w-4 mr-1" />{exportando ? 'Exportando…' : 'Exportar este lote em Excel'}</Button>
+        <ul className="mt-4 space-y-3 text-sm">{lote?.itens.map(i => <li key={i.mlb} className="border-b border-border pb-3"><button type="button" className="text-left hover:underline break-words" onClick={() => setMlb(i.mlb)}>{titulos.get(i.mlb)} <span className="text-xs text-muted-foreground">{i.mlb} · {brl(i.faturamentoCents / 100)}</span></button><p className="mt-1 text-xs tabular-nums text-muted-foreground">Construção {ind(i.construcao)} · Resposta {ind(i.resposta)} · confiança {i.confianca === 'media' ? 'média' : i.confianca}</p></li>)}</ul>
+      </SheetContent>
+    </Sheet>
+
+    {detalhe && <div className="sr-only" aria-live="polite">{detalhe.leitura}</div>}
+    <DetalheAnuncioAbc custId={custId} mlb={mlb} onClose={() => setMlb(null)} extra={detalhe ? <div className="space-y-2 rounded-lg border p-3 text-sm">
+      <p className="font-semibold">{detalhe.quadrante ? ROTULO_QUADRANTE[detalhe.quadrante] : 'Diagnóstico indisponível'} <span className="text-xs text-muted-foreground font-normal">· confiança {detalhe.confianca}</span></p>
+      {[detalhe.construcao, detalhe.resposta].map(e => <div key={e.eixo}>
+        <div className="flex justify-between text-xs"><span>{e.eixo === 'construcao' ? 'Construção' : 'Resposta'}</span><span className="tabular-nums">{ind(e.indice)} · cobertura {pct(e.cobertura * 100)}</span></div>
+        <div className="h-2 rounded bg-muted"><div className="h-2 rounded bg-primary" style={{ width: `${e.indice ?? 0}%` }} /></div>
+      </div>)}
+      <p className="text-xs">{detalhe.leitura}</p>
+      <ul className="space-y-3 border-t border-border pt-3">{[...detalhe.construcao.dimensoes, ...detalhe.resposta.dimensoes].map(d => <li key={d.dimensao} className="text-xs"><div className="flex justify-between gap-2 font-semibold"><span>{ROTULO_DIMENSAO[d.dimensao]}</span><span className="tabular-nums">{d.nota === null ? 'Sem medição' : num(Math.round(d.nota * 100))}</span></div><p className="mt-1 text-muted-foreground">{d.evidencia}</p>{d.acao && <p className="mt-1">{d.acao}</p>}</li>)}</ul>
+      {detalhe.acaoPrincipal && <p className="text-xs font-semibold">{detalhe.acaoPrincipal}</p>}
+    </div> : null} />
+  </section>;
+}

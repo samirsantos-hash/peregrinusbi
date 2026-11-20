@@ -247,7 +247,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4">
         {/* Composed Chart */}
-        <div className="glass-card p-5">
+        <div className="glass-card flex flex-col p-5">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium">
@@ -287,11 +287,12 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
           </div>
 
           {chartData.length === 0 ?
-          <div className="flex items-center justify-center h-[340px] text-muted-foreground text-sm">
+          <div className="flex flex-1 items-center justify-center min-h-[340px] text-muted-foreground text-sm">
               Sem dados disponíveis para o período selecionado
             </div> :
 
-          <ResponsiveContainer width="100%" height={340}>
+          <div className="flex-1 min-h-[340px]">
+          <ResponsiveContainer width="100%" height="100%" minHeight={340}>
               <ComposedChart data={chartData} key={`trend-${granularity}`}>
                 <defs>
                   <linearGradient id="gradGmvBar" x1="0" y1="0" x2="0" y2="1">
@@ -371,6 +372,7 @@ const TrendAnalysisPanel = ({ kpis, dataGranularity = "daily", allKpisDaily }: T
               
               </ComposedChart>
             </ResponsiveContainer>
+          </div>
           }
         </div>
 

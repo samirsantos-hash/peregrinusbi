@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { NIVEIS_CLIENTE } from "@/lib/permissoes";
 
 interface SellerOption {
   id: string;
@@ -26,7 +27,7 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   onCreated: () => void;
   sellers: SellerOption[];
-  createPortfolio: (name: string, custIds: string[], assignedTo?: string) => Promise<{ error: string | null }>;
+  createPortfolio: (name: string, custIds: string[], assignedTo?: string, plano?: string, clienteId?: string) => Promise<{ error: string | null }>;
 }
 
 export default function CreatePortfolioModal({ open, onOpenChange, onCreated, sellers, createPortfolio }: Props) {
@@ -38,6 +39,8 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
   const [selectedCustIds, setSelectedCustIds] = useState<string[]>([]);
   const [users, setUsers] = useState<UserOption[]>([]);
   const [assignedTo, setAssignedTo] = useState<string>("");
+  const [plano, setPlano] = useState<string>("");
+  const [clienteId, setClienteId] = useState<string>("");
 
   // Load users (gerentes + admins) for assignment
   useEffect(() => {
@@ -107,7 +110,7 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
     if (custIds.length === 0) return;
 
     setSaving(true);
-    const { error } = await createPortfolio(name.trim(), custIds, assignedTo || undefined);
+    const { error } = await createPortfolio(name.trim(), custIds, assignedTo || undefined, plano, clienteId || undefined);
     setSaving(false);
 
     if (!error) {
@@ -117,6 +120,8 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
       setSelectedCustIds([]);
       setSearchSeller("");
       setAssignedTo("");
+      setPlano("");
+      setClienteId("");
       onOpenChange(false);
       onCreated();
     }
@@ -250,6 +255,26 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
             </div>
           )}
 
+          <div className="space-y-2">
+            <Label>Plano do cliente</Label>
+            <Select value={plano} onValueChange={setPlano}>
+              <SelectTrigger><SelectValue placeholder="Selecione o plano" /></SelectTrigger>
+              <SelectContent>
+                {NIVEIS_CLIENTE.map(n => <SelectItem key={n.id} value={n.id}>{n.nome} — {n.descricao}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>Usuário do cliente (recebe o plano)</Label>
+            <Select value={clienteId} onValueChange={(v) => setClienteId(v === "__none__" ? "" : v)}>
+              <SelectTrigger><SelectValue placeholder="Selecione o usuário (opcional)" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">Nenhum</SelectItem>
+                {users.map((u) => <SelectItem key={u.userId} value={u.userId}>{u.email}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Admin assignment */}
           <div className="space-y-2">
             <Label className="flex items-center gap-1.5">
@@ -274,7 +299,7 @@ export default function CreatePortfolioModal({ open, onOpenChange, onCreated, se
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button
             onClick={handleSave}
-            disabled={saving || !name.trim() || selectedCustIds.length === 0}
+            disabled={saving || !name.trim() || !plano || selectedCustIds.length === 0}
           >
             {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
             Criar Carteira

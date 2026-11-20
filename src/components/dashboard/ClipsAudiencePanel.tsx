@@ -1,3 +1,4 @@
+import { IconeIndicador, TextoComIcones } from "@/components/ds/IconeIndicador";
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
@@ -17,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import type { SellerKPI } from "@/hooks/useSellerData";
 import type { EligibilityItem } from "@/hooks/useEligibility";
 import type { ListingQuality } from "@/hooks/useListingsQuality";
+import ClipsRanking from './ClipsRanking';
 
 interface ClipsAudiencePanelProps {
   kpis: SellerKPI[];
@@ -191,7 +193,7 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
               <div className="space-y-2">
                 <p className="text-xs font-medium text-warning flex items-center gap-1.5">
                   <FileVideo className="w-3.5 h-3.5" />
-                  🎬 Clip com baixa performance — Revisar visitas e conversão
+                  Clip com baixa performance — Revisar visitas e conversão
                 </p>
                 <p className="text-[11px] text-muted-foreground">
                   Sem métricas por anúncio disponíveis hoje. Se o clip existe, o problema é alcance
@@ -220,13 +222,13 @@ const HotItemCard = ({ item, videoStatus, clipsLink, idx }: HotItemCardProps) =>
             ) : videoStatus.status === "no-reach" ? (
               <p className="text-xs text-destructive flex items-center gap-1.5">
                 <Ban className="w-3.5 h-3.5" />
-                🚫 Vídeo sem Alcance (Verificar Indexação ou Qualidade)
+                Vídeo sem Alcance (Verificar Indexação ou Qualidade)
               </p>
             ) : (
               <div className="space-y-2">
                 {videoStatus.status === "low-conversion" && (
                   <p className="text-xs font-medium" style={{ color: "hsl(50 100% 50%)" }}>
-                    ⚠️ Refazer Roteiro/Edição (Baixa Conversão)
+                    <IconeIndicador simbolo="⚠️" className="h-3.5 w-3.5 mr-1" /> Refazer Roteiro/Edição (Baixa Conversão)
                   </p>
                 )}
                 {AUDIT_CHECKLIST.map((c, i) => (
@@ -470,7 +472,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
   const conversionRate = pct(totals.ordersClips, totals.visitasClips);
   const conversionGeneral = pct(totals.tsi, totals.visits);
   const clipsVsGeralDelta = conversionRate - conversionGeneral;
-  const clipsBeatsGeral = totals.visitasClips > 0 && totals.visits > 0 && conversionRate >= conversionGeneral;
+  // A loja só tem unidades vendidas por visita; Clips tem pedidos por visita. Bases diferentes não são comparadas.
+  const clipsBeatsGeral = false;
 
   /* ── Fallback flag: per-item clip data is missing but seller has clip activity ── */
   const hasSellerLevelClipsOnly = useMemo(() => {
@@ -521,9 +524,9 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
     const clip = itemClipMap.get(itemId);
     const hc = clip ? clip.hasClip : false;
     if (hc) {
-      return <Badge className="text-[11px] bg-emerald/10 text-emerald border-emerald/20">✅ Ativo no Clips</Badge>;
+      return <Badge className="text-[11px] bg-emerald/10 text-emerald border-emerald/20"><IconeIndicador simbolo="✅" className="h-3 w-3 mr-1" /> Ativo no Clips</Badge>;
     }
-    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20">❌ Analisar</Badge>;
+    return <Badge className="text-[11px] bg-destructive/15 text-destructive border-destructive/20"><IconeIndicador simbolo="❌" className="h-3 w-3 mr-1" /> Analisar</Badge>;
   };
 
   /* ── Summary using performance-based detection ── */
@@ -593,8 +596,8 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
             </h3>
             <TooltipInfo text="Proporção de anúncios únicos (MLBs) que possuem dados de performance de Clips ativos (visitas, impressões ou pedidos via clip) vs. anúncios sem nenhum dado de clips." />
           </div>
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-[200px] h-[200px]">
+          <div className="grid grid-cols-1 xl:grid-cols-[200px_minmax(0,1fr)_minmax(0,1.3fr)] items-center gap-6">
+            <div className="w-[200px] h-[200px] mx-auto">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -620,7 +623,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="flex-1 space-y-3">
+            <div className="min-w-0 space-y-3">
               {effectiveCoverage.mode === "items" ? (
                 <>
                   <p className="text-sm text-foreground">
@@ -663,13 +666,15 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
               {effectiveCoverage.mode === "items" && clipCoverage.withoutClip > 0 && (
                 <p className="text-xs text-warning flex items-center gap-1.5">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  {clipCoverage.withoutClip} anúncios sem Clip representam oportunidades perdidas de conversão
+                  {clipCoverage.withoutClip} anúncios sem desempenho de Clip registrado no período (a publicação de vídeo não está confirmada)
                 </p>
               )}
             </div>
           </div>
         </div>
       )}
+
+      <ClipsRanking itens={listingsQuality ?? []} nomes={dedupedEligibility} />
 
       {/* ── Row 1: Metric cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -683,10 +688,10 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
         />
         <MetricCard
           icon={Activity}
-          label="Conversão Geral"
+          label="Unidades por visita (loja)"
           value={`${conversionGeneral.toFixed(2).replace(".", ",")}%`}
-          sub={`${fmt(totals.tsi)} pedidos / ${fmt(totals.visits)} visitas`}
-          tooltip="Taxa de conversão geral da loja: (TSI / Visitas) × 100. É o benchmark interno que a conversão via Clips precisa superar."
+          sub={`${fmt(totals.tsi)} unidades / ${fmt(totals.visits)} visitas`}
+          tooltip="Unidades vendidas da loja divididas pelas visitas. Usa unidades, não pedidos, por isso não é comparável à conversão via Clips."
           accentClass="text-foreground"
         />
         <MetricCard
@@ -713,22 +718,14 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           icon={ShoppingCart}
           label="Conversão Clips"
           value={`${conversionRate.toFixed(2).replace(".", ",")}%`}
-          sub={
-            totals.visitasClips > 0 && totals.visits > 0
-              ? `${fmt(totals.ordersClips)} pedidos · ${clipsBeatsGeral ? "+" : ""}${clipsVsGeralDelta.toFixed(2).replace(".", ",")}pp vs Geral`
-              : `${fmt(totals.ordersClips)} pedidos via clips`
-          }
-          tooltip="Taxa de conversão: (Pedidos via Clips / Visitas via Clips) × 100. Comparada ao benchmark interno (Conversão Geral) — quando acima, o vídeo está pré-qualificando o comprador."
-          accentClass={
-            totals.visitasClips > 0 && totals.visits > 0
-              ? clipsBeatsGeral ? "text-emerald" : "text-warning"
-              : conversionRate > 1 ? "text-emerald" : "text-neon-blue"
-          }
+          sub={`${fmt(totals.ordersClips)} pedidos / ${fmt(totals.visitasClips)} visitas via Clips`}
+          tooltip="Pedidos via Clips divididos pelas visitas via Clips. Não é comparada às unidades por visita da loja, que usam outra base."
+          accentClass="text-neon-blue"
         />
       </div>
 
       {/* ── Banner comparativo: Conversão Clips vs Geral ── */}
-      {totals.visitasClips > 0 && totals.visits > 0 && (
+      {false && (
         <div
           className={`glass-card p-4 border flex items-start gap-3 ${
             clipsBeatsGeral
@@ -806,7 +803,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
                 formatter={(v: any) => `${Number(v).toFixed(2).replace(".", ",")}%`}
               />
               <Legend wrapperStyle={{ fontSize: 11, color: "hsl(var(--ec-text-sec))" }} />
-              <Line type="monotone" dataKey="convGeral" name="Conversão Geral" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+              <Line type="monotone" dataKey="convGeral" name="Unidades por visita (loja)" stroke="hsl(var(--neon-blue))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
               <Line type="monotone" dataKey="convClips" name="Conversão Clips" stroke="hsl(var(--emerald))" strokeWidth={2.5} dot={{ r: 3 }} activeDot={{ r: 5 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -907,7 +904,7 @@ const ClipsAudiencePanel = ({ kpis, eligibilityItems, listingsQuality, sellerCus
           <div className="flex items-center gap-3">
             <Flame className="w-5 h-5 text-warning" />
             <h3 className="text-sm font-semibold uppercase tracking-wider text-warning">
-              🔥 Alerta de Conversão: Otimização de Vídeo e Script
+              Alerta de Conversão: Otimização de Vídeo e Script
             </h3>
             <TooltipInfo text="Itens com alto volume de vendas que precisam de otimização de vídeo. Expanda cada card para acessar o checklist de diagnóstico de produção." />
           </div>

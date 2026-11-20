@@ -30,7 +30,8 @@ const KpiCard = ({ id, titulo, valor, delta, sparkline, severidade = "neutro", n
 
   return (
     <motion.button
-      whileHover={{ y: -2 }}
+      data-card-interactive="true"
+      data-card-surface="true"
       onClick={() => onExpandir(id)}
       className={`relative text-left rounded-lg border bg-card p-4 transition-shadow cursor-pointer focus:outline-none ${
         selected ? "ring-2 ring-primary shadow-lg" : "hover:shadow-md"

@@ -1,0 +1,51 @@
+import { Package, Search, Store } from 'lucide-react';
+import { SELLER_TABS, SUBANALISES, type SellerTab } from './sellerTabs';
+import { SECAO_PERMISSAO } from '@/lib/permissoes';
+
+export type AcessoArvore = { id: string; label: string; secao?: string; subaba?: string; caminho?: string; aba?: string; permissao: string; consultor?: boolean; rede?: boolean };
+export type RamoArvore = SellerTab & { acessos: AcessoArvore[] };
+const externo = (id: string, label: string, caminho: string, permissao: string, aba?: string): AcessoArvore => ({ id, label, caminho, permissao, aba, consultor: caminho !== '/multilojas', rede: caminho === '/multilojas' });
+const extras: Record<string, AcessoArvore[]> = {
+  publicidade: [externo('gestao-campanhas', 'Gerenciar campanhas', '/publicidade', 'publicidade.visualizar', 'campanhas'), externo('gestao-ads', 'Anúncios patrocinados', '/publicidade', 'publicidade.visualizar', 'anuncios')],
+  opportunities: [externo('vendas-promocoes', 'Diagnóstico de promoções por anúncio', '/anuncios', 'promocoes.visualizar', 'vendas-promocoes'), externo('participacao', 'Anúncios em promoções', '/anuncios', 'promocoes.visualizar', 'participacao'), externo('gerenciar', 'Gerenciar promoções', '/anuncios', 'promocoes.visualizar', 'promocoes')],
+  perguntas: [externo('responder', 'Consultar e responder', '/perguntas', 'perguntas.visualizar')],
+};
+export const RAMOS_ACESSOS: RamoArvore[] = SELLER_TABS.map(tab => ({ ...tab,
+  label: tab.id === 'opportunities' ? 'Promoções e oportunidades' : tab.label,
+  acessos: (SUBANALISES[tab.id] ?? (tab.id === 'perguntas' ? [{ id: 'resumo', label: 'Indicadores de perguntas' }] : [])).filter(s => tab.id !== 'correlacoes' || s.id === 'geral').map<AcessoArvore>(s => ({ id: s.id, label: tab.id === 'opportunities' && s.id === 'promocoes' ? 'Desempenho de promoções' : s.label, secao: tab.id, subaba: s.id, permissao: `${SECAO_PERMISSAO[tab.id]}.visualizar` })).concat(extras[tab.id] ?? []),
+}));
+RAMOS_ACESSOS.push(
+  { id: 'anuncios', label: 'Anúncios', icon: Package, order: 2, descricao: 'Anúncios, desempenho e produtos', juniorTip: '', acessos: [externo('lista', 'Lista de anúncios', '/anuncios', 'anuncios.visualizar', 'anuncios'), externo('desempenho', 'Desempenho de anúncios', '/anuncios', 'correlacoes.visualizar', 'correlacoes'), externo('abc', 'Curva ABC de produtos', '/anuncios', 'correlacoes.visualizar', 'abc'), externo('diagnostico', 'Diagnóstico em dois eixos', '/anuncios', 'correlacoes.visualizar', 'diagnostico'), externo('melhorias', 'Conteúdo e melhorias', '/anuncios', 'qualidade.visualizar', 'melhorias')] },
+  { id: 'mercado', label: 'Mercado', icon: Search, order: 12, descricao: 'Estudos e tendências', juniorTip: '', acessos: [externo('estudos', 'Estudos de mercado', '/mercado', 'mercado.visualizar', 'estudos'), externo('tendencias', 'Tendências', '/mercado', 'mercado.visualizar', 'tendencias')] },
+  { id: 'multilojas', label: 'Multilojas', icon: Store, order: 13, descricao: 'Rede de lojas', juniorTip: '', acessos: [externo('rede', 'Visão da rede de lojas', '/multilojas', 'multilojas.visualizar')] },
+);
+export const GRUPOS_ACESSOS = [
+  { titulo: 'Comando Central', ids: ['efficiency', 'reputation'] },
+  { titulo: 'Motor de Vendas', ids: ['competitiveness', 'publicidade', 'opportunities', 'mercado'] },
+  { titulo: 'Anúncios & Conteúdo', ids: ['anuncios', 'quality', 'clips', 'correlacoes'] },
+  { titulo: 'Operação', ids: ['logistics', 'perguntas', 'pock'] },
+  { titulo: 'Planejamento', ids: ['metas', 'multilojas'] },
+];
+
+// Only implemented read-only views belong to the simplified tree.
+export const RAMOS_DIDATICOS: RamoArvore[] = RAMOS_ACESSOS.filter(r => r.id === 'efficiency').map(r => ({
+  ...r, label: 'Métricas de Negócio',
+  acessos: [
+    { id: 'indicadores', label: 'Indicadores de negócio', secao: 'efficiency', subaba: 'indicadores', permissao: 'resumo.visualizar' },
+    { id: 'historico', label: 'Faturamento mensal', secao: 'efficiency', subaba: 'historico', permissao: 'resumo.visualizar' },
+  ],
+}));
+export const GRUPOS_DIDATICOS = [{ titulo: 'Comando Central', ids: ['efficiency'] }];
+
+export function paginaDidatica(id: string | null): 'indicadores' | 'historico' {
+  return id === 'historico' ? 'historico' : 'indicadores';
+}
+
+export function destinoAcesso(a: AcessoArvore, custId?: string, contaId?: string) {
+  const params = new URLSearchParams();
+  if (!a.caminho) { params.set('aba', a.secao ?? 'efficiency'); if (a.subaba) params.set('subaba', a.subaba); }
+  else if (a.aba) params.set('aba', a.aba);
+  if (a.caminho === '/mercado' || a.caminho === '/publicidade' || a.caminho === '/perguntas') { if (contaId) params.set('conta', contaId); if (a.caminho === '/publicidade' && custId) params.set('loja', custId); }
+  else if (a.caminho !== '/multilojas' && custId) params.set('loja', custId);
+  return `${a.caminho ?? '/'}${params.toString() ? `?${params.toString()}` : ''}`;
+}

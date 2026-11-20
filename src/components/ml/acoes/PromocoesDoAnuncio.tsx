@@ -12,6 +12,7 @@ import { useAcaoEmLote } from "@/lib/mlAcoes";
 import { PROMO_PRECO_FIEL, STATUS_PROMO_ITEM } from "@/lib/mlRotulos";
 import { DialogoPrevia } from "./DialogoPrevia";
 import { ErroAcao, lerNumero } from "./AlterarPreco";
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 type PromoAoVivo = {
   promotion_id: string | null;
@@ -43,6 +44,9 @@ type Resposta = { item: { item_id: string; titulo: string | null; preco: number 
 const hoje = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" }).format(new Date());
 const somarDias = (d: string, n: number) => new Date(Date.parse(`${d}T12:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 const dataBr = (iso: string | null) => (iso ? new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }) : "—");
+const pct = (v: number | null) => `${(v ?? 0).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
+/** Códigos internos do ML (ex.: SMART_LIGHTNING) nunca aparecem crus na tela. */
+const legivel = (t: string) => /^[A-Z0-9_]+$/.test(t) ? t.toLowerCase().split("_").map((w, i) => i ? w : w[0].toUpperCase() + w.slice(1)).join(" ") : t;
 
 /** Promoções de um anúncio lidas ao vivo do ML, com entrar, alterar oferta e sair. */
 export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
@@ -51,10 +55,11 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
   aoFechar: () => void;
   aoConcluir: () => void;
 }) {
+  const { pode } = usePermissoes();
   const consulta = useQuery({
     queryKey: ["ml-promocoes-item", accountId, item?.item_id],
     enabled: !!item,
-    queryFn: () => chamarFuncaoMl<Resposta>("ml-promotions-item", { account_id: accountId, item_id: item!.item_id }),
+    queryFn: () => { if (!item) throw new Error('Selecione um anúncio.'); return chamarFuncaoMl<Resposta>("ml-promotions-item", { account_id: accountId, item_id: item.item_id }); },
   });
   const acao = useAcaoEmLote("ml-promotions-action", accountId, () => { consulta.refetch(); aoConcluir(); });
   const [editando, setEditando] = useState<{ chave: string; modo: "aderir" | "alterar" } | null>(null);
@@ -65,8 +70,8 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
 
   return (
     <>
-      <Sheet open={!!item} onOpenChange={(v) => !v && aoFechar()}>
-        <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
+      <Sheet modal={false} open={!!item} onOpenChange={(v) => !v && aoFechar()}>
+        <SheetContent side="right" className="listing-detail-sheet w-[88vw] max-w-[420px] sm:max-w-[420px] overflow-y-auto p-4 break-words" onInteractOutside={e => e.preventDefault()}>
           <SheetHeader>
             <SheetTitle>Promoções do anúncio</SheetTitle>
             <SheetDescription>
@@ -91,10 +96,11 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
               const chave = chaveDe(p);
               const ed = editando?.chave === chave ? editando : null;
               return (
-                <div key={chave} className="border border-border [border-width:0.5px] p-3 space-y-2 text-sm">
+                <div key={chave} className="detalhe-cartao p-3 space-y-2 text-sm">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-medium">{p.nome_tipo}{p.nome ? ` · ${p.nome}` : ""}</p>
+                      <p className="detalhe-rotulo">{legivel(p.nome_tipo)}</p>
+                      {p.nome && <p className="font-medium">{legivel(p.nome)}</p>}
                       <p className="text-xs text-muted-foreground">
                         {STATUS_PROMO_ITEM[p.status] ?? p.status}
                         {p.inicio || p.fim ? ` · ${dataBr(p.inicio)} a ${dataBr(p.fim)}` : ""}
@@ -111,9 +117,9 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
                     </p>
                   )}
                   {(p.meli_pct != null || p.vendedor_pct != null) && (
-                    <p className="text-xs text-muted-foreground">Desconto: Mercado Livre {p.meli_pct ?? 0}% · vendedor {p.vendedor_pct ?? 0}%</p>
+                    <p className="text-xs text-muted-foreground tabular-nums">Desconto: Mercado Livre {pct(p.meli_pct)} · vendedor {pct(p.vendedor_pct)}</p>
                   )}
-                  {p.motivo_sair && !p.pode.sair && <p className="text-xs text-ec-ambar">{p.motivo_sair}</p>}
+                  {p.motivo_sair && !p.pode.sair && <p className="text-xs text-muted-foreground">{p.motivo_sair}</p>}
 
                   {ed ? (
                     <FormOferta
@@ -122,19 +128,19 @@ export function PromocoesDoAnuncio({ accountId, item, aoFechar, aoConcluir }: {
                       aoCancelar={() => setEditando(null)}
                       aoRevisar={(entrada) => {
                         setEditando(null);
-                        acao.previa({ acao: ed.modo, itens: [{ item_id: item!.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id, ...entrada }] });
+                        if (item) acao.previa({ acao: ed.modo, itens: [{ item_id: item.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id, ...entrada }] });
                       }}
                     />
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {p.pode.aderir && (
+                      {p.pode.aderir && pode('promocoes.aplicar') && (
                         p.preco_por === "vendedor"
                           ? <Button size="sm" onClick={() => setEditando({ chave, modo: "aderir" })}>Entrar</Button>
-                          : <Button size="sm" onClick={() => acao.previa({ acao: "aderir", itens: [{ item_id: item!.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id }] })}>Entrar</Button>
+                          : <Button size="sm" onClick={() => { if (item) acao.previa({ acao: "aderir", itens: [{ item_id: item.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id }] }); }}>Entrar</Button>
                       )}
-                      {p.pode.alterar && <Button size="sm" variant="outline" onClick={() => setEditando({ chave, modo: "alterar" })}>Alterar oferta</Button>}
-                      {p.pode.sair && (
-                        <Button size="sm" variant="outline" onClick={() => acao.previa({ acao: "sair", itens: [{ item_id: item!.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id }] })}>
+                      {p.pode.alterar && pode('promocoes.aplicar') && <Button size="sm" variant="outline" onClick={() => setEditando({ chave, modo: "alterar" })}>Alterar oferta</Button>}
+                      {p.pode.sair && pode('promocoes.remover') && (
+                        <Button size="sm" variant="outline" onClick={() => { if (item) acao.previa({ acao: "sair", itens: [{ item_id: item.item_id, promotion_type: p.tipo, promotion_id: p.promotion_id, offer_id: p.offer_id }] }); }}>
                           Sair
                         </Button>
                       )}
