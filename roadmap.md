@@ -1,5 +1,11 @@
 # Roadmap
 
+## Vidro nas barras, botões e menus — 20/11
+- [x] Adaptar acabamento inspirado no Expo Glass ao painel web com tokens claro/escuro, reflexo branco e desfoque somente nas superfícies externas; preservar Home, gráficos e permissões.
+- [x] Teste público prévio: 28.450 requisições, uma falha (0,00351%); somente documentos e arquivos públicos, não capacidade autenticada.
+- [x] Treze testes de navegação aprovados e compilação OK; seletores compartilhados também recebem o material. Sem publicação.
+- [ ] Conferência visual bloqueada: sessão real na raiz permaneceu com a camada de carregamento interceptando cliques; barras, menus, celular e movimento reduzido não confirmados visualmente.
+
 ## Full — estoque e reposição — 13/11
 - [x] Separar produto, estoque, reposição e melhorias em células legíveis, com vermelho apenas para risco real.
 - [x] Incluir produtos já no Full e distinguir estoque disponível para venda Full do total físico; fallback individual quando o lote é recusado.
